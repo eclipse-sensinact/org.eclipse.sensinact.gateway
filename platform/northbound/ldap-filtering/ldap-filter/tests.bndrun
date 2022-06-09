@@ -92,7 +92,6 @@
 	junit-platform-commons;version='[1.8.2,1.8.3)',\
 	junit-platform-engine;version='[1.8.2,1.8.3)',\
 	junit-platform-launcher;version='[1.8.2,1.8.3)',\
-	json;version='[20190722.0.0,20190722.0.1)',\
 	org.eclipse.jetty.websocket.servlet;version='[9.4.42,9.4.43)',\
 	org.osgi.service.component;version='[1.4.0,1.4.1)',\
 	slf4j.log4j12;version='[1.7.25,1.7.26)',\

@@ -14,7 +14,10 @@ import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.generic.Task.CommandType;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,8 +55,8 @@ public class SystemInvoker {
     }
 
     @TaskCommand(target = "/sensiNact/system/address", method = CommandType.GET)
-    public JSONArray getIpAddress(String uri, String attributeName) {
-        JSONArray array = new JSONArray();
+    public JsonArray getIpAddress(String uri, String attributeName) {
+        JsonArrayBuilder array = JsonProviderFactory.getProvider().createArrayBuilder();
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
@@ -65,13 +68,13 @@ public class SystemInvoker {
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
                     if (addr instanceof Inet4Address) {
-                        array.put(addr.getHostAddress());
+                        array.add(addr.getHostAddress());
                     }
                 }
             }
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
-        return array;
+        return array.build();
     }
 }

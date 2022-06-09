@@ -18,8 +18,6 @@ import java.util.Set;
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.historic.storage.agent.generic.StorageConnection;
 import org.eclipse.sensinact.gateway.tools.connector.influxdb.InfluxDbDatabase;
-import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
-import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,16 +38,16 @@ public class InfluxDBStorageConnection extends StorageConnection {
 	private static final String STORAGE_AGENT_INFLUXDB_ENABLE_DEFAULT = "org.eclipse.sensinact.gateway.history.influxdb.default";
 	private static final String STORAGE_AGENT_INFLUXDB_ENABLE_GEOJSON = "org.eclipse.sensinact.gateway.history.influxdb.geojson";
 	
-	private static final JSONObjectStatement STATEMENT = 
-    		new JSONObjectStatement(new JSONTokenerStatement(
+	private static final String STATEMENT = 
+    		
 			    "{" + 
 			    " \"type\": \"Feature\"," + 
 			    " \"properties\": {}," + 
 			    "  \"geometry\": {" + 
 			    "     \"type\": \"Point\"," + 
-			    "     \"coordinates\": [ $(longitude),$(latitude)] " + 
+			    "     \"coordinates\": [ %d, %d] " + 
 			    "  }" + 
-			    "}"));
+			    "}";
 	
 	private String measurement;
 	private InfluxDbDatabase database;
@@ -189,10 +187,7 @@ public class InfluxDBStorageConnection extends StorageConnection {
 					fields.put("latitude", latitude);
 					fields.put("longitude", longitude);
 				}
-				STATEMENT.apply("latitude", latitude);
-			    STATEMENT.apply("longitude", longitude);		    
-			    geolocation = STATEMENT.toString();
-			    
+				geolocation = String.format(STATEMENT, longitude, latitude);
 			} catch(IllegalArgumentException e) {
 				LOGGER.error(e.getMessage(),e);
 			}

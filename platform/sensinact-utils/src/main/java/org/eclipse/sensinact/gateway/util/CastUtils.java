@@ -10,9 +10,6 @@
 package org.eclipse.sensinact.gateway.util;
 
 import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonArrayBuilder;
@@ -20,12 +17,12 @@ import jakarta.json.JsonException;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonString;
+import jakarta.json.JsonStructure;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
 import java.io.StringReader;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +31,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -263,10 +263,10 @@ public abstract class CastUtils {
         if (char.class == javaType || Character.class == javaType) {
             return "string";
         }
-        if (JSONObject.class == javaType) {
+        if (JsonObject.class == javaType) {
             return "object";
         }
-        if (JSONArray.class == javaType) {
+        if (JsonArray.class == javaType) {
             return "array";
         }
         if (CastUtils.isPrimitive(javaType)) {
@@ -393,8 +393,7 @@ public abstract class CastUtils {
         	}
         }
         
-        if (JSONObject.class.isAssignableFrom(object.getClass()) || JSONArray.class.isAssignableFrom(object.getClass()) ||
-        		JsonObject.class.isAssignableFrom(object.getClass()) || JsonArray.class.isAssignableFrom(object.getClass())) {
+        if (JsonObject.class.isAssignableFrom(object.getClass()) || JsonArray.class.isAssignableFrom(object.getClass())) {
             return CastUtils.<T>getObjectFromJSON(clazz, object);
         }
         if (CastUtils.isPrimitive(clazz)) {
@@ -409,27 +408,12 @@ public abstract class CastUtils {
                 return (T) Enum.valueOf((Class<Enum>) clazz, (String) object);
 
             } else {
-                JSONObject objectJSONObject = null;
-                JSONArray objectJSONArray = null;
-                Object objectJSON = null;
+                JsonStructure objectJSON = null;
                 try {
-                    objectJSONObject = new JSONObject((String) object);
-                    objectJSON = objectJSONObject;
-
-                } catch (JSONException e) {
-                    try {
-                        objectJSONArray = new JSONArray((String) object);
-                        objectJSON = objectJSONArray;
-
-                    } catch (JSONException ej) {
-                        if (JSONObject.class.isAssignableFrom(clazz)) {
-                            throw new ClassCastException(e.getMessage());
-
-                        } else if (JSONArray.class.isAssignableFrom(clazz)) {
-                            throw new ClassCastException(ej.getMessage());
-                        }
-                        throw new ClassCastException(message);
-                    }
+                	objectJSON = JsonProviderFactory.read((String) object, JsonStructure.class);
+                } catch (JsonException e) {
+                	LOGGER.log(Level.SEVERE, message, e);
+                	throw new ClassCastException(message);
                 }
                 return CastUtils.cast(clazz, objectJSON);
             }
@@ -463,13 +447,13 @@ public abstract class CastUtils {
             }
             return (T) array;
         }
-        if (JSONArray.class.isAssignableFrom(object.getClass())) {
-            int length = ((JSONArray) object).length();
+        if (JsonArray.class.isAssignableFrom(object.getClass())) {
+            int length = ((JsonArray) object).size();
             Class<?> componentType = clazz.getComponentType();
             Object array = Array.newInstance(componentType, length);
 
             for (int i = 0; i < length; i++) {
-                Array.set(array, i, CastUtils.cast(componentType, ((JSONArray) object).get(i)));
+                Array.set(array, i, CastUtils.cast(componentType, ((JsonArray) object).get(i)));
             }
             return (T) array;
         }
@@ -797,11 +781,11 @@ public abstract class CastUtils {
             } else if (Number.class.isAssignableFrom(json.getClass())) {
                 return (T) CastUtils.getPrimitiveFromNumber(clazz, (Number) json);
 
-            } else if (JSONObject.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
-                return (T) ((JSONObject) json).toString();
+            } else if (JsonObject.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
+                return (T) ((JsonObject) json).toString();
 
-            } else if (JSONArray.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
-                return (T) ((JSONArray) json).toString();
+            } else if (JsonArray.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
+                return (T) ((JsonArray) json).toString();
             } else if (JsonString.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
             	return (T) ((JsonString) json).getString();
             } else if (JsonValue.class.isAssignableFrom(json.getClass()) && String.class.isAssignableFrom(clazz)) {
@@ -809,11 +793,11 @@ public abstract class CastUtils {
             }
             return CastUtils.castPrimitive(clazz, json);
 
-        } else if (JSONObject.class.isAssignableFrom(json.getClass())) {
-            return getObjectFromJSON(clazz, (JSONObject) json);
+        } else if (JsonObject.class.isAssignableFrom(json.getClass())) {
+            return getObjectFromJSON(clazz, (JsonObject) json);
 
-        } else if (JSONArray.class.isAssignableFrom(json.getClass())) {
-            return getObjectFromJSON(clazz, (JSONArray) json);
+        } else if (JsonArray.class.isAssignableFrom(json.getClass())) {
+            return getObjectFromJSON(clazz, (JsonArray) json);
             
         } else if (JsonObject.class.isAssignableFrom(json.getClass())) {
         	return getObjectFromJSON(clazz, (JsonObject) json);
@@ -823,15 +807,10 @@ public abstract class CastUtils {
 
         } else if (json.getClass().equals(String.class)) {
             try {
-                return getObjectFromJSON(clazz, new JSONObject((String) json));
+                return getObjectFromJSON(clazz, JsonProviderFactory.read((String) json, JsonStructure.class));
 
-            } catch (JSONException e) {
-                try {
-                    return getObjectFromJSON(clazz, new JSONArray((String) json));
-
-                } catch (JSONException je) {
-                    LOGGER.log(Level.CONFIG, je.getMessage(), je);
-                }
+            } catch (JsonException e) {
+            	LOGGER.log(Level.CONFIG, e.getMessage(), e);
             }
         }
         //last chance
@@ -844,69 +823,6 @@ public abstract class CastUtils {
         return null;
     }
 
-    /**
-     * Converts and returns a JSONObject instance into the Java
-     * object it describes
-     *
-     * @param classloader the appropriate classloader
-     * @param clazz       the Class of the Java object to instantiate
-     * @param jsonObject  the JSONObject to convert
-     * @return the created Java object
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T getObjectFromJSON(Class<T> clazz, JSONObject jsonObject) {
-        if (JSONObject.NULL.equals(jsonObject)) {
-            return (T) null;
-        }
-        if (String.class.isAssignableFrom(clazz)) {
-            return (T) jsonObject.toString();
-        }
-        if (clazz.isArray()) {
-            Class<?> componentType = clazz.getComponentType();
-            Object array = Array.newInstance(componentType, jsonObject.length());
-            String[] names = JSONObject.getNames(jsonObject);
-
-            int index = 0;
-            for (; index < names.length; index++) {
-                Array.set(array, index, getObjectFromJSON(componentType, jsonObject.get(names[index])));
-            }
-            return (T) array;
-        }
-        return ReflectUtils.instantiate(clazz, jsonObject);
-    }
-
-    /**
-     * Converts and returns a JSONArray instance into the Java
-     * object it describes
-     *
-     * @param classloader the appropriate classloader
-     * @param clazz       the Class of the Java object to instantiate
-     * @param jsonArray   the JSONArray to convert
-     * @return the created Java object
-     */
-    public static <T> T getObjectFromJSON(Class<T> clazz, JSONArray jsonArray) {
-        if (JSONObject.NULL.equals(jsonArray)) {
-            return (T) null;
-        }
-        if (clazz.isAssignableFrom(JSONArray.class)) {
-            return (T) jsonArray;
-        }
-        if (String.class.isAssignableFrom(clazz)) {
-            return (T) jsonArray.toString();
-        }
-        if (clazz.isArray()) {
-            Class<?> componentType = clazz.getComponentType();
-            Object array = Array.newInstance(componentType, jsonArray.length());
-            int index = 0;
-
-            for (; index < jsonArray.length(); index++) {
-                Array.set(array, index, getObjectFromJSON(componentType, jsonArray.get(index)));
-            }
-            return (T) array;
-        }
-        return ReflectUtils.instantiate(clazz, jsonArray);
-    }
-    
     /**
      * Converts and returns a JsonObject instance into the Java
      * object it describes
@@ -935,7 +851,7 @@ public abstract class CastUtils {
     }
     
     /**
-     * Converts and returns a JSONArray instance into the Java
+     * Converts and returns a JsonArray instance into the Java
      * object it describes
      *
      * @param classloader the appropriate classloader
@@ -976,9 +892,9 @@ public abstract class CastUtils {
     public static <S extends Object, T extends Map<String, S>> T toMap(Class<T> clazz, Class<S> subtype, String jsonString) {
         if (jsonString != null && jsonString.length() > 0) {
             try {
-                return toMap(clazz, subtype, new JSONObject(jsonString));
+                return toMap(clazz, subtype, JsonProviderFactory.readObject(jsonString));
 
-            } catch (JSONException e) {
+            } catch (JsonException e) {
                 LOGGER.log(Level.CONFIG, e.getMessage(), e);
             }
         }
@@ -996,27 +912,23 @@ public abstract class CastUtils {
      * @return the {@link Map} built from the {@link JSONObject}
      */
     @SuppressWarnings("unchecked")
-    public static <S extends Object, T extends Map<String, S>> T toMap(Class<T> clazz, Class<S> subtype, JSONObject jsonObject) {
+    public static <S extends Object, T extends Map<String, S>> T toMap(Class<T> clazz, Class<S> subtype, JsonObject jsonObject) {
         T map = null;
         if (clazz.equals(Map.class)) {
             clazz = (Class<T>) new HashMap<String, S>().getClass();
+        } else if (clazz.equals(SortedMap.class)) {
+        	clazz = (Class<T>) new TreeMap<String, S>().getClass();
         }
         try {
             map = clazz.newInstance();
-            if (!JSONObject.NULL.equals(jsonObject)) {
-                String[] names = JSONObject.getNames(jsonObject);
-                if (names == null) {
-                    return null;
-                }
-                int position = 0;
-                int length = names.length;
-                for (; position < length; position++) {
-                    S object = getObjectFromJSON(subtype, jsonObject.get(names[position]));
+            if (jsonObject != null) {
+            	for(Entry<String, JsonValue> e : jsonObject.entrySet()) {
+            		S object = getObjectFromJSON(subtype, e.getValue());
                     if (object == null) {
                         continue;
                     }
-                    map.put(names[position], object);
-                }
+            		map.put(e.getKey(), object);
+            	}
             }
         } catch (Exception e) {
             LOGGER.log(Level.CONFIG, e.getMessage(), e);
@@ -1025,7 +937,7 @@ public abstract class CastUtils {
     }
 
     /**
-     * Converts and returns the {@link JSONArray} object passed as
+     * Converts and returns the {@link JsonArray} object passed as
      * parameter into a {@link List}
      *
      * @param classloader the appropriate classloader
@@ -1034,18 +946,16 @@ public abstract class CastUtils {
      * @param jsonArray   the {@link JSONArray} object to convert into a {@link List}
      * @return the {@link List} built using the {@link JSONArray}
      */
-    public static <S extends Object, T extends List<S>> T toList(Class<T> clazz, Class<S> subtype, JSONArray jsonArray) {
+    public static <S extends Object, T extends List<S>> T toList(Class<T> clazz, Class<S> subtype, JsonArray jsonArray) {
         T list = null;
         if (clazz.equals(List.class)) {
             clazz = (Class<T>) new ArrayList<S>().getClass();
         }
         try {
             list = clazz.newInstance();
-            if (!JSONObject.NULL.equals(jsonArray)) {
-                int position = 0;
-                int length = jsonArray.length();
-                for (; position < length; position++) {
-                    S object = getObjectFromJSON(subtype, jsonArray.get(position));
+            if (jsonArray != null) {
+                for (JsonValue jv : jsonArray) {
+                    S object = getObjectFromJSON(subtype, jv);
                     if (object == null) {
                         continue;
                     }
@@ -1069,9 +979,9 @@ public abstract class CastUtils {
     public static Map<?, Object> toMap(String jsonString) {
         if (jsonString != null && jsonString.length() > 0) {
             try {
-                return toMap(new JSONObject(jsonString));
+                return toMap(JsonProviderFactory.readObject(jsonString));
 
-            } catch (JSONException e) {
+            } catch (JsonException e) {
                 //e.printStackTrace();
                 System.out.println(e.getMessage());
             }
@@ -1086,34 +996,55 @@ public abstract class CastUtils {
      * @param jsonObject the {@link JSONObject} object to convert into a {@link Map}
      * @return the {@link Map} built from the {@link JSONObject}
      */
-    public static Map<?, Object> toMap(JSONObject jsonObject) {
-        if (JSONObject.NULL.equals(jsonObject) || (jsonObject.length() == 0)) {
+    public static Map<String, Object> toMap(JsonObject jsonObject) {
+        if (jsonObject == null || jsonObject.isEmpty()) {
             return Collections.emptyMap();
         }
         Map<String, Object> map = new HashMap<String, Object>();
-        String[] names = JSONObject.getNames(jsonObject);
-        if (names == null) {
-            return null;
-        }
-        int position = 0;
-        int length = names.length;
-        for (; position < length; position++) {
-            Object object = jsonObject.get(names[position]);
+        for(Entry<String, JsonValue> e : jsonObject.entrySet()) {
+            JsonValue object = e.getValue();
             if (object == null) {
                 continue;
             }
-            if (JSONObject.class.isAssignableFrom(object.getClass())) {
-                map.put(names[position], toMap((JSONObject) object));
-
-            } else if (JSONArray.class.isAssignableFrom(object.getClass())) {
-                map.put(names[position], toList((JSONArray) object));
-
-            } else {
-                map.put(names[position], object);
+            Object converted = fromJsonValue(object);
+            if(converted == null) {
+            	continue;
             }
+            map.put(e.getKey(), converted);
         }
         return map;
     }
+
+	private static Object fromJsonValue(JsonValue object) {
+		Object converted;
+		switch(object.getValueType()) {
+			case ARRAY:
+				converted = toList(object.asJsonArray());
+				break;
+			case FALSE:
+				converted = Boolean.FALSE;
+				break;
+			case NULL:
+				converted = null;
+			case NUMBER:
+				JsonNumber jn = (JsonNumber) object;
+				converted = jn.isIntegral() ? jn.longValue() : jn.doubleValue();
+				break;
+			case OBJECT:
+				converted = toMap(object.asJsonObject());
+				break;
+			case STRING:
+				converted = ((JsonString)object).getString();
+				break;
+			case TRUE:
+				converted = Boolean.TRUE;
+				break;
+			default:
+				LOGGER.warning("Unknown value type " + object.getValueType());
+				converted = null;
+		}
+		return converted;
+	}
 
     /**
      * Converts and returns the {@link JSONArray} object passed as
@@ -1122,27 +1053,23 @@ public abstract class CastUtils {
      * @param jsonArray the {@link JSONArray} object to convert into a {@link List}
      * @return the {@link List} built using the {@link JSONArray}
      */
-    public static List<Object> toList(JSONArray jsonArray) {
-        if (jsonArray == null || (jsonArray.length() == 0)) {
+    public static List<Object> toList(JsonArray jsonArray) {
+        if (jsonArray == null || (jsonArray.size() == 0)) {
             return Collections.emptyList();
         }
         List<Object> list = new ArrayList<Object>();
         int position = 0;
-        int length = jsonArray.length();
+        int length = jsonArray.size();
         for (; position < length; position++) {
-            Object object = jsonArray.get(position);
+            JsonValue object = jsonArray.get(position);
             if (object == null) {
                 continue;
             }
-            if (JSONObject.class.isAssignableFrom(object.getClass())) {
-                list.add(toMap((JSONObject) object));
-
-            } else if (JSONArray.class.isAssignableFrom(object.getClass())) {
-                list.add(toList((JSONArray) object));
-
-            } else {
-                list.add(object);
+            Object converted = fromJsonValue(object);
+            if(converted == null) {
+            	continue;
             }
+            list.add(converted);
         }
         return list;
     }
@@ -1202,18 +1129,11 @@ public abstract class CastUtils {
                 return ((Double) value).doubleValue();
             }
         }
-        if (JSONObject.class.isAssignableFrom(type)) {
-            if (JSONObject.NULL.equals(value)) {
-                return null;
-            }
-            String[] names = JSONObject.getNames((JSONObject) value);
-            if (names == null || names.length == 0) {
-                return new JSONObject();
-            }
-            return new JSONObject(((JSONObject) value), names);
+        if (JsonObject.class.isAssignableFrom(type)) {
+            return JsonProviderFactory.getProvider().createObjectBuilder((JsonObject) value).build();
         }
-        if (JSONArray.class.isAssignableFrom(type)) {
-            return new JSONArray(((JSONArray) value).toString());
+        if (JsonArray.class.isAssignableFrom(type)) {
+            return JsonProviderFactory.getProvider().createArrayBuilder((JsonArray) value).build();
         }
         Class<?> alternativeClass = null;
         if (Object.class == type && Object.class != (alternativeClass = value.getClass())) {

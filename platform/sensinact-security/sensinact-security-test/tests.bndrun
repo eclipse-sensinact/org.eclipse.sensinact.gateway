@@ -103,7 +103,6 @@
 	junit-platform-commons;version='[1.8.2,1.8.3)',\
 	junit-platform-engine;version='[1.8.2,1.8.3)',\
 	junit-platform-launcher;version='[1.8.2,1.8.3)',\
-	json;version='[20190722.0.0,20190722.0.1)',\
 	org.eclipse.jetty.websocket.client;version='[9.4.42,9.4.43)',\
 	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
 	org.osgi.service.component;version='[1.4.0,1.4.1)',\
@@ -113,5 +112,4 @@
 	com.fasterxml.jackson.core.jackson-databind;version='[2.13.2,2.13.3)',\
 	jakarta.json-api;version='[2.1.0,2.1.1)',\
 	org.eclipse.parsson;version='[1.1.0,1.1.1)',\
-	com.fasterxml.jackson.datatype.jackson-datatype-jakarta-jsonp;version='[2.13.2,2.13.3)',\
-	org.eclipse.sensinact.gateway.sensinact-security-none;version='[2.0.0,2.0.1)'
+	com.fasterxml.jackson.datatype.jackson-datatype-jakarta-jsonp;version='[2.13.2,2.13.3)'
