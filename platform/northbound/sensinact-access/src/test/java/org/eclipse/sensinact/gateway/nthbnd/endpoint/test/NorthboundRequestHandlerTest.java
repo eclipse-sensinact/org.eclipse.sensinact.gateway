@@ -44,7 +44,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import jakarta.json.spi.JsonProvider;
 

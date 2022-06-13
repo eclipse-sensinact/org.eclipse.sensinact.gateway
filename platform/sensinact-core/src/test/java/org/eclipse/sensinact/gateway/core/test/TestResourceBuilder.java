@@ -91,7 +91,6 @@ import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
@@ -153,7 +152,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 
 		String get2 = r1.get().getJSON();
 
-		JSONAssert.assertEquals(get1, get2, false);
+		assertEquals(get1, get2);
 
 		JsonProvider provider = JsonProviderFactory.getProvider();
 		final JsonObject changed = provider
@@ -303,7 +302,7 @@ public class TestResourceBuilder<R extends ModelInstance> {
 		
 		final AtomicInteger callbackCounter = new AtomicInteger();
 		
-		JSONAssert.assertEquals(get1, get2, false);
+		assertEquals(get1, get2);
 		SubscribeResponse res = r1.subscribe(new Recipient() {
 			@Override
 			public void callback(String callbackId, SnaMessage[] messages) throws Exception {

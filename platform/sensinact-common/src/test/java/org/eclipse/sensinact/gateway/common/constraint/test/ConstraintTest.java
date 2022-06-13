@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.common.constraint.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -27,7 +28,6 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * test Constraint
@@ -92,13 +92,13 @@ public class ConstraintTest {
         assertTrue(constraint.complies("0033921976095"));
         assertFalse(constraint.complies("0033aa9976095"));
         assertFalse(constraint.complies("003368997609544"));
-        JSONAssert.assertEquals(ConstraintTest.EXPRESSION, constraint.getJSON(), false);
+        assertEquals(ConstraintTest.EXPRESSION, constraint.getJSON());
         constraint = ConstraintFactory.Loader.load(classloader, JsonProviderFactory.readObject(ConstraintTest.COLLECTION));
         assertTrue(constraint.complies("3"));
         assertTrue(constraint.complies("a"));
         assertFalse(constraint.complies("d"));
 
-        JSONAssert.assertEquals(ConstraintTest.RETURNED_COLLECTION, constraint.getJSON(), false);
+        assertEquals(ConstraintTest.RETURNED_COLLECTION, constraint.getJSON());
 
         constraint = constraint.getComplement();
         assertFalse(constraint.complies("3"));
@@ -114,6 +114,6 @@ public class ConstraintTest {
         assertFalse(constraint.complies(18));
         assertFalse(constraint.complies(16));
 
-        JSONAssert.assertEquals(ConstraintTest.RETURNED_ABSOLUTE, constraint.getJSON(), false);
+        assertEquals(ConstraintTest.RETURNED_ABSOLUTE, constraint.getJSON());
     }
 }

@@ -24,7 +24,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import jakarta.json.JsonObject;
 
@@ -75,7 +74,8 @@ public class DynamicParameterTest {
 			assertEquals(1000, trigger.getValue());
 
 			String triggerJSON = trigger.getJSON();
-			JSONAssert.assertEquals(DynamicParameterTest.BUILDER_0, triggerJSON, false);
+			assertEquals(JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_0), 
+					JsonProviderFactory.readObject(triggerJSON));
 
 			jsonBuilder = JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_2);
 			trigger = factory.newInstance(mediator, new Executable<Void, Object>() {
@@ -92,7 +92,8 @@ public class DynamicParameterTest {
 			assertEquals(2, trigger.getValue());
 			assertEquals("copy", trigger.getValue());
 
-			JSONAssert.assertEquals(DynamicParameterTest.BUILDER_2, trigger.getJSON(), false);
+			assertEquals(JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_2), 
+					JsonProviderFactory.readObject(trigger.getJSON()));
 
 			jsonBuilder = JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_3);
 			factory = loader.load(mediator, jsonBuilder.getString("type"));

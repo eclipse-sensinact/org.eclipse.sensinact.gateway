@@ -16,7 +16,6 @@ Import-Package: \
 	org.eclipse.sensinact.gateway.common.execution,\
 	org.eclipse.sensinact.gateway.util,\
 	javax.xml.parsers,\
-	org.json,\
 	org.osgi.framework;version="[1.6,2)",\
 	org.xml.sax,\
 	*

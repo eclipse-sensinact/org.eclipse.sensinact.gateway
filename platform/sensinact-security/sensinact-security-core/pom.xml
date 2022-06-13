@@ -86,11 +86,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-sqlite-connector</artifactId>
 			<version>${project.version}</version>

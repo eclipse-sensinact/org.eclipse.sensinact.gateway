@@ -11,11 +11,8 @@ package org.eclipse.sensinact.gateway.generic.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.core.ActionResource;
@@ -40,7 +37,6 @@ import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.context.InstalledBundleExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
@@ -555,7 +551,7 @@ public class TestGenericImplementation {
         
         System.err.println(response.getJSON());
         
-        JSONAssert.assertEquals(all, response.getJSON(), false);
+        assertEquals(all, response.getJSON());
         core.close();
     }
 }

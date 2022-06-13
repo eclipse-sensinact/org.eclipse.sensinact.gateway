@@ -27,7 +27,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import jakarta.json.JsonObject;
 
@@ -135,7 +134,8 @@ public class TriggerTest {
 			trigger = factory.newInstance(mediator, JsonProviderFactory.readObject(TriggerTest.TRIGGER_1));
 			assertEquals("constant", trigger.execute(new TriggerArgumentBuilder.Empty().build(null)));
 
-			JSONAssert.assertEquals(TriggerTest.TRIGGER_1, trigger.getJSON(), false);
+			assertEquals(JsonProviderFactory.readObject(TriggerTest.TRIGGER_1), 
+					JsonProviderFactory.readObject(trigger.getJSON()));
 
 			trigger = factory.newInstance(mediator, JsonProviderFactory.readObject(TriggerTest.TRIGGER_2));
 			assertEquals("value", trigger.execute(new TriggerArgumentBuilder.Parameter(trigger.<Integer>getArgument()).build(
@@ -184,7 +184,8 @@ public class TriggerTest {
 					}					
 				})));
 
-			JSONAssert.assertEquals(TriggerTest.TRIGGER_2, trigger.getJSON(), false);
+			assertEquals(JsonProviderFactory.readObject(TriggerTest.TRIGGER_2), 
+					JsonProviderFactory.readObject(trigger.getJSON()));
 
 			jsonTrigger =  JsonProviderFactory.readObject(TriggerTest.TRIGGER_3);
 			factory = loader.load(mediator, jsonTrigger.getString("type"));

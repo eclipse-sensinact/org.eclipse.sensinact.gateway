@@ -29,12 +29,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
-
-
-		<dependency>
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-utils</artifactId>
 			<version>${project.version}</version>
@@ -63,11 +57,6 @@
 			<groupId>org.eclipse.sensinact.gateway</groupId>
 			<artifactId>sensinact-signature-validator-mock</artifactId>
 			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -98,7 +98,6 @@
 	junit-platform-launcher;version='[1.8.2,1.8.3)',\
 	junit-jupiter-params;version='[5.8.2,5.8.3)',\
 	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
-	json;version='[20190722.0.0,20190722.0.1)',\
 	org.eclipse.jetty.websocket.client;version='[9.4.42,9.4.43)',\
 	org.eclipse.jetty.websocket.servlet;version='[9.4.42,9.4.43)',\
 	org.osgi.service.component;version='[1.4.0,1.4.1)',\

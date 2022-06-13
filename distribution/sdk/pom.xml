@@ -361,11 +361,6 @@
 			<version>${org.jline.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>${org.json.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.mapdb</groupId>
 			<artifactId>mapdb</artifactId>
 			<version>${org.mapdb.version}</version>
