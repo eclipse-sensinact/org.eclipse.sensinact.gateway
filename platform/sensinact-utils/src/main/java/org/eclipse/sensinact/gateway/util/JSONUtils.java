@@ -20,6 +20,7 @@ import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.json.JsonException;
 import jakarta.json.JsonString;
 import jakarta.json.JsonStructure;
 import jakarta.json.JsonValue;
@@ -118,12 +119,21 @@ public class JSONUtils {
             return builder.toString();
         }
         if (String.class == object.getClass() /*&& new JSONValidator((String)object).valid()*/) {
-        	    try {
-        	    	JsonProviderFactory.read((String) object, JsonStructure.class);
-        	 		return (String)object;
-        	    }catch(Exception e) {
-        	    	LOGGER.error(e.getMessage(),e);
-        	    }
+        	
+        	String string = (String) object;
+        	int firstNonBlankChar = string.codePoints()
+        		.filter(i -> !Character.isWhitespace(i))
+        		.findFirst()
+        		.orElse('x');
+        		
+        	if(firstNonBlankChar == '[' || firstNonBlankChar == '{') {
+        		try {
+        			return JsonProviderFactory.read(string, JsonStructure.class).toString();
+        		} catch (JsonException je) {
+        			LOGGER.error("Failed to parse json", je);
+        		}
+        	}
+    		return JsonProviderFactory.getProvider().createValue(object.toString()).toString();
         }
         if (CastUtils.isPrimitive(object.getClass())) {
             return JSONUtils.primitiveToJSONFormat(object);
