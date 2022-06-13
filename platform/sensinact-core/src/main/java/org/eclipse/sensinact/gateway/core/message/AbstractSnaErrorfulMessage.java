@@ -45,7 +45,13 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 		if (errorsArray == null || (length = errorsArray.size()) == 0) {
 			return;
 		}
-		JsonArrayBuilder errors = JsonProviderFactory.getProvider().createArrayBuilder(getErrors());
+		JsonArrayBuilder errors;
+		JsonArray previous = getErrors();
+		if(previous != null) {
+			errors = JsonProviderFactory.getProvider().createArrayBuilder(previous);
+		} else {
+			errors = JsonProviderFactory.getProvider().createArrayBuilder();
+		}
 		int index = 0;
 		for (; index < length; index++) {
 			errors.add(errorsArray.get(index));
@@ -101,7 +107,6 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 	 */
 	@Override
 	public JsonArray getErrors() {
-		JsonArray jsonArray  = super.<JsonArray>get(SnaConstants.ERRORS_KEY);
-		return jsonArray == null ? JsonArray.EMPTY_JSON_ARRAY : jsonArray;
+		return super.<JsonArray>get(SnaConstants.ERRORS_KEY);
 	}
 }
