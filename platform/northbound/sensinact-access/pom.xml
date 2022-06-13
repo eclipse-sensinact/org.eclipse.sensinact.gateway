@@ -57,10 +57,5 @@
 			<artifactId>sensinact-signature-validator-mock</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

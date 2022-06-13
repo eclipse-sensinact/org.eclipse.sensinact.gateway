@@ -11,8 +11,10 @@ package org.eclipse.sensinact.gateway.common.primitive;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  * A Primitive is a data structure mapping a name to a value whose type is
@@ -125,11 +127,11 @@ public abstract class Primitive implements Nameable {
      *
      * @param jsonObject the JSONObject describing the Primitive to instantiate
      */
-    protected Primitive(Mediator mediator, JSONObject jsonObject) throws InvalidValueException {
-        this(mediator, jsonObject == null ? null : jsonObject.optString(PrimitiveDescription.NAME_KEY), 
-        		jsonObject == null ? null : jsonObject.optString(PrimitiveDescription.TYPE_KEY));
+    protected Primitive(Mediator mediator, JsonObject jsonObject) throws InvalidValueException {
+        this(mediator, jsonObject == null ? null : jsonObject.getString(PrimitiveDescription.NAME_KEY, null), 
+        		jsonObject == null ? null : jsonObject.getString(PrimitiveDescription.TYPE_KEY, null));
         // set the value if defined in the JSONObject
-        Object ovalue = jsonObject.opt(PrimitiveDescription.VALUE_KEY);
+        JsonValue ovalue = jsonObject.get(PrimitiveDescription.VALUE_KEY);
         if (ovalue != null)
             this.setValue(CastUtils.getObjectFromJSON(this.getType(), ovalue));
     }
@@ -197,8 +199,8 @@ public abstract class Primitive implements Nameable {
      */
     protected void checkType(Class<?> type) throws InvalidValueTypeException {
         if (!CastUtils.isPrimitive(type) 
-        		&& !JSONObject.class.isAssignableFrom(type) 
-        		&& !JSONArray.class.isAssignableFrom(type) 
+        		&& !JsonObject.class.isAssignableFrom(type) 
+        		&& !JsonArray.class.isAssignableFrom(type) 
         		&& !type.isEnum() 
         		&& (!type.isArray() || !CastUtils.isPrimitive(type.getComponentType()))) {
             throw new InvalidValueTypeException("Invalid type : " + type.getCanonicalName());

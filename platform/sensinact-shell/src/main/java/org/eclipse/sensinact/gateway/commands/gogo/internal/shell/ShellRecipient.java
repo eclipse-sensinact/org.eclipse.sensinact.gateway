@@ -9,11 +9,16 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
+import java.io.StringReader;
+
 import org.eclipse.sensinact.gateway.commands.gogo.internal.CommandServiceMediator;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRecipient;
-import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * {@link NorthboundRecipient} dedicated to subscribe access method
@@ -37,24 +42,22 @@ public class ShellRecipient extends NorthboundRecipient {
      * callback(java.lang.String, org.eclipse.sensinact.gateway.core.message.SnaMessage[])
      */
     public void callback(String callbackId, SnaMessage<?>[] messages) {
-        int index = 0;
-        int length = messages == null ? 0 : messages.length;
-
-        StringBuilder builder = new StringBuilder();
-        builder.append(JSONUtils.OPEN_BRACE);
-        builder.append("\"callbackId\" : \"");
-        builder.append(callbackId);
-        builder.append("\",\"messages\" :");
-        builder.append(JSONUtils.OPEN_BRACKET);
-        for (; index < length; index++) {
-            builder.append(index == 0 ? "" : ",");
-            builder.append(messages[index].getJSON());
+        JsonProvider provider = JsonProviderFactory.getProvider();
+        
+        JsonArrayBuilder jab = provider.createArrayBuilder();
+        if(messages != null) {
+        	for (SnaMessage<?> m : messages) {
+        		jab.add(provider.createReader(new StringReader(m.getJSON())).readObject());
+        	}
         }
-        builder.append(JSONUtils.CLOSE_BRACKET);
-        builder.append(JSONUtils.CLOSE_BRACE);
+        
+        JsonObject jo = provider.createObjectBuilder()
+        		.add("callbackId", callbackId)
+        		.add("messages", jab)
+        		.build();
 
         ((CommandServiceMediator) super.mediator).getOutput().outputUnderlined("Callback", 2);
 
-        ((CommandServiceMediator) super.mediator).getOutput().output(new JSONObject(builder.toString()), 2);
+        ((CommandServiceMediator) super.mediator).getOutput().output(jo, 2);
     }
 }

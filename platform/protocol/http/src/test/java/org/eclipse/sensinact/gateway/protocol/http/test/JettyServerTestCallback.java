@@ -9,35 +9,35 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.protocol.http.test;
 
-import org.eclipse.sensinact.gateway.util.IOUtils;
-import org.json.JSONObject;
+import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObjectBuilder;
 
 class JettyServerTestCallback {
 
     @doPost
     public void callbackPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        JSONObject requestDescription = new JSONObject();
-        requestDescription.put("method", "POST");
+        JsonObjectBuilder requestDescription = JsonProviderFactory.getProvider().createObjectBuilder();
+        requestDescription.add("method", "POST");
         
         if (request.getQueryString() != null) 
-            requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
+            requestDescription.add("url", request.getRequestURI() + "?" + request.getQueryString());
         else 
-            requestDescription.put("url", request.getRequestURI());
+            requestDescription.add("url", request.getRequestURI());
 
-        requestDescription.put("content-type", request.getContentType());
-        requestDescription.put("content-length", request.getContentLength());
+        requestDescription.add("content-type", request.getContentType());
+        requestDescription.add("content-length", request.getContentLength());
 
         try {
-            byte[] content = IOUtils.read(request.getInputStream());
-            String message = new String(content);
-            requestDescription.put("message", new JSONObject(message));
+            requestDescription.add("message", JsonProviderFactory.getProvider().createReader(request.getInputStream()).readValue());
 
             response.setContentType("application/json");
-            response.getWriter().println(requestDescription.toString());
+            response.getWriter().println(requestDescription.build().toString());
             response.setStatus(200);
 
         } catch (IOException e) {
@@ -48,15 +48,15 @@ class JettyServerTestCallback {
 
     @doGet
     public void callbackGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        JSONObject requestDescription = new JSONObject();
-        requestDescription.put("method", "GET");
+        JsonObjectBuilder requestDescription = JsonProviderFactory.getProvider().createObjectBuilder();
+        requestDescription.add("method", "GET");
         if (request.getQueryString() != null) 
-            requestDescription.put("url", request.getRequestURI() + "?" + request.getQueryString());
+            requestDescription.add("url", request.getRequestURI() + "?" + request.getQueryString());
         else 
-            requestDescription.put("url", request.getRequestURI());
+            requestDescription.add("url", request.getRequestURI());
         response.setContentType("application/json");
         try {
-            response.getWriter().println(requestDescription.toString());
+            response.getWriter().println(requestDescription.build().toString());
             response.setStatus(200);
 
         } catch (IOException e) {

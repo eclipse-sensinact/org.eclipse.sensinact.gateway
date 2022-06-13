@@ -12,16 +12,19 @@ package org.eclipse.sensinact.gateway.sthbnd.ttn.listener;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnSubPacket;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnUplinkPayload;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.TtnUplinkPacket;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.JsonObject;
 
 public class TtnUplinkListener extends MqttTopicMessage {
 	
@@ -30,13 +33,15 @@ public class TtnUplinkListener extends MqttTopicMessage {
 	public static final String DOWNLINK_MARKER = "#DOWNLINK#";
 	
     private final Mediator mediator;
-    private final MqttProtocolStackEndpoint endpoint;
-	private TtnDownlinkListener dowlinkListener;
-
-    public TtnUplinkListener(Mediator mediator, TtnDownlinkListener downlinkListener, MqttProtocolStackEndpoint endpoint) {
+    private final ProtocolStackEndpoint<MqttPacket> endpoint;
+	private final TtnDownlinkListener dowlinkListener;
+	private final ObjectMapper mapper;
+	
+    public TtnUplinkListener(Mediator mediator, TtnDownlinkListener downlinkListener, ProtocolStackEndpoint<MqttPacket> endpoint, ObjectMapper mapper) {
         this.mediator = mediator;
         this.endpoint = endpoint;
         this.dowlinkListener = downlinkListener;
+        this.mapper = mapper;
     }
 
     /* (non-Javadoc)
@@ -49,12 +54,12 @@ public class TtnUplinkListener extends MqttTopicMessage {
             LOG.debug("Uplink message: " + message);
         
         String device = topic.split("/")[2];
-        JSONObject json = new JSONObject(message);
         TtnUplinkPayload payload = null;
 
         try {
+        	JsonObject json = mapper.readValue(message, JsonObject.class);
             payload = new TtnUplinkPayload(mediator, json);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             if(LOG.isErrorEnabled()) 
                 LOG.error(e.getMessage(),e);
         }

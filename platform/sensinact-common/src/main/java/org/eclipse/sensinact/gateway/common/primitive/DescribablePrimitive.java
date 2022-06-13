@@ -10,7 +10,9 @@
 package org.eclipse.sensinact.gateway.common.primitive;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
+
+import jakarta.json.JsonObject;
 
 /**
  * A Primitive is a data structure mapping a name to a value whose type is
@@ -72,7 +74,7 @@ public abstract class DescribablePrimitive extends Primitive implements Describa
      * @param jsonObject the JSONObject describing the Primitive
      *                   to instantiate
      */
-    protected DescribablePrimitive(Mediator mediator, JSONObject jsonObject) throws InvalidValueException {
+    protected DescribablePrimitive(Mediator mediator, JsonObject jsonObject) throws InvalidValueException {
         super(mediator, jsonObject);
     }
 

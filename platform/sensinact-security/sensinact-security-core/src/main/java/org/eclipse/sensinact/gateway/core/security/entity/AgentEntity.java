@@ -13,7 +13,8 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Agent Entity
@@ -47,7 +48,7 @@ public class AgentEntity extends SnaEntity {
 	 * @param row
 	 * 
 	 */
-	public AgentEntity(JSONObject row) {
+	public AgentEntity(JsonObject row) {
 		super(row);
 	}
 

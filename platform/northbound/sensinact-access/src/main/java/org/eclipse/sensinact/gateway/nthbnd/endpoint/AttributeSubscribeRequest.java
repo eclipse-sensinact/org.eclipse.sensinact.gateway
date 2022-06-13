@@ -9,12 +9,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.endpoint;
 
-import org.json.JSONArray;
+import jakarta.json.JsonArray;
 
 public class AttributeSubscribeRequest extends AttributeRequest {
 	
     private NorthboundRecipient recipient;
-    private JSONArray conditions;
+    private JsonArray conditions;
 	private String policy;
 	private Argument[] extraArguments;
 
@@ -27,7 +27,7 @@ public class AttributeSubscribeRequest extends AttributeRequest {
      */
     public AttributeSubscribeRequest(String requestIdentifier, 
     		String serviceProvider, String service, String resource, String attribute, 
-    		NorthboundRecipient recipient, JSONArray conditions, String policy, 
+    		NorthboundRecipient recipient, JsonArray conditions, String policy, 
     		Argument[] extraArguments) {
     	
         super(requestIdentifier, serviceProvider, service, resource, attribute);
@@ -49,7 +49,7 @@ public class AttributeSubscribeRequest extends AttributeRequest {
         if (length > 0) 
             System.arraycopy(superArguments, 0, arguments, 0, length);
         arguments[length] = new Argument(NorthboundRecipient.class, this.recipient);
-        arguments[length + 1] = new Argument(JSONArray.class, this.conditions);
+        arguments[length + 1] = new Argument(JsonArray.class, this.conditions);
         arguments[length + 2] = new Argument(String.class, this.policy);
         if (offset > 0)
             System.arraycopy(this.extraArguments, 0, arguments, length+3, offset);

@@ -15,8 +15,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import jakarta.json.JsonException;
 
 //import org.eclipse.sensinact.gateway.util.crypto.Base64;
 public class HttpServiceTestClient {
@@ -38,8 +38,7 @@ public class HttpServiceTestClient {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
-                    JSONObject jsonData = new JSONObject(content);
-                    builder.setContent(jsonData.toString());
+                    builder.setContent(content);
                 }
             } else {
                 return null;
@@ -50,7 +49,7 @@ public class HttpServiceTestClient {
             byte[] responseContent = response.getContent();
             String contentStr = (responseContent == null ? null : new String(responseContent));
             return contentStr;
-        }catch (JSONException e) {
+        }catch (JsonException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

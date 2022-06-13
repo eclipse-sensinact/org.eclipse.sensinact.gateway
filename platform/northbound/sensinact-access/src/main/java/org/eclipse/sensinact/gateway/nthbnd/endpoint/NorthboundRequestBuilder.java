@@ -17,7 +17,8 @@ import org.eclipse.sensinact.gateway.core.filtering.FilteringCollection;
 import org.eclipse.sensinact.gateway.core.filtering.FilteringDefinition;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
+
+import jakarta.json.JsonArray;
 
 /**
  * @author <a href="mailto:cmunilla@kentyou.com">Christophe Munilla</a>
@@ -263,7 +264,7 @@ public class NorthboundRequestBuilder {
             	extraArguments = this.arguments.size() > 3?this.arguments.subList(3, this.arguments.size()-1):null;
                 if (this.resource != null) 
                     request = new AttributeSubscribeRequest(getRequestIdentifier(), serviceProvider, service, resource, attribute, 
-                    	northboundRecipient, (JSONArray)(this.arguments.size() > 1?this.arguments.get(1).value:new JSONArray()), 
+                    	northboundRecipient, (JsonArray)(this.arguments.size() > 1?this.arguments.get(1).value:JsonArray.EMPTY_JSON_ARRAY), 
                     	policy, extraArguments==null|| extraArguments.size()==0?null:extraArguments.toArray(new Argument[0]));
                 else 
                     request = new RegisterAgentRequest(getRequestIdentifier(), serviceProvider, service, northboundRecipient, 

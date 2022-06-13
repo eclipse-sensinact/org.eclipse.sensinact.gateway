@@ -20,17 +20,20 @@ import org.eclipse.sensinact.gateway.core.filtering.Filtering;
 import org.eclipse.sensinact.gateway.core.filtering.FilteringType;
 import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
 import org.eclipse.sensinact.gateway.util.LocationUtils;
-import org.eclipse.sensinact.gateway.util.json.JSONObjectStatement;
-import org.eclipse.sensinact.gateway.util.json.JSONTokenerStatement;
-import org.eclipse.sensinact.gateway.util.json.JSONValidator;
-import org.eclipse.sensinact.gateway.util.json.JSONValidator.JSONToken;
-import org.eclipse.sensinact.gateway.util.location.Point;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.eclipse.sensinact.gateway.util.location.Segment;
 import org.eclipse.sensinact.gateway.util.location.geojson.GeoJson;
-import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 /**
  * {@link Filtering} implementation allowing to apply a location discrimination
@@ -42,6 +45,10 @@ import org.slf4j.LoggerFactory;
 @Component(immediate=true, service = Filtering.class)
 public class GeoJSONFiltering implements Filtering {
     public static final String GEOJSON = "geojson";
+    
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
 
 	//********************************************************************//
     //						NESTED DECLARATIONS			  			      //
@@ -55,16 +62,15 @@ public class GeoJSONFiltering implements Filtering {
     
     private static Logger LOG = LoggerFactory.getLogger(GeoJSONFiltering.class.getCanonicalName());
 
-    private static final JSONObjectStatement STATEMENT = 
-    		new JSONObjectStatement(new JSONTokenerStatement(
-			    "{" + 
-			    " \"type\": \"Feature\"," + 
-			    " \"properties\": {}," + 
-			    "  \"geometry\": {" + 
-			    "     \"type\": \"Point\"," + 
-			    "     \"coordinates\": [ $(longitude),$(latitude)] " + 
-			    "  }" + 
-			    "}"));
+    private static final String POINT_FEATURE_TEMPLATE = 
+    		"{" + 
+		    " \"type\": \"Feature\"," + 
+		    " \"properties\": {}," + 
+		    "  \"geometry\": {" + 
+		    "     \"type\": \"Point\"," + 
+		    "     \"coordinates\": [ %d, %d ] " + 
+		    "  }" + 
+		    "}";
 
     //********************************************************************//
     //						INSTANCE DECLARATIONS						  //
@@ -77,62 +83,74 @@ public class GeoJSONFiltering implements Filtering {
 
     @Override
     public String apply(String definition, Object result) {
-        JSONObject obj = new JSONObject(definition);
-        boolean output = obj.optBoolean("output");
+    	JsonObject obj;
+		try {
+			obj = mapper.readValue(definition, JsonObject.class);
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to read definition " + definition, e);
+		}
+		
+        boolean output = obj.getBoolean("output", false);
         if (!output) {
             return String.valueOf(result);
         }
 
-        JSONValidator validator = new JSONValidator(String.valueOf(result));
-        StringBuilder builder = new StringBuilder();
-        builder.append("{\"type\": \"FeatureCollection\", \"features\": [");
-
-        int count = 0;
-        int index = 0;
-
-        Set<String> names = new HashSet<String>();
-        Map<Integer, String> locationMap = new HashMap<Integer, String>();
-        Map<Integer, String> nameMap = new HashMap<Integer, String>();
-
-        while (true) {
-            JSONToken token = validator.nextToken();
-            if (token == null) {
-                break;
-            }
-            if (token.ordinal() == JSONToken.JSON_OBJECT_OPENING.ordinal()) {
-                count++;
-            }
-            if (token.ordinal() == JSONToken.JSON_OBJECT_CLOSING.ordinal()) {
-                Integer ind = Integer.valueOf(count);
-                nameMap.remove(ind);
-                locationMap.remove(ind);
-                count--;
-            }
-            if (token.ordinal() == JSONToken.JSON_OBJECT_ITEM.ordinal() && token.getContext().key.equals(Resource.NAME)) {
-                Integer ind = Integer.valueOf(count);
-                String name = (String) token.getContext().value;
-                if (name != null) {
-                    nameMap.put(ind, name);
-                }
-                String location = null;
-                if ((location = locationMap.get(ind)) != null && !names.contains(name) && writeLocation(name, location, index, builder)) {
-                    index++;
-                }
-            }
-            if (token.ordinal() == JSONToken.JSON_OBJECT_ITEM.ordinal() && token.getContext().key.equals(LocationResource.LOCATION)) {
-                Integer ind = Integer.valueOf(count);
-                String location = (String) token.getContext().value;
-                if (location != null) {
-                    locationMap.put(ind, location);
-                }
-                String name = null;
-                if ((name = nameMap.get(ind)) != null && !names.contains(name) && writeLocation(name, location, index, builder)) {
-                    index++;
-                }
-            }
+        try {
+	        JsonParser parser = mapper.createParser(String.valueOf(result));
+	        StringBuilder builder = new StringBuilder();
+	        builder.append("{\"type\": \"FeatureCollection\", \"features\": [");
+	
+	        int count = 0;
+	        int index = 0;
+	
+	        Set<String> names = new HashSet<String>();
+	        Map<Integer, String> locationMap = new HashMap<Integer, String>();
+	        Map<Integer, String> nameMap = new HashMap<Integer, String>();
+	
+	        while (true) {
+	            JsonToken token = parser.nextToken();
+	            if (token == null) {
+	                break;
+	            }
+	            if (token.ordinal() == JsonToken.START_OBJECT.ordinal()) {
+	                count++;
+	            }
+	            if (token.ordinal() == JsonToken.END_OBJECT.ordinal()) {
+	                Integer ind = Integer.valueOf(count);
+	                nameMap.remove(ind);
+	                locationMap.remove(ind);
+	                count--;
+	            }
+	            if (token.ordinal() == JsonToken.FIELD_NAME.ordinal() && parser.getCurrentName().equals(Resource.NAME)) {
+	                Integer ind = Integer.valueOf(count);
+	                parser.nextToken();
+	                String name = parser.readValueAs(String.class);
+	                if (name != null) {
+	                    nameMap.put(ind, name);
+	                }
+	                String location = null;
+	                if ((location = locationMap.get(ind)) != null && !names.contains(name) && writeLocation(name, location, index, builder)) {
+	                    index++;
+	                }
+	            }
+	            if (token.ordinal() == JsonToken.FIELD_NAME.ordinal() && parser.getCurrentName().equals(LocationResource.LOCATION)) {
+	                Integer ind = Integer.valueOf(count);
+	                parser.nextToken();
+	                String location =  parser.readValueAs(String.class);
+	                if (location != null) {
+	                    locationMap.put(ind, location);
+	                }
+	                String name = null;
+	                if ((name = nameMap.get(ind)) != null && !names.contains(name) && writeLocation(name, location, index, builder)) {
+	                    index++;
+	                }
+	            }
+	        }
+	        builder.append("]}");
+	        return builder.toString();
+        } catch (Exception e) {
+        	throw new RuntimeException("Failed to correctly process the location of one or more providers", e);
         }
-        builder.append("]}");
-        return builder.toString();
     }
 
     boolean writeLocation(String name, String location, int index, StringBuilder builder) {
@@ -158,18 +176,14 @@ public class GeoJSONFiltering implements Filtering {
             String[] locationElements = location.split(new String(new char[] {sep}));
             double latitude = Double.parseDouble(locationElements[0]);
             double longitude = Double.parseDouble(locationElements[1]);
-            STATEMENT.apply("latitude", latitude);
-            STATEMENT.apply("longitude", longitude);
             if (index > 0) 
                 builder.append(",");
             
-            builder.append(STATEMENT.toString());
+            builder.append(String.format(POINT_FEATURE_TEMPLATE, longitude, latitude));
             return true;
 
         } catch (Exception e) {
         	LOG.error("could not write location",e);
-        } finally {
-            STATEMENT.reset();
         }
         return false;
     }
@@ -178,10 +192,10 @@ public class GeoJSONFiltering implements Filtering {
     public String getLDAPComponent(String definition) {
         String ldapFilter = null;
         try {
-            JSONObject obj = new JSONObject(definition);
-            double lat = obj.getDouble("latitude");
-            double lng = obj.getDouble("longitude");
-            double distance = obj.getDouble("distance");
+            JsonObject obj = mapper.readValue(definition, JsonObject.class);
+            double lat = obj.getJsonNumber("latitude").doubleValue();
+            double lng = obj.getJsonNumber("longitude").doubleValue();
+            double distance = obj.getJsonNumber("distance").doubleValue();
 
             Segment rad0 = null;
             Segment rad90 = null;

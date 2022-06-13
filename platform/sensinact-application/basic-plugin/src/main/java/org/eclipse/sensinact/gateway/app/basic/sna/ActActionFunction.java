@@ -10,13 +10,14 @@
 package org.eclipse.sensinact.gateway.app.basic.sna;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 
+import org.eclipse.sensinact.gateway.app.api.plugin.PluginHook;
 import org.eclipse.sensinact.gateway.app.manager.component.data.ResourceData;
 import org.eclipse.sensinact.gateway.core.Resource;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.BundleContext;
+
+import jakarta.json.JsonObject;
 
 /**
  * This class is fired at the end of the application
@@ -33,9 +34,9 @@ public class ActActionFunction extends ActionFunction {
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
-    public static JSONObject getJSONSchemaFunction(BundleContext context) {
+    public static JsonObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+        	return JsonProviderFactory.getProvider().createReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream()).readObject();
         } catch (IOException e) {
             e.printStackTrace();
         }

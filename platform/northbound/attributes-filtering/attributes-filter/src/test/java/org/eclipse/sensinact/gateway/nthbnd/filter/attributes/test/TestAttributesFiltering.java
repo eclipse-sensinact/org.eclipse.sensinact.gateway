@@ -9,11 +9,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.filter.attributes.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.StringReader;
+
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.ModelInstance;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.http.test.HttpServiceTestClient;
 import org.eclipse.sensinact.gateway.nthbnd.filter.attributes.ws.test.WsServiceTestClient;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +25,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.JsonObject;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -46,6 +52,7 @@ public class TestAttributesFiltering {
     //						INSTANCE DECLARATIONS						  //
     //********************************************************************//
 
+    private JsonProvider provider = JsonProviderFactory.getProvider();
 	 private String location; 
 	 
 	@BeforeEach
@@ -60,19 +67,22 @@ public class TestAttributesFiltering {
     @Test
     public void testHttpFiltered() throws Exception {
         String response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
-        JSONObject result = new JSONObject(response);
-        JSONObject expected = new JSONObject(
+        JsonObject result = provider.createReader(new StringReader(response)).readObject();
+        JsonObject expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
         + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
         + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
         + "}]" 
         + ",\"location\":\""+location.replace("\"","\\\"")+"\""
-        + ",\"friendlyName\":\"startName\"}]}");
+        + ",\"friendlyName\":\"startName\"}]"
+        + ",\"type\":\"COMPLETE_LIST\""
+        + ",\"uri\":\"/\""
+        + ",\"statusCode\":200}")).readObject();
         
         System.out.println("==============================================");
         System.out.println("result: ");
@@ -80,7 +90,7 @@ public class TestAttributesFiltering {
         System.out.println(expected);
         System.out.println("==============================================");
         
-        JSONAssert.assertEquals(expected, new JSONObject(response), false);
+        assertEquals(expected, result);
         
         HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact/slider/admin/friendlyName/SET",
         "[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]", "POST");
@@ -88,55 +98,64 @@ public class TestAttributesFiltering {
         Thread.sleep(2000);
         response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs=[friendlyName]", null, "GET");
         
-        result = new JSONObject(response);
-        expected = new JSONObject(
+        result = provider.createReader(new StringReader(response)).readObject();
+        expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
         + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
         + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
         + "}]" 
         + ",\"location\":\""+location.replace("\"","\\\"")+"\""
-        + ",\"friendlyName\":\"mySlider\"}]}");
-        JSONAssert.assertEquals(expected, new JSONObject(response), false);
+        + ",\"friendlyName\":\"mySlider\"}]"
+        + ",\"type\":\"COMPLETE_LIST\""
+        + ",\"uri\":\"/\""
+        + ",\"statusCode\":200}")).readObject();
+        assertEquals(expected, result);
         
         response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs={friendlyName,icon}", null, "GET");
-        result = new JSONObject(response);
-        expected = new JSONObject(
+        result = provider.createReader(new StringReader(response)).readObject();
+        expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"{friendlyName,icon}\",\"type\":\"attrs\"}]," 
         + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
         + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
         + "}]" 
         + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"icon\":null"
-        + ",\"friendlyName\":\"mySlider\"}]}");
-        JSONAssert.assertEquals(expected, result, false);
+        + ",\"friendlyName\":\"mySlider\"}]"
+        + ",\"type\":\"COMPLETE_LIST\""
+        + ",\"uri\":\"/\""
+        + ",\"statusCode\":200}")).readObject();
+        assertEquals(expected, result);
 
         response = HttpServiceTestClient.newRequest(HTTP_ROOTURL + "/sensinact?attrs=friendlyName,icon,bridge", null, "GET");
-        result = new JSONObject(response);
-        expected = new JSONObject(
+        result = provider.createReader(new StringReader(response)).readObject();
+        expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"friendlyName,icon,bridge\",\"type\":\"attrs\"}]," 
         + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
         + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
         + "}]" 
         + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
-        + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");
-        JSONAssert.assertEquals(expected, result, false);
+        + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]"
+        + ",\"type\":\"COMPLETE_LIST\""
+        + ",\"uri\":\"/\""
+        + ",\"statusCode\":200}")).readObject();
+        assertEquals(expected, result);
     }
 
     @Test
@@ -146,20 +165,23 @@ public class TestAttributesFiltering {
         
         String response = this.synchronizedRequest(client, "/sensinact", 
         		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
-        JSONObject result = new JSONObject(response);
-        JSONObject expected = new JSONObject(
+        JsonObject result = provider.createReader(new StringReader(response)).readObject();
+        JsonObject expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
-        + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
-        + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
-        + "}]" 
-        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
-        + ",\"friendlyName\":\"startName\"}]}");
-        JSONAssert.assertEquals(expected, result, false);
+    	+ "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+    	+ "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+    	+ "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+    	+ "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+    	+ "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
+    	+ "{\"name\":\"cursor\",\"resources\":" 
+    	+ "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
+    	+ "}]" 
+    	+ ",\"location\":\""+location.replace("\"","\\\"")+"\""
+    	+ ",\"friendlyName\":\"startName\"}]"
+    	+ ",\"type\":\"COMPLETE_LIST\""
+    	+ ",\"uri\":\"/\""
+    	+ ",\"statusCode\":200}")).readObject();
+        assertEquals(expected, result);
 
         this.synchronizedRequest(client, "/sensinact/slider/admin/friendlyName/SET", 
         		"[{\"name\":\"attributeName\",\"type\":\"string\",\"value\":\"value\"},{\"name\":\"value\",\"type\":\"string\",\"value\":\"mySlider\"}]");
@@ -168,58 +190,67 @@ public class TestAttributesFiltering {
 
         response = this.synchronizedRequest(client, "/sensinact", 
         		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"[friendlyName]\"}]");
-        result = new JSONObject(response);
-        expected = new JSONObject(
+        result = provider.createReader(new StringReader(response)).readObject();
+        expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"[friendlyName]\",\"type\":\"attrs\"}]," 
-        + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
-        + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
-        + "}]" 
-        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
-        + ",\"friendlyName\":\"mySlider\"}]}");
-        JSONAssert.assertEquals(expected, result, false);
+		+ "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
+		+ "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+		+ "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+		+ "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+		+ "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
+		+ "{\"name\":\"cursor\",\"resources\":" 
+		+ "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
+		+ "}]" 
+		+ ",\"location\":\""+location.replace("\"","\\\"")+"\""
+		+ ",\"friendlyName\":\"mySlider\"}]"
+		+ ",\"type\":\"COMPLETE_LIST\""
+		+ ",\"uri\":\"/\""
+		+ ",\"statusCode\":200}")).readObject();
+        assertEquals(expected, result);
 
         response = this.synchronizedRequest(client, "/sensinact", 
         		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"{friendlyName,icon}\"}]");
-        result = new JSONObject(response);
-        expected = new JSONObject(
+        result = provider.createReader(new StringReader(response)).readObject();
+        expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"{friendlyName,icon}\",\"type\":\"attrs\"}]," 
         + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
-        + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
-        + "}]" 
-        + ",\"location\":\""+location.replace("\"","\\\"")+"\""
-        + ",\"icon\":null"
-        + ",\"friendlyName\":\"mySlider\"}]}");
-        JSONAssert.assertEquals(expected, result, false);
+    	+ "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+    	+ "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+    	+ "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+    	+ "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
+    	+ "{\"name\":\"cursor\",\"resources\":" 
+    	+ "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
+    	+ "}]" 
+    	+ ",\"location\":\""+location.replace("\"","\\\"")+"\""
+    	+ ",\"icon\":null"
+    	+ ",\"friendlyName\":\"mySlider\"}]"
+    	+ ",\"type\":\"COMPLETE_LIST\""
+    	+ ",\"uri\":\"/\""
+    	+ ",\"statusCode\":200}")).readObject();
+        assertEquals(expected, result);
 
         response = this.synchronizedRequest(client, "/sensinact", 
         		"[{\"name\":\"attrs\",\"type\":\"string\",\"value\":\"friendlyName,icon,bridge\"}]");
         System.err.println(response);
-        result = new JSONObject(response);
-        expected = new JSONObject(
+        result = provider.createReader(new StringReader(response)).readObject();
+        expected = provider.createReader(new StringReader(
         "{\"filters\":[{\"definition\":\"friendlyName,icon,bridge\",\"type\":\"attrs\"}]," 
         + "\"providers\":" + "[{\"name\":\"slider\",\"services\":[{\"name\":\"admin\"," 
-        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"location\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\"}," 
-        + "{\"name\":\"icon\",\"type\":\"PROPERTY\"}]}," 
+        + "\"resources\":" + "[{\"name\":\"friendlyName\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"location\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}," 
+        + "{\"name\":\"bridge\",\"type\":\"PROPERTY\",\"rws\":\"RO\"}," 
+        + "{\"name\":\"icon\",\"type\":\"PROPERTY\",\"rws\":\"RW\"}]}," 
         + "{\"name\":\"cursor\",\"resources\":" 
-        + "[{\"name\":\"position\",\"type\":\"SENSOR\"}]" 
+        + "[{\"name\":\"position\",\"type\":\"SENSOR\",\"rws\":\"RO\"}]" 
         + "}]" 
         + ",\"location\":\""+location.replace("\"","\\\"")+"\""
         + ",\"friendlyName\":\"mySlider\""
         + ",\"icon\":null"
-        + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]}");
-        JSONAssert.assertEquals(expected, result, false);
+        + ",\"bridge\":\"org.eclipse.sensinact.gateway.simulated.devices.slider\"}]"
+        + ",\"type\":\"COMPLETE_LIST\""
+        + ",\"uri\":\"/\""
+        + ",\"statusCode\":200}")).readObject();
+        assertEquals(expected, result);
         client.close();
     }
 

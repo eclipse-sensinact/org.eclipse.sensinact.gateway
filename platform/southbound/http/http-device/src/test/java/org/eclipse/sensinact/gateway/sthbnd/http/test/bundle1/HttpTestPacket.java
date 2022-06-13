@@ -11,28 +11,41 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.test.bundle1;
 
 import org.eclipse.sensinact.gateway.generic.Task;
-import org.eclipse.sensinact.gateway.generic.packet.annotation.*;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.CommandID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.Data;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ResourceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceID;
+import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponsePacket;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 public class HttpTestPacket extends HttpResponsePacket {
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
 	private String serviceProviderId;
 	private String serviceId;
 	private String resourceId;
 	private Object data;
 
-	public HttpTestPacket(HttpResponse response) throws JSONException {
+	public HttpTestPacket(HttpResponse response) throws Exception{
     	super(response);    	
     	byte[] c = super.content;
     	if(c != null &&  c.length>0) {
-    		String str = new String(c);    		
-			JSONObject json = new JSONObject(str);
-			this.serviceProviderId = json.getString("serviceProviderId");
-			this.serviceId = json.getString("serviceId");
-			this.resourceId = json.getString("resourceId");
-			this.data = json.get("data");
+    		JsonObject jo = mapper.readValue(c, JsonObject.class);
+			this.serviceProviderId = jo.getString("serviceProviderId");
+			this.serviceId = jo.getString("serviceId");
+			this.resourceId = jo.getString("resourceId");
+			this.data = jo.getInt("data");
     	}
 	}
 	

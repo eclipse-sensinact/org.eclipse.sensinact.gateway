@@ -19,7 +19,8 @@ import org.eclipse.sensinact.gateway.core.message.Recipient;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod.Type;
 import org.eclipse.sensinact.gateway.core.remote.SensinactCoreBaseIface;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
+
+import jakarta.json.JsonArray;
 
 /**
  *
@@ -35,7 +36,7 @@ public class RemoteAccessMethodExecutable implements Executable<SensinactCoreBas
 	public static final TypedKey<Object[]> ARGUMENTS_TK = new TypedKey<Object[]>(ARGUMENTS, Object[].class, false);
 	public static final TypedKey<String> SUBSCRIPTION_ID_TK = new TypedKey<String>(SUBSCRIPTION_ID, String.class,
 			false);
-	public static final TypedKey<JSONArray> CONDITIONS_TK = new TypedKey<JSONArray>(CONDITIONS, JSONArray.class, false);
+	public static final TypedKey<JsonArray> CONDITIONS_TK = new TypedKey<JsonArray>(CONDITIONS, JsonArray.class, false);
 	public static final TypedKey<Recipient> RECIPIENT_TK = new TypedKey<Recipient>(RECIPIENT, Recipient.class, false);
 	public static final TypedKey<Object> VALUE_TK = new TypedKey<Object>(VALUE, Object.class, false);
 
@@ -108,14 +109,14 @@ public class RemoteAccessMethodExecutable implements Executable<SensinactCoreBas
 		switch (this.method.name()) {
 		case "ACT":
 			json = core.act(publicKey, provider, service, resource, CastUtils.cast(
-					JSONArray.class, this.props.get(ARGUMENTS_TK)).toString());
+					JsonArray.class, this.props.get(ARGUMENTS_TK)).toString());
 			break;
 		case "GET":
 			json = core.get(publicKey, provider, service, resource, attribute);
 			break;
 		case "SET":
 			json = core.set(publicKey, provider, service, resource, attribute, CastUtils.cast(
-					JSONArray.class, this.props.get(VALUE_TK)).toString());
+					JsonArray.class, this.props.get(VALUE_TK)).toString());
 			break;
 		case "SUBSCRIBE":
 		case "UNSUBSCRIBE":

@@ -24,8 +24,11 @@ import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricProvider;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.HistoricValueRequest;
 import org.eclipse.sensinact.gateway.historic.storage.reader.api.TemporalDTO;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 /**
  *
@@ -65,23 +68,22 @@ public class HistoricValueQuery {
 				.forEach(s -> request.addTargetResource(s[0], s[1], s[2]));
 			
 			Map<String, TemporalDTO> data = request.execute();
-			
-			JSONArray array = new JSONArray();
+			JsonProvider jp = JsonProviderFactory.getProvider();
+			JsonArrayBuilder array = jp.createArrayBuilder();
 			
 			for(Entry<String, TemporalDTO> e : data.entrySet()) {
-				JSONObject container = new JSONObject();
-				JSONObject value = new JSONObject();
-				
-				container.put("path", e.getKey());
-				container.put("historicValue", value);
-				
+				JsonObjectBuilder value = jp.createObjectBuilder();
 				TemporalDTO dto = e.getValue();
 				
-				value.put("tagId", dto.tagID);
-				value.put("timestamp", dto.timestamp);
-				value.put("value", dto.value);
+				value.add("tagId", dto.tagID);
+				value.add("timestamp", dto.timestamp);
+				value.add("value", dto.value);
 
-				array.put(container);
+				JsonObjectBuilder container = jp.createObjectBuilder();
+				container.add("path", e.getKey());
+				container.add("historicValue", value);
+
+				array.add(container);
 			}
 			
 			return array.toString();

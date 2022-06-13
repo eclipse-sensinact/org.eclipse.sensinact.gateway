@@ -20,12 +20,10 @@ import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
 
 public class RegisterAgentRequest extends NorthboundRequest {
 	
     private NorthboundRecipient recipient;
-    private JSONArray constraints;
     private String serviceProvider;
     private String service;
     private SnaFilter filter;

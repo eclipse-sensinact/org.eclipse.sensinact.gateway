@@ -10,10 +10,16 @@
 package org.eclipse.sensinact.gateway.protocol.http.client;
 
 import org.eclipse.sensinact.gateway.protocol.http.HeadersCollection;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.util.HashMap;
@@ -59,30 +65,32 @@ public class ConnectionConfigurationImpl<RESPONSE extends Response, REQUEST exte
      */
     public ConnectionConfigurationImpl(String configuration) {
         this();
-        JSONObject jsonConfiguration = new JSONObject(configuration);
+        JsonObject jsonConfiguration = JsonProviderFactory.getProvider().createReader(new StringReader(configuration)).readObject();
 
-        this.uri = (String) jsonConfiguration.opt("uri");
-        this.httpMethod = (String) jsonConfiguration.opt("httpMethod");
+        this.uri = jsonConfiguration.getString("uri", null);
+        this.httpMethod = jsonConfiguration.getString("httpMethod", null);
 
-        this.content = jsonConfiguration.opt("content");
+        this.content = jsonConfiguration.getString("content", null);
 
-        this.acceptType = (String) jsonConfiguration.opt("acceptType");
-        this.contentType = (String) jsonConfiguration.opt("contentType");
+        this.acceptType = jsonConfiguration.getString("acceptType", null);
+        this.contentType = jsonConfiguration.getString("contentType", null);
 
-        Integer timeout = (Integer) jsonConfiguration.opt("connectTimeout");
-        this.connectTimeout = timeout != null ? timeout.intValue() : -1;
+        this.connectTimeout = jsonConfiguration.getInt("connectTimeout", -1);
 
-        timeout = (Integer) jsonConfiguration.opt("readTimeout");
-        this.readTimeout = timeout != null ? timeout.intValue() : -1;
+        this.readTimeout = jsonConfiguration.getInt("readTimeout", -1);
 
-        JSONArray params = jsonConfiguration.optJSONArray("parameters");
+        JsonArray params = jsonConfiguration.getJsonArray("parameters");
         int index = 0;
-        int length = params == null ? 0 : params.length();
+        int length = params == null ? 0 : params.size();
 
         for (; index < length; index++) {
-            JSONObject object = params.optJSONObject(index);
-            if (!JSONObject.NULL.equals(object)) {
-                queryParameter(object.optString("key"), object.optString("value"));
+            JsonObject object = params.getJsonObject(index);
+            if (object != null) {
+            	JsonValue value = object.get("value");
+            	if(value != null && value.getValueType() != ValueType.NULL) {
+            		queryParameter(object.getString("key", null), value.getValueType() == ValueType.STRING ?
+            				((JsonString)value).getString() : value.toString());
+            	}
             }
         }
     }

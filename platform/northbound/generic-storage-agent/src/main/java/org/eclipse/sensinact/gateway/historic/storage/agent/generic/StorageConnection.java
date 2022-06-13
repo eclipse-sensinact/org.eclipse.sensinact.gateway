@@ -9,9 +9,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.historic.storage.agent.generic;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * Processes the effective storage in the linked data store
@@ -29,9 +30,9 @@ public abstract class StorageConnection {
     /**
      * Store the JSON formated data passed as parameter 
      *
-     * @param object the {@link JSONObject} wrapping the data to be stored
+     * @param object the {@link JsonObject} wrapping the data to be stored
      */
-    protected abstract void store(JSONObject object);
+    protected abstract void store(JsonObject object);
 
     /**
      * Constructor
@@ -47,7 +48,7 @@ public abstract class StorageConnection {
             public void run() {
                 while (running) {
                     try {
-                        JSONObject element = stack.pop();
+                        JsonObject element = stack.pop();
                         if (element != null) {
                             store(element);
                         } else {

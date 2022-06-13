@@ -33,12 +33,13 @@ import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessageImpl;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * {@link RemoteCore} implementation
@@ -252,7 +253,7 @@ public class RemoteSensiNact implements RemoteCore {
 						if (ref == null) {
 							continue;
 						}
-						JSONObject response = this.localEndpoint.unsubscribe(ref.publicKey, 
+						JsonObject response = this.localEndpoint.unsubscribe(ref.publicKey, 
 							ref.serviceProviderId, ref.serviceId, ref.resourceId, keys[index]);
 						LOG.debug(response.toString());
 					}
@@ -309,45 +310,45 @@ public class RemoteSensiNact implements RemoteCore {
 	}
 
 	@Override
-	public JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId,
+	public JsonObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			String attributeId) {
 		return this.localEndpoint.get(publicKey, serviceProviderId, serviceId, resourceId, attributeId);
 	}
 
 	@Override
-	public JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId,
+	public JsonObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			String attributeId, Object parameter) {
 		return this.localEndpoint.set(publicKey, serviceProviderId, serviceId, resourceId, attributeId, parameter);
 	}
 
 	@Override
-	public JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,
+	public JsonObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			Object[] parameters) {
 		return this.localEndpoint.act(publicKey, serviceProviderId, serviceId, resourceId, parameters);
 	}
 
 	@Override
-	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			JSONArray conditions) {
-		JSONObject response = this.subscribe(publicKey, serviceProviderId, serviceId, resourceId, this.remoteEndpoint,
+	public JsonObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
+			JsonArray conditions) {
+		JsonObject response = this.subscribe(publicKey, serviceProviderId, serviceId, resourceId, this.remoteEndpoint,
 				conditions);
 		return response;
 	}
 
 	@Override
-	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			Recipient recipient, JSONArray conditions) {
-		JSONObject response = this.localEndpoint.subscribe(publicKey, serviceProviderId, serviceId, resourceId,
+	public JsonObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
+			Recipient recipient, JsonArray conditions) {
+		JsonObject response = this.localEndpoint.subscribe(publicKey, serviceProviderId, serviceId, resourceId,
 				recipient, conditions);
 
-		if (response.optInt("statusCode") == 200) {
+		if (response.getInt("statusCode") == 200) {
 			try {
-				String subscriptionId = response.getJSONObject("response").getString("subscriptionId");
+				String subscriptionId = response.getJsonObject("response").getString("subscriptionId");
 
 				this.subscriptionIds.put(subscriptionId,
 						new SubscriptionReference(publicKey, serviceProviderId, serviceId, resourceId));
 
-			} catch (JSONException e) {
+			} catch (Exception e) {
 				LOG.error(e.getMessage(),e);
 			}
 		}
@@ -355,11 +356,11 @@ public class RemoteSensiNact implements RemoteCore {
 	}
 
 	@Override
-	public JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
+	public JsonObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
 			String subscriptionId) {
 		this.subscriptionIds.remove(subscriptionId);
 
-		JSONObject response = this.localEndpoint.unsubscribe(publicKey, serviceProviderId, serviceId, resourceId,
+		JsonObject response = this.localEndpoint.unsubscribe(publicKey, serviceProviderId, serviceId, resourceId,
 				subscriptionId);
 		return response;
 	}
@@ -388,11 +389,11 @@ public class RemoteSensiNact implements RemoteCore {
 		Session session = this.localEndpoint.getSession(publicKey);
 		RemoteAgentCallback callback = new RemoteAgentCallback(remoteAgentId, this);
 		SubscribeResponse resp = session.registerSessionAgent(callback, filter);
-		JSONObject registration = resp.getResponse();
+		JsonObject registration = resp.getResponse();
 		String localAgentId = null;
 
-		if (!JSONObject.NULL.equals(registration) && (localAgentId = (String) 
-			registration.opt("subscriptionId")) != null) {
+		if (registration != null && (localAgentId =
+			registration.getString("subscriptionId", null)) != null) {
 			this.localAgents.put(remoteAgentId, localAgentId);
 		}
 	}
@@ -441,9 +442,13 @@ public class RemoteSensiNact implements RemoteCore {
 	private final void propagateRemoteConnectionStatus(boolean connected, String namespace) {
 		SnaRemoteMessageImpl message = new SnaRemoteMessageImpl(UriUtils.ROOT, 
 			connected?SnaRemoteMessage.Remote.CONNECTED:SnaRemoteMessage.Remote.DISCONNECTED);
-		message.setNotification(new JSONObject().put(SnaConstants.REMOTE, 
-			connected?SnaRemoteMessage.Remote.CONNECTED.name():SnaRemoteMessage.Remote.DISCONNECTED.name())
-				.put(SnaConstants.NAMESPACE, namespace));
+		
+		message.setNotification(JsonProviderFactory.getProvider()
+				.createObjectBuilder()
+				.add(SnaConstants.REMOTE, connected ? SnaRemoteMessage.Remote.CONNECTED.name() 
+						: SnaRemoteMessage.Remote.DISCONNECTED.name())
+				.add(SnaConstants.NAMESPACE, namespace)
+				.build());
 		dispatch("*", message);
 	}
 }

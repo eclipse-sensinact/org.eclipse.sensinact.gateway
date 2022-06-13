@@ -25,17 +25,27 @@ import org.eclipse.sensinact.gateway.simulated.slider.internal.SliderAdapter;
 import org.eclipse.sensinact.gateway.simulated.slider.internal.SliderGUI;
 import org.eclipse.sensinact.gateway.simulated.slider.internal.SliderPacket;
 import org.eclipse.sensinact.gateway.simulated.slider.internal.SliderSetter;
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonArray;
 
 @Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator extends AbstractActivator<Mediator> {
 
     private static final String SLIDERS_DEFAULT = "[\"slider\"]";
     private static final String GUI_ENABLED = "org.eclipse.sensinact.simulated.gui.enabled";
+
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
     
     private LocalProtocolStackEndpoint<SliderPacket> connector;
     
@@ -62,9 +72,9 @@ public class Activator extends AbstractActivator<Mediator> {
             sliders = SLIDERS_DEFAULT;
         }
 
-        JSONArray slidersArray = new JSONArray(sliders);
+        JsonArray slidersArray = mapper.readValue(sliders, JsonArray.class);
 
-        for (int i = 0; i < slidersArray.length(); i++) {
+        for (int i = 0; i < slidersArray.size(); i++) {
             final String id = slidersArray.getString(i);
             SliderSetterItf sliderPanel = null;
 

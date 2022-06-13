@@ -24,7 +24,7 @@ import org.eclipse.sensinact.gateway.security.oauth2.IdentityServer;
 import org.eclipse.sensinact.gateway.security.oauth2.OAuthServer;
 import org.eclipse.sensinact.gateway.security.oauth2.UserInfo;
 
-import org.json.JSONObject;
+import jakarta.json.JsonObject;
 
 @WebServlet(/*asyncSupported = true*/)
 public class SecurityServlet extends HttpServlet {
@@ -67,7 +67,7 @@ public class SecurityServlet extends HttpServlet {
         		if (code != null) {
         			int status = 401;
         			HttpSession session = request.getSession();
-        			JSONObject tokens = authServer.verify(code, request);
+        			JsonObject tokens = authServer.verify(code, request);
         			if (tokens != null) {
         				String id_token;
         				String access_token;

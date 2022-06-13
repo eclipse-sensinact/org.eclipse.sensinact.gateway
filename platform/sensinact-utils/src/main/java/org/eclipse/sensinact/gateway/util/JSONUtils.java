@@ -16,11 +16,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.util.json.JSONValidator;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonString;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonValue;
 
 /**
  * JSON Helpers
@@ -75,11 +77,11 @@ public class JSONUtils {
         if (object == null) {
             return JSON_NULL;
         }
-        if (JSONObject.class.isAssignableFrom(object.getClass())) {
-            return ((JSONObject) object).toString();
+        if (JsonString.class.isAssignableFrom(object.getClass())) {
+        	return ((JsonString) object).getString();
         }
-        if (JSONArray.class.isAssignableFrom(object.getClass())) {
-            return ((JSONArray) object).toString();
+        if (JsonValue.class.isAssignableFrom(object.getClass())) {
+        	return object.toString();
         }
         if (object.getClass().isArray()) {
             return JSONUtils.arrayToJSONFormat(object, context);
@@ -117,9 +119,8 @@ public class JSONUtils {
         }
         if (String.class == object.getClass() /*&& new JSONValidator((String)object).valid()*/) {
         	    try {
-	        	 	if(new JSONValidator((String)object).valid()) {
-	        	 		return (String)object;
-	        	 	}
+        	    	JsonProviderFactory.read((String) object, JsonStructure.class);
+        	 		return (String)object;
         	    }catch(Exception e) {
         	    	LOGGER.error(e.getMessage(),e);
         	    }

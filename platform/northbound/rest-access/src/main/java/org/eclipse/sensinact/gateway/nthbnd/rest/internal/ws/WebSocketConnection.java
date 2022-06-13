@@ -10,6 +10,7 @@
 package org.eclipse.sensinact.gateway.nthbnd.rest.internal.ws;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -26,10 +27,13 @@ import org.eclipse.jetty.websocket.common.OpCode;
 import org.eclipse.sensinact.gateway.core.security.InvalidCredentialException;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundEndpoint;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundMediator;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * WebSocket connection endpoint
@@ -94,22 +98,29 @@ public class WebSocketConnection {
     public void onMessage(String message) {
     	if(partial)
     		return;
+    	JsonProvider provider = JsonProviderFactory.getProvider();
         try {
-            JSONObject jsonObject = new JSONObject(message);
+			JsonObject jsonObject = provider.createReader(new StringReader(message)).readObject();
             WsRestAccessRequest wrapper = new WsRestAccessRequest(mediator, this, jsonObject);
             WsRestAccess restAccess = new WsRestAccess(wrapper, this);
             restAccess.proceed();
-        } catch (IOException | JSONException e) {
+        } catch (IOException | JsonException e) {
             LOG.error(e.getMessage(), e);
             try {
-				this.send(new JSONObject().put("statusCode", 400).put("message", "Bad request").toString());
+				this.send(provider.createObjectBuilder()
+						.add("statusCode", 400)
+						.add("message", "Bad request")
+						.build().toString());
 			} catch (Exception e1) {
 	            LOG.error(e1.getMessage(),e1);
 			}
         } catch (InvalidCredentialException e) {
             LOG.error(e.getMessage(), e);
             try {
-				this.send(new JSONObject().put("statusCode", 403).put("message", e.getMessage()).toString());
+				this.send(provider.createObjectBuilder()
+						.add("statusCode", 403)
+						.add("message", e.getMessage())
+						.build().toString());
 			} catch (Exception e1) {
 	            LOG.error(e1.getMessage(),e1);
 			}
@@ -117,7 +128,10 @@ public class WebSocketConnection {
         	e.printStackTrace();
             LOG.error(e.getMessage(), e);
             try {
-				this.send(new JSONObject().put("statusCode", 500).put("message", "Exception - Internal server error").toString());
+				this.send(provider.createObjectBuilder()
+						.add("statusCode", 500)
+						.add("message", "Exception - Internal server error")
+						.build().toString());
 			} catch (Exception e1) {
 	            LOG.error(e1.getMessage(),e1);
 			}

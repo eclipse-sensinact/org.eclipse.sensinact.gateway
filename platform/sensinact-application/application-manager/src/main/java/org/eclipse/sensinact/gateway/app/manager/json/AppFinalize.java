@@ -10,7 +10,8 @@
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Finalize is not used for now
@@ -18,13 +19,13 @@ import org.json.JSONObject;
  * @author Rémi Druilhe
  */
 public class AppFinalize implements JSONable {
-    public AppFinalize(JSONObject finalize) {
+    public AppFinalize(JsonObject finalize) {
     }
 
     /**
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject().toString();
+        return JsonObject.EMPTY_JSON_OBJECT.toString();
     }
 }

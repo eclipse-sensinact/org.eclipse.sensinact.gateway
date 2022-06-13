@@ -19,9 +19,11 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -93,7 +95,7 @@ public class DependencyManager extends DependencyManagerAbstract {
     @Override
     public void doHandle(SnaLifecycleMessageImpl message) {
         LOG.debug("Application deployed '{}' reading event {}", application.getName(), message.getJSON());
-        JSONObject messageJson = new JSONObject(message.getJSON());
+        JsonObject messageJson = JsonProviderFactory.readObject(message.getJSON());
         final String messageType = messageJson.getString("type");
         if (messageType.equals(SnaLifecycleMessage.Lifecycle.RESOURCE_APPEARING.toString())) {
             LOG.debug("Application '{}' taking into account the availability of resource '{}'", application.getName(), message.getPath());

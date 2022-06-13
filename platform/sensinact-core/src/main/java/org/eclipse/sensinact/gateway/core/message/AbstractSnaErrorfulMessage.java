@@ -10,8 +10,11 @@
 package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Abstract implementation of an {@link AbstractSnaErrorfulMessage}
@@ -33,24 +36,21 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 	/**
 	 * @InheritedDoc
 	 *
-	 * @see SnaErrorfulMessage#setErrors(org.json.JSONArray)
+	 * @see SnaErrorfulMessage#setErrors(jakarta.json.JsonArray)
 	 */
 	@Override
-	public void setErrors(JSONArray errorsArray) {
+	public void setErrors(JsonArray errorsArray) {
 		int length = 0;
 
-		if (errorsArray == null || (length = errorsArray.length()) == 0) {
+		if (errorsArray == null || (length = errorsArray.size()) == 0) {
 			return;
 		}
-		JSONArray errors = getErrors();
-		if (errors == null) {
-			errors = new JSONArray();
-		}
+		JsonArrayBuilder errors = JsonProviderFactory.getProvider().createArrayBuilder(getErrors());
 		int index = 0;
 		for (; index < length; index++) {
-			errors.put(errorsArray.get(index));
+			errors.add(errorsArray.get(index));
 		}
-		super.putValue(SnaConstants.ERRORS_KEY, errors);
+		super.putValue(SnaConstants.ERRORS_KEY, errors.build());
 	}
 
 	/**
@@ -61,10 +61,10 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 	 *            the thrown exception
 	 */
 	protected void setErrors(String message, Throwable exception) {
-		JSONArray exceptionsArray = new JSONArray();
+		JsonArrayBuilder exceptionsArray = JsonProviderFactory.getProvider().createArrayBuilder();
 
-		JSONObject exceptionObject = new JSONObject();
-		exceptionObject.put("message", message == null ? exception.getMessage() : message);
+		JsonObjectBuilder exceptionObject = JsonProviderFactory.getProvider().createObjectBuilder();
+		exceptionObject.add("message", message == null ? exception.getMessage() : message);
 
 		StringBuilder buffer = new StringBuilder();
 		if (exception != null) {
@@ -78,10 +78,10 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 				buffer.append("\n");
 			}
 		}
-		exceptionObject.put("trace", buffer.toString());
-		exceptionsArray.put(exceptionObject);
+		exceptionObject.add("trace", buffer.toString());
+		exceptionsArray.add(exceptionObject);
 
-		this.setErrors(exceptionsArray);
+		this.setErrors(exceptionsArray.build());
 	}
 
 	/**
@@ -100,7 +100,8 @@ public abstract class AbstractSnaErrorfulMessage<S extends Enum<S> & KeysCollect
 	 * @see SnaErrorfulMessage#getErrors()
 	 */
 	@Override
-	public JSONArray getErrors() {
-		return super.<JSONArray>get(SnaConstants.ERRORS_KEY);
+	public JsonArray getErrors() {
+		JsonArray jsonArray  = super.<JsonArray>get(SnaConstants.ERRORS_KEY);
+		return jsonArray == null ? JsonArray.EMPTY_JSON_ARRAY : jsonArray;
 	}
 }

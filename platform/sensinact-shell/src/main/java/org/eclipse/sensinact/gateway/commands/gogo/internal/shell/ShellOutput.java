@@ -9,9 +9,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.commands.gogo.internal.shell;
 
-import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.Map.Entry;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  * Output writer of the response to shell requests
@@ -27,31 +30,26 @@ public class ShellOutput {
      *               written
      * @param offset the output offset
      */
-    public void output(JSONObject object, int offset) {
-        String[] names = JSONObject.getNames(object);
-        int index = 0;
-        int length = names == null ? 0 : names.length;
-        for (; index < length; index++) {
-            String name = names[index];
+    public void output(JsonObject object, int offset) {
+        for (Entry<String, JsonValue> e : object.entrySet()) {
+            String name = e.getKey();
             if (offset == 0 && (name.equals("type") || name.equals("statusCode"))) {
                 continue;
             }
-            Object value = object.get(name);
+            JsonValue value = e.getValue();
 
-            if (CastUtils.isPrimitive(value.getClass())) {
+            if (value.getValueType() == ValueType.OBJECT) {
+                outputUnderlined(name, offset + 4);
+                output(value.asJsonObject(), offset + 4);
+            } else if (value.getValueType() == ValueType.ARRAY) {
+                outputUnderlined(name, offset + 4);
+                output(value.asJsonArray(), offset + 4);
+            } else {
                 StringBuilder builder = new StringBuilder();
                 builder.append(name);
                 builder.append(" : ");
-                builder.append(value);
+                builder.append(value.toString());
                 output(builder.toString(), offset);
-
-            } else if (value.getClass() == JSONObject.class) {
-                outputUnderlined(name, offset + 4);
-                output((JSONObject) value, offset + 4);
-
-            } else if (value.getClass() == JSONArray.class) {
-                outputUnderlined(name, offset + 4);
-                output((JSONArray) value, offset + 4);
             }
         }
     }
@@ -64,22 +62,16 @@ public class ShellOutput {
      *               written
      * @param offset the output offset
      */
-    public void output(JSONArray object, int offset) {
-        int index = 0;
-        int length = object == null ? 0 : object.length();
-        for (; index < length; index++) {
-            Object value = object.get(index);
-            if (CastUtils.isPrimitive(value.getClass())) {
-                output(String.valueOf(value), offset);
+    public void output(JsonArray object, int offset) {
+        for (JsonValue value : object) {
+            if (value.getValueType() == ValueType.OBJECT) {
 
-            } else if (value.getClass() == JSONObject.class) {
-                output((JSONObject) value, offset + 4);
-
-            } else if (value.getClass() == JSONArray.class) {
-                output((JSONArray) value, offset + 4);
+            } else if (value.getValueType() == ValueType.ARRAY) {
+                output(value.asJsonArray(), offset + 4);
+            } else {
+                output(value.toString(), offset);
             }
         }
-
     }
 
     /**

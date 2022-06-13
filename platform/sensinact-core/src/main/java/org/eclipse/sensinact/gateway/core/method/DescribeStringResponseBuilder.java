@@ -13,8 +13,11 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * Extended {@link AccessMethodResponseBuilder} dedicated to
@@ -78,14 +81,15 @@ public class DescribeStringResponseBuilder extends DescribeResponseBuilder<Strin
 		DescribeStringResponse response = new DescribeStringResponse(super.getPath(), status,
 				describeType);
 
+		JsonProvider provider = JsonProviderFactory.getProvider();
 		if (exceptions != null && exceptions.size() > 0) {
 			Iterator<Exception> iterator = exceptions.iterator();
-			JSONArray exceptionsArray = new JSONArray();
+			JsonArrayBuilder exceptionsArray = provider.createArrayBuilder();
 
 			while (iterator.hasNext()) {
 				Exception exception = iterator.next();
-				JSONObject exceptionObject = new JSONObject();
-				exceptionObject.put("message", exception.getMessage());
+				JsonObjectBuilder exceptionObject = provider.createObjectBuilder();
+				exceptionObject.add("message", exception.getMessage());
 
 				StringBuilder buffer = new StringBuilder();
 				StackTraceElement[] trace = exception.getStackTrace();
@@ -97,10 +101,10 @@ public class DescribeStringResponseBuilder extends DescribeResponseBuilder<Strin
 					buffer.append(trace[index].toString());
 					buffer.append("\n");
 				}
-				exceptionObject.put("trace", buffer.toString());
-				exceptionsArray.put(exceptionObject);
+				exceptionObject.add("trace", buffer.toString());
+				exceptionsArray.add(exceptionObject);
 			}
-			response.setErrors(exceptionsArray);
+			response.setErrors(exceptionsArray.build());
 		}
 		response.setResponse(getAccessMethodObjectResult());
 		return response;

@@ -22,9 +22,13 @@ import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.WebSocketCallbackContext;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.WebSocketRequestWrapper;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.WebSocketResponseWrapper;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
 
 /**
  * A CallbackWebSocketWrapper is a websocket {@link Session} wrapper
@@ -35,6 +39,10 @@ import org.slf4j.LoggerFactory;
 public class CallbackWebSocketServlet {
 	
     private Logger LOG = LoggerFactory.getLogger(CallbackWebSocketServlet.class.getName());
+    
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
     
 	private CallbackService callbackService;
 	private Mediator mediator;
@@ -83,17 +91,18 @@ public class CallbackWebSocketServlet {
     @OnWebSocketMessage
     public void onMessage(String message) {
         final WebSocketCallbackContext context = new WebSocketCallbackContext(mediator,
-        new WebSocketRequestWrapper(message), new WebSocketResponseWrapper(this));
+        new WebSocketRequestWrapper(message, mapper), new WebSocketResponseWrapper(this, mapper));
         try {
             if (this.callbackService != null) {
             	this.callbackService.process(context);
             }
         } catch (Exception | Error e) {
             e.printStackTrace();
-            this.writeMessage(new JSONObject(
-            	).put("statusCode",520
-            	).put("message","Internal server error"
-            	).toString());
+            this.writeMessage(JsonProviderFactory.getProvider()
+            		.createObjectBuilder(
+            	).add("statusCode",520
+            	).add("message","Internal server error"
+            	).build().toString());
         } 
     }
 

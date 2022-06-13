@@ -12,6 +12,7 @@ package org.eclipse.sensinact.gateway.nthbnd.forward.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
+import java.io.StringReader;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -19,8 +20,7 @@ import org.eclipse.sensinact.gateway.nthbnd.http.callback.CallbackService;
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.test.bundle1.CallbackServiceImpl;
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.ForwardingService;
 import org.eclipse.sensinact.gateway.nthbnd.http.forward.test.bundle1.ForwardingServiceImpl;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
@@ -28,7 +28,8 @@ import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.context.InstalledBundleExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.spi.JsonProvider;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(BundleContextExtension.class)
@@ -53,6 +54,8 @@ public class TestForwardingService {
     //********************************************************************//
 
 
+    private JsonProvider jsonProvider = JsonProviderFactory.getProvider();
+    
     /**
      * @inheritDoc
      * @see MidOSGiTest#isExcluded(java.lang.String)
@@ -143,7 +146,8 @@ public class TestForwardingService {
         String simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/forwardingTest1/0", null, "GET");
         System.out.println(simulated2);
 
-        JSONAssert.assertEquals(new JSONObject(simulated1).getJSONArray("providers"), new JSONArray(simulated2), false);
+        assertEquals(jsonProvider.createReader(new StringReader(simulated1)).readObject().getJsonArray("providers"), 
+        		jsonProvider.createReader(new StringReader(simulated2)).readArray());
 
         simulated1 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/sensinact/providers/slider", null, "GET");
         System.out.println(simulated1);
@@ -151,7 +155,8 @@ public class TestForwardingService {
         simulated2 = HttpServiceTestClient.newRequest(mediator, HTTP_ROOTURL + "/forwardingTest1/1", null, "GET");
         System.out.println(simulated2);
 
-        JSONAssert.assertEquals(new JSONObject(simulated1), new JSONObject(simulated2), false);
+        assertEquals(jsonProvider.createReader(new StringReader(simulated1)).readObject(), 
+        		jsonProvider.createReader(new StringReader(simulated2)).readObject());
     }
 
     @Test

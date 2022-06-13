@@ -15,7 +15,10 @@ import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  * Wraps a subscription condition
@@ -49,8 +52,10 @@ public class AppCondition implements JSONable {
      * @param mediator  the mediator
      * @param condition the JSON version of the condition
      */
-    public AppCondition(Mediator mediator, JSONObject condition) {
-        this(mediator, condition.getString(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR), new AppParameter(condition.get(AppJsonConstant.VALUE), condition.getString(AppJsonConstant.TYPE)), condition.optBoolean(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT));
+    public AppCondition(Mediator mediator, JsonObject condition) {
+        this(mediator, condition.getString(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR), 
+        		new AppParameter(condition.get(AppJsonConstant.VALUE), condition.getString(AppJsonConstant.TYPE)), 
+        		condition.getBoolean(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT, false));
     }
 
     /**
@@ -101,6 +106,11 @@ public class AppCondition implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject().put(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR, operator).put(AppJsonConstant.VALUE, parameter.getValue()).put(AppJsonConstant.TYPE, parameter.getType()).put(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT, complement).toString();
+        return JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add(AppJsonConstant.APP_EVENTS_CONDITION_OPERATOR, operator)
+        		.add(AppJsonConstant.VALUE, CastUtils.cast(JsonValue.class, parameter.getValue()))
+        		.add(AppJsonConstant.TYPE, parameter.getType())
+        		.add(AppJsonConstant.APP_EVENTS_CONDITION_COMPLEMENT, complement)
+        		.build().toString();
     }
 }

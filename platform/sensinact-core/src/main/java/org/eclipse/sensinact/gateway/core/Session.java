@@ -24,8 +24,9 @@ import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.SetResponse;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
 import org.eclipse.sensinact.gateway.core.method.UnsubscribeResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * A Session allows to invoke access method on resources, and to access to
@@ -296,7 +297,7 @@ public interface Session {
 	 *         wrapped into a {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String serviceProviderId, String serviceId, String resourceId, 
-			Recipient recipient, JSONArray conditions, Object...args);
+			Recipient recipient, JsonArray conditions, Object...args);
 
 	/**
 	 * Invokes the SUBSCRIBE access method on the resource whose String identifier
@@ -326,7 +327,7 @@ public interface Session {
 	 *         wrapped into a {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String serviceProviderId, String serviceId, String resourceId, 
-		Recipient recipient, JSONArray conditions, String policy, Object...args);
+		Recipient recipient, JsonArray conditions, String policy, Object...args);
 
 	/**
 	 * Invokes the SUBSCRIBE access method on the resource whose String identifier
@@ -357,7 +358,7 @@ public interface Session {
 	 *         {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, 
-		String resourceId, Recipient recipient, JSONArray conditions, Object...args);
+		String resourceId, Recipient recipient, JsonArray conditions, Object...args);
 
 	/**
 	 * Invokes the SUBSCRIBE access method on the resource whose String identifier
@@ -391,7 +392,7 @@ public interface Session {
 	 *         {@link SubscribeResponse}
 	 */
 	SubscribeResponse subscribe(String requestId, String serviceProviderId, String serviceId, String resourceId,
-			Recipient recipient, JSONArray conditions, String policy, Object...args);
+			Recipient recipient, JsonArray conditions, String policy, Object...args);
 
 	/**
 	 * Invokes the UNSUBSCRIBE access method on the resource whose String identifier
@@ -679,7 +680,7 @@ public interface Session {
 	 * @return the JSON formated description of the specified service provider,
 	 *         wrapped into a {@link DescribeResponse}
 	 */
-	DescribeResponse<JSONObject> getProvider(String serviceProviderId);
+	DescribeResponse<JsonObject> getProvider(String serviceProviderId);
 
 	/**
 	 * Returns the JSON formated description of the service provider whose String
@@ -695,7 +696,7 @@ public interface Session {
 	 *         tagged by the specified request identifier, and wrapped into a
 	 *         {@link DescribeResponse}
 	 */
-	DescribeResponse<JSONObject> getProvider(String requestId, String serviceProviderId);
+	DescribeResponse<JsonObject> getProvider(String requestId, String serviceProviderId);
 
 	/**
 	 * Returns the JSON formated list of available service providers for the user
@@ -756,7 +757,7 @@ public interface Session {
 	 * @return the JSON formated description of the specified service, wrapped into
 	 *         a {@link DescribeResponse}
 	 */
-	DescribeResponse<JSONObject> getService(String serviceProviderId, String serviceId);
+	DescribeResponse<JsonObject> getService(String serviceProviderId, String serviceId);
 
 	/**
 	 * Returns the JSON formated description of the service whose String identifier
@@ -774,7 +775,7 @@ public interface Session {
 	 *         specified request identifier, and wrapped into a
 	 *         {@link DescribeResponse}
 	 */
-	DescribeResponse<JSONObject> getService(String requestId, String serviceProviderId, String serviceId);
+	DescribeResponse<JsonObject> getService(String requestId, String serviceProviderId, String serviceId);
 
 	/**
 	 * Returns the JSON formated list of available service providers for the user
@@ -847,7 +848,7 @@ public interface Session {
 	 * @return the JSON formated description of the specified resource, wrapped into
 	 *         a {@link DescribeResponse}
 	 */
-	DescribeResponse<JSONObject> getResource(String serviceProviderId, String serviceId, String resourceId);
+	DescribeResponse<JsonObject> getResource(String serviceProviderId, String serviceId, String resourceId);
 
 	/**
 	 * Returns the JSON formated description of the resource whose String identifier
@@ -869,6 +870,6 @@ public interface Session {
 	 *         the specified request identifier, and wrapped into a
 	 *         {@link DescribeResponse}
 	 */
-	DescribeResponse<JSONObject> getResource(String requestId, String serviceProviderId, String serviceId,
+	DescribeResponse<JsonObject> getResource(String requestId, String serviceProviderId, String serviceId,
 			String resourceId);
 }

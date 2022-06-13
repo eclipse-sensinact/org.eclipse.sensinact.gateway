@@ -9,19 +9,27 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.agent.http.onem2m.internal;
 
+import java.io.IOException;
+
 import org.eclipse.sensinact.gateway.core.DataResource;
 import org.eclipse.sensinact.gateway.core.message.AbstractMidAgentCallback;
+import org.eclipse.sensinact.gateway.core.message.MidAgentCallback;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaResponseMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.GeoJsonUtils;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.eclipse.sensinact.gateway.util.location.Point;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 /**
  * AE = sNa Provider
@@ -32,7 +40,10 @@ import java.io.IOException;
 public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
     private static Logger LOG = LoggerFactory.getLogger(SnaEventOneM2MHttpHandler.class.getCanonicalName());
     private final String cseBase;
-
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+    
     public SnaEventOneM2MHttpHandler(String cseBase) throws IOException {
         this.cseBase = cseBase;
     }
@@ -48,7 +59,14 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
 
         OneM2MModel model = OneM2MModel.getInstance(cseBase);
 
-        JSONObject eventJson = new JSONObject(event.getJSON()).getJSONObject("notification");
+        JsonObject eventJson;
+		try {
+			eventJson = mapper.readValue(event.getJSON(), JsonObject.class).getJsonObject("notification");
+		} catch (Exception e1) {
+			LOG.error("Unable to read event {}", event.getJSON(), e1);
+			return;
+		}
+		
         final String eventPathSplit[] = event.getPath().split("/");
         final String provider = eventPathSplit[1];
         final String service = eventPathSplit[2];
@@ -64,7 +82,7 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
                 LOG.debug("Extracted value '{}' from message", value.toString());
                 if (event.getPath().endsWith("/admin/location/value")) {
                     LOG.debug("Location update message");
-                    Point p = GeoJsonUtils.getFirstPointFromLocationString(String.valueOf(value));
+                    Point p = GeoJsonUtils.getFirstPointFromLocationString(CastUtils.cast(String.class, value));
                     if(p == null){
                         return;
                     }
@@ -97,7 +115,6 @@ public class SnaEventOneM2MHttpHandler extends AbstractMidAgentCallback {
      */
     public void doHandle(SnaLifecycleMessageImpl event) {
         LOG.debug("Received Lifecycle event {}", event.getJSON().toString());
-        JSONObject eventJson = new JSONObject(event.getJSON());
 
         LOG.debug("Evaluating event of the type {}", event.getType());
 

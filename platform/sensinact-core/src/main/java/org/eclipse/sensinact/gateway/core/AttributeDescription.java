@@ -12,8 +12,13 @@ package org.eclipse.sensinact.gateway.core;
 import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.CastUtils;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 /**
  * {@link Description} of an {@link Attribute}
@@ -69,9 +74,9 @@ public class AttributeDescription extends PrimitiveDescription {
 			return EMPTY;
 		}
 		// clones the current JSON description
-		JSONObject description = super.getJSONObject();
+		JsonObjectBuilder description = super.getJsonObject();
 		// appends the JSON formated current value
-		description.put(VALUE_KEY, toJson(this.getType(), this.getValue()));
+		description.add(VALUE_KEY, this.getJsonValue());
 		// appends JSON description of Metadata
 		// associated to the described Attribute
 		// if defined as dynamic
@@ -85,14 +90,13 @@ public class AttributeDescription extends PrimitiveDescription {
 					&& !Metadata.HIDDEN.equals(metadataDescription.getName())
 					&& !Attribute.NICKNAME.equals(metadataDescription.getName())
 					&& !Modifiable.FIXED.equals(metadataDescription.getModifiable())) {
-				description.put(metadataDescription.getName(),
-						toJson(metadataDescription.getType(), metadataDescription.getValue()));
+				description.add(metadataDescription.getName(), getJsonValue(metadataDescription));
 			}
 			if (Attribute.NICKNAME.equals(metadataDescription.getName())) {
-				description.put(NAME_KEY, metadataDescription.getValue());
+				description.add(NAME_KEY, CastUtils.cast(String.class, metadataDescription.getValue()));
 			}
 		}
-		return description.toString();
+		return description.build().toString();
 	}
 
 	/**
@@ -102,11 +106,11 @@ public class AttributeDescription extends PrimitiveDescription {
 	 */
 	@Override
 	public String getJSONDescription() {
-		JSONObject description = this.getJSONObjectDescription();
+		JsonObject description = this.getJSONObjectDescription();
 		if (description == null) {
 			return EMPTY;
 		}
-		return description.toString(INDENT_FACTOR);
+		return description.toString();
 	}
 
 	/**
@@ -114,22 +118,22 @@ public class AttributeDescription extends PrimitiveDescription {
 	 * 
 	 * @return the JSON object representation of the described {@link Attribute}
 	 */
-	protected JSONObject getJSONObjectDescription() {
+	protected JsonObject getJSONObjectDescription() {
 		// if the described attribute is defined as hidden
 		if (this.isHidden()) {
 			return null;
 		}
 		// clones the current JSON description
-		JSONObject description = super.getJSONObject();
+		JsonObjectBuilder description = super.getJsonObject();
 
 		// appends the JSON formated current value
 		// if it is not modifiable
 		if (Modifiable.FIXED.equals(this.getModifiable())) {
-			description.put(VALUE_KEY, toJson(this.getType(), this.getValue()));
+			description.add(VALUE_KEY, CastUtils.cast(JsonValue.class, this.getValue()));
 		}
 		// appends JSON description of Metadata
 		// associated to the described Attribute
-		JSONArray metadataJSON = new JSONArray();
+		JsonArrayBuilder metadataJSON = JsonProviderFactory.getProvider().createArrayBuilder();
 
 		int index = 0;
 		int length = metadataDescriptions.length;
@@ -141,13 +145,13 @@ public class AttributeDescription extends PrimitiveDescription {
 					|| Metadata.HIDDEN.equals(metadataDescription.getName())) {
 				continue;
 			}
-			JSONObject metadataDescriptionJSON = metadataDescription.getJSONObjectDescription();
+			JsonObject metadataDescriptionJSON = metadataDescription.getJSONObjectDescription();
 
 			if (metadataDescriptionJSON != null) {
-				metadataJSON.put(metadataDescriptionJSON);
+				metadataJSON.add(metadataDescriptionJSON);
 			}
 		}
-		description.put(METADATA_KEY, metadataJSON);
-		return description;
+		description.add(METADATA_KEY, metadataJSON);
+		return description.build();
 	}
 }

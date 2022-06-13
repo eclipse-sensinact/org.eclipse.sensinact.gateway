@@ -27,7 +27,9 @@ import org.eclipse.sensinact.gateway.generic.annotation.Unsubscribe;
 import org.eclipse.sensinact.gateway.generic.parser.MethodDefinition;
 import org.eclipse.sensinact.gateway.generic.parser.SignatureDefinition;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -52,7 +54,7 @@ public class ExtResourceImpl extends ResourceImpl {
     }
 
     @Override
-    protected JSONObject passOn(String type, String uri, Object[] parameters) throws Exception {
+    protected JsonObject passOn(String type, String uri, Object[] parameters) throws Exception {
         Task task = super.<Task>passOn(type, uri, parameters);
 
         if (type.equals(AccessMethod.GET) && task != null && task.isResultAvailable() && task.getResult() != AccessMethod.EMPTY) {
@@ -61,7 +63,7 @@ public class ExtResourceImpl extends ResourceImpl {
         if (task == null) {
             return null;
         }
-        return new JSONObject(task.getJSON());
+        return JsonProviderFactory.readObject(task.getJSON());
     }
 
     /**
@@ -135,7 +137,7 @@ public class ExtResourceImpl extends ResourceImpl {
                 }
                 Map<Method, ? extends Annotation> methods = ReflectUtils.getAnnotatedMethods(clazz, annotationClass);
                 Set<Method> methodSet = methods.keySet();
-                Method javaMethod = ReflectUtils.getDeclaredMethod(methodSet.toArray(new Method[0]), JSONObject.class, null, parameterTypes, true);
+                Method javaMethod = ReflectUtils.getDeclaredMethod(methodSet.toArray(new Method[0]), JsonObject.class, null, parameterTypes, true);
 
                 final Method reflectionMethod = javaMethod;
                 AccessMethodExecutor executor = null;
@@ -144,9 +146,9 @@ public class ExtResourceImpl extends ResourceImpl {
                     executor = new AccessMethodExecutor() {
                         @Override
                         public Void execute(AccessMethodResponseBuilder parameter) throws Exception {
-                            JSONObject jsonObject = (JSONObject) reflectionMethod.invoke(self, parameter.getParameters());
+                            JsonObject jsonObject = (JsonObject) reflectionMethod.invoke(self, parameter.getParameters());
 
-                            if (!JSONObject.NULL.equals(jsonObject)) {
+                            if (jsonObject != null) {
                                 parameter.setAccessMethodObjectResult(jsonObject);
                             }
                             return null;

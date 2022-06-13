@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.security.oauth2;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,7 +17,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -29,12 +29,15 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.spi.JsonProvider;
 
 public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 
@@ -79,6 +82,7 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 		}
 		credentials = new Hashtable<String, UserInfo>();
 		localAuth = System.getProperty(AUTH_BASEURL_PROP, AUTH_BASEURL_DEFAULT);
+		JsonProvider provider = JsonProviderFactory.getProvider();
 		try {
 			ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 			conf.setHttpMethod("GET");
@@ -88,7 +92,8 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 			SimpleResponse response = new SimpleRequest(conf).send();
 			int status = response.getStatusCode();
 			if (status == 200) {				
-				JSONObject jsonObject = new JSONObject(new String(response.getContent(), "UTF-8"));
+				JsonObject jsonObject = provider.createReader(
+						new ByteArrayInputStream(response.getContent())).readObject();
 				authEP = new URI(jsonObject.getString("authorization_endpoint"));
 				tokenEP = new URI(jsonObject.getString("token_endpoint"));
 				userinfoEP = new URI(jsonObject.getString("userinfo_endpoint"));
@@ -102,8 +107,9 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 			response = new SimpleRequest(conf).send();
 			status = response.getStatusCode();
 			if (status == 200) {				
-				JSONArray array = new JSONObject(new String(response.getContent(), "UTF-8")).getJSONArray("keys");
-				JSONObject keys = array.getJSONObject(0);				
+				JsonArray array = provider.createReader(
+						new ByteArrayInputStream(response.getContent())).readObject().getJsonArray("keys");
+				JsonObject keys = array.getJsonObject(0);				
 				publicKey = new StringBuilder(
 					).append(keys.getString("n")
 					).append("."
@@ -170,11 +176,12 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 	/** oAuthServer API **/
 	/**********************************************/
 	@Override
-	public JSONObject verify(String code, ServletRequest req) {
-		JSONObject jsonObject = null;
+	public JsonObject verify(String code, ServletRequest req) {
+		JsonObject jsonObject = null;
 		ConnectionConfigurationImpl<SimpleResponse, SimpleRequest> conf = new ConnectionConfigurationImpl<SimpleResponse, SimpleRequest>();
 		conf.setHttpMethod("POST");
 		conf.setContentType("application/x-www-form-urlencoded");
+		JsonProvider provider = JsonProviderFactory.getProvider();
 		try {
 			conf.setUri(tokenEP.toURL().toExternalForm());
 			String credentials = new String(client_id + ":" + client_secret);
@@ -205,7 +212,8 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 				response = new SimpleRequest(conf).send();
 				int status = response.getStatusCode();
 				if (status == 200) {
-					jsonObject = new JSONObject(new String(response.getContent(),"UTF-8"));
+					jsonObject = provider.createReader(
+							new ByteArrayInputStream(response.getContent())).readObject();
 					access_token = jsonObject.getString("access_token");
 				}
 			} catch (Exception e) {
@@ -307,7 +315,8 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 			SimpleResponse response = new SimpleRequest(conf).send();
 			int status = response.getStatusCode();
 			if (status == 200) {
-				JSONObject obj = new JSONObject(new String(response.getContent(),"UTF-8"));
+				JsonObject obj = JsonProviderFactory.getProvider().createReader(
+						new ByteArrayInputStream(response.getContent())).readObject();
 				return obj.getString("access_token");
 			}
 		} catch (Exception e) {
@@ -321,7 +330,7 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 	}
 
 	public void addCredentials(String token, UserInfo newUser) {
-		((OpenID) newUser).add("access_token", token);
+		((OpenID) newUser).addAccessToken(token);
 		credentials.put(token, newUser);
 	}
 
@@ -339,20 +348,15 @@ public class OpenIDServer extends IdentityServerWrapper implements OAuthServer {
 			conf.addHeader("Authorization", "Bearer " + authorization);	
 			
 			SimpleResponse response = new SimpleRequest(conf).send();
-			String resp = new String(response.getContent(),"UTF-8");
 			int status = response.getStatusCode();
 			if (status == 200) {
-				JSONObject jsonObject = new JSONObject(resp);
+				JsonObject jsonObject = JsonProviderFactory.getProvider().createReader(
+						new ByteArrayInputStream(response.getContent())).readObject();
 				user = new OpenID(jsonObject);
-				Iterator<?> it = jsonObject.keys();
-				while (it.hasNext()) {
-					String key = String.valueOf(it.next());
-					user.put(key, jsonObject.get(key));
-				}
 			} else {
 				System.out.println(userinfoEP + " response : " + status);
 				System.out.println(response.getHeaders());
-				System.out.println("error " + resp);
+				System.out.println("error " + new String(response.getContent(),"UTF-8"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

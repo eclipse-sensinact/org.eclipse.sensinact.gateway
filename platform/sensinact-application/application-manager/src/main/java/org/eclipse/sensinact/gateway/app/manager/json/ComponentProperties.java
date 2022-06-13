@@ -10,7 +10,7 @@
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
 /**
  * This class is a builder gathering the properties that are applied on an component
@@ -70,6 +70,8 @@ public class ComponentProperties implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject().put(AppJsonConstant.APP_PROPERTIES_REGISTER, register).toString();
+        return JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add(AppJsonConstant.APP_PROPERTIES_REGISTER, register)
+        		.build().toString();
     }
 }

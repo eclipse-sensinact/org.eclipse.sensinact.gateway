@@ -10,7 +10,8 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.format;
 
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 public class StringResponseFormat implements ResponseFormat<String> {
     @Override
@@ -18,8 +19,8 @@ public class StringResponseFormat implements ResponseFormat<String> {
         if (object == null) {
             return null;
         }
-        if (JSONObject.class.isAssignableFrom(object.getClass())) {
-            return ((JSONObject) object).toString();
+        if (JsonObject.class.isAssignableFrom(object.getClass())) {
+            return ((JsonObject) object).toString();
         }
         if (AccessMethodResponse.class.isAssignableFrom(object.getClass())) {
             return ((AccessMethodResponse<?>) object).getJSON();

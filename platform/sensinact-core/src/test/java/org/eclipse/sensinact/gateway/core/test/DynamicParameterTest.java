@@ -16,7 +16,7 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.method.DynamicParameterValue;
 import org.eclipse.sensinact.gateway.core.method.builder.DynamicParameterValueFactory;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.junit5.context.BundleContextExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.JsonObject;
 
 /**
  * test Constraint
@@ -56,7 +57,7 @@ public class DynamicParameterTest {
 		try {
 			DynamicParameterValueFactory factory = loader.load(mediator, DynamicParameterValue.Type.CONDITIONAL.name());
 
-			JSONObject jsonBuilder = new JSONObject(DynamicParameterTest.BUILDER_0);
+			JsonObject jsonBuilder = JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_0);
 			DynamicParameterValue trigger = factory.newInstance(mediator, new Executable<Void, Object>() {
 				private int n = 0;
 				private int[] ns = new int[] { 2, 22, 18, 55 };
@@ -73,9 +74,10 @@ public class DynamicParameterTest {
 			assertEquals(1000, trigger.getValue());
 
 			String triggerJSON = trigger.getJSON();
-			JSONAssert.assertEquals(DynamicParameterTest.BUILDER_0, triggerJSON, false);
+			assertEquals(JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_0), 
+					JsonProviderFactory.readObject(triggerJSON));
 
-			jsonBuilder = new JSONObject(DynamicParameterTest.BUILDER_2);
+			jsonBuilder = JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_2);
 			trigger = factory.newInstance(mediator, new Executable<Void, Object>() {
 				private int n = 0;
 				private Object[] ns = new Object[] { "value", 2, "copy" };
@@ -90,9 +92,10 @@ public class DynamicParameterTest {
 			assertEquals(2, trigger.getValue());
 			assertEquals("copy", trigger.getValue());
 
-			JSONAssert.assertEquals(DynamicParameterTest.BUILDER_2, trigger.getJSON(), false);
+			assertEquals(JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_2), 
+					JsonProviderFactory.readObject(trigger.getJSON()));
 
-			jsonBuilder = new JSONObject(DynamicParameterTest.BUILDER_3);
+			jsonBuilder = JsonProviderFactory.readObject(DynamicParameterTest.BUILDER_3);
 			factory = loader.load(mediator, jsonBuilder.getString("type"));
 			trigger = factory.newInstance(mediator, new Executable<Void, Object>() {
 				@Override

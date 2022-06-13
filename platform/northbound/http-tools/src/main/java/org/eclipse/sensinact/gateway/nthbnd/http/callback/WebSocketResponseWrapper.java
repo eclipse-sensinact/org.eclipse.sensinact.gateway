@@ -13,15 +13,22 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 
 import org.eclipse.sensinact.gateway.nthbnd.http.callback.internal.CallbackWebSocketServlet;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 public class WebSocketResponseWrapper extends AbstractResponseWrapper {
    
-	CallbackWebSocketServlet wrapper;
+	final CallbackWebSocketServlet wrapper;
+	private final ObjectMapper mapper;
 	
-	public WebSocketResponseWrapper(CallbackWebSocketServlet wrapper){
+	public WebSocketResponseWrapper(CallbackWebSocketServlet wrapper, ObjectMapper mapper){
 		this.wrapper = wrapper;
+		this.mapper = mapper;
 	}	
 
 	/* (non-Javadoc)
@@ -29,37 +36,44 @@ public class WebSocketResponseWrapper extends AbstractResponseWrapper {
 	 */
 	@Override
 	public void flush() {
-		JSONObject attrs=null; 
+		JsonObjectBuilder attrs=null; 
 		if(super.attributes != null && !super.attributes.isEmpty()) {
-			attrs = new JSONObject();
-			for(String key :super.attributes.keySet()) {
+			attrs = JsonProviderFactory.getProvider()
+					.createObjectBuilder();
+			for(String key : super.attributes.keySet()) {
 				try {
-					attrs.put(key, AbstractResponseWrapper.getParameter(super.attributes, key));
-				} catch (JSONException | UnsupportedEncodingException e) {
+					attrs.add(key, AbstractResponseWrapper.getParameter(super.attributes, key));
+				} catch (UnsupportedEncodingException e) {
 					AbstractResponseWrapper.LOG.log(Level.SEVERE, e.getMessage(),e);
 				}
 			}
 		}
 		if(super.content != null && super.content.length > 0) {
 			try {
-				JSONObject obj = new JSONObject(new String(super.content));
+				JsonObjectBuilder builder = JsonProviderFactory.getProvider()
+						.createObjectBuilder(mapper.readValue(super.content, JsonObject.class));
 				if(attrs != null) {
-					obj.put("attributes", attrs);
+					builder.add("attributes", attrs);
 				}
 				if(super.statusCode > 0) {
-					obj.put("statusCode", super.statusCode);
+					builder.add("statusCode", super.statusCode);
 				}
-				this.wrapper.writeMessage(obj.toString());
-			}catch(JSONException e) {
+				this.wrapper.writeMessage(mapper.writeValueAsString(builder.build()));
+			}catch(Exception e) {
 				this.wrapper.writeMessage(new String(content));
 			}
 			return;
 		}
 		if(attrs != null) {
 			if(super.statusCode > 0) {
-				attrs.put("statusCode", super.statusCode);
+				attrs.add("statusCode", super.statusCode);
 			}
-			this.wrapper.writeMessage(attrs.toString());
+			try {
+				this.wrapper.writeMessage(mapper.writeValueAsString(attrs.build()));
+			} catch (JsonProcessingException e) {
+				AbstractResponseWrapper.LOG.log(Level.SEVERE, e.getMessage(),e);
+				this.wrapper.writeMessage("500");
+			}
 			return;
 		}
 		if(super.statusCode > 0) {

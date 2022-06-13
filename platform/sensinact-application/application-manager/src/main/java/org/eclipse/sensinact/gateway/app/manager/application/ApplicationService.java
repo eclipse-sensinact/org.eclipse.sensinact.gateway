@@ -31,9 +31,11 @@ import org.eclipse.sensinact.gateway.core.method.LinkedActMethod;
 import org.eclipse.sensinact.gateway.core.method.Parameter;
 import org.eclipse.sensinact.gateway.core.method.Shortcut;
 import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 import java.util.HashMap;
 
@@ -99,7 +101,7 @@ public class ApplicationService extends ServiceImpl {
         this.addTrigger(AppConstant.STOP, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
         this.addTrigger(AppConstant.UNINSTALL, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.BEFORE);
         this.addTrigger(AppConstant.EXCEPTION, AppConstant.STATUS, new Signature(super.modelInstance.mediator(), act, null, null), appLifecycleTrigger, AccessMethodExecutor.ExecutionPolicy.AFTER);
-        this.addDataResource(PropertyResource.class, AppConstant.CONTENT, JSONObject.class, new JSONObject(appContainer.getJSON()));
+        this.addDataResource(PropertyResource.class, AppConstant.CONTENT, JsonObject.class, JsonProviderFactory.readObject(appContainer.getJSON()));
         this.addDataResource(PropertyResource.class, AppConstant.RESET_ON_STOP, boolean.class, appContainer.getInitialize().getOptions().getResetOnStop());
         this.addDataResource(PropertyResource.class, AppConstant.AUTORESTART, boolean.class, appContainer.getInitialize().getOptions().getAutoStart());
         // Creation of the AppResourceLifecycleWatchdog

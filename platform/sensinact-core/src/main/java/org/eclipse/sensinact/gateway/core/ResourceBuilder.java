@@ -22,6 +22,8 @@ import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
 import org.eclipse.sensinact.gateway.core.message.MidCallback;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
+import org.eclipse.sensinact.gateway.core.message.SnaConstants;
+import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaNotificationMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
@@ -36,10 +38,16 @@ import org.eclipse.sensinact.gateway.core.method.Shortcut;
 import org.eclipse.sensinact.gateway.core.method.Signature;
 import org.eclipse.sensinact.gateway.core.method.SubscribeMethod;
 import org.eclipse.sensinact.gateway.core.method.UnsubscribeMethod;
+import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * Builder of a {@link ResourceImpl}
@@ -410,13 +418,17 @@ public class ResourceBuilder {
 				Object resultObject = resource.passOn(type, resource.getPath(), parameter.getParameters());
 
 				if (resultObject != null && resultObject != AccessMethod.EMPTY
-						&& JSONObject.class.isAssignableFrom(resultObject.getClass())) {
-					JSONObject result = (JSONObject) resultObject;
+						&& resultObject instanceof JsonObject) {
+					JsonObject jsonObject = (JsonObject) resultObject;
+					JsonObjectBuilder result = JsonProviderFactory.getProvider()
+							.createObjectBuilder(jsonObject);
 					result.remove("taskId");
-					if (JSONObject.NULL.equals(result.opt("result"))) {
+					if (jsonObject.containsKey("result") && 
+							jsonObject.get("result") == JsonValue.NULL) {
 						result.remove("result");
 					}
-					parameter.setAccessMethodObjectResult(result);
+					
+					parameter.setAccessMethodObjectResult(result.build());
 				}
 				return null;
 			}
@@ -430,11 +442,12 @@ public class ResourceBuilder {
 				SnaUpdateMessage message = SnaNotificationMessageImpl.Builder.<SnaUpdateMessage>notification(
 					mediator, SnaUpdateMessage.Update.ACTUATED, resource.getPath());
 
-				JSONObject notification = new JSONObject();
-				notification.put(Metadata.TIMESTAMP, System.currentTimeMillis());
-				notification.put(Resource.TYPE, "object");
-				notification.put(DataResource.VALUE, parameter.getAccessMethodObjectResult());
-				message.setNotification(notification);
+				message.setNotification(JsonProviderFactory.getProvider()
+						.createObjectBuilder()
+						.add(Metadata.TIMESTAMP, System.currentTimeMillis())
+						.add(Resource.TYPE, "object")
+						.add(DataResource.VALUE, CastUtils.cast(JsonValue.class, resource))
+						.build());
 
 				resource.getModelInstance().postMessage(message);
 				return null;
@@ -446,12 +459,10 @@ public class ResourceBuilder {
 		return new AccessMethodExecutor() {
 			@Override
 			public Void execute(AccessMethodResponseBuilder snaResult) throws Exception {
-				JSONObject result = null;
 				AttributeDescription description = resource.getDescription((String) snaResult.getParameter(0));
 
 				if (description != null) {
-					result = new JSONObject(description.getJSON());
-					snaResult.setAccessMethodObjectResult(result);
+					snaResult.setAccessMethodObjectResult(JsonProviderFactory.readObject(description.getJSON()));
 				}
 				return null;
 			}
@@ -465,8 +476,7 @@ public class ResourceBuilder {
 				Object[] parameters = snaResult.getParameters();
 				int length = parameters == null?0:parameters.length;	
 				AttributeDescription desc = resource.set((String) parameters[0], (Object)parameters[1]);
-				JSONObject result = new JSONObject(desc.getJSON());
-				snaResult.setAccessMethodObjectResult(result);
+				snaResult.setAccessMethodObjectResult(JsonProviderFactory.readObject(desc.getJSON()));
 				return null;
 			}
 		};
@@ -540,10 +550,11 @@ public class ResourceBuilder {
 						lifetime, buffer, delay);
 
 				if (callbackId != null) {
-					JSONObject result = new JSONObject();
-					result.put("subscriptionId", callbackId);
-					result.put("initial", new JSONObject(attribute.getDescription().getJSON()));
-					snaResult.setAccessMethodObjectResult(result);
+					JsonProvider provider = JsonProviderFactory.getProvider();
+					JsonObjectBuilder job = provider.createObjectBuilder();
+					job.add("subscriptionId", callbackId);
+					job.add("initial", JsonProviderFactory.readObject(provider, attribute.getDescription().getJSON()));
+					snaResult.setAccessMethodObjectResult(job.build());
 				}
 				return null;
 			}
@@ -561,7 +572,9 @@ public class ResourceBuilder {
 							new StringBuilder().append("unknown attribute :").append(attributeName).toString());
 				}
 				resource.unlisten((String) result.getParameter(1));
-				result.setAccessMethodObjectResult(new JSONObject().put("message", "unsubscription done"));
+				JsonProvider provider = JsonProviderFactory.getProvider();
+				JsonObjectBuilder job = provider.createObjectBuilder();
+				result.setAccessMethodObjectResult(job.add("message", "unsubscription done").build());
 				return null;
 			}
 		};

@@ -57,8 +57,7 @@ import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.SubscribeResponse;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -69,6 +68,10 @@ import org.mockito.stubbing.Answer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 
 
@@ -146,14 +149,14 @@ public class TestComponentInstance implements TestResult {
         Mockito.when(context.registerService(Mockito.anyString(), Mockito.any(), Mockito.any(Dictionary.class))).thenReturn(registration);
 
         Mockito.when(mediator.getContext()).thenReturn(context);
-        Mockito.when(getResponse.getResponse(DataResource.VALUE)).thenAnswer(new Answer<Integer>() {
+        Mockito.when(getResponse.getResponse(DataResource.VALUE)).thenAnswer(new Answer<JsonValue>() {
             @Override
-            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return new JSONObject(message.getJSON()).getJSONObject("notification").getInt(DataResource.VALUE);
+            public JsonValue answer(InvocationOnMock invocationOnMock) throws Throwable {
+            	return JsonProviderFactory.readObject(message.getJSON()).getJsonObject("notification").get(DataResource.VALUE);
             }
         });
         Mockito.when(getResponse.getStatusCode()).thenReturn(200);
-        Mockito.when(getResponse.getResponse(DataResource.TYPE)).thenReturn("int");
+        Mockito.when(getResponse.getResponse(String.class, DataResource.TYPE)).thenReturn("int");
         Mockito.when(resource.get(DataResource.TYPE)).thenReturn(getResponse);
         Mockito.when(resource.get(DataResource.VALUE)).thenReturn(getResponse);
         Mockito.when(session.resource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(resource);
@@ -161,9 +164,9 @@ public class TestComponentInstance implements TestResult {
         Mockito.when(session.get(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(getResponse);
 
         Mockito.when(session.getResource(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(
-    		new DescribeResponse<JSONObject>("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", Status.SUCCESS, DescribeType.RESOURCE) {});
+    		new DescribeResponse<JsonObject>("/SimulatedSlider_01/SliderService_SimulatedSlider_01/slider", Status.SUCCESS, DescribeType.RESOURCE) {});
 
-        Mockito.when(session.subscribe(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Recipient.class), Mockito.any(JSONArray.class))).thenReturn(
+        Mockito.when(session.subscribe(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Recipient.class), Mockito.any(JsonArray.class))).thenReturn(
     		subscribeResponse);
         
         Mockito.when(subscribeResponse.getResponse(String.class, SnaConstants.SUBSCRIBE_ID_KEY)).thenReturn("id");
@@ -225,8 +228,8 @@ public class TestComponentInstance implements TestResult {
             e.printStackTrace();
         }
         if (content != null) {
-            String name = new JSONObject(content).getJSONArray("parameters").getJSONObject(0).getString(AppJsonConstant.VALUE);
-            JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
+            String name = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(0).getString(AppJsonConstant.VALUE);
+            JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE);
             AppContainer container = new AppContainer(mediator, name, json);
             ApplicationService service = null;
             try {

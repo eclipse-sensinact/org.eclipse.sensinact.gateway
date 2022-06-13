@@ -13,12 +13,12 @@ import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.function.DataItf;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.BundleContext;
 
+import jakarta.json.JsonObject;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 
 class MockComponentAddition extends AbstractFunction<Integer> {
@@ -29,9 +29,9 @@ class MockComponentAddition extends AbstractFunction<Integer> {
         this.mediator = mediator;
     }
 
-    static JSONObject getJSONSchemaFunction(BundleContext context) {
+    static JsonObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            return JsonProviderFactory.getProvider().createReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream()).readObject();
         } catch (IOException e) {
             e.printStackTrace();
         }

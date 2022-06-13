@@ -14,7 +14,9 @@ import org.eclipse.sensinact.gateway.generic.ExtResourceConfig;
 import org.eclipse.sensinact.gateway.generic.ExtResourceImpl;
 import org.eclipse.sensinact.gateway.generic.ExtServiceImpl;
 import org.eclipse.sensinact.gateway.generic.annotation.Act;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  *
@@ -30,12 +32,16 @@ public class MokeAnnotatedAction extends ExtResourceImpl {
     }
 
     @Act
-    public JSONObject notNamedAct(String number, String message) {
-        return new JSONObject().put("message", number + " called : " + message);
+    public JsonObject notNamedAct(String number, String message) {
+    	return JsonProviderFactory.getProvider().createObjectBuilder()
+    			.add("message", number + " called : " + message)
+    			.build();
     }
 
     @Act
-    public JSONObject act() {
-        return new JSONObject().put("message", "empty call");
+    public JsonObject act() {
+    	return JsonProviderFactory.getProvider().createObjectBuilder()
+    			.add("message", "empty call")
+    			.build();
     }
 }

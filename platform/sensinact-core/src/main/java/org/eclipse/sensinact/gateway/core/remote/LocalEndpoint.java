@@ -13,8 +13,10 @@ import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Endpoint;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link Endpoint} in charge of connecting a {@link RemoteCore} to the
@@ -123,27 +125,27 @@ public abstract class LocalEndpoint implements Endpoint {
 	}
 
 	@Override
-	public JSONObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId,String attributeId) {
-		return new JSONObject(this.getSession(publicKey).get(serviceProviderId, serviceId, resourceId, attributeId).getJSON());
+	public JsonObject get(String publicKey, String serviceProviderId, String serviceId, String resourceId,String attributeId) {
+		return JsonProviderFactory.readObject(this.getSession(publicKey).get(serviceProviderId, serviceId, resourceId, attributeId).getJSON());
 	}
 
 	@Override
-	public JSONObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId,String attributeId, Object parameter) {
-		return new JSONObject(this.getSession(publicKey).set(serviceProviderId, serviceId, resourceId, attributeId, parameter).getJSON());
+	public JsonObject set(String publicKey, String serviceProviderId, String serviceId, String resourceId,String attributeId, Object parameter) {
+		return JsonProviderFactory.readObject(this.getSession(publicKey).set(serviceProviderId, serviceId, resourceId, attributeId, parameter).getJSON());
 	}
 
 	@Override
-	public JSONObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,Object[] parameters) {
-		return new JSONObject(this.getSession(publicKey).act(serviceProviderId, serviceId, resourceId, parameters).getJSON());
+	public JsonObject act(String publicKey, String serviceProviderId, String serviceId, String resourceId,Object[] parameters) {
+		return JsonProviderFactory.readObject(this.getSession(publicKey).act(serviceProviderId, serviceId, resourceId, parameters).getJSON());
 	}
 
 	@Override
-	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,Recipient recipient, JSONArray conditions) {
-		return new JSONObject(this.getSession(publicKey).subscribe(serviceProviderId, serviceId, resourceId, recipient, conditions).getJSON());
+	public JsonObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,Recipient recipient, JsonArray conditions) {
+		return JsonProviderFactory.readObject(this.getSession(publicKey).subscribe(serviceProviderId, serviceId, resourceId, recipient, conditions).getJSON());
 	}
 
 	@Override
-	public JSONObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,String subscriptionId) {
-		return new JSONObject(this.getSession(publicKey).unsubscribe(serviceProviderId, serviceId, resourceId, subscriptionId).getJSON());
+	public JsonObject unsubscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,String subscriptionId) {
+		return JsonProviderFactory.readObject(this.getSession(publicKey).unsubscribe(serviceProviderId, serviceId, resourceId, subscriptionId).getJSON());
 	}
 }

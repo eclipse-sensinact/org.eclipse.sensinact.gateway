@@ -16,9 +16,10 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.primitive.Primitive;
 import org.eclipse.sensinact.gateway.common.primitive.PrimitiveDescription;
 import org.eclipse.sensinact.gateway.core.ResourceImpl;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * A extended {@link Parameter} whose value is build dynamically using a
@@ -74,8 +75,8 @@ public class DynamicParameter extends Parameter {
 	 */
 	@Override
 	public String getJSON() {
-		JSONObject description = super.getJSONObject();
-		description.put(PrimitiveDescription.VALUE_KEY, ((DynamicParameterValue) super.fixedValue).getJSON());
+		JsonObjectBuilder description = super.getJSONObject();
+		description.add(PrimitiveDescription.VALUE_KEY, ((DynamicParameterValue) super.fixedValue).getJSON());
 		return description.toString();
 	}
 

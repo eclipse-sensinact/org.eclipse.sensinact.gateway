@@ -13,7 +13,8 @@ import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.plugin.AbstractPlugin;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 class TestInstaller extends AbstractPlugin {
     private TestResult test;
@@ -24,7 +25,7 @@ class TestInstaller extends AbstractPlugin {
         this.test = test;
     }
 
-    public JSONObject getComponentJSONSchema(String function) {
+    public JsonObject getComponentJSONSchema(String function) {
         if (function.equals("mock_addition")) {
             return MockComponentAddition.getJSONSchemaFunction(mediator.getContext());
         } else if (function.equals("mock_set")) {

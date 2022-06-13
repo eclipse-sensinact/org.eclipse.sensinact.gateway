@@ -10,16 +10,17 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link AccessMethodResponseBuilder} dedicated to
- * {@link DescribeMethod} returning a JSONObject response
+ * {@link DescribeMethod} returning a JsonObject response
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
-public class DescribeJSONResponseBuilder extends DescribeResponseBuilder<JSONObject> {
+public class DescribeJSONResponseBuilder extends DescribeResponseBuilder<JsonObject> {
 	/**
 	 * Constructor
 	 * 
@@ -59,7 +60,7 @@ public class DescribeJSONResponseBuilder extends DescribeResponseBuilder<JSONObj
 	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
 	 */
 	@Override
-	public Class<JSONObject> getComponentType() {
-		return JSONObject.class;
+	public Class<JsonObject> getComponentType() {
+		return JsonObject.class;
 	}
 }

@@ -9,19 +9,20 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.app.manager.checker;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import org.eclipse.sensinact.gateway.app.api.exception.FunctionNotFoundException;
 import org.eclipse.sensinact.gateway.app.api.exception.ValidationException;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.app.manager.osgi.PluginsProxy;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * This class validates the JSON provided by the client to deploy an application
@@ -41,10 +42,10 @@ public class JsonValidator {
      * @throws ValidationException   JSON file is not valid
      * @throws FileNotFoundException unable to find the JSON schema
      */
-    public static void validateApplication(AppServiceMediator mediator, JSONObject json) throws ValidationException, FileNotFoundException {
-        JSONObject rawSchema = null;
+    public static void validateApplication(AppServiceMediator mediator, JsonObject json) throws ValidationException, FileNotFoundException {
+        JsonObject rawSchema = null;
         try {
-            rawSchema = new JSONObject(new JSONTokener(new InputStreamReader(mediator.getContext().getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+            rawSchema = JsonProviderFactory.getProvider().createReader(mediator.getContext().getBundle().getResource("/" + JSON_SCHEMA).openStream()).readObject();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,30 +69,30 @@ public class JsonValidator {
      * @throws ValidationException   JSON file is not valid
      * @throws FileNotFoundException unable to find the JSON schema
      */
-    public static void validateFunctionsParameters(AppServiceMediator mediator, JSONArray components) throws ValidationException, FileNotFoundException {
-        for (int i = 0; i < components.length(); i++) {
-            String function = components.getJSONObject(i).getJSONObject("function").getString("name");
-            JSONObject functionSchema;
-            try {
-                functionSchema = PluginsProxy.getComponentJSONSchema(mediator, function);
-            } catch (FunctionNotFoundException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
-                return;
-            }
-            if (functionSchema == null) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("The JSON of the application is not valid.");
-                }
-                throw new FileNotFoundException("Unable to find the JSON schema of the function: " + function);
-            }
-            JSONObject reformatedFunction = new JSONObject();
-            reformatedFunction.put("name", function);
-            if (components.getJSONObject(i).getJSONObject("function").has("buildparameters")) {
-                reformatedFunction.put("buildparameters", components.getJSONObject(i).getJSONObject("function").getJSONArray("buildparameters"));
-            }
-            reformatedFunction.put("runparameters", components.getJSONObject(i).getJSONObject("function").getJSONArray("runparameters"));
+    public static void validateFunctionsParameters(AppServiceMediator mediator, JsonArray components) throws ValidationException, FileNotFoundException {
+    	for (int i = 0; i < components.size(); i++) {
+    		String function = components.getJsonObject(i).getJsonObject("function").getString("name");
+    		JsonObject functionSchema;
+    		try {
+    			functionSchema = PluginsProxy.getComponentJSONSchema(mediator, function);
+    		} catch (FunctionNotFoundException e) {
+    			if (LOG.isErrorEnabled()) {
+    				LOG.error(e.getMessage(), e);
+    			}
+    			return;
+    		}
+    		if (functionSchema == null) {
+    			if (LOG.isErrorEnabled()) {
+    				LOG.error("The JSON of the application is not valid.");
+    			}
+    			throw new FileNotFoundException("Unable to find the JSON schema of the function: " + function);
+    		}
+    		JsonObjectBuilder reformatedFunction = JsonProviderFactory.getProvider().createObjectBuilder();
+    		reformatedFunction.add("name", function);
+    		if (components.getJsonObject(i).getJsonObject("function").containsKey("buildparameters")) {
+    			reformatedFunction.add("buildparameters", components.getJsonObject(i).getJsonObject("function").getJsonArray("buildparameters"));
+    		}
+    		reformatedFunction.add("runparameters", components.getJsonObject(i).getJsonObject("function").getJsonArray("runparameters"));
             //Schema schema = SchemaLoader.load(functionSchema);
             /*Json inputJson = Json.read(reformatedFunction.toString());
             Json schemaJson = Json.read(functionSchema.toString());

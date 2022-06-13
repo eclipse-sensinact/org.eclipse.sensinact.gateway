@@ -19,7 +19,8 @@ import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.core.method.SetResponse;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * This class acts as a proxy to a sNa resource
@@ -46,12 +47,12 @@ public class ResourceData implements DataItf {
         return uri;
     }
 
-    private DescribeResponse<JSONObject> describe() {
+    private DescribeResponse<JsonObject> describe() {
     	String[] uriElements = UriUtils.getUriElements(getSourceUri());
         if (uriElements.length != 3) {
             return null;
         }
-        DescribeResponse<JSONObject> response = this.session.getResource(uriElements[0], uriElements[1], uriElements[2]);
+        DescribeResponse<JsonObject> response = this.session.getResource(uriElements[0], uriElements[1], uriElements[2]);
         if(response == null || response.getStatusCode()!=200) {
         	 return null;
         }
@@ -102,7 +103,7 @@ public class ResourceData implements DataItf {
     		return null;
     	}
     	this.last = response;
-        return response.getResponse(DataResource.VALUE);
+        return CastUtils.getObjectFromJSON(getType(), response.getResponse(DataResource.VALUE));
     }
 
     /**
@@ -117,7 +118,7 @@ public class ResourceData implements DataItf {
     	if(last == null) {
     		return Object.class;
     	}
-        return CastUtils.jsonTypeToJavaType((String) last.getResponse(DataResource.TYPE));
+        return CastUtils.jsonTypeToJavaType(last.getResponse(String.class, DataResource.TYPE));
     }
 
     /**
@@ -126,11 +127,11 @@ public class ResourceData implements DataItf {
      * @return the String ResourceType
      */
     public String getResourceType() {
-    	DescribeResponse<JSONObject> response = describe();
+    	DescribeResponse<JsonObject> response = describe();
     	if(response == null) {
     		return null;
     	}
-        return (String) response.getResponse().get(DataResource.TYPE);
+        return (String) response.getResponse().getString(DataResource.TYPE);
     }
 
     /**

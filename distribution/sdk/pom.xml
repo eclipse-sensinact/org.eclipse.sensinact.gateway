@@ -309,6 +309,21 @@
 			<artifactId>jackson-core</artifactId>
 			<version>${com.fasterxml.jackson.core.version}</version>
 		</dependency>
+		<dependency>	
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jakarta-jsonp</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>jakarta.json</groupId>
+		    <artifactId>jakarta.json-api</artifactId>
+		    <version>${jakarta.json.api.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.eclipse.parsson</groupId>
+		    <artifactId>parsson</artifactId>
+		    <version>${org.eclipse.parsson.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.hazelcast</groupId>
@@ -359,11 +374,6 @@
 			<groupId>org.jline</groupId>
 			<artifactId>jline</artifactId>
 			<version>${org.jline.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>${org.json.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mapdb</groupId>

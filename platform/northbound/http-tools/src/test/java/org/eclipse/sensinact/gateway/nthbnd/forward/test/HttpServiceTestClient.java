@@ -13,7 +13,6 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfigurationImpl;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
-import org.json.JSONException;
 
 import java.io.IOException;
 
@@ -45,8 +44,6 @@ public class HttpServiceTestClient {
             byte[] responseContent = response.getContent();
             String contentStr = (responseContent == null ? null : new String(responseContent));
             return contentStr;
-        } catch (JSONException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {

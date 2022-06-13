@@ -29,10 +29,11 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.Immutable.O
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreException;
 import org.eclipse.sensinact.gateway.datastore.api.DataStoreService;
 import org.eclipse.sensinact.gateway.util.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * Generic and abstract Data Access Object to interact with the datastore where
@@ -259,17 +260,17 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 			return select();
 		}
 		String query = userDefinedSelectStatement.getStatement();
-		JSONArray array = this.selectStatement(query, variables);
+		JsonArray array = this.selectStatement(query, variables);
 
 		int index = 0;
-		int length = array == null ? 0 : array.length();
+		int length = array == null ? 0 : array.size();
 		List<E> entitiesList = new ArrayList<E>(length);
 
 		for (; index < length; index++) {
 			try {
-				JSONObject jsonObject = array.getJSONObject(index);
+				JsonObject jsonObject = array.getJsonObject(index);
 				entitiesList.add(
-						entityType.getConstructor(JSONObject.class).newInstance(jsonObject));
+						entityType.getConstructor(JsonObject.class).newInstance(jsonObject));
 
 			} catch (Exception e) {
 				LOG.error(e.getMessage(), e);
@@ -297,17 +298,17 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 			Map.Entry<String, Object> entry = iterator.next();
 			selectDirective.where(entry.getKey(), entry.getValue());
 		}
-		JSONArray array = this.selectStatement(selectDirective.toString());
+		JsonArray array = this.selectStatement(selectDirective.toString());
 
 		int index = 0;
-		int length = array == null ? 0 : array.length();
+		int length = array == null ? 0 : array.size();
 		List<E> entitiesList = new ArrayList<E>(length);
 
 		for (; index < length; index++) {
 			try {
-				JSONObject jsonObject = array.getJSONObject(index);
+				JsonObject jsonObject = array.getJsonObject(index);
 				entitiesList.add(
-						entityType.getConstructor(JSONObject.class).newInstance(jsonObject));
+						entityType.getConstructor(JsonObject.class).newInstance(jsonObject));
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -339,7 +340,7 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 	 * @return the array of JSON formated selected records
 	 * @throws DataStoreException
 	 */
-	private JSONArray selectStatement(String query, String... variables) throws DataStoreException {
+	private JsonArray selectStatement(String query, String... variables) throws DataStoreException {
 		return this.dataStoreService.select(formatQuery(query, variables));
 	}
 
@@ -401,18 +402,18 @@ abstract class AbstractSnaDAO<E extends SnaEntity> implements SnaDAO<E> {
 
 		selectDirective.join(keyDirective);
 
-		JSONArray array = this.selectStatement(selectDirective.toString());
+		JsonArray array = this.selectStatement(selectDirective.toString());
 
 		int index = 0;
-		int length = array == null ? 0 : array.length();
+		int length = array == null ? 0 : array.size();
 		List<E> entitiesList = new ArrayList<E>(length);
 		Constructor<E> constructor = null;
 		if (length > 0) {
 			try {
-				constructor = entityType.getConstructor(JSONObject.class);
+				constructor = entityType.getConstructor(JsonObject.class);
 
 				for (; index < length; index++) {
-					JSONObject jsonObject = array.getJSONObject(index);
+					JsonObject jsonObject = array.getJsonObject(index);
 					entitiesList.add(constructor.newInstance(jsonObject));
 				}
 			} catch (Exception e) {

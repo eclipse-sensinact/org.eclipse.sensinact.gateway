@@ -17,9 +17,10 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * Method Entity
@@ -61,7 +62,7 @@ public class UserEntity extends SnaEntity implements User {
 	 * @param row
 	 * 
 	 */
-	public UserEntity(JSONObject row) {
+	public UserEntity(JsonObject row) {
 		super(row);
 	}
 

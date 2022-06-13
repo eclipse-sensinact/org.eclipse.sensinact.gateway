@@ -10,7 +10,7 @@
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
 /**
  * This class is a builder gathering the options that are applied on an application
@@ -93,6 +93,8 @@ public class AppOptions implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        return new JSONObject().put(AppJsonConstant.INIT_OPTIONS_AUTORESTART, autostart).put(AppJsonConstant.INIT_OPTIONS_RESETONSTOP, resetOnStop).toString();
+        return JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add(AppJsonConstant.INIT_OPTIONS_AUTORESTART, autostart)
+        		.add(AppJsonConstant.INIT_OPTIONS_RESETONSTOP, resetOnStop).build().toString();
     }
 }

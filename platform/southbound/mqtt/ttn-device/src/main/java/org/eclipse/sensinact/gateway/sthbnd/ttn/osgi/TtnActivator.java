@@ -24,8 +24,13 @@ import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttTopic;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnActivationListener;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnDownlinkListener;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.listener.TtnUplinkListener;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.Constants;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
 
 @SensiNactBridgeConfiguration(
 	startAtInitializationTime = true,
@@ -51,6 +56,9 @@ public class TtnActivator extends BasisActivator<MqttPacket> {
     @Property(name = "the.things.network.broker.protocol",defaultValue = "SSL")
     public String brokerProtocol;
 
+    private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
    
     @Override
     public void configure() {  
@@ -61,13 +69,13 @@ public class TtnActivator extends BasisActivator<MqttPacket> {
                 .password(appKey)
                 .build();
 
-        final TtnDownlinkListener ttnDownlinkListener = new TtnDownlinkListener(mediator);
+        final TtnDownlinkListener ttnDownlinkListener = new TtnDownlinkListener();
 
         final MqttTopic messageTopic = new MqttTopic("+/devices/+/up",
-                new TtnUplinkListener(mediator, ttnDownlinkListener, (MqttProtocolStackEndpoint) super.endpoint));
+                new TtnUplinkListener(mediator, ttnDownlinkListener, super.endpoint, mapper));
 
         final MqttTopic activationTopic = new MqttTopic("+/devices/+/events/activations",
-                new TtnActivationListener(mediator, (MqttProtocolStackEndpoint) super.endpoint));
+                new TtnActivationListener(super.endpoint, mapper));
         
         MqttBroker broker = new MqttBroker.Builder()
             .host(brokerHost)

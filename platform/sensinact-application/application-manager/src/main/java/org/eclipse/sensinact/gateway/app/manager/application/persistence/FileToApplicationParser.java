@@ -11,8 +11,10 @@ package org.eclipse.sensinact.gateway.app.manager.application.persistence;
 
 import org.eclipse.sensinact.gateway.app.api.persistence.dao.Application;
 import org.eclipse.sensinact.gateway.app.manager.application.persistence.exception.ApplicationParseException;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,10 +32,10 @@ public class FileToApplicationParser {
             StringBuffer sb = new StringBuffer();
             for (String line : lines) sb.append(line);
             final String content = sb.toString();
-            JSONObject jsonFileContent = new JSONObject(content);
-            JSONArray array = jsonFileContent.getJSONArray("parameters");
-            final String applicationName = array.getJSONObject(0).getString("value");
-            final JSONObject jsonApplicationContent = array.getJSONObject(1).getJSONObject("value");
+            JsonObject jsonFileContent = JsonProviderFactory.readObject(content);
+            JsonArray array = jsonFileContent.getJsonArray("parameters");
+            final String applicationName = array.getJsonObject(0).getString("value");
+            final JsonObject jsonApplicationContent = array.getJsonObject(1).getJsonObject("value");
             final String filename = file.getName();
             final Integer indexOfLastDot = filename.lastIndexOf('.');
             String filenameNoExtention = null;

@@ -12,21 +12,42 @@ package org.eclipse.sensinact.gateway.nthbnd.http.callback;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 public class WebSocketRequestWrapper extends AbstractRequestWrapper {
 
-    private String content;
+    private final String content;
+    private final ObjectMapper mapper;
     
-
-    public WebSocketRequestWrapper(String content) {
+    private JsonObject contentJson;
+    
+    public WebSocketRequestWrapper(String content, ObjectMapper mapper) {
         this.content = content;
+        this.mapper = mapper;
+    }
+    
+    private JsonObject getJson() {
+    	if(content == null || content.isEmpty()) {
+    		return null;
+    	}
+    	synchronized (this) {
+			if(contentJson == null) {
+				try {
+		    		contentJson = mapper.readValue(content, JsonObject.class);
+		    	} catch(Exception e) {
+		    		LOG.config(String.format("Unable to convert the request content into a JSON object:\n %s",content));
+		    	}
+			}
+			return contentJson;
+		}
     }
     
     /* (non-Javadoc)
@@ -34,15 +55,14 @@ public class WebSocketRequestWrapper extends AbstractRequestWrapper {
      */
     @Override
     public String getRequestURI() {
-    	try {
-    		JSONObject request = new JSONObject(content);
-            String uri = request.optString("uri");
-            String[] uriElements = uri.split("\\?");
-            return uriElements[0];            
-    	}catch(JSONException e) {
-    		LOG.config(String.format("Unable to convert the request content into a JSON object:\n %s",content));
+    	JsonObject request = getJson();
+    	if(request == null) {
+    		return null;
+    	} else {
+	    	String uri = request.getString("uri", "");
+	    	String[] uriElements = uri.split("\\?");
+	    	return uriElements[0];
     	}
-    	return null;
     }
 
     /* (non-Javadoc)
@@ -50,9 +70,9 @@ public class WebSocketRequestWrapper extends AbstractRequestWrapper {
      */
     @Override
     public Map<String, List<String>> getQueryMap() {
-    	try {
-    		JSONObject request = new JSONObject(content);
-            String uri = request.optString("uri");
+    	JsonObject request = getJson();
+    	if(request != null) {
+            String uri = request.getString("uri", "");
             String[] uriElements = uri.split("\\?");       
 	        if (uriElements.length == 2) {
 	            try {
@@ -61,8 +81,6 @@ public class WebSocketRequestWrapper extends AbstractRequestWrapper {
 	                LOG.log(Level.SEVERE, e.getMessage(),e);
 	            }
 	        }
-    	} catch(JSONException e) {
-    		LOG.config(String.format("Unable to convert the request content into a JSON object:\n %s",content));
     	}
         return Collections.<String, List<String>>emptyMap();
     }
@@ -81,18 +99,12 @@ public class WebSocketRequestWrapper extends AbstractRequestWrapper {
 	@Override
 	public Map<String, List<String>> getAttributes() {
 	    Map<String, List<String>> map = new HashMap<String, List<String>>();
-		if (this.content != null && this.content.length() > 0) {
-			try {
-	    		JSONObject request = new JSONObject(content);
-	            request.remove("uri");
-	            for(Iterator<String> en = request.keys();en.hasNext();) {
-	            	String key = (String) en.next();
-	            	String value = String.valueOf(request.get(key));
-	            	map.put(key, Collections.singletonList(value));
-	            }
-	    	} catch(JSONException e) {
-	    		LOG.config(String.format("Unable to convert the request content into a JSON object:\n %s",content));
-	    	}
+	    JsonObject request = getJson();
+    	if(request != null) {
+            request.remove("uri");
+            for(Entry<String, JsonValue> en : request.entrySet()) {
+            	map.put(en.getKey(), Collections.singletonList(String.valueOf(en.getValue())));
+            }
 		}
 		return map;
 	}

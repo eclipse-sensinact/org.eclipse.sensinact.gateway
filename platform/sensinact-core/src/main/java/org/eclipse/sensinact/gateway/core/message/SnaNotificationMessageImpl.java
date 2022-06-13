@@ -15,7 +15,9 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessage.Lifecycle;
 import org.eclipse.sensinact.gateway.core.message.SnaRemoteMessage.Remote;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessage.Update;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 
 /**
  * 
@@ -64,10 +66,10 @@ public abstract class SnaNotificationMessageImpl<S extends Enum<S> & SnaMessageS
 	/**
 	 * @inheritDoc
 	 * 
-	 * @see SnaNotificationMessage# setNotification(org.json.JSONObject)
+	 * @see SnaNotificationMessage# setNotification(jakarta.json.JSONObject)
 	 */
-	public void setNotification(JSONObject jsonObject) {
-		if (JSONObject.NULL.equals(jsonObject)) {
+	public void setNotification(JsonObject jsonObject) {
+		if (jsonObject == null) {
 			return;
 		}
 		super.putValue(SnaConstants.NOTIFICATION_KEY, jsonObject);
@@ -78,33 +80,33 @@ public abstract class SnaNotificationMessageImpl<S extends Enum<S> & SnaMessageS
 	 * 
 	 * @see SnaNotificationMessage# getNotification()
 	 */
-	public JSONObject getNotification() {
-		JSONObject jsonObject = super.<JSONObject>get(SnaConstants.NOTIFICATION_KEY);
+	public JsonObject getNotification() {
+		JsonObject jsonObject = super.<JsonObject>get(SnaConstants.NOTIFICATION_KEY);
 		return jsonObject;
 	}
 
 	/**
 	 * Returns the object value associated to the string key passed as parameter in
-	 * the notification {@link JSONObject} embedded in this message
+	 * the notification {@link JsonObject} embedded in this message
 	 * 
 	 * @param key
 	 *            the string key for which to retrieve the object value
 	 * @return the object value associated to the specified key in the notification
 	 *         {@link JSONObject}
 	 */
-	public Object getNotification(String key) {
-		Object value = null;
-		JSONObject jsonObject = getNotification();
+	public JsonValue getNotification(String key) {
+		JsonValue value = null;
+		JsonObject jsonObject = getNotification();
 
 		if (jsonObject != null) {
-			value = jsonObject.opt(key);
+			value = jsonObject.get(key);
 		}
 		return value;
 	}
 
 	/**
 	 * Returns the object value associated to the string key passed as parameter ,
-	 * in the notification {@link JSONObject} embedded in this message, casted into
+	 * in the notification {@link JsonObject} embedded in this message, casted into
 	 * the type also passed as parameter
 	 * 
 	 * @param type

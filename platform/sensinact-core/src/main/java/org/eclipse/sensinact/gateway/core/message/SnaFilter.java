@@ -26,10 +26,15 @@ import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.props.TypedProperties;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage.Type;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 /**
  * Allows to check whether an {@link SnaMessage} has to be transmitted or
@@ -126,7 +131,7 @@ public class SnaFilter implements JSONable {
 	 * @param sender
 	 * @param constraints
 	 */
-	public SnaFilter(Mediator mediator, String sender, JSONArray constraints) {
+	public SnaFilter(Mediator mediator, String sender, JsonArray constraints) {
 		this(mediator, sender, false, false, constraints);
 	}
 
@@ -137,15 +142,15 @@ public class SnaFilter implements JSONable {
 	 * @param isComplement
 	 * @param constraints
 	 */
-	public SnaFilter(Mediator mediator, String sender, boolean isPattern, boolean isComplement, JSONArray constraints) {
+	public SnaFilter(Mediator mediator, String sender, boolean isPattern, boolean isComplement, JsonArray constraints) {
 		this(mediator, sender, isPattern, isComplement);
 		int index = 0;
-		int length = constraints == null ? 0 : constraints.length();
+		int length = constraints == null ? 0 : constraints.size();
 		for (; index < length; index++) {
-			this.addCondition(constraints.getJSONObject(index));
+			this.addCondition(constraints.getJsonObject(index));
 		}
 	}
-
+	
 	/**
 	 * Returns the String sender this SnaFilter is targeting
 	 * 
@@ -161,7 +166,7 @@ public class SnaFilter implements JSONable {
 	 * @param jsonCondition
 	 *            the JSON formated {@link Constraint} to add to this filter
 	 */
-	public void addCondition(JSONObject jsonCondition) {
+	public void addCondition(JsonObject jsonCondition) {
 		try {
 			this.addCondition(ConstraintFactory.Loader.load(mediator.getClassLoader(), jsonCondition));
 		} catch (ClassCastException e) {
@@ -340,7 +345,7 @@ public class SnaFilter implements JSONable {
 	 *         </ul>
 	 */
 	boolean matchesConditions(SnaMessage<?> message) {
-		Object toValidate = null;
+		JsonValue toValidate = null;
 
 		switch (((SnaMessageSubType) message.getType()).getSnaMessageType()) {
 		case ERROR:
@@ -348,9 +353,9 @@ public class SnaFilter implements JSONable {
 		case LIFECYCLE:
 			switch ((SnaLifecycleMessage.Lifecycle) message.getType()) {
 			case RESOURCE_APPEARING:
-				JSONObject initial = new JSONObject(message.getJSON()).optJSONObject("initial");
-				if (!JSONObject.NULL.equals(initial)) {
-					toValidate = initial.opt("value");
+				JsonObject initial = JsonProviderFactory.readObject(message.getJSON()).getJsonObject("initial");
+				if (initial != null) {
+					toValidate = initial.get("value");
 				}
 				break;
 			case PROVIDER_APPEARING:
@@ -363,15 +368,15 @@ public class SnaFilter implements JSONable {
 			}
 			break;
 		case RESPONSE:
-			JSONObject response = new JSONObject(message.getJSON()).optJSONObject("response");
-			if (!JSONObject.NULL.equals(response)) {
-				toValidate = response.opt("value");
+			JsonObject response = JsonProviderFactory.readObject(message.getJSON()).getJsonObject("response");
+			if (response != null) {
+				toValidate = response.get("value");
 			}
 			break;
 		case REMOTE:
-			JSONObject remote = new JSONObject(message.getJSON()).optJSONObject("notification");
-			if (!JSONObject.NULL.equals(remote)) {
-				toValidate = remote.opt("namespace");
+			JsonObject remote = JsonProviderFactory.readObject(message.getJSON()).getJsonObject("notification");
+			if (remote != null) {
+				toValidate = remote.get("value");
 			}
 			break;
 		case UPDATE:
@@ -381,9 +386,9 @@ public class SnaFilter implements JSONable {
 				case ATTRIBUTE_VALUE_UPDATED:
 				case METADATA_VALUE_UPDATED:
 					if (this.handleChangedStatus(((TypedProperties<?>) message).<Boolean>get("hasChanged"))) {
-						JSONObject notification = new JSONObject(message.getJSON()).optJSONObject("notification");
-						if (!JSONObject.NULL.equals(notification)) {
-							toValidate = notification.opt("value");
+						JsonObject notification = JsonProviderFactory.readObject(message.getJSON()).getJsonObject("notification");
+						if (notification != null) {
+							toValidate = notification.get("value");
 						}
 					} else {
 						return false;
@@ -459,26 +464,26 @@ public class SnaFilter implements JSONable {
 	/**
 	 * @return
 	 */
-	public JSONObject toJSONObject() {
-		JSONObject object = new JSONObject();
-		JSONArray array = new JSONArray();
+	public JsonObject toJSONObject() {
+		JsonObjectBuilder object = JsonProviderFactory.getProvider().createObjectBuilder();
+		JsonArrayBuilder array = JsonProviderFactory.getProvider().createArrayBuilder();
 
 		Iterator<Type> iterator = this.handledTypes.iterator();
 		while (iterator.hasNext()) {
-			array.put(iterator.next().name());
+			array.add(iterator.next().name());
 		}
-		object.put("types", array);
-		object.put("sender", this.sender);
-		object.put("pattern", this.isPattern);
-		object.put("complement", this.isComplement);
+		object.add("types", array);
+		object.add("sender", this.sender);
+		object.add("pattern", this.isPattern);
+		object.add("complement", this.isComplement);
 
-		array = new JSONArray();
+		array = JsonProviderFactory.getProvider().createArrayBuilder();
 		Iterator<Constraint> constraints = this.conditions.iterator();
 		while (constraints.hasNext()) {
-			array.put(new JSONObject(constraints.next().getJSON()));
+			array.add(JsonProviderFactory.readObject(constraints.next().getJSON()));
 		}
-		object.put("conditions", array);
-		return object;
+		object.add("conditions", array);
+		return object.build();
 	}
 
 	/**

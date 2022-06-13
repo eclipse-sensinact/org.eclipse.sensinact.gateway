@@ -32,10 +32,12 @@ import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethod;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.Signature;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * This factory create the AppManager service provider and its resources in the admin service.
@@ -76,12 +78,12 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
         ResourceImpl installResource = adminService.addActionResource(AppConstant.INSTALL, ActionResource.class);
         AccessMethod.Type act = AccessMethod.Type.valueOf(AccessMethod.ACT);
         installExecutor = new AppInstallExecutor(mediator, this.serviceProvider, persistenceService);
-        installResource.registerExecutor(new Signature(mediator, act, new Class[]{String.class, JSONObject.class}, null), installExecutor, AccessMethodExecutor.ExecutionPolicy.AFTER);
+        installResource.registerExecutor(new Signature(mediator, act, new Class[]{String.class, JsonObject.class}, null), installExecutor, AccessMethodExecutor.ExecutionPolicy.AFTER);
         //installResource.getAccessMethod(act).invoke()
         ResourceImpl uninstallResource = adminService.addActionResource(AppConstant.UNINSTALL, ActionResource.class);
         uninstallExecutor = new AppUninstallExecutor(this.serviceProvider, persistenceService);
         uninstallResource.registerExecutor(new Signature(mediator, act, new Class[]{String.class}, null), uninstallExecutor, AccessMethodExecutor.ExecutionPolicy.AFTER);
-        ResourceImpl resource = adminService.addDataResource(PropertyResource.class, AppConstant.KEYWORDS, JSONArray.class, null);
+        ResourceImpl resource = adminService.addDataResource(PropertyResource.class, AppConstant.KEYWORDS, JsonArray.class, null);
         this.jsonSchemaListener = new AppJsonSchemaListener(mediator, resource);
         this.persistenceService.registerServiceAvailabilityListener(uninstallExecutor);
         this.persistenceService.registerServiceAvailabilityListener(installExecutor);
@@ -129,7 +131,7 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
     public void applicationFound(String applicationName, String content) {
         try {
             LOG.info("Installing new application '{}'", applicationName);
-            installExecutor.install(applicationName, new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject("value"));
+            installExecutor.install(applicationName, JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject("value"));
         } catch (Exception e) {
             LOG.error("Failed to install application '{}'", applicationName, e);
         }
@@ -143,7 +145,7 @@ public class AppManagerFactory extends ApplicationAvailabilityListenerAbstract {
             as.getApplication().stop();
             as.getResource(AppConstant.STATUS).getAttribute(DataResource.VALUE).setValue(ApplicationStatus.INSTALLED);
             as.stop();
-            installExecutor.install(applicationName, new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject("value"));
+            installExecutor.install(applicationName, JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject("value"));
         } catch (Exception e) {
             LOG.error("Failed to uninstall application {}", applicationName, e);
         }

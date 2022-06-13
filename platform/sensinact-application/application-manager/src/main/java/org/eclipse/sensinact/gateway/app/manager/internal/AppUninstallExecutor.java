@@ -16,7 +16,7 @@ import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAva
 import org.eclipse.sensinact.gateway.core.ServiceProviderImpl;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +46,12 @@ public class AppUninstallExecutor extends ApplicationAvailabilityListenerAbstrac
         String name = (String) jsonObjects.getParameter(0);
         try {
             uninstall(name);
-            jsonObjects.setAccessMethodObjectResult(new JSONObject().put("message", "The application " + name + " has been uninstalled"));
+            jsonObjects.setAccessMethodObjectResult(JsonProviderFactory.getProvider().createObjectBuilder()
+            		.add("message", "The application " + name + " has been uninstalled").build());
         } catch (Exception e) {
-            jsonObjects.setAccessMethodObjectResult(new JSONObject().put("message", "The application " + name + " has failed to be uninstalled"));
+            jsonObjects.setAccessMethodObjectResult(JsonProviderFactory.getProvider().createObjectBuilder()
+            		.add("message", "The application " + name + " has failed to be uninstalled")
+            		.build());
         }
         return null;
     }

@@ -13,7 +13,8 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTrigger;
 import org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * 
@@ -34,10 +35,10 @@ public class MokeTriggerFactory implements AccessMethodTriggerFactory {
 	 * @InheritedDoc
 	 *
 	 * @see AccessMethodTriggerFactory#newInstance(org.eclipse.sensinact.gateway.util.mediator.AbstractMediator,
-	 *      org.json.JSONObject)
+	 *      jakarta.json.JSONObject)
 	 */
 	@Override
-	public AccessMethodTrigger newInstance(Mediator mediator, JSONObject trigger) throws InvalidValueException {
+	public AccessMethodTrigger newInstance(Mediator mediator, JsonObject trigger) throws InvalidValueException {
 		return new MokeTrigger();
 	}
 

@@ -27,7 +27,6 @@ import org.eclipse.sensinact.gateway.app.api.persistence.dao.Application;
 import org.eclipse.sensinact.gateway.app.api.persistence.exception.ApplicationPersistenceException;
 import org.eclipse.sensinact.gateway.app.api.persistence.listener.ApplicationAvailabilityListener;
 import org.eclipse.sensinact.gateway.app.manager.application.persistence.exception.ApplicationParseException;
-import org.json.JSONObject;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -37,6 +36,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 @Component(service = ApplicationPersistenceService.class,scope = ServiceScope.SINGLETON)
 @ServiceRanking(100)
@@ -163,7 +164,7 @@ public class FileSystemApplicationPersistenceService implements ApplicationPersi
     }
 
     @Override
-    public JSONObject fetch(String applicationName) throws ApplicationPersistenceException {
+    public JsonObject fetch(String applicationName) throws ApplicationPersistenceException {
         throw new UnsupportedOperationException("Persistence to the disk is not available");
     }
 

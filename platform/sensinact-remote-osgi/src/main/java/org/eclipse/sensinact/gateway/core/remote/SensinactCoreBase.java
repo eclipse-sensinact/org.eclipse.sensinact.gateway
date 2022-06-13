@@ -1,8 +1,8 @@
 package org.eclipse.sensinact.gateway.core.remote;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Dictionary;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
@@ -15,11 +15,12 @@ import org.eclipse.sensinact.gateway.core.message.SnaLifecycleMessageImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaUpdateMessageImpl;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonValue;
 
 public class SensinactCoreBase implements SensinactCoreBaseIface {
 
@@ -73,7 +74,10 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
 
                 private void publicRawMessage(SnaMessage<?> event){
                     try {
-                    	  String uri = new JSONObject(event.getJSON()).getString("uri");
+                    	  String uri = JsonProviderFactory.getProvider()
+                    			  .createReader(new StringReader(event.getJSON()))
+                    			  .readObject()
+                    			  .getString("uri");
                     	  int index = uri.indexOf(':');
 	                      if(index < 0){
 	                         mb.publish(String.format("%s%s",brokerTopicPrefix, namespace), 
@@ -183,14 +187,13 @@ public class SensinactCoreBase implements SensinactCoreBaseIface {
         return resultResponse;
     }
 
-    private Object[] createObjectArrayParamFromJSON(String parameters){
-        JSONArray parameterJSONArray = new JSONArray(parameters);
-        String[] parametersObjectArray = new String[parameterJSONArray.length()];
-        Iterator<?> it = parameterJSONArray.iterator();
-        for(int x = 0;parameters != null && (x < parameters.length()) && it.hasNext();x++){
-            parametersObjectArray[x]=it.next().toString();
-        }
-        return parametersObjectArray;
+    private String[] createObjectArrayParamFromJSON(String parameters){
+    	return JsonProviderFactory.getProvider()
+    			.createReader(new StringReader(parameters))
+    			.readArray()
+    			.stream()
+    			.map(JsonValue::toString)
+    			.toArray(String[]::new);
     }
 
 	@Override

@@ -12,8 +12,13 @@ package org.eclipse.sensinact.gateway.app.manager.json;
 import org.eclipse.sensinact.gateway.app.api.exception.FunctionNotFoundException;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,18 +55,18 @@ public class AppComponent implements JSONable {
      * @param mediator  the mediator
      * @param component the JSON component
      */
-    public AppComponent(AppServiceMediator mediator, JSONObject component) throws FunctionNotFoundException {
+    public AppComponent(AppServiceMediator mediator, JsonObject component) throws FunctionNotFoundException {
         this.identifier = component.getString(AppJsonConstant.APP_IDENTIFIER);
         this.events = new ArrayList<AppEvent>();
-        JSONArray eventArray = component.getJSONArray(AppJsonConstant.APP_EVENTS);
-        for (int i = 0; i < eventArray.length(); i++) {
-            events.add(new AppEvent(mediator, eventArray.getJSONObject(i)));
+        JsonArray eventArray = component.getJsonArray(AppJsonConstant.APP_EVENTS);
+        for (int i = 0; i < eventArray.size(); i++) {
+            events.add(new AppEvent(mediator, eventArray.getJsonObject(i)));
         }
-        this.function = new AppFunction(component.getJSONObject(AppJsonConstant.APP_FUNCTION));
+        this.function = new AppFunction(component.getJsonObject(AppJsonConstant.APP_FUNCTION));
         ComponentProperties.Builder propertiesBuilder = new ComponentProperties.Builder();
-        if (component.has(AppJsonConstant.APP_PROPERTIES)) {
-            JSONObject propertiesJson = component.getJSONObject(AppJsonConstant.APP_PROPERTIES);
-            if (propertiesJson.has(AppJsonConstant.APP_PROPERTIES_REGISTER)) {
+        if (component.containsKey(AppJsonConstant.APP_PROPERTIES)) {
+            JsonObject propertiesJson = component.getJsonObject(AppJsonConstant.APP_PROPERTIES);
+            if (propertiesJson.containsKey(AppJsonConstant.APP_PROPERTIES_REGISTER)) {
                 propertiesBuilder.register(propertiesJson.getBoolean(AppJsonConstant.APP_PROPERTIES_REGISTER));
             }
         }
@@ -108,15 +113,16 @@ public class AppComponent implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        JSONObject component = new JSONObject();
-        component.put(AppJsonConstant.APP_IDENTIFIER, identifier);
-        JSONArray eventArray = new JSONArray();
+        JsonProvider provider = JsonProviderFactory.getProvider();
+		JsonObjectBuilder component = provider.createObjectBuilder();
+        component.add(AppJsonConstant.APP_IDENTIFIER, identifier);
+        JsonArrayBuilder eventArray = provider.createArrayBuilder();
         for (AppEvent event : events) {
-            eventArray.put(event.getJSON());
+            eventArray.add(event.getJSON());
         }
-        component.put(AppJsonConstant.APP_EVENTS, eventArray);
-        component.put(AppJsonConstant.APP_FUNCTION, function.getJSON());
-        component.put(AppJsonConstant.APP_PROPERTIES, properties.getJSON());
-        return component.toString();
+        component.add(AppJsonConstant.APP_EVENTS, eventArray);
+        component.add(AppJsonConstant.APP_FUNCTION, function.getJSON());
+        component.add(AppJsonConstant.APP_PROPERTIES, properties.getJSON());
+        return component.build().toString();
     }
 }

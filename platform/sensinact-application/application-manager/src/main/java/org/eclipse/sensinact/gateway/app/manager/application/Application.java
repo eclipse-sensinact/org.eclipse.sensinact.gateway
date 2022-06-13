@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.app.manager.application;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,10 +35,12 @@ import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * This class wraps the components and handles the lifecycle of the components
@@ -149,7 +152,7 @@ public class Application extends AbstractSensiNactApplication {
             	String[] uriElements = UriUtils.getUriElements(resourceSubscription.getResourceUri());
                 if (uriElements.length != 3) 
                     continue;
-                DescribeResponse<JSONObject> response = super.getSession().getResource(uriElements[0], uriElements[1], uriElements[2]);
+                DescribeResponse<JsonObject> response = super.getSession().getResource(uriElements[0], uriElements[1], uriElements[2]);
                 if(response.getStatusCode()!=200)
                 	 continue;                
                 super.getSession().unsubscribe(uriElements[0], uriElements[1], uriElements[2], 
@@ -204,12 +207,13 @@ public class Application extends AbstractSensiNactApplication {
 	                if(message == null) {
 	                	return;
 	                }
-	                JSONObject messageJson = new JSONObject(message.getJSON());
-	                System.out.println(message.getJSON());
-	                LOG.debug("Processing message {}", message.getJSON());
+	                String json = message.getJSON();
+					JsonObject messageJson = JsonProviderFactory.getProvider().createReader(new StringReader(json)).readObject();
+	                System.out.println(json);
+	                LOG.debug("Processing message {}", json);
 	                String[] uri = message.getPath().split("/");
 	                String resourceUri = "/" + uri[1] + "/" + uri[2] + "/" + uri[3];
-	                Object value = messageJson.getJSONObject("notification").get("value");
+	                Object value = messageJson.getJsonObject("notification").get("value");
 	                ResourceDataProvider dataProvider = null;
 	                for (Map.Entry<ResourceDataProvider, Collection<ResourceSubscription>> subscription : resourceSubscriptions.entrySet()) {
 	                    if (resourceUri.equals(subscription.getKey().getUri())) {

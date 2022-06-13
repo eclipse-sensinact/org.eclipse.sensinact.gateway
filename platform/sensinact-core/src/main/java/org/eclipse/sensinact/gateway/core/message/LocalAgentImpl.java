@@ -12,8 +12,10 @@ package org.eclipse.sensinact.gateway.core.message;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.common.execution.Executable;
 import org.eclipse.sensinact.gateway.core.remote.RemoteCore;
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonException;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -55,7 +57,7 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent {
 				isPattern = LocalAgentImpl.isPattern(mediator, suffix);
 			}
 			boolean isComplement = LocalAgentImpl.isComplement(mediator, suffix);
-			JSONArray conditions = LocalAgentImpl.getConditions(mediator, suffix);
+			JsonArray conditions = LocalAgentImpl.getConditions(mediator, suffix);
 			SnaMessage.Type[] types = LocalAgentImpl.getTypes(mediator, suffix);
 
 			filter = new SnaFilter(mediator, sender, isPattern, isComplement, conditions);
@@ -69,21 +71,20 @@ public class LocalAgentImpl extends AbstractAgent implements LocalAgent {
 		return new LocalAgentImpl(mediator, callback, filter, agentKey);
 	} 
 	
-	protected static JSONArray getConditions(Mediator mediator, String suffix) {
-		JSONArray conditions = null;
+	protected static JsonArray getConditions(Mediator mediator, String suffix) {
+		JsonArray conditions = null;
 
 		String conditionsStr = (String) mediator
 				.getProperty(buildProperty(SNAFILTER_AGENT_CONDITIONS_PROPERTY, suffix));
 
 		if (conditionsStr == null) {
-			conditions = new JSONArray();
+			conditions = JsonArray.EMPTY_JSON_ARRAY;
 
 		} else {
 			try {
-				conditions = new JSONArray(conditionsStr);
-
-			} catch (JSONException e) {
-				conditions = new JSONArray();
+				conditions = JsonProviderFactory.readArray(conditionsStr);
+			} catch (JsonException e) {
+				conditions = JsonArray.EMPTY_JSON_ARRAY;
 			}
 		}
 		return conditions;

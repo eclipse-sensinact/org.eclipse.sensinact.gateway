@@ -27,9 +27,13 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.ReflectUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 
 /**
  * 
@@ -215,9 +219,9 @@ public abstract class SnaEntity {
 	 * @param row
 	 *            the JSONObject describing this SnaEntity
 	 */
-	protected SnaEntity(JSONObject row) {
+	protected SnaEntity(JsonObject row) {
 		this();
-		if (JSONObject.NULL.equals(row)) {
+		if (row == null) {
 			return;
 		}
 		Table table = this.getClass().getAnnotation(Table.class);
@@ -235,10 +239,10 @@ public abstract class SnaEntity {
 			String rowColumn = entry.getValue().value();
 			String column = new StringBuilder().append(table.value()).append(SnaDAO.DOT).append(rowColumn).toString();
 
-			if (row.has(column)) {
+			if (row.containsKey(column)) {
 				setFieldValue(entry.getKey(), row.get(column));
 
-			} else if (row.has(rowColumn)) {
+			} else if (row.containsKey(rowColumn)) {
 				setFieldValue(entry.getKey(), row.get(rowColumn));
 			}
 			// } else if(SnaEntity.class.isAssignableFrom(entry.getKey().getType()))
@@ -344,14 +348,40 @@ public abstract class SnaEntity {
 	 * @param field
 	 * @param value
 	 */
-	protected void setFieldValue(Field field, Object value) {
+	protected void setFieldValue(Field field, JsonValue value) {
 		Method method = null;
+		Object nonJsonValue;
+		if(value == null) {
+			nonJsonValue = null;
+		} else {
+			switch(value.getValueType()) {
+				case FALSE:
+					nonJsonValue = Boolean.FALSE;
+					break;
+				case NULL:
+					nonJsonValue = null;
+					break;
+				case NUMBER:
+					nonJsonValue = ((JsonNumber)value).bigDecimalValue();
+					break;
+				case STRING:
+					nonJsonValue = ((JsonString)value).getString();
+					break;
+				case TRUE:
+					nonJsonValue = Boolean.TRUE;
+					break;
+				default:
+					nonJsonValue = value.toString();
+					break;
+			}
+		}
+		
 		try {
 			if ((method = this.getMethod(this.getMethodName(field.getName(), "set"), field.getType())) != null) {
-				method.invoke(this, CastUtils.cast(field.getType(), value));
+				method.invoke(this, CastUtils.cast(field.getType(), nonJsonValue));
 			} else {
 				field.setAccessible(true);
-				field.set(this, CastUtils.cast(field.getType(), value));
+				field.set(this, CastUtils.cast(field.getType(), nonJsonValue));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

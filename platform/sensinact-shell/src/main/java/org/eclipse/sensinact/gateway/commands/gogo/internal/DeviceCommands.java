@@ -12,7 +12,7 @@ package org.eclipse.sensinact.gateway.commands.gogo.internal;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.gateway.commands.gogo.internal.shell.ShellAccess;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -31,7 +31,8 @@ public class DeviceCommands {
      */
     @Descriptor("display the existing sensiNact service providers instances")
     public void devices() {
-        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(null, null, null, true)));
+        ShellAccess.proceed(component.getCommandMediator(), JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add("uri", CommandServiceMediator.uri(null, null, null, true)).build());
     }
 
     /**
@@ -41,6 +42,7 @@ public class DeviceCommands {
      */
     @Descriptor("display the description of a specific sensiNact service provider instance")
     public void device(@Descriptor("the device ID") String serviceProviderID) {
-        ShellAccess.proceed(component.getCommandMediator(), new JSONObject().put("uri", CommandServiceMediator.uri(serviceProviderID, null, null, false)));
+        ShellAccess.proceed(component.getCommandMediator(), JsonProviderFactory.getProvider().createObjectBuilder()
+        		.add("uri", CommandServiceMediator.uri(serviceProviderID, null, null, false)).build());
     }
 }

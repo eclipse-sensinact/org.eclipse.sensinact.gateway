@@ -18,8 +18,12 @@ import java.util.Stack;
 
 import org.eclipse.sensinact.gateway.common.primitive.PathElement;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * Intermediate {@link AccessMethodExecutor}'s execution result
@@ -158,14 +162,16 @@ public abstract class AccessMethodResponseBuilder<T, A extends AccessMethodRespo
 
 		A response = this.createAccessMethodResponse(status);
 
+		JsonProvider provider = JsonProviderFactory.getProvider();
 		if (exceptions != null && exceptions.size() > 0) {
 			Iterator<Exception> iterator = exceptions.iterator();
-			JSONArray exceptionsArray = new JSONArray();
+			JsonArrayBuilder exceptionsArray = provider.createArrayBuilder();
 
 			while (iterator.hasNext()) {
 				Exception exception = iterator.next();
-				JSONObject exceptionObject = new JSONObject();
-				exceptionObject.put("message", exception.getMessage());
+				JsonObjectBuilder exceptionObject = provider.createObjectBuilder();
+				exceptionObject.add("message", exception.getMessage() == null ? JsonValue.NULL : 
+					provider.createValue(exception.getMessage()));
 
 				StringBuilder buffer = new StringBuilder();
 				StackTraceElement[] trace = exception.getStackTrace();
@@ -177,10 +183,10 @@ public abstract class AccessMethodResponseBuilder<T, A extends AccessMethodRespo
 					buffer.append(trace[index].toString());
 					buffer.append("\n");
 				}
-				exceptionObject.put("trace", buffer.toString());
-				exceptionsArray.put(exceptionObject);
+				exceptionObject.add("trace", buffer.toString());
+				exceptionsArray.add(exceptionObject);
 			}
-			response.setErrors(exceptionsArray);
+			response.setErrors(exceptionsArray.build());
 		}
 		response.setResponse(this.resultObject);
 		return response;

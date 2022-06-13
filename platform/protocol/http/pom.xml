@@ -50,11 +50,6 @@
 			<artifactId>org.apache.felix.http.jetty</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId>
-			<scope>test</scope>
-		</dependency>
 <!-- 		<dependency> -->
 <!-- 			<groupId>org.eclipse.sensinact.gateway</groupId> -->
 <!-- 			<artifactId>sensinact-security-none</artifactId> -->

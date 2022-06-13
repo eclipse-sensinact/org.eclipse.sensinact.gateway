@@ -9,27 +9,29 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.sthbnd.ttn.listener;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.generic.ProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttProtocolStackEndpoint;
+import org.eclipse.sensinact.gateway.sthbnd.mqtt.device.MqttPacket;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.listener.MqttTopicMessage;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.model.TtnActivationPayload;
 import org.eclipse.sensinact.gateway.sthbnd.ttn.packet.TtnActivationPacket;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.JsonObject;
 
 public class TtnActivationListener extends MqttTopicMessage {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TtnActivationListener.class);
 
-    private final Mediator mediator;
-    private final MqttProtocolStackEndpoint endpoint;
+    private final ProtocolStackEndpoint<MqttPacket> endpoint;
+	private final ObjectMapper mapper;
 
-    public TtnActivationListener(Mediator mediator, MqttProtocolStackEndpoint endpoint) {
-        this.mediator = mediator;
+    public TtnActivationListener(ProtocolStackEndpoint<MqttPacket> endpoint, ObjectMapper mapper) {
         this.endpoint = endpoint;
+		this.mapper = mapper;
     }
 
     /* (non-Javadoc)
@@ -42,12 +44,11 @@ public class TtnActivationListener extends MqttTopicMessage {
             LOG.debug("Activation message: " + message);
         }
         String device = topic.split("/")[2];
-        JSONObject json = new JSONObject(message);
         TtnActivationPayload payload = null;
-
         try {
+        	JsonObject json = mapper.readValue(message, JsonObject.class);
             payload = new TtnActivationPayload(json);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         if (payload != null) {

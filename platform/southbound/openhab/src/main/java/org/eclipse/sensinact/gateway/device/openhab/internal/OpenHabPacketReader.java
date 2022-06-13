@@ -25,11 +25,16 @@ import org.eclipse.sensinact.gateway.device.openhab.sensinact.OpenHabMediator;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * OpenHab2 Packet
@@ -59,10 +64,11 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
         return path;
     }
 	
+	private final ObjectMapper mapper;
 	private List<Processable> processables;
     private Map<String,Set<String>> devices;
-	private JSONArray itemsArray = null;
-	private JSONObject item = null;
+	private JsonArray itemsArray = null;
+	private JsonObject item = null;
 	private int pos = 0;
 
 	private Mediator mediator;
@@ -70,6 +76,9 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     public OpenHabPacketReader(Mediator mediator) {
         super();
         this.mediator=mediator;
+        this.mapper = JsonMapper.builder()
+        		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+        		.build();
     }
     
     @Override
@@ -80,9 +89,8 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     	this.devices = new HashMap<>();
         byte[] content = packet.getBytes();
         if(content != null 	&& content.length > 0) {
-        	String sb = new String(content);
         	try {
-        		this.itemsArray = new JSONArray(sb);
+        		this.itemsArray = mapper.readValue(content, JsonArray.class);
         	} catch(Exception e) {
         		LOG.error(e.getMessage(),e);
         	}
@@ -95,7 +103,7 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     		this.processables.remove(0).process();
     		return;
     	}
-    	if(this.itemsArray == null || this.pos == this.itemsArray.length()) {
+    	if(this.itemsArray == null || this.pos == this.itemsArray.size()) {
     		if(this.devices != null && this.devices.size() > 0) {
     			this.devices.entrySet().stream().forEach(e -> {
     				String openHabId = e.getKey(); 
@@ -113,7 +121,7 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     		return;
     	}
         try {
-	        this.item = itemsArray.getJSONObject(pos);
+	        this.item = itemsArray.getJsonObject(pos);
 	        String openhaDeviceId = this.item.getString("name");
             String type = this.item.getString("type");
             String link = this.item.getString("link");
@@ -146,7 +154,7 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
             	parse();
             	return;
             }            	
-        } catch (JSONException e) {
+        } catch (Exception e) {
         	super.configureEOF();
             throw new InvalidPacketException(e);   
         }
@@ -154,15 +162,14 @@ public class OpenHabPacketReader extends SimplePacketReader<HttpPacket> {
     	super.configureEOF();
     }
     
-    private void parseItem(String openhaDeviceId, String type, String value) 
-    		throws JSONException {
+    private void parseItem(String openhaDeviceId, String type, String value) {
         HierarchyDTO hierarchy = getHierarchy(openhaDeviceId);
         this.processables.add(new Processable(Mode.UPDATE,hierarchy,type,value));
     }
 
-    private void parseThing(JSONObject jo) throws JSONException {
+    private void parseThing(JsonObject jo) {
         final String uuid = jo.getString("UID");
-        final JSONObject statusInfo = jo.getJSONObject("statusInfo");
+        final JsonObject statusInfo = jo.getJsonObject("statusInfo");
         final String label = jo.getString("label");
         final String status = statusInfo.getString("status");
         final String statusDetail = statusInfo.getString("statusDetail");

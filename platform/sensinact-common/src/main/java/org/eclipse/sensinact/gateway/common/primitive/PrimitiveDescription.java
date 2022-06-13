@@ -11,8 +11,12 @@ package org.eclipse.sensinact.gateway.common.primitive;
 
 import org.eclipse.sensinact.gateway.util.CastUtils;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 /**
  * Description of a {@link Primitive}
@@ -91,25 +95,35 @@ public abstract class PrimitiveDescription implements Description, Nameable {
      */
     @Override
     public String getJSON() {
-        JSONObject description = getJSONObject();
-        description.put(VALUE_KEY, toJson(this.getType(), this.getValue()));
-        return description.toString(INDENT_FACTOR);
+        JsonObjectBuilder description = getJsonObject();
+        description.add(VALUE_KEY, this.getJsonValue());
+        return description.build().toString();
     }
 
+    protected JsonValue getJsonValue() {
+    	
+    	JsonValue jv = CastUtils.cast(JsonValue.class, this.getValue());
+    	return jv == null ? JsonValue.NULL : jv;
+    }
+
+    protected JsonValue getJsonValue(PrimitiveDescription pd) {
+    	return pd.getJsonValue();
+    }
+    
     /**
-     * Returns the JSONObject from which are based
+     * Returns the JsonObject from which are based
      * the JSON formated string descriptions of this
      * PrimitiveDescription
      *
-     * @return the basis JSONObject describing this
+     * @return the basis JsonObject describing this
      * PrimitiveDescription
      */
-    protected final JSONObject getJSONObject() {
-        JSONObject description = new JSONObject();
-        description.put(NAME_KEY, name);
+    protected final JsonObjectBuilder getJsonObject() {
+        JsonObjectBuilder description = JsonProviderFactory.getProvider().createObjectBuilder();
+        description.add(NAME_KEY, name);
         String typeName = CastUtils.writeClass(this.getType());
 
-        description.put(TYPE_KEY, typeName);
+        description.add(TYPE_KEY, typeName);
         return description;
     }
 
@@ -179,9 +193,9 @@ public abstract class PrimitiveDescription implements Description, Nameable {
      */
     public static Object toJson(Class<?> type, Object value) {
         if (value == null) {
-            return JSONObject.NULL;
+            return JsonObject.NULL;
         }
-        if (String.class == type || type.isPrimitive() || JSONObject.class.isAssignableFrom(type) || JSONArray.class.isAssignableFrom(type)) {
+        if (String.class == type || type.isPrimitive() || JsonObject.class.isAssignableFrom(type) || JsonArray.class.isAssignableFrom(type)) {
             return value;
 
         } else if (type.isEnum()) {

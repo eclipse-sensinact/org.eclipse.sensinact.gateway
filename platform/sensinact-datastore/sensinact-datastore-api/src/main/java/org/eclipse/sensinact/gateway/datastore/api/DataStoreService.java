@@ -9,7 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.datastore.api;
 
-import org.json.JSONArray;
+import jakarta.json.JsonArray;
 
 /**
  * C(reate)R(ead)U(update)D(delete) Service signature
@@ -54,6 +54,6 @@ public interface DataStoreService {
      * @return the JSON object results set
      * @throws DataStoreException
      */
-    JSONArray select(String selectQuery) throws DataStoreException;
+    JsonArray select(String selectQuery) throws DataStoreException;
 
 }

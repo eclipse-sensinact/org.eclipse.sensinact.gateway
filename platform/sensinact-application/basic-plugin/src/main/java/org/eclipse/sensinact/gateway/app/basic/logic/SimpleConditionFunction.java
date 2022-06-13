@@ -10,7 +10,6 @@
 package org.eclipse.sensinact.gateway.app.basic.logic;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.app.api.exception.NotAReadableResourceException;
@@ -22,9 +21,10 @@ import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.constraint.InvalidConstraintDefinitionException;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.osgi.framework.BundleContext;
+
+import jakarta.json.JsonObject;
 
 /**
  * A component that tests if the simple condition is satisfied.
@@ -48,9 +48,9 @@ public class SimpleConditionFunction extends ConditionFunction {
      * @param context the context of the bundle
      * @return the JSON schema of the function
      */
-    public static JSONObject getJSONSchemaFunction(BundleContext context) {
+    public static JsonObject getJSONSchemaFunction(BundleContext context) {
         try {
-            return new JSONObject(new JSONTokener(new InputStreamReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream())));
+        	return JsonProviderFactory.getProvider().createReader(context.getBundle().getResource("/" + JSON_SCHEMA).openStream()).readObject();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -11,7 +11,7 @@ package org.eclipse.sensinact.gateway.core.method;
 
 import java.lang.reflect.Method;
 
-import org.json.JSONObject;
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link AbstractAccessMethodExecutor} implementation referring to a
@@ -34,9 +34,9 @@ public class ReflectionAccessMethodExecutor extends AbstractAccessMethodExecutor
 		if (!method.getDeclaringClass().isAssignableFrom(target.getClass())) {
 			throw new InvalidReflectiveExecutorException("Incompatible method and target types");
 		}
-		if (!JSONObject.class.isAssignableFrom((Class<?>) method.getGenericReturnType())
+		if (!JsonObject.class.isAssignableFrom((Class<?>) method.getGenericReturnType())
 				&& !Void.class.isAssignableFrom((Class<?>) method.getGenericReturnType())) {
-			throw new InvalidReflectiveExecutorException("Incompatible returned type : JSONObject or Void expected");
+			throw new InvalidReflectiveExecutorException("Incompatible returned type : JsonObject or Void expected");
 		}
 		this.method = method;
 		this.target = target;

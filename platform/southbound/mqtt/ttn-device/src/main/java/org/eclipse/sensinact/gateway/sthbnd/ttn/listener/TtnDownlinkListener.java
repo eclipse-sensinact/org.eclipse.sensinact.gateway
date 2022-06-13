@@ -11,7 +11,6 @@ package org.eclipse.sensinact.gateway.sthbnd.ttn.listener;
 
 import java.util.Base64;
 
-import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.sthbnd.mqtt.util.api.MqttBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +19,7 @@ public class TtnDownlinkListener {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TtnDownlinkListener.class);
 
-    private final Mediator mediator;
     private MqttBroker broker;
-
-    public TtnDownlinkListener(Mediator mediator) {
-        this.mediator = mediator;
-    }
 
     public void setBroker(MqttBroker broker) {
     	this.broker = broker;

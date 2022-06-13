@@ -35,7 +35,6 @@ import org.eclipse.sensinact.gateway.protocol.http.client.ConnectionConfiguratio
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleRequest;
 import org.eclipse.sensinact.gateway.protocol.http.client.SimpleResponse;
 import org.eclipse.sensinact.gateway.util.CryptoUtils;
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -75,8 +74,7 @@ public class TestUserManager {
                 builder.setContentType("application/json");
                 builder.setHttpMethod("POST");
                 if (content != null && content.length() > 0) {
-                    JSONObject jsonData = new JSONObject(content);
-                    builder.setContent(jsonData.toString());
+                    builder.setContent(content);
                 }
             } else {
                 return null;

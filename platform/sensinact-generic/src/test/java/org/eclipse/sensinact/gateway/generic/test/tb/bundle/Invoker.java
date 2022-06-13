@@ -13,7 +13,9 @@ import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskInject;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  *
@@ -29,8 +31,8 @@ public class Invoker {
     }
 
     @TaskCommand(method = Task.CommandType.ACT)
-    JSONObject act(Object... parameters) {
-        return new JSONObject().put("message", "THIS IS THE ACT");
+    JsonObject act(Object... parameters) {
+        return JsonProviderFactory.getProvider().createObjectBuilder().add("message", "THIS IS THE ACT").build();
     }
 
     @TaskCommand(method = Task.CommandType.SERVICES_ENUMERATION)

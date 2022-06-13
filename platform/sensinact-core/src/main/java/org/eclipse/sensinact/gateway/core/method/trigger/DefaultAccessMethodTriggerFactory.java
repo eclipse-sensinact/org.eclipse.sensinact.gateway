@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
+import org.eclipse.sensinact.gateway.common.constraint.Constraint;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintConstantPair;
 import org.eclipse.sensinact.gateway.common.constraint.ConstraintFactory;
 import org.eclipse.sensinact.gateway.common.primitive.InvalidValueException;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * Default core's {@link AccessMethodTriggerFactory} implementation
@@ -46,12 +48,12 @@ public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFac
 	 *
 	 * @see org.eclipse.sensinact.gateway.core.method.trigger.AccessMethodTriggerFactory#
 	 *      newInstance(org.eclipse.sensinact.gateway.common.bundle.Mediator,
-	 *      org.json.JSONObject)
+	 *      jakarta.json.JsonObject)
 	 */
 	@Override
-	public AccessMethodTrigger newInstance(Mediator mediator, JSONObject jsonTrigger)
+	public AccessMethodTrigger newInstance(Mediator mediator, JsonObject jsonTrigger)
 			throws InvalidValueException {
-		if (JSONObject.NULL.equals(jsonTrigger)) {
+		if (jsonTrigger == null) {
 			throw new InvalidValueException("Null JSON trigger definition");
 		}
 		AccessMethodTrigger trigger = null;
@@ -60,24 +62,24 @@ public class DefaultAccessMethodTriggerFactory implements AccessMethodTriggerFac
 
 			AccessMethodTrigger.Type type = AccessMethodTrigger.Type.valueOf(jsonType);
 			String builder = jsonTrigger.getString(AccessMethodTrigger.TRIGGER_BUILDER_KEY);
-			boolean passOn = jsonTrigger.optBoolean(AccessMethodTrigger.TRIGGER_PASSON_KEY);
-			Object argument = jsonTrigger.opt(AccessMethodTrigger.TRIGGER_ARGUMENT_KEY);
+			boolean passOn = jsonTrigger.getBoolean(AccessMethodTrigger.TRIGGER_PASSON_KEY, false);
+			Object argument = Constraint.toConstantValue(jsonTrigger.get(AccessMethodTrigger.TRIGGER_ARGUMENT_KEY));
 
 			switch (type) {
 			case CONDITIONAL:
 				List<ConstraintConstantPair> constraints = new ArrayList<ConstraintConstantPair>();
-				JSONArray constants = jsonTrigger.optJSONArray(Constant.TRIGGER_CONSTANTS_KEY);
+				JsonArray constants = jsonTrigger.getJsonArray(Constant.TRIGGER_CONSTANTS_KEY);
 				
 				int constantsIndex = 0;
-				int length = constants == null ? 0 : constants.length();
+				int length = constants == null ? 0 : constants.size();
 
 				for (; constantsIndex < length; constantsIndex++) {
-					JSONObject constantObject = constants.getJSONObject(constantsIndex);
+					JsonObject constantObject = constants.getJsonObject(constantsIndex);
 
 					constraints.add(new ConstraintConstantPair(
 							ConstraintFactory.Loader.load(mediator.getClassLoader(),
-									constantObject.opt(Constant.TRIGGER_CONSTRAINT_KEY)),
-							constantObject.opt(Constant.TRIGGER_CONSTANT_KEY)));
+									constantObject.get(Constant.TRIGGER_CONSTRAINT_KEY)),
+							constantObject.get(Constant.TRIGGER_CONSTANT_KEY)));
 				}
 				trigger = new ConditionalConstant(argument, builder, passOn, constraints);
 				break;

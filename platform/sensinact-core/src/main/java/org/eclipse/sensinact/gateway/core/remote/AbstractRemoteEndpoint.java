@@ -16,10 +16,11 @@ import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.Sessions.SessionObserver;
 import org.eclipse.sensinact.gateway.core.message.Recipient;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * Abstract implementation of a {@link RemoteEndpoint} service.
@@ -95,8 +96,8 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	 * 
 	 * @return the JSON formated subscription response
 	 */
-	protected abstract JSONObject doSubscribe(String publicKey, String serviceProviderId, String serviceId,
-			String resourceId, JSONArray conditions);
+	protected abstract JsonObject doSubscribe(String publicKey, String serviceProviderId, String serviceId,
+			String resourceId, JsonArray conditions);
 
 	/**
 	 * Asks for the close of the remote {@link Session} whose String public key is
@@ -237,14 +238,14 @@ public abstract class AbstractRemoteEndpoint implements RemoteEndpoint, SessionO
 	}
 
 	@Override
-	public JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
-			Recipient recipient, JSONArray conditions) {
+	public JsonObject subscribe(String publicKey, String serviceProviderId, String serviceId, String resourceId,
+			Recipient recipient, JsonArray conditions) {
 		if (!this.getConnected()) {
 			return null;
 		}
-		JSONObject response = this.doSubscribe(publicKey, serviceProviderId, serviceId, resourceId, conditions);
+		JsonObject response = this.doSubscribe(publicKey, serviceProviderId, serviceId, resourceId, conditions);
 		try {
-			this.recipients.put(response.getJSONObject("response").getString("subscriptionId"), recipient);
+			this.recipients.put(response.getJsonObject("response").getString("subscriptionId"), recipient);
 
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);

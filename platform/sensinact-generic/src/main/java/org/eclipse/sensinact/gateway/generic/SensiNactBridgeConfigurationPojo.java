@@ -13,8 +13,10 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,9 +26,11 @@ import org.eclipse.sensinact.gateway.generic.annotation.SensiNactBridgeConfigura
 import org.eclipse.sensinact.gateway.generic.annotation.ServiceProviderDefinition;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
-import org.eclipse.sensinact.gateway.util.json.JSONValidator;
-import org.eclipse.sensinact.gateway.util.json.JSONValidator.JSONToken;
-import org.json.JSONException;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonException;
+import jakarta.json.stream.JsonParser;
+import jakarta.json.stream.JsonParser.Event;
 
 /**
  * Plain old java object describing the configuration of a sensiNact bridge 
@@ -123,7 +127,7 @@ public class SensiNactBridgeConfigurationPojo {
 			List<String> observedPath = new ArrayList<>();
 			this.initialProviders = new HashMap<>();
 			
-			JSONValidator validator = new JSONValidator(new StringReader(json));
+			JsonParser validator = JsonProviderFactory.getProvider().createParser(new StringReader(json));
 			
 			String packetClass = null;
 			String endpointClass = null;
@@ -133,57 +137,72 @@ public class SensiNactBridgeConfigurationPojo {
 			
 			String provider = null;
 			String profile = null;
-					
+			
+			Deque<Object> context = new LinkedList<>();
+			
 			try {
-	            while (true) {
-	                JSONToken t = validator.nextToken();
-	                if (t == null) {
-	                    break;
-	                }
+	            while (validator.hasNext()) {
+	                Event t = validator.next();
+	                
 	               switch(t) {
-	               case JSON_OBJECT_ITEM:
-	                	if(t.getContext().key == null) {
+	               case KEY_NAME:
+	            	   context.push(validator.getString());
+	            	   break;
+	            	   
+	               case VALUE_FALSE:
+	               case VALUE_TRUE:
+	               case VALUE_NUMBER:
+	               case VALUE_STRING:
+	            	   Object o = context.peek();
+	            	   String value = validator.getString();
+	                	if(o == null) {
 	                		continue;
-	                	}	                	
-	                	switch(t.getContext().key) {
+	                	}	
+	                	if(o.equals(0)) {
+	                		if(parsingObserved)
+								observedPath.add(value);
+							break;
+	                	}
+	                	
+	                	switch(o.toString()) {
 		                	case "providerId":
 		                		if(parsingProviders) {
 		                			if(profile!=null) {
-		                				this.initialProviders.put(String.valueOf(t.getContext().value),profile);
+		                				this.initialProviders.put(value,profile);
 		                				profile = null;
 		                			} else {
-		                				provider = String.valueOf(t.getContext().value);
+		                				provider = value;
 		                			}
 		                		}
 		                		break;
 		                	case "profileId":
 		                		if(parsingProviders) {
 		                			if(provider!=null) {
-		                				this.initialProviders.put(provider,String.valueOf(t.getContext().value));
+		                				this.initialProviders.put(provider,value);
 		                				provider = null;
 		                			} else {
-		                				profile = String.valueOf(t.getContext().value);
+		                				profile = value;
 		                			}
 		                		}
 		                		break;
 		                	case "resourceDefinition":
 		                		if(!parsingProviders) {
-		                			this.setResourceDefinition(String.valueOf(t.getContext().value));
+		                			this.setResourceDefinition(value);
 		                		}
 		                		break;
 		                	case "packetType":
 		                		if(!parsingProviders) {
-		                			packetClass = String.valueOf(t.getContext().value);
+		                			packetClass = value;
 		                		}
 		                		break;
 		                	case "endpointType":
 		                		if(!parsingProviders) {
-		                			endpointClass = String.valueOf(t.getContext().value);
+		                			endpointClass = value;
 		                		}
 		                		break;
 		                	case "resourceBuildPolicy":
 		                		if(!parsingProviders) {
-		                			Object policy = t.getContext().value;
+		                			Object policy = value;
 		                			if(policy instanceof String)
 		                				this.setResourceBuildPolicy(new BuildPolicy[] {BuildPolicy.valueOf((String)policy)});
 		                			else if(policy instanceof Byte) {
@@ -193,7 +212,7 @@ public class SensiNactBridgeConfigurationPojo {
 		                		break;
 		                	case "serviceBuildPolicy":
 		                		if(!parsingProviders) {
-		                			Object policy = t.getContext().value;
+		                			Object policy = value;
 		                			if(policy instanceof String)
 		                				this.setServiceBuildPolicy(new BuildPolicy[] {BuildPolicy.valueOf((String)policy)});
 		                			else if(policy instanceof Byte) {
@@ -203,44 +222,45 @@ public class SensiNactBridgeConfigurationPojo {
 		                		break;
 		                	case "startAtInitializationTime":
 		                		if(!parsingProviders)
-		                			this.isStartAtInitializationTime(Boolean.valueOf(String.valueOf(t.getContext().value)));
+		                			this.isStartAtInitializationTime(Boolean.valueOf(value));
 		                		break;
 		                	case "outputOnly":
 		                		if(!parsingProviders)
-		                			this.isOutputOnly(Boolean.valueOf(String.valueOf(t.getContext().value)));
+		                			this.isOutputOnly(Boolean.valueOf(value));
 		                		break;
 	                	}
-					case JSON_ARRAY_ITEM:
-						if(parsingObserved)
-							observedPath.add(String.valueOf(t.getContext().value));
-						break;
-					case JSON_ARRAY_CLOSING:
+	                	break;
+					case END_ARRAY:
 						if(parsingObserved) {
 							parsingObserved=false;
 							this.setObserved(observedPath.toArray(new String[0]));
 						}
+						context.pop();
+						if(!context.isEmpty()) context.pop();
 						break;
-					case JSON_ARRAY_OPENING:
+					case START_ARRAY:
 						if(parsingProviders || parsingObserved)
-							throw new JSONException("Unexpected array opening bracket");
-						if("observed".equals(t.getContext().key))
+							throw new JsonException("Unexpected array opening bracket");
+						if("observed".equals(context.peek()))
 							parsingObserved = true;
+						context.push(0);
 						break;
-					case JSON_OBJECT_OPENING:
+					case START_OBJECT:
 						if(parsingProviders || parsingObserved)
-							throw new JSONException("Unexpected object opening brace");
-						if("initialProviders".equals(t.getContext().key))
+							throw new JsonException("Unexpected object opening brace");
+						if("initialProviders".equals(context.peek()))
 							parsingProviders=true;
 						break;
-					case JSON_OBJECT_CLOSING:
+					case END_OBJECT:
 						if(parsingProviders)
-							parsingProviders = false;						
+							parsingProviders = false;
+						if(!context.isEmpty()) context.pop();
 						break;
 					default:
 						break;
 	                }
 	            }
-	        } catch (JSONException e) {
+	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }		
 			ClassLoader loader = Thread.currentThread().getContextClassLoader();

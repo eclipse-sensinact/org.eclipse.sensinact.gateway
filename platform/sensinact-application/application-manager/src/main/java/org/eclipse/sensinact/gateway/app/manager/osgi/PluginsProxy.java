@@ -13,8 +13,9 @@ import org.eclipse.sensinact.gateway.app.api.exception.FunctionNotFoundException
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.api.plugin.PluginInstaller;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
-import org.json.JSONObject;
 import org.osgi.framework.ServiceReference;
+
+import jakarta.json.JsonObject;
 
 public class PluginsProxy {
     public static final String APP_INSTALL_HOOK_FILTER = "(objectClass=" + PluginInstaller.class.getCanonicalName() + ")";
@@ -27,8 +28,8 @@ public class PluginsProxy {
      * @return the corresponding {@link AppParameter}
      * @throws FunctionNotFoundException when no plugins can return the corresponding function
      */
-    public static JSONObject getComponentJSONSchema(AppServiceMediator mediator, String function) throws FunctionNotFoundException {
-        JSONObject schema = null;
+    public static JsonObject getComponentJSONSchema(AppServiceMediator mediator, String function) throws FunctionNotFoundException {
+        JsonObject schema = null;
         ServiceReference<?>[] serviceReferences = mediator.getServiceReferences(APP_INSTALL_HOOK_FILTER);
         for (ServiceReference<?> serviceReference : serviceReferences) {
             schema = ((PluginInstaller) mediator.getService(serviceReference)).getComponentJSONSchema(function);

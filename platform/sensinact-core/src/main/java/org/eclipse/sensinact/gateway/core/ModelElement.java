@@ -37,7 +37,7 @@ import org.eclipse.sensinact.gateway.core.security.AccessTree;
 import org.eclipse.sensinact.gateway.core.security.ImmutableAccessTree;
 import org.eclipse.sensinact.gateway.core.security.MethodAccessibility;
 import org.eclipse.sensinact.gateway.core.security.MutableAccessTree;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -389,9 +389,10 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 			SnaLifecycleMessage notification = SnaNotificationMessageImpl.Builder
 					.<SnaLifecycleMessage>notification(this.modelInstance.mediator(), event, path);
 
-			JSONObject notificationObject = new JSONObject();
-			notificationObject.put(SnaConstants.ADDED_OR_REMOVED, event.name());
-			notification.setNotification(notificationObject);
+			notification.setNotification(JsonProviderFactory.getProvider()
+					.createObjectBuilder()
+					.add(SnaConstants.ADDED_OR_REMOVED, event.name())
+					.build());
 
 			this.modelInstance.postMessage(notification);
 			forEach(new Executable<E, Void>() {
@@ -439,9 +440,10 @@ public abstract class ModelElement<I extends ModelInstance<?>, M extends ModelEl
 		SnaLifecycleMessage notification = SnaNotificationMessageImpl.Builder
 				.<SnaLifecycleMessage>notification(this.modelInstance.mediator(), event, path);
 
-		JSONObject notificationObject = new JSONObject();
-		notificationObject.put(SnaConstants.ADDED_OR_REMOVED, event.name());
-		notification.setNotification(notificationObject);
+		notification.setNotification(JsonProviderFactory.getProvider()
+				.createObjectBuilder()
+				.add(SnaConstants.ADDED_OR_REMOVED, event.name())
+				.build());
 
 		this.modelInstance.postMessage(notification);
 	}

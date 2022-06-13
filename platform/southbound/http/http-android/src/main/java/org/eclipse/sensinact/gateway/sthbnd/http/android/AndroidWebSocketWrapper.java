@@ -9,6 +9,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.sthbnd.http.android;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -18,16 +22,22 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class AndroidWebSocketWrapper {
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
     private Logger LOG = LoggerFactory.getLogger(AndroidWebSocketWrapper.class.getName());
     private final LocalProtocolStackEndpoint<DevGenPacket> endpoint;
     private List<String> providers = new ArrayList<String>();
@@ -72,19 +82,18 @@ public class AndroidWebSocketWrapper {
     public void onMessage(String message) {
     	try {
 	        LOG.debug("Message received from the client {}, starting packet transformation", message);
-	        JSONObject jsonPayload = new JSONObject(message);
+	        JsonObject jsonPayload = mapper.readValue(message, JsonObject.class);
 	        String provider = jsonPayload.getString("provider");
 	        String service = jsonPayload.getString("service");
 	        String resource = jsonPayload.getString("resource");
 	        String value = null;
-	        String type = null;
 	        DevGenPacket packet = new DevGenPacket(provider, service, resource);
 	
-	        if (jsonPayload.has("value")) {
+	        if (jsonPayload.containsKey("value")) {
 	            value = jsonPayload.get("value").toString();
 	        }
 	
-	        if (jsonPayload.has("type") && jsonPayload.get("type")!=null && jsonPayload.get("type").equals("remove")) {
+	        if (jsonPayload.containsKey("type") && "remove".equals(jsonPayload.getString("type"))) {
 	            packet.isGoodbye(true);
 	        }
 	

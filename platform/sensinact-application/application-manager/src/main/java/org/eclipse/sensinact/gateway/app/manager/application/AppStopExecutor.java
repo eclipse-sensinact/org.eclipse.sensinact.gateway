@@ -18,7 +18,7 @@ import org.eclipse.sensinact.gateway.core.ResourceImpl;
 import org.eclipse.sensinact.gateway.core.message.SnaErrorMessage;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodExecutor;
 import org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
 /**
  * @author Remi Druilhe
@@ -40,12 +40,16 @@ class AppStopExecutor implements AccessMethodExecutor {
             Application application = service.getApplication();
             SnaErrorMessage message = application.stop();
             if (message.getType() == SnaErrorMessage.Error.NO_ERROR) {
-                jsonObjects.push(new JSONObject().put("message", "Application " + service.getName() + " stopped"));
+                jsonObjects.push(JsonProviderFactory.getProvider().createObjectBuilder()
+                		.add("message", "Application " + service.getName() + " stopped")
+                		.build());
             } else {
                 jsonObjects.registerException(new ResourceNotFoundException("Unable to stop the application: " + message.getJSON()));
             }
         } else {
-            jsonObjects.push(new JSONObject().put("message", "Unable to stop the application " + service.getName()));
+            jsonObjects.push(JsonProviderFactory.getProvider().createObjectBuilder()
+            		.add("message", "Unable to stop the application " + service.getName())
+            		.build());
         }
         return null;
     }

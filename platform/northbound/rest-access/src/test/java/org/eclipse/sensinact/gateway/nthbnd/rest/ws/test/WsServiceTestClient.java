@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.nthbnd.rest.ws.test;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.util.Stack;
 import java.util.concurrent.Future;
@@ -22,8 +23,10 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.spi.JsonProvider;
 
 @WebSocket(maxTextMessageSize = 64 * 1024)
 public class WsServiceTestClient implements Runnable {
@@ -32,6 +35,8 @@ public class WsServiceTestClient implements Runnable {
     Session session;
     AtomicBoolean available;
     private String lastMessage;
+    
+    private JsonProvider provider = JsonProviderFactory.getProvider();
 
     public WsServiceTestClient() {
         this.available = new AtomicBoolean(false);
@@ -145,13 +150,13 @@ public class WsServiceTestClient implements Runnable {
                 locked = !this.stack.isEmpty();
             }
             if (request != null) {
-                JSONObject json = new JSONObject();
-                json.put("uri", request.url);
+                JsonObjectBuilder json = provider.createObjectBuilder();
+                json.add("uri", request.url);
                 if (request.content != null) {
-                    json.put("parameters", new JSONArray(request.content));
+                    json.add("parameters", provider.createReader(new StringReader(request.content)).readArray());
                 }
                 try {
-                	this.send(json.toString());
+                	this.send(json.build().toString());
                 } catch(NullPointerException e){
                 	//e.printStackTrace(); 
                 	synchronized (this.stack) {

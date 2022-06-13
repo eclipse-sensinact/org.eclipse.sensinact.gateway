@@ -10,7 +10,8 @@
 package org.eclipse.sensinact.gateway.core.method;
 
 import org.eclipse.sensinact.gateway.core.message.SnaErrorfulMessage;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link AccessMethodResponse} returned by an {@link DescribeMethod}
@@ -18,7 +19,7 @@ import org.json.JSONObject;
  * 
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
-public class DescribeJSONResponse extends DescribeResponse<JSONObject> {
+public class DescribeJSONResponse extends DescribeResponse<JsonObject> {
 	/**
 	 * Constructor
 	 * 

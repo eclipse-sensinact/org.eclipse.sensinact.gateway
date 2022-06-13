@@ -15,15 +15,25 @@ import org.eclipse.sensinact.gateway.generic.packet.InvalidPacketException;
 import org.eclipse.sensinact.gateway.generic.packet.SimplePacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpPacket;
 import org.eclipse.sensinact.gateway.sthbnd.liveobjects.LiveObjectsConstant;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  * @author Rémi Druilhe
  */
 public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
 	
 	class LiveObjectsSubPacket {
 		String serviceProvider;
@@ -56,17 +66,16 @@ public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
     	}
     	if(this.subPackets.isEmpty()) {
             try {
-		        String content = new String(packet.getBytes());
-		        Object json = new JSONTokener(content).nextValue();
-		        if (json instanceof JSONObject) {
-		            JSONObject jsonObject = (JSONObject) json;
-		            if (jsonObject.has("data")) {
-		                JSONArray devices = jsonObject.optJSONArray("data");
-		                int length = devices == null ? 0 : devices.length();
+            	JsonValue jv = mapper.readValue(packet.getBytes(), JsonValue.class);
+		        if (jv.getValueType() == ValueType.OBJECT) {
+		            JsonObject jsonObject = jv.asJsonObject();
+		            if (jsonObject.containsKey("data")) {
+		                JsonArray devices = jsonObject.getJsonArray("data");
+		                int length = devices == null ? 0 : devices.size();
 		
 		                for (int i = 0; i < length; i++) {
-	                        JSONObject jo = devices.optJSONObject(i);
-	                        if (JSONObject.NULL.equals(jo)) {
+	                        JsonObject jo = devices.getJsonObject(i);
+	                        if (jo == null) {
 	                            continue;
 	                        }
 	                        String serviceProviderId = jo.getString("namespace") + ":" + jo.getString("id").replace(" ", "");
@@ -78,19 +87,20 @@ public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
 	                        this.subPackets.add(sub);	
 		                }
 		            }
-		        } else if (json instanceof JSONArray) {
-		            JSONArray jsonArray = (JSONArray) json;
-		            JSONObject jsonObject = jsonArray.getJSONObject(0);
-		            if (jsonArray.getJSONObject(0).has("streamId")) {	                
+		        } else if (jv.getValueType() == ValueType.ARRAY) {
+		            JsonArray jsonArray = (JsonArray) jv.asJsonArray();
+		            JsonObject jsonObject = jsonArray.getJsonObject(0);
+		            if (jsonArray.getJsonObject(0).containsKey("streamId")) {	                
 		            	String serviceProvider = jsonObject.getString("streamId").replace(LiveObjectsConstant.URN, "");
 		            	LiveObjectsSubPacket sub = new LiveObjectsSubPacket();
 	                    sub.serviceProvider = serviceProvider;
 	                    sub.service = "test";
 	                    sub.resource = "temp";
-	                    sub.data = jsonObject.getJSONObject("value").getDouble("temp");
+	                    sub.data = jsonObject.getJsonObject("value").getJsonNumber("temp").doubleValue();
 	                    this.subPackets.add(sub);
 		                
-		                String location = jsonObject.getJSONObject("location").getInt("lat") + ":" + jsonObject.getJSONObject("location").getInt("lon");
+		                String location = jsonObject.getJsonObject("location").getJsonNumber("lat").doubleValue() + 
+		                		":" + jsonObject.getJsonObject("location").getJsonNumber("lon").doubleValue();
 		                sub = new LiveObjectsSubPacket();
 	                    sub.serviceProvider = serviceProvider;
 	                    sub.service = "admin";
@@ -98,8 +108,10 @@ public class LiveObjectsPacketReader extends SimplePacketReader<HttpPacket> {
 	                    sub.data = location;
 	                    this.subPackets.add(sub);
 		            }
+		        } else {
+		        	throw new IllegalArgumentException("Expected a JSON object or array, but got " + new String(packet.getBytes()));
 		        }
-            } catch (JSONException e) {
+            } catch (Exception e) {
             	super.configureEOF();
                 throw new InvalidPacketException(e);
             }

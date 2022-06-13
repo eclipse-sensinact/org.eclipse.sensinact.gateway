@@ -10,7 +10,9 @@
 package org.eclipse.sensinact.gateway.app.manager.json;
 
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  * This class wraps the information for the initialization of the application
@@ -41,14 +43,14 @@ public class AppInitialize implements JSONable {
      *
      * @param initialize the initialize as JSON
      */
-    public AppInitialize(JSONObject initialize) {
+    public AppInitialize(JsonObject initialize) {
         AppOptions.Builder appOptionBuilder = new AppOptions.Builder();
-        if (initialize.has(AppJsonConstant.INIT_OPTIONS)) {
-            JSONObject optionsJson = initialize.getJSONObject(AppJsonConstant.INIT_OPTIONS);
-            if (optionsJson.has(AppJsonConstant.INIT_OPTIONS_AUTORESTART)) {
+        if (initialize.containsKey(AppJsonConstant.INIT_OPTIONS)) {
+            JsonObject optionsJson = initialize.getJsonObject(AppJsonConstant.INIT_OPTIONS);
+            if (optionsJson.containsKey(AppJsonConstant.INIT_OPTIONS_AUTORESTART)) {
                 appOptionBuilder.autorestart(optionsJson.getBoolean(AppJsonConstant.INIT_OPTIONS_AUTORESTART));
             }
-            if (optionsJson.has(AppJsonConstant.INIT_OPTIONS_RESETONSTOP)) {
+            if (optionsJson.containsKey(AppJsonConstant.INIT_OPTIONS_RESETONSTOP)) {
                 appOptionBuilder.resetOnStop(optionsJson.getBoolean(AppJsonConstant.INIT_OPTIONS_RESETONSTOP));
             }
         }
@@ -68,8 +70,8 @@ public class AppInitialize implements JSONable {
      * @see JSONable#getJSON()
      */
     public String getJSON() {
-        JSONObject initialize = new JSONObject();
-        initialize.put(AppJsonConstant.INIT_OPTIONS, options.getJSON());
-        return initialize.toString();
+        return JsonProviderFactory.getProvider().createObjectBuilder()
+        	.add(AppJsonConstant.INIT_OPTIONS, options.getJSON())
+        	.build().toString();
     }
 }

@@ -11,7 +11,8 @@ package org.eclipse.sensinact.gateway.app.api.plugin;
 
 import org.eclipse.sensinact.gateway.app.api.function.AbstractFunction;
 import org.eclipse.sensinact.gateway.app.manager.json.AppFunction;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * This interface has to be implemented by plugins in order to
@@ -27,7 +28,7 @@ public interface PluginInstaller {
      * @return the JSON schema of the function
      */
     //TODO: this function should disappear and be replaced by a check directly based on the name of the JSON file
-    JSONObject getComponentJSONSchema(String function);
+    JsonObject getComponentJSONSchema(String function);
 
     /**
      * Creation of the operation node from the JSON file.

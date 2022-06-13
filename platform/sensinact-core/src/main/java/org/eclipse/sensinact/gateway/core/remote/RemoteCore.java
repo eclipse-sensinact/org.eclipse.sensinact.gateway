@@ -17,8 +17,9 @@ import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.message.SnaAgent;
 import org.eclipse.sensinact.gateway.core.message.SnaFilter;
 import org.eclipse.sensinact.gateway.core.message.SnaMessage;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 /**
  * A RemoteCore represents a remote instance of sensiNact to which the local one
@@ -124,8 +125,8 @@ public interface RemoteCore extends Endpoint {
 	 * @return the JSON formated response of the subscription access method
 	 *         invocation
 	 */
-	JSONObject subscribe(String publicKey, String serviceProviderId, String serviceId, 
-		String resourceId, JSONArray conditions);
+	JsonObject subscribe(String publicKey, String serviceProviderId, String serviceId, 
+		String resourceId, JsonArray conditions);
 
 	/**
 	 * Registers an {@link SnaAgent} in the local instance of sensiNact. The

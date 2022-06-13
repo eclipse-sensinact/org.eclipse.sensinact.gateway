@@ -25,8 +25,7 @@ import org.eclipse.sensinact.gateway.app.manager.checker.JsonValidator;
 import org.eclipse.sensinact.gateway.app.manager.json.AppComponent;
 import org.eclipse.sensinact.gateway.app.manager.json.AppJsonConstant;
 import org.eclipse.sensinact.gateway.app.manager.osgi.AppServiceMediator;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -37,6 +36,9 @@ import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
 
 public class TestAppChecker {
@@ -78,12 +80,12 @@ public class TestAppChecker {
             e.printStackTrace();
         }
         assertNotNull(content);
-        String applicationName = new JSONObject(content).getJSONArray("parameters").getJSONObject(0).getString(AppJsonConstant.VALUE);
-        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
+        String applicationName = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(0).getString(AppJsonConstant.VALUE);
+        JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE);
         List<AppComponent> components = new ArrayList<AppComponent>();
-        JSONArray componentArray = json.getJSONArray("application");
-        for (int i = 0; i < componentArray.length(); i++) {
-            components.add(new AppComponent(mediator, componentArray.getJSONObject(i)));
+        JsonArray componentArray = json.getJsonArray("application");
+        for (int i = 0; i < componentArray.size(); i++) {
+            components.add(new AppComponent(mediator, componentArray.getJsonObject(i)));
         }
         Assertions.assertThatThrownBy(()->{
         	
@@ -100,12 +102,12 @@ public class TestAppChecker {
             e.printStackTrace();
         }
         assertNotNull(content);
-        String applicationName = new JSONObject(content).getJSONArray("parameters").getJSONObject(0).getString(AppJsonConstant.VALUE);
-        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
+        String applicationName = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(0).getString(AppJsonConstant.VALUE);
+        JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE);
         List<AppComponent> components = new ArrayList<AppComponent>();
-        JSONArray componentArray = json.getJSONArray("application");
-        for (int i = 0; i < componentArray.length(); i++) {
-            components.add(new AppComponent(mediator, componentArray.getJSONObject(i)));
+        JsonArray componentArray = json.getJsonArray("application");
+        for (int i = 0; i < componentArray.size(); i++) {
+            components.add(new AppComponent(mediator, componentArray.getJsonObject(i)));
         }
         Assertions.assertThatThrownBy(()->{
         ArchitectureChecker.checkApplication(applicationName, components);
@@ -123,7 +125,7 @@ public class TestAppChecker {
             e.printStackTrace();
         }
         assertNotNull(content);
-        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
+        JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE);
         Assertions.assertThatThrownBy(()->{
 
         JsonValidator.validateApplication(mediator, json);
@@ -141,8 +143,8 @@ public class TestAppChecker {
             e.printStackTrace();
         }
         assertNotNull(content);
-        JSONObject json = new JSONObject(content).getJSONArray("parameters").getJSONObject(1).getJSONObject(AppJsonConstant.VALUE);
-        JsonValidator.validateFunctionsParameters(mediator, json.getJSONArray(AppJsonConstant.APPLICATION));
+        JsonObject json = JsonProviderFactory.readObject(content).getJsonArray("parameters").getJsonObject(1).getJsonObject(AppJsonConstant.VALUE);
+        JsonValidator.validateFunctionsParameters(mediator, json.getJsonArray(AppJsonConstant.APPLICATION));
     }
     /*public void testBoundChecker() {
         assertTrue(true);

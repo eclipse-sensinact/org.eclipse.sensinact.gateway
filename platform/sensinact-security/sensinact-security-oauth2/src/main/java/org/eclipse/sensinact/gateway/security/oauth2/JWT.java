@@ -11,6 +11,7 @@ package org.eclipse.sensinact.gateway.security.oauth2;
 
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -20,22 +21,25 @@ import java.security.Signature;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 
-public class JWT extends JSONObject {
-	private JSONObject header;
-	private String alg;
-	private boolean validity;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
+import jakarta.json.spi.JsonProvider;
 
-	public JWT(String data, String key) throws JSONException, IOException {
+public class JWT {
+	private final JsonObject header;
+	private final String alg;
+	private final boolean validity;
+	protected final JsonObject body;
+
+	public JWT(String data, String key) throws JsonException, IOException {
 		
 		int part1 = data.indexOf(".");
 		int part2 = data.lastIndexOf(".");
@@ -48,7 +52,8 @@ public class JWT extends JSONObject {
 		header = header.replace("_", "/");	
 		header = new String(Base64.getDecoder().decode(header));
 		
-		this.header = new JSONObject(header);
+		JsonProvider provider = JsonProviderFactory.getProvider();
+		this.header = provider.createReader(new StringReader(header)).readObject();
 		alg = this.header.getString("alg");
 		String payload = data.substring(part1 + 1, part2); 
 		while(((4 - payload.length() % 4) % 4)!=0) {
@@ -130,40 +135,48 @@ public class JWT extends JSONObject {
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}
-		JSONObject original = new JSONObject(payload);
-		Iterator<?> it = original.keys();
-		while (it.hasNext()) {
-			String elem = String.valueOf(it.next());
-			this.put(elem, original.get(elem));
-		}
-		if (this.optString("name") == null) {
+		
+		JsonObject original = provider.createReader(new StringReader(payload)).readObject();
+		
+		if (original.getString("name", null) == null) {
 			String value;
-			value = this.optString("preferred_name");
-			if (value != null)
-				this.put("name", value);
-			else {
-				value = this.optString("sub");
-				if (value != null)
-					this.put("name", value);
+			value = original.getString("preferred_name", null);
+			if (value == null) {
+				value = original.getString("sub", null);
+			}
+			if (value != null) {
+				original = provider.createObjectBuilder(original)
+						.add("name", value)
+						.build();
 			}
 		}
 		validity = result;
+		body = original;
 	}
 
 	public JWT() {
+		this.header = null;
+		this.alg = null;
+		this.validity = false;
+		
+		JsonProvider provider = JsonProviderFactory.getProvider();
 		try {
-			this.put("sub", new String("anonymous"));
-			this.put("name", new String("anonymous"));
-			JSONArray roles = new JSONArray();
-			roles.put(new String("anonymous"));
-			this.put("roles", roles);
-		} catch (JSONException e) {
-			e.printStackTrace();
+			this.body = provider.createObjectBuilder()
+					.add("sub", "anonymous")
+					.add("name", "anonymous")
+					.add("roles", provider.createArrayBuilder()
+							.add("anonymous"))
+					.build();
+		} catch (JsonException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
-	public JWT(JSONObject object) {
-		super(object);
+	public JWT(JsonObject object) {
+		this.header = null;
+		this.alg = null;
+		this.validity = false;
+		this.body = object;
 	}
 
 	public boolean isValid() {
@@ -187,11 +200,11 @@ public class JWT extends JSONObject {
 	}
 
 	public List<String> roles() {
-		JSONArray jroles = optJSONArray("roles");
+		JsonArray jroles = body.getJsonArray("roles");
 		List<String> roles = new ArrayList<String>();
 		if (jroles != null) {
-			for (int i = 0; i < jroles.length(); i++) {
-				roles.add(jroles.optString(i));
+			for (int i = 0; i < jroles.size(); i++) {
+				roles.add(jroles.getString(i));
 			}
 		} else
 			roles.add("anonymous");

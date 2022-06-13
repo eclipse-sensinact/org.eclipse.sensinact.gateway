@@ -73,14 +73,14 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.sensinact.gateway</groupId>
-			<artifactId>sensinact-generic</artifactId>
-			<version>${project.version}</version>
+			<groupId>org.eclipse.parsson</groupId>
+			<artifactId>parsson</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId>
+			<groupId>org.eclipse.sensinact.gateway</groupId>
+			<artifactId>sensinact-generic</artifactId>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

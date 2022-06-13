@@ -16,7 +16,10 @@ import org.eclipse.sensinact.gateway.common.primitive.Description;
 import org.eclipse.sensinact.gateway.common.primitive.JSONable;
 import org.eclipse.sensinact.gateway.common.primitive.Nameable;
 import org.eclipse.sensinact.gateway.util.JSONUtils;
-import org.json.JSONArray;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
 
 /**
  * An {@link AccessMethod} {@link Description}
@@ -90,14 +93,14 @@ public class AccessMethodDescription implements Description, Iterable<Signature>
 	 * 
 	 * @return the JSON array representation of the described {@link AccessMethod}
 	 */
-	public JSONArray getJSONObjectDescription() {
-		JSONArray jsonArray = new JSONArray();
+	public JsonArray getJSONObjectDescription() {
+		JsonArrayBuilder jsonArray = JsonProviderFactory.getProvider().createArrayBuilder();
 
 		Iterator<Signature> iterator = this.signatures.iterator();
 		while (iterator.hasNext()) {
-			jsonArray.put(iterator.next().getJSONObjectDescription());
+			jsonArray.add(iterator.next().getJSONObjectDescription());
 		}
-		return jsonArray;
+		return jsonArray.build();
 	}
 
 	/**

@@ -17,8 +17,11 @@ import javax.swing.SpringLayout.Constraints;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.util.CastUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
 
 /**
  * {@link Constraint} factory service
@@ -78,11 +81,11 @@ public interface ConstraintFactory {
             if (Constraint.class.isAssignableFrom(constraint.getClass())) {
                 return (Constraint) constraint;
             }
-            if (JSONObject.class.isAssignableFrom(constraint.getClass())) {
-                return Loader.load(classloader, (JSONObject) constraint);
+            if (JsonObject.class.isAssignableFrom(constraint.getClass())) {
+            	return Loader.load(classloader, (JsonObject) constraint);
             }
-            if (JSONArray.class.isAssignableFrom(constraint.getClass())) {
-                return Loader.load(classloader, (JSONArray) constraint);
+            if (JsonArray.class.isAssignableFrom(constraint.getClass())) {
+            	return Loader.load(classloader, (JsonArray) constraint);
             }
             throw new InvalidConstraintDefinitionException(new StringBuilder().append("Unable to cast ").append(constraint.getClass()).append(" into a constraint").toString());
         }
@@ -92,9 +95,9 @@ public interface ConstraintFactory {
          * @return
          * @throws InvalidConstraintDefinitionException
          */
-        public static Constraint load(ClassLoader classloader, JSONObject constraint) throws InvalidConstraintDefinitionException {
+        public static Constraint load(ClassLoader classloader, JsonObject constraint) throws InvalidConstraintDefinitionException {
             Object operand = null;
-            String type = constraint.optString(Constraint.TYPE_KEY);
+            String type = constraint.getString(Constraint.TYPE_KEY, null);
             Class<?> clazz = null;
 
             if (type != null && type.length() > 0) {
@@ -105,15 +108,15 @@ public interface ConstraintFactory {
                     throw new InvalidConstraintDefinitionException(new StringBuilder().append("Invalid type :").append(type).toString());
                 }
             }
-            String operator = constraint.optString(Constraint.OPERATOR_KEY);
+            String operator = constraint.getString(Constraint.OPERATOR_KEY, null);
             if (operator == null || operator.length() == 0) {
                 throw new InvalidConstraintDefinitionException("Null operator");
             }
-            Object operandObject = constraint.opt(Constraint.OPERAND_KEY);
+            JsonValue operandObject = constraint.get(Constraint.OPERAND_KEY);
             if (operandObject != null) {
-                if (JSONArray.class.isAssignableFrom(operandObject.getClass())) {
-                    JSONArray operandArray = (JSONArray) operandObject;
-                    int length = operandArray.length();
+                if (operandObject.getValueType() == ValueType.ARRAY) {
+                    JsonArray operandArray = operandObject.asJsonArray();
+                    int length = operandArray.size();
                     switch (length) {
                         case 0:
                             break;
@@ -131,7 +134,7 @@ public interface ConstraintFactory {
                     operand = operandObject;
                 }
             }
-            boolean complement = CastUtils.getObjectFromJSON( boolean.class, constraint.opt(Constraint.COMPLEMENT_KEY));
+            boolean complement = constraint.getBoolean(Constraint.COMPLEMENT_KEY, false);
 
             return Loader.load(classloader, operator, clazz, operand, complement);
         }
@@ -149,7 +152,7 @@ public interface ConstraintFactory {
          * formated array of constraints
          * @throws InvalidConstraintDefinitionException
          */
-        public static Constraint load(ClassLoader classloader, JSONArray constraint) throws InvalidConstraintDefinitionException {
+        public static Constraint load(ClassLoader classloader, JsonArray constraint) throws InvalidConstraintDefinitionException {
             if (constraint == null) {
                 throw new InvalidConstraintDefinitionException("Invalid constraint definition : null");
             }
@@ -159,9 +162,9 @@ public interface ConstraintFactory {
                 constraint.remove(0);
 
             } catch (Exception e) {
-                JSONObject uniqueConstraint = null;
+                JsonObject uniqueConstraint = null;
 
-                if (constraint.length() == 1 && !JSONObject.NULL.equals((uniqueConstraint = constraint.optJSONObject(0)))) {
+                if (constraint.size() == 1 && (uniqueConstraint = constraint.getJsonObject(0)) != null) {
                     return Loader.load(classloader, uniqueConstraint);
                 }
                 logicalOperator = Expression.LogicalOperator.AND;
@@ -184,18 +187,18 @@ public interface ConstraintFactory {
          * formated array of constraints
          * @throws InvalidConstraintDefinitionException
          */
-        public static Constraint load(ClassLoader classloader, JSONArray constraint, Expression.LogicalOperator logicalOperator) throws InvalidConstraintDefinitionException {
+        public static Constraint load(ClassLoader classloader, JsonArray constraint, Expression.LogicalOperator logicalOperator) throws InvalidConstraintDefinitionException {
             int index = 0;
-            int length = constraint == null ? 0 : constraint.length();
+            int length = constraint == null ? 0 : constraint.size();
 
             Expression expression = new Expression(logicalOperator);
             for (; index < length; index++) {
                 Object embeddedConstraint = constraint.get(index);
-                if (JSONObject.class.isAssignableFrom(embeddedConstraint.getClass())) {
-                    expression.add(Loader.load(classloader, (JSONObject) embeddedConstraint));
+                if (JsonObject.class.isAssignableFrom(embeddedConstraint.getClass())) {
+                    expression.add(Loader.load(classloader, (JsonObject) embeddedConstraint));
 
-                } else if (JSONArray.class.isAssignableFrom(embeddedConstraint.getClass())) {
-                    expression.add(Loader.load(classloader, (JSONArray) embeddedConstraint));
+                } else if (JsonArray.class.isAssignableFrom(embeddedConstraint.getClass())) {
+                    expression.add(Loader.load(classloader, (JsonArray) embeddedConstraint));
 
                 } else {
                     throw new InvalidConstraintDefinitionException(new StringBuilder().append("Invalid constraint definition : ").append(embeddedConstraint).toString());

@@ -17,11 +17,21 @@ import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpRequest;
 import org.eclipse.sensinact.gateway.sthbnd.http.SimpleHttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.onem2m.internal.OneM2MHttpPacketReader;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.HttpTaskImpl;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 public class OneM2MGetTask extends HttpTaskImpl<SimpleHttpResponse, SimpleHttpRequest> {
     
 	private Mediator mediator;
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
 
 	public OneM2MGetTask(Mediator mediator, CommandType command, TaskTranslator transmitter, 
 		Class<SimpleHttpRequest> requestType, String path, String profileId, 
@@ -48,9 +58,16 @@ public class OneM2MGetTask extends HttpTaskImpl<SimpleHttpResponse, SimpleHttpRe
 
     @Override
     public void setResult(Object result) {
-        JSONObject content = new JSONObject(new String((byte[]) result));
-        if (content.has("m2m:cin"))
-            super.setResult(content.getJSONObject("m2m:cin").getString("con"));
+        JsonObject content;
+		try {
+			content = mapper.readValue((byte[]) result, JsonObject.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+			super.setResult(AccessMethod.EMPTY);
+			return;
+		}
+        if (content.containsKey("m2m:cin"))
+            super.setResult(content.getJsonObject("m2m:cin").getString("con"));
         else
             super.setResult(AccessMethod.EMPTY);
     }

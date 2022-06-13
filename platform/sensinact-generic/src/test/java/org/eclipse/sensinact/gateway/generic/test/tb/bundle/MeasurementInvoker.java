@@ -12,7 +12,9 @@ package org.eclipse.sensinact.gateway.generic.test.tb.bundle;
 import org.eclipse.sensinact.gateway.generic.Task;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskCommand;
 import org.eclipse.sensinact.gateway.generic.annotation.TaskExecution;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import jakarta.json.JsonObject;
 
 /**
  *
@@ -25,7 +27,9 @@ public class MeasurementInvoker {
     }
 
     @TaskCommand(target = "/*/*/activate", method = Task.CommandType.ACT)
-    JSONObject act(Object... parameters) {
-        return parameters != null ? new JSONObject().put("value", ((Float) parameters[1]).floatValue()) : new JSONObject().put("value", 0.0f);
+    JsonObject act(Object... parameters) {
+    	return JsonProviderFactory.getProvider().createObjectBuilder()
+    			.add("value", parameters != null ? ((Float) parameters[1]).floatValue() : 0.0f)
+    			.build();
     }
 }

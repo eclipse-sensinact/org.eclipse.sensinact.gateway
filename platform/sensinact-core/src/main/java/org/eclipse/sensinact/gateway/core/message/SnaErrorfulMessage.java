@@ -11,7 +11,8 @@ package org.eclipse.sensinact.gateway.core.message;
 
 import org.eclipse.sensinact.gateway.common.props.KeysCollection;
 import org.eclipse.sensinact.gateway.common.props.TypedKey;
-import org.json.JSONArray;
+
+import jakarta.json.JsonArray;
 
 /**
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
@@ -28,17 +29,17 @@ public interface SnaErrorfulMessage<S extends Enum<S> & SnaMessageSubType & Keys
 	static final int UNKNOWN_ERROR_CODE = 520;
 
 	public static final TypedKey<?>[] PERMANENT_KEYS = new TypedKey[] {
-			new TypedKey<JSONArray>(SnaConstants.ERRORS_KEY, JSONArray.class, false) };
+			new TypedKey<JsonArray>(SnaConstants.ERRORS_KEY, JsonArray.class, false) };
 
 	/**
 	 * @return
 	 */
-	JSONArray getErrors();
+	JsonArray getErrors();
 
 	/**
 	 * @param errorsArray
 	 */
-	void setErrors(JSONArray errorsArray);
+	void setErrors(JsonArray errorsArray);
 
 	/**
 	 * @param exception

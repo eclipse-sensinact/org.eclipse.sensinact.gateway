@@ -14,7 +14,8 @@ import org.eclipse.sensinact.gateway.core.security.entity.annotation.ForeignKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.NotNull;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * Method Entity
@@ -55,7 +56,7 @@ public class BundleEntity extends SnaEntity {
 	 * @param row
 	 * 
 	 */
-	public BundleEntity(JSONObject row) {
+	public BundleEntity(JsonObject row) {
 		super(row);
 	}
 

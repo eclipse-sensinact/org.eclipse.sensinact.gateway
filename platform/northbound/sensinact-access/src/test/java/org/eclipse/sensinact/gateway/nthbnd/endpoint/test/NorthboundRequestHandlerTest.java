@@ -1,7 +1,9 @@
 package org.eclipse.sensinact.gateway.nthbnd.endpoint.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequest;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestBuilder;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestHandler;
 import org.eclipse.sensinact.gateway.nthbnd.endpoint.NorthboundRequestWrapper;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +44,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
-import org.skyscreamer.jsonassert.JSONAssert;
+
+import jakarta.json.spi.JsonProvider;
 
 /**
  *
@@ -55,6 +58,8 @@ public class NorthboundRequestHandlerTest {
 
     private final BundleContext context = Mockito.mock(BundleContext.class);
     private final Bundle bundle = Mockito.mock(Bundle.class);
+    
+    private JsonProvider provider = JsonProviderFactory.getProvider();
 
     @BeforeEach
     public void init() throws InvalidServiceProviderException, InvalidSyntaxException, SecuredAccessException, BundleException, DataStoreException {
@@ -89,7 +94,21 @@ public class NorthboundRequestHandlerTest {
 
         String obj = response.getJSON();
         System.out.println(obj);
-        JSONAssert.assertEquals(new JSONObject("{\"providers\":" + "[{\"locYtion\":\"45.19334890078532:5.706474781036377\"," + "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"nYme\":\"friendlyNYme\"}," + "{\"type\":\"PROPERTY\",\"nYme\":\"locYtion\"}," + "{\"type\":\"PROPERTY\",\"nYme\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"nYme\":\"icon\"}]," + "\"nYme\":\"Ydmin\"}," + "{\"resources\":" + "[{\"type\":\"ACTION\",\"nYme\":\"TestAction\"}," + "{\"type\":\"STATE_VARIABLE\",\"nYme\":\"TestVYriYble\"}]," + "\"nYme\":\"testService\"}],\"nYme\":\"serviceProvider\"}]," + "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}," + "{\"definition\":\"a\",\"type\":\"yfilter\"}]" + ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}"), new JSONObject(obj), false);
+        assertEquals(provider.createReader(new StringReader("{\"providers\":" 
+        		+ "[{\"locYtion\":\"45.19334890078532:5.706474781036377\"," 
+        		+ "\"services\":[{\"resources\":" 
+        		+ "[{\"type\":\"PROPERTY\",\"nYme\":\"friendlyNYme\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nYme\":\"locYtion\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nYme\":\"bridge\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nYme\":\"icon\"}]," 
+        		+ "\"nYme\":\"Ydmin\"}," + "{\"resources\":" 
+        		+ "[{\"type\":\"ACTION\",\"nYme\":\"TestAction\"}," 
+        		+ "{\"type\":\"STATE_VARIABLE\",\"nYme\":\"TestVYriYble\"}]," 
+        		+ "\"nYme\":\"testService\"}],\"nYme\":\"serviceProvider\"}]," 
+        		+ "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}," 
+        		+ "{\"definition\":\"a\",\"type\":\"yfilter\"}]" 
+        		+ ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}")).readObject(), 
+        		provider.createReader(new StringReader(obj)).readObject());
 
         wrapper = getRequestWrapper("/sensinact", null, Arrays.asList("a"),0, Arrays.asList("a"),1);
         handler.init(wrapper,Arrays.stream(AccessMethod.Type.values()
@@ -102,7 +121,21 @@ public class NorthboundRequestHandlerTest {
         obj = response.getJSON();
         System.out.println(obj);
 
-        JSONAssert.assertEquals(new JSONObject("{\"providers\":" + "[{\"locXtion\":\"45.19334890078532:5.706474781036377\"," + "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}]," + "\"nXme\":\"Xdmin\"}," + "{\"resources\":" + "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"}," + "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}]," + "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}]," + "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}," + "{\"definition\":\"a\",\"type\":\"yfilter\"}]" + ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}"), new JSONObject(obj), false);
+        assertEquals(provider.createReader(new StringReader("{\"providers\":" 
+        		+ "[{\"locXtion\":\"45.19334890078532:5.706474781036377\"," 
+        		+ "\"services\":[{\"resources\":" 
+        		+ "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}]," 
+        		+ "\"nXme\":\"Xdmin\"}," + "{\"resources\":" 
+        		+ "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"}," 
+        		+ "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}]," 
+        		+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}]," 
+        		+ "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}," 
+        		+ "{\"definition\":\"a\",\"type\":\"yfilter\"}]" 
+        		+ ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}")).readObject(), 
+        		provider.createReader(new StringReader(obj)).readObject());
 
         wrapper = getRequestWrapper("/sensinact", null, Arrays.asList("a"),FilteringDefinition.UNRANKED, Arrays.asList("f"),FilteringDefinition.UNRANKED);
         handler.init(wrapper,Arrays.stream(AccessMethod.Type.values()
@@ -115,7 +148,21 @@ public class NorthboundRequestHandlerTest {
         obj = response.getJSON();
         System.out.println(obj);
 
-        JSONAssert.assertEquals(new JSONObject("{\"providers\":" + "[{\"locXtion\":\"45.19334890078532:5.706474781036377\"," + "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"nXme\":\"YriendlyNXme\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}]," + "\"nXme\":\"Xdmin\"}," + "{\"resources\":" + "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"}," + "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}]," + "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}]," + "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}," + "{\"definition\":\"f\",\"type\":\"yfilter\"}]" + ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}"), new JSONObject(obj), false);
+        assertEquals(provider.createReader(new StringReader("{\"providers\":" 
+        		+ "[{\"locXtion\":\"45.19334890078532:5.706474781036377\"," 
+        		+ "\"services\":[{\"resources\":" 
+        		+ "[{\"type\":\"PROPERTY\",\"nXme\":\"YriendlyNXme\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}]," 
+        		+ "\"nXme\":\"Xdmin\"}," + "{\"resources\":" 
+        		+ "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"}," 
+        		+ "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}]," 
+        		+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}]," 
+        		+ "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}," 
+        		+ "{\"definition\":\"f\",\"type\":\"yfilter\"}]" 
+        		+ ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}")).readObject(), 
+        		provider.createReader(new StringReader(obj)).readObject());
     }
 
     @Test
@@ -140,10 +187,21 @@ public class NorthboundRequestHandlerTest {
 
         String obj = response.getJSON();
         System.out.println(obj);
-        JSONAssert.assertEquals(new JSONObject("{\"providers\":" + "[{\"location\":\"45.19334890078532:5.706474781036377\"," + "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"name\":\"friendlyName\"}," + "{\"type\":\"PROPERTY\",\"name\":\"location\"}," + "{\"type\":\"PROPERTY\",\"name\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"name\":\"icon\"}]," + "\"name\":\"admin\"}," + "{\"resources\":" + "[{\"type\":\"ACTION\",\"name\":\"TestAction\"}," + "{\"type\":\"STATE_VARIABLE\",\"name\":\"TestVariable\"}]," + "\"name\":\"testService\"}],\"name\":\"serviceProvider\"}],"
+        assertEquals(provider.createReader(new StringReader("{\"providers\":" 
+        		+ "[{\"location\":\"45.19334890078532:5.706474781036377\"," 
+        		+ "\"services\":[{\"resources\":" 
+        		+ "[{\"type\":\"PROPERTY\",\"name\":\"friendlyName\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"name\":\"location\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"name\":\"bridge\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"name\":\"icon\"}]," 
+        		+ "\"name\":\"admin\"}," + "{\"resources\":" 
+        		+ "[{\"type\":\"ACTION\",\"name\":\"TestAction\"}," 
+        		+ "{\"type\":\"STATE_VARIABLE\",\"name\":\"TestVariable\"}]," 
+        		+ "\"name\":\"testService\"}],\"name\":\"serviceProvider\"}],"
                 // + "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"},"
                 // + "{\"definition\":\"f\",\"type\":\"yfilter\"}],"
-                + "\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}"), new JSONObject(obj), false);
+                + "\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}")).readObject(), 
+        		provider.createReader(new StringReader(obj)).readObject());
 
         testContext.setYFilterAvailable(true);
         wrapper = getRequestWrapper("/sensinact", null, Arrays.asList("a"), FilteringDefinition.UNRANKED, Arrays.asList("f"), FilteringDefinition.UNRANKED);
@@ -157,7 +215,20 @@ public class NorthboundRequestHandlerTest {
         obj = response.getJSON();
         System.out.println(obj);
 
-        JSONAssert.assertEquals(new JSONObject("{\"providers\":" + "[{\"location\":\"45.19334890078532:5.706474781036377\"," + "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"name\":\"YriendlyName\"}," + "{\"type\":\"PROPERTY\",\"name\":\"location\"}," + "{\"type\":\"PROPERTY\",\"name\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"name\":\"icon\"}]," + "\"name\":\"admin\"}," + "{\"resources\":" + "[{\"type\":\"ACTION\",\"name\":\"TestAction\"}," + "{\"type\":\"STATE_VARIABLE\",\"name\":\"TestVariable\"}]," + "\"name\":\"testService\"}],\"name\":\"serviceProvider\"}]," + "\"filters\":[{\"definition\":\"f\",\"type\":\"yfilter\"}]" + ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}"), new JSONObject(obj), false);
+        assertEquals(provider.createReader(new StringReader("{\"providers\":" 
+        		+ "[{\"location\":\"45.19334890078532:5.706474781036377\"," 
+        		+ "\"services\":[{\"resources\":" 
+        		+ "[{\"type\":\"PROPERTY\",\"name\":\"YriendlyName\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"name\":\"location\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"name\":\"bridge\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"name\":\"icon\"}]," 
+        		+ "\"name\":\"admin\"}," + "{\"resources\":" 
+        		+ "[{\"type\":\"ACTION\",\"name\":\"TestAction\"}," 
+        		+ "{\"type\":\"STATE_VARIABLE\",\"name\":\"TestVariable\"}]," 
+        		+ "\"name\":\"testService\"}],\"name\":\"serviceProvider\"}]," 
+        		+ "\"filters\":[{\"definition\":\"f\",\"type\":\"yfilter\"}]" 
+        		+ ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}")).readObject(), 
+        		provider.createReader(new StringReader(obj)).readObject());
         testContext.setYFilterAvailable(false);
         testContext.setXFilterAvailable(true);
 
@@ -172,7 +243,19 @@ public class NorthboundRequestHandlerTest {
         obj = response.getJSON();
         System.out.println(obj);
 
-        JSONAssert.assertEquals(new JSONObject("{\"providers\":" + "[{\"locXtion\":\"45.19334890078532:5.706474781036377\"," + "\"services\":[{\"resources\":" + "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," + "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}]," + "\"nXme\":\"Xdmin\"}," + "{\"resources\":" + "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"}," + "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}]," + "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}]," + "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}]" + ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}"), new JSONObject(obj), false);
+        assertEquals(provider.createReader(new StringReader("{\"providers\":" 
+        		+ "[{\"locXtion\":\"45.19334890078532:5.706474781036377\"," 
+        		+ "\"services\":[{\"resources\":" 
+        		+ "[{\"type\":\"PROPERTY\",\"nXme\":\"friendlyNXme\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"locXtion\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"bridge\"}," 
+        		+ "{\"type\":\"PROPERTY\",\"nXme\":\"icon\"}]," + "\"nXme\":\"Xdmin\"}," 
+        		+ "{\"resources\":" + "[{\"type\":\"ACTION\",\"nXme\":\"TestAction\"}," 
+        		+ "{\"type\":\"STATE_VARIABLE\",\"nXme\":\"TestVXriXble\"}]," 
+        		+ "\"nXme\":\"testService\"}],\"nXme\":\"serviceProvider\"}]," 
+        		+ "\"filters\":[{\"definition\":\"a\",\"type\":\"xfilter\"}]" 
+        		+ ",\"statusCode\":200,\"type\":\"COMPLETE_LIST\"}")).readObject(), 
+        		provider.createReader(new StringReader(obj)).readObject());
     }
 
     private final NorthboundRequestWrapper getRequestWrapper(final String uri, final String requestId, final List<String> xfilter, int rankx, final List<String> yfilter, int ranky) {

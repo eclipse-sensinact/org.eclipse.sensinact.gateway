@@ -14,11 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.eclipse.sensinact.gateway.core.Core;
 import org.eclipse.sensinact.gateway.core.Session;
 import org.eclipse.sensinact.gateway.core.method.DescribeResponse;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.junit5.service.ServiceExtension;
+
+import jakarta.json.JsonObject;
 
 @ExtendWith(ServiceExtension.class)
 public class TestSensiNactResource {
@@ -29,7 +30,7 @@ public class TestSensiNactResource {
     	
     	Session session = core.getAnonymousSession();
     	
-    	DescribeResponse<JSONObject> provider = session.getProvider("sensiNact");
+    	DescribeResponse<JsonObject> provider = session.getProvider("sensiNact");
     	
     	assertEquals("sensiNact", provider.getResponse().getString("name"));
     	

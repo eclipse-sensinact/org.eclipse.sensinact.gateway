@@ -12,7 +12,8 @@ package org.eclipse.sensinact.gateway.core.security.entity;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Column;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.PrimaryKey;
 import org.eclipse.sensinact.gateway.core.security.entity.annotation.Table;
-import org.json.JSONObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * ObjectAccess DAO Entity
@@ -45,7 +46,7 @@ public class ObjectAccessEntity extends ImmutableSnaEntity {
 	 * @param row
 	 * 
 	 */
-	public ObjectAccessEntity(JSONObject row) {
+	public ObjectAccessEntity(JsonObject row) {
 		super(row);
 	}
 

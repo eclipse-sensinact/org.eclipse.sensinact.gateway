@@ -18,9 +18,20 @@ import org.eclipse.sensinact.gateway.generic.packet.annotation.ServiceProviderID
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponse;
 import org.eclipse.sensinact.gateway.sthbnd.http.HttpResponsePacket;
 import org.eclipse.sensinact.gateway.util.UriUtils;
-import org.json.JSONObject;
+import org.eclipse.sensinact.gateway.util.json.JsonProviderFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+
+import jakarta.json.JsonObject;
 
 public class KodiResponsePacket extends HttpResponsePacket {
+	
+	private final ObjectMapper mapper = JsonMapper.builder()
+    		.addModule(new JSONPModule(JsonProviderFactory.getProvider()))
+    		.build();
+	
     @ServiceProviderID
     public final String serviceProvider;
     @ServiceID
@@ -55,7 +66,7 @@ public class KodiResponsePacket extends HttpResponsePacket {
         try {
         	byte[] c = super.getBytes();
             KodiApi api = KodiApi.fromName(resource);
-            return api.getData(new JSONObject(new String(c)).get("result"));
+            return api.getData(mapper.readValue(c, JsonObject.class).getJsonObject("result"));
         } catch (Exception e) {
             return null;
         }

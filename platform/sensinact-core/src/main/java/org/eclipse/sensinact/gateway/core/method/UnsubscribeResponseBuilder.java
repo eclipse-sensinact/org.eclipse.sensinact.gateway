@@ -9,7 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core.method;
 
-import org.json.JSONObject;
+import jakarta.json.JsonObject;
 
 /**
  * Extended {@link AccessMethodResponseBuilder} dedicated to
@@ -18,7 +18,7 @@ import org.json.JSONObject;
  * @author <a href="mailto:christophe.munilla@cea.fr">Christophe Munilla</a>
  */
 @SuppressWarnings("serial")
-public class UnsubscribeResponseBuilder extends AccessMethodResponseBuilder<JSONObject, UnsubscribeResponse> {
+public class UnsubscribeResponseBuilder extends AccessMethodResponseBuilder<JsonObject, UnsubscribeResponse> {
 	/**
 	 * @param uri
 	 * @param parameters
@@ -44,8 +44,8 @@ public class UnsubscribeResponseBuilder extends AccessMethodResponseBuilder<JSON
 	 * @see org.eclipse.sensinact.gateway.core.method.AccessMethodResponseBuilder#getComponentType()
 	 */
 	@Override
-	public Class<JSONObject> getComponentType() {
-		return JSONObject.class;
+	public Class<JsonObject> getComponentType() {
+		return JsonObject.class;
 	}
 
 }
