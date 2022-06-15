@@ -27,7 +27,7 @@ public class TestSensiNactResource {
 
     @Test
     public void testSensiNactResource(@InjectService(timeout = 500) Core core) throws Throwable {
-    	
+    	Thread.sleep(1000);
     	Session session = core.getAnonymousSession();
     	
     	DescribeResponse<JsonObject> provider = session.getProvider("sensiNact");
