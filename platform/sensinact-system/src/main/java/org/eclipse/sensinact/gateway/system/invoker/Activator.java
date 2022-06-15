@@ -10,14 +10,21 @@
 package org.eclipse.sensinact.gateway.system.invoker;
 
 import java.util.Collections;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.gateway.common.bundle.Mediator;
 import org.eclipse.sensinact.gateway.core.Core;
+import org.eclipse.sensinact.gateway.core.method.AccessMethodResponse.Status;
+import org.eclipse.sensinact.gateway.core.method.GetResponse;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfiguration;
 import org.eclipse.sensinact.gateway.generic.ExtModelConfigurationBuilder;
 import org.eclipse.sensinact.gateway.generic.local.LocalProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.generic.packet.Packet;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -30,6 +37,8 @@ public class Activator {
 	// connector#connect call will NPE due to a missing security model
 	@Reference
 	Core core;
+	
+	private ScheduledExecutorService executor;
 	
     private ExtModelConfiguration<Packet> manager = null;
     private LocalProtocolStackEndpoint<Packet> connector = null;
@@ -46,10 +55,31 @@ public class Activator {
             this.connector = new LocalProtocolStackEndpoint<Packet>(mediator);
         }
         this.connector.connect(manager);
+        
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(() -> check(core,ctx.getBundle()), 500, TimeUnit.MILLISECONDS);
     }
 
-    @Deactivate
+    private void check(Core c, Bundle b) {
+		GetResponse getResponse = c.getAnonymousSession().get("sensiNact","system", "name", null);
+		if(getResponse.getStatus() == Status.ERROR) {
+			try {
+				b.stop();
+			} catch (BundleException e) {
+			}
+			try {
+				b.start();
+			} catch (BundleException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Deactivate
     void stop() {
+		if(executor != null)
+			executor.shutdown();
+		
         if (this.connector != null) {
             this.connector.stop();
             this.connector = null;
