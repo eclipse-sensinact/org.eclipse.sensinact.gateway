@@ -13,6 +13,7 @@
   	<module>action</module>
   	<module>writable</module>
   	<module>generic</module>
+  	<module>sensinact-api</module>
   </modules>
   
   <properties>
@@ -56,6 +57,12 @@
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.typedevent</artifactId>
         <version>1.0.0</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.util.promise</artifactId>
+        <version>1.2.0</version>
         <scope>provided</scope>
       </dependency>
     </dependencies>

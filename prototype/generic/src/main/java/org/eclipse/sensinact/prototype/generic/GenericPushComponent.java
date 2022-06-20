@@ -1,12 +1,14 @@
 package org.eclipse.sensinact.prototype.generic;
 
+import org.eclipse.sensinact.prototype.EventTopicNames;
+import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.typedevent.TypedEventBus;
 
 @Component
-public class PushComponent {
+public class GenericPushComponent {
 	
 	@Reference
 	private TypedEventBus bus;
@@ -24,7 +26,7 @@ public class PushComponent {
 		// Send the dto data to sensiNact core somehow?
 		
 		// e.g. Typed Events
-		bus.deliver("sensiNact.push.event", dto);
+		bus.deliver(EventTopicNames.GENERIC_UPDATE_EVENTS, dto);
 		
 		// e.g. Direct to core
 		sensiNact.pushUpdate(dto);

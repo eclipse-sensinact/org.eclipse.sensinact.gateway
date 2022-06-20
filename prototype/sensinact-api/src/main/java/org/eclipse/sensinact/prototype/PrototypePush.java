@@ -1,4 +1,4 @@
-package org.eclipse.sensinact.prototype.push;
+package org.eclipse.sensinact.prototype;
 /**
  * Not real, just a thought
  */
