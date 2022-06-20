@@ -5,5 +5,16 @@ package org.eclipse.sensinact.prototype.model;
  */
 public enum ValueType {
 
-	 MODIFIABLE, UPDATABLE, FIXED;
+	/**
+	 * The value can be modified by a SET operation
+	 */
+	MODIFIABLE, 
+	/**
+	 * This value may change over time, but not SET
+	 */
+	UPDATABLE, 
+	/**
+	 * This value cannot be SET, and will not change over time
+	 */
+	FIXED;
 }

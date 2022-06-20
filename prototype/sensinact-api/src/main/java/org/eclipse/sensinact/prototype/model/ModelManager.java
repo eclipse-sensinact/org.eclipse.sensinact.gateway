@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.prototype.model;
 
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -18,6 +19,10 @@ public interface ModelManager {
 	void deleteService(String provider, String service);
 
 	void deleteResource(String provider, String service, String resource);
+	
+	void registerModel(String model);
+	
+	void registerModel(InputStream model);
 	
 	Map<String, Provider> getProviders();
 

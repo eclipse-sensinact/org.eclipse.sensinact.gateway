@@ -6,4 +6,16 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>model-based</artifactId>
+  
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>sensinact-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+  </dependencies>
 </project>
