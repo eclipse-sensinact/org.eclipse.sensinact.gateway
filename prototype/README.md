@@ -6,7 +6,7 @@ This repository aims to prototype how devices connectors should integrate with s
 
 The annotation module contains the sources for annotations used to define the "code first" connectors 
 
-###Code first
+### Code first
 
 These modules use code to define data objects/methods which is used to infer a data model, rather than having a formal model declaration
 
