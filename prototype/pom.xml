@@ -14,6 +14,7 @@
   	<module>writable</module>
   	<module>generic</module>
   	<module>sensinact-api</module>
+  	<module>notification</module>
   </modules>
   
   <properties>
