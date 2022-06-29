@@ -15,6 +15,7 @@
   	<module>generic</module>
   	<module>sensinact-api</module>
   	<module>notification</module>
+  	<module>models</module>
   </modules>
   
   <properties>
@@ -66,6 +67,22 @@
         <version>1.2.0</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>org.geckoprojects.emf</groupId>
+        <artifactId>org.gecko.emf.osgi.bom</artifactId>
+        <version>4.1.1-SNAPSHOT</version>
+        <scope>provided</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+  
+  <repositories>
+  	<repository>
+  		<id>snaphost</id>
+  		<snapshots>
+  			<enabled>true</enabled>
+		</snapshots>
+  		<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+  	</repository>
+  </repositories>
 </project>
