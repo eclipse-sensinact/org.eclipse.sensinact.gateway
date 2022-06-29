@@ -7,13 +7,11 @@ import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.typedevent.propertytypes.EventTopics;
 
 /**
  * Notified for all data events visible to the client
  */
 @Component
-@EventTopics("DATA/*")
 public class _02_ClientNotification {
 
 	// This is probably not how we should retrieve the session in real life!
