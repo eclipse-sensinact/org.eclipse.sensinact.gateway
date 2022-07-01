@@ -9,6 +9,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.core.method;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -266,12 +267,22 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	 * @return the array of this Signature's {@link Parameter}s'object values
 	 */
 	public Object[] values() {
+		return values(this.iterator());
+	}
+
+	Object[] values(Parameter[] parameters) {
+		if(parameters == null) {
+			return null;
+		}
+
+		return values(Arrays.asList(parameters).iterator());
+	}
+
+	Object[] values(Iterator<Parameter> iterator) {
 		int position = 0;
 		Object[] values = new Object[this.length()];
 
 		Parameter parameter = null;
-		Iterator<Parameter> iterator = this.iterator();
-
 		while (iterator.hasNext()) {
 			parameter = iterator.next();
 			values[position++] = parameter.getValue();
@@ -309,34 +320,42 @@ public class Signature implements JSONable, Iterable<Parameter>, Cloneable {
 	}
 
 	/**
-	 * Returns true if the objects array passed as parameter contains valid object
-	 * to set as values of held {@link Parameter}s; returns false otherwise
+	 * Returns an array of {@link Parameter}s if the objects array passed as
+	 * argument contains valid object to set as values for this {@link Signature},
+	 * returns null otherwise
 	 * 
 	 * @param methodParameters
-	 *            the array of {@link Parameter}s to evaluate the order and the
-	 *            types of
-	 * @return true if the array of {@link Parameter}s passed as parameter contains
-	 *         parameters of the same type and in the same order than this current
-	 *         {@link Set}; false otherwise
+	 *            the array of parameters to evaluate the order and the types of
+	 * @return the array of {@link Parameter}s if the array of parameters
+	 *         passed as argument contains parameters of the same type and in the
+	 *         same order than this current {@link Signature}; null otherwise
 	 */
-	public boolean validParameters(Object[] methodParameters) {
+	public Parameter[] validParameters(Object[] methodParameters) {
 		try {
 			int length = methodParameters == null ? 0 : methodParameters.length;
-	
+
 			if (this.parameters.length != length)
-				return false;
-			
+				return null;
+
+			final Parameter[] newParams = new Parameter[length];
 			int index = 0;
 			for (; index < length; index++) {
-				this.parameters[index].reset();			
-				if (!this.parameters[index].validParameter(methodParameters[index]))
-					return false;
+				final Parameter newParam = (Parameter) this.parameters[index].clone();
+				if (newParam == null) {
+					return null;
+				}
+
+				newParam.reset();
+				if (!newParam.validParameter(methodParameters[index])) {
+					return null;
+				}
+				newParams[index] = newParam;
 			}
+			return newParams;
 		}catch(Exception | Error e) {
 			e.printStackTrace();
-			return false;
+			return null;
 		}
-		return true;
 	}
 
 	/**

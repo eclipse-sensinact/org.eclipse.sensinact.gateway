@@ -115,7 +115,7 @@ public class Shortcut extends Signature {
 	}
 
 	@Override
-	public Object[] values() {
+	Object[] values(Iterator<Parameter> iterator) {
 		int position = 0;
 		Map<Integer, Parameter> gathered = new HashMap<Integer, Parameter>();
 		while (!this.shortucts.isEmpty()) {
@@ -124,9 +124,7 @@ public class Shortcut extends Signature {
 		gathered.putAll(this.fixedParameters);
 		Object[] values = new Object[super.length() + gathered.size()];
 
-		Iterator<Parameter> iterator = super.iterator();
 		Parameter parameter = null;
-
 		for (; position < values.length; position++) {
 			parameter = gathered.get(position);
 			if (parameter == null && iterator.hasNext()) 
