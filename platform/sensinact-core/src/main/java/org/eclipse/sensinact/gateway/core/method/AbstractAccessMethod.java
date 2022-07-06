@@ -372,9 +372,11 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 		
 		Iterator<Signature> iterator = signatures.iterator();		
 		while (iterator.hasNext()) {
-			Signature signature = iterator.next();
-			if (signature.validParameters(parameters)) 
-				return this.invoke(signature);
+			final Signature signature = iterator.next();
+			final Parameter[] validatedParams = signature.validParameters(parameters);
+			if (validatedParams != null) {
+				return this.invoke(signature, validatedParams);
+			}
 		}
 		
 		return this.error(AccessMethodResponse.NOT_FOUND_ERROR_CODE, "Unknown signature");
@@ -385,12 +387,13 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 	 * to parameterize the call
 	 * 
 	 * @param signature  the {@link Signature} of this method parameterizing the invocation
-
+	 * @param validatedPrameters the parameters given to the method, validated for the given signature
 	 * @return the resulting {@link SnaMessage}
 	 */
-	public synchronized <A extends AccessMethodResponseBuilder<T, R>> R invoke(Signature signature) {
-		if (signature == null) 
+	public synchronized <A extends AccessMethodResponseBuilder<T, R>> R invoke(Signature signature, Parameter[] validatedPrameters) {
+		if (signature == null)
 			return this.error(SnaErrorfulMessage.BAD_REQUEST_ERROR_CODE, "Null signature");
+
 		Deque<AccessMethodExecutor> executors = null;
 		Signature current = signature;
 		Signature previous = null;
@@ -410,8 +413,8 @@ public abstract class AbstractAccessMethod<T, R extends AccessMethodResponse<T>>
 		};
 		if (executors == null) 
 			return this.error(SnaErrorfulMessage.NOT_FOUND_ERROR_CODE, "Unknown signature");
-		
-		Object[] parameters = signature.values();
+
+		final Object[] parameters = signature.values(validatedPrameters);
 		A result = this.createAccessMethodResponseBuilder(parameters);
 		
 		if (preProcessingExecutor != null) 
