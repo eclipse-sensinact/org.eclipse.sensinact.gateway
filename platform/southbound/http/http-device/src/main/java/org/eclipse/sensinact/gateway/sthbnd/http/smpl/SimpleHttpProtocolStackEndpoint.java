@@ -10,6 +10,7 @@
 package org.eclipse.sensinact.gateway.sthbnd.http.smpl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -103,7 +104,7 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
         this.recurrences = new LinkedList<>();
         this.adapters = new HashMap<>();
         this.builders = new HashMap<>();
-        this.recurrenceTasks = new HashSet<>();
+        this.recurrenceTasks = Collections.synchronizedSet(new HashSet<>());
         this.worker = Executors.newScheduledThreadPool(3);
         
         //Mediator classloader because we don't need to retrieve
@@ -545,6 +546,11 @@ public class SimpleHttpProtocolStackEndpoint extends HttpProtocolStackEndpoint {
 			Thread.currentThread().interrupt();
 		}
         worker.shutdownNow();
+        try {
+        	worker.awaitTermination(1000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+        	Thread.currentThread().interrupt();
+        }
         super.stop();
     }
 }
