@@ -15,8 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.common.primitive.Modifiable;
@@ -38,21 +36,21 @@ import org.eclipse.sensinact.gateway.sthbnd.http.smpl.HttpTaskProcessingContextH
 import org.eclipse.sensinact.gateway.sthbnd.http.smpl.SimpleHttpProtocolStackEndpoint;
 import org.eclipse.sensinact.gateway.sthbnd.http.task.config.HttpProtocolStackEndpointTasksDescription;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * {@link ManagedServiceFactory} dedicated to HTTP ProtocolStackEndpoint generation
+ * HTTP ProtocolStackEndpoint generation component
  */
-@Component(immediate=true, property= {"service.pid=sensinact.http.endpoint"})
-public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFactory {
+@Component(configurationPid = HttpMappingProtocolStackEndpointFactory.FACTORY_PID, 
+	configurationPolicy = ConfigurationPolicy.REQUIRE)
+public class HttpMappingProtocolStackEndpointFactory {
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpMappingProtocolStackEndpointFactory.class);
 
@@ -64,24 +62,11 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 
 	public static final Modifiable DEFAULT_MODIFIABLE = Modifiable.MODIFIABLE;
 	
-	private Map<String,SimpleHttpProtocolStackEndpoint> endpoints;
-	private BundleContext bundleContext;
+	private SimpleHttpProtocolStackEndpoint endpoint;
 	
 	@Activate
-	public void activate(ComponentContext ccontext) {
-		this.endpoints = new HashMap<>();
-		this.bundleContext = ccontext.getBundleContext();
-	}
-
-	@Override
-	public String getName() {
-		return FACTORY_PID;
-	}
-
-	@Override
-	public void updated(String pid, Dictionary<String, ?> properties) throws ConfigurationException {
-		deleted(pid);
-		HttpMediator mediator = new HttpMediator(this.bundleContext);
+	void activate(BundleContext bundleContext, Map<String, ?> properties) throws Exception {
+		HttpMediator mediator = new HttpMediator(bundleContext);
 		mediator.setTaskProcessingContextHandler(this.getProcessingContextHandler(mediator));
         mediator.setTaskProcessingContextFactory(this.getTaskProcessingContextFactory(mediator));
         mediator.setChainedTaskProcessingContextFactory(this.getChainedTaskProcessingContextFactory(mediator));
@@ -129,30 +114,26 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
 		
 		ExtModelConfiguration<TaskAwareHttpResponsePacket> configuration = buildConfiguration(mediator, endpointDescription, 
 				resourcesConfig);
-		SimpleHttpProtocolStackEndpoint endpoint = null;
 		try {
-			endpoint = new SimpleHttpProtocolStackEndpoint(mediator);
+			this.endpoint = new SimpleHttpProtocolStackEndpoint(mediator);
 		} catch (Exception e) {
 			LOG.error("Unable to create Endpoint", e);
+			throw e;
 		}
-		
-		if(endpoint == null)
-			return;
 
 		if(tasksDescription != null) 
 			endpoint.registerAdapters(tasksDescription);	
 		
 		try {
 			endpoint.connect(configuration);
-			this.endpoints.put(pid,endpoint);
 		} catch (InvalidProtocolStackException e) {
-			LOG.error(e.getMessage(),e);
+			LOG.error("Unable to connect Endpoint", e);
+			throw e;
 		}
 	}
 
-	@Override
-	public void deleted(String pid) {
-		SimpleHttpProtocolStackEndpoint endpoint = this.endpoints.remove(pid);
+	@Deactivate
+	void deactivate() {
 		if(endpoint == null) 
 			return;
 		endpoint.stop();
@@ -199,7 +180,7 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
      *
      * @return the {@link HttpTaskProcessingContextHandler} to be used
      */
-    protected HttpTaskProcessingContextHandler getProcessingContextHandler(HttpMediator mediator) {
+    private HttpTaskProcessingContextHandler getProcessingContextHandler(HttpMediator mediator) {
         return new DefaultHttpTaskProcessingContextHandler();
     }
 
@@ -209,7 +190,7 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
      *
      * @return the {@link HttpTaskProcessingContextFactory} to be used
      */
-    public HttpTaskProcessingContextFactory getTaskProcessingContextFactory(HttpMediator mediator) {
+    private HttpTaskProcessingContextFactory getTaskProcessingContextFactory(HttpMediator mediator) {
         return new DefaultHttpTaskProcessingContextFactory(mediator);
     }
 
@@ -219,7 +200,7 @@ public class HttpMappingProtocolStackEndpointFactory implements ManagedServiceFa
      *
      * @return the {@link HttpChainedTaskProcessingContextFactory} to be used
      */
-    public HttpChainedTaskProcessingContextFactory getChainedTaskProcessingContextFactory(HttpMediator mediator) {
+    private HttpChainedTaskProcessingContextFactory getChainedTaskProcessingContextFactory(HttpMediator mediator) {
         return new DefaultHttpChainedTaskProcessingContextFactory(mediator);
     }
 
