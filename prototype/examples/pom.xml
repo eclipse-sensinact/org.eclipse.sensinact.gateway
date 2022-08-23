@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.kentyou.sensinact.prototype</groupId>
+    <artifactId>prototype</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>examples</artifactId>
+  <packaging>pom</packaging>
+  <name>Example usage patterns</name>
+  
+  <modules>
+  	<module>pull-based</module>
+  	<module>push-based</module>
+  	<module>reflective</module>
+  	<module>model-based</module>
+  	<module>action</module>
+  	<module>writable</module>
+  	<module>generic</module>
+  	<module>notification</module>
+  </modules>
+  
+</project>

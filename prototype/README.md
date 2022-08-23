@@ -4,41 +4,16 @@ This repository aims to prototype how devices connectors should integrate with s
 
 ### Annotation
 
-The annotation module contains the sources for annotations used to define the "code first" connectors 
+The annotation module contains the sources for annotations used to define the "code first" connectors
 
-### Code first
+### Models
 
-These modules use code to define data objects/methods which is used to infer a data model, rather than having a formal model declaration
+The models module contains the EMF models and the code generated from them
 
-#### Push-based
+### Sensinact-API
 
-The push-based module shows how to make data update DTOs and "push" them to sensiNact. These are best for periodic or "pushed" sensor events (e.g. an on/off notification)
+The sensinact-api module contains the API for the sensinact core
 
-#### Pull-based
+#### Examples
 
-The pull-based module shows how to make services that can "get" a sensor value. These are best for low power sensors that you only want to query if necessary.
-
-#### Action
-
-The action module contains examples showing how to define "action" resources using the whiteboard
-
-#### Writable
-
-The writable module contains examples showing how to set data in a device
-
-#### Generic
-
-The generic module contains examples showing how to perform a generic update without having up-front code
-
-### Model first
-
-These modules define a data model directly, then set data into it
-
-#### Reflective
-
-The reflective module contains examples showing how to define a model using method calls
-
-#### Model-based
-
-The model-based module contains examples showing how to define a model using a resource descriptor
-
+The examples project contains examples demonstrating how to use the sensiNact API
