@@ -24,7 +24,7 @@ public @interface Metadata {
 	 * The name of the metadata field, if not set then the dto field name is used
 	 * @return
 	 */
-	String value() default "<<NOT_SET>>";
+	String value() default AnnotationConstants.NOT_SET;
 	/**
 	 * The resource action when the data field is null
 	 * @return

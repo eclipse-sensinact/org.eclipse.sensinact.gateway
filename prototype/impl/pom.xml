@@ -5,21 +5,26 @@
     <artifactId>prototype</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>sensinact-api</artifactId>
+  <artifactId>impl</artifactId>
   
   <dependencies>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi.annotation</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.util.promise</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>sensinact-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>annotation</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.typedevent</artifactId>
     </dependency>
   </dependencies>
 </project>

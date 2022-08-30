@@ -9,6 +9,7 @@
   	<module>sensinact-api</module>
   	<module>models</module>
   	<module>examples</module>
+  	<module>impl</module>
   </modules>
   
   <properties>
@@ -66,8 +67,23 @@
         <version>4.1.1-SNAPSHOT</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.9.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
   
   <repositories>
   	<repository>

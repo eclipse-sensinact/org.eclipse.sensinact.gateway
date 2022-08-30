@@ -5,8 +5,8 @@ import java.util.List;
 /**
  * A special update dto type where multiple values are updated in a single event
  */
-public class BulkGenericDto {
+public final class BulkGenericDto {
 	
-	List<GenericDto> dtos;
+	public List<GenericDto> dtos;
 
 }

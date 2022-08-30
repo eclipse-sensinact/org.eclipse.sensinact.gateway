@@ -5,7 +5,7 @@ package org.eclipse.sensinact.prototype.generic.dto;
  *
  * Used to define a schema for generic device access with no model (e.g. driven by configuration)
  */
-public class GenericDto extends BaseValueDto {
+public final class GenericDto extends BaseValueDto {
 	
 	public Class<?> type;
 	

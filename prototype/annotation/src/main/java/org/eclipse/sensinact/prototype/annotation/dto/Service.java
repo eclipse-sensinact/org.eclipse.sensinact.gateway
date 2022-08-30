@@ -38,5 +38,5 @@ public @interface Service {
 	 * The name of the service
 	 * @return
 	 */
-	String value() default "<<NOT_SET>>";
+	String value() default AnnotationConstants.NOT_SET;
 }

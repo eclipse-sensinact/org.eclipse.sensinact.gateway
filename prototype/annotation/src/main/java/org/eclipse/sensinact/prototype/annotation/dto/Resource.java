@@ -35,5 +35,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.FIELD})
 public @interface Resource {
-	String value() default "<<NOT_SET>>";
+	String value() default AnnotationConstants.NOT_SET;
 }

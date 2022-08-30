@@ -38,5 +38,5 @@ public @interface Provider {
 	 * The name of the provider
 	 * @return
 	 */
-	String value() default "<<NOT_SET>>";
+	String value() default AnnotationConstants.NOT_SET;
 }
