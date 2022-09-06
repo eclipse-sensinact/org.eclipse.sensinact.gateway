@@ -8,4 +8,6 @@ public abstract class AbstractResourceNotification {
 	
 	public String resource;
 	
+	
+	public abstract String getTopic();
 }

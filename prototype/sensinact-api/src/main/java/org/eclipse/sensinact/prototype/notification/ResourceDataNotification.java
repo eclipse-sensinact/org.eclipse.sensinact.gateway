@@ -1,6 +1,7 @@
 package org.eclipse.sensinact.prototype.notification;
 
 import java.time.Instant;
+import java.util.Objects;
 
 /**
  * Data notifications are sent to indicate the change in the value of a resource
@@ -16,5 +17,13 @@ public class ResourceDataNotification extends AbstractResourceNotification {
 	public Object newValue;
 	
 	public Instant timestamp;
+
+	@Override
+	public String getTopic() {
+		Objects.requireNonNull(provider);
+		Objects.requireNonNull(service);
+		Objects.requireNonNull(resource);
+		return String.format("DATA/%s/%s/%s", provider, service, resource);
+	}
 	
 }

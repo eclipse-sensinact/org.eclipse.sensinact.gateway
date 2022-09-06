@@ -1,6 +1,7 @@
 package org.eclipse.sensinact.prototype.notification;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Lifecycle notifications are sent to indicate the creation or deletion of a provider/service/resource
@@ -17,6 +18,21 @@ public class LifecycleNotification extends AbstractResourceNotification {
 	
 	public Map<String, Object> initialMetadata;
 	
+	@Override
+	public String getTopic() {
+		Objects.requireNonNull(status);
+		Objects.requireNonNull(provider);
+		int ordinal = status.ordinal();
+		if(ordinal >= Status.SERVICE_CREATED.ordinal()) {
+			Objects.requireNonNull(service);
+		}
+		if(ordinal >= Status.RESOURCE_CREATED.ordinal()) {
+			Objects.requireNonNull(resource);
+		}
+		
+		return String.format("LIFECYCLE/%s", String.format(status.template, provider, service, resource));
+	}
+
 	public enum Status {
 		/**
 		 * Provider created,
@@ -27,7 +43,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
 		 * <li>{@link LifecycleNotification#initialValue} will be a List of String service names for initial services</li>
 		 * </ul>
 		 */
-		PROVIDER_CREATED, 
+		PROVIDER_CREATED("%s"), 
 		
 		/**
 		 * Provider deleted,
@@ -38,7 +54,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
 		 * <li>{@link LifecycleNotification#initialValue} will be null</li>
 		 * </ul>
 		 */
-		PROVIDER_DELETED, 
+		PROVIDER_DELETED("%s"), 
 		
 		/**
 		 * Service created,
@@ -48,7 +64,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
 		 * <li>{@link LifecycleNotification#initialValue} will be a List of String service names for initial resources</li>
 		 * </ul>
 		 */
-		SERVICE_CREATED, 
+		SERVICE_CREATED("%s/%s"), 
 		
 		/**
 		 * Service deleted,
@@ -58,7 +74,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
 		 * <li>{@link LifecycleNotification#initialValue} will be null</li>
 		 * </ul>
 		 */
-		SERVICE_DELETED, 
+		SERVICE_DELETED("%s/%s"), 
 		
 		/**
 		 * Resource created,
@@ -67,7 +83,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
 		 * <li>{@link LifecycleNotification#initialValue} will be the initial value</li>
 		 * </ul>
 		 */
-		RESOURCE_CREATED, 
+		RESOURCE_CREATED("%s/%s/%s"), 
 		
 		/**
 		 * Resource created,
@@ -76,6 +92,12 @@ public class LifecycleNotification extends AbstractResourceNotification {
 		 * <li>{@link LifecycleNotification#initialValue} will be the initial value</li>
 		 * </ul>
 		 */
-		RESOURCE_DELETED;
+		RESOURCE_DELETED("%s/%s/%s");
+		
+		private final String template;
+		
+		private Status(String template) {
+			this.template = template;
+		}
 	}
 }
