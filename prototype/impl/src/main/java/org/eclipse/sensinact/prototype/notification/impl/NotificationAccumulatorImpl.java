@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.prototype.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
+import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
@@ -35,7 +36,7 @@ import org.osgi.service.typedevent.TypedEventBus;
  * 
  * This type is not thread safe and must not be used concurrently.
  */
-public class NotificationAccumulator {
+public class NotificationAccumulatorImpl implements NotificationAccumulator {
 	
 	private final TypedEventBus eventBus;
 	
@@ -43,7 +44,7 @@ public class NotificationAccumulator {
 
 	private boolean complete = false;
 	
-	public NotificationAccumulator(TypedEventBus eventBus) {
+	public NotificationAccumulatorImpl(TypedEventBus eventBus) {
 		this.eventBus = eventBus;
 	}
 
@@ -56,6 +57,7 @@ public class NotificationAccumulator {
 	 * @param name the provider name
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void addProvider(String name) {
 		doLifecycleMerge(PROVIDER_CREATED, name, null, null, null, null, false);
 	}
@@ -69,6 +71,7 @@ public class NotificationAccumulator {
 	 * @param name the provider name
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void removeProvider(String name) {
 		doLifecycleMerge(PROVIDER_DELETED, name, null, null, null, null, true);
 	}
@@ -84,6 +87,7 @@ public class NotificationAccumulator {
 	 * @param name the service name
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void addService(String provider, String name) {
 		doLifecycleMerge(SERVICE_CREATED, provider, name, null, null, null, false);
 	}
@@ -98,6 +102,7 @@ public class NotificationAccumulator {
 	 * @param name the service name
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void removeService(String provider, String name) {
 		doLifecycleMerge(SERVICE_DELETED, provider, name, null, null, null, true);
 	}
@@ -114,6 +119,7 @@ public class NotificationAccumulator {
 	 * @param name the resource name
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void addResource(String provider, String service, String name) {
 		doLifecycleMerge(RESOURCE_CREATED, provider, service, name, null, null, false);
 	}
@@ -129,6 +135,7 @@ public class NotificationAccumulator {
 	 * @param name the resource name
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void removeResource(String provider, String service, String name) {
 		doLifecycleMerge(RESOURCE_DELETED, provider, service, name, null, null, true);
 	}
@@ -183,6 +190,7 @@ public class NotificationAccumulator {
 	 * @throws IllegalArgumentException if the timestamp is older than the latest known metadata update
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void metadataValueUpdate(String provider, String service, String resource, 
 			Map<String,Object> oldValues, Map<String,Object> newValues, Instant timestamp) {
 		check();
@@ -242,6 +250,7 @@ public class NotificationAccumulator {
 	 * @throws IllegalArgumentException if the timestamp is older than the latest known metadata update
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void resourceValueUpdate(String provider, String service, String resource, Object oldValue, 
 			Object newValue, Instant timestamp) {
 		check();
@@ -289,6 +298,7 @@ public class NotificationAccumulator {
 	 * 
 	 * @throws IllegalStateException if this accumulator has been completed with {@link #completeAndSend()}
 	 */
+	@Override
 	public void resourceAction(String provider, String service, String resource, Instant timestamp) {
 		check();
 		Objects.requireNonNull(timestamp);
@@ -319,6 +329,7 @@ public class NotificationAccumulator {
 		return rn;
 	}
 	
+	@Override
 	public void completeAndSend() {
 		check();
 		complete = true;

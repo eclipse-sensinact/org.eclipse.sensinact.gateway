@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
+import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
@@ -51,7 +52,7 @@ class NotificationSenderTest {
 	
 	@BeforeEach
 	void start() {
-		accumulator = new NotificationAccumulator(bus);
+		accumulator = new NotificationAccumulatorImpl(bus);
 	}
 	
 	@Nested
