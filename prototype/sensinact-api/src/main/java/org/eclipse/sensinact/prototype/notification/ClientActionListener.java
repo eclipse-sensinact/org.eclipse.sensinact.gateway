@@ -7,6 +7,6 @@ package org.eclipse.sensinact.prototype.notification;
  */
 public interface ClientActionListener {
 	
-	void notify(String topic, ResourceDataNotification event);
+	void notify(String topic, ResourceActionNotification event);
 
 }
