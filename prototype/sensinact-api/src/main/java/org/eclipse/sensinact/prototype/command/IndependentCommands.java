@@ -37,7 +37,8 @@ public class IndependentCommands<T> extends AbstractSensinactCommand<List<T>> {
 			.collect(Collectors.toList()));
 	}
 	
-	private Promise<? extends T> safeCall(AbstractSensinactCommand<? extends T> command) {
-		return safeCall(command, model, pf);
+	@SuppressWarnings("unchecked")
+	private Promise<T> safeCall(AbstractSensinactCommand<? extends T> command) {
+		return (Promise<T>) safeCall(command, model, pf);
 	}
 }

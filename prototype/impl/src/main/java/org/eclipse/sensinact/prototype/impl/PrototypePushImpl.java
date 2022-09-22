@@ -65,7 +65,7 @@ public class PrototypePushImpl implements PrototypePush {
 		}
 	}
 
-	private AbstractSensinactCommand<?> toCommand(AbstractUpdateDto dto) {
+	private AbstractSensinactCommand<Void> toCommand(AbstractUpdateDto dto) {
 		if(dto instanceof DataUpdateDto) {
 			return new SetValueCommand((DataUpdateDto) dto);
 		} else if (dto instanceof MetadataUpdateDto) {
