@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.prototype;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,38 @@ import org.eclipse.sensinact.prototype.notification.ClientMetadataListener;
 public interface SensiNactSession {
 
 	/**
+	 * The id of this session
+	 * @return
+	 */
+	String getSessionId();
+	
+	/**
+	 * Get the time at which this session will expire 
+	 * 
+	 * @return
+	 */
+	Instant getExpiry();
+	
+	/**
+	 * Extend this session to expire after the given time period
+	 */
+	void extend(Duration duration);
+	
+	/**
+	 * true if this session is expired
+	 * @return
+	 */
+	boolean isExpired();
+	
+	/**
+	 * Expire this session immediately
+	 */
+	void expire();
+	
+	/**
 	 * Get the active listener registrations
 	 * 
-	 * @return a Map of identifier to list of listened topics
+	 * @return a Map of subscription identifier to list of listened topics
 	 */
 	Map<String, List<String>> activeListeners();
 
