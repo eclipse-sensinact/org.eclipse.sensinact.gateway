@@ -41,6 +41,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
 	}
 
 	private Instant copyCommonFields(GenericDto dto, Instant instant, AbstractUpdateDto dud) {
+		dud.model = dto.model;
 		dud.provider = dto.provider;
 		dud.service = dto.service;
 		dud.resource = dto.resource;

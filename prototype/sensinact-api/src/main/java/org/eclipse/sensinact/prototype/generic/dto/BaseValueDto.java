@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.prototype.annotation.dto.MapAction;
 import org.eclipse.sensinact.prototype.annotation.dto.Metadata;
+import org.eclipse.sensinact.prototype.annotation.dto.Model;
 import org.eclipse.sensinact.prototype.annotation.dto.Provider;
 import org.eclipse.sensinact.prototype.annotation.dto.Resource;
 import org.eclipse.sensinact.prototype.annotation.dto.Service;
@@ -13,6 +14,9 @@ import org.eclipse.sensinact.prototype.annotation.dto.Service;
  */
 public abstract class BaseValueDto {
 
+	@Model
+	public String model;
+	
 	@Provider
 	public String provider;
 	

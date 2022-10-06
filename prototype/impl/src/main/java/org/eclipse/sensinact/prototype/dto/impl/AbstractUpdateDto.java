@@ -4,6 +4,8 @@ import java.time.Instant;
 
 public abstract class AbstractUpdateDto {
 
+	public String model;
+	
 	public String provider;
 	
 	public String service;
