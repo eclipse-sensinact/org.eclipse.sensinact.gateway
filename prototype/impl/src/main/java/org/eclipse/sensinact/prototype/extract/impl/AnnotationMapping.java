@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.eclipse.sensinact.prototype.annotation.dto.Data;
 import org.eclipse.sensinact.prototype.annotation.dto.MapAction;
 import org.eclipse.sensinact.prototype.annotation.dto.Metadata;
+import org.eclipse.sensinact.prototype.annotation.dto.Model;
 import org.eclipse.sensinact.prototype.annotation.dto.NullAction;
 import org.eclipse.sensinact.prototype.annotation.dto.Provider;
 import org.eclipse.sensinact.prototype.annotation.dto.Resource;
@@ -93,6 +94,7 @@ public class AnnotationMapping {
 		String fieldName = f.getName();
 		Class<?> type = data.type() == Object.class ? f.getType() : data.type();
 		
+		Function<Object, String> model = getModelNameMappingForField(clazz, f);
 		Function<Object, String> provider = getProviderNameMappingForField(clazz, f);
 		Function<Object, String> service = getServiceNameMappingForField(clazz, f);
 		Function<Object, String> resource = getResourceNameMappingForDataField(clazz, f);
@@ -108,6 +110,7 @@ public class AnnotationMapping {
 				return null;
 			}
 			
+			dto.model = model.apply(o);
 			dto.provider = provider.apply(o);
 			dto.service = service.apply(o);
 			dto.resource = resource.apply(o);
@@ -121,6 +124,7 @@ public class AnnotationMapping {
 	private static Function<Object, MetadataUpdateDto> createMetaDataMapping(Class<?> clazz, Field f, Metadata metadata) {
 		String fieldName = f.getName();
 		
+		Function<Object, String> model = getModelNameMappingForField(clazz, f);
 		Function<Object, String> provider = getProviderNameMappingForField(clazz, f);
 		Function<Object, String> service = getServiceNameMappingForField(clazz, f);
 		Function<Object, String> resource = getResourceNameMappingForMetadataField(clazz, f);
@@ -162,6 +166,7 @@ public class AnnotationMapping {
 				processedMd = Collections.singletonMap(key, md);
 			}
 			
+			dto.model = model.apply(o);
 			dto.provider = provider.apply(o);
 			dto.service = service.apply(o);
 			dto.resource = resource.apply(o);
@@ -172,6 +177,15 @@ public class AnnotationMapping {
 		return dtoMapper;
 	}
 
+	private static Function<Object,String> getModelNameMappingForField(Class<?> clazz, Field f) {
+		Function<Object,String> mapping = getAnnotatedNameMapping(clazz, f, Model.class);
+		if(mapping == null) {
+			// Models are optional
+			mapping = o -> null;
+		}
+		return mapping;
+	}
+	
 	private static Function<Object,String> getProviderNameMappingForField(Class<?> clazz, Field f) {
 		Function<Object,String> mapping = getAnnotatedNameMapping(clazz, f, Provider.class);
 		if(mapping == null) {
