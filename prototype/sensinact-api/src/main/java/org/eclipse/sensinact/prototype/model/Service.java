@@ -9,6 +9,8 @@ public interface Service extends Modelled {
 	
 	ResourceBuilder<?> createResource(String resource);
 	
-	Map<String, Resource> getServices();
+	Map<String, ? extends Resource> getResources();
+	
+	Provider getProvider();
 
 }

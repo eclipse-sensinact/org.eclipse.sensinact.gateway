@@ -11,4 +11,13 @@ public interface GatewayThread {
 	public <T> Promise<T> execute(AbstractSensinactCommand<T> command);
 
 	public NotificationAccumulator createAccumulator();
+	
+	public static GatewayThread getGatewayThread() {
+		Thread currentThread = Thread.currentThread();
+		if(currentThread instanceof GatewayThread) {
+			return (GatewayThread) currentThread;
+		} else {
+			throw new IllegalStateException("Not running on the gateway thread");
+		}
+	}
 }

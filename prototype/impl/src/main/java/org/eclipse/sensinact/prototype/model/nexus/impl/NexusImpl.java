@@ -11,6 +11,7 @@
  */
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
@@ -29,10 +31,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
-import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 
 /**
@@ -40,18 +40,16 @@ import org.osgi.service.component.annotations.Reference;
  * @author Juergen Albert
  * @since 26 Sep 2022
  */
-@Component
 public class NexusImpl {
 
 	/** HTTPS_ECLIPSE_ORG_SENSINACT_BASE */
 	private static final String DEFAULT_URI = "https://eclipse.org/sensinact/base";
 	private static final URI DEFAULT_URI_OBJECT = URI.createURI(DEFAULT_URI);
 
-	@Reference
-	private ResourceSet resourceSet;
+	private final ResourceSet resourceSet;
+	private final SensiNactPackage sensinactPackage;
+	private final Supplier<NotificationAccumulator> notificationAccumulator;
 	
-	@Reference
-	private SensiNactPackage sensinactPackage;
 	
 	private Map<URI, ProviderTypeWrapper> providerCache = new ConcurrentHashMap<>();
 	private Map<URI, EPackage> packageCache = new ConcurrentHashMap<>();
@@ -59,6 +57,14 @@ public class NexusImpl {
 	private EPackage defaultPackage;
 	
 	
+	
+	
+	public NexusImpl(ResourceSet resourceSet, SensiNactPackage sensinactPackage, Supplier<NotificationAccumulator> accumulator) {
+		this.resourceSet = resourceSet;
+		this.sensinactPackage = sensinactPackage;
+		this.notificationAccumulator = accumulator;
+	}
+
 	private static class ProviderTypeWrapper {
 		
 		private EClass provider;
@@ -176,28 +182,24 @@ public class NexusImpl {
 		packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
 	}
 	
-	public void handleDataUpdateDto(DataUpdateDto dto) {
-		String model = dto.model;
+	public void handleDataUpdate(String model, String provider, String service, String resource,
+			Class<?> type, Object data, Instant timestamp) {
 		if(model == null) {
-			model = dto.provider; 
+			model = provider; 
 		}
 		
 		ProviderTypeWrapper wrapper = getOrCreateProvider(model, DEFAULT_URI);
-		String service = dto.service;
 		ModelTransaction transaction = getOrCreateService(service, wrapper);
-		String resource = dto.resource;
-		Class<?> type = dto.type;
 		transaction = getOrCreateResource(wrapper, resource, type, transaction);
 		updateInstances(wrapper, transaction);
-		setData(wrapper, transaction, dto);
+		setData(wrapper, transaction, createURI(model, provider), data, timestamp);
 	}
 	
 	/**
 	 * @param transaction
 	 * @param data
 	 */
-	private void setData(ProviderTypeWrapper wrapper, ModelTransaction transaction, DataUpdateDto dto) {
-		URI instanceUri = createURI(dto);
+	private void setData(ProviderTypeWrapper wrapper, ModelTransaction transaction, URI instanceUri, Object data, Instant timestamp) {
 		wrapper.getLock().readLock().lock();
 		Provider provider = wrapper.getInstances().get(instanceUri);
 		wrapper.getLock().readLock().unlock();
@@ -227,7 +229,8 @@ public class NexusImpl {
 			wrapper.getLock().writeLock().unlock();
 		}
 		
-		service.eSet(transaction.getFeaturePath().get(1), dto.data);
+		//TODO: Avoid setting if timestamp is too old
+		service.eSet(transaction.getFeaturePath().get(1), data);
 		
 		//TODO: Handle Metadata
 	}
@@ -236,12 +239,11 @@ public class NexusImpl {
 	 * @param dto
 	 * @return
 	 */
-	private URI createURI(DataUpdateDto dto) {
-		String model = dto.model;
+	private URI createURI(String model, String provider) {
 		if(model == null) {
-			model = dto.provider; 
+			model = provider; 
 		}
-		URI uri = URI.createURI(model).appendSegment(dto.provider).appendFragment(dto.provider);
+		URI uri = URI.createURI(model).appendSegment(provider).appendFragment(provider);
 		return uri;
 	}
 

@@ -9,5 +9,7 @@ public interface ProviderBuilder {
 	
 	ProviderBuilder withAutoDeletion(boolean autoDelete);
 	
+	ProviderBuilder withModelName(String name);
+	
 	Provider build();
 }

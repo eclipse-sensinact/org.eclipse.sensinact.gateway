@@ -32,5 +32,7 @@ public interface Resource extends Modelled {
 	 * @throws IllegalStateException if this resource is not an action resource
 	 */
 	List<Class<?>> getArguments();
+	
+	Service getService();
 
 }

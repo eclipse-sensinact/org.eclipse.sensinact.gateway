@@ -1,5 +1,7 @@
 package org.eclipse.sensinact.prototype.command;
 
+import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayThread;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -40,15 +42,6 @@ public abstract class AbstractSensinactCommand<T> {
 	
 	protected abstract Promise<T> call(SensinactModel model, PromiseFactory promiseFactory);
 	
-	protected GatewayThread getGatewayThread() {
-		Thread currentThread = Thread.currentThread();
-		if(currentThread instanceof GatewayThread) {
-			return (GatewayThread) currentThread;
-		} else {
-			throw new IllegalStateException("Not running on the gateway thread");
-		}
-	}
-
 	protected static <R> Promise<R> safeCall(AbstractSensinactCommand<R> command, 
 			SensinactModel model, PromiseFactory pf) {
 		try {

@@ -1,5 +1,7 @@
 package org.eclipse.sensinact.prototype.command;
 
+import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayThread;
+
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;

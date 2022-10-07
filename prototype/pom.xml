@@ -21,6 +21,20 @@
     <bnd.version>6.1.0</bnd.version>
   </properties>
   
+  <repositories>
+    <repository>
+      <id>ossrh</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories> 
+  
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -109,16 +123,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
-  <repositories>
-  	<repository>
-  		<id>snaphost</id>
-  		<snapshots>
-  			<enabled>true</enabled>
-		</snapshots>
-  		<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-  	</repository>
-  </repositories>
   
   <build>
     <pluginManagement>
