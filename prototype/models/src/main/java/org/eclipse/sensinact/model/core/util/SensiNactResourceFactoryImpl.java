@@ -1,8 +1,6 @@
 /*
  */
-package org.eclipse.core.model.sensinact.util;
-
-import org.eclipse.core.model.sensinact.SensiNactPackage;
+package org.eclipse.sensinact.model.core.util;
 
 import org.eclipse.emf.common.util.URI;
 
@@ -10,19 +8,25 @@ import org.eclipse.emf.ecore.resource.Resource;
 
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
 
+import org.eclipse.sensinact.model.core.SensiNactPackage;
+
 import org.gecko.emf.osgi.annotation.provide.ProvideEMFResourceConfigurator;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ServiceScope;
 
 /**
  * <!-- begin-user-doc -->
  * The <b>Resource Factory</b> associated with the package.
  * <!-- end-user-doc -->
- * @see org.eclipse.core.model.sensinact.util.SensiNactResourceImpl
+ * @see org.eclipse.sensinact.model.core.util.SensiNactResourceImpl
  * @generated
  */
- @Component( name = SensiNactPackage.eNAME + "Factory", service = Resource.Factory.class, scope = ServiceScope.SINGLETON)
+ @Component( name = SensiNactPackage.eNAME + "Factory", service = Resource.Factory.class, scope = ServiceScope.SINGLETON,
+ 	reference = @Reference( name = SensiNactPackage.eNAME + "Package", service = SensiNactPackage.class, cardinality = ReferenceCardinality.MANDATORY)
+ )
  @ProvideEMFResourceConfigurator( name = SensiNactPackage.eNAME,
 	contentType = { "" }, 
 	fileExtension = {

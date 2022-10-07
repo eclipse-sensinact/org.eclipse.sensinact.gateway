@@ -1,6 +1,6 @@
 /**
  */
-package org.eclipse.core.model.sensinact.util;
+package org.eclipse.sensinact.model.core.util;
 
 import org.eclipse.emf.common.util.URI;
 
@@ -10,7 +10,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * <!-- begin-user-doc -->
  * The <b>Resource </b> associated with the package.
  * <!-- end-user-doc -->
- * @see org.eclipse.core.model.sensinact.util.SensiNactResourceFactoryImpl
+ * @see org.eclipse.sensinact.model.core.util.SensiNactResourceFactoryImpl
  * @generated
  */
 public class SensiNactResourceImpl extends XMIResourceImpl {

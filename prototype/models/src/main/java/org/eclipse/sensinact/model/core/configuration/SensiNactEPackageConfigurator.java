@@ -1,9 +1,13 @@
 /*
  */
-package org.eclipse.core.model.sensinact.impl;
+package org.eclipse.sensinact.model.core.configuration;
 
-import org.eclipse.core.model.sensinact.SensiNactPackage;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.eclipse.sensinact.model.core.SensiNactPackage;
+
+import org.gecko.emf.osgi.EMFNamespaces;
 import org.gecko.emf.osgi.EPackageConfigurator;
 
 /**
@@ -22,7 +26,7 @@ public class SensiNactEPackageConfigurator implements EPackageConfigurator {
 		this.ePackage = ePackage;
 	}
 	
-	/* 
+	/**
 	 * (non-Javadoc)
 	 * @see org.gecko.emf.osgi.EPackageRegistryConfigurator#configureEPackage(org.eclipse.emf.ecore.EPackage.Registry)
 	 * @generated
@@ -32,7 +36,7 @@ public class SensiNactEPackageConfigurator implements EPackageConfigurator {
 		registry.put(SensiNactPackage.eNS_URI, ePackage);
 	}
 	
-	/* 
+	/**
 	 * (non-Javadoc)
 	 * @see org.gecko.emf.osgi.EPackageRegistryConfigurator#unconfigureEPackage(org.eclipse.emf.ecore.EPackage.Registry)
 	 * @generated
@@ -40,5 +44,20 @@ public class SensiNactEPackageConfigurator implements EPackageConfigurator {
 	@Override
 	public void unconfigureEPackage(org.eclipse.emf.ecore.EPackage.Registry registry) {
 		registry.remove(SensiNactPackage.eNS_URI);
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see org.gecko.emf.osgi.EPackageConfigurator#getServiceProperties()
+	 * @generated
+	 */
+	@Override
+	public Map<String, Object> getServiceProperties() {
+		Map<String, Object> properties = new HashMap<String, Object>();
+		properties.put(EMFNamespaces.EMF_MODEL_NAME, SensiNactPackage.eNAME);
+		properties.put(EMFNamespaces.EMF_MODEL_NSURI, SensiNactPackage.eNS_URI);
+		properties.put(EMFNamespaces.EMF_MODEL_FILE_EXT, "sensinact");
+		properties.put(EMFNamespaces.EMF_CONFIGURATOR_VERSION, "1.0");
+		return properties;
 	}
 }

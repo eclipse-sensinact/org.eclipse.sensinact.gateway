@@ -1,13 +1,16 @@
-/*
+/**
  */
-package org.eclipse.core.model.sensinact.util;
+package org.eclipse.sensinact.model.core.util;
 
-import org.eclipse.core.model.sensinact.*;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 
 import org.eclipse.emf.ecore.util.Switch;
+
+import org.eclipse.sensinact.model.core.*;
 
 /**
  * <!-- begin-user-doc -->
@@ -19,7 +22,7 @@ import org.eclipse.emf.ecore.util.Switch;
  * until a non-null result is returned,
  * which is the result of the switch.
  * <!-- end-user-doc -->
- * @see org.eclipse.core.model.sensinact.SensiNactPackage
+ * @see org.eclipse.sensinact.model.core.SensiNactPackage
  * @generated
  */
 public class SensiNactSwitch<T> extends Switch<T> {
@@ -29,7 +32,7 @@ public class SensiNactSwitch<T> extends Switch<T> {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected SensiNactPackage modelPackage;
+	protected static SensiNactPackage modelPackage;
 
 	/**
 	 * Creates an instance of the switch.
@@ -37,8 +40,10 @@ public class SensiNactSwitch<T> extends Switch<T> {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public SensiNactSwitch(SensiNactPackage modelPackage) {
-		this.modelPackage = modelPackage;
+	public SensiNactSwitch() {
+		if (modelPackage == null) {
+			modelPackage = SensiNactPackage.eINSTANCE;
+		}
 	}
 
 	/**
@@ -64,33 +69,69 @@ public class SensiNactSwitch<T> extends Switch<T> {
 	@Override
 	protected T doSwitch(int classifierID, EObject theEObject) {
 		switch (classifierID) {
+			case SensiNactPackage.PROVIDER: {
+				Provider provider = (Provider)theEObject;
+				T result = caseProvider(provider);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case SensiNactPackage.ADMIN: {
+				Admin admin = (Admin)theEObject;
+				T result = caseAdmin(admin);
+				if (result == null) result = caseService(admin);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
 			case SensiNactPackage.SERVICE: {
 				Service service = (Service)theEObject;
 				T result = caseService(service);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
-			case SensiNactPackage.LOCATION: {
-				Location location = (Location)theEObject;
-				T result = caseLocation(location);
+			case SensiNactPackage.METADATA: {
+				Metadata metadata = (Metadata)theEObject;
+				T result = caseMetadata(metadata);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
-			case SensiNactPackage.LOCATABLE: {
-				Locatable locatable = (Locatable)theEObject;
-				T result = caseLocatable(locatable);
-				if (result == null) result = defaultCase(theEObject);
-				return result;
-			}
-			case SensiNactPackage.DEVICE: {
-				Device device = (Device)theEObject;
-				T result = caseDevice(device);
-				if (result == null) result = caseLocatable(device);
+			case SensiNactPackage.FEATURE_METADATA: {
+				@SuppressWarnings("unchecked") Map.Entry<EStructuralFeature, Metadata> featureMetadata = (Map.Entry<EStructuralFeature, Metadata>)theEObject;
+				T result = caseFeatureMetadata(featureMetadata);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
 			default: return defaultCase(theEObject);
 		}
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Provider</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Provider</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseProvider(Provider object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Admin</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Admin</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseAdmin(Admin object) {
+		return null;
 	}
 
 	/**
@@ -109,47 +150,32 @@ public class SensiNactSwitch<T> extends Switch<T> {
 	}
 
 	/**
-	 * Returns the result of interpreting the object as an instance of '<em>Location</em>'.
+	 * Returns the result of interpreting the object as an instance of '<em>Metadata</em>'.
 	 * <!-- begin-user-doc -->
 	 * This implementation returns null;
 	 * returning a non-null result will terminate the switch.
 	 * <!-- end-user-doc -->
 	 * @param object the target of the switch.
-	 * @return the result of interpreting the object as an instance of '<em>Location</em>'.
+	 * @return the result of interpreting the object as an instance of '<em>Metadata</em>'.
 	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
 	 * @generated
 	 */
-	public T caseLocation(Location object) {
+	public T caseMetadata(Metadata object) {
 		return null;
 	}
 
 	/**
-	 * Returns the result of interpreting the object as an instance of '<em>Locatable</em>'.
+	 * Returns the result of interpreting the object as an instance of '<em>Feature Metadata</em>'.
 	 * <!-- begin-user-doc -->
 	 * This implementation returns null;
 	 * returning a non-null result will terminate the switch.
 	 * <!-- end-user-doc -->
 	 * @param object the target of the switch.
-	 * @return the result of interpreting the object as an instance of '<em>Locatable</em>'.
+	 * @return the result of interpreting the object as an instance of '<em>Feature Metadata</em>'.
 	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
 	 * @generated
 	 */
-	public T caseLocatable(Locatable object) {
-		return null;
-	}
-
-	/**
-	 * Returns the result of interpreting the object as an instance of '<em>Device</em>'.
-	 * <!-- begin-user-doc -->
-	 * This implementation returns null;
-	 * returning a non-null result will terminate the switch.
-	 * <!-- end-user-doc -->
-	 * @param object the target of the switch.
-	 * @return the result of interpreting the object as an instance of '<em>Device</em>'.
-	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-	 * @generated
-	 */
-	public T caseDevice(Device object) {
+	public T caseFeatureMetadata(Map.Entry<EStructuralFeature, Metadata> object) {
 		return null;
 	}
 

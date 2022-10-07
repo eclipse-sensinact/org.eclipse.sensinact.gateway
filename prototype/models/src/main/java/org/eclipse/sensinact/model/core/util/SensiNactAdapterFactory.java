@@ -1,8 +1,8 @@
-/*
+/**
  */
-package org.eclipse.core.model.sensinact.util;
+package org.eclipse.sensinact.model.core.util;
 
-import org.eclipse.core.model.sensinact.*;
+import java.util.Map;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notifier;
@@ -10,13 +10,16 @@ import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
+
+import org.eclipse.sensinact.model.core.*;
 
 /**
  * <!-- begin-user-doc -->
  * The <b>Adapter Factory</b> for the model.
  * It provides an adapter <code>createXXX</code> method for each class of the model.
  * <!-- end-user-doc -->
- * @see org.eclipse.core.model.sensinact.SensiNactPackage
+ * @see org.eclipse.sensinact.model.core.SensiNactPackage
  * @generated
  */
 public class SensiNactAdapterFactory extends AdapterFactoryImpl {
@@ -26,7 +29,7 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected SensiNactPackage modelPackage;
+	protected static SensiNactPackage modelPackage;
 
 	/**
 	 * Creates an instance of the adapter factory.
@@ -34,8 +37,10 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public SensiNactAdapterFactory(SensiNactPackage modelPackage) {
-		this.modelPackage = modelPackage;
+	public SensiNactAdapterFactory() {
+		if (modelPackage == null) {
+			modelPackage = SensiNactPackage.eINSTANCE;
+		}
 	}
 
 	/**
@@ -64,22 +69,26 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	protected SensiNactSwitch<Adapter> modelSwitch =
-		new SensiNactSwitch<Adapter>(modelPackage) {
+		new SensiNactSwitch<Adapter>() {
+			@Override
+			public Adapter caseProvider(Provider object) {
+				return createProviderAdapter();
+			}
+			@Override
+			public Adapter caseAdmin(Admin object) {
+				return createAdminAdapter();
+			}
 			@Override
 			public Adapter caseService(Service object) {
 				return createServiceAdapter();
 			}
 			@Override
-			public Adapter caseLocation(Location object) {
-				return createLocationAdapter();
+			public Adapter caseMetadata(Metadata object) {
+				return createMetadataAdapter();
 			}
 			@Override
-			public Adapter caseLocatable(Locatable object) {
-				return createLocatableAdapter();
-			}
-			@Override
-			public Adapter caseDevice(Device object) {
-				return createDeviceAdapter();
+			public Adapter caseFeatureMetadata(Map.Entry<EStructuralFeature, Metadata> object) {
+				return createFeatureMetadataAdapter();
 			}
 			@Override
 			public Adapter defaultCase(EObject object) {
@@ -102,13 +111,41 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 
 
 	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.core.model.sensinact.Service <em>Service</em>}'.
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.Provider <em>Provider</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see org.eclipse.core.model.sensinact.Service
+	 * @see org.eclipse.sensinact.model.core.Provider
+	 * @generated
+	 */
+	public Adapter createProviderAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.Admin <em>Admin</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.Admin
+	 * @generated
+	 */
+	public Adapter createAdminAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.Service <em>Service</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.Service
 	 * @generated
 	 */
 	public Adapter createServiceAdapter() {
@@ -116,44 +153,30 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 	}
 
 	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.core.model.sensinact.Location <em>Location</em>}'.
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.Metadata <em>Metadata</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see org.eclipse.core.model.sensinact.Location
+	 * @see org.eclipse.sensinact.model.core.Metadata
 	 * @generated
 	 */
-	public Adapter createLocationAdapter() {
+	public Adapter createMetadataAdapter() {
 		return null;
 	}
 
 	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.core.model.sensinact.Locatable <em>Locatable</em>}'.
+	 * Creates a new adapter for an object of class '{@link java.util.Map.Entry <em>Feature Metadata</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see org.eclipse.core.model.sensinact.Locatable
+	 * @see java.util.Map.Entry
 	 * @generated
 	 */
-	public Adapter createLocatableAdapter() {
-		return null;
-	}
-
-	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.core.model.sensinact.Device <em>Device</em>}'.
-	 * <!-- begin-user-doc -->
-	 * This default implementation returns null so that we can easily ignore cases;
-	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
-	 * <!-- end-user-doc -->
-	 * @return the new adapter.
-	 * @see org.eclipse.core.model.sensinact.Device
-	 * @generated
-	 */
-	public Adapter createDeviceAdapter() {
+	public Adapter createFeatureMetadataAdapter() {
 		return null;
 	}
 
