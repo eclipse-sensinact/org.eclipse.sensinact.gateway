@@ -28,7 +28,6 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
  *   <li>{@link org.eclipse.sensinact.model.core.impl.MetadataImpl#getFeature <em>Feature</em>}</li>
  *   <li>{@link org.eclipse.sensinact.model.core.impl.MetadataImpl#getTimestamp <em>Timestamp</em>}</li>
  *   <li>{@link org.eclipse.sensinact.model.core.impl.MetadataImpl#getSource <em>Source</em>}</li>
- *   <li>{@link org.eclipse.sensinact.model.core.impl.MetadataImpl#getValue <em>Value</em>}</li>
  * </ul>
  *
  * @generated
@@ -73,26 +72,6 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
 	 * @ordered
 	 */
 	protected EObject source;
-
-	/**
-	 * The default value of the '{@link #getValue() <em>Value</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getValue()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String VALUE_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getValue() <em>Value</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getValue()
-	 * @generated
-	 * @ordered
-	 */
-	protected String value = VALUE_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -222,29 +201,6 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
 	 * @generated
 	 */
 	@Override
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setValue(String newValue) {
-		String oldValue = value;
-		value = newValue;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.METADATA__VALUE, oldValue, value));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
 			case SensiNactPackage.METADATA__FEATURE:
@@ -255,8 +211,6 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
 			case SensiNactPackage.METADATA__SOURCE:
 				if (resolve) return getSource();
 				return basicGetSource();
-			case SensiNactPackage.METADATA__VALUE:
-				return getValue();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -277,9 +231,6 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
 				return;
 			case SensiNactPackage.METADATA__SOURCE:
 				setSource((EObject)newValue);
-				return;
-			case SensiNactPackage.METADATA__VALUE:
-				setValue((String)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -302,9 +253,6 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
 			case SensiNactPackage.METADATA__SOURCE:
 				setSource((EObject)null);
 				return;
-			case SensiNactPackage.METADATA__VALUE:
-				setValue(VALUE_EDEFAULT);
-				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -323,8 +271,6 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
 				return TIMESTAMP_EDEFAULT == null ? timestamp != null : !TIMESTAMP_EDEFAULT.equals(timestamp);
 			case SensiNactPackage.METADATA__SOURCE:
 				return source != null;
-			case SensiNactPackage.METADATA__VALUE:
-				return VALUE_EDEFAULT == null ? value != null : !VALUE_EDEFAULT.equals(value);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -341,8 +287,6 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
 		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (timestamp: ");
 		result.append(timestamp);
-		result.append(", value: ");
-		result.append(value);
 		result.append(')');
 		return result.toString();
 	}
