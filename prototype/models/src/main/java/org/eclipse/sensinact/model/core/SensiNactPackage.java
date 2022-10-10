@@ -169,13 +169,22 @@ public interface SensiNactPackage extends EPackage {
 	int ADMIN__FRIENDLY_NAME = SERVICE_FEATURE_COUNT + 0;
 
 	/**
+	 * The feature id for the '<em><b>Location</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int ADMIN__LOCATION = SERVICE_FEATURE_COUNT + 1;
+
+	/**
 	 * The number of structural features of the '<em>Admin</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int ADMIN_FEATURE_COUNT = SERVICE_FEATURE_COUNT + 1;
+	int ADMIN_FEATURE_COUNT = SERVICE_FEATURE_COUNT + 2;
 
 	/**
 	 * The number of operations of the '<em>Admin</em>' class.
@@ -224,22 +233,13 @@ public interface SensiNactPackage extends EPackage {
 	int METADATA__SOURCE = 2;
 
 	/**
-	 * The feature id for the '<em><b>Value</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int METADATA__VALUE = 3;
-
-	/**
 	 * The number of structural features of the '<em>Metadata</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int METADATA_FEATURE_COUNT = 4;
+	int METADATA_FEATURE_COUNT = 3;
 
 	/**
 	 * The number of operations of the '<em>Metadata</em>' class.
@@ -351,6 +351,17 @@ public interface SensiNactPackage extends EPackage {
 	EAttribute getAdmin_FriendlyName();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.model.core.Admin#getLocation <em>Location</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Location</em>'.
+	 * @see org.eclipse.sensinact.model.core.Admin#getLocation()
+	 * @see #getAdmin()
+	 * @generated
+	 */
+	EAttribute getAdmin_Location();
+
+	/**
 	 * Returns the meta object for class '{@link org.eclipse.sensinact.model.core.Service <em>Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -413,17 +424,6 @@ public interface SensiNactPackage extends EPackage {
 	 * @generated
 	 */
 	EReference getMetadata_Source();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.model.core.Metadata#getValue <em>Value</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Value</em>'.
-	 * @see org.eclipse.sensinact.model.core.Metadata#getValue()
-	 * @see #getMetadata()
-	 * @generated
-	 */
-	EAttribute getMetadata_Value();
 
 	/**
 	 * Returns the meta object for class '{@link java.util.Map.Entry <em>Feature Metadata</em>}'.

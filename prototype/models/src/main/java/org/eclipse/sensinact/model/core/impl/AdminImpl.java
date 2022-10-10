@@ -20,6 +20,7 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
  * </p>
  * <ul>
  *   <li>{@link org.eclipse.sensinact.model.core.impl.AdminImpl#getFriendlyName <em>Friendly Name</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.model.core.impl.AdminImpl#getLocation <em>Location</em>}</li>
  * </ul>
  *
  * @generated
@@ -44,6 +45,26 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	 * @ordered
 	 */
 	protected String friendlyName = FRIENDLY_NAME_EDEFAULT;
+
+	/**
+	 * The default value of the '{@link #getLocation() <em>Location</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getLocation()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String LOCATION_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getLocation() <em>Location</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getLocation()
+	 * @generated
+	 * @ordered
+	 */
+	protected String location = LOCATION_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -93,10 +114,35 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	 * @generated
 	 */
 	@Override
+	public String getLocation() {
+		return location;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setLocation(String newLocation) {
+		String oldLocation = location;
+		location = newLocation;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__LOCATION, oldLocation, location));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
 			case SensiNactPackage.ADMIN__FRIENDLY_NAME:
 				return getFriendlyName();
+			case SensiNactPackage.ADMIN__LOCATION:
+				return getLocation();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -111,6 +157,9 @@ public class AdminImpl extends ServiceImpl implements Admin {
 		switch (featureID) {
 			case SensiNactPackage.ADMIN__FRIENDLY_NAME:
 				setFriendlyName((String)newValue);
+				return;
+			case SensiNactPackage.ADMIN__LOCATION:
+				setLocation((String)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -127,6 +176,9 @@ public class AdminImpl extends ServiceImpl implements Admin {
 			case SensiNactPackage.ADMIN__FRIENDLY_NAME:
 				setFriendlyName(FRIENDLY_NAME_EDEFAULT);
 				return;
+			case SensiNactPackage.ADMIN__LOCATION:
+				setLocation(LOCATION_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -141,6 +193,8 @@ public class AdminImpl extends ServiceImpl implements Admin {
 		switch (featureID) {
 			case SensiNactPackage.ADMIN__FRIENDLY_NAME:
 				return FRIENDLY_NAME_EDEFAULT == null ? friendlyName != null : !FRIENDLY_NAME_EDEFAULT.equals(friendlyName);
+			case SensiNactPackage.ADMIN__LOCATION:
+				return LOCATION_EDEFAULT == null ? location != null : !LOCATION_EDEFAULT.equals(location);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -157,6 +211,8 @@ public class AdminImpl extends ServiceImpl implements Admin {
 		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (friendlyName: ");
 		result.append(friendlyName);
+		result.append(", location: ");
+		result.append(location);
 		result.append(')');
 		return result.toString();
 	}

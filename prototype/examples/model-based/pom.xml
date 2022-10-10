@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.kentyou.sensinact.prototype</groupId>
-    <artifactId>prototype</artifactId>
+    <artifactId>examples</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>model-based</artifactId>

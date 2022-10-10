@@ -19,6 +19,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcoreFactory;
@@ -36,6 +37,12 @@ public class EMFUtil {
 	private static final Map<Class<?>, EClassifier> typeMap = new HashMap<Class<?>, EClassifier>();
 	static {
 		EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
+	}
+	
+	public static Map<String, Object> toEObjectAttributesToMap(EObject eObject){
+		Map<String, Object> result = new HashMap<String, Object>();
+		eObject.eClass().getEAttributes().forEach(a -> result.put(a.getName(), eObject.eGet(a)));
+		return result;
 	}
 	
 	/**

@@ -177,6 +177,16 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	@Override
+	public EAttribute getAdmin_Location() {
+		return (EAttribute)adminEClass.getEStructuralFeatures().get(1);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public EClass getService() {
 		return serviceEClass;
 	}
@@ -229,16 +239,6 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	@Override
 	public EReference getMetadata_Source() {
 		return (EReference)metadataEClass.getEStructuralFeatures().get(2);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getMetadata_Value() {
-		return (EAttribute)metadataEClass.getEStructuralFeatures().get(3);
 	}
 
 	/**
@@ -306,6 +306,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 
 		adminEClass = createEClass(ADMIN);
 		createEAttribute(adminEClass, ADMIN__FRIENDLY_NAME);
+		createEAttribute(adminEClass, ADMIN__LOCATION);
 
 		serviceEClass = createEClass(SERVICE);
 		createEReference(serviceEClass, SERVICE__METADATA);
@@ -314,7 +315,6 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		createEReference(metadataEClass, METADATA__FEATURE);
 		createEAttribute(metadataEClass, METADATA__TIMESTAMP);
 		createEReference(metadataEClass, METADATA__SOURCE);
-		createEAttribute(metadataEClass, METADATA__VALUE);
 
 		featureMetadataEClass = createEClass(FEATURE_METADATA);
 		createEReference(featureMetadataEClass, FEATURE_METADATA__KEY);
@@ -358,6 +358,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 
 		initEClass(adminEClass, Admin.class, "Admin", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getAdmin_FriendlyName(), ecorePackage.getEString(), "friendlyName", null, 0, 1, Admin.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getAdmin_Location(), ecorePackage.getEString(), "location", null, 0, 1, Admin.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(serviceEClass, Service.class, "Service", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getService_Metadata(), this.getFeatureMetadata(), null, "metadata", null, 0, -1, Service.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -366,7 +367,6 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		initEReference(getMetadata_Feature(), ecorePackage.getEStructuralFeature(), null, "feature", null, 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getMetadata_Timestamp(), ecorePackage.getEDate(), "timestamp", null, 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEReference(getMetadata_Source(), ecorePackage.getEObject(), null, "source", null, 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getMetadata_Value(), ecorePackage.getEString(), "value", null, 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(featureMetadataEClass, Map.Entry.class, "FeatureMetadata", !IS_ABSTRACT, !IS_INTERFACE, !IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getFeatureMetadata_Key(), ecorePackage.getEStructuralFeature(), null, "key", null, 0, 1, Map.Entry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
