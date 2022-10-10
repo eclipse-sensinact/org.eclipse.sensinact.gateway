@@ -11,7 +11,7 @@ JAVA_CLASSPATH="bin/felix.jar"
 
 function isReadmeFile (){
 	if [ ! "$1" = "README" ]; then
-	  return 1; 
+	  return 1;
 	fi
 	return 0;
 }
@@ -63,7 +63,7 @@ while [[ $# -gt 0 ]]; do
 
 			result=$(whiptail --title "sensiNact Profile Configurator" \
 				--checklist "Please select the profiles to activate" 36 70 26 ${files[@]} 2>&1 >/dev/tty)
-			
+
 			if [ $? == 1 ]; then
 				echo "Cancelling"
 				exit 0
@@ -104,8 +104,12 @@ while [[ $# -gt 0 ]]; do
 			exit 0
 			;;
 		*)
-			echo "Invalid options: $1" >&2
-			exit 1
+			if [ -n "$1" ]
+			then
+				echo "Invalid options: $1" >&2
+				exit 1
+			fi
+			shift
 			;;
 	esac
 done
