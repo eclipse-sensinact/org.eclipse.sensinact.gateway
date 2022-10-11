@@ -91,6 +91,10 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 				return createFeatureMetadataAdapter();
 			}
 			@Override
+			public Adapter caseModelMetadata(ModelMetadata object) {
+				return createModelMetadataAdapter();
+			}
+			@Override
 			public Adapter defaultCase(EObject object) {
 				return createEObjectAdapter();
 			}
@@ -177,6 +181,20 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createFeatureMetadataAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.ModelMetadata <em>Model Metadata</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.ModelMetadata
+	 * @generated
+	 */
+	public Adapter createModelMetadataAdapter() {
 		return null;
 	}
 

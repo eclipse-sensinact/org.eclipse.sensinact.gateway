@@ -64,6 +64,7 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 			case SensiNactPackage.SERVICE: return createService();
 			case SensiNactPackage.METADATA: return createMetadata();
 			case SensiNactPackage.FEATURE_METADATA: return (EObject)createFeatureMetadata();
+			case SensiNactPackage.MODEL_METADATA: return createModelMetadata();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -121,6 +122,17 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 	public Map.Entry<EStructuralFeature, Metadata> createFeatureMetadata() {
 		FeatureMetadataImpl featureMetadata = new FeatureMetadataImpl();
 		return featureMetadata;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public ModelMetadata createModelMetadata() {
+		ModelMetadataImpl modelMetadata = new ModelMetadataImpl();
+		return modelMetadata;
 	}
 
 	/**

@@ -13,19 +13,25 @@ package org.eclipse.sensinact.prototype.model.nexus.impl;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EModelElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.sensinact.model.core.ModelMetadata;
 
 /**
  * Some Helper methods to work with Ecores.
@@ -61,11 +67,14 @@ public class EMFUtil {
 	 * @param name the name of the EClass
 	 * @param superType the super type {@link EClass} to use
 	 */
-	public static EClass createEClass(String name, EPackage ePackage, EClass... superTypes ) {
+	public static EClass createEClass(String name, EPackage ePackage, Function<EClass, List<EAnnotation>> annotationCreator,  EClass... superTypes ) {
 		EClass eClass = EcoreFactory.eINSTANCE.createEClass();
 		eClass.setName(name);
-		eClass.getEAllSuperTypes().addAll(Arrays.asList(superTypes));
+		eClass.getESuperTypes().addAll(Arrays.asList(superTypes));
 		ePackage.getEClassifiers().add(eClass);
+		if(annotationCreator != null) {
+			eClass.getEAnnotations().addAll(annotationCreator.apply(eClass));
+		}
 		return eClass;
 	}
 	
@@ -79,18 +88,37 @@ public class EMFUtil {
 		return ePackage;
 	}
 
+	public static EAnnotation createEAnnotation(String source, Map<String, String> detailKeys) {
+		EAnnotation annotation = EcoreFactory.eINSTANCE.createEAnnotation();
+		annotation.setSource(source);
+		annotation.getDetails().putAll(detailKeys);
+		return annotation;
+	}
+
+	public static EAnnotation createEAnnotation(String source, List<EObject> content) {
+		EAnnotation annotation = EcoreFactory.eINSTANCE.createEAnnotation();
+		annotation.setSource(source);
+		annotation.getContents().addAll(content);
+		return annotation;
+	}
+	
+
 	/**
 	 * @param serviceName
 	 * @param service
 	 * @param b
 	 * @return
 	 */
-	public static EReference createEReference(EClass parent, String refName, EClass type, boolean containment) {
+	public static EReference createEReference(EClass parent, String refName, EClass type, boolean containment, Function<EStructuralFeature, List<EAnnotation>> annotationCreator) {
 		EReference feature = EcoreFactory.eINSTANCE.createEReference();
 		feature.setName(refName);
 		feature.setEType(type);
 		feature.setContainment(containment);
 		parent.getEStructuralFeatures().add(feature);
+		if(annotationCreator != null) {
+			List<EAnnotation> annotations = annotationCreator.apply(feature);
+			feature.getEAnnotations().addAll(annotations);
+		}
 		return feature;
 	}
 
@@ -101,12 +129,36 @@ public class EMFUtil {
 	 * @param type
 	 * @return
 	 */
-	public static EAttribute createEAttribute(EClass service, String resource, Class<?> type) {
+	public static EAttribute createEAttribute(EClass service, String resource, Class<?> type, Function<EStructuralFeature, List<EAnnotation>> annotationCreator) {
 		EAttribute attribute = EcoreFactory.eINSTANCE.createEAttribute();
 		attribute.setName(resource);
 		attribute.setEType(typeMap.get(type));
 		service.getEStructuralFeatures().add(attribute);
+		if(annotationCreator != null) {
+			attribute.getEAnnotations().addAll(annotationCreator.apply(attribute));
+		}
 		return attribute;
 	}
 	
+	/**
+	 * @param feature
+	 * @return
+	 */
+	public static int getVersion(EModelElement eModelElement) {
+		EAnnotation eAnnotation = eModelElement.getEAnnotation("metadata");
+		if(eAnnotation == null) {
+			return -1;
+		}
+		return ((ModelMetadata) eAnnotation.getContents().get(0)).getVersion();
+	}
+	
+	/**
+	 * Returns the Version of the containing {@link EClass} of the {@link EStructuralFeature} 
+	 * @param feature the Feature
+	 * @return the version of the container
+	 */
+	public static int getContainerVersion(EStructuralFeature feature) {
+		return getVersion( (EClass) feature.eContainer());
+	}
+
 }

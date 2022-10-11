@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.impl.EPackageImpl;
 
 import org.eclipse.sensinact.model.core.Admin;
 import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactFactory;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
@@ -59,6 +60,13 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	private EClass featureMetadataEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass modelMetadataEClass = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -277,6 +285,26 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	@Override
+	public EClass getModelMetadata() {
+		return modelMetadataEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getModelMetadata_Version() {
+		return (EAttribute)modelMetadataEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public SensiNactFactory getSensiNactFactory() {
 		return (SensiNactFactory)getEFactoryInstance();
 	}
@@ -319,6 +347,9 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		featureMetadataEClass = createEClass(FEATURE_METADATA);
 		createEReference(featureMetadataEClass, FEATURE_METADATA__KEY);
 		createEReference(featureMetadataEClass, FEATURE_METADATA__VALUE);
+
+		modelMetadataEClass = createEClass(MODEL_METADATA);
+		createEAttribute(modelMetadataEClass, MODEL_METADATA__VERSION);
 	}
 
 	/**
@@ -350,6 +381,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 
 		// Add supertypes to classes
 		adminEClass.getESuperTypes().add(this.getService());
+		modelMetadataEClass.getESuperTypes().add(this.getMetadata());
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(providerEClass, Provider.class, "Provider", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -371,6 +403,9 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		initEClass(featureMetadataEClass, Map.Entry.class, "FeatureMetadata", !IS_ABSTRACT, !IS_INTERFACE, !IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getFeatureMetadata_Key(), ecorePackage.getEStructuralFeature(), null, "key", null, 0, 1, Map.Entry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEReference(getFeatureMetadata_Value(), this.getMetadata(), null, "value", null, 0, 1, Map.Entry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(modelMetadataEClass, ModelMetadata.class, "ModelMetadata", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getModelMetadata_Version(), ecorePackage.getEInt(), "version", null, 0, 1, ModelMetadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);

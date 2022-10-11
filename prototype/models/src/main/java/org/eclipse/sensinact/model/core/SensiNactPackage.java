@@ -296,6 +296,70 @@ public interface SensiNactPackage extends EPackage {
 	 */
 	int FEATURE_METADATA_OPERATION_COUNT = 0;
 
+	/**
+	 * The meta object id for the '{@link org.eclipse.sensinact.model.core.impl.ModelMetadataImpl <em>Model Metadata</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see org.eclipse.sensinact.model.core.impl.ModelMetadataImpl
+	 * @see org.eclipse.sensinact.model.core.impl.SensiNactPackageImpl#getModelMetadata()
+	 * @generated
+	 */
+	int MODEL_METADATA = 5;
+
+	/**
+	 * The feature id for the '<em><b>Feature</b></em>' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_METADATA__FEATURE = METADATA__FEATURE;
+
+	/**
+	 * The feature id for the '<em><b>Timestamp</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_METADATA__TIMESTAMP = METADATA__TIMESTAMP;
+
+	/**
+	 * The feature id for the '<em><b>Source</b></em>' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_METADATA__SOURCE = METADATA__SOURCE;
+
+	/**
+	 * The feature id for the '<em><b>Version</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_METADATA__VERSION = METADATA_FEATURE_COUNT + 0;
+
+	/**
+	 * The number of structural features of the '<em>Model Metadata</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_METADATA_FEATURE_COUNT = METADATA_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of operations of the '<em>Model Metadata</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_METADATA_OPERATION_COUNT = METADATA_OPERATION_COUNT + 0;
+
 
 	/**
 	 * Returns the meta object for class '{@link org.eclipse.sensinact.model.core.Provider <em>Provider</em>}'.
@@ -458,6 +522,27 @@ public interface SensiNactPackage extends EPackage {
 	 * @generated
 	 */
 	EReference getFeatureMetadata_Value();
+
+	/**
+	 * Returns the meta object for class '{@link org.eclipse.sensinact.model.core.ModelMetadata <em>Model Metadata</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Model Metadata</em>'.
+	 * @see org.eclipse.sensinact.model.core.ModelMetadata
+	 * @generated
+	 */
+	EClass getModelMetadata();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.model.core.ModelMetadata#getVersion <em>Version</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Version</em>'.
+	 * @see org.eclipse.sensinact.model.core.ModelMetadata#getVersion()
+	 * @see #getModelMetadata()
+	 * @generated
+	 */
+	EAttribute getModelMetadata_Version();
 
 	/**
 	 * Returns the factory that creates the instances of the model.

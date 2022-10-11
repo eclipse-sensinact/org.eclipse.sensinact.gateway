@@ -58,6 +58,15 @@ public interface SensiNactFactory extends EFactory {
 	Metadata createMetadata();
 
 	/**
+	 * Returns a new object of class '<em>Model Metadata</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Model Metadata</em>'.
+	 * @generated
+	 */
+	ModelMetadata createModelMetadata();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

@@ -13,6 +13,7 @@ package org.eclipse.sensinact.prototype.model.nexus.impl;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -23,17 +24,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAnnotation;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
-import org.osgi.service.component.annotations.Activate;
 
 
 /**
@@ -63,6 +66,9 @@ public class NexusImpl {
 		this.resourceSet = resourceSet;
 		this.sensinactPackage = sensinactPackage;
 		this.notificationAccumulator = accumulator;
+		
+		defaultPackage = EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", resourceSet);
+		packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
 	}
 
 	private static class ProviderTypeWrapper {
@@ -164,25 +170,21 @@ public class NexusImpl {
 		}
 	}
 	
-	@Activate
-	void activate() {
-		defaultPackage = EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", resourceSet);
-		packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
-	}
-	
 	public void handleDataUpdate(String model, String provider, String service, String resource,
 			Class<?> type, Object data, Instant timestamp) {
 		if(model == null) {
 			model = provider; 
 		}
 		
+		Instant metaTimestamp = timestamp == null? Instant.now() : timestamp;
+		
 		NotificationAccumulator accumulator = notificationAccumulator.get();
 		
-		ProviderTypeWrapper wrapper = getOrCreateProvider(model, DEFAULT_URI, accumulator);
-		ModelTransaction transaction = getOrCreateService(service, wrapper, accumulator);
-		transaction = getOrCreateResource(wrapper, resource, type, transaction, accumulator);
+		ProviderTypeWrapper wrapper = getOrCreateProvider(model, DEFAULT_URI, metaTimestamp, accumulator);
+		ModelTransaction transaction = getOrCreateService(service, wrapper, metaTimestamp, accumulator);
+		transaction = getOrCreateResource(wrapper, resource, type, transaction, metaTimestamp, accumulator);
 		updateInstances(wrapper, transaction);
-		setData(wrapper, transaction, model, provider, data, timestamp, accumulator);
+		setData(wrapper, transaction, model, provider, data, metaTimestamp, accumulator);
 	}
 	
 	/**
@@ -213,20 +215,20 @@ public class NexusImpl {
 		EStructuralFeature resourceFeature = transaction.getFeaturePath().get(1);
 		
 		//Handle Metadata
-		Instant metaTimestamp = timestamp == null? Instant.now() : timestamp;
-		Date tStamp = Date.from(metaTimestamp);
+		
+		Date tStamp = Date.from(timestamp);
 		Metadata metadata = service.getMetadata().get(resourceFeature);
 		
 		Map<String, Object> oldMetaData = null;
-		Object oldValue = service.eGet(serviceFeature);
+		Object oldValue = service.eGet(resourceFeature);
 		if(metadata != null){
 			oldMetaData = EMFUtil.toEObjectAttributesToMap(metadata);
 			oldMetaData.put("value", oldValue);
 		}
 		
 		if(metadata == null || metadata.getTimestamp().before(tStamp)) {
-			service.eSet(serviceFeature, data);
-			accumulator.resourceValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldValue, data, metaTimestamp);
+			service.eSet(resourceFeature, data);
+			accumulator.resourceValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldValue, data, timestamp);
 		} else {
 			return;
 		}
@@ -242,10 +244,19 @@ public class NexusImpl {
 		Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata);
 		newMetaData.put("value", data);
 		
-		accumulator.metadataValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldMetaData, newMetaData, metaTimestamp);
+		accumulator.metadataValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldMetaData, newMetaData, timestamp);
 	}
 	
-	
+	public Provider getProvider(String providerName) {
+		return getProvider(providerName, providerName);
+	}
+
+	public Provider getProvider(String model, String providerName) {
+		URI packageUri = URI.createURI(DEFAULT_URI);
+		URI providerUri = packageUri.appendFragment(model);
+		ProviderTypeWrapper wrapper = providerCache.get(providerUri);
+		return wrapper == null ? null : wrapper.getInstances().get(createURI(model, providerName));
+	}
 
 	/**
 	 * @param dto
@@ -264,7 +275,7 @@ public class NexusImpl {
 	 * @param transaction
 	 */
 	private void updateInstances(ProviderTypeWrapper wrapper, ModelTransaction transaction) {
-		if(transaction.getServiceState() != ModelTransactionState.NONE && transaction.getResourceState() != ModelTransactionState.NONE) {
+		if(transaction.getServiceState() != ModelTransactionState.NONE || transaction.getResourceState() != ModelTransactionState.NONE) {
 			Set<Entry<URI,Provider>> entrySet = wrapper.getInstances().entrySet();
 			for (Iterator<Entry<URI, Provider>> iterator = entrySet.iterator(); iterator.hasNext();) {
 				Entry<URI, Provider> entry = iterator.next();
@@ -272,12 +283,12 @@ public class NexusImpl {
 				//we have to create a copy, so the instances know about the updated model
 				Provider updatedProvider = provider;
 				if(transaction.getServiceState() == ModelTransactionState.NEW) {
-					updatedProvider = EcoreUtil.copy(provider);
+					updatedProvider = SensinactCopier.copySelective(provider);
 					entry.setValue(updatedProvider);
 				}
 				if(transaction.getResourceState() == ModelTransactionState.NEW && updatedProvider.eIsSet(transaction.getFeaturePath().get(0))) {
 					Service service = (Service) updatedProvider.eGet(transaction.getFeaturePath().get(0));
-					Service updatedService = EcoreUtil.copy(service);
+					Service updatedService = SensinactCopier.copySelective(service);
 					updatedProvider.eSet(transaction.getFeaturePath().get(0), updatedService);
 				}
 			}
@@ -292,21 +303,23 @@ public class NexusImpl {
 	 * @return
 	 */
 	private ModelTransaction getOrCreateResource(ProviderTypeWrapper wrapper, String resource, Class<?> type,
-			ModelTransaction transaction, NotificationAccumulator accumulator) {
+			ModelTransaction transaction, Instant timestamp, NotificationAccumulator accumulator) {
 		EClass service = transaction.getService();
-		EStructuralFeature feature = service.getEStructuralFeature(resource);
+		EAttribute feature = (EAttribute) service.getEStructuralFeature(resource);
 		if(feature == null) {
 			//The EClass does not have a reference to the service. This means we need to create an EClass representing the Service and add a reference to our provider EClass 
 			if(transaction.getServiceState() != ModelTransactionState.NEW) {
 				transaction.setResourceState(ModelTransactionState.NEW);
 			}
-			feature = EMFUtil.createEAttribute(service, resource, type);
+			updateMetadata(service);
+			feature = EMFUtil.createEAttribute(service, resource, type, ef -> createEFeatureAnnotation(ef, timestamp));
+			service.getEStructuralFeatures().add(feature);
 		}
 		transaction.addFeature(feature);
 		return transaction;
 	}
 
-	private ProviderTypeWrapper getOrCreateProvider(String rawProviderName, String thePackageUri, NotificationAccumulator accumulator) {
+	private ProviderTypeWrapper getOrCreateProvider(String rawProviderName, String thePackageUri, Instant timestamp, NotificationAccumulator accumulator) {
 		String providerName = firstToUpper(rawProviderName);
 		URI packageUri = URI.createURI(thePackageUri);
 		URI providerUri = packageUri.appendFragment(providerName);
@@ -315,7 +328,7 @@ public class NexusImpl {
 			EPackage ePackage = packageCache.get(packageUri);
 			EClass providerClass = (EClass) ePackage.getEClassifier(providerName);
 			if(providerClass == null) {
-				providerClass = EMFUtil.createEClass(providerName, ePackage, sensinactPackage.getProvider());
+				providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),  sensinactPackage.getProvider());
 				wrapper = new ProviderTypeWrapper(providerClass);
 				providerCache.put(providerUri, wrapper);
 				notificationAccumulator.get().addProvider(providerName);
@@ -324,21 +337,50 @@ public class NexusImpl {
 		return wrapper;
 	}
 	
-	private ModelTransaction getOrCreateService(String serviceName, ProviderTypeWrapper wrapper, NotificationAccumulator accumulator) {
+	private ModelTransaction getOrCreateService(String serviceName, ProviderTypeWrapper wrapper, Instant timestamp, NotificationAccumulator accumulator) {
 		ModelTransaction transaction = new ModelTransaction();
 		EClass provider = wrapper.getProviderType();
+		EClass service = null;
 		EStructuralFeature feature = provider.getEStructuralFeature(serviceName);
 		if(feature == null) {
 			//The EClass does not have a reference to the service. This means we need to create an EClass representing the Service and add a reference to our provider EClass 
 			transaction.setServiceState(ModelTransactionState.NEW);
 			EPackage ePackage = wrapper.getProviderType().getEPackage();
-			EClass service = EMFUtil.createEClass(constructServiceEClassName(provider.getName(), serviceName), ePackage, sensinactPackage.getService());
-			feature = EMFUtil.createEReference(provider, serviceName, service, true);
-			transaction.setService(service);
+			updateMetadata(provider);
+			service = EMFUtil.createEClass(constructServiceEClassName(provider.getName(), serviceName), ePackage, (ec) -> createEClassAnnotations(timestamp), sensinactPackage.getService());
+			feature = EMFUtil.createEReference(provider, serviceName, service, true, ef -> createEFeatureAnnotation(ef, timestamp));
+		} else {
+			service = (EClass) feature.getEType();
 		}
+		transaction.setService(service);
 		transaction.addFeature(feature);
 		return transaction;
 	}
+
+	/**
+	 * @param provider
+	 */
+	private void updateMetadata(EClass provider) {
+		EAnnotation metadata = provider.getEAnnotation("metadata"); 
+		ModelMetadata meta = (ModelMetadata) metadata.getContents().get(0);
+		meta.setVersion(meta.getVersion() + 1);
+	}
+	private List<EAnnotation> createEClassAnnotations(Instant timestamp){
+		ModelMetadata meta = sensinactPackage.getSensiNactFactory().createModelMetadata();
+		meta.setTimestamp(Date.from(timestamp));
+		meta.setVersion(1);
+		EAnnotation annotation = EMFUtil.createEAnnotation("metadata", Collections.singletonList(meta));
+		return Collections.singletonList(annotation);
+	}
+
+	private List<EAnnotation> createEFeatureAnnotation(EStructuralFeature feature, Instant timestamp){
+		ModelMetadata meta = sensinactPackage.getSensiNactFactory().createModelMetadata();
+		meta.setTimestamp(Date.from(timestamp));
+		meta.setVersion(EMFUtil.getContainerVersion(feature));
+		EAnnotation annotation = EMFUtil.createEAnnotation("metadata", Collections.singletonList(meta));
+		return Collections.singletonList(annotation);
+	}
+	
 
 	/**
 	 * @param name
