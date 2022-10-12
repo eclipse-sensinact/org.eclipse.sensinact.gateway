@@ -58,7 +58,7 @@ public class SessionManager implements SensiNactSessionManager, TypedEventHandle
 				sessionId = userDefaultSessionIds.putIfAbsent(userToken, sessionId);
 			}
 			
-			if(!sessionId.equals(session.getSessionId())) {
+			if(sessionId != null) {
 				// Someone beat us to the punch
 				removeSession(userToken, session.getSessionId());
 				session.expire();

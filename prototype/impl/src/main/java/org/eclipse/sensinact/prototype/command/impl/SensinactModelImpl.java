@@ -28,7 +28,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
 			Class<?> valueType) {
 		checkValid();
 		
-		SensinactProvider p = new SensinactProviderImpl(active, model, resource);
+		SensinactProvider p = new SensinactProviderImpl(active, model, provider);
 		SensinactService s = new SensinactServiceImpl(active, p, service);
 		
 		return new SensinactResourceImpl(active, s, resource, valueType, accumulator, nexusImpl, pf);

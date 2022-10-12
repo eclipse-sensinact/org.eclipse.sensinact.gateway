@@ -19,6 +19,7 @@
     <junit.version>5.9.0</junit.version>
     <mockito.version>4.7.0</mockito.version>
     <bnd.version>6.4.0-SNAPSHOT</bnd.version>
+    <osgi.test.version>1.2.1</osgi.test.version>
   </properties>
   
   <repositories>
@@ -71,33 +72,37 @@
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.util.promise</artifactId>
+        <version>1.2.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.component</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.component.annotations</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.typedevent</artifactId>
         <version>1.0.0</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.util.promise</artifactId>
-        <version>1.2.0</version>
-        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.bom</artifactId>
         <version>4.2.0-SNAPSHOT</version>
-        <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.test.bom</artifactId>
+        <version>${osgi.test.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+	  </dependency>
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
@@ -140,6 +145,29 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.test.junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>7.0.3</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+      <version>2.2.2</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.aries.typedevent</groupId>
+      <artifactId>org.apache.aries.typedevent.bus</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
   
