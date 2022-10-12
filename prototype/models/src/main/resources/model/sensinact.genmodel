@@ -5,21 +5,30 @@
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="8.0" suppressGenModelAnnotations="false"
     copyrightFields="false" operationReflection="true" importOrganizing="true" oSGiCompatible="true">
   <foreignModel>sensinact.ecore</foreignModel>
-  <genPackages prefix="SensiNact" basePackage="org.eclipse.core.model" resource="XMI"
+  <genPackages prefix="SensiNact" basePackage="org.eclipse.sensinact.model" resource="XMI"
       disposableProviderFactory="true" literalsInterface="false" ecorePackage="sensinact.ecore#/">
+    <genClasses ecoreClass="sensinact.ecore#//Provider">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Provider/id"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Provider/admin"/>
+    </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//Admin">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/friendlyName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/location"/>
+    </genClasses>
     <genClasses image="false" ecoreClass="sensinact.ecore#//Service">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Service/id"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Service/metadata"/>
     </genClasses>
-    <genClasses ecoreClass="sensinact.ecore#//Location">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Location/lat"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Location/lng"/>
+    <genClasses ecoreClass="sensinact.ecore#//Metadata">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//Metadata/feature"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Metadata/timestamp"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//Metadata/source"/>
     </genClasses>
-    <genClasses image="false" ecoreClass="sensinact.ecore#//Locatable">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Locatable/location"/>
+    <genClasses ecoreClass="sensinact.ecore#//FeatureMetadata">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureMetadata/key"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureMetadata/value"/>
     </genClasses>
-    <genClasses ecoreClass="sensinact.ecore#//Device">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Device/id"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Device/name"/>
+    <genClasses ecoreClass="sensinact.ecore#//ModelMetadata">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ModelMetadata/version"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

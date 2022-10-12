@@ -1,11 +1,17 @@
 package org.eclipse.sensinact.prototype.command.impl;
 
+import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayThread;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
+import org.eclipse.sensinact.prototype.model.nexus.impl.NexusImpl;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.NotificationAccumulatorImpl;
 import org.osgi.service.component.annotations.Activate;
@@ -24,6 +30,14 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 	@Reference
 	TypedEventBus typedEventBus;
 	
+	@Reference
+	ResourceSet resourceSet;
+	
+	@Reference
+	SensiNactPackage sensinactPackage;
+	
+	private NexusImpl nexusImpl;
+	
 	// TODO decide if we should just use an infinite queue
 	private final BlockingQueue<WorkItem<?>> work = new ArrayBlockingQueue<>(4096);
 	
@@ -31,8 +45,11 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 	
 	private final PromiseFactory promiseFactory = new PromiseFactory(null, null);
 	
+	private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
+	
 	@Activate
 	void activate() {
+		nexusImpl = new NexusImpl(resourceSet, sensinactPackage, this::getCurrentAccumulator);
 		start();
 	}
 	
@@ -48,6 +65,11 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 		}
 	}
 	
+	private NotificationAccumulator getCurrentAccumulator() {
+		WorkItem<?> workItem = currentItem.get();
+		return workItem == null ? null : workItem.command.getAccumulator();
+	}
+	
 	@Override
 	public PromiseFactory getPromiseFactory() {
 		return promiseFactory;
@@ -61,7 +83,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 	@Override
 	public <T> Promise<T> execute(AbstractSensinactCommand<T> command) {
 		Deferred<T> d = getPromiseFactory().deferred();
-		work.add(new WorkItem<>(d, command));
+		work.add(new WorkItem<>(d, command, nexusImpl));
 		return d.getPromise();
 	}
 
@@ -69,25 +91,32 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 	public void run() {
 		while(run.get()) {
 			try {
-				work.take().doWork();
+				WorkItem<?> item = work.take();
+				currentItem.set(item);
+				item.doWork();
 			} catch (InterruptedException e) {
 				continue;
+			} finally {
+				currentItem.set(null);
 			}
 		}
 	}
 	
-	private static class WorkItem<T> {
+	private class WorkItem<T> {
 		private final Deferred<T> d;
 		private final AbstractSensinactCommand<T> command;
+		private final NexusImpl nexusImpl;
 		
-		public WorkItem(Deferred<T> d, AbstractSensinactCommand<T> command) {
+		public WorkItem(Deferred<T> d, AbstractSensinactCommand<T> command, NexusImpl nexusImpl) {
 			this.d = d;
 			this.command = command;
+			this.nexusImpl = nexusImpl;
 		}
 
 		void doWork() {
 			try {
-				SensinactModelImpl modelImpl = new SensinactModelImpl(command.getAccumulator());
+				SensinactModelImpl modelImpl = new SensinactModelImpl(command.getAccumulator(), nexusImpl, 
+						getGatewayThread().getPromiseFactory());
 				Promise<T> promise;
 				try {
 					promise = command.call(modelImpl);

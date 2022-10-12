@@ -9,6 +9,8 @@ public interface Provider extends Modelled {
 	
 	ServiceBuilder createService(String service);
 	
-	Map<String, Service> getServices();
+	Map<String, ? extends Service> getServices();
+	
+	String getModelName();
 
 }
