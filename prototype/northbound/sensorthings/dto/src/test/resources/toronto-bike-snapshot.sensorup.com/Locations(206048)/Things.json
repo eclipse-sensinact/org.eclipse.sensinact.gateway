@@ -1,0 +1,16 @@
+{
+  "@iot.count": 1,
+  "value": [
+    {
+      "@iot.id": 206047,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)",
+      "description": "Bloor St / Brunswick Ave Toronto bike share station with data of available bikes and available docks",
+      "name": "7061:Bloor St / Brunswick Ave",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/Locations"
+    }
+  ]
+}

@@ -1,0 +1,906 @@
+{
+  "@iot.count": 3511,
+  "@iot.nextLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Observations?$top=100&$skip=100",
+  "value": [
+    {
+      "@iot.id": 1595467,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595467)",
+      "phenomenonTime": "2017-02-16T21:55:12.233Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595467)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595467)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1594850,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594850)",
+      "phenomenonTime": "2017-02-16T21:50:10.003Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594850)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594850)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1594673,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594673)",
+      "phenomenonTime": "2017-02-16T21:45:11.977Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594673)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594673)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1594048,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594048)",
+      "phenomenonTime": "2017-02-16T21:40:09.993Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594048)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1594048)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1593917,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1593917)",
+      "phenomenonTime": "2017-02-16T21:35:12.035Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1593917)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1593917)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1593548,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1593548)",
+      "phenomenonTime": "2017-02-16T21:30:12.057Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1593548)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1593548)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1592965,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592965)",
+      "phenomenonTime": "2017-02-16T21:25:10.425Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592965)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592965)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1592410,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592410)",
+      "phenomenonTime": "2017-02-16T21:20:09.249Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592410)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592410)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1592039,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592039)",
+      "phenomenonTime": "2017-02-16T21:15:09.083Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592039)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1592039)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1591995,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591995)",
+      "phenomenonTime": "2017-02-16T21:10:13.075Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591995)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591995)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1591247,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591247)",
+      "phenomenonTime": "2017-02-16T21:05:09.048Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591247)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591247)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1591119,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591119)",
+      "phenomenonTime": "2017-02-16T21:00:12.362Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591119)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1591119)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1590724,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1590724)",
+      "phenomenonTime": "2017-02-16T20:55:12.834Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1590724)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1590724)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1590337,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1590337)",
+      "phenomenonTime": "2017-02-16T20:50:12.979Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1590337)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1590337)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1589703,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1589703)",
+      "phenomenonTime": "2017-02-16T20:45:08.559Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1589703)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1589703)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1589257,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1589257)",
+      "phenomenonTime": "2017-02-16T20:40:08.240Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1589257)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1589257)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1588603,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1588603)",
+      "phenomenonTime": "2017-02-16T20:30:09.984Z",
+      "result": "23",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1588603)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1588603)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1588116,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1588116)",
+      "phenomenonTime": "2017-02-16T20:25:09.025Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1588116)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1588116)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1587739,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587739)",
+      "phenomenonTime": "2017-02-16T20:20:09.236Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587739)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587739)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1587323,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587323)",
+      "phenomenonTime": "2017-02-16T20:15:09.354Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587323)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587323)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1587061,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587061)",
+      "phenomenonTime": "2017-02-16T20:10:10.499Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587061)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1587061)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1586864,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1586864)",
+      "phenomenonTime": "2017-02-16T20:05:12.376Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1586864)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1586864)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1586156,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1586156)",
+      "phenomenonTime": "2017-02-16T20:00:08.355Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1586156)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1586156)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1585829,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585829)",
+      "phenomenonTime": "2017-02-16T19:55:09.313Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585829)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585829)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1585549,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585549)",
+      "phenomenonTime": "2017-02-16T19:50:10.681Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585549)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585549)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1585006,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585006)",
+      "phenomenonTime": "2017-02-16T19:45:08.790Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585006)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1585006)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1584626,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1584626)",
+      "phenomenonTime": "2017-02-16T19:40:09.093Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1584626)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1584626)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1584468,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1584468)",
+      "phenomenonTime": "2017-02-16T19:35:12.465Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1584468)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1584468)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1583855,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583855)",
+      "phenomenonTime": "2017-02-16T19:30:09.941Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583855)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583855)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1583732,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583732)",
+      "phenomenonTime": "2017-02-16T19:25:12.618Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583732)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583732)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1583101,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583101)",
+      "phenomenonTime": "2017-02-16T19:20:09.974Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583101)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1583101)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1582635,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1582635)",
+      "phenomenonTime": "2017-02-16T19:15:09.123Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1582635)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1582635)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1582200,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1582200)",
+      "phenomenonTime": "2017-02-16T19:10:08.958Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1582200)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1582200)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1581829,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581829)",
+      "phenomenonTime": "2017-02-16T19:05:09.028Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581829)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581829)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1581407,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581407)",
+      "phenomenonTime": "2017-02-16T19:00:08.082Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581407)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581407)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1581022,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581022)",
+      "phenomenonTime": "2017-02-16T18:55:08.486Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581022)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1581022)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1580940,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1580940)",
+      "phenomenonTime": "2017-02-16T18:50:11.810Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1580940)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1580940)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1580610,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1580610)",
+      "phenomenonTime": "2017-02-16T18:45:12.988Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1580610)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1580610)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1579883,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579883)",
+      "phenomenonTime": "2017-02-16T18:40:09.897Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579883)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579883)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1579488,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579488)",
+      "phenomenonTime": "2017-02-16T18:35:09.057Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579488)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579488)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1579075,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579075)",
+      "phenomenonTime": "2017-02-16T18:30:08.986Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579075)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1579075)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1578802,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578802)",
+      "phenomenonTime": "2017-02-16T18:25:09.370Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578802)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578802)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1578336,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578336)",
+      "phenomenonTime": "2017-02-16T18:20:09.220Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578336)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578336)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1578013,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578013)",
+      "phenomenonTime": "2017-02-16T18:15:09.828Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578013)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1578013)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1577689,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1577689)",
+      "phenomenonTime": "2017-02-16T18:10:10.645Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1577689)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1577689)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1577171,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1577171)",
+      "phenomenonTime": "2017-02-16T18:05:09.570Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1577171)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1577171)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1576852,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576852)",
+      "phenomenonTime": "2017-02-16T18:00:10.649Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576852)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576852)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1576390,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576390)",
+      "phenomenonTime": "2017-02-16T17:55:09.660Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576390)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576390)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1576289,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576289)",
+      "phenomenonTime": "2017-02-16T17:50:12.181Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576289)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1576289)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1575866,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1575866)",
+      "phenomenonTime": "2017-02-16T17:45:12.113Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1575866)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1575866)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1575340,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1575340)",
+      "phenomenonTime": "2017-02-16T17:40:10.893Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1575340)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1575340)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1574741,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1574741)",
+      "phenomenonTime": "2017-02-16T17:35:08.876Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1574741)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1574741)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1574396,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1574396)",
+      "phenomenonTime": "2017-02-16T17:30:09.530Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1574396)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1574396)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1573944,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573944)",
+      "phenomenonTime": "2017-02-16T17:25:09.557Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573944)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573944)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1573563,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573563)",
+      "phenomenonTime": "2017-02-16T17:20:09.241Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573563)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573563)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1573147,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573147)",
+      "phenomenonTime": "2017-02-16T17:15:08.132Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573147)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1573147)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1572847,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572847)",
+      "phenomenonTime": "2017-02-16T17:10:09.103Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572847)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572847)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1572458,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572458)",
+      "phenomenonTime": "2017-02-16T17:05:09.325Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572458)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572458)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1572267,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572267)",
+      "phenomenonTime": "2017-02-16T17:00:12.439Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572267)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1572267)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1571930,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571930)",
+      "phenomenonTime": "2017-02-16T16:55:11.737Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571930)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571930)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1571370,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571370)",
+      "phenomenonTime": "2017-02-16T16:50:10.229Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571370)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571370)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1571019,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571019)",
+      "phenomenonTime": "2017-02-16T16:45:10.753Z",
+      "result": "22",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571019)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1571019)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1570725,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1570725)",
+      "phenomenonTime": "2017-02-16T16:40:11.631Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1570725)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1570725)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1570057,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1570057)",
+      "phenomenonTime": "2017-02-16T16:35:08.901Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1570057)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1570057)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1569932,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1569932)",
+      "phenomenonTime": "2017-02-16T16:30:11.885Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1569932)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1569932)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1569302,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1569302)",
+      "phenomenonTime": "2017-02-16T16:25:09.564Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1569302)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1569302)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1568977,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568977)",
+      "phenomenonTime": "2017-02-16T16:20:09.535Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568977)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568977)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1568799,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568799)",
+      "phenomenonTime": "2017-02-16T16:15:12.934Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568799)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568799)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1568217,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568217)",
+      "phenomenonTime": "2017-02-16T16:10:14.996Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568217)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1568217)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1567654,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1567654)",
+      "phenomenonTime": "2017-02-16T16:05:09.646Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1567654)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1567654)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1567244,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1567244)",
+      "phenomenonTime": "2017-02-16T16:00:08.209Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1567244)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1567244)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1566926,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566926)",
+      "phenomenonTime": "2017-02-16T15:55:09.175Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566926)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566926)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1566821,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566821)",
+      "phenomenonTime": "2017-02-16T15:50:11.950Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566821)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566821)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1566339,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566339)",
+      "phenomenonTime": "2017-02-16T15:45:11.293Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566339)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1566339)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1565936,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565936)",
+      "phenomenonTime": "2017-02-16T15:40:11.375Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565936)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565936)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1565304,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565304)",
+      "phenomenonTime": "2017-02-16T15:35:09.125Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565304)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565304)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1565052,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565052)",
+      "phenomenonTime": "2017-02-16T15:30:10.462Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565052)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1565052)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1564620,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1564620)",
+      "phenomenonTime": "2017-02-16T15:25:10.814Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1564620)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1564620)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1564284,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1564284)",
+      "phenomenonTime": "2017-02-16T15:20:10.168Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1564284)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1564284)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1563895,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1563895)",
+      "phenomenonTime": "2017-02-16T15:15:10.467Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1563895)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1563895)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1563330,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1563330)",
+      "phenomenonTime": "2017-02-16T15:10:09.618Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1563330)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1563330)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1562936,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562936)",
+      "phenomenonTime": "2017-02-16T15:05:08.060Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562936)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562936)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1562547,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562547)",
+      "phenomenonTime": "2017-02-16T15:00:08.249Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562547)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562547)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1562414,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562414)",
+      "phenomenonTime": "2017-02-16T14:55:11.305Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562414)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1562414)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1561755,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1561755)",
+      "phenomenonTime": "2017-02-16T14:50:08.409Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1561755)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1561755)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1561456,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1561456)",
+      "phenomenonTime": "2017-02-16T14:45:09.811Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1561456)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1561456)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1560947,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560947)",
+      "phenomenonTime": "2017-02-16T14:40:08.583Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560947)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560947)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1560688,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560688)",
+      "phenomenonTime": "2017-02-16T14:35:10.129Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560688)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560688)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1560334,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560334)",
+      "phenomenonTime": "2017-02-16T14:30:09.826Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560334)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1560334)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1559849,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559849)",
+      "phenomenonTime": "2017-02-16T14:25:09.189Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559849)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559849)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1559515,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559515)",
+      "phenomenonTime": "2017-02-16T14:20:09.489Z",
+      "result": "21",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559515)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559515)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1559002,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559002)",
+      "phenomenonTime": "2017-02-16T14:15:08.316Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559002)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1559002)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1558744,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1558744)",
+      "phenomenonTime": "2017-02-16T14:10:09.825Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1558744)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1558744)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1558272,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1558272)",
+      "phenomenonTime": "2017-02-16T14:05:09.766Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1558272)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1558272)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1557844,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557844)",
+      "phenomenonTime": "2017-02-16T14:00:08.874Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557844)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557844)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1557498,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557498)",
+      "phenomenonTime": "2017-02-16T13:55:08.913Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557498)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557498)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1557127,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557127)",
+      "phenomenonTime": "2017-02-16T13:50:10.200Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557127)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1557127)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1556660,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1556660)",
+      "phenomenonTime": "2017-02-16T13:45:09.261Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1556660)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1556660)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1556279,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1556279)",
+      "phenomenonTime": "2017-02-16T13:40:08.586Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1556279)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1556279)/FeatureOfInterest"
+    },
+    {
+      "@iot.id": 1555976,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1555976)",
+      "phenomenonTime": "2017-02-16T13:35:10.069Z",
+      "result": "20",
+      "resultTime": null,
+      "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1555976)/Datastream",
+      "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1555976)/FeatureOfInterest"
+    }
+  ]
+}

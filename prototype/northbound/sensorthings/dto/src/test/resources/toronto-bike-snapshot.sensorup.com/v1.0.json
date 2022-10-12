@@ -1,0 +1,36 @@
+{
+  "value": [
+    {
+      "name": "Things",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things"
+    },
+    {
+      "name": "Locations",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations"
+    },
+    {
+      "name": "HistoricalLocations",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations"
+    },
+    {
+      "name": "Datastreams",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams"
+    },
+    {
+      "name": "Sensors",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors"
+    },
+    {
+      "name": "Observations",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations"
+    },
+    {
+      "name": "ObservedProperties",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties"
+    },
+    {
+      "name": "FeaturesOfInterest",
+      "url": "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest"
+    }
+  ]
+}
