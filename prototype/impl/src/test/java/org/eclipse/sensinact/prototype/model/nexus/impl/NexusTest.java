@@ -15,7 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -27,12 +30,13 @@ import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
-import org.eclipse.sensinact.prototype.notification.impl.NotificationAccumulatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.osgi.service.typedevent.TypedEventBus;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
 /**
@@ -40,18 +44,16 @@ import org.osgi.service.typedevent.TypedEventBus;
  * @author Juergen Albert
  * @since 10 Oct 2022
  */
+@ExtendWith(MockitoExtension.class)
 public class NexusTest {
 
 	@Mock
-	TypedEventBus bus;
-	
 	NotificationAccumulator accumulator;
 
 	private ResourceSet resourceSet;
 	
 	@BeforeEach
 	void start() {
-		accumulator = new NotificationAccumulatorImpl(bus);
 		resourceSet = new ResourceSetImpl();
 		
 		resourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put("https", new XMIResourceFactoryImpl());
@@ -157,13 +159,32 @@ public class NexusTest {
 	@Nested
 	public class BasicEventsTest {
 		
+		private static final String TEST_PROVIDER = "testprovider";
+		private static final String TEST_SERVICE = "testservice";
+		private static final String TEST_SERVICE_2 = "testservice2";
+		private static final String TEST_RESOURCE = "testValue";
+		private static final String TEST_RESOURCE_2 = "testValue2";
+		private static final String TEST_VALUE = "test";
+		private static final String TEST_VALUE_2 = "test2";
+
 		@Test
 		void basicTest() {
 			
 			NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
 			
-			nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test", Instant.now());
-			accumulator.completeAndSend();
+			Instant now = Instant.now();
+			nexus.handleDataUpdate("TestModel", TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, String.class, TEST_VALUE, now);
+			
+			Mockito.verify(accumulator).addProvider(TEST_PROVIDER);
+			Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE);
+			// TODO - this is missing
+//			Mockito.verify(accumulator).addResource(TESTPROVIDER, TESTSERVICE, TEST_RESOURCE);
+			Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null, TEST_VALUE, now);
+			// TODO - the value is in here, which is surprising, as is the timestamp being a date
+			Mockito.verify(accumulator).metadataValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null, 
+					Map.of("value", TEST_VALUE, "timestamp", new Date(now.toEpochMilli())), now);
+			
+			Mockito.verifyNoMoreInteractions(accumulator);
 		}
 		
 		@Test
@@ -171,9 +192,26 @@ public class NexusTest {
 			
 			NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
 			
-			nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test", Instant.now());
-			nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue2", String.class, "test", Instant.now());
-			accumulator.completeAndSend();
+			Instant now = Instant.now();
+			Instant before = now.minus(Duration.ofHours(1));
+			
+			nexus.handleDataUpdate("TestModel", TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, String.class, TEST_VALUE, before);
+			nexus.handleDataUpdate("TestModel", TEST_PROVIDER, TEST_SERVICE, "testValue2", String.class, TEST_VALUE, now);
+			
+			Mockito.verify(accumulator).addProvider(TEST_PROVIDER);
+			Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE);
+			// TODO - these are missing
+//			Mockito.verify(accumulator).addResource(TESTPROVIDER, TESTSERVICE, TEST_RESOURCE);
+//			Mockito.verify(accumulator).addResource(TESTPROVIDER, TESTSERVICE, TEST_RESOURCE_2);
+			Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null, TEST_VALUE, before);
+			Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE_2, null, TEST_VALUE, now);
+			
+			Mockito.verify(accumulator).metadataValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null, 
+					Map.of("value", TEST_VALUE, "timestamp", new Date(before.toEpochMilli())), before);
+			Mockito.verify(accumulator).metadataValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE_2, null, 
+					Map.of("value", TEST_VALUE, "timestamp", new Date(now.toEpochMilli())), now);
+			
+			Mockito.verifyNoMoreInteractions(accumulator);
 		}
 		
 		@Test
@@ -181,9 +219,27 @@ public class NexusTest {
 			
 			NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
 			
-			nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test", Instant.now());
-			nexus.handleDataUpdate("TestModel", "testprovider", "testservice2", "testValue", String.class, "test2", Instant.now());
-			accumulator.completeAndSend();
+			Instant now = Instant.now();
+			Instant before = now.minus(Duration.ofHours(1));
+			
+			nexus.handleDataUpdate("TestModel", TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, String.class, TEST_VALUE, before);
+			nexus.handleDataUpdate("TestModel", TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE, String.class, TEST_VALUE_2, now);
+			
+			Mockito.verify(accumulator).addProvider(TEST_PROVIDER);
+			Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE);
+			Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE_2);
+			// TODO - these are missing
+//			Mockito.verify(accumulator).addResource(TESTPROVIDER, TESTSERVICE, TEST_RESOURCE);
+//			Mockito.verify(accumulator).addResource(TESTPROVIDER, TESTSERVICE, TEST_RESOURCE_2);
+			Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null, TEST_VALUE, before);
+			Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE, null, TEST_VALUE_2, now);
+			
+			Mockito.verify(accumulator).metadataValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null, 
+					Map.of("value", TEST_VALUE, "timestamp", new Date(before.toEpochMilli())), before);
+			Mockito.verify(accumulator).metadataValueUpdate(TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE, null, 
+					Map.of("value", TEST_VALUE_2, "timestamp", new Date(now.toEpochMilli())), now);
+			
+			Mockito.verifyNoMoreInteractions(accumulator);
 		}
 	}
 }

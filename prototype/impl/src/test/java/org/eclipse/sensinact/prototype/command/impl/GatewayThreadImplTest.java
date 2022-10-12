@@ -7,6 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.SensinactModel;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.service.typedevent.TypedEventBus;
 import org.osgi.util.promise.Promise;
@@ -24,13 +30,25 @@ public class GatewayThreadImplTest {
 
 	@Mock
 	TypedEventBus eventBus;
+	@Mock
+	SensiNactPackage sensinactPackage;
+	@Mock
+	ResourceSet resourceSet;
+	@Mock
+	Resource resource;
 	
 	GatewayThreadImpl thread;
 	
 	@BeforeEach
 	void setup() {
+		
+		Mockito.when(resourceSet.createResource(Mockito.any(URI.class)))
+			.thenAnswer(i -> new ResourceImpl((URI)i.getArgument(0)));
+		
 		thread = new GatewayThreadImpl();
 		thread.typedEventBus = eventBus;
+		thread.sensinactPackage = sensinactPackage;
+		thread.resourceSet = resourceSet;
 		thread.activate();
 	}
 	

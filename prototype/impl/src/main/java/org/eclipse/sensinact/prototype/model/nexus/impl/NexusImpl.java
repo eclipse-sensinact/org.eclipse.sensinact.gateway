@@ -209,7 +209,7 @@ public class NexusImpl {
 		if(service == null) {
 			service = (Service) EcoreUtil.create((EClass) serviceFeature.getEType());
 			provider.eSet(serviceFeature, service);
-			accumulator.addService(providerName, providerName);
+			accumulator.addService(providerName, serviceFeature.getName());
 		}
 		
 		EStructuralFeature resourceFeature = transaction.getFeaturePath().get(1);
@@ -331,7 +331,9 @@ public class NexusImpl {
 				providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),  sensinactPackage.getProvider());
 				wrapper = new ProviderTypeWrapper(providerClass);
 				providerCache.put(providerUri, wrapper);
-				notificationAccumulator.get().addProvider(providerName);
+				// TODO - do we need a notification here, and if so what notification?
+				// It's definitely not the creation of a provider instance
+//				notificationAccumulator.get().addProvider(providerName);
 			}
 		}
 		return wrapper;
