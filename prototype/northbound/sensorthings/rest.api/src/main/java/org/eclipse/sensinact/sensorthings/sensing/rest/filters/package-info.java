@@ -7,12 +7,4 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.dto;
-
-public abstract class NameDescription extends Id {
-
-    public String name;
-
-    public String description;
-
-}
+package org.eclipse.sensinact.sensorthings.sensing.rest.filters;

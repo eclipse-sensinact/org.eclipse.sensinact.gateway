@@ -7,12 +7,16 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.dto;
+package org.eclipse.sensinact.sensorthings.sensing.rest.annotation;
 
-public abstract class NameDescription extends Id {
+import jakarta.ws.rs.NameBinding;
 
-    public String name;
-
-    public String description;
+/**
+ * This annotation indicates that the resource method has a path parameter
+ * named <code>prop</code> which should be used to restrict the serialized
+ * output to contain only the named property
+ */
+@NameBinding
+public @interface PropFilter {
 
 }

@@ -13,11 +13,24 @@ import java.util.List;
 
 public class RootResponse {
 
+    public ServerSettings serverSettings;
+    
     public List<NameUrl> value;
     
+    public static class ServerSettings {
+        public List<String> conformance;
+    }
+      
     public static class NameUrl {
         public String name;
         public String url;
+        
+        public static NameUrl create(String name, String url) {
+            NameUrl nu = new NameUrl();
+            nu.name = name;
+            nu.url = url;
+            return nu;
+        }
     }
     
 }

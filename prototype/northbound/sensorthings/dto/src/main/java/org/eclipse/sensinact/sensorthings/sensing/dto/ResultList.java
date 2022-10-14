@@ -16,10 +16,11 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ResultList<T extends IdSelf> {
+public class ResultList<T extends Self> {
 
+    @JsonInclude(NON_NULL)
     @JsonProperty("@iot.count")
-    public int count;
+    public Integer count;
 
     @JsonInclude(NON_NULL)
     @JsonProperty("@iot.nextLink")

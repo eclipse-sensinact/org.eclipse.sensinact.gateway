@@ -9,20 +9,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
-import java.time.Instant;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class HistoricalLocation extends Id {
+public class Self {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    public Instant time;
-
-    @JsonProperty("Locations@iot.navigationLink")
-    public String locationsLink;
-
-    @JsonProperty("Thing@iot.navigationLink")
-    public String thingLink;
+    @JsonProperty("@iot.selfLink")
+    public String selfLink;
 
 }

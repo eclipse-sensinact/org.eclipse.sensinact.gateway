@@ -7,12 +7,15 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.dto;
+package org.eclipse.sensinact.sensorthings.sensing.rest.annotation;
 
-public abstract class NameDescription extends Id {
+import jakarta.ws.rs.NameBinding;
 
-    public String name;
-
-    public String description;
+/**
+ * This annotation indicates that the resource method returns a value which
+ * should be filtered to contain only the self link
+ */
+@NameBinding
+public @interface RefFilter {
 
 }

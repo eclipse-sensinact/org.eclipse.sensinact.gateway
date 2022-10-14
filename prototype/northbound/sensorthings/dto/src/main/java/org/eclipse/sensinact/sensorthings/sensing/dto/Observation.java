@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Observation extends IdSelf {
+public class Observation extends Id {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant phenomenonTime;

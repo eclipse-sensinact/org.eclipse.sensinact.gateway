@@ -7,16 +7,6 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.dto;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public abstract class IdSelf {
-
-    @JsonProperty("@iot.id")
-    public Object iotId;
-
-    @JsonProperty("@iot.selfLink")
-    public String iotSelfLink;
-
-}
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("0.0.1")
+package org.eclipse.sensinact.sensorthings.sensing.rest;

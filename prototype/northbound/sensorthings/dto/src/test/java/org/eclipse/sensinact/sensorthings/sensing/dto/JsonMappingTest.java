@@ -94,8 +94,8 @@ class JsonMappingTest {
         
         void assertThing(Thing thing, Integer id, String selfLink, String description, String name, String datastreams, 
                 String historicalLocations, String locations) {
-            assertEquals(id, thing.iotId);
-            assertEquals(selfLink, thing.iotSelfLink);
+            assertEquals(id, thing.id);
+            assertEquals(selfLink, thing.selfLink);
             assertEquals(description, thing.description);
             assertEquals(name, thing.name);
             assertEquals(Map.of(), thing.properties);
@@ -132,8 +132,8 @@ class JsonMappingTest {
         
         void assertLocation(Location location, Integer id, String selfLink, String description, String name,
                 double longitude, double latitude, String things, String historicalLocations) {
-            assertEquals(id, location.iotId);
-            assertEquals(selfLink, location.iotSelfLink);
+            assertEquals(id, location.id);
+            assertEquals(selfLink, location.selfLink);
             assertEquals(description, location.description);
             assertEquals(name, location.name);
             assertEquals("application/vnd.geo+json", location.encodingType);
@@ -166,8 +166,8 @@ class JsonMappingTest {
         
         void assertHistoricalLocation(HistoricalLocation historicalLocation, Integer id, String selfLink, String time,
                 String locations, String thing) {
-            assertEquals(id, historicalLocation.iotId);
-            assertEquals(selfLink, historicalLocation.iotSelfLink);
+            assertEquals(id, historicalLocation.id);
+            assertEquals(selfLink, historicalLocation.selfLink);
             assertEquals(Instant.parse(time), historicalLocation.time);
             assertEquals(locations, historicalLocation.locationsLink);
             assertEquals(thing, historicalLocation.thingLink);
@@ -211,8 +211,8 @@ class JsonMappingTest {
         void assertDatastream(Datastream datastream, Integer id, String selfLink, String name, String description,
                 String observationType, String unitName, String observations, String observedProperty, String sensor, 
                 String thing) {
-            assertEquals(id, datastream.iotId);
-            assertEquals(selfLink, datastream.iotSelfLink);
+            assertEquals(id, datastream.id);
+            assertEquals(selfLink, datastream.selfLink);
             assertEquals(name, datastream.name);
             assertEquals(description, datastream.description);
             assertEquals(observationType, datastream.observationType);
@@ -250,8 +250,8 @@ class JsonMappingTest {
         
         void assertSensor(Sensor datastream, Integer id, String selfLink, String name, String description,
                 String encodingType, String metadata, String datastreams) {
-            assertEquals(id, datastream.iotId);
-            assertEquals(selfLink, datastream.iotSelfLink);
+            assertEquals(id, datastream.id);
+            assertEquals(selfLink, datastream.selfLink);
             assertEquals(name, datastream.name);
             assertEquals(description, datastream.description);
             assertEquals(encodingType, datastream.encodingType);
@@ -284,8 +284,8 @@ class JsonMappingTest {
         
         void assertObservation(Observation observation, Integer id, String selfLink, String time, String result,
                 String datastream, String featureOfInterest) {
-            assertEquals(id, observation.iotId);
-            assertEquals(selfLink, observation.iotSelfLink);
+            assertEquals(id, observation.id);
+            assertEquals(selfLink, observation.selfLink);
             assertEquals(Instant.parse(time), observation.phenomenonTime);
             assertEquals(result, observation.result);
             assertNull(observation.resultTime);
@@ -317,8 +317,8 @@ class JsonMappingTest {
         
         void assertObservedProperty(ObservedProperty observation, Integer id, String selfLink, String name, String description,
                 String definition, String datastreams) {
-            assertEquals(id, observation.iotId);
-            assertEquals(selfLink, observation.iotSelfLink);
+            assertEquals(id, observation.id);
+            assertEquals(selfLink, observation.selfLink);
             assertEquals(name, observation.name);
             assertEquals(description, observation.description);
             assertEquals(definition, observation.definition);
@@ -350,8 +350,8 @@ class JsonMappingTest {
         
         void assertFeatureOfInterest(FeatureOfInterest featureOfInterest, Integer id, String selfLink, String name, String description,
                 double longitude, double latitude, String observations) {
-            assertEquals(id, featureOfInterest.iotId);
-            assertEquals(selfLink, featureOfInterest.iotSelfLink);
+            assertEquals(id, featureOfInterest.id);
+            assertEquals(selfLink, featureOfInterest.selfLink);
             assertEquals(name, featureOfInterest.name);
             assertEquals(description, featureOfInterest.description);
             assertEquals("application/vnd.geo+json", featureOfInterest.encodingType);
@@ -369,8 +369,8 @@ class JsonMappingTest {
         @Test
         void testThing() throws Exception {
             Thing thing = new Thing();
-            thing.iotId = 206047;
-            thing.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)";
+            thing.id = 206047;
+            thing.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)";
             thing.name = "7061:Bloor St / Brunswick Ave";
             thing.description = "Bloor St / Brunswick Ave Toronto bike share station with data of available bikes and available docks";
             thing.properties = Map.of();
@@ -385,8 +385,8 @@ class JsonMappingTest {
         @Test
         void testLocation() throws Exception {
             Location location = new Location();
-            location.iotId = 206048;
-            location.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)";
+            location.id = 206048;
+            location.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)";
             location.name = "7061:Bloor St / Brunswick Ave";
             location.description = "The geographic location with coordinates for the Toronto bike share station Bloor St / Brunswick Ave";
             location.encodingType = "application/vnd.geo+json";
@@ -409,8 +409,8 @@ class JsonMappingTest {
         @Test
         void testHistoricalLocation() throws Exception {
             HistoricalLocation historicalLocation = new HistoricalLocation();
-            historicalLocation.iotId = 206049;
-            historicalLocation.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)";
+            historicalLocation.id = 206049;
+            historicalLocation.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)";
             historicalLocation.time = Instant.parse("2017-02-04T15:50:10.489Z");
             historicalLocation.locationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Locations";
             historicalLocation.thingLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Thing";
@@ -426,8 +426,8 @@ class JsonMappingTest {
         @Test
         void testDatastream() throws Exception {
             Datastream datastream = new Datastream();
-            datastream.iotId = 1512;
-            datastream.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)";
+            datastream.id = 1512;
+            datastream.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)";
             datastream.name = "7203:Harrison/Dovercourt:available_bikes";
             datastream.description = "The datastream of available bikes count for the Toronto bike share station Harrison/Dovercourt";
             datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation";
@@ -445,8 +445,8 @@ class JsonMappingTest {
         @Test
         void testSensor() throws Exception {
             Sensor sensor = new Sensor();
-            sensor.iotId = 4;
-            sensor.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)";
+            sensor.id = 4;
+            sensor.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)";
             sensor.name = "available_docks";
             sensor.description = "A sensor for tracking how many docks are available in a bike station";
             sensor.encodingType = "text/plan";
@@ -460,8 +460,8 @@ class JsonMappingTest {
         @Test
         void testObservation() throws Exception {
             Observation observation = new Observation();
-            observation.iotId = 1595550;
-            observation.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)";
+            observation.id = 1595550;
+            observation.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)";
             observation.phenomenonTime = Instant.parse("2017-02-16T21:55:12.841Z");
             observation.result = "7";
             observation.datastreamLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)/Datastream";
@@ -474,8 +474,8 @@ class JsonMappingTest {
         @Test
         void testObservedProperty() throws Exception {
             ObservedProperty observedProperty = new ObservedProperty();
-            observedProperty.iotId = 2;
-            observedProperty.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)";
+            observedProperty.id = 2;
+            observedProperty.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)";
             observedProperty.name = "available_docks";
             observedProperty.description = "The total number count of available docks in a bike station";
             observedProperty.definition = "https://member.bikesharetoronto.com/stations";
@@ -488,8 +488,8 @@ class JsonMappingTest {
         @Test
         void testFeatureOfInterest() throws Exception {
             FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-            featureOfInterest.iotId = 1514;
-            featureOfInterest.iotSelfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1514)";
+            featureOfInterest.id = 1514;
+            featureOfInterest.selfLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1514)";
             featureOfInterest.name = "7203:Harrison/Dovercourt";
             featureOfInterest.description = "Generated using location details: The geographic location with coordinates for the Toronto bike share station Harrison/Dovercourt";
             featureOfInterest.encodingType = "application/vnd.geo+json";
