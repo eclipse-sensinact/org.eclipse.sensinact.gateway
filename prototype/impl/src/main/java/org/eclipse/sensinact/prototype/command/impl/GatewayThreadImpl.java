@@ -36,106 +36,106 @@ import org.osgi.util.promise.PromiseFactory;
 @Component
 public class GatewayThreadImpl extends Thread implements GatewayThread {
 
-	@Reference
-	TypedEventBus typedEventBus;
-	
-	@Reference
-	ResourceSet resourceSet;
-	
-	@Reference
-	SensiNactPackage sensinactPackage;
-	
-	private NexusImpl nexusImpl;
-	
-	// TODO decide if we should just use an infinite queue
-	private final BlockingQueue<WorkItem<?>> work = new ArrayBlockingQueue<>(4096);
-	
-	private final AtomicBoolean run = new AtomicBoolean(true);
-	
-	private final PromiseFactory promiseFactory = new PromiseFactory(null, null);
-	
-	private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
-	
-	@Activate
-	void activate() {
-		nexusImpl = new NexusImpl(resourceSet, sensinactPackage, this::getCurrentAccumulator);
-		start();
-	}
-	
-	@Deactivate
-	void deactivate() {
-		run.set(false);
-		interrupt();
-		try {
-			join(500);
-		} catch (InterruptedException e) {
-			// Just keep going and reset our interrupt status
-			Thread.currentThread().interrupt();
-		}
-	}
-	
-	private NotificationAccumulator getCurrentAccumulator() {
-		WorkItem<?> workItem = currentItem.get();
-		return workItem == null ? null : workItem.command.getAccumulator();
-	}
-	
-	@Override
-	public PromiseFactory getPromiseFactory() {
-		return promiseFactory;
-	}
+    @Reference
+    TypedEventBus typedEventBus;
 
-	@Override
-	public NotificationAccumulator createAccumulator() {
-		return new NotificationAccumulatorImpl(typedEventBus);
-	}
+    @Reference
+    ResourceSet resourceSet;
 
-	@Override
-	public <T> Promise<T> execute(AbstractSensinactCommand<T> command) {
-		Deferred<T> d = getPromiseFactory().deferred();
-		work.add(new WorkItem<>(d, command, nexusImpl));
-		return d.getPromise();
-	}
+    @Reference
+    SensiNactPackage sensinactPackage;
 
-	@Override
-	public void run() {
-		while(run.get()) {
-			try {
-				WorkItem<?> item = work.take();
-				currentItem.set(item);
-				item.doWork();
-			} catch (InterruptedException e) {
-				continue;
-			} finally {
-				currentItem.set(null);
-			}
-		}
-	}
-	
-	private class WorkItem<T> {
-		private final Deferred<T> d;
-		private final AbstractSensinactCommand<T> command;
-		private final NexusImpl nexusImpl;
-		
-		public WorkItem(Deferred<T> d, AbstractSensinactCommand<T> command, NexusImpl nexusImpl) {
-			this.d = d;
-			this.command = command;
-			this.nexusImpl = nexusImpl;
-		}
+    private NexusImpl nexusImpl;
 
-		void doWork() {
-			try {
-				SensinactModelImpl modelImpl = new SensinactModelImpl(command.getAccumulator(), nexusImpl, 
-						getGatewayThread().getPromiseFactory());
-				Promise<T> promise;
-				try {
-					promise = command.call(modelImpl);
-				} finally {
-					modelImpl.invalidate();
-				}
-				d.resolveWith(promise);
-			} catch (Exception e) {
-				d.fail(e);
-			}
-		}
-	}
+    // TODO decide if we should just use an infinite queue
+    private final BlockingQueue<WorkItem<?>> work = new ArrayBlockingQueue<>(4096);
+
+    private final AtomicBoolean run = new AtomicBoolean(true);
+
+    private final PromiseFactory promiseFactory = new PromiseFactory(null, null);
+
+    private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
+
+    @Activate
+    void activate() {
+        nexusImpl = new NexusImpl(resourceSet, sensinactPackage, this::getCurrentAccumulator);
+        start();
+    }
+
+    @Deactivate
+    void deactivate() {
+        run.set(false);
+        interrupt();
+        try {
+            join(500);
+        } catch (InterruptedException e) {
+            // Just keep going and reset our interrupt status
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private NotificationAccumulator getCurrentAccumulator() {
+        WorkItem<?> workItem = currentItem.get();
+        return workItem == null ? null : workItem.command.getAccumulator();
+    }
+
+    @Override
+    public PromiseFactory getPromiseFactory() {
+        return promiseFactory;
+    }
+
+    @Override
+    public NotificationAccumulator createAccumulator() {
+        return new NotificationAccumulatorImpl(typedEventBus);
+    }
+
+    @Override
+    public <T> Promise<T> execute(AbstractSensinactCommand<T> command) {
+        Deferred<T> d = getPromiseFactory().deferred();
+        work.add(new WorkItem<>(d, command, nexusImpl));
+        return d.getPromise();
+    }
+
+    @Override
+    public void run() {
+        while (run.get()) {
+            try {
+                WorkItem<?> item = work.take();
+                currentItem.set(item);
+                item.doWork();
+            } catch (InterruptedException e) {
+                continue;
+            } finally {
+                currentItem.set(null);
+            }
+        }
+    }
+
+    private class WorkItem<T> {
+        private final Deferred<T> d;
+        private final AbstractSensinactCommand<T> command;
+        private final NexusImpl nexusImpl;
+
+        public WorkItem(Deferred<T> d, AbstractSensinactCommand<T> command, NexusImpl nexusImpl) {
+            this.d = d;
+            this.command = command;
+            this.nexusImpl = nexusImpl;
+        }
+
+        void doWork() {
+            try {
+                SensinactModelImpl modelImpl = new SensinactModelImpl(command.getAccumulator(), nexusImpl,
+                        getGatewayThread().getPromiseFactory());
+                Promise<T> promise;
+                try {
+                    promise = command.call(modelImpl);
+                } finally {
+                    modelImpl.invalidate();
+                }
+                d.resolveWith(promise);
+            } catch (Exception e) {
+                d.fail(e);
+            }
+        }
+    }
 }

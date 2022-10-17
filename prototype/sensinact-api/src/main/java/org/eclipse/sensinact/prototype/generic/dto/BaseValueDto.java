@@ -23,19 +23,19 @@ import org.eclipse.sensinact.prototype.annotation.dto.Service;
  */
 public abstract class BaseValueDto {
 
-	@Model
-	public String model;
-	
-	@Provider
-	public String provider;
-	
-	@Service
-	public String service;
-	
-	@Resource
-	public String resource;
+    @Model
+    public String model;
 
-	@Metadata(onMap = {MapAction.USE_KEYS_AS_FIELDS, MapAction.REMOVE_NULL_VALUES})
-	public Map<String, Object> metadata;
-	
+    @Provider
+    public String provider;
+
+    @Service
+    public String service;
+
+    @Resource
+    public String resource;
+
+    @Metadata(onMap = { MapAction.USE_KEYS_AS_FIELDS, MapAction.REMOVE_NULL_VALUES })
+    public Map<String, Object> metadata;
+
 }

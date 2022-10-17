@@ -10,12 +10,12 @@
 package org.eclipse.sensinact.prototype.notification;
 
 /**
- * Used to register a session-based listener for resource data 
+ * Used to register a session-based listener for resource data
  * 
  * Events will be filtered based on the session's visibility of the resources
  */
 public interface ClientDataListener {
-	
-	void notify(String topic, ResourceDataNotification event);
+
+    void notify(String topic, ResourceDataNotification event);
 
 }

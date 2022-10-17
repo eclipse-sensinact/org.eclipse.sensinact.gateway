@@ -28,24 +28,26 @@ import java.lang.annotation.Target;
  * 
  * or
  * 
- * On the type, or a {@link Data} field with a value containing the provider name
+ * On the type, or a {@link Data} field with a value containing the provider
+ * name
  * 
  * <pre>
  * &#64;Provider(&quot;exampleProvider&quot;)
  * public class MyDto {
- *   &#64;Service(&quot;exampleService&quot;)
- *   &#64;Data
- *   public String value;
+ *     &#64;Service(&quot;exampleService&quot;)
+ *     &#64;Data
+ *     public String value;
  * }
  * </pre>
  * 
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ ElementType.TYPE, ElementType.FIELD })
 public @interface Provider {
-	/**
-	 * The name of the provider
-	 * @return
-	 */
-	String value() default AnnotationConstants.NOT_SET;
+    /**
+     * The name of the provider
+     * 
+     * @return
+     */
+    String value() default AnnotationConstants.NOT_SET;
 }

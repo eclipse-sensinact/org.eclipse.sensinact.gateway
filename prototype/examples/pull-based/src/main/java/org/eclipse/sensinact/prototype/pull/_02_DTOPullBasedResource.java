@@ -24,18 +24,18 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = _02_DTOPullBasedResource.class)
 public class _02_DTOPullBasedResource {
 
-	@GET(ReturnType.DTO)
-	public SimpleDTO getValue() {
-		// Get the value from the sensor
-		return null;
-	}
-	
-	@Provider("pull_example")
-	@Service("dto")
-	public static class SimpleDTO {
-		
-		@Data
-		public int count;
+    @GET(ReturnType.DTO)
+    public SimpleDTO getValue() {
+        // Get the value from the sensor
+        return null;
+    }
 
-	}
+    @Provider("pull_example")
+    @Service("dto")
+    public static class SimpleDTO {
+
+        @Data
+        public int count;
+
+    }
 }

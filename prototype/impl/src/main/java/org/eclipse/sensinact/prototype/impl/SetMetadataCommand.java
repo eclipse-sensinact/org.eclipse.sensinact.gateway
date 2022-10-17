@@ -16,19 +16,19 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
-	
-	private final MetadataUpdateDto metadataUpdateDto;
-	
-	public SetMetadataCommand(MetadataUpdateDto metadataUpdateDto) {
-		this.metadataUpdateDto = metadataUpdateDto;
-	}
 
-	@Override
-	protected Promise<Void> call(SensinactModel model, PromiseFactory promiseFactory) {
-		
-		//TODO set the metadata in the model
-		
-		return promiseFactory.resolved(null);
-	}
+    private final MetadataUpdateDto metadataUpdateDto;
+
+    public SetMetadataCommand(MetadataUpdateDto metadataUpdateDto) {
+        this.metadataUpdateDto = metadataUpdateDto;
+    }
+
+    @Override
+    protected Promise<Void> call(SensinactModel model, PromiseFactory promiseFactory) {
+
+        // TODO set the metadata in the model
+
+        return promiseFactory.resolved(null);
+    }
 
 }

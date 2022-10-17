@@ -15,6 +15,6 @@ import org.eclipse.sensinact.prototype.model.Provider;
 
 public interface SensinactProvider extends CommandScoped, Provider {
 
-	Map<String, ? extends SensinactService> getServices();
-	
+    Map<String, ? extends SensinactService> getServices();
+
 }

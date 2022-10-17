@@ -20,19 +20,19 @@ import java.util.Objects;
  * DATA/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
 public class ResourceDataNotification extends AbstractResourceNotification {
-	
-	public Object oldValue;
-	
-	public Object newValue;
-	
-	public Instant timestamp;
 
-	@Override
-	public String getTopic() {
-		Objects.requireNonNull(provider);
-		Objects.requireNonNull(service);
-		Objects.requireNonNull(resource);
-		return String.format("DATA/%s/%s/%s", provider, service, resource);
-	}
-	
+    public Object oldValue;
+
+    public Object newValue;
+
+    public Instant timestamp;
+
+    @Override
+    public String getTopic() {
+        Objects.requireNonNull(provider);
+        Objects.requireNonNull(service);
+        Objects.requireNonNull(resource);
+        return String.format("DATA/%s/%s/%s", provider, service, resource);
+    }
+
 }

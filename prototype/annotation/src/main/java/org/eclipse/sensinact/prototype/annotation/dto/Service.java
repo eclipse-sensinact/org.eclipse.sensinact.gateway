@@ -33,19 +33,20 @@ import java.lang.annotation.Target;
  * <pre>
  * &#64;Provider(&quot;exampleProvider&quot;)
  * public class MyDto {
- *   &#64;Service(&quot;exampleService&quot;)
- *   &#64;Data
- *   public String value;
+ *     &#64;Service(&quot;exampleService&quot;)
+ *     &#64;Data
+ *     public String value;
  * }
  * </pre>
  * 
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ ElementType.TYPE, ElementType.FIELD })
 public @interface Service {
-	/**
-	 * The name of the service
-	 * @return
-	 */
-	String value() default AnnotationConstants.NOT_SET;
+    /**
+     * The name of the service
+     * 
+     * @return
+     */
+    String value() default AnnotationConstants.NOT_SET;
 }

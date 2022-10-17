@@ -26,23 +26,25 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Repeatable(ACT.ACTs.class)
 public @interface ACT {
-	
-	/**
-	 * The service that this ACT method applies to
-	 * @return
-	 */
-	String service();
-	
-	/**
-	 * The resource that this ACT method applies to
-	 * @return
-	 */
-	String resource();
-	
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface ACTs {
-		ACT[] value();
-	}
+
+    /**
+     * The service that this ACT method applies to
+     * 
+     * @return
+     */
+    String service();
+
+    /**
+     * The resource that this ACT method applies to
+     * 
+     * @return
+     */
+    String resource();
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface ACTs {
+        ACT[] value();
+    }
 
 }

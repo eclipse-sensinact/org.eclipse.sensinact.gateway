@@ -22,13 +22,14 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = _01_SimplePullBasedResource.class)
 public class _01_SimplePullBasedResource {
 
-	/**
-	 * A GET method for a service and resource
-	 * @return
-	 */
-	@GET(service = "example", resource = "default")
-	public Double getValue() {
-		// Get the value from the sensor
-		return null;
-	}
+    /**
+     * A GET method for a service and resource
+     * 
+     * @return
+     */
+    @GET(service = "example", resource = "default")
+    public Double getValue() {
+        // Get the value from the sensor
+        return null;
+    }
 }

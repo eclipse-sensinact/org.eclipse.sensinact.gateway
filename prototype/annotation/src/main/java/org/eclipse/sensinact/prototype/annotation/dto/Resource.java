@@ -28,21 +28,22 @@ import java.lang.annotation.Target;
  * 
  * or
  * 
- * On the type, or a {@link Data} field with a value containing the resource name
+ * On the type, or a {@link Data} field with a value containing the resource
+ * name
  * 
  * <pre>
  * &#64;Provider(&quot;exampleProvider&quot;)
  * &#64;Service(&quot;exampleService&quot;)
  * public class MyDto {
- *   &#64;Resource(&quot;exampleResource&quot;)
- *   &#64;Data
- *   public String value;
+ *     &#64;Resource(&quot;exampleResource&quot;)
+ *     &#64;Data
+ *     public String value;
  * }
  * </pre>
  * 
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ ElementType.TYPE, ElementType.FIELD })
 public @interface Resource {
-	String value() default AnnotationConstants.NOT_SET;
+    String value() default AnnotationConstants.NOT_SET;
 }

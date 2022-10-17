@@ -22,14 +22,15 @@ import org.osgi.service.component.annotations.ComponentPropertyType;
  */
 @ComponentPropertyType
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 public @interface ProviderName {
-	
-	String PREFIX_ = "sensiNact.";
-	
-	/**
-	 * The name(s) of the provider(s) provided by the whiteboard resource
-	 * @return
-	 */
-	String[] value();
+
+    String PREFIX_ = "sensiNact.";
+
+    /**
+     * The name(s) of the provider(s) provided by the whiteboard resource
+     * 
+     * @return
+     */
+    String[] value();
 }

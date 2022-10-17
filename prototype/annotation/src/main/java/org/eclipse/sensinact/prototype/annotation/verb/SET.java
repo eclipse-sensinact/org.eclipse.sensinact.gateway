@@ -26,29 +26,33 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Repeatable(SET.SETs.class)
 public @interface SET {
-	
-	/**
-	 * The service that this SET method applies to
-	 * @return
-	 */
-	String service();
-	
-	/**
-	 * The resource that this SET method applies to
-	 * @return
-	 */
-	String resource();
-	
-	/**
-	 * The type of the resource data. If not set then the received parameter type of the method is used. 
-	 * @return
-	 */
-	Class<?> type() default Object.class;
-	
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface SETs {
-		SET[] value();
-	}
+
+    /**
+     * The service that this SET method applies to
+     * 
+     * @return
+     */
+    String service();
+
+    /**
+     * The resource that this SET method applies to
+     * 
+     * @return
+     */
+    String resource();
+
+    /**
+     * The type of the resource data. If not set then the received parameter type of
+     * the method is used.
+     * 
+     * @return
+     */
+    Class<?> type() default Object.class;
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface SETs {
+        SET[] value();
+    }
 
 }

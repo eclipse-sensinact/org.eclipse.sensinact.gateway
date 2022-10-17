@@ -20,15 +20,15 @@ import java.util.Objects;
  * ACTION/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
 public class ResourceActionNotification extends AbstractResourceNotification {
-	
-	public Instant timestamp;
-	
-	@Override
-	public String getTopic() {
-		Objects.requireNonNull(provider);
-		Objects.requireNonNull(service);
-		Objects.requireNonNull(resource);
-		return String.format("ACTION/%s/%s/%s", provider, service, resource);
-	}
-	
+
+    public Instant timestamp;
+
+    @Override
+    public String getTopic() {
+        Objects.requireNonNull(provider);
+        Objects.requireNonNull(service);
+        Objects.requireNonNull(resource);
+        return String.format("ACTION/%s/%s/%s", provider, service, resource);
+    }
+
 }

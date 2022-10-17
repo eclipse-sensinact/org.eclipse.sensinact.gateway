@@ -24,104 +24,103 @@ import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SensinactResourceImpl extends CommandScopedImpl implements SensinactResource  {
+public class SensinactResourceImpl extends CommandScopedImpl implements SensinactResource {
 
-	private final String name;
-	private final SensinactService service;
-	private final Class<?> type;
-	private final NexusImpl nexusImpl;
-	private final PromiseFactory promiseFactory;
+    private final String name;
+    private final SensinactService service;
+    private final Class<?> type;
+    private final NexusImpl nexusImpl;
+    private final PromiseFactory promiseFactory;
 
-	public SensinactResourceImpl(AtomicBoolean active, SensinactService service, String name, Class<?> type, NotificationAccumulator accumulator, 
-			NexusImpl nexusImpl, PromiseFactory promiseFactory) {
-		super(active);
-		this.service = service;
-		this.name = name;
-		this.type = type;
-		this.nexusImpl = nexusImpl;
-		this.promiseFactory = promiseFactory;
-	}
+    public SensinactResourceImpl(AtomicBoolean active, SensinactService service, String name, Class<?> type,
+            NotificationAccumulator accumulator, NexusImpl nexusImpl, PromiseFactory promiseFactory) {
+        super(active);
+        this.service = service;
+        this.name = name;
+        this.type = type;
+        this.nexusImpl = nexusImpl;
+        this.promiseFactory = promiseFactory;
+    }
 
-	@Override
-	public Class<?> getType() {
-		return type;
-	}
+    @Override
+    public Class<?> getType() {
+        return type;
+    }
 
-	@Override
-	public ValueType getValueType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public ValueType getValueType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public ResourceType getResourceType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public ResourceType getResourceType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public List<Class<?>> getArguments() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public List<Class<?>> getArguments() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public boolean isExclusivelyOwned() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    @Override
+    public boolean isExclusivelyOwned() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	@Override
-	public boolean isAutoDelete() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    @Override
+    public boolean isAutoDelete() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	@Override
-	public Promise<Void> setValue(Object value, Instant timestamp) {
-		checkValid();
-		
-		SensinactService service = getService();
-		SensinactProvider provider = service.getProvider();
-		
-		nexusImpl.handleDataUpdate(provider.getModelName(), provider.getName(), service.getName(), 
-				getName(), getType(), value, timestamp);
-		return promiseFactory.resolved(null);
-	}
+    @Override
+    public Promise<Void> setValue(Object value, Instant timestamp) {
+        checkValid();
 
-	@Override
-	public Promise<Object> getValue() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        SensinactService service = getService();
+        SensinactProvider provider = service.getProvider();
 
-	@Override
-	public SensinactService getService() {
-		return service;
-	}
+        nexusImpl.handleDataUpdate(provider.getModelName(), provider.getName(), service.getName(), getName(), getType(),
+                value, timestamp);
+        return promiseFactory.resolved(null);
+    }
 
-	@Override
-	public Promise<Void> setMetadataValue(String name, Object value, Instant timestamp) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Promise<Object> getValue() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Promise<Object> getMetadataValue(String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public SensinactService getService() {
+        return service;
+    }
 
-	@Override
-	public Promise<Map<String, Object>> getMetadataValues() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Promise<Void> setMetadataValue(String name, Object value, Instant timestamp) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	
+    @Override
+    public Promise<Object> getMetadataValue(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Promise<Map<String, Object>> getMetadataValues() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

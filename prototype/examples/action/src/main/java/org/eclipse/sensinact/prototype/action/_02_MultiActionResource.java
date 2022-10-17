@@ -20,19 +20,19 @@ import org.osgi.service.component.annotations.Component;
  * Multiple providers from a single service, different methods for each resource
  */
 @WhiteboardResource
-@ProviderName({"foo", "bar", "foobar"})
+@ProviderName({ "foo", "bar", "foobar" })
 @Component(service = _02_MultiActionResource.class)
 public class _02_MultiActionResource {
 
-	@ACT(service = "example", resource = "fizz")
-	public void setFizz(@UriParam(UriSegment.PROVIDER) String provider) {
-	}
+    @ACT(service = "example", resource = "fizz")
+    public void setFizz(@UriParam(UriSegment.PROVIDER) String provider) {
+    }
 
-	@ACT(service = "example", resource = "buzz")
-	public void setBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
-	}
+    @ACT(service = "example", resource = "buzz")
+    public void setBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
+    }
 
-	@ACT(service = "example", resource = "fizzbuzz")
-	public void setFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
-	}
+    @ACT(service = "example", resource = "fizzbuzz")
+    public void setFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
+    }
 }

@@ -20,62 +20,62 @@ import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 
 public class GenericDtoDataExtractor implements DataExtractor {
 
-	@Override
-	public List<? extends AbstractUpdateDto> getUpdates(Object update) {
-		
-		GenericDto dto = check(update);
-		
-		List<AbstractUpdateDto> list = new ArrayList<>();
-		
-		Instant instant = null;
-		
-		if(dto.value != null) {
-			DataUpdateDto dud = new DataUpdateDto();
-			instant = copyCommonFields(dto, instant, dud);
-			if(dto.type != null)
-				dud.type = dto.type;
-			dud.data = dto.value;
-			list.add(dud);
-		}
+    @Override
+    public List<? extends AbstractUpdateDto> getUpdates(Object update) {
 
-		if(dto.metadata != null) {
-			MetadataUpdateDto dud = new MetadataUpdateDto();
-			instant = copyCommonFields(dto, instant, dud);
-			dud.metadata = dto.metadata;
-			dud.removeNullValues = true;
-			list.add(dud);
-		}
-		
-		return list;
-	}
+        GenericDto dto = check(update);
 
-	private Instant copyCommonFields(GenericDto dto, Instant instant, AbstractUpdateDto dud) {
-		dud.model = dto.model;
-		dud.provider = dto.provider;
-		dud.service = dto.service;
-		dud.resource = dto.resource;
-		dud.timestamp = instant == null ? instant = Instant.now() : instant;
-		return instant;
-	}
+        List<AbstractUpdateDto> list = new ArrayList<>();
 
-	private GenericDto check(Object update) {
-		GenericDto dto;
-		try {
-			dto = GenericDto.class.cast(update);
-		} catch (ClassCastException e) {
-			throw new IllegalArgumentException("The supplied update dto is not of the correct type to extract", e);
-		}
-		
-		if(dto.provider == null) {
-			throw new IllegalArgumentException("No provider is defined");
-		}
-		if(dto.service == null) {
-			throw new IllegalArgumentException("No service is defined");
-		}
-		if(dto.resource == null) {
-			throw new IllegalArgumentException("No resource is defined");
-		}
-		
-		return dto;
-	}
+        Instant instant = null;
+
+        if (dto.value != null) {
+            DataUpdateDto dud = new DataUpdateDto();
+            instant = copyCommonFields(dto, instant, dud);
+            if (dto.type != null)
+                dud.type = dto.type;
+            dud.data = dto.value;
+            list.add(dud);
+        }
+
+        if (dto.metadata != null) {
+            MetadataUpdateDto dud = new MetadataUpdateDto();
+            instant = copyCommonFields(dto, instant, dud);
+            dud.metadata = dto.metadata;
+            dud.removeNullValues = true;
+            list.add(dud);
+        }
+
+        return list;
+    }
+
+    private Instant copyCommonFields(GenericDto dto, Instant instant, AbstractUpdateDto dud) {
+        dud.model = dto.model;
+        dud.provider = dto.provider;
+        dud.service = dto.service;
+        dud.resource = dto.resource;
+        dud.timestamp = instant == null ? instant = Instant.now() : instant;
+        return instant;
+    }
+
+    private GenericDto check(Object update) {
+        GenericDto dto;
+        try {
+            dto = GenericDto.class.cast(update);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("The supplied update dto is not of the correct type to extract", e);
+        }
+
+        if (dto.provider == null) {
+            throw new IllegalArgumentException("No provider is defined");
+        }
+        if (dto.service == null) {
+            throw new IllegalArgumentException("No service is defined");
+        }
+        if (dto.resource == null) {
+            throw new IllegalArgumentException("No resource is defined");
+        }
+
+        return dto;
+    }
 }

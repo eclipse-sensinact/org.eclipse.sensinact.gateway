@@ -24,14 +24,15 @@ import org.osgi.service.component.annotations.Component;
 @ProviderName("pull_based")
 @Component(service = _04_ParameterActionResource.class)
 public class _04_ParameterActionResource {
-	
-	/**
-	 * A GET method for a service and resource
-	 * @return
-	 */
-	@ACT(service = "example", resource = "default")
-	public List<Long> doAction(Instant fromTime, Instant toTime) {
-		// Run the action and return the result
-		return null;
-	}
+
+    /**
+     * A GET method for a service and resource
+     * 
+     * @return
+     */
+    @ACT(service = "example", resource = "default")
+    public List<Long> doAction(Instant fromTime, Instant toTime) {
+        // Run the action and return the result
+        return null;
+    }
 }

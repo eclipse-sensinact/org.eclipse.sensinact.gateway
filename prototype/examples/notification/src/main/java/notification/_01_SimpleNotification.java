@@ -21,10 +21,10 @@ import org.osgi.service.typedevent.propertytypes.EventTopics;
 @EventTopics("DATA/*")
 public class _01_SimpleNotification implements TypedEventHandler<ResourceDataNotification> {
 
-	@Override
-	public void notify(String topic, ResourceDataNotification event) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void notify(String topic, ResourceDataNotification event) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

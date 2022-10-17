@@ -34,54 +34,49 @@ import org.osgi.util.promise.Promise;
 
 @Component
 public class PrototypePushImpl implements PrototypePush {
-	//TODO wrap this in a more pleasant type?
-	@Reference
-	GatewayThread thread;
-	
-	/**
-	 * We use a weak map so we don't keep classloaders for old bundles
-	 */
-	private final Map<Class<?>, DataExtractor> cachedExtractors = new WeakHashMap<>();
+    // TODO wrap this in a more pleasant type?
+    @Reference
+    GatewayThread thread;
 
-	@Override
-	public Promise<?> pushUpdate(Object o) {
-		
-		DataExtractor extractor;
-		
-		Class<?> updateClazz = o.getClass();
-		
-		synchronized (cachedExtractors) {
-			extractor = cachedExtractors.computeIfAbsent(updateClazz, this::createDataExtractor);
-		}
-		
-		List<? extends AbstractUpdateDto> updates = extractor.getUpdates(o);
-		
-		return thread.execute(new IndependentCommands<>(
-				updates.stream()
-					.map(this::toCommand)
-					.collect(toList()
-			)
-		));
-	}
-	
-	private DataExtractor createDataExtractor(Class<?> clazz) {
-		if(clazz == GenericDto.class) {
-			return new GenericDtoDataExtractor();
-		} else if (clazz == BulkGenericDto.class) {
-			return new BulkGenericDtoDataExtractor();
-		} else {
-			return new CustomDtoDataExtractor(clazz);
-		}
-	}
+    /**
+     * We use a weak map so we don't keep classloaders for old bundles
+     */
+    private final Map<Class<?>, DataExtractor> cachedExtractors = new WeakHashMap<>();
 
-	private AbstractSensinactCommand<Void> toCommand(AbstractUpdateDto dto) {
-		if(dto instanceof DataUpdateDto) {
-			return new SetValueCommand((DataUpdateDto) dto);
-		} else if (dto instanceof MetadataUpdateDto) {
-			return new SetMetadataCommand((MetadataUpdateDto) dto);
-		} else {
-			throw new IllegalArgumentException("Unknown dto type " + dto.getClass().toString());
-		}
-	}
-	
+    @Override
+    public Promise<?> pushUpdate(Object o) {
+
+        DataExtractor extractor;
+
+        Class<?> updateClazz = o.getClass();
+
+        synchronized (cachedExtractors) {
+            extractor = cachedExtractors.computeIfAbsent(updateClazz, this::createDataExtractor);
+        }
+
+        List<? extends AbstractUpdateDto> updates = extractor.getUpdates(o);
+
+        return thread.execute(new IndependentCommands<>(updates.stream().map(this::toCommand).collect(toList())));
+    }
+
+    private DataExtractor createDataExtractor(Class<?> clazz) {
+        if (clazz == GenericDto.class) {
+            return new GenericDtoDataExtractor();
+        } else if (clazz == BulkGenericDto.class) {
+            return new BulkGenericDtoDataExtractor();
+        } else {
+            return new CustomDtoDataExtractor(clazz);
+        }
+    }
+
+    private AbstractSensinactCommand<Void> toCommand(AbstractUpdateDto dto) {
+        if (dto instanceof DataUpdateDto) {
+            return new SetValueCommand((DataUpdateDto) dto);
+        } else if (dto instanceof MetadataUpdateDto) {
+            return new SetMetadataCommand((MetadataUpdateDto) dto);
+        } else {
+            throw new IllegalArgumentException("Unknown dto type " + dto.getClass().toString());
+        }
+    }
+
 }

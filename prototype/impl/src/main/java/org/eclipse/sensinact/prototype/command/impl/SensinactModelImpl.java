@@ -20,27 +20,27 @@ import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactModelImpl extends CommandScopedImpl implements SensinactModel {
-	
-	private final NotificationAccumulator accumulator;
-	private final NexusImpl nexusImpl;
-	private final PromiseFactory pf;
-	
-	public SensinactModelImpl(NotificationAccumulator accumulator, NexusImpl nexusImpl, PromiseFactory pf) {
-		super(new AtomicBoolean(true));
-		this.accumulator = accumulator;
-		this.nexusImpl = nexusImpl;
-		this.pf = pf;
-	}
 
-	@Override
-	public SensinactResource getOrCreateResource(String model, String provider, String service, String resource,
-			Class<?> valueType) {
-		checkValid();
-		
-		SensinactProvider p = new SensinactProviderImpl(active, model, provider);
-		SensinactService s = new SensinactServiceImpl(active, p, service);
-		
-		return new SensinactResourceImpl(active, s, resource, valueType, accumulator, nexusImpl, pf);
-	}
-	
+    private final NotificationAccumulator accumulator;
+    private final NexusImpl nexusImpl;
+    private final PromiseFactory pf;
+
+    public SensinactModelImpl(NotificationAccumulator accumulator, NexusImpl nexusImpl, PromiseFactory pf) {
+        super(new AtomicBoolean(true));
+        this.accumulator = accumulator;
+        this.nexusImpl = nexusImpl;
+        this.pf = pf;
+    }
+
+    @Override
+    public SensinactResource getOrCreateResource(String model, String provider, String service, String resource,
+            Class<?> valueType) {
+        checkValid();
+
+        SensinactProvider p = new SensinactProviderImpl(active, model, provider);
+        SensinactService s = new SensinactServiceImpl(active, p, service);
+
+        return new SensinactResourceImpl(active, s, resource, valueType, accumulator, nexusImpl, pf);
+    }
+
 }

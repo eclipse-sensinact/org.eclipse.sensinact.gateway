@@ -21,8 +21,8 @@ import org.osgi.service.component.annotations.ComponentPropertyType;
  */
 @ComponentPropertyType
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 public @interface WhiteboardResource {
-	
-	String PREFIX_ = "sensiNact.";
+
+    String PREFIX_ = "sensiNact.";
 }

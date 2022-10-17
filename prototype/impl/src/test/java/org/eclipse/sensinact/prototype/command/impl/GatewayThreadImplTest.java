@@ -37,57 +37,57 @@ import org.osgi.util.promise.PromiseFactory;
 @ExtendWith(MockitoExtension.class)
 public class GatewayThreadImplTest {
 
-	@Mock
-	TypedEventBus eventBus;
-	@Mock
-	SensiNactPackage sensinactPackage;
-	@Mock
-	ResourceSet resourceSet;
-	@Mock
-	Resource resource;
-	
-	GatewayThreadImpl thread;
-	
-	@BeforeEach
-	void setup() {
-		
-		Mockito.when(resourceSet.createResource(Mockito.any(URI.class)))
-			.thenAnswer(i -> new ResourceImpl((URI)i.getArgument(0)));
-		
-		thread = new GatewayThreadImpl();
-		thread.typedEventBus = eventBus;
-		thread.sensinactPackage = sensinactPackage;
-		thread.resourceSet = resourceSet;
-		thread.activate();
-	}
-	
-	@AfterEach
-	void teardown() {
-		thread.deactivate();
-	}
-	
-	@Test
-	void testExecute() throws Exception {
-		Semaphore sem = new Semaphore(0);
-		AbstractSensinactCommand<Integer> command = new AbstractSensinactCommand<Integer>() {
+    @Mock
+    TypedEventBus eventBus;
+    @Mock
+    SensiNactPackage sensinactPackage;
+    @Mock
+    ResourceSet resourceSet;
+    @Mock
+    Resource resource;
 
-			@Override
-			protected Promise<Integer> call(SensinactModel model, PromiseFactory promiseFactory) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
-				return promiseFactory.resolved(5);
-			}
-		};
-		
-		Promise<Integer> result = thread.execute(command).onResolve(sem::release);
-		
-		assertFalse(result.isDone());
-		assertTrue(sem.tryAcquire(200, TimeUnit.MILLISECONDS));
-		
-		assertEquals(5, result.getValue());
-	}
+    GatewayThreadImpl thread;
+
+    @BeforeEach
+    void setup() {
+
+        Mockito.when(resourceSet.createResource(Mockito.any(URI.class)))
+                .thenAnswer(i -> new ResourceImpl((URI) i.getArgument(0)));
+
+        thread = new GatewayThreadImpl();
+        thread.typedEventBus = eventBus;
+        thread.sensinactPackage = sensinactPackage;
+        thread.resourceSet = resourceSet;
+        thread.activate();
+    }
+
+    @AfterEach
+    void teardown() {
+        thread.deactivate();
+    }
+
+    @Test
+    void testExecute() throws Exception {
+        Semaphore sem = new Semaphore(0);
+        AbstractSensinactCommand<Integer> command = new AbstractSensinactCommand<Integer>() {
+
+            @Override
+            protected Promise<Integer> call(SensinactModel model, PromiseFactory promiseFactory) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return promiseFactory.resolved(5);
+            }
+        };
+
+        Promise<Integer> result = thread.execute(command).onResolve(sem::release);
+
+        assertFalse(result.isDone());
+        assertTrue(sem.tryAcquire(200, TimeUnit.MILLISECONDS));
+
+        assertEquals(5, result.getValue());
+    }
 
 }

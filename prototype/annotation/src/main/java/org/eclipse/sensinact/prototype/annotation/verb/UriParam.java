@@ -22,21 +22,22 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface UriParam {
 
-	/**
-	 * What part of the URI should be passed
-	 * @return
-	 */
-	UriSegment value () default UriSegment.URI;
-	
-	public enum UriSegment {
-		/** The whole URI */
-		URI,
-		/** The provider name */
-		PROVIDER,
-		/** The service name */
-		SERVICE,
-		/** The resource name */
-		RESOURCE
-	}
-	
+    /**
+     * What part of the URI should be passed
+     * 
+     * @return
+     */
+    UriSegment value() default UriSegment.URI;
+
+    public enum UriSegment {
+        /** The whole URI */
+        URI,
+        /** The provider name */
+        PROVIDER,
+        /** The service name */
+        SERVICE,
+        /** The resource name */
+        RESOURCE
+    }
+
 }
