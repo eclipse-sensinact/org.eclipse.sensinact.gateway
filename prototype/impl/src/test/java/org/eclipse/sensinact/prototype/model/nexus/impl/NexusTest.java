@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 - 2022 Data In Motion and others.
+ * Copyright (c) 2022 Data In Motion and others.
  * All rights reserved. 
  * 
  * This program and the accompanying materials are made available under the terms of the 
@@ -8,6 +8,7 @@
  * 
  * Contributors:
  *     Data In Motion - initial API and implementation
+ *     Kentyou - fixes and updates to start basic testing
  */
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 

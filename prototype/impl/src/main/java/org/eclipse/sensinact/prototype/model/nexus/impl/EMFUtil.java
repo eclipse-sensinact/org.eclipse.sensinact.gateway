@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012 - 2022 Data In Motion and others.
+ * Copyright (c) 2022 Data In Motion and others.
  * All rights reserved. 
  * 
  * This program and the accompanying materials are made available under the terms of the 
