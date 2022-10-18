@@ -1,0 +1,50 @@
+header:
+  license:
+    spdx-id: EPL-2.0
+    copyright-owner: Contributors to the Eclipse Foundation
+    content: |
+      This program and the accompanying materials are made
+      available under the terms of the Eclipse Public License 2.0
+      which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    pattern: |
+      This program and the accompanying materials are made
+      available under the terms of the Eclipse Public License 2.0
+      which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  paths-ignore:
+    - 'dist'
+    - 'licenses'
+    - '**/package-info.java'
+    - '**/packageinfo'
+    - '**/module-info.java'
+    - '**/*.bnd'
+    - '**/*.bndrun'
+    - '**/*.xml'
+    - '**/*.ecore'
+    - '**/*.genmodel'
+    - '**/*.md'
+    - '**/*.MD'
+    - '**/.keep'
+    - '**/*.jetproperties'
+    - '**/*.javajet'
+    - '**/*.javajetinc'
+    - '**/*.properties'
+    - '**/*.maven'
+    - '**/*.html'
+    - '**/*.aird'
+    - '**/*.basic'
+    - '**/.classpath'
+    - '**/.editorconfig'
+    - 'legacy/**'
+    - 'LICENSE'
+    - 'NOTICE'
+    - '.gitattributes'
+    - '.github/**'
+    - '.gitignore'
+    - '.licenserc.yaml'
+    - '**/.project'
+    - '**/*.prefs'
+    - 'license.templates'
+ 
+  comment: always
