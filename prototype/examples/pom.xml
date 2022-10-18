@@ -14,22 +14,29 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.eclipse.sensinact.gateway</groupId>
-    <artifactId>prototype</artifactId>
+    <artifactId>sensinact-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
+  <groupId>org.eclipse.sensinact.gateway.examples</groupId>
   <artifactId>examples</artifactId>
   <packaging>pom</packaging>
   <name>Example usage patterns</name>
-  
+
+  <!-- No integration tests or deployment -->
+  <properties>
+    <bnd-tests.skip>true</bnd-tests.skip>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
   <modules>
-  	<module>pull-based</module>
-  	<module>push-based</module>
-  	<module>reflective</module>
-  	<module>model-based</module>
-  	<module>action</module>
-  	<module>writable</module>
-  	<module>generic</module>
-  	<module>notification</module>
+    <module>pull-based</module>
+    <module>push-based</module>
+    <module>reflective</module>
+    <module>model-based</module>
+    <module>action</module>
+    <module>writable</module>
+    <module>generic</module>
+    <module>notification</module>
   </modules>
-  
+
 </project>

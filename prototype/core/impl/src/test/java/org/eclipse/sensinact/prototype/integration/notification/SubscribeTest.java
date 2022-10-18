@@ -30,7 +30,7 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.junit5.service.ServiceExtension;
 
 @ExtendWith(ServiceExtension.class)
-class SubscribeTest {
+public class SubscribeTest {
 
     private static final String USER = "user";
 

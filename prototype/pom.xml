@@ -13,27 +13,130 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse.sensinact.gateway</groupId>
-  <artifactId>prototype</artifactId>
+  <artifactId>sensinact-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
+
+  <url>https://projects.eclipse.org/projects/technology.sensinact</url>
+
+  <inceptionYear>2017</inceptionYear>
+
+  <mailingLists>
+    <mailingList>
+      <name>Eclipse sensiNact Development List</name>
+      <post>sensinact-dev@eclipse.org</post>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+    <developer>
+      <id>timothyjward</id>
+      <name>Timothy Ward</name>
+      <organization>Kentyou</organization>
+      <organizationUrl>https://www.kentyou.com/</organizationUrl>
+    </developer>
+    <developer>
+      <id>tcalmant</id>
+      <name>Thomas Calmant</name>
+      <organization>Kentyou</organization>
+      <organizationUrl>https://www.kentyou.com/</organizationUrl>
+    </developer>
+    <developer>
+      <id>juergen-albert</id>
+      <name>Jürgen Albert</name>
+      <organization>Data in Motion</organization>
+      <organizationUrl>https://www.datainmotion.de/</organizationUrl>
+    </developer>
+    <developer>
+      <id>stbischof</id>
+      <name>Stefan Bischof</name>
+    </developer>
+  </developers>
+
+  <contributors>
+    <contributor>
+      <name>Christophe Munilla</name>
+      <organization>Kentyou</organization>
+    </contributor>
+    <contributor>
+      <name>Etienne Gandrilee</name>
+      <organization>CEA</organization>
+    </contributor>
+    <contributor>
+      <name>Jander Botelho do Nascimento</name>
+      <organization>CEA</organization>
+    </contributor>
+    <contributor>
+      <name>Remi Druilhe</name>
+      <organization>CEA</organization>
+    </contributor>
+  </contributors>
+
+  <licenses>
+    <license>
+      <name>EPL 2.0</name>
+      <url>http://www.eclipse.org/legal/epl-2.0</url>
+      <distribution>repo</distribution>
+      <comments>Except for 3rd party content and examples.</comments>
+    </license>
+    <license>
+      <name>Apache License, 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+      <comments>
+        Jackson JSON processing
+        Apache Felix implementations of OSGi specifications
+      </comments>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</connection>
+    <developerConnection>scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</developerConnection>
+    <url>https://github.com/eclipse/org.eclipse.sensinact.gateway</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <organization>
+    <name>Eclipse Foundation</name>
+    <url>https://www.eclipse.org/org/foundation/</url>
+  </organization>
+
+
   <modules>
-  	<module>annotation</module>
-  	<module>sensinact-api</module>
-  	<module>models</module>
-  	<module>examples</module>
-  	<module>impl</module>
+    <module>core</module>
+    <module>examples</module>
   </modules>
-  
+
   <properties>
+    <!-- Build properties -->
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- compile dependency versions -->
+    <osgi.core.version>7.0.0</osgi.core.version>
+    <osgi.promise.version>1.2.0</osgi.promise.version>
+    <osgi.implementation.namespace.version>1.0.0</osgi.implementation.namespace.version>
+    <osgi.ds.version>1.5.0</osgi.ds.version>
+    <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
+    <gecko.emf.version>4.2.0-SNAPSHOT</gecko.emf.version>
+
+    <!-- runtime dependencies -->
+    <felix.framework.version>7.0.3</felix.framework.version>
+    <felix.scr.version>2.2.2</felix.scr.version>
+    <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
+
+    <!-- test dependency versions -->
     <junit.version>5.9.0</junit.version>
     <mockito.version>4.7.0</mockito.version>
-    <bnd.version>6.4.0-SNAPSHOT</bnd.version>
     <osgi.test.version>1.2.1</osgi.test.version>
+
+    <!-- plugin dependency versions -->
+    <bnd.version>6.4.0-SNAPSHOT</bnd.version>
   </properties>
-  
+
   <repositories>
     <repository>
       <id>ossrh</id>
@@ -46,10 +149,21 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
-  </repositories> 
-  
+    <repository>
+      <id>eclipse-sensinact</id>
+      <name>Eclipse Nexus - sensiNact group</name>
+      <url>https://repo.eclipse.org/content/groups/sensinact/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <pluginRepositories>
-	<pluginRepository>
+    <pluginRepository>
       <id>bnd-snapshots</id>
       <name>bnd snapshot repository</name>
       <url>https://bndtools.jfrog.io/bndtools/update-snapshot</url>
@@ -59,62 +173,85 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
-	</pluginRepository>  	
+    </pluginRepository>
   </pluginRepositories>
-  
+
   <dependencyManagement>
     <dependencies>
+      <!-- Compile -->
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>osgi.core</artifactId>
-        <version>7.0.0</version>
+        <version>${osgi.core.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>osgi.annotation</artifactId>
-        <version>7.0.0</version>
+        <version>${osgi.core.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.namespace.implementation</artifactId>
-        <version>1.0.0</version>
+        <version>${osgi.implementation.namespace.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.util.promise</artifactId>
-        <version>1.2.0</version>
+        <version>${osgi.promise.version}</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.component</artifactId>
-        <version>1.5.0</version>
+        <version>${osgi.ds.version}</version>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.component.annotations</artifactId>
-        <version>1.5.0</version>
+        <version>${osgi.ds.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.typedevent</artifactId>
-        <version>1.0.0</version>
+        <version>${osgi.typedevent.version}</version>
       </dependency>
       <dependency>
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.bom</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>${gecko.emf.version}</version>
       </dependency>
+
+      <!-- Runtime -->
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.framework</artifactId>
+        <version>${felix.framework.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.scr</artifactId>
+        <version>${felix.scr.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.aries.typedevent</groupId>
+        <artifactId>org.apache.aries.typedevent.bus</artifactId>
+        <version>${aries.typedevent.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+
+      <!-- Test -->
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>org.osgi.test.bom</artifactId>
         <version>${osgi.test.version}</version>
         <type>pom</type>
         <scope>import</scope>
-	  </dependency>
+      </dependency>
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
@@ -135,13 +272,13 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-		<groupId>org.geckoprojects.emf</groupId>
-		<artifactId>org.gecko.emf.osgi.codegen</artifactId>
-		<version>4.2.0-SNAPSHOT</version>
-	  </dependency>
+        <groupId>org.geckoprojects.emf</groupId>
+        <artifactId>org.gecko.emf.osgi.codegen</artifactId>
+        <version>${gecko.emf.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -163,53 +300,35 @@
       <artifactId>org.osgi.test.junit5</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.framework</artifactId>
-      <version>7.0.3</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
-      <version>2.2.2</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.aries.typedevent</groupId>
-      <artifactId>org.apache.aries.typedevent.bus</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
   </dependencies>
-  
+
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
-			<groupId>org.eclipse.m2e</groupId>
-			<artifactId>lifecycle-mapping</artifactId>
-			<version>1.0.0</version>
-			<configuration>
-				<lifecycleMappingMetadata>
-					<pluginExecutions>
-						<pluginExecution>
-							<pluginExecutionFilter>
-								<groupId>biz.aQute.bnd</groupId>
-								<artifactId>bnd-generate-maven-plugin</artifactId>
-								<versionRange>${bnd.version}</versionRange>
-								<goals>
-									<goal>bnd-generate</goal>
-								</goals>
-							</pluginExecutionFilter>
-          					<action>
-				               <ignore/>
-				             </action>
-						</pluginExecution>
-					</pluginExecutions>
-				</lifecycleMappingMetadata>
-			</configuration>
-		</plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-generate-maven-plugin</artifactId>
+                    <versionRange>${bnd.version}</versionRange>
+                    <goals>
+                      <goal>bnd-generate</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
         <plugin>
           <groupId>biz.aQute.bnd</groupId>
           <artifactId>bnd-maven-plugin</artifactId>
@@ -220,6 +339,11 @@
                 <goal>bnd-process</goal>
               </goals>
               <configuration>
+                <bnd><![CDATA[
+                Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
+                Git-Descriptor: ${system-allow-fail;git describe --dirty --always --abbrev=9}
+                Git-SHA: ${system-allow-fail;git rev-list -1 --no-abbrev-commit HEAD}
+                ]]></bnd>
                 <bndfile>bnd.bnd</bndfile>
               </configuration>
             </execution>
@@ -230,9 +354,15 @@
                 <goal>bnd-process-tests</goal>
               </goals>
               <configuration>
+                <bnd><![CDATA[
+                Bundle-SymbolicName: ${project.groupId}.${project.artifactId}-tests
+                Fragment-Host: ${project.groupId}.${project.artifactId}
+                Git-Descriptor: ${system-allow-fail;git describe --dirty --always --abbrev=9}
+                Git-SHA: ${system-allow-fail;git rev-list -1 --no-abbrev-commit HEAD}
+                Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE;NAMED;*.integration.*}
+                ]]></bnd>
                 <bndfile>tests.bnd</bndfile>
-                <artifactFragment>true</artifactFragment>
-                <testCases>junit5</testCases>
+                <testCases>useTestCasesHeader</testCases>
               </configuration>
             </execution>
           </executions>
@@ -296,7 +426,7 @@
                 </bundles>
                 <bndruns>
                   <include>*-test.bndrun</include>
-                </bndruns>                
+                </bndruns>
               </configuration>
             </execution>
             <execution>
@@ -343,6 +473,11 @@
               </goals>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.0.0</version>
         </plugin>
       </plugins>
     </pluginManagement>

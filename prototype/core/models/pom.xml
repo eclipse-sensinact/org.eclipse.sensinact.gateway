@@ -13,17 +13,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.eclipse.sensinact.gateway</groupId>
-    <artifactId>prototype</artifactId>
+    <groupId>org.eclipse.sensinact.gateway.core</groupId>
+    <artifactId>core</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>impl</artifactId>
-  
+  <artifactId>models</artifactId>
+
+  <!-- No integration tests -->
+  <properties>
+    <bnd-tests.skip>true</bnd-tests.skip>
+  </properties>
+
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>sensinact-api</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -31,24 +35,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>models</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.component.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.typedevent</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.geckoprojects.emf</groupId>
       <artifactId>org.gecko.emf.osgi.bom</artifactId>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -57,11 +48,34 @@
       </plugin>
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-testing-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-resolver-maven-plugin</artifactId>
+        <artifactId>bnd-generate-maven-plugin</artifactId>
+        <version>${bnd.version}</version>
+        <configuration>
+          <externalPlugins>
+            <dependency>
+              <groupId>org.geckoprojects.emf</groupId>
+              <artifactId>org.gecko.emf.osgi.codegen</artifactId>
+            </dependency>
+          </externalPlugins>
+          <steps>
+            <step>
+              <trigger>src/main/resources/model/sensinact.genmodel</trigger>
+              <generateCommand>geckoEMF</generateCommand>
+              <output>src/main/java</output>
+              <properties>
+                <genmodel>src/main/resources/model/sensinact.genmodel</genmodel>
+              </properties>
+            </step>
+          </steps>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>bnd-generate</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

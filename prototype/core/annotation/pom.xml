@@ -13,24 +13,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.eclipse.sensinact.gateway.examples</groupId>
-    <artifactId>examples</artifactId>
+    <groupId>org.eclipse.sensinact.gateway.core</groupId>
+    <artifactId>core</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>action</artifactId>
-  
+  <artifactId>annotation</artifactId>
+  <name>Annotations for sensiNact connectors</name>
+
+  <!-- No integration tests -->
+  <properties>
+    <bnd-tests.skip>true</bnd-tests.skip>
+  </properties>
+
   <dependencies>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.annotation</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.eclipse.sensinact.gateway.core</groupId>
-      <artifactId>annotation</artifactId>
-      <version>${project.version}</version>
-    </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>

@@ -1,7 +1,7 @@
 -tester: biz.aQute.tester.junit-platform
 
 -runrequires: \
-	bnd.identity;id=impl-tests,\
+	bnd.identity;id=org.eclipse.sensinact.gateway.core.impl-tests,\
 	bnd.identity;id='slf4j.simple'
 -resolve.effective: active
 
@@ -9,16 +9,12 @@
 -runfw: org.apache.felix.framework
 
 -runbundles: \
-	annotation;version='[0.0.1,0.0.2)',\
-	impl;version='[0.0.1,0.0.2)',\
-	impl-tests;version='[0.0.1,0.0.2)',\
 	junit-jupiter-api;version='[5.9.0,5.9.1)',\
 	junit-jupiter-engine;version='[5.9.0,5.9.1)',\
 	junit-jupiter-params;version='[5.9.0,5.9.1)',\
 	junit-platform-commons;version='[1.9.0,1.9.1)',\
 	junit-platform-engine;version='[1.9.0,1.9.1)',\
 	junit-platform-launcher;version='[1.9.0,1.9.1)',\
-	models;version='[0.0.1,0.0.2)',\
 	net.bytebuddy.byte-buddy;version='[1.12.13,1.12.14)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.12.13,1.12.14)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
@@ -42,6 +38,10 @@
 	org.osgi.util.function;version='[1.1.0,1.1.1)',\
 	org.osgi.util.promise;version='[1.2.0,1.2.1)',\
 	org.osgi.util.pushstream;version='[1.0.1,1.0.2)',\
-	sensinact-api;version='[0.0.1,0.0.2)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
-	slf4j.simple;version='[1.7.25,1.7.26)'
+	slf4j.simple;version='[1.7.25,1.7.26)',\
+	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.api;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.impl;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.impl-tests;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)'
