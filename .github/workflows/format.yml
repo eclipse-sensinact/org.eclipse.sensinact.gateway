@@ -19,6 +19,6 @@ jobs:
     - name: Git Checkout
       uses: actions/checkout@v3
     - name: Editor Config Validation
-      uses: zbeekman/EditorConfig-Action@v1.1.1
+      uses: zbeekman/EditorConfig-Action@v1.1.0
       env:
         ALWAYS_LINT_ALL_FILES: "false"
