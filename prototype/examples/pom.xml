@@ -20,7 +20,8 @@
   <groupId>org.eclipse.sensinact.gateway.examples</groupId>
   <artifactId>examples</artifactId>
   <packaging>pom</packaging>
-  <name>Example usage patterns</name>
+  <name>Prototype examples</name>
+  <description>This project contains example code demonstrating the use of various techniques for pushing data into sensiNact</description>
 
   <!-- No integration tests or deployment -->
   <properties>

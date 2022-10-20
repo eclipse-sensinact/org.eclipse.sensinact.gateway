@@ -18,7 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>action</artifactId>
-  
+  <name>Example action</name>
+  <description>The action module contains examples showing how to define "action" resources using the whiteboard</description>
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>

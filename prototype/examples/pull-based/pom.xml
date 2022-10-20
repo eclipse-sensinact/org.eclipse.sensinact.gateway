@@ -18,7 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>pull-based</artifactId>
-  <name>Pull Based device Example</name>
+  <name>Example pull-based</name>
+  <description>The pull-based module shows how to make services that can "get" a sensor value. These are best for low power sensors that you only want to query if necessary</description>
   
   <dependencies>
     <dependency>

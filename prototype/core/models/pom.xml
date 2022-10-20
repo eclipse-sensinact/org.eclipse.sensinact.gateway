@@ -18,7 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>models</artifactId>
-
+  <name>SensiNact core models</name>
+  <description>Models for sensinact gateway core.</description>
   <!-- No integration tests -->
   <properties>
     <bnd-tests.skip>true</bnd-tests.skip>

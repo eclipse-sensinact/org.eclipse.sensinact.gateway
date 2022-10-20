@@ -18,6 +18,9 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>generic</artifactId>
+  <name>Example generic</name>
+  <description>The generic module contains examples showing how to perform a generic update without having up-front code.</description>
+
   <dependencies>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
