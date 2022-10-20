@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.reflective;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 import org.eclipse.sensinact.prototype.model.ModelManager;
 import org.eclipse.sensinact.prototype.model.ModelProvider;
@@ -22,7 +22,7 @@ import org.osgi.service.component.annotations.Component;
 @Component
 public class ProgrammaticModelProvider implements ModelProvider {
 
-    Random random = new Random();
+    SecureRandom random = new SecureRandom();
 
     @Override
     public void init(ModelManager manager) {
