@@ -67,8 +67,7 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
         }
     }
     
-    @SuppressWarnings("unchecked")
-    private static final Comparator<Object> BASE_COMPARATOR = (Comparator<Object>) Comparator.nullsFirst(Comparator.naturalOrder());
+    private static final Comparator<Comparable<Object>> BASE_COMPARATOR = Comparator.nullsFirst(Comparator.naturalOrder());
     
     private Comparator<Object> toComparator(String s) {
         
@@ -92,7 +91,8 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
         return ascending ? result : result.reversed();
     }
     
-    public Object get(Object o, String[] path) {
+    @SuppressWarnings("unchecked")
+    public Comparable<Object> get(Object o, String[] path) {
         Object result = o;
         for(String s : path) {
             if(result == null) {
@@ -104,7 +104,7 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
                 throw new BadRequestException("Failed to order objects by " + Arrays.toString(path));
             }
         }
-        return result;
+        return (Comparable<Object>) result;
     }
     
 }

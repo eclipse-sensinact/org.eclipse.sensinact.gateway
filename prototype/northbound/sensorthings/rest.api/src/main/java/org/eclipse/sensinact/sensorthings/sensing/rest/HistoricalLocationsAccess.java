@@ -26,12 +26,16 @@ public interface HistoricalLocationsAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public HistoricalLocation getHistoricalLocationProp(@PathParam("id") String id);
+    default public HistoricalLocation getHistoricalLocationProp(@PathParam("id") String id) {
+        return getHistoricalLocation(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public HistoricalLocation getHistoricalLocationPropValue(@PathParam("id") String id);
+    default public HistoricalLocation getHistoricalLocationPropValue(@PathParam("id") String id) {
+        return getHistoricalLocation(id);
+    }
 
     @Path("Locations")
     @GET
@@ -40,7 +44,9 @@ public interface HistoricalLocationsAccess {
     @Path("Locations/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getHistoricalLocationLocationsRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getHistoricalLocationLocationsRef(@PathParam("id") String id) {
+        return getHistoricalLocationLocations(id);
+    }
 
     @Path("Locations({id2})")
     @GET
@@ -49,7 +55,9 @@ public interface HistoricalLocationsAccess {
     @Path("Locations({id2})/{prop}")
     @GET
     @PropFilter
-    public Location getHistoricalLocationLocationProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Location getHistoricalLocationLocationProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getHistoricalLocationLocation(id, id2);
+    }
 
     @Path("Locations({id2})/Things")
     @GET
@@ -61,28 +69,32 @@ public interface HistoricalLocationsAccess {
 
     @Path("Thing")
     @GET
-    public Thing getDatastreamThing(@PathParam("id") String id);
+    public Thing getHistoricalLocationThing(@PathParam("id") String id);
 
     @Path("Thing/$ref")
     @GET
     @RefFilter
-    public Self getDatastreamThingRef(@PathParam("id") String id);
+    default public Self getHistoricalLocationThingRef(@PathParam("id") String id) {
+        return getHistoricalLocationThingRef(id);
+    }
     
     @Path("Thing/{prop}")
     @GET
     @PropFilter
-    public Thing getDatastreamThingProp(@PathParam("id") String id);
+    default public Thing getHistoricalLocationThingProp(@PathParam("id") String id) {
+        return getHistoricalLocationThing(id);
+    }
     
     @Path("Thing/Datastreams")
     @GET
-    public ResultList<Datastream> getDatastreamThingDatastreams(@PathParam("id") String id);
+    public ResultList<Datastream> getHistoricalLocationThingDatastreams(@PathParam("id") String id);
 
     @Path("Thing/HistoricalLocations")
     @GET
-    public ResultList<HistoricalLocation> getDatastreamThingHistoricalLocations(@PathParam("id") String id);
+    public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(@PathParam("id") String id);
 
     @Path("Thing/Locations")
     @GET
-    public ResultList<Location> getDatastreamThingLocations(@PathParam("id") String id);
+    public ResultList<Location> getHistoricalLocationThingLocations(@PathParam("id") String id);
     
 }

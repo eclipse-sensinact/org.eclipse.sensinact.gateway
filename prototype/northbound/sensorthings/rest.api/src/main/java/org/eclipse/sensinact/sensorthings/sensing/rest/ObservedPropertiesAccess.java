@@ -27,12 +27,16 @@ public interface ObservedPropertiesAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public ObservedProperty getObservedPropertyProp(@PathParam("id") String id);
+    default public ObservedProperty getObservedPropertyProp(@PathParam("id") String id) {
+        return getObservedProperty(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public ObservedProperty getObservedPropertyPropValue(@PathParam("id") String id);
+    default public ObservedProperty getObservedPropertyPropValue(@PathParam("id") String id) {
+        return getObservedProperty(id);
+    }
 
     @Path("Datastreams")
     @GET
@@ -41,7 +45,9 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getObservedPropertyDatastreamRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getObservedPropertyDatastreamsRef(@PathParam("id") String id) {
+        return getObservedPropertyDatastreams(id);
+    }
 
     @Path("Datastreams({id2})")
     @GET
@@ -50,7 +56,9 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams({id2})/{prop}")
     @GET
     @PropFilter
-    public Datastream getObservedPropertyDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Datastream getObservedPropertyDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getObservedPropertyDatastream(id, id2);
+    }
 
     @Path("Datastreams(id2)/Observations")
     @GET

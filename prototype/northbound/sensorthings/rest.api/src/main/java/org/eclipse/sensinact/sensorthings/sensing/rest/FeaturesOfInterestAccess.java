@@ -25,12 +25,16 @@ public interface FeaturesOfInterestAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public FeatureOfInterest getFeatureOfInterestProp(@PathParam("id") String id);
+    default public FeatureOfInterest getFeatureOfInterestProp(@PathParam("id") String id) {
+        return getFeatureOfInterest(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public FeatureOfInterest getFeatureOfInterestPropValue(@PathParam("id") String id);
+    default public FeatureOfInterest getFeatureOfInterestPropValue(@PathParam("id") String id) {
+        return getFeatureOfInterest(id);
+    }
 
     @Path("Observations")
     @GET
@@ -39,7 +43,9 @@ public interface FeaturesOfInterestAccess {
     @Path("Observations/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getFeatureOfInterestObservationsRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getFeatureOfInterestObservationsRef(@PathParam("id") String id) {
+        return getFeatureOfInterestObservations(id);
+    }
 
     @Path("Observations({id2})")
     @GET
@@ -48,7 +54,9 @@ public interface FeaturesOfInterestAccess {
     @Path("Observations({id2})/{prop}")
     @GET
     @PropFilter
-    public Observation getFeatureOfInterestObservationsProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Observation getFeatureOfInterestObservationsProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getFeatureOfInterestObservation(id, id2);
+    }
 
     @Path("Observations({id2})/Datastream")
     @GET
@@ -56,6 +64,8 @@ public interface FeaturesOfInterestAccess {
 
     @Path("Observations({id2})/FeatureOfInterest")
     @GET
-    public Datastream getFeatureOfInterestObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public FeatureOfInterest getFeatureOfInterestObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getFeatureOfInterest(id);
+    }
     
 }

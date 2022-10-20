@@ -26,12 +26,16 @@ public interface LocationsAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public Location getLocationProp(@PathParam("id") String id);
+    default public Location getLocationProp(@PathParam("id") String id) {
+        return getLocation(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public Location getLocationPropValue(@PathParam("id") String id);
+    default public Location getLocationPropValue(@PathParam("id") String id) {
+        return getLocation(id);
+    }
 
     @Path("HistoricalLocations")
     @GET
@@ -40,7 +44,9 @@ public interface LocationsAccess {
     @Path("HistoricalLocations/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getLocationHistoricalLocationsRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getLocationHistoricalLocationsRef(@PathParam("id") String id) {
+        return getLocationHistoricalLocations(id);
+    }
 
     @Path("HistoricalLocations({id2})")
     @GET
@@ -49,7 +55,9 @@ public interface LocationsAccess {
     @Path("HistoricalLocations({id2})/{prop}")
     @GET
     @PropFilter
-    public HistoricalLocation getLocationHistoricalLocationProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public HistoricalLocation getLocationHistoricalLocationProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getLocationHistoricalLocation(id, id2);
+    }
 
     @Path("HistoricalLocation({id2})/Thing")
     @GET
@@ -66,7 +74,9 @@ public interface LocationsAccess {
     @Path("Things/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getLocationThingsRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getLocationThingsRef(@PathParam("id") String id) {
+        return getLocationThings(id);
+    }
 
     @Path("Things({id2})")
     @GET
@@ -75,7 +85,9 @@ public interface LocationsAccess {
     @Path("Things({id2})/{prop}")
     @GET
     @PropFilter
-    public Thing getLocationThingProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Thing getLocationThingProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getLocationThing(id, id2);
+    }
     
     @Path("Things({id2})/Datastreams")
     @GET

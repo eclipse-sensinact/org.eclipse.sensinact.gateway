@@ -29,12 +29,16 @@ public interface ThingsAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public Thing getThingProp(@PathParam("id") String id);
+    default public Thing getThingProp(@PathParam("id") String id) {
+        return getThing(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public Thing getThingPropValue(@PathParam("id") String id);
+    default public Thing getThingPropValue(@PathParam("id") String id) {
+        return getThing(id);
+    }
 
     @Path("Datastreams")
     @GET
@@ -43,7 +47,9 @@ public interface ThingsAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getThingDatastreamRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getThingDatastreamsRef(@PathParam("id") String id) {
+        return getThingDatastreams(id);
+    }
 
     @Path("Datastreams({id2})")
     @GET
@@ -52,7 +58,9 @@ public interface ThingsAccess {
     @Path("Datastreams({id2})/{prop}")
     @GET
     @PropFilter
-    public Datastream getThingDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Datastream getThingDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getThingDatastream(id, id2);
+    }
 
     @Path("Datastreams(id2)/Observations")
     @GET
@@ -77,7 +85,9 @@ public interface ThingsAccess {
     @Path("HistoricalLocations/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getThingHistoricalLocationsRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getThingHistoricalLocationsRef(@PathParam("id") String id) {
+        return getThingHistoricalLocations(id);
+    }
 
     @Path("HistoricalLocations({id2})")
     @GET
@@ -86,7 +96,9 @@ public interface ThingsAccess {
     @Path("HistoricalLocations({id2})/{prop}")
     @GET
     @PropFilter
-    public HistoricalLocation getThingHistoricalLocationProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public HistoricalLocation getThingHistoricalLocationProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getThingHistoricalLocation(id, id2);
+    }
 
     @Path("HistoricalLocation({id2})/Thing")
     @GET
@@ -103,7 +115,9 @@ public interface ThingsAccess {
     @Path("Locations/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getThingLocationsRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getThingLocationsRef(@PathParam("id") String id) {
+        return getThingLocations(id);
+    }
 
     @Path("Locations({id2})")
     @GET
@@ -112,7 +126,9 @@ public interface ThingsAccess {
     @Path("Locations({id2})/{prop}")
     @GET
     @PropFilter
-    public Location getThingLocationProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Location getThingLocationProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getThingLocation(id, id2);
+    }
 
     @Path("Locations({id2})/Things")
     @GET

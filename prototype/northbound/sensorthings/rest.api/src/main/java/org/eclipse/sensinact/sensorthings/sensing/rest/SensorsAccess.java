@@ -27,12 +27,16 @@ public interface SensorsAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public Sensor getSensorProp(@PathParam("id") String id);
+    default public Sensor getSensorProp(@PathParam("id") String id) {
+        return getSensor(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public Sensor getSensorPropValue(@PathParam("id") String id);
+    default public Sensor getSensorPropValue(@PathParam("id") String id) {
+        return getSensor(id);
+    }
 
     @Path("Datastreams")
     @GET
@@ -41,7 +45,9 @@ public interface SensorsAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getSensorDatastreamRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getSensorDatastreamsRef(@PathParam("id") String id) {
+        return getSensorDatastreams(id);
+    }
 
     @Path("Datastreams({id2})")
     @GET
@@ -50,7 +56,9 @@ public interface SensorsAccess {
     @Path("Datastreams({id2})/{prop}")
     @GET
     @PropFilter
-    public Datastream getSensorDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Datastream getSensorDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getSensorDatastream(id, id2);
+    }
 
     @Path("Datastreams(id2)/Observations")
     @GET

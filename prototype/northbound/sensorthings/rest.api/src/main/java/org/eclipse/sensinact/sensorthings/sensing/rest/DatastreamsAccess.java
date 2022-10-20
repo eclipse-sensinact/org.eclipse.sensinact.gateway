@@ -3,6 +3,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -28,12 +30,16 @@ public interface DatastreamsAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public Datastream getDatastreamProp(@PathParam("id") String id);
+    default public Datastream getDatastreamProp(@PathParam("id") String id) {
+        return getDatastream(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public Datastream getDatastreamPropValue(@PathParam("id") String id);
+    default public Datastream getDatastreamPropValue(@PathParam("id") String id) {
+        return getDatastream(id);
+    }
 
     @Path("Observations")
     @GET
@@ -42,7 +48,9 @@ public interface DatastreamsAccess {
     @Path("Observations/$ref")
     @GET
     @RefFilter
-    public ResultList<Self> getDatastreamObservationsRef(@PathParam("id") String id);
+    default public ResultList<? extends Self> getDatastreamObservationsRef(@PathParam("id") String id) {
+        return getDatastreamObservations(id);
+    }
 
     @Path("Observations({id2})")
     @GET
@@ -51,7 +59,9 @@ public interface DatastreamsAccess {
     @Path("Observations({id2})/{prop}")
     @GET
     @PropFilter
-    public Observation getDatastreamObservationsProp(@PathParam("id") String id, @PathParam("id2") String id2);
+    default public Observation getDatastreamObservationsProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+        return getDatastreamObservation(id, id2);
+    }
 
     @Path("Observations({id2})/Datastream")
     @GET
@@ -59,7 +69,7 @@ public interface DatastreamsAccess {
 
     @Path("Observations({id2})/FeatureOfInterest")
     @GET
-    public Datastream getDatastreamObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2);
+    public FeatureOfInterest getDatastreamObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2);
     
     @Path("ObservedProperty")
     @GET
@@ -68,12 +78,16 @@ public interface DatastreamsAccess {
     @Path("ObservedProperty/$ref")
     @GET
     @RefFilter
-    public Self getDatastreamObservedPropertyRef(@PathParam("id") String id);
+    default public Self getDatastreamObservedPropertyRef(@PathParam("id") String id) {
+        return getDatastreamObservedProperty(id);
+    }
 
     @Path("ObservedProperty/{prop}")
     @GET
     @PropFilter
-    public ObservedProperty getDatastreamObservedPropertyProp(@PathParam("id") String id);
+    default public ObservedProperty getDatastreamObservedPropertyProp(@PathParam("id") String id) {
+        return getDatastreamObservedProperty(id);
+    }
 
     @Path("ObservedProperty/Datastreams")
     @GET
@@ -86,12 +100,16 @@ public interface DatastreamsAccess {
     @Path("Sensor/$ref")
     @GET
     @RefFilter
-    public Self getDatastreamSensorRef(@PathParam("id") String id);
+    default public Self getDatastreamSensorRef(@PathParam("id") String id) {
+        return getDatastreamSensor(id);
+    }
 
     @Path("Sensor/{prop}")
     @GET
     @PropFilter
-    public Sensor getDatastreamSensorProp(@PathParam("id") String id);
+    default public Sensor getDatastreamSensorProp(@PathParam("id") String id) {
+        return getDatastreamSensor(id);
+    }
     
     @Path("Sensor/Datastreams")
     @GET
@@ -104,12 +122,16 @@ public interface DatastreamsAccess {
     @Path("Thing/$ref")
     @GET
     @RefFilter
-    public Self getDatastreamThingRef(@PathParam("id") String id);
+    default public Self getDatastreamThingRef(@PathParam("id") String id) {
+        return getDatastreamThing(id);
+    }
     
     @Path("Thing/{prop}")
     @GET
     @PropFilter
-    public Thing getDatastreamThingProp(@PathParam("id") String id);
+    default public Thing getDatastreamThingProp(@PathParam("id") String id) {
+        return getDatastreamThing(id);
+    }
     
     @Path("Thing/Datastreams")
     @GET
@@ -117,7 +139,7 @@ public interface DatastreamsAccess {
 
     @Path("Thing/HistoricalLocations")
     @GET
-    public ResultList<Datastream> getDatastreamThingHistoricalLocations(@PathParam("id") String id);
+    public ResultList<HistoricalLocation> getDatastreamThingHistoricalLocations(@PathParam("id") String id);
 
     @Path("Thing/Locations")
     @GET

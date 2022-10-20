@@ -28,12 +28,16 @@ public interface ObservationsAccess {
     @Path("{prop}")
     @GET
     @PropFilter
-    public Observation getObservationProp(@PathParam("id") String id);
+    default public Observation getObservationProp(@PathParam("id") String id) {
+        return getObservation(id);
+    }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    public Observation getObservationPropValue(@PathParam("id") String id);
+    default public Observation getObservationPropValue(@PathParam("id") String id) {
+        return getObservation(id);
+    }
 
     @Path("Datastream")
     @GET
@@ -42,12 +46,16 @@ public interface ObservationsAccess {
     @Path("Datastream/$ref")
     @GET
     @RefFilter
-    public Self getObservationDatastreamRef(@PathParam("id") String id);
+    default public Self getObservationDatastreamRef(@PathParam("id") String id) {
+        return getObservationDatastream(id);
+    }
 
     @Path("Datastream/{prop}")
     @GET
     @PropFilter
-    public Observation getObservationDatastreamProp(@PathParam("id") String id);
+    default public Datastream getObservationDatastreamProp(@PathParam("id") String id) {
+        return getObservationDatastream(id);
+    }
 
     @Path("Datastream/Observations")
     @GET
@@ -72,12 +80,16 @@ public interface ObservationsAccess {
     @Path("FeatureOfInterest/$ref")
     @GET
     @RefFilter
-    public Self getObservationFeatureOfInterestRef(@PathParam("id") String id);
+    default public Self getObservationFeatureOfInterestRef(@PathParam("id") String id) {
+        return getObservationFeatureOfInterest(id);
+    }
 
     @Path("FeatureOfInterest/{prop}")
     @GET
     @PropFilter
-    public FeatureOfInterest getObservationFeatureOfInterestProp(@PathParam("id") String id);
+    default public FeatureOfInterest getObservationFeatureOfInterestProp(@PathParam("id") String id) {
+        return getObservationFeatureOfInterest(id);
+    }
     
     @Path("FeatureOfInterest/Observations")
     @GET

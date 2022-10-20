@@ -9,12 +9,20 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Sensor extends NameDescription {
 
     public String encodingType;
     public Object metadata;
+    
+    @JsonInclude(NON_NULL)
+    public Map<String, Object> properties;
 
     @JsonProperty("Datastreams@iot.navigationLink")
     public String datastreamsLink;

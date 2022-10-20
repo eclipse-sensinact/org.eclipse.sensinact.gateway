@@ -36,6 +36,9 @@ public class Datastream extends NameDescription {
     @JsonInclude(NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant resultTime;
+    
+    @JsonInclude(NON_NULL)
+    public Map<String, Object> properties;
 
     @JsonProperty("Observations@iot.navigationLink")
     public String observationsLink;
