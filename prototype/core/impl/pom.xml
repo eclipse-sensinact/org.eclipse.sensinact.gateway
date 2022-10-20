@@ -18,6 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>impl</artifactId>
+  <name>SensiNact core implementation</name>
+  <description>The implementation of the sensinact gateway core</description>
 
   <dependencies>
     <dependency>

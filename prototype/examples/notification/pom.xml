@@ -18,6 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>notification</artifactId>
+  <name>Example notification</name>
+  <description>The notification module contains examples showing how to handle notifications.</description>
   
   <dependencies>
     <dependency>

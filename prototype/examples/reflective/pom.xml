@@ -18,7 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>reflective</artifactId>
-  <description>Programmatic creation of resource model</description>
+  <name>Example reflective</name>
+  <description>The reflective module contains examples showing how to define a model using method calls</description>
   
   <dependencies>
     <dependency>

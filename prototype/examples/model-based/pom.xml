@@ -18,6 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>model-based</artifactId>
+  <name>Example model-based</name>
+  <description>The model-based module contains examples showing how to define a model using a resource descriptor</description>
   
   <dependencies>
     <dependency>

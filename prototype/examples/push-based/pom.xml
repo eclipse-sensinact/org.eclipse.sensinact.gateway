@@ -18,6 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>push-based</artifactId>
+  <name>Example push-based</name>
+  <description>The push-based module shows how to make data update DTOs and "push" them to sensiNact. These are best for periodic or "pushed" sensor events (e.g. an on/off notification)</description>
   
   <dependencies>
     <dependency>

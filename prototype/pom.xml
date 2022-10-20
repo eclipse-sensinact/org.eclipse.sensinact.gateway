@@ -79,15 +79,6 @@
       <distribution>repo</distribution>
       <comments>Except for 3rd party content and examples.</comments>
     </license>
-    <license>
-      <name>Apache License, 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-      <distribution>repo</distribution>
-      <comments>
-        Jackson JSON processing
-        Apache Felix implementations of OSGi specifications
-      </comments>
-    </license>
   </licenses>
 
   <scm>
@@ -352,6 +343,8 @@
               </goals>
               <configuration>
                 <bnd><![CDATA[
+                Bundle-Copyright: Copyright (c) (${now;YYYY}) Contributors to the Eclipse Foundation.
+                Bundle-Description: ${project.description}
                 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
                 Git-Descriptor: ${system-allow-fail;git describe --dirty --always --abbrev=9}
                 Git-SHA: ${system-allow-fail;git rev-list -1 --no-abbrev-commit HEAD}

@@ -18,8 +18,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>annotation</artifactId>
-  <name>Annotations for sensiNact connectors</name>
-
+  <name>SensiNact core Annotations</name>
+  <description>The Annotations for sensinact gateway core.</description>
   <!-- No integration tests -->
   <properties>
     <bnd-tests.skip>true</bnd-tests.skip>
