@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype;
 
+import java.time.Instant;
 import java.util.Map;
 
 public class ResourceDescription {
@@ -25,5 +26,7 @@ public class ResourceDescription {
     public Map<String, Object> metadata;
 
     public Object value;
+    
+    public Instant timestamp;
 
 }

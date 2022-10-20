@@ -18,5 +18,5 @@ public class ProviderDescription {
 
     public String provider;
 
-    public List<String> resources;
+    public List<String> services;
 }

@@ -106,6 +106,7 @@
   <modules>
     <module>core</module>
     <module>examples</module>
+    <module>sensinact-bom</module>
   </modules>
 
   <properties>

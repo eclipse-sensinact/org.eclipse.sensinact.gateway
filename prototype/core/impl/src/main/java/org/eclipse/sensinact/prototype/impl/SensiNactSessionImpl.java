@@ -221,6 +221,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public List<ProviderDescription> listProviders() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     public void notify(String topic, AbstractResourceNotification event) {
         List<SessionListenerRegistration> toNotify;

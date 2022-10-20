@@ -227,4 +227,10 @@ public interface SensiNactSession {
      *                                  location
      */
     ProviderDescription describeProvider(String provider);
+    
+    /**
+     * Get the list of providers
+     * @return
+     */
+    List<ProviderDescription> listProviders();
 }
