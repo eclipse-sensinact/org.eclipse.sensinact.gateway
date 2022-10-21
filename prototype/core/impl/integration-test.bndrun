@@ -1,12 +1,17 @@
 -tester: biz.aQute.tester.junit-platform
 
 -runrequires: \
-	bnd.identity;id=org.eclipse.sensinact.gateway.core.impl-tests,\
+	bnd.identity;id=${project.groupId}.${project.artifactId}-tests,\
 	bnd.identity;id='slf4j.simple'
 -resolve.effective: active
 
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
+
+# This will help us keep -runbundles sorted
+-runstartlevel: \
+    order=sortbynameversion,\
+    begin=-1
 
 -runbundles: \
 	junit-jupiter-api;version='[5.9.0,5.9.1)',\
@@ -25,12 +30,18 @@
 	org.eclipse.emf.common;version='[2.23.0,2.23.1)',\
 	org.eclipse.emf.ecore;version='[2.25.0,2.25.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.16.0,2.16.1)',\
+	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.api;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.impl;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.impl-tests;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)',\
 	org.gecko.emf.osgi.api;version='[4.2.0,4.2.1)',\
 	org.gecko.emf.osgi.component;version='[4.2.0,4.2.1)',\
 	org.mockito.junit-jupiter;version='[4.7.0,4.7.1)',\
 	org.mockito.mockito-core;version='[4.7.0,4.7.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\
 	org.osgi.test.common;version='[1.2.1,1.2.2)',\
@@ -39,9 +50,4 @@
 	org.osgi.util.promise;version='[1.2.0,1.2.1)',\
 	org.osgi.util.pushstream;version='[1.0.1,1.0.2)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
-	slf4j.simple;version='[1.7.25,1.7.26)',\
-	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.1,0.0.2)',\
-	org.eclipse.sensinact.gateway.core.api;version='[0.0.1,0.0.2)',\
-	org.eclipse.sensinact.gateway.core.impl;version='[0.0.1,0.0.2)',\
-	org.eclipse.sensinact.gateway.core.impl-tests;version='[0.0.1,0.0.2)',\
-	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)'
+	slf4j.simple;version='[1.7.25,1.7.26)'
