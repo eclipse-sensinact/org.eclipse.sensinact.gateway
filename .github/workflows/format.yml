@@ -20,6 +20,7 @@ jobs:
     - name: Git Checkout
       uses: actions/checkout@v3
     - name: Editor Config Validation
-      uses: zbeekman/EditorConfig-Action@master
+      uses: timothyjward/EditorConfig-Action@subdirectory
       env:
         ALWAYS_LINT_ALL_FILES: "false"
+        REPOSITORY_PATH: "prototype"
