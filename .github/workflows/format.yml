@@ -1,12 +1,12 @@
 name: 'Editor Config format check'
 
 on:
-  push:
   pull_request:
 
 defaults:
   run:
     shell: bash
+    working-directory: prototype
 
 permissions:
   contents: read
@@ -18,7 +18,11 @@ jobs:
     steps:
     - name: Git Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: ${{ github.event.pull_request.commits }}
     - name: Editor Config Validation
-      uses: zbeekman/EditorConfig-Action@v1.1.1
+      uses: timothyjward/EditorConfig-Action@subdirectory
       env:
         ALWAYS_LINT_ALL_FILES: "false"
+        ADD_SAFE_DIRECTORY: "true"
+        REPOSITORY_PATH: "prototype"
