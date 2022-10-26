@@ -29,6 +29,7 @@ header:
     - '**/*.jetproperties'
     - '**/*.javajet'
     - '**/*.javajetinc'
+    - '**/*.json'
     - '**/*.properties'
     - '**/*.maven'
     - '**/*.html'
