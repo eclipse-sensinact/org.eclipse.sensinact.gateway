@@ -1,0 +1,21 @@
+{
+  "@iot.count": 2,
+  "value": [
+    {
+      "@iot.id": 2,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)",
+      "description": "The total number count of available docks in a bike station",
+      "definition": "https://member.bikesharetoronto.com/stations",
+      "name": "available_docks",
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)/Datastreams"
+    },
+    {
+      "@iot.id": 1,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(1)",
+      "description": "The total number count of available bikes in a bike station",
+      "definition": "https://member.bikesharetoronto.com/stations",
+      "name": "available_bikes",
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(1)/Datastreams"
+    }
+  ]
+}

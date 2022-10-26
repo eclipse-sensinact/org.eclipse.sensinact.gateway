@@ -1,0 +1,9 @@
+{
+  "@iot.id": 4,
+  "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)",
+  "description": "A sensor for tracking how many docks are available in a bike station",
+  "name": "available_docks",
+  "encodingType": "text/plan",
+  "metadata": "https://member.bikesharetoronto.com/stations",
+  "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)/Datastreams"
+}

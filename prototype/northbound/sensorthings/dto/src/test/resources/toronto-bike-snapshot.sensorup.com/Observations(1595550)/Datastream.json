@@ -1,0 +1,16 @@
+{
+  "@iot.id": 1512,
+  "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)",
+  "description": "The datastream of available bikes count for the Toronto bike share station Harrison/Dovercourt",
+  "name": "7203:Harrison/Dovercourt:available_bikes",
+  "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+  "unitOfMeasurement": {
+    "symbol": "{TOT}",
+    "name": "bike count",
+    "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+  },
+  "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/Observations",
+  "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/ObservedProperty",
+  "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/Sensor",
+  "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/Thing"
+}

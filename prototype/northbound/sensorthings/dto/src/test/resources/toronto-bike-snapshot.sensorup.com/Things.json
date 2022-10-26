@@ -1,0 +1,1106 @@
+{
+  "@iot.count": 199,
+  "@iot.nextLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things?$top=100&$skip=100",
+  "value": [
+    {
+      "@iot.id": 206047,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)",
+      "description": "Bloor St / Brunswick Ave Toronto bike share station with data of available bikes and available docks",
+      "name": "7061:Bloor St / Brunswick Ave",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/Locations"
+    },
+    {
+      "@iot.id": 1581,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1581)",
+      "description": "Wellington Dog Park Toronto bike share station with data of available bikes and available docks",
+      "name": "7216:Wellington Dog Park",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1581)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1581)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1581)/Locations"
+    },
+    {
+      "@iot.id": 1573,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1573)",
+      "description": "Fort York/Garrison Toronto bike share station with data of available bikes and available docks",
+      "name": "7211:Fort York/Garrison",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1573)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1573)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1573)/Locations"
+    },
+    {
+      "@iot.id": 1565,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1565)",
+      "description": "Mary McCormick Rec Centre Toronto bike share station with data of available bikes and available docks",
+      "name": "7210:Mary McCormick Rec Centre",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1565)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1565)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1565)/Locations"
+    },
+    {
+      "@iot.id": 1557,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1557)",
+      "description": "Ossington/Harrison Toronto bike share station with data of available bikes and available docks",
+      "name": "7209:Ossington/Harrison",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1557)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1557)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1557)/Locations"
+    },
+    {
+      "@iot.id": 1549,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1549)",
+      "description": "College/Clinton Toronto bike share station with data of available bikes and available docks",
+      "name": "7208:College/Clinton",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1549)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1549)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1549)/Locations"
+    },
+    {
+      "@iot.id": 1541,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1541)",
+      "description": "Dundas/Crawford Toronto bike share station with data of available bikes and available docks",
+      "name": "7207:Dundas/Crawford",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1541)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1541)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1541)/Locations"
+    },
+    {
+      "@iot.id": 1533,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1533)",
+      "description": "Claremont/Dundas Toronto bike share station with data of available bikes and available docks",
+      "name": "7206:Claremont/Dundas",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1533)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1533)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1533)/Locations"
+    },
+    {
+      "@iot.id": 1525,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1525)",
+      "description": "Rusholme Park/College Toronto bike share station with data of available bikes and available docks",
+      "name": "7205:Rusholme Park/College",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1525)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1525)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1525)/Locations"
+    },
+    {
+      "@iot.id": 1517,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1517)",
+      "description": "College/Crawford Toronto bike share station with data of available bikes and available docks",
+      "name": "7204:College/Crawford",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1517)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1517)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1517)/Locations"
+    },
+    {
+      "@iot.id": 1509,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1509)",
+      "description": "Harrison/Dovercourt Toronto bike share station with data of available bikes and available docks",
+      "name": "7203:Harrison/Dovercourt",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1509)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1509)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1509)/Locations"
+    },
+    {
+      "@iot.id": 1501,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1501)",
+      "description": "City Hall Toronto bike share station with data of available bikes and available docks",
+      "name": "7202:City Hall",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1501)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1501)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1501)/Locations"
+    },
+    {
+      "@iot.id": 1493,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1493)",
+      "description": "College/Markham Toronto bike share station with data of available bikes and available docks",
+      "name": "7199:College/Markham",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1493)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1493)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1493)/Locations"
+    },
+    {
+      "@iot.id": 1485,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1485)",
+      "description": "Queen/Cowan Toronto bike share station with data of available bikes and available docks",
+      "name": "7198:Queen/Cowan",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1485)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1485)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1485)/Locations"
+    },
+    {
+      "@iot.id": 1477,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1477)",
+      "description": "Roxton/Harbord Toronto bike share station with data of available bikes and available docks",
+      "name": "7196:Roxton/Harbord",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1477)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1477)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1477)/Locations"
+    },
+    {
+      "@iot.id": 1469,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1469)",
+      "description": "Ulster/Bathurst Toronto bike share station with data of available bikes and available docks",
+      "name": "7195:Ulster/Bathurst",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1469)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1469)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1469)/Locations"
+    },
+    {
+      "@iot.id": 1461,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1461)",
+      "description": "Mortimer/Coxwell Toronto bike share station with data of available bikes and available docks",
+      "name": "7194:Mortimer/Coxwell",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1461)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1461)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1461)/Locations"
+    },
+    {
+      "@iot.id": 1453,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1453)",
+      "description": "Queen/Gladstone Toronto bike share station with data of available bikes and available docks",
+      "name": "7193:Queen/Gladstone",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1453)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1453)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1453)/Locations"
+    },
+    {
+      "@iot.id": 1445,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1445)",
+      "description": "Harbord/ Clinton Toronto bike share station with data of available bikes and available docks",
+      "name": "7192:Harbord/ Clinton",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1445)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1445)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1445)/Locations"
+    },
+    {
+      "@iot.id": 1437,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1437)",
+      "description": "Central Tech Toronto bike share station with data of available bikes and available docks",
+      "name": "7191:Central Tech",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1437)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1437)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1437)/Locations"
+    },
+    {
+      "@iot.id": 1429,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1429)",
+      "description": "St. George/Hoskin Toronto bike share station with data of available bikes and available docks",
+      "name": "7190:St. George/Hoskin",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1429)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1429)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1429)/Locations"
+    },
+    {
+      "@iot.id": 1421,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1421)",
+      "description": "Augusta/Denison Sq Toronto bike share station with data of available bikes and available docks",
+      "name": "7189:Augusta/Denison Sq",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1421)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1421)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1421)/Locations"
+    },
+    {
+      "@iot.id": 1413,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1413)",
+      "description": "Atlantic/Liberty Toronto bike share station with data of available bikes and available docks",
+      "name": "7188:Atlantic/Liberty",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1413)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1413)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1413)/Locations"
+    },
+    {
+      "@iot.id": 1405,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1405)",
+      "description": "Ossington Ave/College St. Toronto bike share station with data of available bikes and available docks",
+      "name": "7184:Ossington Ave/College St.",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1405)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1405)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1405)/Locations"
+    },
+    {
+      "@iot.id": 1397,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1397)",
+      "description": "Margueretta/College Toronto bike share station with data of available bikes and available docks",
+      "name": "7183:Margueretta/College",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1397)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1397)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1397)/Locations"
+    },
+    {
+      "@iot.id": 1389,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1389)",
+      "description": "Sterling/Dundas Toronto bike share station with data of available bikes and available docks",
+      "name": "7182:Sterling/Dundas",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1389)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1389)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1389)/Locations"
+    },
+    {
+      "@iot.id": 1381,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1381)",
+      "description": "Lansdowne/Whytock Toronto bike share station with data of available bikes and available docks",
+      "name": "7181:Lansdowne/Whytock",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1381)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1381)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1381)/Locations"
+    },
+    {
+      "@iot.id": 1373,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1373)",
+      "description": "Lansdowne/Wade Toronto bike share station with data of available bikes and available docks",
+      "name": "7180:Lansdowne/Wade",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1373)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1373)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1373)/Locations"
+    },
+    {
+      "@iot.id": 1365,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1365)",
+      "description": "Bloor GO/UP Station Toronto bike share station with data of available bikes and available docks",
+      "name": "7179:Bloor GO/UP Station",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1365)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1365)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1365)/Locations"
+    },
+    {
+      "@iot.id": 1357,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1357)",
+      "description": "Dundas St W/Edna Ave Toronto bike share station with data of available bikes and available docks",
+      "name": "7178:Dundas St W/Edna Ave",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1357)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1357)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1357)/Locations"
+    },
+    {
+      "@iot.id": 1349,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1349)",
+      "description": "Liberty/Pirandello Toronto bike share station with data of available bikes and available docks",
+      "name": "7177:Liberty/Pirandello",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1349)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1349)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1349)/Locations"
+    },
+    {
+      "@iot.id": 1341,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1341)",
+      "description": "Fort York/Bathurst Toronto bike share station with data of available bikes and available docks",
+      "name": "7176:Fort York/Bathurst",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1341)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1341)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1341)/Locations"
+    },
+    {
+      "@iot.id": 1333,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1333)",
+      "description": "HTO Park Toronto bike share station with data of available bikes and available docks",
+      "name": "7175:HTO Park",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1333)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1333)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1333)/Locations"
+    },
+    {
+      "@iot.id": 1325,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1325)",
+      "description": "Bloor/Dundas St W Toronto bike share station with data of available bikes and available docks",
+      "name": "7174:Bloor/Dundas St W",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1325)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1325)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1325)/Locations"
+    },
+    {
+      "@iot.id": 1317,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1317)",
+      "description": "Cariboo St/ Rail Path Toronto bike share station with data of available bikes and available docks",
+      "name": "7173:Cariboo St/ Rail Path",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1317)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1317)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1317)/Locations"
+    },
+    {
+      "@iot.id": 1309,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1309)",
+      "description": "Strachan and Princes' Blvd Toronto bike share station with data of available bikes and available docks",
+      "name": "7172:Strachan and Princes' Blvd",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1309)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1309)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1309)/Locations"
+    },
+    {
+      "@iot.id": 1301,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1301)",
+      "description": "Strachan/Lakeshore Toronto bike share station with data of available bikes and available docks",
+      "name": "7171:Strachan/Lakeshore",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1301)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1301)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1301)/Locations"
+    },
+    {
+      "@iot.id": 1293,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1293)",
+      "description": "Spadina / Willcocks Toronto bike share station with data of available bikes and available docks",
+      "name": "7170:Spadina / Willcocks",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1293)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1293)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1293)/Locations"
+    },
+    {
+      "@iot.id": 1285,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1285)",
+      "description": "Front/Bay Toronto bike share station with data of available bikes and available docks",
+      "name": "7169:Front/Bay",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1285)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1285)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1285)/Locations"
+    },
+    {
+      "@iot.id": 1277,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1277)",
+      "description": "Bay/Lakeshore Toronto bike share station with data of available bikes and available docks",
+      "name": "7168:Bay/Lakeshore",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1277)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1277)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1277)/Locations"
+    },
+    {
+      "@iot.id": 1269,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1269)",
+      "description": "Moss Park Toronto bike share station with data of available bikes and available docks",
+      "name": "7167:Moss Park",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1269)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1269)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1269)/Locations"
+    },
+    {
+      "@iot.id": 1261,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1261)",
+      "description": "Victoria/Dundas Toronto bike share station with data of available bikes and available docks",
+      "name": "7164:Victoria/Dundas",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1261)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1261)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1261)/Locations"
+    },
+    {
+      "@iot.id": 1253,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1253)",
+      "description": "Yonge/Wood Toronto bike share station with data of available bikes and available docks",
+      "name": "7163:Yonge/Wood",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1253)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1253)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1253)/Locations"
+    },
+    {
+      "@iot.id": 1245,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1245)",
+      "description": "Hayter/Laplante Toronto bike share station with data of available bikes and available docks",
+      "name": "7162:Hayter/Laplante",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1245)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1245)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1245)/Locations"
+    },
+    {
+      "@iot.id": 1237,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1237)",
+      "description": "Beverly/College Toronto bike share station with data of available bikes and available docks",
+      "name": "7161:Beverly/College",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1237)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1237)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1237)/Locations"
+    },
+    {
+      "@iot.id": 1229,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1229)",
+      "description": "King/Tecumseth Toronto bike share station with data of available bikes and available docks",
+      "name": "7160:King/Tecumseth",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1229)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1229)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1229)/Locations"
+    },
+    {
+      "@iot.id": 1221,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1221)",
+      "description": "King/Strachan Toronto bike share station with data of available bikes and available docks",
+      "name": "7158:King/Strachan",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1221)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1221)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1221)/Locations"
+    },
+    {
+      "@iot.id": 1213,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1213)",
+      "description": "Bloor/Dufferin Toronto bike share station with data of available bikes and available docks",
+      "name": "7157:Bloor/Dufferin",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1213)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1213)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1213)/Locations"
+    },
+    {
+      "@iot.id": 1205,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1205)",
+      "description": "Salem/Bloor Toronto bike share station with data of available bikes and available docks",
+      "name": "7156:Salem/Bloor",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1205)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1205)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1205)/Locations"
+    },
+    {
+      "@iot.id": 1197,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1197)",
+      "description": "Bathurst/Lennox Toronto bike share station with data of available bikes and available docks",
+      "name": "7155:Bathurst/Lennox",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1197)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1197)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1197)/Locations"
+    },
+    {
+      "@iot.id": 1189,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1189)",
+      "description": "Bathurst Subway Station Toronto bike share station with data of available bikes and available docks",
+      "name": "7154:Bathurst Subway Station",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1189)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1189)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1189)/Locations"
+    },
+    {
+      "@iot.id": 1181,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1181)",
+      "description": "Bloor/Christie Toronto bike share station with data of available bikes and available docks",
+      "name": "7153:Bloor/Christie",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1181)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1181)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1181)/Locations"
+    },
+    {
+      "@iot.id": 1173,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1173)",
+      "description": "Bloor/Ossington Toronto bike share station with data of available bikes and available docks",
+      "name": "7152:Bloor/Ossington",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1173)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1173)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1173)/Locations"
+    },
+    {
+      "@iot.id": 1165,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1165)",
+      "description": "Essex/Christie Toronto bike share station with data of available bikes and available docks",
+      "name": "7151:Essex/Christie",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1165)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1165)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1165)/Locations"
+    },
+    {
+      "@iot.id": 1157,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1157)",
+      "description": "Dufferin Grove Park Toronto bike share station with data of available bikes and available docks",
+      "name": "7150:Dufferin Grove Park",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1157)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1157)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1157)/Locations"
+    },
+    {
+      "@iot.id": 1149,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1149)",
+      "description": "Yarmouth/Christie Toronto bike share station with data of available bikes and available docks",
+      "name": "7149:Yarmouth/Christie",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1149)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1149)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1149)/Locations"
+    },
+    {
+      "@iot.id": 1141,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1141)",
+      "description": "King / Jefferson Toronto bike share station with data of available bikes and available docks",
+      "name": "7148:King / Jefferson",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1141)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1141)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1141)/Locations"
+    },
+    {
+      "@iot.id": 1133,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1133)",
+      "description": "King St / Mowat Toronto bike share station with data of available bikes and available docks",
+      "name": "7147:King St / Mowat",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1133)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1133)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1133)/Locations"
+    },
+    {
+      "@iot.id": 1125,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1125)",
+      "description": "Benson/Christie Wychwood Barns Toronto bike share station with data of available bikes and available docks",
+      "name": "7146:Benson/Christie Wychwood Barns",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1125)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1125)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1125)/Locations"
+    },
+    {
+      "@iot.id": 1117,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1117)",
+      "description": "Palmerston/Vermont Toronto bike share station with data of available bikes and available docks",
+      "name": "7144:Palmerston/Vermont",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1117)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1117)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1117)/Locations"
+    },
+    {
+      "@iot.id": 1109,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1109)",
+      "description": "Kendal/Bernard Toronto bike share station with data of available bikes and available docks",
+      "name": "7143:Kendal/Bernard",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1109)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1109)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1109)/Locations"
+    },
+    {
+      "@iot.id": 1101,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1101)",
+      "description": "Bridgeman/Bathurst Toronto bike share station with data of available bikes and available docks",
+      "name": "7142:Bridgeman/Bathurst",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1101)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1101)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1101)/Locations"
+    },
+    {
+      "@iot.id": 1093,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1093)",
+      "description": "Bridgeman/Kendal Toronto bike share station with data of available bikes and available docks",
+      "name": "7141:Bridgeman/Kendal",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1093)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1093)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1093)/Locations"
+    },
+    {
+      "@iot.id": 1085,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1085)",
+      "description": "Macpherson/ Spadina Toronto bike share station with data of available bikes and available docks",
+      "name": "7140:Macpherson/ Spadina",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1085)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1085)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1085)/Locations"
+    },
+    {
+      "@iot.id": 1077,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1077)",
+      "description": "Glen Edyth/Davenport Toronto bike share station with data of available bikes and available docks",
+      "name": "7139:Glen Edyth/Davenport",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1077)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1077)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1077)/Locations"
+    },
+    {
+      "@iot.id": 1069,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1069)",
+      "description": "Davenport/Christie Toronto bike share station with data of available bikes and available docks",
+      "name": "7138:Davenport/Christie",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1069)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1069)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1069)/Locations"
+    },
+    {
+      "@iot.id": 1061,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1061)",
+      "description": "Davenport/Bathurst Toronto bike share station with data of available bikes and available docks",
+      "name": "7137:Davenport/Bathurst",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1061)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1061)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1061)/Locations"
+    },
+    {
+      "@iot.id": 1053,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1053)",
+      "description": "Queen/Close Toronto bike share station with data of available bikes and available docks",
+      "name": "7136:Queen/Close",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1053)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1053)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1053)/Locations"
+    },
+    {
+      "@iot.id": 1045,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1045)",
+      "description": "Hanna/Liberty Toronto bike share station with data of available bikes and available docks",
+      "name": "7135:Hanna/Liberty",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1045)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1045)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1045)/Locations"
+    },
+    {
+      "@iot.id": 1037,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1037)",
+      "description": "Marlborough/Yonge Toronto bike share station with data of available bikes and available docks",
+      "name": "7134:Marlborough/Yonge",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1037)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1037)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1037)/Locations"
+    },
+    {
+      "@iot.id": 1029,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1029)",
+      "description": "Summerhill Station Toronto bike share station with data of available bikes and available docks",
+      "name": "7133:Summerhill Station",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1029)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1029)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1029)/Locations"
+    },
+    {
+      "@iot.id": 1021,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1021)",
+      "description": "Kendal/Spadina Toronto bike share station with data of available bikes and available docks",
+      "name": "7132:Kendal/Spadina",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1021)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1021)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1021)/Locations"
+    },
+    {
+      "@iot.id": 1013,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1013)",
+      "description": "Taddle Creek Park Toronto bike share station with data of available bikes and available docks",
+      "name": "7131:Taddle Creek Park",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1013)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1013)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1013)/Locations"
+    },
+    {
+      "@iot.id": 1005,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1005)",
+      "description": "Davenport/Bedford Toronto bike share station with data of available bikes and available docks",
+      "name": "7130:Davenport/Bedford",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1005)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1005)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1005)/Locations"
+    },
+    {
+      "@iot.id": 997,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(997)",
+      "description": "Davenport/Avenue Toronto bike share station with data of available bikes and available docks",
+      "name": "7129:Davenport/Avenue",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(997)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(997)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(997)/Locations"
+    },
+    {
+      "@iot.id": 989,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(989)",
+      "description": "Yonge/Aylmer Toronto bike share station with data of available bikes and available docks",
+      "name": "7128:Yonge/Aylmer",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(989)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(989)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(989)/Locations"
+    },
+    {
+      "@iot.id": 981,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(981)",
+      "description": "Bay/Davenport Toronto bike share station with data of available bikes and available docks",
+      "name": "7127:Bay/Davenport",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(981)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(981)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(981)/Locations"
+    },
+    {
+      "@iot.id": 973,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(973)",
+      "description": "Yonge/Yorkville Toronto bike share station with data of available bikes and available docks",
+      "name": "7126:Yonge/Yorkville",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(973)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(973)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(973)/Locations"
+    },
+    {
+      "@iot.id": 965,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(965)",
+      "description": "Dundas/Broadview Toronto bike share station with data of available bikes and available docks",
+      "name": "7124:Dundas/Broadview",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(965)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(965)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(965)/Locations"
+    },
+    {
+      "@iot.id": 957,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(957)",
+      "description": "Portland/Stewart Toronto bike share station with data of available bikes and available docks",
+      "name": "7123:Portland/Stewart",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(957)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(957)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(957)/Locations"
+    },
+    {
+      "@iot.id": 949,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(949)",
+      "description": "Niagara/Tecumseth Toronto bike share station with data of available bikes and available docks",
+      "name": "7122:Niagara/Tecumseth",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(949)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(949)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(949)/Locations"
+    },
+    {
+      "@iot.id": 941,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(941)",
+      "description": "Jarvis/Dundas Toronto bike share station with data of available bikes and available docks",
+      "name": "7121:Jarvis/Dundas",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(941)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(941)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(941)/Locations"
+    },
+    {
+      "@iot.id": 933,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(933)",
+      "description": "Gerrard/River Toronto bike share station with data of available bikes and available docks",
+      "name": "7120:Gerrard/River",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(933)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(933)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(933)/Locations"
+    },
+    {
+      "@iot.id": 925,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(925)",
+      "description": "Sumach/Winchester Toronto bike share station with data of available bikes and available docks",
+      "name": "7119:Sumach/Winchester",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(925)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(925)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(925)/Locations"
+    },
+    {
+      "@iot.id": 917,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(917)",
+      "description": "King/Bay Toronto bike share station with data of available bikes and available docks",
+      "name": "7118:King/Bay",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(917)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(917)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(917)/Locations"
+    },
+    {
+      "@iot.id": 909,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(909)",
+      "description": "Castle Frank/Bloor Toronto bike share station with data of available bikes and available docks",
+      "name": "7117:Castle Frank/Bloor",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(909)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(909)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(909)/Locations"
+    },
+    {
+      "@iot.id": 901,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(901)",
+      "description": "Parliament/Bloor Toronto bike share station with data of available bikes and available docks",
+      "name": "7116:Parliament/Bloor",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(901)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(901)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(901)/Locations"
+    },
+    {
+      "@iot.id": 893,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(893)",
+      "description": "Howard St./ Sherbourne St. Toronto bike share station with data of available bikes and available docks",
+      "name": "7115:Howard St./ Sherbourne St.",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(893)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(893)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(893)/Locations"
+    },
+    {
+      "@iot.id": 885,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(885)",
+      "description": "Carlton/Parliament Toronto bike share station with data of available bikes and available docks",
+      "name": "7114:Carlton/Parliament",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(885)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(885)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(885)/Locations"
+    },
+    {
+      "@iot.id": 877,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(877)",
+      "description": "Parliament/Aberdeen Toronto bike share station with data of available bikes and available docks",
+      "name": "7113:Parliament/Aberdeen",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(877)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(877)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(877)/Locations"
+    },
+    {
+      "@iot.id": 869,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(869)",
+      "description": "Liberty/Fraser Toronto bike share station with data of available bikes and available docks",
+      "name": "7112:Liberty/Fraser",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(869)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(869)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(869)/Locations"
+    },
+    {
+      "@iot.id": 861,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(861)",
+      "description": "King/Douro Toronto bike share station with data of available bikes and available docks",
+      "name": "7111:King/Douro",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(861)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(861)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(861)/Locations"
+    },
+    {
+      "@iot.id": 853,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(853)",
+      "description": "Queen/Berkely Toronto bike share station with data of available bikes and available docks",
+      "name": "7110:Queen/Berkely",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(853)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(853)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(853)/Locations"
+    },
+    {
+      "@iot.id": 845,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(845)",
+      "description": "Seaton/Dundas St E Toronto bike share station with data of available bikes and available docks",
+      "name": "7109:Seaton/Dundas St E",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(845)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(845)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(845)/Locations"
+    },
+    {
+      "@iot.id": 837,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(837)",
+      "description": "Front/Cherry Toronto bike share station with data of available bikes and available docks",
+      "name": "7108:Front/Cherry",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(837)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(837)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(837)/Locations"
+    },
+    {
+      "@iot.id": 829,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(829)",
+      "description": "Cherry/Distillery Ln Toronto bike share station with data of available bikes and available docks",
+      "name": "7107:Cherry/Distillery Ln",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(829)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(829)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(829)/Locations"
+    },
+    {
+      "@iot.id": 821,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(821)",
+      "description": "Mill/Tannery Toronto bike share station with data of available bikes and available docks",
+      "name": "7106:Mill/Tannery",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(821)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(821)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(821)/Locations"
+    },
+    {
+      "@iot.id": 813,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(813)",
+      "description": "Queen/Sackville Toronto bike share station with data of available bikes and available docks",
+      "name": "7105:Queen/Sackville",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(813)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(813)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(813)/Locations"
+    },
+    {
+      "@iot.id": 805,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(805)",
+      "description": "King/River Toronto bike share station with data of available bikes and available docks",
+      "name": "7104:King/River",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(805)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(805)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(805)/Locations"
+    },
+    {
+      "@iot.id": 797,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(797)",
+      "description": "Jimmie Simpson Park Toronto bike share station with data of available bikes and available docks",
+      "name": "7103:Jimmie Simpson Park",
+      "properties": {
+      },
+      "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(797)/Datastreams",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(797)/HistoricalLocations",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(797)/Locations"
+    }
+  ]
+}

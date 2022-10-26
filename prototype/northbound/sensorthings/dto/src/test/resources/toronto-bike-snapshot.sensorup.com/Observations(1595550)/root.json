@@ -1,0 +1,9 @@
+{
+  "@iot.id": 1595550,
+  "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)",
+  "phenomenonTime": "2017-02-16T21:55:12.841Z",
+  "result": "7",
+  "resultTime": null,
+  "Datastream@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)/Datastream",
+  "FeatureOfInterest@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)/FeatureOfInterest"
+}
