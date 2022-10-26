@@ -96,6 +96,7 @@
 
   <modules>
     <module>core</module>
+    <module>northbound</module>
     <module>examples</module>
     <module>sensinact-bom</module>
   </modules>
