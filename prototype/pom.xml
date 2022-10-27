@@ -114,10 +114,12 @@
     <osgi.ds.version>1.5.0</osgi.ds.version>
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
     <gecko.emf.version>4.2.0-SNAPSHOT</gecko.emf.version>
+    <slf4j.version>1.7.36</slf4j.version>
 
     <!-- runtime dependencies -->
     <felix.framework.version>7.0.3</felix.framework.version>
     <felix.scr.version>2.2.2</felix.scr.version>
+    <felix.configadmin.version>1.9.24</felix.configadmin.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
 
     <!-- test dependency versions -->
@@ -230,10 +232,20 @@
       </dependency>
       <dependency>
         <groupId>org.geckoprojects.emf</groupId>
-        <artifactId>org.gecko.emf.osgi.bom</artifactId>
+        <artifactId>org.gecko.emf.osgi.api</artifactId>
         <version>${gecko.emf.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.geckoprojects.emf</groupId>
+        <artifactId>org.gecko.emf.osgi.component</artifactId>
+        <version>${gecko.emf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      
       <!-- Runtime -->
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -246,6 +258,11 @@
         <artifactId>org.apache.felix.scr</artifactId>
         <version>${felix.scr.version}</version>
         <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.configadmin</artifactId>
+        <version>${felix.configadmin.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.aries.typedevent</groupId>
@@ -285,6 +302,12 @@
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.codegen</artifactId>
         <version>${gecko.emf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
