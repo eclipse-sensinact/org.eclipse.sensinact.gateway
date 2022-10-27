@@ -177,6 +177,13 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
+    <pluginRepository>
+		<id>dash-licenses-snapshots</id>
+		<url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+	</pluginRepository>
   </pluginRepositories>
 
   <dependencyManagement>
@@ -488,5 +495,21 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+		<!-- https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
+		<plugin>
+			<groupId>org.eclipse.dash</groupId>
+			<artifactId>license-tool-plugin</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<executions>
+				<execution>
+					<id>license-check</id>
+					<goals>
+						<goal>license-check</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
+	</plugins>
   </build>
 </project>
