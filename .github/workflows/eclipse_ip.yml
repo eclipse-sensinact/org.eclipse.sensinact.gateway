@@ -20,5 +20,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -B org.eclipse.dash:license-tool-plugin:license-check -Ddash.fail=true -Ddash.summary=DEPENDENCIES --file prototype/pom.xml
-
+      run: mvn -B org.eclipse.dash:license-tool-plugin:license-check -Dlicenses-check -Ddash.fail=true -Ddash.summary=DEPENDENCIES --file prototype/pom.xml
