@@ -37,7 +37,11 @@
     </dependency>
     <dependency>
       <groupId>org.geckoprojects.emf</groupId>
-      <artifactId>org.gecko.emf.osgi.bom</artifactId>
+      <artifactId>org.gecko.emf.osgi.api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.emf</groupId>
+      <artifactId>org.gecko.emf.osgi.component</artifactId>
     </dependency>
   </dependencies>
 
