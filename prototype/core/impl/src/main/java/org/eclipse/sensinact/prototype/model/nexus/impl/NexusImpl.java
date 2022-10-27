@@ -63,7 +63,7 @@ public class NexusImpl {
         this.sensinactPackage = sensinactPackage;
         this.notificationAccumulator = accumulator;
 
-        defaultPackage = EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", resourceSet);
+        defaultPackage = EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", this.resourceSet);
         packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
     }
 
