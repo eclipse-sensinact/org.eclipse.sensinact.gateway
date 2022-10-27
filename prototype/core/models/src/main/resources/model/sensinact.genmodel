@@ -8,6 +8,7 @@
   <foreignModel>sensinact.ecore</foreignModel>
   <genPackages prefix="SensiNact" basePackage="org.eclipse.sensinact.model" resource="XMI"
       disposableProviderFactory="true" literalsInterface="false" ecorePackage="sensinact.ecore#/">
+    <genDataTypes ecoreDataType="sensinact.ecore#//EInstant"/>
     <genClasses ecoreClass="sensinact.ecore#//Provider">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Provider/id"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Provider/admin"/>
