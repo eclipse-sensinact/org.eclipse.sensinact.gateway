@@ -177,13 +177,7 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
-    <pluginRepository>
-		<id>dash-licenses-snapshots</id>
-		<url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
-		<snapshots>
-			<enabled>true</enabled>
-		</snapshots>
-	</pluginRepository>
+
   </pluginRepositories>
 
   <dependencyManagement>
@@ -349,7 +343,8 @@
                 <goal>bnd-process</goal>
               </goals>
               <configuration>
-                <bnd><![CDATA[
+                <bnd>
+                  <![CDATA[
                 Bundle-Copyright: Copyright (c) (${now;YYYY}) Contributors to the Eclipse Foundation.
                 Bundle-Description: ${project.description}
                 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
@@ -357,7 +352,8 @@
                 Git-SHA: ${system-allow-fail;git rev-list -1 --no-abbrev-commit HEAD}
                 -noextraheaders: true
                 -reproducible: true
-                ]]></bnd>
+                ]]>
+                </bnd>
                 <bndfile>bnd.bnd</bndfile>
               </configuration>
             </execution>
@@ -368,13 +364,15 @@
                 <goal>bnd-process-tests</goal>
               </goals>
               <configuration>
-                <bnd><![CDATA[
+                <bnd>
+                  <![CDATA[
                 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}-tests
                 Fragment-Host: ${project.groupId}.${project.artifactId}
                 Git-Descriptor: ${system-allow-fail;git describe --dirty --always --abbrev=9}
                 Git-SHA: ${system-allow-fail;git rev-list -1 --no-abbrev-commit HEAD}
                 Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE;NAMED;*.integration.*}
-                ]]></bnd>
+                ]]>
+                </bnd>
                 <bndfile>tests.bnd</bndfile>
                 <testCases>useTestCasesHeader</testCases>
               </configuration>
@@ -495,21 +493,44 @@
         </plugin>
       </plugins>
     </pluginManagement>
-    <plugins>
-		<!-- https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
-		<plugin>
-			<groupId>org.eclipse.dash</groupId>
-			<artifactId>license-tool-plugin</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<executions>
-				<execution>
-					<id>license-check</id>
-					<goals>
-						<goal>license-check</goal>
-					</goals>
-				</execution>
-			</executions>
-		</plugin>
-	</plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>eclipse-licenses-check</id>
+      <activation>
+        <property>
+          <name>licenses-check</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>dash-licenses-snapshots</id>
+          <url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+      <build>
+        <plugins>
+          <!-- https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
+          <plugin>
+            <groupId>org.eclipse.dash</groupId>
+            <artifactId>license-tool-plugin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <id>license-check</id>
+                <goals>
+                  <goal>license-check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
