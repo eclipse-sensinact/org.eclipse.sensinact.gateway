@@ -34,18 +34,18 @@ import org.eclipse.emf.ecore.EStructuralFeature;
  * @generated
  */
 public interface Service extends EObject {
-    /**
-     * Returns the value of the '<em><b>Metadata</b></em>' map. The key is of type
-     * {@link org.eclipse.emf.ecore.EStructuralFeature}, and the value is of type
-     * {@link org.eclipse.sensinact.model.core.Metadata}, <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * 
-     * @return the value of the '<em>Metadata</em>' map.
-     * @see org.eclipse.sensinact.model.core.SensiNactPackage#getService_Metadata()
-     * @model mapType="org.eclipse.sensinact.model.core.FeatureMetadata&lt;org.eclipse.emf.ecore.EStructuralFeature,
-     *        org.eclipse.sensinact.model.core.Metadata&gt;"
-     * @generated
-     */
-    EMap<EStructuralFeature, Metadata> getMetadata();
+	/**
+	 * Returns the value of the '<em><b>Metadata</b></em>' map. The key is of type
+	 * {@link org.eclipse.emf.ecore.EStructuralFeature}, and the value is of type
+	 * {@link org.eclipse.sensinact.model.core.Metadata}, <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * 
+	 * @return the value of the '<em>Metadata</em>' map.
+	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getService_Metadata()
+	 * @model mapType="org.eclipse.sensinact.model.core.FeatureMetadata&lt;org.eclipse.emf.ecore.EStructuralFeature,
+	 *        org.eclipse.sensinact.model.core.Metadata&gt;"
+	 * @generated
+	 */
+	EMap<EStructuralFeature, Metadata> getMetadata();
 
 } // Service
