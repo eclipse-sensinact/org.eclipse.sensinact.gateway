@@ -31,6 +31,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -55,10 +56,7 @@ public class NexusTest {
 
     @BeforeEach
     void start() {
-        resourceSet = new ResourceSetImpl();
-
-        // Register the package to ensure it is available during loading.
-        resourceSet.getPackageRegistry().put(SensiNactPackage.eNS_URI, SensiNactPackage.eINSTANCE);
+        resourceSet = EMFTestUtil.createResourceSet();
     }
 
     @Nested

@@ -15,16 +15,16 @@ package org.eclipse.sensinact.model.core;
 import org.eclipse.emf.ecore.EObject;
 
 /**
- * <!-- begin-user-doc --> A representation of the model object
- * '<em><b>Provider</b></em>'. <!-- end-user-doc -->
+ * <!-- begin-user-doc -->
+ * A representation of the model object '<em><b>Provider</b></em>'.
+ * <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
  * </p>
  * <ul>
- * <li>{@link org.eclipse.sensinact.model.core.Provider#getId <em>Id</em>}</li>
- * <li>{@link org.eclipse.sensinact.model.core.Provider#getAdmin
- * <em>Admin</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.model.core.Provider#getId <em>Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.model.core.Provider#getAdmin <em>Admin</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.model.core.SensiNactPackage#getProvider()
@@ -33,9 +33,9 @@ import org.eclipse.emf.ecore.EObject;
  */
 public interface Provider extends EObject {
 	/**
-	 * Returns the value of the '<em><b>Id</b></em>' attribute. <!-- begin-user-doc
-	 * --> <!-- end-user-doc -->
-	 * 
+	 * Returns the value of the '<em><b>Id</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Id</em>' attribute.
 	 * @see #setId(String)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getProvider_Id()
@@ -45,9 +45,9 @@ public interface Provider extends EObject {
 	String getId();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Provider#getId
-	 * <em>Id</em>}' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
+	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Provider#getId <em>Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Id</em>' attribute.
 	 * @see #getId()
 	 * @generated
@@ -55,9 +55,9 @@ public interface Provider extends EObject {
 	void setId(String value);
 
 	/**
-	 * Returns the value of the '<em><b>Admin</b></em>' containment reference. <!--
-	 * begin-user-doc --> <!-- end-user-doc -->
-	 * 
+	 * Returns the value of the '<em><b>Admin</b></em>' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Admin</em>' containment reference.
 	 * @see #setAdmin(Admin)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getProvider_Admin()
@@ -67,10 +67,9 @@ public interface Provider extends EObject {
 	Admin getAdmin();
 
 	/**
-	 * Sets the value of the
-	 * '{@link org.eclipse.sensinact.model.core.Provider#getAdmin <em>Admin</em>}'
-	 * containment reference. <!-- begin-user-doc --> <!-- end-user-doc -->
-	 * 
+	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Provider#getAdmin <em>Admin</em>}' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Admin</em>' containment reference.
 	 * @see #getAdmin()
 	 * @generated

@@ -25,6 +25,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.SensinactModel;
+import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.service.typedevent.TypedEventBus;
 import org.osgi.util.promise.Promise;
@@ -42,10 +44,11 @@ public class GatewayThreadImplTest {
 
     @Mock
     TypedEventBus typedEventBus;
-    @Mock
-    SensiNactPackage sensinactPackage;
-    @Mock
-    ResourceSet resourceSet;
+
+    @Spy
+    SensiNactPackage sensinactPackage = SensiNactPackage.eINSTANCE;
+    @Spy
+    ResourceSet resourceSet = EMFTestUtil.createResourceSet();;
 
     @InjectMocks
     GatewayThreadImpl thread = new GatewayThreadImpl();
@@ -53,8 +56,7 @@ public class GatewayThreadImplTest {
     @BeforeEach
     void setup() {
 
-        Mockito.when(resourceSet.createResource(Mockito.any(URI.class)))
-                .thenAnswer(i -> new ResourceImpl(i.getArgument(0)));
+    	resourceSet = EMFTestUtil.createResourceSet();
 
         thread.activate();
     }
