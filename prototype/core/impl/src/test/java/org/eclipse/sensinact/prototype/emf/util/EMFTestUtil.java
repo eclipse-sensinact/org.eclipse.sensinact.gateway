@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Data In Motion - initial API and implementation 
+*   Data In Motion - initial API and implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.emf.util;
 
@@ -24,15 +24,15 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
  */
 public class EMFTestUtil {
 
-	/**
-	 * @return a fully configured {@link ResourceSet} to be used in non OSGi tests
-	 */
-	public static ResourceSet createResourceSet() {
-		ResourceSet resourceSet = new ResourceSetImpl();
+    /**
+     * @return a fully configured {@link ResourceSet} to be used in non OSGi tests
+     */
+    public static ResourceSet createResourceSet() {
+        ResourceSet resourceSet = new ResourceSetImpl();
 
         // Register the package to ensure it is available during loading.
         resourceSet.getPackageRegistry().put(SensiNactPackage.eNS_URI, SensiNactPackage.eINSTANCE);
         return resourceSet;
-	}
-	
+    }
+
 }
