@@ -229,10 +229,10 @@ public class NexusImpl {
             oldMetaData = EMFUtil.toEObjectAttributesToMap(metadata);
             oldMetaData.put("value", oldValue);
         }
-        if(oldValue ==  null) {
-        	accumulator.addResource(providerName, serviceFeature.getName(), resourceFeature.getName());
+        if (oldValue == null) {
+            accumulator.addResource(providerName, serviceFeature.getName(), resourceFeature.getName());
         }
-        
+
         if (metadata == null || metadata.getTimestamp().isBefore(timestamp)) {
             service.eSet(resourceFeature, data);
             accumulator.resourceValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldValue,

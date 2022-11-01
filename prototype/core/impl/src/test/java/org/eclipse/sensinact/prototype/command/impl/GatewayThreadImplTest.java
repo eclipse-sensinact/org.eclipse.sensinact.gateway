@@ -56,7 +56,7 @@ public class GatewayThreadImplTest {
     @BeforeEach
     void setup() {
 
-    	resourceSet = EMFTestUtil.createResourceSet();
+        resourceSet = EMFTestUtil.createResourceSet();
 
         thread.activate();
     }
@@ -66,14 +66,13 @@ public class GatewayThreadImplTest {
         thread.deactivate();
     }
 
-
     @Test
     void testExecute() throws Exception {
         final int delay = 100;
         final int testValue = 5;
         final int threadWaitTime = 200;
         Semaphore sem = new Semaphore(0);
-        
+
         AbstractSensinactCommand<Integer> command = new AbstractSensinactCommand<Integer>() {
 
             @Override

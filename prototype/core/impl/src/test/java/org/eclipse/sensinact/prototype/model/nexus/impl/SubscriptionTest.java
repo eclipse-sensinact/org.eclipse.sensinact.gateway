@@ -55,7 +55,7 @@ public class SubscriptionTest {
 
     @BeforeEach
     void start() {
-    	resourceSet = EMFTestUtil.createResourceSet();
+        resourceSet = EMFTestUtil.createResourceSet();
     }
 
     @Nested
@@ -81,7 +81,7 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addProvider(TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE);
             // TODO - this is missing
-			Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
+            Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null,
                     TEST_VALUE, now);
             // TODO - the value is in here, which is surprising, as is the timestamp being a
@@ -108,8 +108,8 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addProvider(TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE);
             // TODO - these are missing
-			Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
-			Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE_2);
+            Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
+            Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null,
                     TEST_VALUE, before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE_2, null,
@@ -140,8 +140,8 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addService(TEST_PROVIDER, TEST_SERVICE_2);
             // TODO - these are missing
-			Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
-			Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE_2);
+            Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
+            Mockito.verify(accumulator).addResource(TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, null,
                     TEST_VALUE, before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE_2, null,

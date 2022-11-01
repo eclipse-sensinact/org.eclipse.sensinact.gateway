@@ -26,7 +26,7 @@ public class ResourceDescription {
     public Map<String, Object> metadata;
 
     public Object value;
-    
+
     public Instant timestamp;
 
 }
