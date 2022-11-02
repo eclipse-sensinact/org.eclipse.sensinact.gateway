@@ -22,3 +22,4 @@ jobs:
         VALIDATE_ALL_CODEBASE: false
         VALIDATE_EDITORCONFIG: true
         DEFAULT_BRANCH: ${{ github.event.pull_request.base.sha }}
+        LOG_LEVEL: TRACE
