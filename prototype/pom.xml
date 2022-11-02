@@ -113,7 +113,7 @@
     <osgi.implementation.namespace.version>1.0.0</osgi.implementation.namespace.version>
     <osgi.ds.version>1.5.0</osgi.ds.version>
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
-    <gecko.emf.version>4.2.0-SNAPSHOT</gecko.emf.version>
+    <gecko.emf.version>4.3.0</gecko.emf.version>
     <slf4j.version>1.7.36</slf4j.version>
 
     <!-- runtime dependencies -->
