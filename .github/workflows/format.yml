@@ -18,11 +18,6 @@ jobs:
         fetch-depth: 0
     - name: Editor Config Validation
       uses: github/super-linter/slim@v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_EDITORCONFIG: master
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       env:
         VALIDATE_ALL_CODEBASE: false
         VALIDATE_EDITORCONFIG: true
-        
