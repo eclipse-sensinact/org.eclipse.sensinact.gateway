@@ -15,7 +15,6 @@ package org.eclipse.sensinact.prototype.model.nexus.impl;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +63,7 @@ public class NexusImpl {
         this.sensinactPackage = sensinactPackage;
         this.notificationAccumulator = accumulator;
 
-        defaultPackage = EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", resourceSet);
+        defaultPackage = EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", this.resourceSet);
         packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
     }
 
@@ -222,7 +221,6 @@ public class NexusImpl {
 
         // Handle Metadata
 
-        Date tStamp = Date.from(timestamp);
         Metadata metadata = service.getMetadata().get(resourceFeature);
 
         Map<String, Object> oldMetaData = null;
@@ -231,8 +229,11 @@ public class NexusImpl {
             oldMetaData = EMFUtil.toEObjectAttributesToMap(metadata);
             oldMetaData.put("value", oldValue);
         }
+        if (oldValue == null) {
+            accumulator.addResource(providerName, serviceFeature.getName(), resourceFeature.getName());
+        }
 
-        if (metadata == null || metadata.getTimestamp().before(tStamp)) {
+        if (metadata == null || metadata.getTimestamp().isBefore(timestamp)) {
             service.eSet(resourceFeature, data);
             accumulator.resourceValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldValue,
                     data, timestamp);
@@ -246,7 +247,7 @@ public class NexusImpl {
             metadata.setSource(service);
             service.getMetadata().put(resourceFeature, metadata);
         }
-        metadata.setTimestamp(tStamp);
+        metadata.setTimestamp(timestamp);
 
         Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata);
         newMetaData.put("value", data);
@@ -345,9 +346,6 @@ public class NexusImpl {
                         sensinactPackage.getProvider());
                 wrapper = new ProviderTypeWrapper(providerClass);
                 providerCache.put(providerUri, wrapper);
-                // TODO - do we need a notification here, and if so what notification?
-                // It's definitely not the creation of a provider instance
-//				notificationAccumulator.get().addProvider(providerName);
             }
         }
         return wrapper;
@@ -389,7 +387,7 @@ public class NexusImpl {
 
     private List<EAnnotation> createEClassAnnotations(Instant timestamp) {
         ModelMetadata meta = sensinactPackage.getSensiNactFactory().createModelMetadata();
-        meta.setTimestamp(Date.from(timestamp));
+        meta.setTimestamp(timestamp);
         meta.setVersion(1);
         EAnnotation annotation = EMFUtil.createEAnnotation("metadata", Collections.singletonList(meta));
         return Collections.singletonList(annotation);
@@ -397,7 +395,7 @@ public class NexusImpl {
 
     private List<EAnnotation> createEFeatureAnnotation(EStructuralFeature feature, Instant timestamp) {
         ModelMetadata meta = sensinactPackage.getSensiNactFactory().createModelMetadata();
-        meta.setTimestamp(Date.from(timestamp));
+        meta.setTimestamp(timestamp);
         meta.setVersion(EMFUtil.getContainerVersion(feature));
         EAnnotation annotation = EMFUtil.createEAnnotation("metadata", Collections.singletonList(meta));
         return Collections.singletonList(annotation);
