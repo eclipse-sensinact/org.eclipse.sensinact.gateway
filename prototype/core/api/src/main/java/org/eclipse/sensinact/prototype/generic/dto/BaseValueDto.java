@@ -26,15 +26,28 @@ import org.eclipse.sensinact.prototype.annotation.dto.Service;
  */
 public abstract class BaseValueDto {
 
+    /**
+     * The model to which this value belongs. If null then a model name 
+     * will be created if necessary
+     */
     @Model
     public String model;
 
+    /**
+     * The provider to which this value belongs. Must be set.
+     */
     @Provider
     public String provider;
 
+    /**
+     * The service to which this value belongs. Must be set.
+     */
     @Service
     public String service;
 
+    /**
+     * The resource to which this value belongs. Must be set.
+     */
     @Resource
     public String resource;
 
