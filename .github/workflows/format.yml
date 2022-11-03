@@ -17,11 +17,11 @@ jobs:
       with:
         fetch-depth: 0
         ref: ${{ github.event.pull_request.head.ref }}
-    - name: Editor Config Validation
+    - name: Editor Config Validation against PR base commit
       uses: github/super-linter/slim@v4
       env:
         VALIDATE_ALL_CODEBASE: false
         VALIDATE_EDITORCONFIG: true
         DEFAULT_BRANCH: ${{ github.event.pull_request.base.sha }}
-        GITHUB_WORKSPACE: '${{ env.GITHUB_WORKSPACE }}/prototype'
+        FILTER_REGEX_INCLUDE: '${{ env.GITHUB_WORKSPACE }}/prototype/.*
         LOG_LEVEL: TRACE
