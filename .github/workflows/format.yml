@@ -23,5 +23,5 @@ jobs:
         VALIDATE_ALL_CODEBASE: false
         VALIDATE_EDITORCONFIG: true
         DEFAULT_BRANCH: ${{ github.event.pull_request.base.sha }}
-        FILTER_REGEX_INCLUDE: '${{ env.GITHUB_WORKSPACE }}/prototype/.*
+        FILTER_REGEX_INCLUDE: '${{ env.GITHUB_WORKSPACE }}/prototype/.*'
         LOG_LEVEL: TRACE
