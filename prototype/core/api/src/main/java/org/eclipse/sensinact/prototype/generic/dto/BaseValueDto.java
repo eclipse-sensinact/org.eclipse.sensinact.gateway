@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.generic.dto;
 
@@ -27,7 +27,7 @@ import org.eclipse.sensinact.prototype.annotation.dto.Service;
 public abstract class BaseValueDto {
 
     /**
-     * The model to which this value belongs. If null then a model name 
+     * The model to which this value belongs. If null then a model name
      * will be created if necessary
      */
     @Model
