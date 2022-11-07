@@ -52,5 +52,6 @@ header:
     - '**/.project'
     - '**/*.prefs'
     - 'license.templates'
+    - 'prototype/distribution/launcher/src/test/resources/repository/**'
  
   comment: always
