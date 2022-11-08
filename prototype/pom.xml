@@ -98,6 +98,7 @@
     <module>core</module>
     <module>examples</module>
     <module>sensinact-bom</module>
+    <module>distribution</module>
   </modules>
 
   <properties>
@@ -113,6 +114,7 @@
     <osgi.implementation.namespace.version>1.0.0</osgi.implementation.namespace.version>
     <osgi.ds.version>1.5.0</osgi.ds.version>
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
+    <osgi.feature.version>1.0.0</osgi.feature.version>
     <gecko.emf.version>4.3.0</gecko.emf.version>
     <slf4j.version>1.7.36</slf4j.version>
 
@@ -120,6 +122,9 @@
     <felix.framework.version>7.0.3</felix.framework.version>
     <felix.scr.version>2.2.2</felix.scr.version>
     <felix.configadmin.version>1.9.24</felix.configadmin.version>
+    <felix.cm.json.version>1.0.6</felix.cm.json.version>
+    <felix.feature.version>1.0.0</felix.feature.version>
+    <johnzon.version>1.2.19</johnzon.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
 
     <!-- test dependency versions -->
@@ -225,6 +230,11 @@
         <version>${osgi.typedevent.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.feature</artifactId>
+        <version>${osgi.feature.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.api</artifactId>
         <version>${gecko.emf.version}</version>
@@ -239,7 +249,7 @@
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
-      
+
       <!-- Runtime -->
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -257,11 +267,36 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.configadmin</artifactId>
         <version>${felix.configadmin.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.cm.json</artifactId>
+        <version>${felix.cm.json.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.feature</artifactId>
+        <version>${felix.feature.version}</version>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.aries.typedevent</groupId>
         <artifactId>org.apache.aries.typedevent.bus</artifactId>
         <version>${aries.typedevent.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.johnzon</groupId>
+        <artifactId>johnzon-core</artifactId>
+        <version>${johnzon.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-json_1.1_spec</artifactId>
+        <version>1.5</version>
         <scope>runtime</scope>
       </dependency>
 
