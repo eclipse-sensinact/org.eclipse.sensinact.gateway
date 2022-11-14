@@ -117,6 +117,9 @@
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
     <osgi.feature.version>1.0.0</osgi.feature.version>
     <gecko.emf.version>4.3.0</gecko.emf.version>
+    <emf.common.version>2.23.0</emf.common.version>
+    <emf.ecore.version>2.25.0</emf.ecore.version>
+    <emf.ecore.xmi.version>2.16.0</emf.ecore.xmi.version>
     <slf4j.version>1.7.36</slf4j.version>
     <jackson.version>2.14.0</jackson.version>
 
@@ -127,6 +130,7 @@
     <felix.cm.json.version>1.0.6</felix.cm.json.version>
     <felix.feature.version>1.0.0</felix.feature.version>
     <johnzon.version>1.2.19</johnzon.version>
+    <aries.component-dsl.version>1.2.2</aries.component-dsl.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
 
     <!-- test dependency versions -->
@@ -247,6 +251,21 @@
         <version>${gecko.emf.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.eclipse.emf</groupId>
+        <artifactId>org.eclipse.emf.common</artifactId>
+        <version>${emf.common.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.emf</groupId>
+        <artifactId>org.eclipse.emf.ecore</artifactId>
+        <version>${emf.ecore.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.emf</groupId>
+        <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+        <version>${emf.ecore.xmi.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.version}</version>
@@ -291,6 +310,12 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.feature</artifactId>
         <version>${felix.feature.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.aries.component-dsl</groupId>
+        <artifactId>org.apache.aries.component-dsl.component-dsl</artifactId>
+        <version>${aries.component-dsl.version}</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>

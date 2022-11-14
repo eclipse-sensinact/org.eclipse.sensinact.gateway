@@ -13,18 +13,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.eclipse.sensinact.gateway</groupId>
-    <artifactId>sensinact-parent</artifactId>
+    <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+    <artifactId>distribution</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
-  <artifactId>distribution</artifactId>
+  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+  <artifactId>features</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact Distribution</name>
-  <description>This project contains code for launching sensiNact gateway instances</description>
+  <name>Eclipse sensiNact Features</name>
+  <description>This project contains definitions of sensiNact features</description>
 
   <modules>
-    <module>launcher</module>
-    <module>features</module>
+    <module>core-feature</module>
   </modules>
 </project>
