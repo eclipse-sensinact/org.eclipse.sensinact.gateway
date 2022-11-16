@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -38,7 +38,7 @@ import jakarta.ws.rs.core.UriInfo;
 @Produces(APPLICATION_JSON)
 @Path("/v1.1")
 public interface RootResourceAccess {
-    
+
     @GET
     default RootResponse getRootResponse(@Context UriInfo info) {
         RootResponse response = new RootResponse();
@@ -67,7 +67,7 @@ public interface RootResourceAccess {
                 create("ObservedProperties", info.getAbsolutePathBuilder().path("ObservedProperties").toString()),
                 create("FeaturesOfInterest", info.getAbsolutePathBuilder().path("FeaturesOfInterest").toString())
             );
-        
+
         return response;
     }
 
@@ -86,7 +86,7 @@ public interface RootResourceAccess {
     @GET
     @Path("Datastreams")
     ResultList<Datastream> getDatastreams();
-    
+
     @GET
     @Path("Sensors")
     ResultList<Sensor> getSensors();
@@ -94,11 +94,11 @@ public interface RootResourceAccess {
     @GET
     @Path("Observations")
     ResultList<Observation> getObservations();
-    
+
     @GET
     @Path("ObservedProperties")
     ResultList<ObservedProperty> getObservedProperties();
-    
+
     @GET
     @Path("FeaturesOfInterest")
     ResultList<FeatureOfInterest> getFeaturesOfInterest();

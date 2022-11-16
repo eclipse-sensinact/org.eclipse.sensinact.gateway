@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -39,7 +39,7 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         Boolean addCount = (Boolean) requestContext.getProperty(COUNT_PROP);
-        
+
         if(addCount) {
             Object entity = responseContext.getEntity();
             if(entity instanceof ResultList) {
@@ -52,7 +52,7 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         boolean addCount = false;
-        
+
         List<String> list = requestContext.getUriInfo().getQueryParameters().get("$count");
         if(list.size() > 1) {
             requestContext.abortWith(Response

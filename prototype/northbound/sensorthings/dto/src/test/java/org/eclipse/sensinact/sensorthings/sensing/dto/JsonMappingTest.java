@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
@@ -38,20 +38,20 @@ class JsonMappingTest {
     ObjectMapper getObjectMapper() {
         return new ObjectMapper().registerModule(new JavaTimeModule());
     }
-    
+
     File getFile(String path) {
         return new File("src/test/resources/toronto-bike-snapshot.sensorup.com", path);
     }
-    
+
     @Nested
     class ResourceParsing {
-        
+
         @Test
         void testRootResponse() throws IOException {
             RootResponse response = getObjectMapper().readValue(getFile("v1.0.json"), RootResponse.class);
-            
+
             assertEquals(8, response.value.size());
-            
+
             List<String> expected = List.of(
                     "Things", "https://toronto-bike-snapshot.sensorup.com/v1.0/Things",
                     "Locations", "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations",
@@ -61,23 +61,23 @@ class JsonMappingTest {
                     "Observations", "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations",
                     "ObservedProperties", "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties",
                     "FeaturesOfInterest", "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest"
-                  );
+                );
             Iterator<String> it = expected.iterator();
             for(NameUrl nu : response.value) {
                 assertEquals(it.next(), nu.name);
                 assertEquals(it.next(), nu.url);
             }
         }
-        
+
         @Test
         void testThings() throws IOException {
             ResultList<Thing> things = getObjectMapper().readValue(getFile("Things.json"), new TypeReference<ResultList<Thing>>(){});
-            
+
             assertEquals(199, things.count);
             assertEquals("https://toronto-bike-snapshot.sensorup.com/v1.0/Things?$top=100&$skip=100", things.nextLink);
             assertEquals(100, things.value.size());
-            
-            
+
+
             assertThing(things.value.get(0), 206047, "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)",
                 "Bloor St / Brunswick Ave Toronto bike share station with data of available bikes and available docks",
                 "7061:Bloor St / Brunswick Ave", "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/Datastreams",
@@ -94,8 +94,8 @@ class JsonMappingTest {
                 "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1573)/HistoricalLocations",
                 "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(1573)/Locations");
         }
-        
-        void assertThing(Thing thing, Integer id, String selfLink, String description, String name, String datastreams, 
+
+        void assertThing(Thing thing, Integer id, String selfLink, String description, String name, String datastreams,
                 String historicalLocations, String locations) {
             assertEquals(id, thing.id);
             assertEquals(selfLink, thing.selfLink);
@@ -110,12 +110,12 @@ class JsonMappingTest {
         @Test
         void testLocations() throws IOException {
             ResultList<Location> locations = getObjectMapper().readValue(getFile("Locations.json"), new TypeReference<ResultList<Location>>(){});
-            
+
             assertEquals(199, locations.count);
             assertEquals("https://toronto-bike-snapshot.sensorup.com/v1.0/Locations?$top=100&$skip=100", locations.nextLink);
             assertEquals(100, locations.value.size());
-            
-            
+
+
             assertLocation(locations.value.get(0), 206048, "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)",
                     "The geographic location with coordinates for the Toronto bike share station Bloor St / Brunswick Ave",
                     "7061:Bloor St / Brunswick Ave", -79.407224, 43.665876,
@@ -132,7 +132,7 @@ class JsonMappingTest {
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1574)/Things",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1574)/HistoricalLocations");
         }
-        
+
         void assertLocation(Location location, Integer id, String selfLink, String description, String name,
                 double longitude, double latitude, String things, String historicalLocations) {
             assertEquals(id, location.id);
@@ -146,16 +146,16 @@ class JsonMappingTest {
             assertEquals(things, location.thingsLink);
             assertEquals(historicalLocations, location.historicalLocationsLink);
         }
-        
+
         @Test
         void testHistoricalLocations() throws IOException {
             ResultList<HistoricalLocation> locations = getObjectMapper().readValue(getFile("HistoricalLocations.json"), new TypeReference<ResultList<HistoricalLocation>>(){});
-            
+
             assertEquals(199, locations.count);
             assertEquals("https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations?$top=100&$skip=100", locations.nextLink);
             assertEquals(100, locations.value.size());
-            
-            
+
+
             assertHistoricalLocation(locations.value.get(0), 206049, "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)",
                     "2017-02-04T15:50:10.489Z", "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Locations",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Thing");
@@ -166,7 +166,7 @@ class JsonMappingTest {
                     "2017-02-02T20:45:24.906Z", "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(1575)/Locations",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(1575)/Thing");
         }
-        
+
         void assertHistoricalLocation(HistoricalLocation historicalLocation, Integer id, String selfLink, String time,
                 String locations, String thing) {
             assertEquals(id, historicalLocation.id);
@@ -179,12 +179,12 @@ class JsonMappingTest {
         @Test
         void testDatastreams() throws IOException {
             ResultList<Datastream> streams = getObjectMapper().readValue(getFile("Datastreams.json"), new TypeReference<ResultList<Datastream>>(){});
-            
+
             assertEquals(398, streams.count);
             assertEquals("https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams?$top=100&$skip=100", streams.nextLink);
             assertEquals(100, streams.value.size());
-            
-            
+
+
             assertDatastream(streams.value.get(0), 206051, "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)",
                     "7061:Bloor St / Brunswick Ave:available_docks", "The datastream of available docks count for the Toronto bike share station Bloor St / Brunswick Ave",
                     "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation", "dock count",
@@ -192,7 +192,7 @@ class JsonMappingTest {
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/ObservedProperty",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Sensor",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Thing"
-                   );
+                );
             assertDatastream(streams.value.get(1), 206050, "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)",
                     "7061:Bloor St / Brunswick Ave:available_bikes", "The datastream of available bikes count for the Toronto bike share station Bloor St / Brunswick Ave",
                     "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation", "bike count",
@@ -200,7 +200,7 @@ class JsonMappingTest {
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)/ObservedProperty",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)/Sensor",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)/Thing"
-                    );
+                );
             assertDatastream(streams.value.get(2), 1585, "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)",
                     "7216:Wellington Dog Park:available_docks", "The datastream of available docks count for the Toronto bike share station Wellington Dog Park",
                     "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation", "dock count",
@@ -208,11 +208,11 @@ class JsonMappingTest {
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)/ObservedProperty",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)/Sensor",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)/Thing"
-                    );
+                );
         }
-        
+
         void assertDatastream(Datastream datastream, Integer id, String selfLink, String name, String description,
-                String observationType, String unitName, String observations, String observedProperty, String sensor, 
+                String observationType, String unitName, String observations, String observedProperty, String sensor,
                 String thing) {
             assertEquals(id, datastream.id);
             assertEquals(selfLink, datastream.selfLink);
@@ -232,25 +232,25 @@ class JsonMappingTest {
         @Test
         void testSensors() throws IOException {
             ResultList<Sensor> streams = getObjectMapper().readValue(getFile("Sensors.json"), new TypeReference<ResultList<Sensor>>(){});
-            
+
             assertEquals(2, streams.count);
             assertNull(streams.nextLink);
             assertEquals(2, streams.value.size());
-            
-            
+
+
             assertSensor(streams.value.get(0), 4, "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)",
                     "available_docks", "A sensor for tracking how many docks are available in a bike station",
                     "text/plan", "https://member.bikesharetoronto.com/stations",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)/Datastreams"
-                    );
+                );
             assertSensor(streams.value.get(1), 3, "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(3)",
                     "available_bikes", "A sensor for tracking how many bikes are available in a bike station",
                     "text/plan", "https://member.bikesharetoronto.com/stations",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(3)/Datastreams"
-                    );
-            
+                );
+
         }
-        
+
         void assertSensor(Sensor datastream, Integer id, String selfLink, String name, String description,
                 String encodingType, String metadata, String datastreams) {
             assertEquals(id, datastream.id);
@@ -265,26 +265,26 @@ class JsonMappingTest {
         @Test
         void testObservations() throws IOException {
             ResultList<Observation> observations = getObjectMapper().readValue(getFile("Observations.json"), new TypeReference<ResultList<Observation>>(){});
-            
+
             assertEquals(1594349, observations.count);
             assertEquals("https://toronto-bike-snapshot.sensorup.com/v1.0/Observations?$top=100&$skip=100", observations.nextLink);
             assertEquals(100, observations.value.size());
-            
-            
+
+
             assertObservation(observations.value.get(0), 1595550, "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)",
                     "2017-02-16T21:55:12.841Z", "7", "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)/Datastream",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)/FeatureOfInterest"
-                    );
+                );
             assertObservation(observations.value.get(1), 1595551, "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595551)",
                     "2017-02-16T21:55:12.841Z", "4", "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595551)/Datastream",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595551)/FeatureOfInterest"
-                    );
+                );
             assertObservation(observations.value.get(2), 1595549, "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595549)",
                     "2017-02-16T21:55:12.830Z", "8", "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595549)/Datastream",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595549)/FeatureOfInterest"
-                    );
+                );
         }
-        
+
         void assertObservation(Observation observation, Integer id, String selfLink, String time, String result,
                 String datastream, String featureOfInterest) {
             assertEquals(id, observation.id);
@@ -296,30 +296,30 @@ class JsonMappingTest {
             assertEquals(datastream, observation.datastreamLink);
             assertEquals(featureOfInterest, observation.featureOfInterestLink);
         }
-        
+
         @Test
         void testObservedProperties() throws IOException {
             ResultList<ObservedProperty> observedProps = getObjectMapper().readValue(getFile("ObservedProperties.json"), new TypeReference<ResultList<ObservedProperty>>(){});
-            
+
             assertEquals(2, observedProps.count);
             assertNull(observedProps.nextLink);
             assertEquals(2, observedProps.value.size());
-            
-            
+
+
             assertObservedProperty(observedProps.value.get(0), 2, "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)",
-                    "available_docks", "The total number count of available docks in a bike station", 
-                    "https://member.bikesharetoronto.com/stations", 
+                    "available_docks", "The total number count of available docks in a bike station",
+                    "https://member.bikesharetoronto.com/stations",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)/Datastreams"
-                    );
+                );
             assertObservedProperty(observedProps.value.get(1), 1, "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(1)",
-                    "available_bikes", "The total number count of available bikes in a bike station", 
-                    "https://member.bikesharetoronto.com/stations", 
+                    "available_bikes", "The total number count of available bikes in a bike station",
+                    "https://member.bikesharetoronto.com/stations",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(1)/Datastreams"
-                    );
+                );
         }
-        
-        void assertObservedProperty(ObservedProperty observation, Integer id, String selfLink, String name, String description,
-                String definition, String datastreams) {
+
+        void assertObservedProperty(ObservedProperty observation, Integer id, String selfLink, String name,
+                String description, String definition, String datastreams) {
             assertEquals(id, observation.id);
             assertEquals(selfLink, observation.selfLink);
             assertEquals(name, observation.name);
@@ -327,32 +327,32 @@ class JsonMappingTest {
             assertEquals(definition, observation.definition);
             assertEquals(datastreams, observation.datastreamsLink);
         }
-        
+
         @Test
         void testFeaturesOfInterest() throws IOException {
             ResultList<FeatureOfInterest> observedProps = getObjectMapper().readValue(getFile("FeaturesOfInterest.json"), new TypeReference<ResultList<FeatureOfInterest>>(){});
-            
+
             assertEquals(199, observedProps.count);
             assertEquals("https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest?$top=100&$skip=100", observedProps.nextLink);
             assertEquals(100, observedProps.value.size());
-            
-            
+
+
             assertFeatureOfInterest(observedProps.value.get(0), 206052, "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(206052)",
-                    "7061:Bloor St / Brunswick Ave", "Generated using location details: The geographic location with coordinates for the Toronto bike share station Bloor St / Brunswick Ave", 
+                    "7061:Bloor St / Brunswick Ave", "Generated using location details: The geographic location with coordinates for the Toronto bike share station Bloor St / Brunswick Ave",
                     -79.407224, 43.665876, "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(206052)/Observations"
-                    );
+                );
             assertFeatureOfInterest(observedProps.value.get(1), 1586, "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1586)",
-                    "7216:Wellington Dog Park", "Generated using location details: The geographic location with coordinates for the Toronto bike share station Wellington Dog Park", 
+                    "7216:Wellington Dog Park", "Generated using location details: The geographic location with coordinates for the Toronto bike share station Wellington Dog Park",
                     -79.409339, 43.641281, "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1586)/Observations"
-                    );
+                );
             assertFeatureOfInterest(observedProps.value.get(2), 1578, "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1578)",
-                    "7211:Fort York/Garrison", "Generated using location details: The geographic location with coordinates for the Toronto bike share station Fort York/Garrison", 
+                    "7211:Fort York/Garrison", "Generated using location details: The geographic location with coordinates for the Toronto bike share station Fort York/Garrison",
                     -79.4061111111111, 43.6375, "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1578)/Observations"
-                    );
+                );
         }
-        
-        void assertFeatureOfInterest(FeatureOfInterest featureOfInterest, Integer id, String selfLink, String name, String description,
-                double longitude, double latitude, String observations) {
+
+        void assertFeatureOfInterest(FeatureOfInterest featureOfInterest, Integer id, String selfLink, String name,
+                String description, double longitude, double latitude, String observations) {
             assertEquals(id, featureOfInterest.id);
             assertEquals(selfLink, featureOfInterest.selfLink);
             assertEquals(name, featureOfInterest.name);
@@ -365,10 +365,10 @@ class JsonMappingTest {
         }
     }
 
-    
+
     @Nested
     class ResourceSerialization {
-        
+
         @Test
         void testThing() throws Exception {
             Thing thing = new Thing();
@@ -380,11 +380,11 @@ class JsonMappingTest {
             thing.datastreamsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/Datastreams";
             thing.historicalLocationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/HistoricalLocations";
             thing.locationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Things(206047)/Locations";
-            
+
             assertEquals(getObjectMapper().readTree(getFile("Datastreams(206051)/Thing.json")),
                     getObjectMapper().valueToTree(thing));
         }
-        
+
         @Test
         void testLocation() throws Exception {
             Location location = new Location();
@@ -395,16 +395,16 @@ class JsonMappingTest {
             location.encodingType = "application/vnd.geo+json";
             location.thingsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/Things";
             location.historicalLocationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/HistoricalLocations";
-            
+
             Point point = new Point();
             point.setCoordinates(new LngLatAlt(-79.407224, 43.665876));
-            
+
             location.location = point;
-            
+
             ResultList<Location> list = new ResultList<>();
             list.value = List.of(location);
             list.count = 1;
-            
+
             assertEquals(getObjectMapper().readTree(getFile("HistoricalLocations(206049)/Locations.json")),
                     getObjectMapper().valueToTree(list));
         }
@@ -417,11 +417,11 @@ class JsonMappingTest {
             historicalLocation.time = Instant.parse("2017-02-04T15:50:10.489Z");
             historicalLocation.locationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Locations";
             historicalLocation.thingLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Thing";
-            
+
             ResultList<HistoricalLocation> list = new ResultList<>();
             list.value = List.of(historicalLocation);
             list.count = 1;
-            
+
             assertEquals(getObjectMapper().readTree(getFile("Locations(206048)/HistoricalLocations.json")),
                     getObjectMapper().valueToTree(list));
         }
@@ -435,12 +435,12 @@ class JsonMappingTest {
             datastream.description = "The datastream of available bikes count for the Toronto bike share station Harrison/Dovercourt";
             datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation";
             datastream.unitOfMeasurement = Map.of("symbol", "{TOT}", "name", "bike count", "definition", "http://unitsofmeasure.org/ucum.html#para-50");
-            
+
             datastream.observationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/Observations";
             datastream.observedPropertyLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/ObservedProperty";
             datastream.sensorLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/Sensor";
             datastream.thingLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/Thing";
-            
+
             assertEquals(getObjectMapper().readTree(getFile("Observations(1595550)/Datastream.json")),
                     getObjectMapper().valueToTree(datastream));
         }
@@ -455,7 +455,7 @@ class JsonMappingTest {
             sensor.encodingType = "text/plan";
             sensor.metadata = "https://member.bikesharetoronto.com/stations";
             sensor.datastreamsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)/Datastreams";
-            
+
             assertEquals(getObjectMapper().readTree(getFile("Datastreams(206051)/Sensor.json")),
                     getObjectMapper().valueToTree(sensor));
         }
@@ -469,7 +469,7 @@ class JsonMappingTest {
             observation.result = "7";
             observation.datastreamLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)/Datastream";
             observation.featureOfInterestLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Observations(1595550)/FeatureOfInterest";
-            
+
             assertEquals(getObjectMapper().readTree(getFile("Observations(1595550)/root.json")),
                     getObjectMapper().valueToTree(observation));
         }
@@ -483,7 +483,7 @@ class JsonMappingTest {
             observedProperty.description = "The total number count of available docks in a bike station";
             observedProperty.definition = "https://member.bikesharetoronto.com/stations";
             observedProperty.datastreamsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)/Datastreams";
-            
+
             assertEquals(getObjectMapper().readTree(getFile("Datastreams(206051)/ObservedProperty.json")),
                     getObjectMapper().valueToTree(observedProperty));
         }
@@ -497,12 +497,12 @@ class JsonMappingTest {
             featureOfInterest.description = "Generated using location details: The geographic location with coordinates for the Toronto bike share station Harrison/Dovercourt";
             featureOfInterest.encodingType = "application/vnd.geo+json";
             featureOfInterest.observationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1514)/Observations";
-            
+
             Point point = new Point();
-            point.setCoordinates(new LngLatAlt(-79.424557,43.650978));
-            
+            point.setCoordinates(new LngLatAlt(-79.424557, 43.650978));
+
             featureOfInterest.feature = point;
-            
+
             assertEquals(getObjectMapper().readTree(getFile("Observations(1595550)/FeatureOfInterest.json")),
                     getObjectMapper().valueToTree(featureOfInterest));
         }

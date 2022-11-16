@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -33,10 +33,10 @@ import jakarta.ws.rs.Produces;
 @Produces(APPLICATION_JSON)
 @Path("/v1.1/Observations({id})")
 public interface ObservationsAccess {
-    
+
     @GET
     public Observation getObservation(@PathParam("id") String id);
-    
+
     @Path("{prop}")
     @GET
     @PropFilter
@@ -72,7 +72,7 @@ public interface ObservationsAccess {
     @Path("Datastream/Observations")
     @GET
     public ResultList<Observation> getObservationDatastreamObservations(@PathParam("id") String id);
-    
+
     @Path("Datastream/ObservedProperty")
     @GET
     public ObservedProperty getObservationDatastreamObservedProperty(@PathParam("id") String id);
@@ -80,15 +80,15 @@ public interface ObservationsAccess {
     @Path("Datastream/Sensor")
     @GET
     public Sensor getObservationDatastreamSensor(@PathParam("id") String id);
-    
+
     @Path("Datastream/Thing")
     @GET
     public Thing getObservationDatastreamThing(@PathParam("id") String id);
-    
+
     @Path("FeatureOfInterest")
     @GET
     public FeatureOfInterest getObservationFeatureOfInterest(@PathParam("id") String id);
-    
+
     @Path("FeatureOfInterest/$ref")
     @GET
     @RefFilter
@@ -102,9 +102,9 @@ public interface ObservationsAccess {
     default public FeatureOfInterest getObservationFeatureOfInterestProp(@PathParam("id") String id) {
         return getObservationFeatureOfInterest(id);
     }
-    
+
     @Path("FeatureOfInterest/Observations")
     @GET
     public ResultList<Observation> getObservationFeatureOfInterestObservations(@PathParam("id") String id);
-    
+
 }

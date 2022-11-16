@@ -18,7 +18,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>rest.gateway</artifactId>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
@@ -38,7 +38,7 @@
       <artifactId>org.osgi.service.jakartars</artifactId>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>

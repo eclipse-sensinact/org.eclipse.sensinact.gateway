@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
@@ -25,19 +25,19 @@ public class Observation extends Id {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant phenomenonTime;
-    
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant resultTime;
-    
+
     public Object result;
-    
+
     @JsonInclude(NON_NULL)
     public Object resultQuality;
-    
+
     @JsonInclude(NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant validTime;
-    
+
     @JsonInclude(NON_NULL)
     public Map<String, Object> parameters;
 

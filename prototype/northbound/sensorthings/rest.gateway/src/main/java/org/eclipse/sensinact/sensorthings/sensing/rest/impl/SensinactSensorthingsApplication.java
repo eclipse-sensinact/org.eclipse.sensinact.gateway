@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
@@ -28,7 +28,7 @@ public class SensinactSensorthingsApplication extends Application {
 
     @Reference
     SensiNactSessionManager sessionManager;
-    
+
     @Override
     public Set<Class<?>> getClasses() {
         return Set.of(

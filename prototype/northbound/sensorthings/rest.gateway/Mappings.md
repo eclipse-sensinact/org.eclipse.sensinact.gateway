@@ -97,4 +97,4 @@ A Sensorthings Thing is most closely akin to a sensiNact provider:
 # Future changes
  
  * Support for history in data streams?
- * Link to the model so that ObservedProperty is shared? 
+ * Link to the model so that ObservedProperty is shared?

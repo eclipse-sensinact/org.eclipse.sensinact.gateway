@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
@@ -17,17 +17,17 @@ import java.util.List;
 public class RootResponse {
 
     public ServerSettings serverSettings;
-    
+
     public List<NameUrl> value;
-    
+
     public static class ServerSettings {
         public List<String> conformance;
     }
-      
+
     public static class NameUrl {
         public String name;
         public String url;
-        
+
         public static NameUrl create(String name, String url) {
             NameUrl nu = new NameUrl();
             nu.name = name;
@@ -35,5 +35,5 @@ public class RootResponse {
             return nu;
         }
     }
-    
+
 }

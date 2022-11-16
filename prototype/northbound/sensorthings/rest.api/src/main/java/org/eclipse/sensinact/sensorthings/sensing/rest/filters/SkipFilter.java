@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -41,7 +41,7 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         Integer skip = (Integer) requestContext.getProperty(SKIP_PROP);
-        
+
         Object entity = responseContext.getEntity();
         if(entity instanceof ResultList) {
             @SuppressWarnings("unchecked")
@@ -53,7 +53,7 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         int skip = 0;
-        
+
         List<String> list = requestContext.getUriInfo().getQueryParameters().get("$skip");
         if(list.size() > 1) {
             requestContext.abortWith(Response
@@ -71,14 +71,14 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
                         .build());
             }
         }
-        
+
         if(skip < 0) {
             requestContext.abortWith(Response
                     .status(Status.BAD_REQUEST)
                     .entity("The $skip parameter must be an integer greater than zero")
                     .build());
         }
-        
+
         requestContext.setProperty(SKIP_PROP, skip);
     }
 

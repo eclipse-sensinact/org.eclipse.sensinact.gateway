@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -30,10 +30,10 @@ import jakarta.ws.rs.Produces;
 @Produces(APPLICATION_JSON)
 @Path("/v1.1/FeaturesOfInterest({id})")
 public interface FeaturesOfInterestAccess {
-    
+
     @GET
     public FeatureOfInterest getFeatureOfInterest(@PathParam("id") String id);
-    
+
     @Path("{prop}")
     @GET
     @PropFilter
@@ -79,5 +79,5 @@ public interface FeaturesOfInterestAccess {
     default public FeatureOfInterest getFeatureOfInterestObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2) {
         return getFeatureOfInterest(id);
     }
-    
+
 }

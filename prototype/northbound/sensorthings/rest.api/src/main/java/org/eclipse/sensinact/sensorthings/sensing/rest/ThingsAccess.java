@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -34,10 +34,10 @@ import jakarta.ws.rs.Produces;
 @Produces(APPLICATION_JSON)
 @Path("/v1.1/Things({id})")
 public interface ThingsAccess {
-    
+
     @GET
     public Thing getThing(@PathParam("id") String id);
-    
+
     @Path("{prop}")
     @GET
     @PropFilter
@@ -66,7 +66,7 @@ public interface ThingsAccess {
     @Path("Datastreams({id2})")
     @GET
     public Datastream getThingDatastream(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Datastreams({id2})/{prop}")
     @GET
     @PropFilter
@@ -77,7 +77,7 @@ public interface ThingsAccess {
     @Path("Datastreams(id2)/Observations")
     @GET
     public ResultList<Observation> getThingDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Datastreams({id2})/ObservedProperty")
     @GET
     public ObservedProperty getThingDatastreamObservedProperty(@PathParam("id") String id, @PathParam("id2") String id2);
@@ -85,11 +85,11 @@ public interface ThingsAccess {
     @Path("Datastreams({id2})/Sensor")
     @GET
     public Sensor getThingDatastreamSensor(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Datastreams({id2})/Thing")
     @GET
     public Thing getThingDatastreamThing(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("HistoricalLocations")
     @GET
     public ResultList<HistoricalLocation> getThingHistoricalLocations(@PathParam("id") String id);
@@ -119,7 +119,7 @@ public interface ThingsAccess {
     @Path("HistoricalLocations({id2})/Locations")
     @GET
     public ResultList<Location> getThingHistoricalLocationLocations(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Locations")
     @GET
     public ResultList<Location> getThingLocations(@PathParam("id") String id);
@@ -149,5 +149,5 @@ public interface ThingsAccess {
     @Path("Locations({id2})/HistoricalLocations")
     @GET
     public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
 }

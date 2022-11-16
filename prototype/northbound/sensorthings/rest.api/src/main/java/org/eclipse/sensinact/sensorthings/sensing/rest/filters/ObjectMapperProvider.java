@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -18,12 +18,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.ws.rs.ext.ContextResolver;
 
 /**
- * Provides a suitable ObjectMapper for JSON serialization 
+ * Provides a suitable ObjectMapper for JSON serialization
  */
 public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper mapper;
-    
+
     public ObjectMapperProvider() {
         this.mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule());

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
@@ -18,13 +18,13 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.ContextResolver;
 
 /**
- * Provides a suitable ObjectMapper for JSON serialization 
+ * Provides a suitable ObjectMapper for JSON serialization
  */
 public class SensinactSessionProvider implements ContextResolver<SensiNactSession> {
 
     @Context
     SensinactSensorthingsApplication application;
-    
+
     @Override
     public SensiNactSession getContext(Class<?> type) {
         // TODO proper user and session mapping

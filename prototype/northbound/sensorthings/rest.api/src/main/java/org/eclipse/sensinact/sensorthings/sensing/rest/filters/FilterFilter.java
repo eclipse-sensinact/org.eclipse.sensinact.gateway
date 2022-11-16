@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -39,7 +39,7 @@ public class FilterFilter implements ContainerRequestFilter, ContainerResponseFi
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        
+
         List<String> list = requestContext.getUriInfo().getQueryParameters().get("$filter");
         if (!list.isEmpty()) {
             requestContext.abortWith(Response

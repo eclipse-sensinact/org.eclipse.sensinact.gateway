@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
@@ -52,11 +52,11 @@ public class ObservationsAccessImpl implements ObservationsAccess {
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
         Observation o = DtoMapper.toObservation(uriInfo, userSession.describeResource(provider, service, resource));
-        
+
         if(!id.equals(o.id)) {
             throw new NotFoundException();
         }
-        
+
         return o;
     }
 
@@ -67,11 +67,11 @@ public class ObservationsAccessImpl implements ObservationsAccess {
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
         Datastream d = DtoMapper.toDatastream(userSession, uriInfo, userSession.describeResource(provider, service, resource));
-        
+
         if(!id.equals(d.id)) {
             throw new NotFoundException();
         }
-        
+
         return d;
     }
 

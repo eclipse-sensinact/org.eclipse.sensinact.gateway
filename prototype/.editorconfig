@@ -15,6 +15,10 @@ trim_trailing_whitespace = true
 [*.{xml,json}]
 indent_size = 2
 
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 1
+
 # Custom rules for unit tests with oddly named resource files
 [distribution/launcher/src/test/resources/**.feature]
 indent_size = 2

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -32,10 +32,10 @@ import jakarta.ws.rs.Produces;
 @Produces(APPLICATION_JSON)
 @Path("/v1.1/ObservedProperties({id})")
 public interface ObservedPropertiesAccess {
-    
+
     @GET
     public ObservedProperty getObservedProperty(@PathParam("id") String id);
-    
+
     @Path("{prop}")
     @GET
     @PropFilter
@@ -64,7 +64,7 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams({id2})")
     @GET
     public Datastream getObservedPropertyDatastream(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Datastreams({id2})/{prop}")
     @GET
     @PropFilter
@@ -75,7 +75,7 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams(id2)/Observations")
     @GET
     public ResultList<Observation> getObservedPropertyDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Datastreams({id2})/ObservedProperty")
     @GET
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(@PathParam("id") String id, @PathParam("id2") String id2);
@@ -83,9 +83,9 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams({id2})/Sensor")
     @GET
     public Sensor getObservedPropertyDatastreamSensor(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Datastreams({id2})/Thing")
     @GET
     public Thing getObservedPropertyDatastreamThing(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
 }

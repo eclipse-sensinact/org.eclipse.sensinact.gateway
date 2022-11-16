@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
@@ -46,11 +46,11 @@ public class LocationsAccessImpl implements LocationsAccess {
     public Location getLocation(String id) {
         String provider = DtoMapper.extractFirstIdSegment(id);
         Location l = DtoMapper.toLocation(userSession, uriInfo, mapper, provider);
-        
+
         if(!id.equals(l.id)) {
             throw new NotFoundException();
         }
-        
+
         return l;
     }
 
@@ -65,7 +65,7 @@ public class LocationsAccessImpl implements LocationsAccess {
     public HistoricalLocation getLocationHistoricalLocation(String id, String id2) {
         String provider = DtoMapper.extractFirstIdSegment(id);
         HistoricalLocation hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
-        
+
         if(!id2.equals(hl.id)) {
             throw new NotFoundException();
         }

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -31,10 +31,10 @@ import jakarta.ws.rs.Produces;
 @Produces(APPLICATION_JSON)
 @Path("/v1.1/Locations({id})")
 public interface LocationsAccess {
-    
+
     @GET
     public Location getLocation(@PathParam("id") String id);
-    
+
     @Path("{prop}")
     @GET
     @PropFilter
@@ -93,14 +93,14 @@ public interface LocationsAccess {
     @Path("Things({id2})")
     @GET
     public Thing getLocationThing(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("Things({id2})/{prop}")
     @GET
     @PropFilter
     default public Thing getLocationThingProp(@PathParam("id") String id, @PathParam("id2") String id2) {
         return getLocationThing(id, id2);
     }
-    
+
     @Path("Things({id2})/Datastreams")
     @GET
     public ResultList<Datastream> getLocationThingDatastreams(@PathParam("id") String id, @PathParam("id2") String id2);
@@ -112,5 +112,5 @@ public interface LocationsAccess {
     @Path("Things({id2})/Locations")
     @GET
     public ResultList<Location> getLocationThingLocations(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
 }

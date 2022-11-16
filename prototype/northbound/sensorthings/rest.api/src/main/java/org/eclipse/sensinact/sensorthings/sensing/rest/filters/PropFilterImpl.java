@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -32,21 +32,21 @@ public class PropFilterImpl implements WriterInterceptor {
 
     @Context
     UriInfo uriInfo;
-    
+
     @Override
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
         Object entity = context.getEntity();
-        
+
         String propName = uriInfo.getPathParameters().getFirst("prop");
         boolean rawValue = uriInfo.getPath().endsWith("/$value");
-        
+
         try {
             Object prop = entity.getClass().getField(propName).get(entity);
             context.setEntity(rawValue ? prop : Map.of(propName, prop));
         } catch (Exception e) {
             throw new BadRequestException("Failed to locate property " + propName, e);
         }
-        
+
         context.proceed();
     }
 }

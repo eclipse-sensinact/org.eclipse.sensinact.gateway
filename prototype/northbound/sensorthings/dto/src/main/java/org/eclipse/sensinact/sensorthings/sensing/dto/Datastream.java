@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
@@ -26,20 +26,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Datastream extends NameDescription {
 
     public String observationType;
-    
+
     public Map<String, Object> unitOfMeasurement;
-    
+
     @JsonInclude(NON_NULL)
     public Polygon observedArea;
-    
+
     @JsonInclude(NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant phenomenonTime;
-    
+
     @JsonInclude(NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant resultTime;
-    
+
     @JsonInclude(NON_NULL)
     public Map<String, Object> properties;
 

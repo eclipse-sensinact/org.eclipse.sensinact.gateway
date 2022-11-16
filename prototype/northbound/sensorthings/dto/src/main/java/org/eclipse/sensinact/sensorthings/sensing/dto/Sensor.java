@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
@@ -23,7 +23,7 @@ public class Sensor extends NameDescription {
 
     public String encodingType;
     public Object metadata;
-    
+
     @JsonInclude(NON_NULL)
     public Map<String, Object> properties;
 

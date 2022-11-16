@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -39,7 +39,7 @@ public class SensorThingsFeature implements Feature {
         // Bound response rewriters
         context.register(PropFilterImpl.class);
         context.register(RefFilterImpl.class);
-        
+
         // Query string handlers
         context.register(CountFilter.class);
         context.register(ExpandFilter.class);
@@ -48,7 +48,7 @@ public class SensorThingsFeature implements Feature {
         context.register(SelectFilter.class);
         context.register(SkipFilter.class);
         context.register(TopFilter.class);
-        
+
         return true;
     }
 

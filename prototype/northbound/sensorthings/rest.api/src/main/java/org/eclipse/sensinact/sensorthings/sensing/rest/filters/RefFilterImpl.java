@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -34,7 +34,7 @@ public class RefFilterImpl implements WriterInterceptor {
     @Override
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
         Object entity = context.getEntity();
-        
+
         if(entity instanceof ResultList) {
             @SuppressWarnings("unchecked")
             ResultList<? extends Self> resultList = (ResultList<? extends Self>) entity;
@@ -53,7 +53,7 @@ public class RefFilterImpl implements WriterInterceptor {
         } else if (entity != null) {
             throw new InternalServerErrorException("The entity " + entity + " does not have a reference");
         }
-        
+
         context.proceed();
     }
 }

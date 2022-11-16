@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -43,7 +43,7 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
             throws IOException {
         @SuppressWarnings("unchecked")
         Comparator<Object> comparator = (Comparator<Object>) requestContext.getProperty(ORDERBY_PROP);
-        
+
         Object entity = responseContext.getEntity();
         if(entity instanceof ResultList) {
             ResultList<?> resultList = (ResultList<?>) entity;
@@ -54,7 +54,7 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         List<String> list = requestContext.getUriInfo().getQueryParameters().get("$orderby");
-       
+
         try {
             Comparator<Object> comparator = list.stream()
                     .flatMap(s -> Arrays.stream(s.split(",")))
@@ -69,11 +69,11 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
                     .build());
         }
     }
-    
+
     private static final Comparator<Comparable<Object>> BASE_COMPARATOR = Comparator.nullsFirst(Comparator.naturalOrder());
-    
+
     private Comparator<Object> toComparator(String s) {
-        
+
         String clause = s.trim();
         boolean ascending;
         if(clause.endsWith("asc")) {
@@ -85,15 +85,15 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
         } else {
             ascending = true;
         }
-        
+
         final String[] path = clause.split("/");
         Comparator<Object> result = (a,b) -> {
             return BASE_COMPARATOR.compare(get(a, path), get(b,path));
         };
-        
+
         return ascending ? result : result.reversed();
     }
-    
+
     @SuppressWarnings("unchecked")
     public Comparable<Object> get(Object o, String[] path) {
         Object result = o;
@@ -109,5 +109,5 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
         }
         return (Comparable<Object>) result;
     }
-    
+
 }

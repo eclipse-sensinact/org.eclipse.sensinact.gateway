@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
@@ -35,10 +35,10 @@ import jakarta.ws.rs.Produces;
 @Produces(APPLICATION_JSON)
 @Path("/v1.1/Datastreams({id})")
 public interface DatastreamsAccess {
-    
+
     @GET
     public Datastream getDatastream(@PathParam("id") String id);
-    
+
     @Path("{prop}")
     @GET
     @PropFilter
@@ -82,11 +82,11 @@ public interface DatastreamsAccess {
     @Path("Observations({id2})/FeatureOfInterest")
     @GET
     public FeatureOfInterest getDatastreamObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2);
-    
+
     @Path("ObservedProperty")
     @GET
     public ObservedProperty getDatastreamObservedProperty(@PathParam("id") String id);
-    
+
     @Path("ObservedProperty/$ref")
     @GET
     @RefFilter
@@ -108,7 +108,7 @@ public interface DatastreamsAccess {
     @Path("Sensor")
     @GET
     public Sensor getDatastreamSensor(@PathParam("id") String id);
-    
+
     @Path("Sensor/$ref")
     @GET
     @RefFilter
@@ -122,7 +122,7 @@ public interface DatastreamsAccess {
     default public Sensor getDatastreamSensorProp(@PathParam("id") String id) {
         return getDatastreamSensor(id);
     }
-    
+
     @Path("Sensor/Datastreams")
     @GET
     public ResultList<Datastream> getDatastreamSensorDatastreams(@PathParam("id") String id);
@@ -137,14 +137,14 @@ public interface DatastreamsAccess {
     default public Self getDatastreamThingRef(@PathParam("id") String id) {
         return getDatastreamThing(id);
     }
-    
+
     @Path("Thing/{prop}")
     @GET
     @PropFilter
     default public Thing getDatastreamThingProp(@PathParam("id") String id) {
         return getDatastreamThing(id);
     }
-    
+
     @Path("Thing/Datastreams")
     @GET
     public ResultList<Datastream> getDatastreamThingDatastreams(@PathParam("id") String id);
@@ -156,5 +156,5 @@ public interface DatastreamsAccess {
     @Path("Thing/Locations")
     @GET
     public ResultList<Location> getDatastreamThingLocations(@PathParam("id") String id);
-    
+
 }

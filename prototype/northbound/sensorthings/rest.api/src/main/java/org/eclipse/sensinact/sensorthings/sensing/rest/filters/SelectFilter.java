@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
@@ -40,7 +40,7 @@ public class SelectFilter implements ContainerResponseFilter {
 
     @Context
     ObjectMapper mapper;
-    
+
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
@@ -48,10 +48,10 @@ public class SelectFilter implements ContainerResponseFilter {
                 .get("$select").stream()
                     .flatMap(s -> Arrays.stream(s.split(",")))
                     .collect(toList());
-        
+
         Object entity = responseContext.getEntity();
         JsonNode json = mapper.valueToTree(entity);
-        
+
         if(entity instanceof ResultList) {
             ArrayNode values = (ArrayNode) json.get("value");
             for(JsonNode jn : values) {
@@ -64,7 +64,7 @@ public class SelectFilter implements ContainerResponseFilter {
             ObjectNode on = (ObjectNode) json;
             on.retain(fields);
         }
-        
+
         responseContext.setEntity(json);
     }
 
