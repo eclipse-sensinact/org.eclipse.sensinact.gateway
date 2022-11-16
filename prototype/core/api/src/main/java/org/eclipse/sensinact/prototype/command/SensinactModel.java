@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command;
 
@@ -28,7 +28,8 @@ public interface SensinactModel extends CommandScoped {
 
     SensinactResource getResource(String model, String providerName, String service, String resource);
 
-    <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource, Class<T> type);
+    <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
+            Class<T> type);
 
     /**
      * Sets the value of resource. Creates it if necessary

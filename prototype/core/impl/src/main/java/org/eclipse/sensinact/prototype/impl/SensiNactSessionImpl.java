@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.impl;
 
@@ -114,7 +114,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     /**
      * Must be called holding {@link #lock}
-     * 
+     *
      * @param topics
      * @param prefix
      * @param reg
@@ -160,7 +160,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     /**
      * Must be called holding {@link #lock}
-     * 
+     *
      * @param subscriptionId
      * @param regs
      */

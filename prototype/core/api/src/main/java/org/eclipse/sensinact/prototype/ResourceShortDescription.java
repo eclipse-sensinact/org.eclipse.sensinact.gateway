@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype;
 
@@ -24,8 +24,8 @@ public class ResourceShortDescription {
     public ValueType valueType;
 
     public ResourceType resourceType;
-    
+
     public Class<?> contentType;
-    
+
     public List<Class<?>> actMethodArgumentsTypes;
 }

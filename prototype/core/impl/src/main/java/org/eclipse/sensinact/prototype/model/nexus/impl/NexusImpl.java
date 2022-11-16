@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Data In Motion - initial API and implementation 
+*   Data In Motion - initial API and implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
@@ -41,7 +41,7 @@ import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
 /**
- * 
+ *
  * @author Juergen Albert
  * @since 26 Sep 2022
  */
@@ -80,7 +80,7 @@ public class NexusImpl {
 
         /**
          * Returns the provider.
-         * 
+         *
          * @return the provider
          */
         public EClass getProviderType() {
@@ -89,7 +89,7 @@ public class NexusImpl {
 
         /**
          * Returns the instances.
-         * 
+         *
          * @return the instances
          */
         public Map<URI, Provider> getInstances() {
@@ -114,7 +114,7 @@ public class NexusImpl {
 
         /**
          * Returns the featurePath.
-         * 
+         *
          * @return the featurePath
          */
         public List<EStructuralFeature> getFeaturePath() {
@@ -123,7 +123,7 @@ public class NexusImpl {
 
         /**
          * Returns the service.
-         * 
+         *
          * @return the service
          */
         public EClass getService() {
@@ -132,7 +132,7 @@ public class NexusImpl {
 
         /**
          * Sets the service.
-         * 
+         *
          * @param service the service to set
          */
         public void setService(EClass service) {
@@ -141,7 +141,7 @@ public class NexusImpl {
 
         /**
          * Returns the serviceState.
-         * 
+         *
          * @return the serviceState
          */
         public ModelTransactionState getServiceState() {
@@ -150,7 +150,7 @@ public class NexusImpl {
 
         /**
          * Sets the serviceState.
-         * 
+         *
          * @param serviceState the serviceState to set
          */
         public void setServiceState(ModelTransactionState serviceState) {
@@ -159,7 +159,7 @@ public class NexusImpl {
 
         /**
          * Returns the resourceState.
-         * 
+         *
          * @return the resourceState
          */
         public ModelTransactionState getResourceState() {
@@ -168,7 +168,7 @@ public class NexusImpl {
 
         /**
          * Sets the resourceState.
-         * 
+         *
          * @param resourceState the resourceState to set
          */
         public void setResourceState(ModelTransactionState resourceState) {
