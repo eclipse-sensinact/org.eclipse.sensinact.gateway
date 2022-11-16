@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Data In Motion - initial API and implementation 
+*   Data In Motion - initial API and implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
@@ -31,6 +32,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.sensinact.model.core.Admin;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
@@ -39,7 +41,7 @@ import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
 /**
- * 
+ *
  * @author Juergen Albert
  * @since 26 Sep 2022
  */
@@ -78,7 +80,7 @@ public class NexusImpl {
 
         /**
          * Returns the provider.
-         * 
+         *
          * @return the provider
          */
         public EClass getProviderType() {
@@ -87,7 +89,7 @@ public class NexusImpl {
 
         /**
          * Returns the instances.
-         * 
+         *
          * @return the instances
          */
         public Map<URI, Provider> getInstances() {
@@ -112,7 +114,7 @@ public class NexusImpl {
 
         /**
          * Returns the featurePath.
-         * 
+         *
          * @return the featurePath
          */
         public List<EStructuralFeature> getFeaturePath() {
@@ -121,7 +123,7 @@ public class NexusImpl {
 
         /**
          * Returns the service.
-         * 
+         *
          * @return the service
          */
         public EClass getService() {
@@ -130,7 +132,7 @@ public class NexusImpl {
 
         /**
          * Sets the service.
-         * 
+         *
          * @param service the service to set
          */
         public void setService(EClass service) {
@@ -139,7 +141,7 @@ public class NexusImpl {
 
         /**
          * Returns the serviceState.
-         * 
+         *
          * @return the serviceState
          */
         public ModelTransactionState getServiceState() {
@@ -148,7 +150,7 @@ public class NexusImpl {
 
         /**
          * Sets the serviceState.
-         * 
+         *
          * @param serviceState the serviceState to set
          */
         public void setServiceState(ModelTransactionState serviceState) {
@@ -157,7 +159,7 @@ public class NexusImpl {
 
         /**
          * Returns the resourceState.
-         * 
+         *
          * @return the resourceState
          */
         public ModelTransactionState getResourceState() {
@@ -166,7 +168,7 @@ public class NexusImpl {
 
         /**
          * Sets the resourceState.
-         * 
+         *
          * @param resourceState the resourceState to set
          */
         public void setResourceState(ModelTransactionState resourceState) {
@@ -202,8 +204,20 @@ public class NexusImpl {
         if (provider == null) {
             provider = (Provider) EcoreUtil.create(wrapper.getProviderType());
             provider.setId(providerName);
-            provider.setAdmin(sensinactPackage.getSensiNactFactory().createAdmin());
-            provider.getAdmin().setFriendlyName(providerName);
+
+            final Admin adminSvc = sensinactPackage.getSensiNactFactory().createAdmin();
+            provider.setAdmin(adminSvc);
+            adminSvc.setFriendlyName(providerName);
+
+            // Set a timestamp to admin resources to indicate them as valued
+            for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
+                Metadata metadata = sensinactPackage.getSensiNactFactory().createMetadata();
+                metadata.setFeature(resourceFeature);
+                metadata.setSource(provider.getAdmin());
+                metadata.setTimestamp(timestamp);
+                adminSvc.getMetadata().put(resourceFeature, metadata);
+            }
+
             wrapper.getInstances().put(instanceUri, provider);
             accumulator.addProvider(providerName);
         }
@@ -262,9 +276,17 @@ public class NexusImpl {
 
     public Provider getProvider(String model, String providerName) {
         URI packageUri = URI.createURI(DEFAULT_URI);
-        URI providerUri = packageUri.appendFragment(model);
+        URI providerUri = packageUri.appendFragment(firstToUpper(model));
         ProviderTypeWrapper wrapper = providerCache.get(providerUri);
         return wrapper == null ? null : wrapper.getInstances().get(createURI(model, providerName));
+    }
+
+    /**
+     * Lists know providers
+     */
+    public List<Provider> getProviders() {
+        return providerCache.values().stream().flatMap((wrapper) -> wrapper.instances.values().stream())
+                .collect(Collectors.toList());
     }
 
     /**

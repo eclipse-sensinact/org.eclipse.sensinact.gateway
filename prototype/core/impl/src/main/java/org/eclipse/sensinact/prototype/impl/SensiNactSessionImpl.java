@@ -8,12 +8,13 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.impl;
 
 import static java.util.stream.Collectors.toList;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,12 +25,23 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.prototype.ProviderDescription;
 import org.eclipse.sensinact.prototype.ResourceDescription;
+import org.eclipse.sensinact.prototype.ResourceShortDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.ServiceDescription;
+import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.prototype.command.GatewayThread;
+import org.eclipse.sensinact.prototype.command.GetCommand;
+import org.eclipse.sensinact.prototype.command.SensinactModel;
+import org.eclipse.sensinact.prototype.command.SensinactResource;
+import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.model.ResourceType;
+import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.prototype.notification.ClientActionListener;
 import org.eclipse.sensinact.prototype.notification.ClientDataListener;
@@ -39,6 +51,8 @@ import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceMetaDataNotification;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 public class SensiNactSessionImpl implements SensiNactSession {
 
@@ -55,8 +69,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private boolean expired;
 
-    public SensiNactSessionImpl() {
+    private final GatewayThread thread;
+
+    public SensiNactSessionImpl(final GatewayThread thread) {
         expiry = Instant.now().plusSeconds(600);
+        this.thread = thread;
     }
 
     @Override
@@ -97,7 +114,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     /**
      * Must be called holding {@link #lock}
-     * 
+     *
      * @param topics
      * @param prefix
      * @param reg
@@ -143,7 +160,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     /**
      * Must be called holding {@link #lock}
-     * 
+     *
      * @param subscriptionId
      * @param regs
      */
@@ -155,22 +172,66 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return list.isEmpty() ? null : list;
     }
 
+    private <T> T executeDirectGetCommand(Function<SensinactModel, T> caller) {
+        return executeGetCommand(caller, Function.identity());
+    }
+
+    private <I, T> T executeGetCommand(Function<SensinactModel, I> caller, Function<I, T> converter) {
+        return executeGetCommand(caller, converter, null);
+    }
+
+    private <I, T> T executeGetCommand(Function<SensinactModel, I> caller, Function<I, T> converter, T defaultValue) {
+        try {
+            return thread.execute(new GetCommand<T>() {
+                @Override
+                public Promise<T> call(SensinactModel model, PromiseFactory pf) {
+                    I modelValue = caller.apply(model);
+                    T value;
+                    if (modelValue != null) {
+                        value = converter.apply(modelValue);
+                    } else {
+                        value = defaultValue;
+                    }
+                    return pf.resolved(value);
+                }
+            }).getValue();
+        } catch (InvocationTargetException | InterruptedException e) {
+            // Re-throw as a runtime exception
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
-        // TODO Auto-generated method stub
-        return null;
+        // FIXME: pass the model as argument
+        return executeGetCommand((m) -> m.getResourceValue(provider, provider, service, resource, clazz),
+                (timedVal) -> timedVal.getValue());
     }
 
     @Override
     public void setResourceValue(String provider, String service, String resource, Object o) {
-        // TODO Auto-generated method stub
-
+        setResourceValue(provider, service, resource, o, Instant.now());
     }
 
     @Override
     public void setResourceValue(String provider, String service, String resource, Object o, Instant instant) {
-        // TODO Auto-generated method stub
-
+        try {
+            thread.execute(new AbstractSensinactCommand<Object>() {
+                @Override
+                public Promise<Object> call(SensinactModel model, PromiseFactory pf) {
+                    // FIXME: pass the model as argument
+                    model.setOrCreateResource(provider, provider, service, resource,
+                            o != null ? o.getClass() : Float.class, o, instant);
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -206,26 +267,69 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ResourceDescription describeResource(String provider, String service, String resource) {
-        // TODO Auto-generated method stub
-        return null;
+        // FIXME: pass the model as argument
+        return executeDirectGetCommand((m) -> {
+            final SensinactResource sensinactResource = m.getResource(provider, provider, service, resource);
+            if (sensinactResource != null) {
+                final TimedValue<Object> val = m.getResourceValue(provider, provider, service, resource, null);
+                final ResourceDescription result = new ResourceDescription();
+                result.provider = sensinactResource.getService().getProvider().getName();
+                result.service = sensinactResource.getService().getName();
+                result.resource = sensinactResource.getName();
+                result.value = val.getValue();
+                result.timestamp = val.getTimestamp();
+                return result;
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
+        // FIXME: pass the model as argument
+        return executeGetCommand((m) -> m.getResource(provider, provider, service, resource), (rc) -> {
+            final ResourceShortDescription result = new ResourceShortDescription();
+            result.actMethodArgumentsTypes = null;
+            result.contentType = rc.getType();
+            result.name = rc.getName();
+            // TODO: get it from the description
+            result.resourceType = ResourceType.PROPERTY;
+            result.valueType = ValueType.UPDATABLE;
+            return result;
+        });
     }
 
     @Override
     public ServiceDescription describeService(String provider, String service) {
-        // TODO Auto-generated method stub
-        return null;
+        // FIXME: pass the model as argument
+        return executeGetCommand((m) -> m.getService(provider, provider, service), (snSvc) -> {
+            final ServiceDescription description = new ServiceDescription();
+            description.service = snSvc.getName();
+            description.provider = snSvc.getProvider().getName();
+            description.resources = new ArrayList<>(snSvc.getResources().keySet());
+            return description;
+        });
     }
 
     @Override
     public ProviderDescription describeProvider(String provider) {
-        // TODO Auto-generated method stub
-        return null;
+        // FIXME: pass the model as argument
+        return executeGetCommand((m) -> m.getProvider(provider, provider), (snProvider) -> {
+            final ProviderDescription description = new ProviderDescription();
+            description.provider = snProvider.getName();
+            description.services = new ArrayList<>(snProvider.getServices().keySet());
+            return description;
+        });
     }
 
     @Override
     public List<ProviderDescription> listProviders() {
-        // TODO Auto-generated method stub
-        return null;
+        return executeGetCommand((m) -> m.getProviders(), (providers) -> providers.stream().map((snProvider) -> {
+            final ProviderDescription description = new ProviderDescription();
+            description.provider = snProvider.getName();
+            description.services = new ArrayList<>(snProvider.getServices().keySet());
+            return description;
+        }).collect(Collectors.toList()), List.of());
     }
 
     public void notify(String topic, AbstractResourceNotification event) {

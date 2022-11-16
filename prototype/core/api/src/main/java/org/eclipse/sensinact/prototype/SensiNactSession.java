@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype;
 
@@ -26,14 +26,14 @@ public interface SensiNactSession {
 
     /**
      * The id of this session
-     * 
+     *
      * @return
      */
     String getSessionId();
 
     /**
      * Get the time at which this session will expire
-     * 
+     *
      * @return
      */
     Instant getExpiry();
@@ -45,7 +45,7 @@ public interface SensiNactSession {
 
     /**
      * true if this session is expired
-     * 
+     *
      * @return
      */
     boolean isExpired();
@@ -57,13 +57,13 @@ public interface SensiNactSession {
 
     /**
      * Get the active listener registrations
-     * 
+     *
      * @return a Map of subscription identifier to list of listened topics
      */
     Map<String, List<String>> activeListeners();
 
     /**
-     * 
+     *
      * @param topics - topic strings, omitting the initial segment (e.g. LIFECYCLE)
      * @param cdl    a listener, or null if data events are ignored
      * @param cml    a listener, or null if metadata events are ignored
@@ -76,14 +76,14 @@ public interface SensiNactSession {
 
     /**
      * Remove a registered listener
-     * 
+     *
      * @param id the registration identifier
      */
     void removeListener(String id);
 
     /**
      * Get the value of a resource
-     * 
+     *
      * @param <T>
      * @param provider
      * @param service
@@ -99,7 +99,7 @@ public interface SensiNactSession {
 
     /**
      * Set the value of a resource with the current time
-     * 
+     *
      * @param provider
      * @param service
      * @param resource
@@ -114,7 +114,7 @@ public interface SensiNactSession {
 
     /**
      * Set the value of a resource with the supplied time
-     * 
+     *
      * @param provider
      * @param service
      * @param resource
@@ -131,7 +131,7 @@ public interface SensiNactSession {
 
     /**
      * Get the metadata for a resource
-     * 
+     *
      * @param provider
      * @param service
      * @param resource
@@ -143,7 +143,7 @@ public interface SensiNactSession {
 
     /**
      * Set the metadata for a resource
-     * 
+     *
      * @param provider
      * @param service
      * @param resource
@@ -156,7 +156,7 @@ public interface SensiNactSession {
 
     /**
      * Get a metadata value for a resource
-     * 
+     *
      * @param <T>
      * @param provider
      * @param service
@@ -170,7 +170,7 @@ public interface SensiNactSession {
 
     /**
      * Set a metadata value for a resource
-     * 
+     *
      * @param <T>
      * @param provider
      * @param service
@@ -185,7 +185,7 @@ public interface SensiNactSession {
 
     /**
      * Perform an action on a resource
-     * 
+     *
      * @param provider
      * @param service
      * @param resource
@@ -198,7 +198,7 @@ public interface SensiNactSession {
 
     /**
      * Get the description of a resource
-     * 
+     *
      * @param provider
      * @param service
      * @param resource
@@ -206,11 +206,15 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
+    // FIXME: should be renamed getResource
     ResourceDescription describeResource(String provider, String service, String resource);
+
+    // FIXME: should replace describeResource
+    ResourceShortDescription describeResourceShort(String provider, String service, String resource);
 
     /**
      * Get the description of a resource
-     * 
+     *
      * @param provider
      * @param service
      * @return
@@ -220,7 +224,7 @@ public interface SensiNactSession {
 
     /**
      * Get the description of a resource
-     * 
+     *
      * @param provider
      * @return
      * @throws IllegalArgumentException if there is no provider at the given
@@ -230,7 +234,7 @@ public interface SensiNactSession {
 
     /**
      * Get the list of providers
-     * 
+     *
      * @return
      */
     List<ProviderDescription> listProviders();

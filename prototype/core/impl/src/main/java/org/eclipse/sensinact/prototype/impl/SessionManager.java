@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.impl;
 
@@ -27,14 +27,19 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
+import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.notification.AbstractResourceNotification;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.osgi.service.typedevent.propertytypes.EventTopics;
 
 @Component
 @EventTopics({ "LIFECYCLE/*", "METADATA/*", "DATA/*", "ACTION/*" })
 public class SessionManager implements SensiNactSessionManager, TypedEventHandler<AbstractResourceNotification> {
+
+    @Reference
+    GatewayThread thread;
 
     private final Object lock = new Object();
 
@@ -142,7 +147,7 @@ public class SessionManager implements SensiNactSessionManager, TypedEventHandle
 
     @Override
     public SensiNactSession createNewSession(String userToken) {
-        SensiNactSessionImpl session = new SensiNactSessionImpl();
+        SensiNactSessionImpl session = new SensiNactSessionImpl(thread);
         String sessionId = session.getSessionId();
 
         synchronized (lock) {

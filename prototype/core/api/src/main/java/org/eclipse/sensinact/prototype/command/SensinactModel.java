@@ -8,12 +8,42 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command;
+
+import java.time.Instant;
+import java.util.List;
 
 public interface SensinactModel extends CommandScoped {
 
     SensinactResource getOrCreateResource(String model, String provider, String service, String resource,
             Class<?> valueType);
+
+    List<SensinactProvider> getProviders();
+
+    SensinactProvider getProvider(String model, String providerName);
+
+    SensinactService getService(String model, String providerName, String service);
+
+    SensinactResource getResource(String model, String providerName, String service, String resource);
+
+    <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
+            Class<T> type);
+
+    /**
+     * Sets the value of resource. Creates it if necessary
+     *
+     * @param model     Model name
+     * @param provider  Provider name
+     * @param service   Service name
+     * @param resource  Resource name
+     * @param resource2
+     * @param type      Resource content type
+     * @param value     Resource value
+     * @param instant   Update time stamp
+     */
+    void setOrCreateResource(String model, String provider, String service, String resource, Class<?> type,
+            Object value, Instant instant);
+
 }
