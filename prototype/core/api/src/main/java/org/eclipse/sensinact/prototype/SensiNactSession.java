@@ -206,7 +206,11 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
+    // FIXME: should be renamed getResource
     ResourceDescription describeResource(String provider, String service, String resource);
+
+    // FIXME: should replace describeResource
+    ResourceShortDescription describeResourceShort(String provider, String service, String resource);
 
     /**
      * Get the description of a resource

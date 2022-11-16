@@ -12,8 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.prototype.command.SensinactProvider;
 import org.eclipse.sensinact.prototype.command.SensinactResource;
@@ -24,6 +29,11 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
 
     private final SensinactProvider provider;
     private final String name;
+
+    /**
+     * Resource name -&gt; resource bean
+     */
+    private final Map<String, SensinactResource> resources = new HashMap<>();
 
     public SensinactServiceImpl(AtomicBoolean active, SensinactProvider provider, String name) {
         super(active);
@@ -39,8 +49,24 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
 
     @Override
     public Map<String, SensinactResource> getResources() {
-        // TODO Auto-generated method stub
-        return null;
+        return Map.copyOf(resources);
+    }
+
+    /**
+     * Bundle-private way to populate resources
+     */
+    public void setResources(final Map<String, SensinactResource> resources) {
+        synchronized (this.resources) {
+            this.resources.clear();
+            this.resources.putAll(resources);
+        }
+    }
+
+    /**
+     * Bundle-private way to populate resources
+     */
+    public void setResources(final Collection<SensinactResource> resources) {
+        setResources(resources.stream().collect(Collectors.toMap(SensinactResource::getName, Function.identity())));
     }
 
     @Override
@@ -65,4 +91,9 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
         return provider;
     }
 
+    @Override
+    public String toString() {
+        return String.format("SensiNactService(provider=%s, name=%s, resources=%s)", provider.getName(), name,
+                List.of());
+    }
 }

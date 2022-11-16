@@ -53,7 +53,7 @@ A `Resource` is the lowest level of the sensiNact data model. A resource represe
 
 ## Data Resources
 
-A data resource has a single `value` associated with it representing the data it provides. 
+A data resource has a single `value` associated with it representing the data it provides.
 A resource also has zero or more metadata entries associated with it. For brevity we will use the term `field` to refer to both value and metadata entries.
 
 The `fields` of a resource have associated time stamps representing the times at which they were last updated. They also have an associated property indicating how their value can change.
@@ -79,11 +79,11 @@ Action resources are similar to data resources, but do not have a `value` that c
 A service is a logical grouping of one or more resources that are related, for example a smart plug might have two services:
 
  1. `switch` - a service representing the switching capability of the smart plug
-   * `state` - a resource representing the state of the switch, either `ON` or `OFF`
-   * `toggle` - an action resource which changes the state of the switch
+    * `state` - a resource representing the state of the switch, either `ON` or `OFF`
+    * `toggle` - an action resource which changes the state of the switch
  2. `monitor` - a service representing the power monitoring for the smart plug
-   * `current` - a resource providing the current passing through the plug
-   * `power` - a resource providing the power passing through the plug
+    * `current` - a resource providing the current passing through the plug
+    * `power` - a resource providing the power passing through the plug
 
 ## Providers
 

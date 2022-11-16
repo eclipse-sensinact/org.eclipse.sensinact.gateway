@@ -12,8 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.prototype.command.SensinactProvider;
 import org.eclipse.sensinact.prototype.command.SensinactService;
@@ -23,6 +27,11 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
 
     private final String model;
     private final String name;
+
+    /**
+     * Service name -&gt; service bean
+     */
+    private final Map<String, SensinactService> services = new HashMap<>();
 
     public SensinactProviderImpl(AtomicBoolean active, String model, String name) {
         super(active);
@@ -38,8 +47,24 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
 
     @Override
     public Map<String, SensinactService> getServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return Map.copyOf(services);
+    }
+
+    /**
+     * Bundle-private way to populate services
+     */
+    public void setServices(final Map<String, SensinactService> services) {
+        synchronized (this.services) {
+            this.services.clear();
+            this.services.putAll(services);
+        }
+    }
+
+    /**
+     * Bundle-private way to populate services
+     */
+    public void setServices(final Collection<SensinactService> services) {
+        setServices(services.stream().collect(Collectors.toMap(SensinactService::getName, Function.identity())));
     }
 
     @Override
@@ -64,4 +89,8 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
         return model;
     }
 
+    @Override
+    public String toString() {
+        return String.format("SensiNactProvider(model=%s, name=%s, services=%s)", model, name, services.keySet());
+    }
 }
