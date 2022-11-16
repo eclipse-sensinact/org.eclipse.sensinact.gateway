@@ -13,8 +13,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.eclipse.sensinact.sensorthings</groupId>
-    <artifactId>parent</artifactId>
+    <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
+    <artifactId>sensorthings</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>rest.api</artifactId>
@@ -25,7 +25,7 @@
       <artifactId>osgi.annotation</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sensinact.sensorthings</groupId>
+      <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>dto</artifactId>
       <version>${project.version}</version>
     </dependency>
