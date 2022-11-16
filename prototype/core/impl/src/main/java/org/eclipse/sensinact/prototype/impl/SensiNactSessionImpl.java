@@ -195,14 +195,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     return pf.resolved(value);
                 }
             }).getValue();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (InvocationTargetException | InterruptedException e) {
+            // Re-throw as a runtime exception
+            throw new RuntimeException(e);
         }
-        return defaultValue;
     }
 
     @Override
