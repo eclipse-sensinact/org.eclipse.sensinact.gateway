@@ -1,18 +1,18 @@
-/*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Data In Motion - initial API and implementation 
-**********************************************************************/
+/**
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   Data In Motion - initial API and implementation 
+ */
 package org.eclipse.sensinact.model.core.impl;
 
-import java.util.Date;
+import java.time.Instant;
 
 import org.eclipse.emf.common.notify.Notification;
 
@@ -63,7 +63,7 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
      * @generated
      * @ordered
      */
-    protected static final Date TIMESTAMP_EDEFAULT = null;
+    protected static final Instant TIMESTAMP_EDEFAULT = null;
 
     /**
      * The cached value of the '{@link #getTimestamp() <em>Timestamp</em>}'
@@ -73,7 +73,7 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
      * @generated
      * @ordered
      */
-    protected Date timestamp = TIMESTAMP_EDEFAULT;
+    protected Instant timestamp = TIMESTAMP_EDEFAULT;
 
     /**
      * The cached value of the '{@link #getSource() <em>Source</em>}' reference.
@@ -152,7 +152,7 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
      * @generated
      */
     @Override
-    public Date getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
@@ -162,8 +162,8 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
      * @generated
      */
     @Override
-    public void setTimestamp(Date newTimestamp) {
-        Date oldTimestamp = timestamp;
+    public void setTimestamp(Instant newTimestamp) {
+        Instant oldTimestamp = timestamp;
         timestamp = newTimestamp;
         if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.METADATA__TIMESTAMP, oldTimestamp,
@@ -246,7 +246,7 @@ public class MetadataImpl extends MinimalEObjectImpl.Container implements Metada
             setFeature((EStructuralFeature) newValue);
             return;
         case SensiNactPackage.METADATA__TIMESTAMP:
-            setTimestamp((Date) newValue);
+            setTimestamp((Instant) newValue);
             return;
         case SensiNactPackage.METADATA__SOURCE:
             setSource((EObject) newValue);

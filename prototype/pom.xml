@@ -99,6 +99,7 @@
     <module>northbound</module>
     <module>examples</module>
     <module>sensinact-bom</module>
+    <module>distribution</module>
   </modules>
 
   <properties>
@@ -114,11 +115,17 @@
     <osgi.implementation.namespace.version>1.0.0</osgi.implementation.namespace.version>
     <osgi.ds.version>1.5.0</osgi.ds.version>
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
-    <gecko.emf.version>4.2.0-SNAPSHOT</gecko.emf.version>
+    <osgi.feature.version>1.0.0</osgi.feature.version>
+    <gecko.emf.version>4.3.0</gecko.emf.version>
+    <slf4j.version>1.7.36</slf4j.version>
 
     <!-- runtime dependencies -->
     <felix.framework.version>7.0.3</felix.framework.version>
     <felix.scr.version>2.2.2</felix.scr.version>
+    <felix.configadmin.version>1.9.24</felix.configadmin.version>
+    <felix.cm.json.version>1.0.6</felix.cm.json.version>
+    <felix.feature.version>1.0.0</felix.feature.version>
+    <johnzon.version>1.2.19</johnzon.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
 
     <!-- test dependency versions -->
@@ -178,6 +185,7 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
+
   </pluginRepositories>
 
   <dependencyManagement>
@@ -223,9 +231,24 @@
         <version>${osgi.typedevent.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.feature</artifactId>
+        <version>${osgi.feature.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.geckoprojects.emf</groupId>
-        <artifactId>org.gecko.emf.osgi.bom</artifactId>
+        <artifactId>org.gecko.emf.osgi.api</artifactId>
         <version>${gecko.emf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.geckoprojects.emf</groupId>
+        <artifactId>org.gecko.emf.osgi.component</artifactId>
+        <version>${gecko.emf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
 
       <!-- Runtime -->
@@ -242,9 +265,39 @@
         <scope>runtime</scope>
       </dependency>
       <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.configadmin</artifactId>
+        <version>${felix.configadmin.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.cm.json</artifactId>
+        <version>${felix.cm.json.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.feature</artifactId>
+        <version>${felix.feature.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
         <groupId>org.apache.aries.typedevent</groupId>
         <artifactId>org.apache.aries.typedevent.bus</artifactId>
         <version>${aries.typedevent.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.johnzon</groupId>
+        <artifactId>johnzon-core</artifactId>
+        <version>${johnzon.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-json_1.1_spec</artifactId>
+        <version>1.5</version>
         <scope>runtime</scope>
       </dependency>
 
@@ -279,6 +332,12 @@
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.codegen</artifactId>
         <version>${gecko.emf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -343,7 +402,8 @@
                 <goal>bnd-process</goal>
               </goals>
               <configuration>
-                <bnd><![CDATA[
+                <bnd>
+                  <![CDATA[
                 Bundle-Copyright: Copyright (c) (${now;YYYY}) Contributors to the Eclipse Foundation.
                 Bundle-Description: ${project.description}
                 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
@@ -351,7 +411,8 @@
                 Git-SHA: ${system-allow-fail;git rev-list -1 --no-abbrev-commit HEAD}
                 -noextraheaders: true
                 -reproducible: true
-                ]]></bnd>
+                ]]>
+                </bnd>
                 <bndfile>bnd.bnd</bndfile>
               </configuration>
             </execution>
@@ -362,13 +423,15 @@
                 <goal>bnd-process-tests</goal>
               </goals>
               <configuration>
-                <bnd><![CDATA[
+                <bnd>
+                  <![CDATA[
                 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}-tests
                 Fragment-Host: ${project.groupId}.${project.artifactId}
                 Git-Descriptor: ${system-allow-fail;git describe --dirty --always --abbrev=9}
                 Git-SHA: ${system-allow-fail;git rev-list -1 --no-abbrev-commit HEAD}
                 Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE;NAMED;*.integration.*}
-                ]]></bnd>
+                ]]>
+                </bnd>
                 <bndfile>tests.bnd</bndfile>
                 <testCases>useTestCasesHeader</testCases>
               </configuration>
@@ -490,4 +553,43 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>eclipse-licenses-check</id>
+      <activation>
+        <property>
+          <name>licenses-check</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>dash-licenses-snapshots</id>
+          <url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+      <build>
+        <plugins>
+          <!-- https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
+          <plugin>
+            <groupId>org.eclipse.dash</groupId>
+            <artifactId>license-tool-plugin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <id>license-check</id>
+                <goals>
+                  <goal>license-check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

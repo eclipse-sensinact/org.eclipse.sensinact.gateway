@@ -1,19 +1,20 @@
-/*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Data In Motion - initial API and implementation 
-**********************************************************************/
+/**
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   Data In Motion - initial API and implementation 
+ */
 package org.eclipse.sensinact.model.core;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 
@@ -374,6 +375,16 @@ public interface SensiNactPackage extends EPackage {
     int MODEL_METADATA_OPERATION_COUNT = METADATA_OPERATION_COUNT + 0;
 
     /**
+     * The meta object id for the '<em>EInstant</em>' data type. <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
+     * 
+     * @see java.time.Instant
+     * @see org.eclipse.sensinact.model.core.impl.SensiNactPackageImpl#getEInstant()
+     * @generated
+     */
+    int EINSTANT = 6;
+
+    /**
      * Returns the meta object for class
      * '{@link org.eclipse.sensinact.model.core.Provider <em>Provider</em>}'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
@@ -571,6 +582,17 @@ public interface SensiNactPackage extends EPackage {
      * @generated
      */
     EAttribute getModelMetadata_Version();
+
+    /**
+     * Returns the meta object for data type '{@link java.time.Instant
+     * <em>EInstant</em>}'. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return the meta object for data type '<em>EInstant</em>'.
+     * @see java.time.Instant
+     * @model instanceClass="java.time.Instant"
+     * @generated
+     */
+    EDataType getEInstant();
 
     /**
      * Returns the factory that creates the instances of the model. <!--

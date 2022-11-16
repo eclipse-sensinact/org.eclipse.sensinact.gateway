@@ -1,0 +1,12 @@
+{
+  "feature-resource-version": "1.0",
+  "id": "org.eclipse.sensinact.gateway.launcher.test:foo:1.0.0",
+  "bundles": [
+    {
+      "id": "org.eclipse.sensinact.gateway.launcher.test:buzz:1.0.0"
+    },
+    {
+      "id": "org.eclipse.sensinact.gateway.launcher.test:buzz:1.0.1"
+    }
+  ]
+}

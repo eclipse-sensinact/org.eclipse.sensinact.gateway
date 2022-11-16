@@ -1,20 +1,23 @@
-/*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Data In Motion - initial API and implementation 
-**********************************************************************/
+/**
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   Data In Motion - initial API and implementation 
+ */
 package org.eclipse.sensinact.model.core.impl;
+
+import java.time.Instant;
 
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -92,6 +95,36 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
      * @generated
      */
     @Override
+    public Object createFromString(EDataType eDataType, String initialValue) {
+        switch (eDataType.getClassifierID()) {
+        case SensiNactPackage.EINSTANT:
+            return createEInstantFromString(eDataType, initialValue);
+        default:
+            throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
+        }
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    @Override
+    public String convertToString(EDataType eDataType, Object instanceValue) {
+        switch (eDataType.getClassifierID()) {
+        case SensiNactPackage.EINSTANT:
+            return convertEInstantToString(eDataType, instanceValue);
+        default:
+            throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
+        }
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    @Override
     public Provider createProvider() {
         ProviderImpl provider = new ProviderImpl();
         return provider;
@@ -149,6 +182,24 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
     public ModelMetadata createModelMetadata() {
         ModelMetadataImpl modelMetadata = new ModelMetadataImpl();
         return modelMetadata;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public Instant createEInstantFromString(EDataType eDataType, String initialValue) {
+        return (Instant) super.createFromString(eDataType, initialValue);
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public String convertEInstantToString(EDataType eDataType, Object instanceValue) {
+        return super.convertToString(eDataType, instanceValue);
     }
 
     /**

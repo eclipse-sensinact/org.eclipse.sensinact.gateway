@@ -1,21 +1,24 @@
-/*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Data In Motion - initial API and implementation 
-**********************************************************************/
+/**
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   Data In Motion - initial API and implementation 
+ */
 package org.eclipse.sensinact.model.core.impl;
+
+import java.time.Instant;
 
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 
@@ -77,6 +80,13 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
      * @generated
      */
     private EClass modelMetadataEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    private EDataType eInstantEDataType = null;
 
     /**
      * Creates an instance of the model <b>Package</b>, registered with
@@ -321,6 +331,16 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
      * @generated
      */
     @Override
+    public EDataType getEInstant() {
+        return eInstantEDataType;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    @Override
     public SensiNactFactory getSensiNactFactory() {
         return (SensiNactFactory) getEFactoryInstance();
     }
@@ -367,6 +387,9 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 
         modelMetadataEClass = createEClass(MODEL_METADATA);
         createEAttribute(modelMetadataEClass, MODEL_METADATA__VERSION);
+
+        // Create data types
+        eInstantEDataType = createEDataType(EINSTANT);
     }
 
     /**
@@ -426,7 +449,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
         initEReference(getMetadata_Feature(), ecorePackage.getEStructuralFeature(), null, "feature", null, 0, 1,
                 Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES,
                 !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getMetadata_Timestamp(), ecorePackage.getEDate(), "timestamp", null, 0, 1, Metadata.class,
+        initEAttribute(getMetadata_Timestamp(), this.getEInstant(), "timestamp", null, 0, 1, Metadata.class,
                 !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
         initEReference(getMetadata_Source(), ecorePackage.getEObject(), null, "source", null, 0, 1, Metadata.class,
                 !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE,
@@ -445,6 +468,9 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
                 IS_GENERATED_INSTANCE_CLASS);
         initEAttribute(getModelMetadata_Version(), ecorePackage.getEInt(), "version", null, 0, 1, ModelMetadata.class,
                 !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+        // Initialize data types
+        initEDataType(eInstantEDataType, Instant.class, "EInstant", IS_SERIALIZABLE, !IS_GENERATED_INSTANCE_CLASS);
 
         // Create resource
         createResource(eNS_URI);

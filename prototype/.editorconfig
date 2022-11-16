@@ -14,3 +14,11 @@ trim_trailing_whitespace = true
 
 [*.{xml,json}]
 indent_size = 2
+
+# Custom rules for unit tests with oddly named resource files
+[distribution/launcher/src/test/resources/**.feature]
+indent_size = 2
+
+[distribution/launcher/src/test/resources/**.{jar,bundle}]
+insert_final_newline = false
+

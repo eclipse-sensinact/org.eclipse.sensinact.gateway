@@ -2,11 +2,7 @@ name: 'Editor Config format check'
 
 on:
   pull_request:
-
-defaults:
-  run:
-    shell: bash
-    working-directory: prototype
+    branches: [future/prototype]
 
 permissions:
   contents: read
@@ -16,13 +12,14 @@ jobs:
     name: Validate Editor Config formatting
     runs-on: 'ubuntu-latest'
     steps:
-    - name: Git Checkout
+    - name: Checkout PR head branch
       uses: actions/checkout@v3
       with:
-        fetch-depth: ${{ github.event.pull_request.commits }}
-    - name: Editor Config Validation
-      uses: timothyjward/EditorConfig-Action@subdirectory
+        fetch-depth: 0
+    - name: Editor Config Validation against PR base commit
+      uses: github/super-linter/slim@v4
       env:
-        ALWAYS_LINT_ALL_FILES: "false"
-        ADD_SAFE_DIRECTORY: "true"
-        REPOSITORY_PATH: "prototype"
+        VALIDATE_ALL_CODEBASE: false
+        VALIDATE_EDITORCONFIG: true
+        DEFAULT_BRANCH: ${{ github.event.pull_request.base.sha }}
+        FILTER_REGEX_INCLUDE: '${{ env.GITHUB_WORKSPACE }}/prototype/.*'

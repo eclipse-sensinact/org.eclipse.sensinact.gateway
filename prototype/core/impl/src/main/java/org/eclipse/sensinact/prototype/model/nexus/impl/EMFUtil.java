@@ -32,6 +32,7 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.ModelMetadata;
 
 /**
@@ -82,7 +83,8 @@ public class EMFUtil {
     }
 
     public static EPackage createPackage(String name, String nsUri, String prefix, ResourceSet resourceSet) {
-        Resource resource = resourceSet.createResource(URI.createURI(nsUri));
+        Resource resource = new XMIResourceImpl(URI.createURI(nsUri));
+        resourceSet.getResources().add(resource);
         EPackage ePackage = EcoreFactory.eINSTANCE.createEPackage();
         resource.getContents().add(ePackage);
         ePackage.setName(name);

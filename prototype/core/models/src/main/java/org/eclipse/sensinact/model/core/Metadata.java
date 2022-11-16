@@ -1,18 +1,18 @@
-/*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Data In Motion - initial API and implementation 
-**********************************************************************/
+/**
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   Data In Motion - initial API and implementation 
+ */
 package org.eclipse.sensinact.model.core;
 
-import java.util.Date;
+import java.time.Instant;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -66,12 +66,12 @@ public interface Metadata extends EObject {
      * begin-user-doc --> <!-- end-user-doc -->
      * 
      * @return the value of the '<em>Timestamp</em>' attribute.
-     * @see #setTimestamp(Date)
+     * @see #setTimestamp(Instant)
      * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_Timestamp()
-     * @model
+     * @model dataType="org.eclipse.sensinact.model.core.EInstant"
      * @generated
      */
-    Date getTimestamp();
+    Instant getTimestamp();
 
     /**
      * Sets the value of the
@@ -82,7 +82,7 @@ public interface Metadata extends EObject {
      * @see #getTimestamp()
      * @generated
      */
-    void setTimestamp(Date value);
+    void setTimestamp(Instant value);
 
     /**
      * Returns the value of the '<em><b>Source</b></em>' reference. <!--
