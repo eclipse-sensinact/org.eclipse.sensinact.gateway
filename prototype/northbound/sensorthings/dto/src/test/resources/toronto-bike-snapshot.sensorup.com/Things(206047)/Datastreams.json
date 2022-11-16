@@ -1,0 +1,37 @@
+{
+  "@iot.count": 2,
+  "value": [
+    {
+      "@iot.id": 206051,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bloor St / Brunswick Ave",
+      "name": "7061:Bloor St / Brunswick Ave:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Thing"
+    },
+    {
+      "@iot.id": 206050,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)",
+      "description": "The datastream of available bikes count for the Toronto bike share station Bloor St / Brunswick Ave",
+      "name": "7061:Bloor St / Brunswick Ave:available_bikes",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "bike count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206050)/Thing"
+    }
+  ]
+}

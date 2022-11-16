@@ -20,10 +20,13 @@
   <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
   <artifactId>northbound</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact Northboung components</name>
+
+  <name>Northbound Connectors</name>
+  <description>This reactor contains northbound connectors that are used to interact with sensiNact</description>
 
   <modules>
     <module>rest</module>
+    <module>sensorthings</module>
   </modules>
 
 </project>

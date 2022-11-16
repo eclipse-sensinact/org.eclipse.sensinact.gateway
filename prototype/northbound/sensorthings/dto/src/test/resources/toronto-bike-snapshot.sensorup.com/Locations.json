@@ -1,0 +1,1606 @@
+{
+  "@iot.count": 199,
+  "@iot.nextLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations?$top=100&$skip=100",
+  "value": [
+    {
+      "@iot.id": 206048,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bloor St / Brunswick Ave",
+      "name": "7061:Bloor St / Brunswick Ave",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.407224,
+          43.665876
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1582,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1582)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Wellington Dog Park",
+      "name": "7216:Wellington Dog Park",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.409339,
+          43.641281
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1582)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1582)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1574,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1574)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Fort York/Garrison",
+      "name": "7211:Fort York/Garrison",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4061111111111,
+          43.6375
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1574)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1574)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1566,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1566)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Mary McCormick Rec Centre",
+      "name": "7210:Mary McCormick Rec Centre",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4330555555556,
+          43.6475
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1566)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1566)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1558,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1558)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Ossington/Harrison",
+      "name": "7209:Ossington/Harrison",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4213888888889,
+          43.6511111111111
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1558)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1558)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1550,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1550)",
+      "description": "The geographic location with coordinates for the Toronto bike share station College/Clinton",
+      "name": "7208:College/Clinton",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.414663,
+          43.656296
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1550)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1550)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1542,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1542)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Dundas/Crawford",
+      "name": "7207:Dundas/Crawford",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.416944,
+          43.649722
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1542)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1542)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1534,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1534)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Claremont/Dundas",
+      "name": "7206:Claremont/Dundas",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.411667,
+          43.651667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1534)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1534)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1526,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1526)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Rusholme Park/College",
+      "name": "7205:Rusholme Park/College",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.42972222,
+          43.65277778
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1526)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1526)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1518,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1518)",
+      "description": "The geographic location with coordinates for the Toronto bike share station College/Crawford",
+      "name": "7204:College/Crawford",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.418889,
+          43.655
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1518)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1518)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1510,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1510)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Harrison/Dovercourt",
+      "name": "7203:Harrison/Dovercourt",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.424557,
+          43.650978
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1510)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1510)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1502,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1502)",
+      "description": "The geographic location with coordinates for the Toronto bike share station City Hall",
+      "name": "7202:City Hall",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.384167,
+          43.651667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1502)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1502)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1494,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1494)",
+      "description": "The geographic location with coordinates for the Toronto bike share station College/Markham",
+      "name": "7199:College/Markham",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4091666666667,
+          43.6563888888889
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1494)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1494)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1486,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1486)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Queen/Cowan",
+      "name": "7198:Queen/Cowan",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.432837,
+          43.6409
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1486)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1486)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1478,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1478)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Roxton/Harbord",
+      "name": "7196:Roxton/Harbord",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4233333333333,
+          43.6588888888889
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1478)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1478)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1470,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1470)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Ulster/Bathurst",
+      "name": "7195:Ulster/Bathurst",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4088888888889,
+          43.66
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1470)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1470)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1462,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1462)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Mortimer/Coxwell",
+      "name": "7194:Mortimer/Coxwell",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.326319,
+          43.690564
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1462)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1462)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1454,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1454)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Queen/Gladstone",
+      "name": "7193:Queen/Gladstone",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4275,
+          43.6430555555556
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1454)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1454)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1446,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1446)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Harbord/ Clinton",
+      "name": "7192:Harbord/ Clinton",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.416277,
+          43.660167
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1446)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1446)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1438,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1438)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Central Tech",
+      "name": "7191:Central Tech",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.407896,
+          43.661975
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1438)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1438)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1430,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1430)",
+      "description": "The geographic location with coordinates for the Toronto bike share station St. George/Hoskin",
+      "name": "7190:St. George/Hoskin",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.398334,
+          43.664059
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1430)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1430)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1422,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1422)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Augusta/Denison Sq",
+      "name": "7189:Augusta/Denison Sq",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4019444444445,
+          43.6541666666667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1422)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1422)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1414,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1414)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Atlantic/Liberty",
+      "name": "7188:Atlantic/Liberty",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4197222222222,
+          43.6366666666667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1414)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1414)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1406,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1406)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Ossington Ave/College St.",
+      "name": "7184:Ossington Ave/College St.",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.422634,
+          43.6544915
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1406)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1406)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1398,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1398)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Margueretta/College",
+      "name": "7183:Margueretta/College",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4377777777778,
+          43.6513888888889
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1398)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1398)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1390,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1390)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Sterling/Dundas",
+      "name": "7182:Sterling/Dundas",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4430555555556,
+          43.6508333333333
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1390)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1390)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1382,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1382)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Lansdowne/Whytock",
+      "name": "7181:Lansdowne/Whytock",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4413888888889,
+          43.6538888888889
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1382)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1382)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1374,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1374)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Lansdowne/Wade",
+      "name": "7180:Lansdowne/Wade",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4427777777778,
+          43.6591666666667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1374)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1374)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1366,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1366)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bloor GO/UP Station",
+      "name": "7179:Bloor GO/UP Station",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4502777777778,
+          43.6575
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1366)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1366)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1358,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1358)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Dundas St W/Edna Ave",
+      "name": "7178:Dundas St W/Edna Ave",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4525,
+          43.6575
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1358)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1358)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1350,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1350)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Liberty/Pirandello",
+      "name": "7177:Liberty/Pirandello",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4147222222222,
+          43.6386111111111
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1350)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1350)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1342,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1342)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Fort York/Bathurst",
+      "name": "7176:Fort York/Bathurst",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.399995,
+          43.639114
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1342)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1342)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1334,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1334)",
+      "description": "The geographic location with coordinates for the Toronto bike share station HTO Park",
+      "name": "7175:HTO Park",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3875,
+          43.6386
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1334)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1334)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1326,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1326)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bloor/Dundas St W",
+      "name": "7174:Bloor/Dundas St W",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4516666666667,
+          43.6563889
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1326)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1326)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1318,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1318)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Cariboo St/ Rail Path",
+      "name": "7173:Cariboo St/ Rail Path",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4583333333333,
+          43.66666667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1318)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1318)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1310,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1310)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Strachan and Princes' Blvd",
+      "name": "7172:Strachan and Princes' Blvd",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4088888888889,
+          43.635
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1310)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1310)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1302,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1302)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Strachan/Lakeshore",
+      "name": "7171:Strachan/Lakeshore",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.40909861,
+          43.63409333
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1302)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1302)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1294,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1294)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Spadina / Willcocks",
+      "name": "7170:Spadina / Willcocks",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4013888888889,
+          43.6616667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1294)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1294)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1286,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1286)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Front/Bay",
+      "name": "7169:Front/Bay",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.378912,
+          43.646162
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1286)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1286)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1278,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1278)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bay/Lakeshore",
+      "name": "7168:Bay/Lakeshore",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3769444444444,
+          43.6436111
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1278)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1278)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1270,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1270)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Moss Park",
+      "name": "7167:Moss Park",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3711111111111,
+          43.6544444
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1270)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1270)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1262,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1262)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Victoria/Dundas",
+      "name": "7164:Victoria/Dundas",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.379953,
+          43.657189
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1262)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1262)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1254,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1254)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Yonge/Wood",
+      "name": "7163:Yonge/Wood",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3825,
+          43.6622222
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1254)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1254)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1246,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1246)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Hayter/Laplante",
+      "name": "7162:Hayter/Laplante",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3855555555556,
+          43.6591666666667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1246)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1246)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1238,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1238)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Beverly/College",
+      "name": "7161:Beverly/College",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3952777777778,
+          43.6575
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1238)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1238)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1230,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1230)",
+      "description": "The geographic location with coordinates for the Toronto bike share station King/Tecumseth",
+      "name": "7160:King/Tecumseth",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4055555555556,
+          43.6433333333333
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1230)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1230)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1222,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1222)",
+      "description": "The geographic location with coordinates for the Toronto bike share station King/Strachan",
+      "name": "7158:King/Strachan",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4111111111111,
+          43.6422222
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1222)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1222)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1214,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1214)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bloor/Dufferin",
+      "name": "7157:Bloor/Dufferin",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4358333333333,
+          43.6608333333333
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1214)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1214)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1206,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1206)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Salem/Bloor",
+      "name": "7156:Salem/Bloor",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4316666666667,
+          43.6608333
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1206)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1206)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1198,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1198)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bathurst/Lennox",
+      "name": "7155:Bathurst/Lennox",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4105555555556,
+          43.6638889
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1198)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1198)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1190,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1190)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bathurst Subway Station",
+      "name": "7154:Bathurst Subway Station",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4116666666667,
+          43.6666667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1190)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1190)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1182,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1182)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bloor/Christie",
+      "name": "7153:Bloor/Christie",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4188888888889,
+          43.6638889
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1182)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1182)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1174,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1174)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bloor/Ossington",
+      "name": "7152:Bloor/Ossington",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4255555555556,
+          43.6619444
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1174)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1174)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1166,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1166)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Essex/Christie",
+      "name": "7151:Essex/Christie",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4202777777778,
+          43.6686111
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1166)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1166)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1158,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1158)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Dufferin Grove Park",
+      "name": "7150:Dufferin Grove Park",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4336111111111,
+          43.6555556
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1158)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1158)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1150,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1150)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Yarmouth/Christie",
+      "name": "7149:Yarmouth/Christie",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4208333333333,
+          43.67
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1150)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1150)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1142,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1142)",
+      "description": "The geographic location with coordinates for the Toronto bike share station King / Jefferson",
+      "name": "7148:King / Jefferson",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.423611,
+          43.639444
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1142)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1142)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1134,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1134)",
+      "description": "The geographic location with coordinates for the Toronto bike share station King St / Mowat",
+      "name": "7147:King St / Mowat",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.4252777777778,
+          43.6394444
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1134)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1134)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1126,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1126)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Benson/Christie Wychwood Barns",
+      "name": "7146:Benson/Christie Wychwood Barns",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.425,
+          43.68
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1126)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1126)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1118,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1118)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Palmerston/Vermont",
+      "name": "7144:Palmerston/Vermont",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.416389,
+          43.671389
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1118)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1118)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1110,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1110)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Kendal/Bernard",
+      "name": "7143:Kendal/Bernard",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.408317,
+          43.671513
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1110)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1110)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1102,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1102)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bridgeman/Bathurst",
+      "name": "7142:Bridgeman/Bathurst",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.414722,
+          43.674444
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1102)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1102)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1094,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1094)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bridgeman/Kendal",
+      "name": "7141:Bridgeman/Kendal",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.410278,
+          43.675556
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1094)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1094)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1086,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1086)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Macpherson/ Spadina",
+      "name": "7140:Macpherson/ Spadina",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.40698,
+          43.675791
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1086)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1086)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1078,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1078)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Glen Edyth/Davenport",
+      "name": "7139:Glen Edyth/Davenport",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.405556,
+          43.677778
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1078)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1078)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1070,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1070)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Davenport/Christie",
+      "name": "7138:Davenport/Christie",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.423889,
+          43.675278
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1070)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1070)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1062,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1062)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Davenport/Bathurst",
+      "name": "7137:Davenport/Bathurst",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.416111,
+          43.676667
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1062)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1062)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1054,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1054)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Queen/Close",
+      "name": "7136:Queen/Close",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.435841,
+          43.640634
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1054)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1054)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1046,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1046)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Hanna/Liberty",
+      "name": "7135:Hanna/Liberty",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.419722,
+          43.638333
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1046)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1046)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1038,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1038)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Marlborough/Yonge",
+      "name": "7134:Marlborough/Yonge",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.391111,
+          43.68
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1038)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1038)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1030,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1030)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Summerhill Station",
+      "name": "7133:Summerhill Station",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.390556,
+          43.681944
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1030)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1030)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1022,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1022)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Kendal/Spadina",
+      "name": "7132:Kendal/Spadina",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.405416,
+          43.670303
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1022)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1022)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1014,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1014)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Taddle Creek Park",
+      "name": "7131:Taddle Creek Park",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.398443,
+          43.66986
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1014)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1014)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 1006,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1006)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Davenport/Bedford",
+      "name": "7130:Davenport/Bedford",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.399807,
+          43.674613
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1006)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(1006)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 998,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(998)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Davenport/Avenue",
+      "name": "7129:Davenport/Avenue",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.396273,
+          43.674991
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(998)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(998)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 990,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(990)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Yonge/Aylmer",
+      "name": "7128:Yonge/Aylmer",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.388858,
+          43.675492
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(990)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(990)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 982,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(982)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bay/Davenport",
+      "name": "7127:Bay/Davenport",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.390592,
+          43.672829
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(982)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(982)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 974,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(974)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Yonge/Yorkville",
+      "name": "7126:Yonge/Yorkville",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.387778,
+          43.671944
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(974)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(974)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 966,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(966)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Dundas/Broadview",
+      "name": "7124:Dundas/Broadview",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.351104,
+          43.662365
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(966)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(966)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 958,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(958)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Portland/Stewart",
+      "name": "7123:Portland/Stewart",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.399802,
+          43.643603
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(958)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(958)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 950,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(950)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Niagara/Tecumseth",
+      "name": "7122:Niagara/Tecumseth",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.404444,
+          43.641389
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(950)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(950)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 942,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(942)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Jarvis/Dundas",
+      "name": "7121:Jarvis/Dundas",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.374756,
+          43.657266
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(942)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(942)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 934,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(934)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Gerrard/River",
+      "name": "7120:Gerrard/River",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.358534,
+          43.663993
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(934)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(934)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 926,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(926)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Sumach/Winchester",
+      "name": "7119:Sumach/Winchester",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.362379,
+          43.66721
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(926)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(926)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 918,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(918)",
+      "description": "The geographic location with coordinates for the Toronto bike share station King/Bay",
+      "name": "7118:King/Bay",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.380042,
+          43.648575
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(918)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(918)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 910,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(910)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Castle Frank/Bloor",
+      "name": "7117:Castle Frank/Bloor",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.368579,
+          43.674083
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(910)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(910)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 902,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(902)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Parliament/Bloor",
+      "name": "7116:Parliament/Bloor",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.371849,
+          43.671827
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(902)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(902)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 894,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(894)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Howard St./ Sherbourne St.",
+      "name": "7115:Howard St./ Sherbourne St.",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.376367,
+          43.6712581
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(894)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(894)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 886,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(886)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Carlton/Parliament",
+      "name": "7114:Carlton/Parliament",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.36793,
+          43.664524
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(886)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(886)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 878,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(878)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Parliament/Aberdeen",
+      "name": "7113:Parliament/Aberdeen",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.368333,
+          43.665278
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(878)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(878)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 870,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(870)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Liberty/Fraser",
+      "name": "7112:Liberty/Fraser",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.424146,
+          43.637981
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(870)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(870)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 862,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(862)",
+      "description": "The geographic location with coordinates for the Toronto bike share station King/Douro",
+      "name": "7111:King/Douro",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.416379,
+          43.640885
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(862)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(862)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 854,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(854)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Queen/Berkely",
+      "name": "7110:Queen/Berkely",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3658333333333,
+          43.6552778
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(854)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(854)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 846,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(846)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Seaton/Dundas St E",
+      "name": "7109:Seaton/Dundas St E",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.369596,
+          43.658777
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(846)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(846)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 838,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(838)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Front/Cherry",
+      "name": "7108:Front/Cherry",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.358395,
+          43.652686
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(838)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(838)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 830,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(830)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Cherry/Distillery Ln",
+      "name": "7107:Cherry/Distillery Ln",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.356832,
+          43.650279
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(830)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(830)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 822,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(822)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Mill/Tannery",
+      "name": "7106:Mill/Tannery",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.354455,
+          43.652219
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(822)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(822)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 814,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(814)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Queen/Sackville",
+      "name": "7105:Queen/Sackville",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.3613888888889,
+          43.6561111
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(814)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(814)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 806,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(806)",
+      "description": "The geographic location with coordinates for the Toronto bike share station King/River",
+      "name": "7104:King/River",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.356598,
+          43.657071
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(806)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(806)/HistoricalLocations"
+    },
+    {
+      "@iot.id": 798,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(798)",
+      "description": "The geographic location with coordinates for the Toronto bike share station Jimmie Simpson Park",
+      "name": "7103:Jimmie Simpson Park",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "coordinates": [
+          -79.344946,
+          43.660176
+        ],
+        "type": "Point"
+      },
+      "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(798)/Things",
+      "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(798)/HistoricalLocations"
+    }
+  ]
+}
