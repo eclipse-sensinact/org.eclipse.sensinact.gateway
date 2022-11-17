@@ -19,10 +19,13 @@ indent_size = 2
 trim_trailing_whitespace = false
 indent_size = 1
 
+[*.bndrun]
+indent_style = tab
+insert_final_newline = false
+
 # Custom rules for unit tests with oddly named resource files
 [distribution/launcher/src/test/resources/**.feature]
 indent_size = 2
 
 [distribution/launcher/src/test/resources/**.{jar,bundle}]
 insert_final_newline = false
-
