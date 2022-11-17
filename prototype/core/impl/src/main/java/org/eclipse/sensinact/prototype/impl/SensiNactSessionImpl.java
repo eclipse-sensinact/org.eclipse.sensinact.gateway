@@ -140,20 +140,21 @@ public class SensiNactSessionImpl implements SensiNactSession {
             List<String> topics = listenerRegistrations.remove(id);
 
             if (topics != null) {
-                removeListener("DATA/", topics);
-                removeListener("METADATA/", topics);
-                removeListener("LIFECYCLE/", topics);
-                removeListener("ACTION/", topics);
+                removeListener(id, "DATA/", topics);
+                removeListener(id, "METADATA/", topics);
+                removeListener(id, "LIFECYCLE/", topics);
+                removeListener(id, "ACTION/", topics);
             }
         }
     }
 
-    private void removeListener(String prefix, List<String> topics) {
+    private void removeListener(String subscriptionId, String prefix, List<String> topics) {
         topics.stream().map(prefix::concat).forEach(s -> {
             if (s.endsWith("*")) {
-                listenersByWildcardTopic.computeIfPresent(s.substring(0, s.length() - 1), this::removeSubscription);
+                listenersByWildcardTopic.computeIfPresent(s.substring(0, s.length() - 1),
+                        (topic, regs) -> this.removeSubscription(subscriptionId, regs));
             } else {
-                listenersByTopic.computeIfPresent(s, this::removeSubscription);
+                listenersByTopic.computeIfPresent(s, (topic, regs) -> this.removeSubscription(subscriptionId, regs));
             }
         });
     }
