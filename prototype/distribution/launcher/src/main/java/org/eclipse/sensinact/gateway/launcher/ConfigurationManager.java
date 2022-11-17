@@ -138,43 +138,42 @@ public class ConfigurationManager {
     private void reloadConfigFile() {
         try {
             ConfigurationResource config;
-            if(Files.exists(configFile)) {
+            if (Files.exists(configFile)) {
                 config = new ConfigurationResource();
             } else {
                 try (Reader reader = Files.newBufferedReader(configFile)) {
                     ConfigurationReader configReader = Configurations.buildReader()
                             .withConfiguratorPropertyHandler((a, b, c) -> {
                             }).build(reader);
-                    
+
                     config = configReader.readConfigurationResource();
-                    
-                    if(!configReader.getIgnoredErrors().isEmpty()) {
+
+                    if (!configReader.getIgnoredErrors().isEmpty()) {
                         // TODO log these warnings
                     }
                 }
             }
-            
-            Map<String, Configuration> existingConfigs = Optional.ofNullable(configAdmin.listConfigurations("(.sensinact.config=true)"))
-                    .map(Arrays::stream)
-                    .map(s -> s.collect(toMap(Configuration::getPid, Function.identity())))
-                    .orElse(Map.of());
-            
-            for(Entry<String, Hashtable<String, Object>> e : config.getConfigurations().entrySet()) {
+
+            Map<String, Configuration> existingConfigs = Optional
+                    .ofNullable(configAdmin.listConfigurations("(.sensinact.config=true)")).map(Arrays::stream)
+                    .map(s -> s.collect(toMap(Configuration::getPid, Function.identity()))).orElse(Map.of());
+
+            for (Entry<String, Hashtable<String, Object>> e : config.getConfigurations().entrySet()) {
                 String pid = e.getKey();
-                Hashtable<String,Object> value = e.getValue();
+                Hashtable<String, Object> value = e.getValue();
                 value.put(".sensinact.config", Boolean.TRUE);
-                if(existingConfigs.containsKey(pid)) {
+                if (existingConfigs.containsKey(pid)) {
                     // Remove so we don't delete later
                     existingConfigs.remove(pid).updateIfDifferent(value);
                 } else {
                     createConfig(pid, value);
                 }
             }
-            
-            for(Configuration c : existingConfigs.values()) {
+
+            for (Configuration c : existingConfigs.values()) {
                 c.delete();
             }
-            
+
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -184,7 +183,7 @@ public class ConfigurationManager {
     private void createConfig(String pid, Hashtable<String, Object> value) throws IOException {
         int idx = pid.indexOf('~');
         Configuration cfg;
-        if(idx < 0) {
+        if (idx < 0) {
             cfg = configAdmin.getConfiguration(pid, "?");
         } else {
             cfg = configAdmin.getFactoryConfiguration(pid.substring(0, idx), pid.substring(idx + 1), "?");
