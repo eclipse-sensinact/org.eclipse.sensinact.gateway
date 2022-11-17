@@ -21,6 +21,7 @@ indent_size = 1
 
 [*.bndrun]
 indent_style = tab
+insert_final_newline = false
 
 # Custom rules for unit tests with oddly named resource files
 [distribution/launcher/src/test/resources/**.feature]
