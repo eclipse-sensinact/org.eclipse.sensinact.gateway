@@ -1,0 +1,26 @@
+#generating
+#Wed Nov 16 11:17:29 GMT 2022
+felix.configadmin.version=1.9.24
+bnd-tests.skip=true
+slf4j.version=1.7.36
+felix.framework.version=7.0.3
+junit.version=5.9.0
+aries.typedevent.version=0.0.2-SNAPSHOT
+maven.compiler.source=11
+osgi.feature.version=1.0.0
+osgi.test.version=1.2.1
+felix.scr.version=2.2.2
+maven.compiler.release=11
+bnd.version=6.4.0-SNAPSHOT
+osgi.core.version=7.0.0
+osgi.implementation.namespace.version=1.0.0
+felix.cm.json.version=1.0.6
+osgi.typedevent.version=1.0.0
+project.build.sourceEncoding=UTF-8
+felix.feature.version=1.0.0
+johnzon.version=1.2.19
+osgi.promise.version=1.2.0
+mockito.version=4.7.0
+osgi.ds.version=1.5.0
+maven.compiler.target=11
+gecko.emf.version=4.3.0

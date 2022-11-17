@@ -1,0 +1,64 @@
+[
+  {
+    "type": "Point",
+    "coordinates": [
+      100.0,
+      0.0
+    ],
+    "extra": "foo"
+  },
+  {
+    "type": "Feature",
+    "id": "f2",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          100.0,
+          0.0
+        ],
+        [
+          101.0,
+          1.0
+        ]
+      ]
+    },
+    "properties": {
+      "foo": "bar"
+    },
+    "centerline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          -170,
+          10
+        ],
+        [
+          170,
+          11
+        ]
+      ]
+    }
+  },
+  {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            102.0,
+            0.5
+          ]
+        },
+        "properties": {
+          "prop0": "value0"
+        }
+      }
+    ],
+    "extra": {
+      "bar": "baz"
+    }
+  }
+]
