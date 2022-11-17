@@ -35,7 +35,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 
 @Produces(APPLICATION_JSON)
-@Path("/sensinact")
+@Path("")
 public interface IRestNorthbound {
 
     @Path("")
