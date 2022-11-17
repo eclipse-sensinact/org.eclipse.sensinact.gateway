@@ -32,15 +32,20 @@
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.cm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.feature</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.feature</artifactId>
+      <artifactId>org.apache.felix.cm.json</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.cm.json</artifactId>
+      <artifactId>org.apache.felix.feature</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.johnzon</groupId>
@@ -49,6 +54,7 @@
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-json_1.1_spec</artifactId>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
@@ -57,6 +63,27 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-resolver-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-export-maven-plugin</artifactId>
+        <version>${bnd.version}</version>
+        <executions>
+          <execution>
+            <id>export</id>
+            <goals>
+              <goal>export</goal>
+            </goals>
+            <configuration>
+              <resolve>true</resolve>
+              <includeDependencyManagement>true</includeDependencyManagement>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

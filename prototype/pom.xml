@@ -114,6 +114,7 @@
     <osgi.promise.version>1.2.0</osgi.promise.version>
     <osgi.implementation.namespace.version>1.0.0</osgi.implementation.namespace.version>
     <osgi.ds.version>1.5.0</osgi.ds.version>
+    <osgi.cm.version>1.6.1</osgi.cm.version>
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
     <osgi.feature.version>1.0.0</osgi.feature.version>
     <gecko.emf.version>4.3.0</gecko.emf.version>
@@ -132,6 +133,7 @@
     <johnzon.version>1.2.19</johnzon.version>
     <aries.component-dsl.version>1.2.2</aries.component-dsl.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
+    <aries.spifly.version>1.3.5</aries.spifly.version>
 
     <!-- test dependency versions -->
     <junit.version>5.9.0</junit.version>
@@ -232,6 +234,11 @@
       </dependency>
       <dependency>
         <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.cm</artifactId>
+        <version>${osgi.cm.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
         <artifactId>org.osgi.service.typedevent</artifactId>
         <version>${osgi.typedevent.version}</version>
       </dependency>
@@ -322,6 +329,12 @@
         <groupId>org.apache.aries.typedevent</groupId>
         <artifactId>org.apache.aries.typedevent.bus</artifactId>
         <version>${aries.typedevent.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.aries.spifly</groupId>
+        <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
+        <version>${aries.spifly.version}</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>
