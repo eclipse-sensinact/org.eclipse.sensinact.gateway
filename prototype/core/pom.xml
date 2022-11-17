@@ -27,6 +27,7 @@
     <module>api</module>
     <module>models</module>
     <module>impl</module>
+    <module>geo-json</module>
   </modules>
 
 </project>
