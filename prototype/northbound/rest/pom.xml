@@ -24,7 +24,7 @@
   <properties>
     <gecko.jersey.version>6.0.0-SNAPSHOT</gecko.jersey.version>
     <hk2.version>3.0.3</hk2.version>
-    <jackson.version>2.13.3</jackson.version>
+    <jackson.version>2.13.4</jackson.version>
     <jersey.version>3.0.8</jersey.version>
     <jetty.version>11.0.12</jetty.version>
   </properties>
