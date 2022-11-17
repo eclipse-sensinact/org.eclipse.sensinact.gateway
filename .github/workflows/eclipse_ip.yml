@@ -22,4 +22,4 @@ jobs:
     - name: Build with Maven
       run: mvn -B org.eclipse.dash:license-tool-plugin:license-check -Dlicenses-check -Ddash.fail=true -Ddash.summary=DEPENDENCIES -DexcludeArtifactIds=$EXCLUDED_ARTIFACTS -P eclipse-licenses-check --file prototype/pom.xml
       env:
-        EXCLUDED_ARTIFACTS: 'nothing'
+        EXCLUDED_ARTIFACTS: 'org.gecko.rest.jersey,org.gecko.rest.jersey.config,org.gecko.rest.jersey.jetty,org.gecko.rest.jersey.sse'
