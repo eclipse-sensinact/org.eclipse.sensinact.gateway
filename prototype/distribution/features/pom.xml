@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2022 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+    <artifactId>distribution</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+  <artifactId>features</artifactId>
+  <packaging>pom</packaging>
+  <name>Eclipse sensiNact Features</name>
+  <description>This project contains definitions of sensiNact features</description>
+
+  <modules>
+    <module>core-feature</module>
+    <module>jakarta-rest-whiteboard-feature</module>
+  </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.sling</groupId>
+          <artifactId>slingfeature-maven-plugin</artifactId>
+          <version>1.6.8</version>
+          <extensions>true</extensions>
+          <executions>
+            <execution>
+              <id>createFeature</id>
+              <phase>package</phase>
+              <goals>
+                <goal>include-artifact</goal>
+              </goals>
+              <configuration>
+                <skipAddJarToFeature>true</skipAddJarToFeature>
+                <includeDependenciesWithScope>compile,runtime</includeDependenciesWithScope>
+              </configuration>
+            </execution>
+            <execution>
+              <id>attachFeature</id>
+              <phase>package</phase>
+              <goals>
+                <goal>attach-features</goal>
+              </goals>
+              <configuration></configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

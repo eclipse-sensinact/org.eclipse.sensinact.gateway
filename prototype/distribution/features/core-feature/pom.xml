@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2022 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+    <artifactId>features</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>core-feature</artifactId>
+  <name>Eclipse sensiNact core Feature</name>
+  <description>This project contains a feature representing the core of sensiNact</description>
+
+  <properties>
+    <gateway.version>0.0.1-SNAPSHOT</gateway.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>annotation</artifactId>
+      <version>${gateway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>api</artifactId>
+      <version>${gateway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>impl</artifactId>
+      <version>${gateway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>models</artifactId>
+      <version>${gateway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.aries.component-dsl</groupId>
+      <artifactId>org.apache.aries.component-dsl.component-dsl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.typedevent</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.aries.typedevent</groupId>
+      <artifactId>org.apache.aries.typedevent.bus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.emf</groupId>
+      <artifactId>org.gecko.emf.osgi.api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.emf</groupId>
+      <artifactId>org.gecko.emf.osgi.component</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>slingfeature-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
