@@ -10,7 +10,8 @@
 	bnd.identity;id='org.eclipse.jetty.server',\
 	bnd.identity;id='org.gecko.rest.jersey.config',\
 	bnd.identity;id='org.gecko.rest.jersey.sse',\
-	bnd.identity;id='org.eclipse.parsson.jakarta.json'
+	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
+	bnd.identity;id='org.glassfish.jersey.core.jersey-client'
 -resolve.effective: active
 
 -runee: JavaSE-11
@@ -40,7 +41,7 @@
 	junit-platform-engine;version='[1.9.0,1.9.1)',\
 	junit-platform-launcher;version='[1.9.0,1.9.1)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
-	org.apache.aries.spifly.dynamic.bundle;version='[1.3.5,1.3.6)',\
+	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.5,1.3.6)',\
 	org.apache.aries.typedevent.bus;version='[0.0.2,0.0.3)',\
 	org.apache.felix.cm.json;version='[2.0.0,2.0.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\

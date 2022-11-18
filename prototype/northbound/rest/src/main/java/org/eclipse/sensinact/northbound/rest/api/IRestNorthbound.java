@@ -34,6 +34,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.sse.SseEventSink;
 
 @Produces(APPLICATION_JSON)
@@ -90,6 +91,7 @@ public interface IRestNorthbound {
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/SUBSCRIBE")
     @GET
+    @Produces(MediaType.SERVER_SENT_EVENTS)
     void watchResource(@PathParam("providerId") String providerId, @PathParam("serviceName") String serviceName,
             @PathParam("rcName") String rcName, @Context SseEventSink eventSink);
 }

@@ -52,9 +52,6 @@ import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.notification.ClientDataListener;
 import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.Providers;
@@ -74,13 +71,6 @@ public class RestNorthbound implements IRestNorthbound {
      */
     @Context
     Providers providers;
-
-    /**
-     * Returns the configured object mapper
-     */
-    private ObjectMapper getMapper() {
-        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
 
     /**
      * Returns a user session
@@ -615,8 +605,6 @@ public class RestNorthbound implements IRestNorthbound {
     @Override
     public void watchResource(String providerId, String serviceName, String rcName, SseEventSink eventSink) {
         final SensiNactSession session = getSession();
-        final ObjectMapper mapper = getMapper();
-
         final AtomicReference<String> listenerId = new AtomicReference<>();
 
         final ClientDataListener cdl = (t, e) -> {
@@ -626,13 +614,8 @@ public class RestNorthbound implements IRestNorthbound {
                 return;
             }
 
-            try {
-                eventSink.send(sse.newEvent("data", mapper.writeValueAsString(new ResourceDataNotificationDTO(e))));
-            } catch (JsonProcessingException ex) {
-                eventSink.send(sse.newEvent("error", "Error prepare JSON event: " + ex.getMessage()));
-                eventSink.close();
-                session.removeListener(listenerId.get());
-            }
+            eventSink.send(sse.newEventBuilder().name("data").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                    .data(new ResourceDataNotificationDTO(e)).build());
         };
 
         final ClientLifecycleListener cll = (t, e) -> {
@@ -642,14 +625,8 @@ public class RestNorthbound implements IRestNorthbound {
                 return;
             }
 
-            try {
-                eventSink.send(
-                        sse.newEvent("lifecycle", mapper.writeValueAsString(new ResourceLifecycleNotificationDTO(e))));
-            } catch (JsonProcessingException ex) {
-                eventSink.send(sse.newEvent("error", "Error prepare JSON event: " + ex.getMessage()));
-                eventSink.close();
-                session.removeListener(listenerId.get());
-            }
+            eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                    .data(new ResourceLifecycleNotificationDTO(e)).build());
         };
 
         // Register the listener
