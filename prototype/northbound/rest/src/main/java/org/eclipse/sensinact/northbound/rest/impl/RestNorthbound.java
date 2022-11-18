@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
@@ -39,6 +40,8 @@ import org.eclipse.sensinact.northbound.rest.dto.ResultResourcesListDTO;
 import org.eclipse.sensinact.northbound.rest.dto.ResultServicesListDTO;
 import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
 import org.eclipse.sensinact.northbound.rest.dto.ShortResourceDescriptionDTO;
+import org.eclipse.sensinact.northbound.rest.dto.notification.ResourceDataNotificationDTO;
+import org.eclipse.sensinact.northbound.rest.dto.notification.ResourceLifecycleNotificationDTO;
 import org.eclipse.sensinact.prototype.ProviderDescription;
 import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.ResourceShortDescription;
@@ -46,25 +49,44 @@ import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.ServiceDescription;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
+import org.eclipse.sensinact.prototype.notification.ClientDataListener;
+import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
+import jakarta.ws.rs.sse.Sse;
+import jakarta.ws.rs.sse.SseEventSink;
 
 public class RestNorthbound implements IRestNorthbound {
 
+    /**
+     * Server-sent events handling
+     */
     @Context
-    UriInfo uriInfo;
+    Sse sse;
 
+    /**
+     * Access to custom context resolvers
+     */
     @Context
-    Providers provider;
+    Providers providers;
+
+    /**
+     * Returns the configured object mapper
+     */
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
 
     /**
      * Returns a user session
      */
     private SensiNactSession getSession() {
-        return provider.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
     /**
@@ -588,5 +610,50 @@ public class RestNorthbound implements IRestNorthbound {
         }
 
         return result;
+    }
+
+    @Override
+    public void watchResource(String providerId, String serviceName, String rcName, SseEventSink eventSink) {
+        final SensiNactSession session = getSession();
+        final ObjectMapper mapper = getMapper();
+
+        final AtomicReference<String> listenerId = new AtomicReference<>();
+
+        final ClientDataListener cdl = (t, e) -> {
+            if (eventSink.isClosed()) {
+                // Event sink is already closed: remove listener
+                session.removeListener(listenerId.get());
+                return;
+            }
+
+            try {
+                eventSink.send(sse.newEvent("data", mapper.writeValueAsString(new ResourceDataNotificationDTO(e))));
+            } catch (JsonProcessingException ex) {
+                eventSink.send(sse.newEvent("error", "Error prepare JSON event: " + ex.getMessage()));
+                eventSink.close();
+                session.removeListener(listenerId.get());
+            }
+        };
+
+        final ClientLifecycleListener cll = (t, e) -> {
+            if (eventSink.isClosed()) {
+                // Event sink is already closed: remove listener
+                session.removeListener(listenerId.get());
+                return;
+            }
+
+            try {
+                eventSink.send(
+                        sse.newEvent("lifecycle", mapper.writeValueAsString(new ResourceLifecycleNotificationDTO(e))));
+            } catch (JsonProcessingException ex) {
+                eventSink.send(sse.newEvent("error", "Error prepare JSON event: " + ex.getMessage()));
+                eventSink.close();
+                session.removeListener(listenerId.get());
+            }
+        };
+
+        // Register the listener
+        final String topic = String.join("/", providerId, serviceName, rcName);
+        listenerId.set(session.addListener(List.of(topic), cdl, null, cll, null));
     }
 }

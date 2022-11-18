@@ -33,6 +33,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.sse.SseEventSink;
 
 @Produces(APPLICATION_JSON)
 @Path("")
@@ -85,4 +87,9 @@ public interface IRestNorthbound {
     ResultActResponse<?> resourceAct(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName,
             List<AccessMethodCallParameterDTO> parameters);
+
+    @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/SUBSCRIBE")
+    @GET
+    void watchResource(@PathParam("providerId") String providerId, @PathParam("serviceName") String serviceName,
+            @PathParam("rcName") String rcName, @Context SseEventSink eventSink);
 }
