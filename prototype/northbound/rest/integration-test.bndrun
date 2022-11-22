@@ -64,8 +64,8 @@
 	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.rest;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.rest-tests;version='[0.0.1,0.0.2)',\
-	org.gecko.emf.osgi.api;version='[4.3.0,4.3.1)',\
-	org.gecko.emf.osgi.component;version='[4.3.0,4.3.1)',\
+	org.gecko.emf.osgi.api;version='[4.4.0,4.4.1)',\
+	org.gecko.emf.osgi.component;version='[4.4.0,4.4.1)',\
 	org.gecko.rest.jersey;version='[6.0.0,6.0.1)',\
 	org.gecko.rest.jersey.config;version='[6.0.0,6.0.1)',\
 	org.gecko.rest.jersey.jetty;version='[6.0.0,6.0.1)',\

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Data In Motion - initial API and implementation 
+*   Data In Motion - initial API and implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
@@ -21,7 +21,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil.Copier;
  * As we modify the EClasses on the fly, we need to prevent the copier to call
  * {@link EObject#sIsSet} or {@link EObject#sSet} for features that are new, as
  * this would cause an {@link IndexOutOfBoundsException}
- * 
+ *
  * @author Juergen Albert
  * @since 11 Oct 2022
  */
@@ -32,7 +32,7 @@ public class SensinactCopier extends Copier {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.emf.ecore.util.EcoreUtil.Copier#copyAttribute(org.eclipse.emf.
      * ecore.EAttribute, org.eclipse.emf.ecore.EObject,
@@ -42,14 +42,16 @@ public class SensinactCopier extends Copier {
     protected void copyAttribute(EAttribute eAttribute, EObject eObject, EObject copyEObject) {
         int attributeVersion = EMFUtil.getVersion(eAttribute);
         int containerVersion = EMFUtil.getContainerVersion(eAttribute);
-        if (attributeVersion != containerVersion) {
+        // if a Version is -1, it has no Version and is usually the case for the
+        // features are from the base EClass we inherit from
+        if (attributeVersion == -1 || attributeVersion != containerVersion) {
             super.copyAttribute(eAttribute, eObject, copyEObject);
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.emf.ecore.util.EcoreUtil.Copier#copyContainment(org.eclipse.emf.
      * ecore.EReference, org.eclipse.emf.ecore.EObject,
@@ -59,7 +61,9 @@ public class SensinactCopier extends Copier {
     protected void copyContainment(EReference eReference, EObject eObject, EObject copyEObject) {
         int attributeVersion = EMFUtil.getVersion(eReference);
         int containerVersion = EMFUtil.getContainerVersion(eReference);
-        if (attributeVersion != containerVersion) {
+        // if a Version is -1, it has no Version and is usually the case for the
+        // features are from the base EClass we inherit from
+        if (attributeVersion == -1 || attributeVersion != containerVersion) {
             super.copyContainment(eReference, eObject, copyEObject);
         }
     }

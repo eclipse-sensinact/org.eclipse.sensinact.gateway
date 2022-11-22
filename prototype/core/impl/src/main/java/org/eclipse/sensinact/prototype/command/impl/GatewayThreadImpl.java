@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
@@ -75,6 +75,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             // Just keep going and reset our interrupt status
             Thread.currentThread().interrupt();
         }
+        nexusImpl.shutDown();
     }
 
     private NotificationAccumulator getCurrentAccumulator() {

@@ -12,6 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -30,6 +35,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.Admin;
@@ -39,6 +45,8 @@ import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -47,6 +55,11 @@ import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
  */
 public class NexusImpl {
 
+    private static final Logger LOG = LoggerFactory.getLogger(NexusImpl.class);
+
+    private static final String BASE = "data/";
+    private static final String INSTANCES = BASE + "instances/";
+    private static final String BASIC_BASE_ECORE = BASE + "models/basic/base.ecore";
     /** HTTPS_ECLIPSE_ORG_SENSINACT_BASE */
     private static final String DEFAULT_URI = "https://eclipse.org/sensinact/base";
     private static final URI DEFAULT_URI_OBJECT = URI.createURI(DEFAULT_URI);
@@ -64,9 +77,88 @@ public class NexusImpl {
         this.resourceSet = resourceSet;
         this.sensinactPackage = sensinactPackage;
         this.notificationAccumulator = accumulator;
+        // TODO we need a general Working Directory for such data
+        Optional<EPackage> packageOptional = loadDefaultPackage(Paths.get(BASIC_BASE_ECORE));
 
-        defaultPackage = EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", this.resourceSet);
+        defaultPackage = packageOptional
+                .orElseGet(() -> EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", this.resourceSet));
         packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
+        loadInstances();
+    }
+
+    private Optional<EPackage> loadDefaultPackage(Path fileName) {
+        Resource resource = resourceSet.createResource(URI.createFileURI(fileName.toString()));
+        if (Files.isRegularFile(fileName)) {
+            try {
+                resource.load(null);
+                if (!resource.getContents().isEmpty()) {
+                    EPackage defaultPackage = (EPackage) resource.getContents().get(0);
+                    resource.setURI(URI.createURI(defaultPackage.getNsURI()));
+                    return Optional.of(defaultPackage);
+                }
+            } catch (IOException e) {
+                LOG.error(
+                        "THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error Loading default EPackage from persistent file: {}",
+                        fileName, e);
+                throw new RuntimeException(e);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void loadInstances() {
+
+        Path instancesPath = Paths.get(INSTANCES);
+        if (Files.isDirectory(instancesPath)) {
+            try {
+                Files.walk(instancesPath).forEach(this::load);
+            } catch (IOException e) {
+                LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error loading instances from Path: {}",
+                        instancesPath, e);
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void load(Path path) {
+        try {
+            if (Files.isDirectory(path)) {
+                return;
+            } else {
+                URI uri = URI.createFileURI(path.toString());
+                Resource resource = resourceSet.createResource(uri);
+                resource.load(null);
+                if (!resource.getContents().isEmpty()) {
+                    Provider provider = (Provider) resource.getContents().get(0);
+                    EClass eClass = provider.eClass();
+                    URI providerUri = EcoreUtil.getURI(eClass);
+                    ProviderTypeWrapper wrapper = new ProviderTypeWrapper(eClass);
+                    ProviderTypeWrapper temp = providerCache.putIfAbsent(providerUri, wrapper);
+                    wrapper = temp == null ? wrapper : temp;
+                    uri = createURI(provider);
+                    resource.setURI(providerUri.trimFragment());
+                    wrapper.getInstances().put(uri, provider);
+
+                }
+            }
+        } catch (IOException e) {
+            LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error loading provider from Path: {}", path, e);
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void shutDown() {
+        defaultPackage.eResource().setURI(URI.createFileURI(BASIC_BASE_ECORE));
+        try {
+            defaultPackage.eResource().save(null);
+            providerCache.values().forEach(this::saveInstance);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        resourceSet.getResources().clear();
     }
 
     private static class ProviderTypeWrapper {
@@ -276,7 +368,7 @@ public class NexusImpl {
 
     public Provider getProvider(String model, String providerName) {
         URI packageUri = URI.createURI(DEFAULT_URI);
-        URI providerUri = packageUri.appendFragment(firstToUpper(model));
+        URI providerUri = packageUri.appendFragment("//" + firstToUpper(model));
         ProviderTypeWrapper wrapper = providerCache.get(providerUri);
         return wrapper == null ? null : wrapper.getInstances().get(createURI(model, providerName));
     }
@@ -299,6 +391,10 @@ public class NexusImpl {
         }
         URI uri = URI.createURI(model).appendSegment(provider).appendFragment(provider);
         return uri;
+    }
+
+    private URI createURI(Provider provider) {
+        return createURI(provider.eClass().getName(), provider.getId());
     }
 
     /**
@@ -358,18 +454,16 @@ public class NexusImpl {
             NotificationAccumulator accumulator) {
         String providerName = firstToUpper(rawProviderName);
         URI packageUri = URI.createURI(thePackageUri);
-        URI providerUri = packageUri.appendFragment(providerName);
-        ProviderTypeWrapper wrapper = providerCache.get(providerUri);
-        if (wrapper == null) {
-            EPackage ePackage = packageCache.get(packageUri);
-            EClass providerClass = (EClass) ePackage.getEClassifier(providerName);
-            if (providerClass == null) {
-                providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),
-                        sensinactPackage.getProvider());
-                wrapper = new ProviderTypeWrapper(providerClass);
-                providerCache.put(providerUri, wrapper);
-            }
+        EPackage ePackage = packageCache.get(packageUri);
+        EClass providerClass = (EClass) ePackage.getEClassifier(providerName);
+        if (providerClass != null) {
+            return providerCache.get(EcoreUtil.getURI(providerClass));
         }
+
+        providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),
+                sensinactPackage.getProvider());
+        ProviderTypeWrapper wrapper = new ProviderTypeWrapper(providerClass);
+        providerCache.put(EcoreUtil.getURI(providerClass), wrapper);
         return wrapper;
     }
 
@@ -398,9 +492,6 @@ public class NexusImpl {
         return transaction;
     }
 
-    /**
-     * @param provider
-     */
     private void updateMetadata(EClass provider) {
         EAnnotation metadata = provider.getEAnnotation("metadata");
         ModelMetadata meta = (ModelMetadata) metadata.getContents().get(0);
@@ -424,7 +515,12 @@ public class NexusImpl {
     }
 
     /**
-     * @param name
+     * We need a Unique name for the Service Class if they reside in the same
+     * Package. Thus we create a hopefully unique name.
+     *
+     * TODO: Place each Provider in its own Subpackage?
+     *
+     * @param providerName
      * @param serviceName
      * @return
      */
@@ -436,4 +532,19 @@ public class NexusImpl {
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
+    private void saveInstance(ProviderTypeWrapper wrapper) {
+        URI baseUri = URI.createURI(INSTANCES);
+        wrapper.getInstances().forEach((u, e) -> {
+            URI instanceUri = baseUri.appendSegments(u.segments()).appendFileExtension("xmi");
+            Resource res = resourceSet.createResource(instanceUri);
+            res.getContents().add(e);
+            try {
+                e.eResource().save(null);
+            } catch (IOException ex) {
+                LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error saving provider fro URI: {}", instanceUri,
+                        e);
+                throw new RuntimeException(ex);
+            }
+        });
+    }
 }
