@@ -48,9 +48,13 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class ConfigurationManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationManager.class);
 
     @Reference
     ConfigurationAdmin configAdmin;
@@ -67,6 +71,9 @@ public class ConfigurationManager {
         watchService = FileSystems.getDefault().newWatchService();
 
         configFile = Paths.get(System.getProperty("sensinact.config.dir", "./config"), "configuration.json");
+
+        LOGGER.info("Eclipse sensiNact is watching for changes in configuration file {}", configFile);
+
         configFile.getParent().register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
 
         executor = Executors.newSingleThreadExecutor(this::createThread);
@@ -83,19 +90,19 @@ public class ConfigurationManager {
 
     @Deactivate
     void stop() {
+        LOGGER.info("Eclipse sensiNact configuration manager is stopping. Configurations will not be changed");
 
         try {
             watchService.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn("Error when stopping the configuration manager", e);
         }
 
         executor.shutdown();
         try {
             executor.awaitTermination(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.warn("Error when stopping the configuration manager", e);
         }
     }
 
@@ -105,7 +112,7 @@ public class ConfigurationManager {
             try {
                 key = watchService.take();
             } catch (ClosedWatchServiceException | InterruptedException e) {
-                // TODO log this
+                LOGGER.error("No longer able to monitor the configuration file {}", configFile, e);
                 return;
             }
 
@@ -127,10 +134,10 @@ public class ConfigurationManager {
                 key.reset();
                 executor.submit(this::watch);
             } else {
-                // TODO log that configuration is broken
+                LOGGER.error("No longer able to monitor the configuration file {} as the key is invalid", configFile);
             }
         } catch (Exception e) {
-            // TODO log this error
+            LOGGER.error("An unexpected error occurred watching the configuration file {}", configFile, e);
             executor.submit(this::watch);
         }
     }
@@ -139,8 +146,6 @@ public class ConfigurationManager {
         try {
             ConfigurationResource config;
             if (Files.exists(configFile)) {
-                config = new ConfigurationResource();
-            } else {
                 try (Reader reader = Files.newBufferedReader(configFile)) {
                     ConfigurationReader configReader = Configurations.buildReader()
                             .withConfiguratorPropertyHandler((a, b, c) -> {
@@ -148,10 +153,12 @@ public class ConfigurationManager {
 
                     config = configReader.readConfigurationResource();
 
-                    if (!configReader.getIgnoredErrors().isEmpty()) {
-                        // TODO log these warnings
+                    for (String warning : configReader.getIgnoredErrors()) {
+                        LOGGER.warn("Configuration file parsing warning. Error was\n{}", warning);
                     }
                 }
+            } else {
+                config = new ConfigurationResource();
             }
 
             Map<String, Configuration> existingConfigs = Optional
@@ -175,8 +182,7 @@ public class ConfigurationManager {
             }
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("An unexpected error occurred parsing the configuration file {}", configFile, e);
         }
     }
 

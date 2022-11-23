@@ -349,6 +349,12 @@
         <version>1.5</version>
         <scope>runtime</scope>
       </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>runtime</scope>
+      </dependency>
 
       <!-- Test -->
       <dependency>
@@ -381,12 +387,6 @@
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.codegen</artifactId>
         <version>${gecko.emf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>${slf4j.version}</version>
-        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>

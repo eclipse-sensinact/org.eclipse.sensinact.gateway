@@ -27,4 +27,16 @@
     <module>launcher</module>
     <module>features</module>
   </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.sling</groupId>
+          <artifactId>slingfeature-maven-plugin</artifactId>
+          <version>1.6.8</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
