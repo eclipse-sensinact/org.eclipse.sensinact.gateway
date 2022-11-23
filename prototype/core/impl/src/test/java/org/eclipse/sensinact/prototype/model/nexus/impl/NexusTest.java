@@ -17,6 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 
 import org.eclipse.emf.ecore.EClass;
@@ -28,6 +35,7 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,7 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * 
+ *
  * @author Juergen Albert
  * @since 10 Oct 2022
  */
@@ -51,6 +59,44 @@ public class NexusTest {
     @BeforeEach
     void start() {
         resourceSet = EMFTestUtil.createResourceSet();
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        Path data = Paths.get("data");
+        if (Files.exists(data)) {
+            Files.walkFileTree(data, new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    try {
+                        Files.delete(file);
+                    } catch (IOException e) {
+                        throw exc;
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    if (exc != null) { // directory iteration failed
+                        throw exc;
+                    }
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
     }
 
     @Nested
@@ -146,6 +192,73 @@ public class NexusTest {
 
             Object value = service.eGet(valueFeature);
             assertEquals("test2", value);
+        }
+
+        @Test
+        void basicPersistanceTest() throws IOException {
+
+            NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
+                    Instant.now());
+
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice2", "testValue", String.class, "test2",
+                    Instant.now());
+
+            nexus.shutDown();
+
+            nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            Provider provider = nexus.getProvider("TestModel", "testprovider");
+            assertNotNull(provider);
+            EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice2");
+            Service service = (Service) provider.eGet(serviceFeature);
+
+            EStructuralFeature valueFeature = service.eClass().getEStructuralFeature("testValue");
+
+            assertNotNull(valueFeature);
+            assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
+
+            Object value = service.eGet(valueFeature);
+            assertEquals("test2", value);
+
+        }
+
+        @Test
+        void basicPersistanceTestMultiple() throws IOException {
+
+            NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
+                    Instant.now());
+
+            nexus.handleDataUpdate("TestModelNew", "testproviderNew", "testservice2", "testValue", String.class,
+                    "test2", Instant.now());
+
+            nexus.handleDataUpdate(null, "something_else", "whatever", "testValue", String.class, "test2",
+                    Instant.now());
+
+            nexus.shutDown();
+
+            nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+
+            assertObject(nexus, "TestModel", "testprovider", "testservice", "testValue", "test");
+            assertObject(nexus, "TestModelNew", "testproviderNew", "testservice2", "testValue", "test2");
+            assertObject(nexus, "Something_else", "something_else", "whatever", "testValue", "test2");
+
+        }
+
+        void assertObject(NexusImpl nexus, String modelName, String provider, String service, String resource,
+                String value) {
+            Provider providerObject = nexus.getProvider(modelName, provider);
+            assertNotNull(providerObject);
+            EStructuralFeature serviceFeature = providerObject.eClass().getEStructuralFeature(service);
+            Service serviceObject = (Service) providerObject.eGet(serviceFeature);
+
+            EStructuralFeature valueFeature = serviceObject.eClass().getEStructuralFeature(resource);
+
+            assertNotNull(valueFeature);
+            assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
+
+            Object valueObject = serviceObject.eGet(valueFeature);
+            assertEquals(value, valueObject);
         }
     }
 }

@@ -14,11 +14,12 @@ package org.eclipse.sensinact.prototype.emf.util;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 
 /**
  * Some helpful methods to be reused by all the tests
- * 
+ *
  * @author Juergen Albert
  * @since 28 Oct 2022
  */
@@ -32,6 +33,11 @@ public class EMFTestUtil {
 
         // Register the package to ensure it is available during loading.
         resourceSet.getPackageRegistry().put(SensiNactPackage.eNS_URI, SensiNactPackage.eINSTANCE);
+
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new XMIResourceFactoryImpl());
+        resourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put("http", new XMIResourceFactoryImpl());
+        resourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put("https", new XMIResourceFactoryImpl());
         return resourceSet;
     }
 

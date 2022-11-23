@@ -53,7 +53,12 @@
       <groupId>org.geckoprojects.emf</groupId>
       <artifactId>org.gecko.emf.osgi.component</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
   </dependencies>
+
 
   <build>
     <plugins>
