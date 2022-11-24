@@ -61,10 +61,7 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        List<String> list = requestContext.getUriInfo().getQueryParameters().get("$orderby");
-        if (list == null) {
-            return;
-        }
+        List<String> list = requestContext.getUriInfo().getQueryParameters().getOrDefault("$orderby", List.of());
 
         try {
             Comparator<Object> comparator = list.stream()
