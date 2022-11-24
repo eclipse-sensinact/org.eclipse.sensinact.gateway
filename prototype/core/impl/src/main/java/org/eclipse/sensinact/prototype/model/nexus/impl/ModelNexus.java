@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
@@ -47,18 +45,22 @@ import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.prototype.model.nexus.impl.ModelTransaction.ModelTransactionState;
+import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
+import org.eclipse.sensinact.prototype.model.nexus.impl.emf.SensinactCopier;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A Central Nexus for Models
  *
  * @author Juergen Albert
  * @since 26 Sep 2022
  */
-public class NexusImpl {
+public class ModelNexus {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NexusImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ModelNexus.class);
 
     private static final String BASE = "data/";
     private static final String INSTANCES = BASE + "instances/";
@@ -75,7 +77,7 @@ public class NexusImpl {
     private Map<URI, EPackage> packageCache = new ConcurrentHashMap<>();
     private EPackage defaultPackage;
 
-    public NexusImpl(ResourceSet resourceSet, SensiNactPackage sensinactPackage,
+    public ModelNexus(ResourceSet resourceSet, SensiNactPackage sensinactPackage,
             Supplier<NotificationAccumulator> accumulator) {
         this.resourceSet = resourceSet;
         this.sensinactPackage = sensinactPackage;
@@ -162,113 +164,6 @@ public class NexusImpl {
         }
 
         resourceSet.getResources().clear();
-    }
-
-    private static class ProviderTypeWrapper {
-
-        private EClass provider;
-        private Map<URI, Provider> instances = new ConcurrentHashMap<>();
-
-        public ProviderTypeWrapper(EClass provider) {
-            this.provider = provider;
-        }
-
-        /**
-         * Returns the provider.
-         *
-         * @return the provider
-         */
-        public EClass getProviderType() {
-            return provider;
-        }
-
-        /**
-         * Returns the instances.
-         *
-         * @return the instances
-         */
-        public Map<URI, Provider> getInstances() {
-            return instances;
-        }
-    }
-
-    enum ModelTransactionState {
-        NONE, NEW
-    }
-
-    private static class ModelTransaction {
-
-        private List<EStructuralFeature> featurePath = new ArrayList<>();
-        private ModelTransactionState serviceState = ModelTransactionState.NONE;
-        private ModelTransactionState resourceState = ModelTransactionState.NONE;
-        private EClass service;
-
-        public void addFeature(EStructuralFeature feature) {
-            featurePath.add(feature);
-        }
-
-        /**
-         * Returns the featurePath.
-         *
-         * @return the featurePath
-         */
-        public List<EStructuralFeature> getFeaturePath() {
-            return featurePath;
-        }
-
-        /**
-         * Returns the service.
-         *
-         * @return the service
-         */
-        public EClass getService() {
-            return service;
-        }
-
-        /**
-         * Sets the service.
-         *
-         * @param service the service to set
-         */
-        public void setService(EClass service) {
-            this.service = service;
-        }
-
-        /**
-         * Returns the serviceState.
-         *
-         * @return the serviceState
-         */
-        public ModelTransactionState getServiceState() {
-            return serviceState;
-        }
-
-        /**
-         * Sets the serviceState.
-         *
-         * @param serviceState the serviceState to set
-         */
-        public void setServiceState(ModelTransactionState serviceState) {
-            this.serviceState = serviceState;
-        }
-
-        /**
-         * Returns the resourceState.
-         *
-         * @return the resourceState
-         */
-        public ModelTransactionState getResourceState() {
-            return resourceState;
-        }
-
-        /**
-         * Sets the resourceState.
-         *
-         * @param resourceState the resourceState to set
-         */
-        public void setResourceState(ModelTransactionState resourceState) {
-            this.resourceState = resourceState;
-        }
     }
 
     public void handleDataUpdate(String model, String provider, String service, String resource, Class<?> type,
@@ -582,8 +477,8 @@ public class NexusImpl {
         }
     }
 
-    public void setResourceMetadata(String modelName, String providerName, String serviceName,
-            String resourceName, String metadataKey, Object value, Instant timestamp) {
+    public void setResourceMetadata(String modelName, String providerName, String serviceName, String resourceName,
+            String metadataKey, Object value, Instant timestamp) {
         if (metadataKey == null || metadataKey.isEmpty()) {
             throw new IllegalArgumentException("Empty metadata key");
         }
@@ -614,11 +509,13 @@ public class NexusImpl {
         }
 
         // Remove current value, if any
-        final EList<FeatureCustomMetadata> extra = metadata.getExtra();
-        extra.stream().filter(e -> metadataKey.equals(e.getName())).findFirst().ifPresent(extra::remove);;
+        final List<FeatureCustomMetadata> extra = metadata.getExtra();
+        extra.stream().filter(e -> metadataKey.equals(e.getName())).findFirst().ifPresent(extra::remove);
+        ;
 
         // Store new metadata
-        final FeatureCustomMetadata customMetadata = sensinactPackage.getSensiNactFactory().createFeatureCustomMetadata();
+        final FeatureCustomMetadata customMetadata = sensinactPackage.getSensiNactFactory()
+                .createFeatureCustomMetadata();
         customMetadata.setName(metadataKey);
         customMetadata.setTimestamp(timestamp);
         customMetadata.setValue(value);

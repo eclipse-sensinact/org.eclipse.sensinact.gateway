@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Data In Motion - initial API and implementation 
+*   Data In Motion - initial API and implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.model.nexus.impl;
+package org.eclipse.sensinact.prototype.model.nexus.impl.emf;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,7 +37,7 @@ import org.eclipse.sensinact.model.core.ModelMetadata;
 
 /**
  * Some Helper methods to work with Ecores.
- * 
+ *
  * @author Juergen Albert
  * @since 5 Oct 2022
  */
@@ -129,7 +129,7 @@ public class EMFUtil {
 
     /**
      * TODO: What should we do if the type is unkwon?
-     * 
+     *
      * @param service
      * @param resource
      * @param type
@@ -162,7 +162,7 @@ public class EMFUtil {
     /**
      * Returns the Version of the containing {@link EClass} of the
      * {@link EStructuralFeature}
-     * 
+     *
      * @param feature the Feature
      * @return the version of the container
      */

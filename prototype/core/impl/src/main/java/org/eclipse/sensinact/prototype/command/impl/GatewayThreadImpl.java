@@ -23,7 +23,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.model.nexus.impl.NexusImpl;
+import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.NotificationAccumulatorImpl;
 import org.osgi.service.component.annotations.Activate;
@@ -41,7 +41,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     private final TypedEventBus typedEventBus;
 
-    private final NexusImpl nexusImpl;
+    private final ModelNexus nexusImpl;
 
     // TODO decide if we should just use an infinite queue
     private final BlockingQueue<WorkItem<?>> work = new ArrayBlockingQueue<>(4096);
@@ -56,7 +56,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     public GatewayThreadImpl(@Reference TypedEventBus typedEventBus, @Reference ResourceSet resourceSet,
             @Reference SensiNactPackage sensinactPackage) {
         this.typedEventBus = typedEventBus;
-        nexusImpl = new NexusImpl(resourceSet, sensinactPackage, this::getCurrentAccumulator);
+        nexusImpl = new ModelNexus(resourceSet, sensinactPackage, this::getCurrentAccumulator);
         start();
     }
 
@@ -113,9 +113,9 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     private class WorkItem<T> {
         private final Deferred<T> d;
         private final AbstractSensinactCommand<T> command;
-        private final NexusImpl nexusImpl;
+        private final ModelNexus nexusImpl;
 
-        public WorkItem(Deferred<T> d, AbstractSensinactCommand<T> command, NexusImpl nexusImpl) {
+        public WorkItem(Deferred<T> d, AbstractSensinactCommand<T> command, ModelNexus nexusImpl) {
             this.d = d;
             this.command = command;
             this.nexusImpl = nexusImpl;

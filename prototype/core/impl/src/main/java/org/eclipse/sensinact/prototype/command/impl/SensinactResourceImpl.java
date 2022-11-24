@@ -27,7 +27,7 @@ import org.eclipse.sensinact.prototype.command.SensinactService;
 import org.eclipse.sensinact.prototype.command.TimedValue;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
-import org.eclipse.sensinact.prototype.model.nexus.impl.NexusImpl;
+import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -37,16 +37,16 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     private final String name;
     private final SensinactService service;
     private final Class<?> type;
-    private final NexusImpl nexusImpl;
+    private final ModelNexus modelNexus;
     private final PromiseFactory promiseFactory;
 
     public SensinactResourceImpl(AtomicBoolean active, SensinactService service, String name, Class<?> type,
-            NotificationAccumulator accumulator, NexusImpl nexusImpl, PromiseFactory promiseFactory) {
+            NotificationAccumulator accumulator, ModelNexus nexusImpl, PromiseFactory promiseFactory) {
         super(active);
         this.service = service;
         this.name = name;
         this.type = type;
-        this.nexusImpl = nexusImpl;
+        this.modelNexus = nexusImpl;
         this.promiseFactory = promiseFactory;
     }
 
@@ -97,7 +97,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         SensinactService service = getService();
         SensinactProvider provider = service.getProvider();
 
-        nexusImpl.handleDataUpdate(provider.getModelName(), provider.getName(), service.getName(), getName(), getType(),
+        modelNexus.handleDataUpdate(provider.getModelName(), provider.getName(), service.getName(), getName(), getType(),
                 value, timestamp);
         return promiseFactory.resolved(null);
     }
@@ -107,7 +107,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         checkValid();
 
         final SensinactProvider snProvider = service.getProvider();
-        final Provider provider = nexusImpl.getProvider(snProvider.getModelName(), snProvider.getName());
+        final Provider provider = modelNexus.getProvider(snProvider.getModelName(), snProvider.getName());
         if (provider == null) {
             return null;
         }
@@ -147,7 +147,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
         final SensinactProvider provider = service.getProvider();
         try {
-            nexusImpl.setResourceMetadata(provider.getModelName(), provider.getName(), service.getName(), this.name,
+            modelNexus.setResourceMetadata(provider.getModelName(), provider.getName(), service.getName(), this.name,
                     name, value, timestamp);
             return promiseFactory.resolved(null);
         } catch (Throwable t) {
@@ -160,7 +160,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         checkValid();
 
         final SensinactProvider provider = service.getProvider();
-        final Map<String, Object> resourceMetadata = nexusImpl.getResourceMetadata(provider.getModelName(),
+        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider.getModelName(),
                 provider.getName(), service.getName(), name);
         if (resourceMetadata == null) {
             return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
@@ -174,7 +174,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         checkValid();
 
         final SensinactProvider provider = service.getProvider();
-        final Map<String, Object> resourceMetadata = nexusImpl.getResourceMetadata(provider.getModelName(),
+        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider.getModelName(),
                 provider.getName(), service.getName(), name);
         if (resourceMetadata == null) {
             return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
