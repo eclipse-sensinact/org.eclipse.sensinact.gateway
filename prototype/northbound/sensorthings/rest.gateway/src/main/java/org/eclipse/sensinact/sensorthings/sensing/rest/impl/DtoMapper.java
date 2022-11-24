@@ -117,9 +117,9 @@ public class DtoMapper {
             UriInfo uriInfo, String providerName) {
         HistoricalLocation historicalLocation = new HistoricalLocation();
 
-        TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, true);
+        final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, true);
         final Instant time;
-        if(location == null) {
+        if(location.getTimestamp() == null) {
             time = Instant.EPOCH;
         } else {
             time = location.getTimestamp();
@@ -167,7 +167,7 @@ public class DtoMapper {
                 "definition", String.valueOf(resource.metadata.get("sensorthings.unit.definition")));
 
         datastream.observedArea = getObservedArea(
-                getLocation(userSession, mapper, resource.provider, true).getValue());
+                getLocation(userSession, mapper, resource.provider, false).getValue());
         datastream.properties = resource.metadata;
 
         datastream.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("Datastreams({id})")
@@ -252,13 +252,14 @@ public class DtoMapper {
         final Instant time;
         if (locationResource.value == null) {
             if (allowNull) {
-                return null;
+                parsedLocation = null;
+                time = null;
+            } else {
+                Point point = new Point();
+                point.coordinates = new Coordinates();
+                parsedLocation = point;
+                time = Instant.EPOCH;
             }
-
-            Point point = new Point();
-            point.coordinates = new Coordinates();
-            parsedLocation = point;
-            time = Instant.EPOCH;
         } else {
             final Object rawValue = locationResource.value;
             if (rawValue instanceof GeoJsonObject) {
