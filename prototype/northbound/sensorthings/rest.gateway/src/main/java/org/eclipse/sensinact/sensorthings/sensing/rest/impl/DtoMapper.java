@@ -126,6 +126,7 @@ public class DtoMapper {
         }
 
         historicalLocation.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
+        historicalLocation.time = time;
 
         historicalLocation.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("HistoricalLocations({id})")
                 .resolveTemplate("id", historicalLocation.id).build().toString();

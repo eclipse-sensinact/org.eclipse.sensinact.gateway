@@ -84,7 +84,7 @@ public class ObservationsAccessImpl implements ObservationsAccess {
         Datastream d = DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
                 userSession.describeResource(provider, service, resource));
 
-        if(!id.equals(d.id)) {
+        if (!String.join("~", provider, service, resource).equals(d.id)) {
             throw new NotFoundException();
         }
 
