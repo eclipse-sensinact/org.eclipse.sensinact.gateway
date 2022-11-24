@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import jakarta.ws.rs.NameBinding;
 
 /**
@@ -20,6 +23,7 @@ import jakarta.ws.rs.NameBinding;
  * output to contain only the named property
  */
 @NameBinding
+@Retention(RetentionPolicy.RUNTIME)
 public @interface PropFilter {
 
 }

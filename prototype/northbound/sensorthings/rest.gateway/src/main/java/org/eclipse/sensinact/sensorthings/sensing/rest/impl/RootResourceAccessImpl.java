@@ -32,21 +32,29 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.RootResourceAccess;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class RootResourceAccessImpl implements RootResourceAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
 
     @Override
     public ResultList<Thing> getThings() {
+        SensiNactSession userSession = getSession();
         ResultList<Thing> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
@@ -57,38 +65,44 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
     @Override
     public ResultList<Location> getLocations() {
+        SensiNactSession userSession = getSession();
         ResultList<Location> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
-        list.value = providers.stream().map(p -> DtoMapper.toLocation(userSession, uriInfo, mapper, p.provider)).collect(toList());
+        list.value = providers.stream().map(p -> DtoMapper.toLocation(userSession, uriInfo, getMapper(), p.provider)).collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocations() {
+        SensiNactSession userSession = getSession();
         ResultList<HistoricalLocation> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
-        list.value = providers.stream().map(p -> DtoMapper.toHistoricalLocation(userSession, uriInfo, p.provider)).collect(toList());
+        list.value = providers.stream()
+                .map(p -> DtoMapper.toHistoricalLocation(userSession, getMapper(), uriInfo, p.provider))
+                .collect(toList());
         return list;
     }
 
     @Override
     public ResultList<Datastream> getDatastreams() {
+        SensiNactSession userSession = getSession();
         ResultList<Datastream> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
         list.value = providers.stream()
                 .flatMap(p -> p.services.stream().map(s -> userSession.describeService(p.provider, s)))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, uriInfo, r)).collect(toList());
+                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<Sensor> getSensors() {
+        SensiNactSession userSession = getSession();
         ResultList<Sensor> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
@@ -102,6 +116,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
     @Override
     public ResultList<Observation> getObservations() {
+        SensiNactSession userSession = getSession();
         ResultList<Observation> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
@@ -115,6 +130,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
     @Override
     public ResultList<ObservedProperty> getObservedProperties() {
+        SensiNactSession userSession = getSession();
         ResultList<ObservedProperty> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
@@ -128,11 +144,12 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
     @Override
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
+        SensiNactSession userSession = getSession();
         ResultList<FeatureOfInterest> list = new ResultList<>();
 
         List<ProviderDescription> providers = userSession.listProviders();
         list.value = providers.stream()
-                .map(p -> DtoMapper.toFeatureOfInterest(userSession, uriInfo, mapper, p.provider)).collect(toList());
+                .map(p -> DtoMapper.toFeatureOfInterest(userSession, uriInfo, getMapper(), p.provider)).collect(toList());
 
         return list;
     }

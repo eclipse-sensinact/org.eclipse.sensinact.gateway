@@ -30,18 +30,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    /**
+     * Returns a user session
+     */
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * Returns an object mapper
+     */
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
+    }
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
@@ -50,7 +63,7 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
 
         FeatureOfInterest foi;
         try {
-            foi = DtoMapper.toFeatureOfInterest(userSession, uriInfo, mapper, provider);
+            foi = DtoMapper.toFeatureOfInterest(getSession(), uriInfo, getMapper(), provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -65,8 +78,8 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
+        SensiNactSession userSession = getSession();
         ResultList<Observation> list = new ResultList<>();
-
         list.value = userSession.describeProvider(provider).services.stream()
                 .map(s -> userSession.describeService(provider, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
@@ -94,7 +107,7 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
 
         Observation o;
         try {
-            o = DtoMapper.toObservation(uriInfo, userSession.describeResource(provider2, service, resource));
+            o = DtoMapper.toObservation(uriInfo, getSession().describeResource(provider2, service, resource));
         } catch (Exception e) {
             throw new NotFoundException();
         }
@@ -123,9 +136,10 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
         String service = extractFirstIdSegment(id2.substring(provider2.length() + 1));
         String resource = extractFirstIdSegment(provider2.substring(provider.length() + service.length() + 2));
 
+        SensiNactSession userSession = getSession();
         Datastream d;
         try {
-            d = DtoMapper.toDatastream(userSession, uriInfo,
+            d = DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
                     userSession.describeResource(provider2, service, resource));
         } catch (Exception e) {
             throw new NotFoundException();

@@ -40,7 +40,7 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
             throws IOException {
         Boolean addCount = (Boolean) requestContext.getProperty(COUNT_PROP);
 
-        if(addCount) {
+        if(addCount != null && addCount) {
             Object entity = responseContext.getEntity();
             if(entity instanceof ResultList) {
                 ResultList<?> resultList = (ResultList<?>) entity;
@@ -53,7 +53,7 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
     public void filter(ContainerRequestContext requestContext) throws IOException {
         boolean addCount = false;
 
-        List<String> list = requestContext.getUriInfo().getQueryParameters().get("$count");
+        List<String> list = requestContext.getUriInfo().getQueryParameters().getOrDefault("$count", List.of());
         if(list.size() > 1) {
             requestContext.abortWith(Response
                     .status(Status.BAD_REQUEST)

@@ -12,18 +12,21 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
 
 import jakarta.ws.rs.core.Application;
 
-@Component
+@Component(service = Application.class)
 @JakartarsName("sensorthings")
+@JakartarsApplicationBase("/")
 public class SensinactSensorthingsApplication extends Application {
 
     @Reference
@@ -53,4 +56,8 @@ public class SensinactSensorthingsApplication extends Application {
         return sessionManager;
     }
 
+    @Override
+    public Map<String, Object> getProperties() {
+        return Map.of("session.manager", sessionManager);
+    }
 }

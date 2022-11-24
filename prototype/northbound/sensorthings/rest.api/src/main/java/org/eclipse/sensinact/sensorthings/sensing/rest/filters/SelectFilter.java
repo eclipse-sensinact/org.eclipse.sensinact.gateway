@@ -31,31 +31,39 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.Providers;
 
 /**
- * Implements the $orderby query parameter
+ * Implements the $select query parameter
  */
 @Priority(USER + 1)
 public class SelectFilter implements ContainerResponseFilter {
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        List<String> fields = requestContext.getUriInfo().getQueryParameters()
-                .get("$select").stream()
-                    .flatMap(s -> Arrays.stream(s.split(",")))
-                    .collect(toList());
+        List<String> fields = requestContext.getUriInfo().getQueryParameters().getOrDefault("$select", List.of());
+        if (fields.isEmpty()) {
+            return;
+        }
+
+        fields = fields.stream().flatMap(s -> Arrays.stream(s.split(","))).collect(toList());
 
         Object entity = responseContext.getEntity();
-        JsonNode json = mapper.valueToTree(entity);
+        JsonNode json = getMapper().valueToTree(entity);
 
-        if(entity instanceof ResultList) {
+        if (entity instanceof ResultList) {
             ArrayNode values = (ArrayNode) json.get("value");
-            for(JsonNode jn : values) {
-                if(jn.isObject()) {
+            for (JsonNode jn : values) {
+                if (jn.isObject()) {
                     ObjectNode on = (ObjectNode) jn;
                     on.retain(fields);
                 }

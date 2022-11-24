@@ -29,25 +29,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class SensorsAccessImpl implements SensorsAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    /**
+     * Returns a user session
+     */
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * Returns an object mapper
+     */
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
+    }
 
     @Override
     public Sensor getSensor(String id) {
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-        return DtoMapper.toSensor(uriInfo, userSession.describeResource(provider, service, resource));
+        return DtoMapper.toSensor(uriInfo, getSession().describeResource(provider, service, resource));
     }
 
     @Override
@@ -62,11 +75,13 @@ public class SensorsAccessImpl implements SensorsAccess {
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        return DtoMapper.toDatastream(userSession, uriInfo, userSession.describeResource(provider, service, resource));
+        return DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
+                userSession.describeResource(provider, service, resource));
     }
 
     @Override
@@ -80,7 +95,7 @@ public class SensorsAccessImpl implements SensorsAccess {
 
         ResultList<Observation> list = new ResultList<>();
         list.value = List
-                .of(DtoMapper.toObservation(uriInfo, userSession.describeResource(provider, service, resource)));
+                .of(DtoMapper.toObservation(uriInfo, getSession().describeResource(provider, service, resource)));
         return list;
     }
 
@@ -94,7 +109,7 @@ public class SensorsAccessImpl implements SensorsAccess {
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
         ObservedProperty o = DtoMapper.toObservedProperty(uriInfo,
-                userSession.describeResource(provider, service, resource));
+                getSession().describeResource(provider, service, resource));
 
         if (!id.equals(o.id)) {
             throw new NotFoundException();
@@ -114,7 +129,7 @@ public class SensorsAccessImpl implements SensorsAccess {
     @Override
     public Thing getSensorDatastreamThing(String id, String id2) {
         String provider = extractFirstIdSegment(id);
-        Thing t = DtoMapper.toThing(userSession, uriInfo, provider);
+        Thing t = DtoMapper.toThing(getSession(), uriInfo, provider);
         if (!id2.equals(t.id)) {
             throw new NotFoundException();
         }

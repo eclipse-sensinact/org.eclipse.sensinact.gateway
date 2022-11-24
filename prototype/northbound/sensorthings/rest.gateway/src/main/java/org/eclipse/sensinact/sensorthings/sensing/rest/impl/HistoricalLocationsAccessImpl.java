@@ -30,18 +30,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    /**
+     * Returns a user session
+     */
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * Returns an object mapper
+     * @return
+     */
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
+    }
 
     @Override
     public HistoricalLocation getHistoricalLocation(String id) {
@@ -50,7 +64,7 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
 
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -66,7 +80,7 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         getTimestampFromId(id);
 
         ResultList<Location> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toLocation(userSession, uriInfo, mapper, provider));
+        list.value = List.of(DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider));
 
         return list;
     }
@@ -76,7 +90,7 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        Location loc = DtoMapper.toLocation(userSession, uriInfo, mapper, provider);
+        Location loc = DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider);
 
         if (!id2.equals(loc.id)) {
             throw new NotFoundException();
@@ -90,7 +104,7 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         getTimestampFromId(id);
 
         ResultList<Thing> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toThing(userSession, uriInfo, provider));
+        list.value = List.of(DtoMapper.toThing(getSession(), uriInfo, provider));
 
         return list;
     }
@@ -109,7 +123,7 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
 
         Thing t;
         try {
-            t = DtoMapper.toThing(userSession, uriInfo, provider);
+            t = DtoMapper.toThing(getSession(), uriInfo, provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -124,12 +138,13 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ResultList<Datastream> list = new ResultList<>();
+        SensiNactSession userSession = getSession();
 
+        ResultList<Datastream> list = new ResultList<>();
         list.value = userSession.describeProvider(provider).services.stream()
                 .map(s -> userSession.describeService(provider, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, uriInfo, r)).collect(toList());
+                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
 
         return list;
     }

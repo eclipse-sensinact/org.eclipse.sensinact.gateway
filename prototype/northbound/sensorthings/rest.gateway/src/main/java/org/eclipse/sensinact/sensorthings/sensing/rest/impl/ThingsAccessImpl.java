@@ -33,35 +33,49 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class ThingsAccessImpl implements ThingsAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    /**
+     * Returns a user session
+     */
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * Returns an object mapper
+     */
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
+    }
 
     @Override
     public Thing getThing(String id) {
-        String provider = extractFirstIdSegment(id);
-        return DtoMapper.toThing(userSession, uriInfo, provider);
+        DtoMapper.validatedProviderId(id);
+        return DtoMapper.toThing(getSession(), uriInfo, id);
     }
 
     @Override
     public ResultList<Datastream> getThingDatastreams(String id) {
-        String provider = extractFirstIdSegment(id);
+        DtoMapper.validatedProviderId(id);
+
+        SensiNactSession userSession = getSession();
 
         ResultList<Datastream> list = new ResultList<>();
-
-        list.value = userSession.describeProvider(provider).services.stream()
-                .map(s -> userSession.describeService(provider, s))
+        list.value = userSession.describeProvider(id).services.stream()
+                .map(s -> userSession.describeService(id, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, uriInfo, r)).collect(toList());
+                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
 
         return list;
     }
@@ -74,9 +88,11 @@ public class ThingsAccessImpl implements ThingsAccess {
             throw new NotFoundException();
         }
 
+        SensiNactSession userSession = getSession();
+
         String service = extractFirstIdSegment(id2.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id2.substring(provider.length() + service.length() + 2));
-        Datastream d = DtoMapper.toDatastream(userSession, uriInfo,
+        Datastream d = DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
                 userSession.describeResource(provider, service, resource));
 
         if (!id2.equals(d.id)) {
@@ -92,6 +108,8 @@ public class ThingsAccessImpl implements ThingsAccess {
         if (!id.equals(provider)) {
             throw new NotFoundException();
         }
+
+        SensiNactSession userSession = getSession();
 
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -109,6 +127,8 @@ public class ThingsAccessImpl implements ThingsAccess {
         if (!id.equals(provider)) {
             throw new NotFoundException();
         }
+
+        SensiNactSession userSession = getSession();
 
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -130,6 +150,8 @@ public class ThingsAccessImpl implements ThingsAccess {
         if (!id.equals(provider)) {
             throw new NotFoundException();
         }
+
+        SensiNactSession userSession = getSession();
 
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -160,7 +182,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
@@ -182,7 +204,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
@@ -211,7 +233,7 @@ public class ThingsAccessImpl implements ThingsAccess {
         getTimestampFromId(id2);
 
         ResultList<Location> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toLocation(userSession, uriInfo, mapper, provider));
+        list.value = List.of(DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider));
 
         return list;
     }
@@ -221,7 +243,7 @@ public class ThingsAccessImpl implements ThingsAccess {
         String provider = extractFirstIdSegment(id);
 
         ResultList<Location> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toLocation(userSession, uriInfo, mapper, provider));
+        list.value = List.of(DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider));
 
         return list;
     }
@@ -236,7 +258,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         getTimestampFromId(id2);
 
-        Location l = DtoMapper.toLocation(userSession, uriInfo, mapper, provider);
+        Location l = DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider);
 
         if (!id2.equals(l.id)) {
             throw new NotFoundException();
@@ -252,7 +274,7 @@ public class ThingsAccessImpl implements ThingsAccess {
             throw new NotFoundException();
         }
         ResultList<Thing> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toThing(userSession, uriInfo, provider));
+        list.value = List.of(DtoMapper.toThing(getSession(), uriInfo, provider));
         return list;
     }
 
@@ -262,7 +284,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }

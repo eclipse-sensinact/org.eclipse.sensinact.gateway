@@ -19,11 +19,22 @@
   </parent>
   <artifactId>rest.gateway</artifactId>
 
+  <properties>
+    <gecko.jersey.version>6.0.0-SNAPSHOT</gecko.jersey.version>
+    <hk2.version>3.0.3</hk2.version>
+    <jersey.version>3.0.8</jersey.version>
+    <jetty.version>11.0.12</jetty.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>rest.api</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>geo-json</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -44,6 +55,23 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-testing-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-resolver-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-run-maven-plugin</artifactId>
+        <version>${bnd.version}</version>
+        <configuration>
+          <includeDependencyManagement>true</includeDependencyManagement>
+          <bndrun>integration-test.bndrun</bndrun>
+        </configuration>
       </plugin>
     </plugins>
   </build>

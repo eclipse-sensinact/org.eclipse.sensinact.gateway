@@ -16,8 +16,15 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.Feature;
+import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.gateway.geojson.Polygon;
 import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
+import org.eclipse.sensinact.prototype.command.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -26,12 +33,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.geojson.Feature;
-import org.geojson.FeatureCollection;
-import org.geojson.GeoJsonObject;
-import org.geojson.Point;
-import org.geojson.Polygon;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
@@ -73,10 +76,10 @@ public class DtoMapper {
     private static String getProperty(GeoJsonObject location, String propName) {
         if (location instanceof Feature) {
             Feature f = (Feature) location;
-            return toString(f.getProperty(propName));
+            return toString(f.properties.get(propName));
         } else if (location instanceof FeatureCollection) {
             FeatureCollection fc = (FeatureCollection) location;
-            return fc.getFeatures().stream().map(f -> toString(f.getProperty(propName))).filter(p -> p != null)
+            return fc.features.stream().map(f -> toString(f.properties.get(propName))).filter(p -> p != null)
                     .findFirst().orElse(null);
         }
         return null;
@@ -86,18 +89,9 @@ public class DtoMapper {
             String providerName) {
         Location location = new Location();
 
-        ResourceDescription locationResource = getProviderAdminField(userSession, providerName, "location");
-
-        Instant time;
-        GeoJsonObject object;
-        if (locationResource.value == null) {
-            object = new Point(0, 0);
-            time = Instant.EPOCH;
-        } else {
-            object = GeoJsonObject.class.isInstance(locationResource.value) ? (GeoJsonObject) locationResource.value
-                    : mapper.convertValue(locationResource.value, GeoJsonObject.class);
-            time = locationResource.timestamp;
-        }
+        final TimedValue<GeoJsonObject> rcLocation = getLocation(userSession, mapper, providerName, false);
+        final Instant time = rcLocation.getTimestamp();
+        final GeoJsonObject object = rcLocation.getValue();
 
         location.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
 
@@ -119,17 +113,16 @@ public class DtoMapper {
         return location;
     }
 
-    public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, UriInfo uriInfo,
-            String providerName) {
+    public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, ObjectMapper mapper,
+            UriInfo uriInfo, String providerName) {
         HistoricalLocation historicalLocation = new HistoricalLocation();
 
-        ResourceDescription locationResource = getProviderAdminField(userSession, providerName, "location");
-
-        Instant time;
-        if (locationResource.value == null) {
+        final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, true);
+        final Instant time;
+        if(location.getTimestamp() == null) {
             time = Instant.EPOCH;
         } else {
-            time = locationResource.timestamp;
+            time = location.getTimestamp();
         }
 
         historicalLocation.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
@@ -147,16 +140,17 @@ public class DtoMapper {
     private static Polygon getObservedArea(GeoJsonObject object) {
 
         if (object instanceof Feature) {
-            object = ((Feature) object).getGeometry();
+            object = ((Feature) object).geometry;
         } else if (object instanceof FeatureCollection) {
             // TODO is there a better mapping?
-            object = ((FeatureCollection) object).getFeatures().stream().map(Feature::getGeometry)
+            object = ((FeatureCollection) object).features.stream().map((f) -> f.geometry)
                     .filter(Polygon.class::isInstance).map(Polygon.class::cast).findFirst().orElse(null);
         }
         return object instanceof Polygon ? (Polygon) object : null;
     }
 
-    public static Datastream toDatastream(SensiNactSession userSession, UriInfo uriInfo, ResourceDescription resource) {
+    public static Datastream toDatastream(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
+            ResourceDescription resource) {
         Datastream datastream = new Datastream();
 
         datastream.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
@@ -167,15 +161,16 @@ public class DtoMapper {
         // TODO can we make this more fine-grained
         datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
 
-        datastream.unitOfMeasurement = Map.of("symbol", resource.metadata.get("unit"), "name",
-                resource.metadata.get("sensorthings.unit.name"), "definition",
-                resource.metadata.get("sensorthings.unit.definition"));
+        datastream.unitOfMeasurement = Map.of(
+                "symbol", String.valueOf(resource.metadata.get("unit")),
+                "name", String.valueOf(resource.metadata.get("sensorthings.unit.name")),
+                "definition", String.valueOf(resource.metadata.get("sensorthings.unit.definition")));
 
         datastream.observedArea = getObservedArea(
-                (GeoJsonObject) getProviderAdminField(userSession, resource.provider, "location").value);
+                getLocation(userSession, mapper, resource.provider, false).getValue());
         datastream.properties = resource.metadata;
 
-        datastream.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("Sensors({id})")
+        datastream.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("Datastreams({id})")
                 .resolveTemplate("id", datastream.id).build().toString();
         datastream.observationsLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Observations").build()
                 .toString();
@@ -211,7 +206,7 @@ public class DtoMapper {
     public static Observation toObservation(UriInfo uriInfo, ResourceDescription resource) {
         Observation observation = new Observation();
 
-        observation.id = String.format("%s~%s~%s~s", resource.provider, resource.service, resource.resource,
+        observation.id = String.format("%s~%s~%s~%s", resource.provider, resource.service, resource.resource,
                 Long.toString(resource.timestamp.toEpochMilli(), 16));
 
         observation.resultTime = resource.timestamp;
@@ -249,22 +244,61 @@ public class DtoMapper {
         return observedProperty;
     }
 
+    private static TimedValue<GeoJsonObject> getLocation(SensiNactSession userSession, ObjectMapper mapper,
+            String providerName, boolean allowNull) {
+        ResourceDescription locationResource = getProviderAdminField(userSession, providerName, "location");
+
+        final GeoJsonObject parsedLocation;
+        final Instant time;
+        if (locationResource.value == null) {
+            if (allowNull) {
+                parsedLocation = null;
+                time = null;
+            } else {
+                Point point = new Point();
+                point.coordinates = new Coordinates();
+                parsedLocation = point;
+                time = Instant.EPOCH;
+            }
+        } else {
+            final Object rawValue = locationResource.value;
+            if (rawValue instanceof GeoJsonObject) {
+                parsedLocation = (GeoJsonObject) rawValue;
+            } else if (rawValue instanceof String) {
+                try {
+                    parsedLocation = mapper.readValue((String) rawValue, GeoJsonObject.class);
+                } catch (JsonProcessingException ex) {
+                    if (allowNull) {
+                        return null;
+                    }
+                    throw new RuntimeException("Invalid resource location content", ex);
+                }
+            } else {
+                parsedLocation = mapper.convertValue(locationResource.value, GeoJsonObject.class);
+            }
+            time = locationResource.timestamp;
+        }
+
+        return new TimedValue<GeoJsonObject>() {
+            @Override
+            public Instant getTimestamp() {
+                return time;
+            }
+
+            @Override
+            public GeoJsonObject getValue() {
+                return parsedLocation;
+            }
+        };
+    }
+
     public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, UriInfo uriInfo,
             ObjectMapper mapper, String providerName) {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest();
 
-        ResourceDescription locationResource = getProviderAdminField(userSession, providerName, "location");
-
-        Instant time;
-        GeoJsonObject object;
-        if (locationResource.value == null) {
-            object = new Point(0, 0);
-            time = Instant.EPOCH;
-        } else {
-            object = GeoJsonObject.class.isInstance(locationResource.value) ? (GeoJsonObject) locationResource.value
-                    : mapper.convertValue(locationResource.value, GeoJsonObject.class);
-            time = locationResource.timestamp;
-        }
+        final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, false);
+        final Instant time = location.getTimestamp();
+        final GeoJsonObject object = location.getValue();
 
         featureOfInterest.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
 
@@ -286,8 +320,15 @@ public class DtoMapper {
     }
 
     public static String extractFirstIdSegment(String id) {
+        if(id.isEmpty()) {
+            throw new BadRequestException("Invalid id");
+        }
+
         int idx = id.indexOf('~');
-        if(idx < 1 || idx == id.length() - 1) {
+        if (idx == -1) {
+            // No segment found, return the whole ID
+            return id;
+        } else if (idx == 0 || idx == id.length() - 1) {
             throw new BadRequestException("Invalid id");
         }
         return id.substring(0, idx);
@@ -304,4 +345,14 @@ public class DtoMapper {
             throw new BadRequestException("Invalid id");
         }
     }
+
+    /**
+     * Ensure the given ID contains a single segment
+     */
+    public static void validatedProviderId(String id) {
+        if (id.contains("~")) {
+            throw new BadRequestException("Multi-segments ID found");
+        }
+    }
+
 }

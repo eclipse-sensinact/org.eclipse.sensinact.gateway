@@ -30,7 +30,6 @@
 
   <properties>
     <sensinact.core.version>0.0.1-SNAPSHOT</sensinact.core.version>
-    <jackson.version>2.13.4</jackson.version>
   </properties>
 
   <dependencyManagement>
@@ -38,6 +37,11 @@
       <dependency>
         <groupId>org.eclipse.sensinact.gateway.core</groupId>
         <artifactId>api</artifactId>
+        <version>${sensinact.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>geo-json</artifactId>
         <version>${sensinact.core.version}</version>
       </dependency>
       <dependency>
@@ -69,11 +73,6 @@
         <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
         <artifactId>jackson-jakarta-rs-json-provider</artifactId>
         <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>de.grundid.opendatalab</groupId>
-        <artifactId>geojson-jackson</artifactId>
-        <version>1.14</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

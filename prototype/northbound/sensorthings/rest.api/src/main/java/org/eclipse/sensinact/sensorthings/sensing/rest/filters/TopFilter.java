@@ -41,6 +41,9 @@ public class TopFilter implements ContainerRequestFilter, ContainerResponseFilte
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         Integer top = (Integer) requestContext.getProperty(TOP_PROP);
+        if(top == null) {
+            return;
+        }
 
         Object entity = responseContext.getEntity();
         if(entity instanceof ResultList) {
@@ -55,7 +58,9 @@ public class TopFilter implements ContainerRequestFilter, ContainerResponseFilte
         int top = 0;
 
         List<String> list = requestContext.getUriInfo().getQueryParameters().get("$top");
-        if(list.size() > 1) {
+        if (list == null) {
+            return;
+        } else if (list.size() > 1) {
             requestContext.abortWith(Response
                     .status(Status.BAD_REQUEST)
                     .entity("Only one $top parameter may be provided")
