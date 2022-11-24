@@ -13,16 +13,17 @@
 package org.eclipse.sensinact.gateway.launcher;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
@@ -31,6 +32,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -46,6 +48,8 @@ import org.osgi.service.feature.Feature;
 import org.osgi.service.feature.FeatureBundle;
 import org.osgi.service.feature.FeatureService;
 import org.osgi.service.feature.ID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(configurationPid = "sensinact.launcher")
 public class FeatureLauncher {
@@ -57,6 +61,8 @@ public class FeatureLauncher {
 
         String featureDir() default "features";
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureLauncher.class);
 
     @Reference
     FeatureService featureService;
@@ -78,8 +84,8 @@ public class FeatureLauncher {
      */
     private final List<String> features = new ArrayList<>();
 
-    private File repository;
-    private File featureDir;
+    private Path repository;
+    private Path featureDir;
 
     @Activate
     void start(BundleContext context, Config config) {
@@ -91,15 +97,20 @@ public class FeatureLauncher {
 
     @Modified
     void update(Config config) {
-        repository = new File(config.repository());
-        featureDir = new File(config.featureDir());
+        repository = Paths.get(config.repository());
+        featureDir = Paths.get(config.featureDir());
 
         List<String> newFeatures = stream(config.features()).collect(toList());
+
+        LOGGER.info("Feature installation for features {} requested using repository {} and feature directory {}",
+                newFeatures, repository, featureDir);
 
         /**
          * Removed, in installation order
          */
         List<String> removed = features.stream().filter(s -> !newFeatures.contains(s)).collect(toList());
+
+        LOGGER.info("The following features {} are no longer required and will be removed.", removed);
 
         // First remove all removes
         removeFeatures(removed);
@@ -110,6 +121,7 @@ public class FeatureLauncher {
         features.clear();
         features.addAll(newFeatures);
 
+        LOGGER.info("Feature update complete.");
     }
 
     @Deactivate
@@ -142,6 +154,8 @@ public class FeatureLauncher {
             }
         }
 
+        LOGGER.debug("The following bundles {} are no longer required and will be removed.", orderedBundlesForRemoval);
+
         // Normal iteration order is now reverse install order
         // First we stop then we uninstall
         for (String s : orderedBundlesForRemoval) {
@@ -150,8 +164,7 @@ public class FeatureLauncher {
                 try {
                     b.stop();
                 } catch (BundleException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn("An error occurred stopping bundle {}.", s, e);
                 }
             }
         }
@@ -162,8 +175,7 @@ public class FeatureLauncher {
                 try {
                     b.uninstall();
                 } catch (BundleException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn("An error occurred uninstalling bundle {}.", s, e);
                 }
             }
         }
@@ -175,10 +187,13 @@ public class FeatureLauncher {
 
         List<String> bundles = featureModel.getBundles().stream().map(fb -> fb.getID().toString()).collect(toList());
         if (featuresToBundles.containsKey(feature)) {
+            LOGGER.debug("Updating feature {}", feature);
             if (featuresToBundles.get(feature).equals(bundles)) {
                 // No work to do, already installed
+                LOGGER.debug("The feature {} is already up to date", feature);
                 return;
             } else {
+                LOGGER.debug("The feature {} is out of date and will be removed and re-installed", feature);
                 removeFeatures(List.of(feature));
             }
         }
@@ -202,8 +217,7 @@ public class FeatureLauncher {
             try {
                 b.start();
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warn("An error occurred starting a bundle in feature {}", feature, e);
             }
         }
 
@@ -211,46 +225,50 @@ public class FeatureLauncher {
 
     private Feature loadFeature(String feature) {
 
-        File featureFile;
+        LOGGER.debug("Loading feature model {}", feature);
+
+        Path featureFile;
         if (feature.indexOf(':') >= 0) {
-            ID id = featureService.getIDfromMavenCoordinates(feature);
-            featureFile = getFileFromRepository(id, "json");
+            featureFile = getFileFromRepository(featureService.getIDfromMavenCoordinates(feature), "json");
         } else {
             String simpleFileName = feature;
             if (!simpleFileName.endsWith(".json")) {
                 simpleFileName += ".json";
             }
 
-            featureFile = new File(featureDir, simpleFileName);
+            featureFile = featureDir.resolve(simpleFileName);
         }
 
-        if (featureFile.exists()) {
-            try (FileReader fr = new FileReader(featureFile, UTF_8)) {
+        if (Files.isRegularFile(featureFile)) {
+            try (Reader fr = Files.newBufferedReader(featureFile, UTF_8)) {
                 return featureService.readFeature(fr);
             } catch (IOException ioe) {
-                // TODO Auto-generated catch block
-                ioe.printStackTrace();
+                LOGGER.warn("Failed to parse feature {} from file {}", feature, featureFile, ioe);
             }
+        } else {
+            LOGGER.warn("No feature file for feature {}", feature);
         }
 
         return null;
     }
 
     private Bundle installBundle(ID bundleIdentifier) {
-        try (InputStream is = getBundle(bundleIdentifier)) {
+        LOGGER.debug("Installing bundle {}", bundleIdentifier.toString());
+        try (InputStream is = newInputStream(getFileFromRepository(bundleIdentifier, "jar"))) {
             return context.installBundle(bundleIdentifier.toString(), is);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn("An error occurred installing bundle {}", bundleIdentifier.toString(), e);
         }
         return null;
     }
 
-    private File getFileFromRepository(ID id, String defaultType) {
-        File file;
+    private Path getFileFromRepository(ID id, String defaultType) {
+        LOGGER.debug("Searching for feature {} in repository {}", id, repository);
+
+        Path file;
         String groupPath = id.getGroupId().replace('.', File.separatorChar);
 
-        Path path = repository.toPath().resolve(groupPath).resolve(id.getArtifactId()).resolve(id.getVersion());
+        Path path = repository.resolve(groupPath).resolve(id.getArtifactId()).resolve(id.getVersion());
 
         String fileName;
         if (id.getClassifier().isEmpty()) {
@@ -261,9 +279,12 @@ public class FeatureLauncher {
 
         fileName = fileName.concat(String.format(".%s", id.getType().orElse(defaultType)));
 
-        file = path.resolve(fileName).toFile();
+        file = path.resolve(fileName);
 
-        if (!file.exists() && id.getVersion().endsWith("-SNAPSHOT")) {
+        LOGGER.debug("Expected file path for feature {} is {}", id, file);
+
+        if (!Files.isRegularFile(file) && id.getVersion().endsWith("-SNAPSHOT")) {
+            LOGGER.debug("File not found, looking for the latest SNAPSHOT");
             String regex;
             if (id.getClassifier().isEmpty()) {
                 regex = String.format("%s-%s-\\d{8}\\.\\d{6}-\\d+\\.%s", id.getArtifactId(),
@@ -277,21 +298,22 @@ public class FeatureLauncher {
 
             Pattern pattern = Pattern.compile(regex);
 
+            LOGGER.debug("File not found, looking for the latest SNAPSHOT");
             try {
-                file = Files.list(path).map(p -> p.getFileName().toString()).filter(pattern.asMatchPredicate())
-                        .sorted(Comparator.reverseOrder()).findFirst().map(s -> path.resolve(s).toFile()).orElse(file);
+                Optional<Path> found = Files.list(path).map(p -> p.getFileName().toString())
+                        .filter(pattern.asMatchPredicate()).sorted(Comparator.reverseOrder()).findFirst()
+                        .map(s -> path.resolve(s));
+
+                if (found.isPresent()) {
+                    file = found.get();
+                    LOGGER.debug("A SNAPSHOT file was found for feature {} at {}", id, file);
+                }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warn("An error occurred while searching for snapshot files", e);
             }
         }
 
         return file;
-    }
-
-    private InputStream getBundle(ID id) throws IOException {
-        File bundleFile = getFileFromRepository(id, "jar");
-        return new FileInputStream(bundleFile);
     }
 
 }
