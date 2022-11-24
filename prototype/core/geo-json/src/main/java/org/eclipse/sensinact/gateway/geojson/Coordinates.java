@@ -35,5 +35,5 @@ public class Coordinates {
     /**
      * The elevation will be {@link Double#NaN} if not set
      */
-    public double elevation;
+    public double elevation = Double.NaN;
 }
