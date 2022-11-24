@@ -39,16 +39,9 @@ import org.osgi.util.promise.PromiseFactory;
 @Component
 public class GatewayThreadImpl extends Thread implements GatewayThread {
 
-    @Reference
-    TypedEventBus typedEventBus;
+    private final TypedEventBus typedEventBus;
 
-    @Reference
-    ResourceSet resourceSet;
-
-    @Reference
-    SensiNactPackage sensinactPackage;
-
-    private NexusImpl nexusImpl;
+    private final NexusImpl nexusImpl;
 
     // TODO decide if we should just use an infinite queue
     private final BlockingQueue<WorkItem<?>> work = new ArrayBlockingQueue<>(4096);
@@ -60,7 +53,9 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
 
     @Activate
-    void activate() {
+    public GatewayThreadImpl(@Reference TypedEventBus typedEventBus, @Reference ResourceSet resourceSet,
+            @Reference SensiNactPackage sensinactPackage) {
+        this.typedEventBus = typedEventBus;
         nexusImpl = new NexusImpl(resourceSet, sensinactPackage, this::getCurrentAccumulator);
         start();
     }
