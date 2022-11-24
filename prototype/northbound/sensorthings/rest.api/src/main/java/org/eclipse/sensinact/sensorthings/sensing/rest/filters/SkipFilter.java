@@ -41,6 +41,9 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         Integer skip = (Integer) requestContext.getProperty(SKIP_PROP);
+        if (skip == null) {
+            return;
+        }
 
         Object entity = responseContext.getEntity();
         if(entity instanceof ResultList) {
@@ -55,6 +58,10 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
         int skip = 0;
 
         List<String> list = requestContext.getUriInfo().getQueryParameters().get("$skip");
+        if (list == null) {
+            return;
+        }
+
         if(list.size() > 1) {
             requestContext.abortWith(Response
                     .status(Status.BAD_REQUEST)

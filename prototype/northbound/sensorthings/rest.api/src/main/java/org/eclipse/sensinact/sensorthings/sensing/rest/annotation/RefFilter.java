@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import jakarta.ws.rs.NameBinding;
 
 /**
@@ -19,6 +22,7 @@ import jakarta.ws.rs.NameBinding;
  * should be filtered to contain only the self link
  */
 @NameBinding
+@Retention(RetentionPolicy.RUNTIME)
 public @interface RefFilter {
 
 }

@@ -17,7 +17,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import java.time.Instant;
 import java.util.Map;
 
-import org.geojson.Polygon;
+import org.eclipse.sensinact.gateway.geojson.Polygon;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;

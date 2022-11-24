@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
-import org.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

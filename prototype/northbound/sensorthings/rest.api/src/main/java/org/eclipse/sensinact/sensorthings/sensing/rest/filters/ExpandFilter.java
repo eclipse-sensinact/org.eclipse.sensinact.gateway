@@ -40,7 +40,7 @@ public class ExpandFilter implements ContainerRequestFilter, ContainerResponseFi
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
-        List<String> list = requestContext.getUriInfo().getQueryParameters().get("$expand");
+        List<String> list = requestContext.getUriInfo().getQueryParameters().getOrDefault("$expand", List.of());
         if (!list.isEmpty()) {
             requestContext.abortWith(Response
                     .status(Status.NOT_IMPLEMENTED)

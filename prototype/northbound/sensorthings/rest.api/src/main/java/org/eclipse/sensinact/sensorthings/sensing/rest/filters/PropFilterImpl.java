@@ -38,6 +38,12 @@ public class PropFilterImpl implements WriterInterceptor {
         Object entity = context.getEntity();
 
         String propName = uriInfo.getPathParameters().getFirst("prop");
+        if(propName == null) {
+            // No property filter
+            context.proceed();
+            return;
+        }
+
         boolean rawValue = uriInfo.getPath().endsWith("/$value");
 
         try {

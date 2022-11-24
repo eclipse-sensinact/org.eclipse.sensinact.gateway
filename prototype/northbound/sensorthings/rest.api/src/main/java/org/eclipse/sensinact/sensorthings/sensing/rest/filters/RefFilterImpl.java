@@ -20,6 +20,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.RefFilter;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.ext.WriterInterceptor;
@@ -50,6 +54,17 @@ public class RefFilterImpl implements WriterInterceptor {
             Self newEntity = new Self();
             newEntity.selfLink = self.selfLink;
             context.setEntity(newEntity);
+        } else if(entity instanceof ObjectNode) {
+            ObjectNode node = (ObjectNode) entity;
+            if(!node.isArray()) {
+                node.retain("@iot.selfLink");
+            } else {
+                ArrayNode array = (ArrayNode) entity;
+                for(int i = 0 ; i < array.size() ; i++) {
+                    final JsonNode jsonNode = array.get(i);
+                    array.set(i, ((ObjectNode) jsonNode).get("@iot.selfLink"));
+                }
+            }
         } else if (entity != null) {
             throw new InternalServerErrorException("The entity " + entity + " does not have a reference");
         }

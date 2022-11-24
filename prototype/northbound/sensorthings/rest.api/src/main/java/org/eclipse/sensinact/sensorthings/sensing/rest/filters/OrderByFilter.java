@@ -15,11 +15,13 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 import static jakarta.ws.rs.Priorities.ENTITY_CODER;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.BadRequestException;
@@ -43,17 +45,26 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
             throws IOException {
         @SuppressWarnings("unchecked")
         Comparator<Object> comparator = (Comparator<Object>) requestContext.getProperty(ORDERBY_PROP);
+        if (comparator == null) {
+            return;
+        }
 
         Object entity = responseContext.getEntity();
-        if(entity instanceof ResultList) {
-            ResultList<?> resultList = (ResultList<?>) entity;
-            resultList.value.sort(comparator);
+        if (entity instanceof ResultList) {
+            @SuppressWarnings("unchecked")
+            ResultList<Self> resultList = (ResultList<Self>) entity;
+            List<Self> sortedList = new ArrayList<>(resultList.value);
+            sortedList.sort(comparator);
+            resultList.value = List.copyOf(sortedList);
         }
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         List<String> list = requestContext.getUriInfo().getQueryParameters().get("$orderby");
+        if (list == null) {
+            return;
+        }
 
         try {
             Comparator<Object> comparator = list.stream()
@@ -97,8 +108,8 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
     @SuppressWarnings("unchecked")
     public Comparable<Object> get(Object o, String[] path) {
         Object result = o;
-        for(String s : path) {
-            if(result == null) {
+        for (String s : path) {
+            if (result == null) {
                 break;
             }
             try {

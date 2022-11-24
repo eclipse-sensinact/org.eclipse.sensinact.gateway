@@ -34,29 +34,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class DatastreamsAccessImpl implements DatastreamsAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
 
     @Override
     public Datastream getDatastream(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-        return DtoMapper.toDatastream(userSession, uriInfo, userSession.describeResource(provider, service, resource));
+        return DtoMapper.toDatastream(userSession, getMapper(), uriInfo, userSession.describeResource(provider, service, resource));
     }
 
     @Override
     public ResultList<Observation> getDatastreamObservations(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -69,6 +78,7 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public Observation getDatastreamObservation(String id, String id2) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -88,12 +98,14 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public FeatureOfInterest getDatastreamObservationFeatureOfInterest(String id, String id2) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
-        return DtoMapper.toFeatureOfInterest(userSession, uriInfo, mapper, provider);
+        return DtoMapper.toFeatureOfInterest(userSession, uriInfo, getMapper(), provider);
     }
 
     @Override
     public ObservedProperty getDatastreamObservedProperty(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -116,6 +128,7 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public Sensor getDatastreamSensor(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -135,12 +148,14 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public Thing getDatastreamThing(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         return DtoMapper.toThing(userSession, uriInfo, provider);
     }
 
     @Override
     public ResultList<Datastream> getDatastreamThingDatastreams(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
 
         ResultList<Datastream> list = new ResultList<>();
@@ -148,19 +163,20 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
         list.value = userSession.describeProvider(provider).services.stream()
                 .map(s -> userSession.describeService(provider, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, uriInfo, r)).collect(toList());
+                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<HistoricalLocation> getDatastreamThingHistoricalLocations(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(userSession, getMapper(), uriInfo, provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
@@ -172,12 +188,13 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public ResultList<Location> getDatastreamThingLocations(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         Location hl;
         try {
-            hl = DtoMapper.toLocation(userSession, uriInfo, mapper, provider);
+            hl = DtoMapper.toLocation(userSession, uriInfo, getMapper(), provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }

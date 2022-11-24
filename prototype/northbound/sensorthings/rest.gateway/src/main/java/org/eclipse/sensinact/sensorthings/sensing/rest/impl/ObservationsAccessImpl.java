@@ -32,18 +32,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class ObservationsAccessImpl implements ObservationsAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    /**
+     * Returns a user session
+     */
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * Returns an object mapper
+     * @return
+     */
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
+    }
 
     @Override
     public Observation getObservation(String id) {
@@ -51,7 +65,7 @@ public class ObservationsAccessImpl implements ObservationsAccess {
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        Observation o = DtoMapper.toObservation(uriInfo, userSession.describeResource(provider, service, resource));
+        Observation o = DtoMapper.toObservation(uriInfo, getSession().describeResource(provider, service, resource));
 
         if(!id.equals(o.id)) {
             throw new NotFoundException();
@@ -62,11 +76,13 @@ public class ObservationsAccessImpl implements ObservationsAccess {
 
     @Override
     public Datastream getObservationDatastream(String id) {
+        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        Datastream d = DtoMapper.toDatastream(userSession, uriInfo, userSession.describeResource(provider, service, resource));
+        Datastream d = DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
+                userSession.describeResource(provider, service, resource));
 
         if(!id.equals(d.id)) {
             throw new NotFoundException();
@@ -88,7 +104,7 @@ public class ObservationsAccessImpl implements ObservationsAccess {
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        return DtoMapper.toObservedProperty(uriInfo, userSession.describeResource(provider, service, resource));
+        return DtoMapper.toObservedProperty(uriInfo, getSession().describeResource(provider, service, resource));
     }
 
     @Override
@@ -97,19 +113,19 @@ public class ObservationsAccessImpl implements ObservationsAccess {
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        return DtoMapper.toSensor(uriInfo, userSession.describeResource(provider, service, resource));
+        return DtoMapper.toSensor(uriInfo, getSession().describeResource(provider, service, resource));
     }
 
     @Override
     public Thing getObservationDatastreamThing(String id) {
         String provider = extractFirstIdSegment(id);
-        return DtoMapper.toThing(userSession, uriInfo, provider);
+        return DtoMapper.toThing(getSession(), uriInfo, provider);
     }
 
     @Override
     public FeatureOfInterest getObservationFeatureOfInterest(String id) {
         String provider = extractFirstIdSegment(id);
-        return DtoMapper.toFeatureOfInterest(userSession, uriInfo, mapper, provider);
+        return DtoMapper.toFeatureOfInterest(getSession(), uriInfo, getMapper(), provider);
     }
 
     @Override
@@ -117,8 +133,9 @@ public class ObservationsAccessImpl implements ObservationsAccess {
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ResultList<Observation> list = new ResultList<>();
+        SensiNactSession userSession = getSession();
 
+        ResultList<Observation> list = new ResultList<>();
         list.value = userSession.describeProvider(provider).services.stream()
                 .map(s -> userSession.describeService(provider, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))

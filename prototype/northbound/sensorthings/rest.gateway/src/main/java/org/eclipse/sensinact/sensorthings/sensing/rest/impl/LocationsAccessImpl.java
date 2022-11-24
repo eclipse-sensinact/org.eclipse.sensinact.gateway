@@ -29,23 +29,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 
 public class LocationsAccessImpl implements LocationsAccess {
-
-    @Context
-    SensiNactSession userSession;
 
     @Context
     UriInfo uriInfo;
 
     @Context
-    ObjectMapper mapper;
+    Providers providers;
+
+    /**
+     * Returns a user session
+     */
+    private SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * Returns an object mapper
+     * @return
+     */
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
+    }
+
 
     @Override
     public Location getLocation(String id) {
         String provider = DtoMapper.extractFirstIdSegment(id);
-        Location l = DtoMapper.toLocation(userSession, uriInfo, mapper, provider);
+        Location l = DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider);
 
         if(!id.equals(l.id)) {
             throw new NotFoundException();
@@ -64,7 +79,7 @@ public class LocationsAccessImpl implements LocationsAccess {
     @Override
     public HistoricalLocation getLocationHistoricalLocation(String id, String id2) {
         String provider = DtoMapper.extractFirstIdSegment(id);
-        HistoricalLocation hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
+        HistoricalLocation hl = DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, provider);
 
         if(!id2.equals(hl.id)) {
             throw new NotFoundException();
@@ -78,7 +93,7 @@ public class LocationsAccessImpl implements LocationsAccess {
             throw new NotFoundException();
         }
         String provider = DtoMapper.extractFirstIdSegment(id);
-        return DtoMapper.toThing(userSession, uriInfo, provider);
+        return DtoMapper.toThing(getSession(), uriInfo, provider);
     }
 
     @Override
@@ -92,26 +107,27 @@ public class LocationsAccessImpl implements LocationsAccess {
     public ResultList<Thing> getLocationThings(String id) {
         String provider = DtoMapper.extractFirstIdSegment(id);
         ResultList<Thing> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toThing(userSession, uriInfo, provider));
+        list.value = List.of(DtoMapper.toThing(getSession(), uriInfo, provider));
         return list;
     }
 
     @Override
     public Thing getLocationThing(String id, String id2) {
         String provider = DtoMapper.extractFirstIdSegment(id);
-        return DtoMapper.toThing(userSession, uriInfo, provider);
+        return DtoMapper.toThing(getSession(), uriInfo, provider);
     }
 
     @Override
     public ResultList<Datastream> getLocationThingDatastreams(String id, String id2) {
         String provider = extractFirstIdSegment(id);
 
-        ResultList<Datastream> list = new ResultList<>();
+        SensiNactSession userSession = getSession();
 
+        ResultList<Datastream> list = new ResultList<>();
         list.value = userSession.describeProvider(provider).services.stream()
                 .map(s -> userSession.describeService(provider, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, uriInfo, r)).collect(toList());
+                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
 
         return list;
     }
@@ -122,7 +138,7 @@ public class LocationsAccessImpl implements LocationsAccess {
 
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(userSession, uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, provider);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }

@@ -23,9 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
-import org.geojson.LngLatAlt;
-import org.geojson.Point;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -141,8 +141,8 @@ class JsonMappingTest {
             assertEquals(name, location.name);
             assertEquals("application/vnd.geo+json", location.encodingType);
             assertInstanceOf(Point.class, location.location);
-            assertEquals(longitude, ((Point)location.location).getCoordinates().getLongitude());
-            assertEquals(latitude, ((Point)location.location).getCoordinates().getLatitude());
+            assertEquals(longitude, ((Point)location.location).coordinates.longitude);
+            assertEquals(latitude, ((Point)location.location).coordinates.latitude);
             assertEquals(things, location.thingsLink);
             assertEquals(historicalLocations, location.historicalLocationsLink);
         }
@@ -359,8 +359,8 @@ class JsonMappingTest {
             assertEquals(description, featureOfInterest.description);
             assertEquals("application/vnd.geo+json", featureOfInterest.encodingType);
             assertInstanceOf(Point.class, featureOfInterest.feature);
-            assertEquals(longitude, ((Point)featureOfInterest.feature).getCoordinates().getLongitude());
-            assertEquals(latitude, ((Point)featureOfInterest.feature).getCoordinates().getLatitude());
+            assertEquals(longitude, ((Point)featureOfInterest.feature).coordinates.longitude);
+            assertEquals(latitude, ((Point)featureOfInterest.feature).coordinates.latitude);
             assertEquals(observations, featureOfInterest.observationsLink);
         }
     }
@@ -397,7 +397,9 @@ class JsonMappingTest {
             location.historicalLocationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/HistoricalLocations";
 
             Point point = new Point();
-            point.setCoordinates(new LngLatAlt(-79.407224, 43.665876));
+            point.coordinates = new Coordinates();
+            point.coordinates.longitude = -79.407224;
+            point.coordinates.latitude = 43.665876;
 
             location.location = point;
 
@@ -499,7 +501,9 @@ class JsonMappingTest {
             featureOfInterest.observationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1514)/Observations";
 
             Point point = new Point();
-            point.setCoordinates(new LngLatAlt(-79.424557, 43.650978));
+            point.coordinates = new Coordinates();
+            point.coordinates.longitude = -79.424557;
+            point.coordinates.latitude = 43.650978;
 
             featureOfInterest.feature = point;
 
