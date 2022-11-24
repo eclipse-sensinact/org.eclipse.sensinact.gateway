@@ -128,6 +128,10 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     @Override
     public <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
             Class<T> type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Resource type must not be null");
+        }
+
         final Provider provider = nexusImpl.getProvider(model, providerName);
         if (provider == null) {
             return null;
@@ -154,9 +158,16 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
             timestamp = null;
         }
 
-        // FIXME: check its type
-        T val = (T) svc.eGet(rcFeature);
-        return new TimedValueImpl<T>(val, timestamp);
+        // Check value type
+        final Object rawValue = svc.eGet(rcFeature);
+        if (rawValue == null) {
+            return new TimedValueImpl<T>(null, timestamp);
+        } else if (!type.isAssignableFrom(rawValue.getClass())) {
+            throw new IllegalArgumentException(
+                    "Expected a " + type.getName() + " but resource is a " + rawValue.getClass().getName());
+        } else {
+            return new TimedValueImpl<T>(type.cast(rawValue), timestamp);
+        }
     }
 
     @Override

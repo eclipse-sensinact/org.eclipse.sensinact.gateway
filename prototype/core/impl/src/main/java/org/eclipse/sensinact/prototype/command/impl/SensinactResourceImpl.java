@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
@@ -17,9 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.command.SensinactProvider;
 import org.eclipse.sensinact.prototype.command.SensinactResource;
 import org.eclipse.sensinact.prototype.command.SensinactService;
+import org.eclipse.sensinact.prototype.command.TimedValue;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.model.nexus.impl.NexusImpl;
@@ -98,9 +103,37 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
-    public Promise<Object> getValue() {
-        // TODO Auto-generated method stub
-        return null;
+    public Promise<TimedValue<?>> getValue() {
+        checkValid();
+
+        final SensinactProvider snProvider = service.getProvider();
+        final Provider provider = nexusImpl.getProvider(snProvider.getModelName(), snProvider.getName());
+        if (provider == null) {
+            return null;
+        }
+
+        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(service.getName());
+        if (svcFeature == null) {
+            return null;
+        }
+        final Service svc = (Service) provider.eGet(svcFeature);
+
+        final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(name);
+        if (rcFeature == null) {
+            // No value
+            return promiseFactory.resolved(new TimedValueImpl<Object>(null, null));
+        }
+
+        // Get the resource metadata
+        final Metadata metadata = svc.getMetadata().get(rcFeature);
+        final Instant timestamp;
+        if (metadata != null) {
+            timestamp = metadata.getTimestamp();
+        } else {
+            timestamp = null;
+        }
+
+        return promiseFactory.resolved(new TimedValueImpl<Object>(svc.eGet(rcFeature), timestamp));
     }
 
     @Override
@@ -110,20 +143,44 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
     @Override
     public Promise<Void> setMetadataValue(String name, Object value, Instant timestamp) {
-        // TODO Auto-generated method stub
-        return null;
+        checkValid();
+
+        final SensinactProvider provider = service.getProvider();
+        try {
+            nexusImpl.setResourceMetadata(provider.getModelName(), provider.getName(), service.getName(), this.name,
+                    name, value, timestamp);
+            return promiseFactory.resolved(null);
+        } catch (Throwable t) {
+            return promiseFactory.failed(t);
+        }
     }
 
     @Override
     public Promise<Object> getMetadataValue(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        checkValid();
+
+        final SensinactProvider provider = service.getProvider();
+        final Map<String, Object> resourceMetadata = nexusImpl.getResourceMetadata(provider.getModelName(),
+                provider.getName(), service.getName(), name);
+        if (resourceMetadata == null) {
+            return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
+        } else {
+            return promiseFactory.resolved(resourceMetadata.get(name));
+        }
     }
 
     @Override
     public Promise<Map<String, Object>> getMetadataValues() {
-        // TODO Auto-generated method stub
-        return null;
+        checkValid();
+
+        final SensinactProvider provider = service.getProvider();
+        final Map<String, Object> resourceMetadata = nexusImpl.getResourceMetadata(provider.getModelName(),
+                provider.getName(), service.getName(), name);
+        if (resourceMetadata == null) {
+            return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
+        } else {
+            return promiseFactory.resolved(resourceMetadata);
+        }
     }
 
 }

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command;
 
@@ -26,7 +26,7 @@ public interface SensinactResource extends CommandScoped, Resource {
 
     Promise<Void> setValue(Object value, Instant timestamp);
 
-    Promise<Object> getValue();
+    Promise<TimedValue<?>> getValue();
 
     Promise<Void> setMetadataValue(String name, Object value, Instant timestamp);
 

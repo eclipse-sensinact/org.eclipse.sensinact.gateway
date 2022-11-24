@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
@@ -39,6 +41,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.Admin;
+import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
@@ -547,4 +550,79 @@ public class NexusImpl {
             }
         });
     }
+
+    public Map<String, Object> getResourceMetadata(String modelName, String providerName, String serviceName,
+            String resourceName) {
+        final Provider provider = getProvider(modelName, providerName);
+        if (provider == null) {
+            return null;
+        }
+
+        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(serviceName);
+        if (svcFeature == null) {
+            return null;
+        }
+
+        final Service svc = (Service) provider.eGet(svcFeature);
+        final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resourceName);
+        if (rcFeature == null) {
+            return Map.of();
+        }
+
+        final Metadata metadata = svc.getMetadata().get(rcFeature);
+        if (metadata == null) {
+            return Map.of();
+        } else {
+            final Map<String, Object> rcMeta = new HashMap<>();
+            for (FeatureCustomMetadata entry : metadata.getExtra()) {
+                rcMeta.put(entry.getName(), entry.getValue());
+            }
+            rcMeta.putAll(EMFUtil.toEObjectAttributesToMap(metadata));
+            return rcMeta;
+        }
+    }
+
+    public void setResourceMetadata(String modelName, String providerName, String serviceName,
+            String resourceName, String metadataKey, Object value, Instant timestamp) {
+        if (metadataKey == null || metadataKey.isEmpty()) {
+            throw new IllegalArgumentException("Empty metadata key");
+        }
+
+        if (timestamp == null) {
+            throw new IllegalArgumentException("Invalid timestamp");
+        }
+
+        final Provider provider = getProvider(modelName, providerName);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown provider");
+        }
+
+        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(serviceName);
+        if (svcFeature == null) {
+            throw new IllegalArgumentException("Unknown service");
+        }
+
+        final Service svc = (Service) provider.eGet(svcFeature);
+        final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resourceName);
+        if (rcFeature == null) {
+            throw new IllegalArgumentException("Unknown resource");
+        }
+
+        Metadata metadata = svc.getMetadata().get(rcFeature);
+        if (metadata == null) {
+            throw new IllegalStateException("No existing metadata for resource");
+        }
+
+        // Remove current value, if any
+        final EList<FeatureCustomMetadata> extra = metadata.getExtra();
+        extra.stream().filter(e -> metadataKey.equals(e.getName())).findFirst().ifPresent(extra::remove);;
+
+        // Store new metadata
+        final FeatureCustomMetadata customMetadata = sensinactPackage.getSensiNactFactory().createFeatureCustomMetadata();
+        customMetadata.setName(metadataKey);
+        customMetadata.setTimestamp(timestamp);
+        customMetadata.setValue(value);
+        extra.add(customMetadata);
+    }
+
 }
