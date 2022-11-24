@@ -105,7 +105,7 @@ public class NexusTest {
         @Test
         void basicTest() {
 
-            NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
 
             nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
                     Instant.now());
@@ -138,7 +138,7 @@ public class NexusTest {
         @Test
         void basicServiceExtensionTest() {
 
-            NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
 
             nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
                     Instant.now());
@@ -169,7 +169,7 @@ public class NexusTest {
         @Test
         void basicSecondServiceTest() {
 
-            NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
 
             nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
                     Instant.now());
@@ -197,7 +197,7 @@ public class NexusTest {
         @Test
         void basicPersistanceTest() throws IOException {
 
-            NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
             nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
                     Instant.now());
 
@@ -206,7 +206,7 @@ public class NexusTest {
 
             nexus.shutDown();
 
-            nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
             Provider provider = nexus.getProvider("TestModel", "testprovider");
             assertNotNull(provider);
             EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice2");
@@ -225,7 +225,7 @@ public class NexusTest {
         @Test
         void basicPersistanceTestMultiple() throws IOException {
 
-            NexusImpl nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
             nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
                     Instant.now());
 
@@ -237,7 +237,7 @@ public class NexusTest {
 
             nexus.shutDown();
 
-            nexus = new NexusImpl(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
 
             assertObject(nexus, "TestModel", "testprovider", "testservice", "testValue", "test");
             assertObject(nexus, "TestModelNew", "testproviderNew", "testservice2", "testValue", "test2");
@@ -245,7 +245,7 @@ public class NexusTest {
 
         }
 
-        void assertObject(NexusImpl nexus, String modelName, String provider, String service, String resource,
+        void assertObject(ModelNexus nexus, String modelName, String provider, String service, String resource,
                 String value) {
             Provider providerObject = nexus.getProvider(modelName, provider);
             assertNotNull(providerObject);

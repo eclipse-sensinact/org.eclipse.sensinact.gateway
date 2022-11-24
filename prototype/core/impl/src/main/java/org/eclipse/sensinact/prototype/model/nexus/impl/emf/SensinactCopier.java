@@ -10,7 +10,7 @@
 * Contributors:
 *   Data In Motion - initial API and implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.model.nexus.impl;
+package org.eclipse.sensinact.prototype.model.nexus.impl.emf;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
