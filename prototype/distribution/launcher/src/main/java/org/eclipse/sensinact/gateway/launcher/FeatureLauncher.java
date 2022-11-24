@@ -47,7 +47,7 @@ import org.osgi.service.feature.FeatureBundle;
 import org.osgi.service.feature.FeatureService;
 import org.osgi.service.feature.ID;
 
-@Component
+@Component(configurationPid = "sensinact.launcher")
 public class FeatureLauncher {
 
     @interface Config {
