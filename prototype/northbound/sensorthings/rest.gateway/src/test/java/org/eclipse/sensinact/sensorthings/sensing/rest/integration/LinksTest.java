@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests that all links related to a thing are valid
@@ -60,8 +59,6 @@ public class LinksTest {
 
     @InjectService
     PrototypePush push;
-
-    final ObjectMapper mapper = new ObjectMapper();
 
     final TestUtils utils = new TestUtils();
 
