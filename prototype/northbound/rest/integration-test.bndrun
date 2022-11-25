@@ -22,11 +22,11 @@
 	order=sortbynameversion,\
 	begin=-1
 -runbundles: \
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.13.4,2.13.5)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.13.4,2.13.5)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.13.4,2.13.5)',\
-	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.13.4,2.13.5)',\
-	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.13.4,2.13.5)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.14.0,2.14.1)',\
 	jakarta.activation-api;version='[2.1.0,2.1.1)',\
 	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
 	jakarta.inject.jakarta.inject-api;version='[2.0.1,2.0.2)',\
@@ -45,7 +45,7 @@
 	org.apache.aries.typedevent.bus;version='[0.0.2,0.0.3)',\
 	org.apache.felix.cm.json;version='[2.0.0,2.0.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
-	org.apache.felix.configurator;version='[1.0.17,1.0.18)',\
+	org.apache.felix.configurator;version='[1.0.18,1.0.19)',\
 	org.apache.felix.converter;version='[1.0.14,1.0.15)',\
 	org.apache.felix.http.servlet-api;version='[2.0.0,2.0.1)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
@@ -85,10 +85,6 @@
 	org.glassfish.jersey.media.jersey-media-jaxb;version='[3.0.8,3.0.9)',\
 	org.glassfish.jersey.media.jersey-media-sse;version='[3.0.8,3.0.9)',\
 	org.objectweb.asm;version='[9.3.0,9.3.1)',\
-	org.objectweb.asm.commons;version='[9.3.0,9.3.1)',\
-	org.objectweb.asm.tree;version='[9.3.0,9.3.1)',\
-	org.objectweb.asm.tree.analysis;version='[9.3.0,9.3.1)',\
-	org.objectweb.asm.util;version='[9.3.0,9.3.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.jakartars;version='[2.0.0,2.0.1)',\
