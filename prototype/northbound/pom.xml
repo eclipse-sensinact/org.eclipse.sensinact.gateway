@@ -24,6 +24,13 @@
   <name>Northbound Connectors</name>
   <description>This reactor contains northbound connectors that are used to interact with sensiNact</description>
 
+  <properties>
+    <gecko.jersey.version>6.0.0-SNAPSHOT</gecko.jersey.version>
+    <hk2.version>3.0.3</hk2.version>
+    <jersey.version>3.0.8</jersey.version>
+    <jetty.version>11.0.12</jetty.version>
+  </properties>
+
   <modules>
     <module>rest</module>
     <module>sensorthings</module>
