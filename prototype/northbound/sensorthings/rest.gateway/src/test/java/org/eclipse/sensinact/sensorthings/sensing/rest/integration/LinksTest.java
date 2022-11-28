@@ -16,8 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -47,6 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests that all links related to a thing are valid
@@ -133,6 +136,16 @@ public class LinksTest {
         return;
     }
 
+    private String toPluralLink(final String kindOfLink) {
+        switch (kindOfLink) {
+        case "FeatureOfInterest":
+            return "FeaturesOfInterest";
+
+        default:
+            return kindOfLink.replaceFirst("y$", "ie") + "s";
+        }
+    }
+
     /**
      * Checks if the access to the data stream works
      */
@@ -145,13 +158,48 @@ public class LinksTest {
         @SuppressWarnings("unchecked")
         Class<S> srcType = (Class<S>) srcObject.getClass();
 
+        final ObjectMapper mapper = utils.getMapper();
+
         for (T item : results.value) {
             // Check access from source object
-            T directAccessItem = utils.queryJson(String.format("%s(%s)", listUrl, item.id), resultType);
+            String directAccessItemUrl = String.format("%s(%s)", listUrl, item.id);
+            T directAccessItem = utils.queryJson(directAccessItemUrl, resultType);
             utils.assertDtoEquals(item, directAccessItem, resultType);
 
             // Check mirror
             checkMirror(String.format("%s(%s)", listUrl, item.id), srcObject, srcType);
+
+            // Check deeper access
+            for (Field field : item.getClass().getFields()) {
+                String fieldName = field.getName();
+                if (!fieldName.endsWith("Link") || "selfLink".equals(fieldName)) {
+                    continue;
+                }
+
+                String kindOfLink = fieldName.substring(0, fieldName.length() - "Link".length());
+                kindOfLink = Character.toUpperCase(kindOfLink.charAt(0)) + kindOfLink.substring(1);
+                try {
+                    if (kindOfLink.endsWith("s")) {
+                        // TODO Returns a result list
+                    } else {
+                        // Returns a single item
+                        @SuppressWarnings("unchecked")
+                        Class<? extends Id> linkType = (Class<? extends Id>) Class
+                                .forName(Id.class.getPackageName() + "." + kindOfLink);
+                        Id linkedDto = mapper.convertValue(
+                                utils.queryJson(String.format("%s/%s", directAccessItemUrl, kindOfLink), Map.class),
+                                linkType);
+
+                        Id directDto = mapper.convertValue(
+                                utils.queryJson(String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id), Map.class),
+                                linkType);
+
+                        utils.assertDtoEquals(directDto, linkedDto, linkType);
+                    }
+                } catch (ClassNotFoundException | ClassCastException e) {
+                    fail(e);
+                }
+            }
         }
     }
 
