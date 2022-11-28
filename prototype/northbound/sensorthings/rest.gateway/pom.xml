@@ -19,13 +19,6 @@
   </parent>
   <artifactId>rest.gateway</artifactId>
 
-  <properties>
-    <gecko.jersey.version>6.0.0-SNAPSHOT</gecko.jersey.version>
-    <hk2.version>3.0.3</hk2.version>
-    <jersey.version>3.0.8</jersey.version>
-    <jetty.version>11.0.12</jetty.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
@@ -47,6 +40,104 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jakartars</artifactId>
+    </dependency>
+
+    <!-- Test -->
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>impl</artifactId>
+      <version>${sensinact.core.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- OSGi -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.cmpn</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.promise</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configurator</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.cm.json</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- SPI fly / Service loader -->
+    <dependency>
+      <groupId>org.apache.aries.spifly</groupId>
+      <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Jakarta RS -->
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+    </dependency>
+
+    <!-- Jersey -->
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-jaxb</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Gecko -->
+    <dependency>
+      <groupId>org.geckoprojects.jakartars</groupId>
+      <artifactId>org.gecko.rest.jersey.config</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.jakartars</groupId>
+      <artifactId>org.gecko.rest.jersey.sse</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.jakartars</groupId>
+      <artifactId>org.gecko.rest.jersey.jetty</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JSON provider -->
+    <dependency>
+      <groupId>org.eclipse.parsson</groupId>
+      <artifactId>jakarta.json</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

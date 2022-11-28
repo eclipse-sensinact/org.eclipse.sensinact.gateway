@@ -127,7 +127,7 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
-        if (!t.id.equals(id)) {
+        if (!t.id.equals(provider)) {
             throw new NotFoundException();
         }
         return t;

@@ -21,14 +21,6 @@
   <name>SensiNact Northbound REST</name>
   <description>Northbound REST access to sensiNact</description>
 
-  <properties>
-    <gecko.jersey.version>6.0.0-SNAPSHOT</gecko.jersey.version>
-    <hk2.version>3.0.3</hk2.version>
-    <jackson.version>2.13.4</jackson.version>
-    <jersey.version>3.0.8</jersey.version>
-    <jetty.version>11.0.12</jetty.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -59,7 +51,6 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jakartars</artifactId>
-      <version>2.0.0-RC1</version>
     </dependency>
 
     <!-- Test -->
@@ -74,13 +65,11 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi.cmpn</artifactId>
-      <version>${osgi.core.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -91,21 +80,18 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configurator</artifactId>
-      <version>1.0.17-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.cm.json</artifactId>
-      <version>2.0.0</version>
       <scope>test</scope>
     </dependency>
 
     <!-- SPI fly / Service loader -->
     <dependency>
       <groupId>org.apache.aries.spifly</groupId>
-      <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
-      <version>1.3.5</version>
+      <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -113,12 +99,10 @@
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
-      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
-      <version>2.1.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -137,19 +121,16 @@
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
       <artifactId>jersey-hk2</artifactId>
-      <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-jaxb</artifactId>
-      <version>${jersey.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -157,19 +138,16 @@
     <dependency>
       <groupId>org.geckoprojects.jakartars</groupId>
       <artifactId>org.gecko.rest.jersey.config</artifactId>
-      <version>${gecko.jersey.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.geckoprojects.jakartars</groupId>
       <artifactId>org.gecko.rest.jersey.sse</artifactId>
-      <version>${gecko.jersey.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.geckoprojects.jakartars</groupId>
       <artifactId>org.gecko.rest.jersey.jetty</artifactId>
-      <version>${gecko.jersey.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -177,7 +155,6 @@
     <dependency>
       <groupId>org.eclipse.parsson</groupId>
       <artifactId>jakarta.json</artifactId>
-      <version>1.1.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
