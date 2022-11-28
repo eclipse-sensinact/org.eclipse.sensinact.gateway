@@ -74,7 +74,7 @@ public interface ThingsAccess {
         return getThingDatastream(id, id2);
     }
 
-    @Path("Datastreams(id2)/Observations")
+    @Path("Datastreams({id2})/Observations")
     @GET
     public ResultList<Observation> getThingDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
 

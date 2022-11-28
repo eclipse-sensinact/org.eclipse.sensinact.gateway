@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
@@ -146,6 +148,30 @@ public class LinksTest {
         }
     }
 
+    private String fromPluralLink(final String kindOfLink) {
+        switch (kindOfLink) {
+        case "FeaturesOfInterest":
+            return "FeatureOfInterest";
+
+        default:
+            return kindOfLink.replaceFirst("ies$", "y").replaceFirst("s$", "");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends Id> Class<T> getDTOType(final String simpleName) throws ClassNotFoundException {
+        return (Class<T>) Class.forName(Id.class.getPackageName() + "." + simpleName);
+    }
+
+    private <T extends Id> Set<Object> listIdsFromURL(final String url, Class<T> linkType)
+            throws IOException, InterruptedException {
+
+        // Result List root
+        final ObjectMapper mapper = utils.getMapper();
+        List<?> values = (List<?>) utils.queryJson(url, Map.class).get("value");
+        return values.stream().map(o -> mapper.convertValue(o, linkType).id).collect(Collectors.toSet());
+    }
+
     /**
      * Checks if the access to the data stream works
      */
@@ -179,20 +205,24 @@ public class LinksTest {
                 String kindOfLink = fieldName.substring(0, fieldName.length() - "Link".length());
                 kindOfLink = Character.toUpperCase(kindOfLink.charAt(0)) + kindOfLink.substring(1);
                 try {
-                    if (kindOfLink.endsWith("s")) {
-                        // TODO Returns a result list
+                    if (kindOfLink.endsWith("s") || kindOfLink.startsWith("Features")) {
+                        // Returns a result list
+                        String singularLink = fromPluralLink(kindOfLink);
+                        Class<? extends Id> linkType = getDTOType(singularLink);
+                        Set<Object> linkedItemsIds = listIdsFromURL(
+                                String.format("%s/%s", directAccessItemUrl, kindOfLink), linkType);
+                        Set<Object> allItemsIds = listIdsFromURL(kindOfLink, linkType);
+                        assertTrue(allItemsIds.containsAll(linkedItemsIds),
+                                linkedItemsIds + " not a subset of " + allItemsIds);
                     } else {
                         // Returns a single item
-                        @SuppressWarnings("unchecked")
-                        Class<? extends Id> linkType = (Class<? extends Id>) Class
-                                .forName(Id.class.getPackageName() + "." + kindOfLink);
+                        Class<? extends Id> linkType = getDTOType(kindOfLink);
                         Id linkedDto = mapper.convertValue(
                                 utils.queryJson(String.format("%s/%s", directAccessItemUrl, kindOfLink), Map.class),
                                 linkType);
 
-                        Id directDto = mapper.convertValue(
-                                utils.queryJson(String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id), Map.class),
-                                linkType);
+                        Id directDto = mapper.convertValue(utils.queryJson(
+                                String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id), Map.class), linkType);
 
                         utils.assertDtoEquals(directDto, linkedDto, linkType);
                     }

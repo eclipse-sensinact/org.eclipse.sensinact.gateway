@@ -72,7 +72,7 @@ public interface SensorsAccess {
         return getSensorDatastream(id, id2);
     }
 
-    @Path("Datastreams(id2)/Observations")
+    @Path("Datastreams({id2})/Observations")
     @GET
     public ResultList<Observation> getSensorDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
 

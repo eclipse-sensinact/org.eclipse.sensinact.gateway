@@ -72,7 +72,7 @@ public interface ObservedPropertiesAccess {
         return getObservedPropertyDatastream(id, id2);
     }
 
-    @Path("Datastreams(id2)/Observations")
+    @Path("Datastreams({id2})/Observations")
     @GET
     public ResultList<Observation> getObservedPropertyDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
 
