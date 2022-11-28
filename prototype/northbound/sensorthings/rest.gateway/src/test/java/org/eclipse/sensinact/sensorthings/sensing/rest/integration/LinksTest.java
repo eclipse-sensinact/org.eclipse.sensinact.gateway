@@ -30,6 +30,7 @@ import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -49,6 +50,25 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * Tests that all links related to a thing are valid
  */
 public class LinksTest {
+
+    private static final TypeReference<ResultList<Datastream>> RESULT_DATASTREAMS = new TypeReference<ResultList<Datastream>>() {
+    };
+
+    private static final TypeReference<ResultList<HistoricalLocation>> RESULT_HISTORICAL_LOCATIONS = new TypeReference<ResultList<HistoricalLocation>>() {
+    };
+
+    private static final TypeReference<ResultList<Location>> RESULT_LOCATIONS = new TypeReference<ResultList<Location>>() {
+    };
+
+    private static final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<ResultList<Observation>>() {
+    };
+
+    private static final TypeReference<ResultList<Sensor>> RESULT_SENSORS = new TypeReference<ResultList<Sensor>>() {
+    };
+
+    private static final TypeReference<ResultList<Thing>> RESULT_THINGS = new TypeReference<ResultList<Thing>>() {
+    };
+
     private static final String USER = "user";
 
     private static final String PROVIDER = "linkTester";
@@ -76,6 +96,21 @@ public class LinksTest {
     void stop() {
         SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.activeListeners().keySet().forEach(session::removeListener);
+    }
+
+    /**
+     * Checks if the access to the data stream works
+     */
+    private <T extends Id> void checkSubLinks(String listUrl, TypeReference<ResultList<T>> resultListType,
+            Class<T> resultType) throws IOException, InterruptedException {
+        ResultList<T> sensors = utils.queryJson(listUrl, resultListType);
+        assertNotNull(sensors);
+        assertFalse(sensors.value.isEmpty(), "No sensor found");
+
+        for (T item : sensors.value) {
+            T directAccessItem = utils.queryJson(String.format("%s(%s)", listUrl, item.id), resultType);
+            utils.assertDtoEquals(item, directAccessItem, resultType);
+        }
     }
 
     /**
@@ -107,8 +142,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new things
-        ResultList<Thing> things = utils.queryJson("/Things", new TypeReference<ResultList<Thing>>() {
-        });
+        ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
         assertNotNull(things);
         assertFalse(things.value.isEmpty(), "No thing found");
 
@@ -122,9 +156,9 @@ public class LinksTest {
             utils.assertDtoEquals(thing, utils.queryJson(thing.selfLink, Thing.class), Thing.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(thing.datastreamsLink);
-            utils.assertURLStatus(thing.historicalLocationsLink);
-            utils.assertURLStatus(thing.locationsLink);
+            checkSubLinks(thing.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(thing.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
+            checkSubLinks(thing.locationsLink, RESULT_LOCATIONS, Location.class);
         }
     }
 
@@ -139,8 +173,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Location> locations = utils.queryJson("/Locations", new TypeReference<ResultList<Location>>() {
-        });
+        ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
         assertNotNull(locations);
         assertFalse(locations.value.isEmpty(), "No location found");
 
@@ -154,8 +187,8 @@ public class LinksTest {
             utils.assertDtoEquals(location, utils.queryJson(location.selfLink, Location.class), Location.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(location.historicalLocationsLink);
-            utils.assertURLStatus(location.thingsLink);
+            checkSubLinks(location.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
+            checkSubLinks(location.thingsLink, RESULT_THINGS, Thing.class);
         }
     }
 
@@ -174,8 +207,7 @@ public class LinksTest {
 
         // Get the new locations
         ResultList<HistoricalLocation> historicalLocations = utils.queryJson("/HistoricalLocations",
-                new TypeReference<ResultList<HistoricalLocation>>() {
-                });
+                RESULT_HISTORICAL_LOCATIONS);
         assertNotNull(historicalLocations);
         assertFalse(historicalLocations.value.isEmpty(), "No historical location found");
 
@@ -190,7 +222,7 @@ public class LinksTest {
                     utils.queryJson(historicalLocation.selfLink, HistoricalLocation.class), HistoricalLocation.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(historicalLocation.locationsLink);
+            checkSubLinks(historicalLocation.locationsLink, RESULT_LOCATIONS, Location.class);
             utils.assertURLStatus(historicalLocation.thingLink);
         }
     }
@@ -206,9 +238,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Datastream> datastreams = utils.queryJson("/Datastreams",
-                new TypeReference<ResultList<Datastream>>() {
-                });
+        ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
         assertNotNull(datastreams);
         assertFalse(datastreams.value.isEmpty(), "No datastream found");
 
@@ -223,7 +253,7 @@ public class LinksTest {
             utils.assertDtoEquals(datastream, utils.queryJson(datastream.selfLink, Datastream.class), Datastream.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(datastream.observationsLink);
+            checkSubLinks(datastream.observationsLink, RESULT_OBSERVATIONS, Observation.class);
             utils.assertURLStatus(datastream.observedPropertyLink);
             utils.assertURLStatus(datastream.sensorLink);
             utils.assertURLStatus(datastream.thingLink);
@@ -241,8 +271,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Sensor> sensors = utils.queryJson("/Sensors", new TypeReference<ResultList<Sensor>>() {
-        });
+        ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
         assertNotNull(sensors);
         assertFalse(sensors.value.isEmpty(), "No sensor found");
 
@@ -256,7 +285,7 @@ public class LinksTest {
             utils.assertDtoEquals(sensor, utils.queryJson(sensor.selfLink, Sensor.class), Sensor.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(sensor.datastreamsLink);
+            checkSubLinks(sensor.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
         }
     }
 
@@ -271,9 +300,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Observation> observations = utils.queryJson("/Observations",
-                new TypeReference<ResultList<Observation>>() {
-                });
+        ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
         assertNotNull(observations);
         assertFalse(observations.value.isEmpty(), "No observation found");
 
@@ -322,7 +349,7 @@ public class LinksTest {
                     ObservedProperty.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(observed.datastreamsLink);
+            checkSubLinks(observed.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
         }
     }
 
@@ -355,6 +382,10 @@ public class LinksTest {
 
             // Check sub-links existence
             utils.assertURLStatus(feature.observationsLink);
+
+            // FIXME: observations have a timestamp, but not the feature of interest
+            // checkSubLinks(feature.observationsLink, RESULT_OBSERVATIONS,
+            // Observation.class);
         }
     }
 }
