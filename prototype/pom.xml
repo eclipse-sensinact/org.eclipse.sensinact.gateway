@@ -114,6 +114,7 @@
     <osgi.implementation.namespace.version>1.0.0</osgi.implementation.namespace.version>
     <osgi.ds.version>1.5.0</osgi.ds.version>
     <osgi.cm.version>1.6.1</osgi.cm.version>
+    <osgi.pushstream.version>1.0.2</osgi.pushstream.version>
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
     <osgi.feature.version>1.0.0</osgi.feature.version>
     <gecko.emf.version>4.4.0</gecko.emf.version>
@@ -334,6 +335,12 @@
         <groupId>org.apache.aries.typedevent</groupId>
         <artifactId>org.apache.aries.typedevent.bus</artifactId>
         <version>${aries.typedevent.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.util.pushstream</artifactId>
+        <version>${osgi.pushstream.version}</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>
@@ -574,6 +581,11 @@
               </goals>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.10.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

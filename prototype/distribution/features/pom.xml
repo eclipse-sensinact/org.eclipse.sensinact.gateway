@@ -17,6 +17,7 @@
     <artifactId>distribution</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
+
   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
   <artifactId>features</artifactId>
   <packaging>pom</packaging>
@@ -24,37 +25,152 @@
   <description>This project contains definitions of sensiNact features</description>
 
   <modules>
+    <module>gogo-shell-feature</module>
     <module>core-feature</module>
-    <module>jakarta-rest-whiteboard-feature</module>
+    <!-- <module>jakarta-rest-whiteboard-feature</module> -->
   </modules>
+
+  <properties>
+    <launcher.version>0.0.1-SNAPSHOT</launcher.version>
+  </properties>
 
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.apache.sling</groupId>
-          <artifactId>slingfeature-maven-plugin</artifactId>
-          <version>1.6.8</version>
-          <extensions>true</extensions>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
           <executions>
             <execution>
-              <id>createFeature</id>
-              <phase>package</phase>
               <goals>
-                <goal>include-artifact</goal>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.3.0</version>
+          <executions>
+            <execution>
+              <id>create-feature-repo</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
               </goals>
               <configuration>
-                <skipAddJarToFeature>true</skipAddJarToFeature>
-                <includeDependenciesWithScope>compile,runtime</includeDependenciesWithScope>
+                <excludeTransitive>true</excludeTransitive>
+                <includeScope>runtime</includeScope>
+                <useRepositoryLayout>true</useRepositoryLayout>
+                <outputDirectory>${project.build.directory}/repository</outputDirectory>
               </configuration>
             </execution>
             <execution>
-              <id>attachFeature</id>
+              <id>copy-test-launcher</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>copy</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/it</outputDirectory>
+                <artifactItems>
+                  <artifactItem>
+                    <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+                    <artifactId>launcher</artifactId>
+                    <version>${launcher.version}</version>
+                    <type>jar</type>
+                    <classifier>export</classifier>
+                    <destFileName>launcher.jar</destFileName>
+                  </artifactItem>
+                </artifactItems>
+              </configuration>
+            </execution>
+            <execution>
+              <id>gather-test-features</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>copy</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/it/features</outputDirectory>
+                <skip>true</skip>
+              </configuration>
+            </execution>
+            <execution>
+              <id>create-test-repo</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>unpack</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/it/repository</outputDirectory>
+                <skip>true</skip>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.1.0</version>
+          <executions>
+            <execution>
+              <id>create-repository-zip</id>
               <phase>package</phase>
               <goals>
-                <goal>attach-features</goal>
+                <goal>run</goal>
               </goals>
-              <configuration></configuration>
+              <configuration>
+                <target>
+                  <zip destfile="${project.build.directory}/repository.zip"
+                    basedir="${project.build.directory}/repository" />
+                </target>
+              </configuration>
+            </execution>
+            <execution>
+              <id>copy-artifact-for-testing</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <configuration>
+                <target>
+                  <unzip src="${project.build.directory}/repository.zip"
+                    dest="${project.build.directory}/it/repository/" />
+                  <copy todir="${project.build.directory}/it/features/">
+                    <fileset dir="${basedir}/src/main/resources/" includes="*.json" />
+                  </copy>
+                </target>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.3.0</version>
+          <executions>
+            <execution>
+              <id>attach-artifacts</id>
+              <phase>package</phase>
+              <goals>
+                <goal>attach-artifact</goal>
+              </goals>
+              <configuration>
+                <artifacts>
+                  <artifact>
+                    <file>${project.build.directory}/repository.zip</file>
+                    <type>zip</type>
+                    <classifier>osgifeaturerepo</classifier>
+                  </artifact>
+                  <artifact>
+                    <file>${basedir}/src/main/resources/${project.artifactId}.json</file>
+                    <type>json</type>
+                    <classifier>osgifeature</classifier>
+                  </artifact>
+                </artifacts>
+              </configuration>
             </execution>
           </executions>
         </plugin>
