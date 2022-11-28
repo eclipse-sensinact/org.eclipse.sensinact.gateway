@@ -119,7 +119,7 @@ public class DtoMapper {
 
         final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, true);
         final Instant time;
-        if(location.getTimestamp() == null) {
+        if (location.getTimestamp() == null) {
             time = Instant.EPOCH;
         } else {
             time = location.getTimestamp();
@@ -248,18 +248,16 @@ public class DtoMapper {
     private static TimedValue<GeoJsonObject> getLocation(SensiNactSession userSession, ObjectMapper mapper,
             String providerName, boolean allowNull) {
         ResourceDescription locationResource = getProviderAdminField(userSession, providerName, "location");
+        final Instant time = locationResource.timestamp != null ? locationResource.timestamp : Instant.EPOCH;
 
         final GeoJsonObject parsedLocation;
-        final Instant time;
         if (locationResource.value == null) {
             if (allowNull) {
                 parsedLocation = null;
-                time = null;
             } else {
                 Point point = new Point();
                 point.coordinates = new Coordinates();
                 parsedLocation = point;
-                time = Instant.EPOCH;
             }
         } else {
             final Object rawValue = locationResource.value;
@@ -277,7 +275,6 @@ public class DtoMapper {
             } else {
                 parsedLocation = mapper.convertValue(locationResource.value, GeoJsonObject.class);
             }
-            time = locationResource.timestamp;
         }
 
         return new TimedValue<GeoJsonObject>() {
@@ -321,7 +318,7 @@ public class DtoMapper {
     }
 
     public static String extractFirstIdSegment(String id) {
-        if(id.isEmpty()) {
+        if (id.isEmpty()) {
             throw new BadRequestException("Invalid id");
         }
 
@@ -337,7 +334,7 @@ public class DtoMapper {
 
     public static Instant getTimestampFromId(String id) {
         int idx = id.lastIndexOf('~');
-        if(idx < 0 || idx == id.length() - 1) {
+        if (idx < 0 || idx == id.length() - 1) {
             throw new BadRequestException("Invalid id");
         }
         try {

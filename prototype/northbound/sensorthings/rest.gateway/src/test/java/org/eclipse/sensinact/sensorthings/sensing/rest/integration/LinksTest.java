@@ -380,12 +380,8 @@ public class LinksTest {
             utils.assertDtoEquals(feature, utils.queryJson(feature.selfLink, FeatureOfInterest.class),
                     FeatureOfInterest.class);
 
-            // Check sub-links existence
-            utils.assertURLStatus(feature.observationsLink);
-
             // FIXME: observations have a timestamp, but not the feature of interest
-            // checkSubLinks(feature.observationsLink, RESULT_OBSERVATIONS,
-            // Observation.class);
+            checkSubLinks(feature.observationsLink, RESULT_OBSERVATIONS, Observation.class);
         }
     }
 }
