@@ -29,6 +29,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
@@ -174,7 +175,7 @@ public class TestUtils {
                     Object expectedFieldValue = field.get(expected);
                     Object actualFieldValue = field.get(actual);
 
-                    if (fieldType.getDeclaredMethods().length == 0
+                    if (Arrays.stream(fieldType.getDeclaredMethods()).filter(m -> !m.isSynthetic()).count() == 0
                             && fieldType.getMethods().length == objectMethods.length
                             && fieldType.getFields().length > 0) {
                         // We have found another DTO: no method, only public fields
@@ -183,10 +184,15 @@ public class TestUtils {
                                         path + "/" + field.getName(), field.getName(), fieldType.getSimpleName(),
                                         expectedFieldValue, actualFieldValue));
                     } else {
-                        assertEquals(field.get(expected), field.get(actual),
-                                String.format("%s: field <%s> (%s) differs: expected <%s> but was <%s>", path,
-                                        field.getName(), fieldType.getSimpleName(), expectedFieldValue,
-                                        actualFieldValue));
+                        try {
+                            assertEquals(field.get(expected), field.get(actual),
+                                    String.format("%s: field <%s> (%s) differs: expected <%s> but was <%s>", path,
+                                            field.getName(), fieldType.getSimpleName(), expectedFieldValue,
+                                            actualFieldValue));
+                        } catch (Throwable t) {
+                            System.out.println("Failed on field:" + field);
+                            fail(t);
+                        }
                     }
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     e.printStackTrace();
