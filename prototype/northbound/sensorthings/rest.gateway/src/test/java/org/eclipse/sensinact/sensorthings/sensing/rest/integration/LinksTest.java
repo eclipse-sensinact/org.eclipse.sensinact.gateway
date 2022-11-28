@@ -15,9 +15,11 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -99,17 +101,57 @@ public class LinksTest {
     }
 
     /**
+     * Check if the mirror access works
+     */
+    private <S extends Id> void checkMirror(String mirrorBaseUrl, S srcObject, Class<S> srcType)
+            throws IOException, InterruptedException {
+        // Single element
+        String mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName());
+        try {
+            S mirrorAccess = utils.queryJson(mirrorUrl, srcType);
+            utils.assertDtoEquals(srcObject, mirrorAccess, srcType);
+            return;
+        } catch (IOException ex) {
+            // ... ignore HTTP error
+        }
+
+        // List of elements
+        mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName() + "s");
+        Map<?, ?> base = utils.queryJson(mirrorUrl, Map.class);
+        List<?> mirrorAccess = utils.getMapper().convertValue(base.get("value"), List.class);
+
+        boolean found = false;
+        for (Object rawItem : mirrorAccess) {
+            S item = utils.getMapper().convertValue(rawItem, srcType);
+            if (srcObject.id.equals(item.id)) {
+                found = true;
+                utils.assertDtoEquals(srcObject, item, srcType);
+                break;
+            }
+        }
+        assertTrue(found, "Source object not found in mirror list");
+        return;
+    }
+
+    /**
      * Checks if the access to the data stream works
      */
-    private <T extends Id> void checkSubLinks(String listUrl, TypeReference<ResultList<T>> resultListType,
-            Class<T> resultType) throws IOException, InterruptedException {
-        ResultList<T> sensors = utils.queryJson(listUrl, resultListType);
-        assertNotNull(sensors);
-        assertFalse(sensors.value.isEmpty(), "No sensor found");
+    private <S extends Id, T extends Id> void checkSubLinks(S srcObject, String listUrl,
+            TypeReference<ResultList<T>> resultListType, Class<T> resultType) throws IOException, InterruptedException {
+        ResultList<T> results = utils.queryJson(listUrl, resultListType);
+        assertNotNull(results);
+        assertFalse(results.value.isEmpty(), "No " + resultType.getSimpleName() + " found");
 
-        for (T item : sensors.value) {
+        @SuppressWarnings("unchecked")
+        Class<S> srcType = (Class<S>) srcObject.getClass();
+
+        for (T item : results.value) {
+            // Check access from source object
             T directAccessItem = utils.queryJson(String.format("%s(%s)", listUrl, item.id), resultType);
             utils.assertDtoEquals(item, directAccessItem, resultType);
+
+            // Check mirror
+            checkMirror(String.format("%s(%s)", listUrl, item.id), srcObject, srcType);
         }
     }
 
@@ -156,9 +198,9 @@ public class LinksTest {
             utils.assertDtoEquals(thing, utils.queryJson(thing.selfLink, Thing.class), Thing.class);
 
             // Check sub-links existence
-            checkSubLinks(thing.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
-            checkSubLinks(thing.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
-            checkSubLinks(thing.locationsLink, RESULT_LOCATIONS, Location.class);
+            checkSubLinks(thing, thing.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(thing, thing.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
+            checkSubLinks(thing, thing.locationsLink, RESULT_LOCATIONS, Location.class);
         }
     }
 
@@ -187,8 +229,9 @@ public class LinksTest {
             utils.assertDtoEquals(location, utils.queryJson(location.selfLink, Location.class), Location.class);
 
             // Check sub-links existence
-            checkSubLinks(location.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
-            checkSubLinks(location.thingsLink, RESULT_THINGS, Thing.class);
+            checkSubLinks(location, location.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS,
+                    HistoricalLocation.class);
+            checkSubLinks(location, location.thingsLink, RESULT_THINGS, Thing.class);
         }
     }
 
@@ -222,7 +265,7 @@ public class LinksTest {
                     utils.queryJson(historicalLocation.selfLink, HistoricalLocation.class), HistoricalLocation.class);
 
             // Check sub-links existence
-            checkSubLinks(historicalLocation.locationsLink, RESULT_LOCATIONS, Location.class);
+            checkSubLinks(historicalLocation, historicalLocation.locationsLink, RESULT_LOCATIONS, Location.class);
             utils.assertURLStatus(historicalLocation.thingLink);
         }
     }
@@ -253,7 +296,7 @@ public class LinksTest {
             utils.assertDtoEquals(datastream, utils.queryJson(datastream.selfLink, Datastream.class), Datastream.class);
 
             // Check sub-links existence
-            checkSubLinks(datastream.observationsLink, RESULT_OBSERVATIONS, Observation.class);
+            checkSubLinks(datastream, datastream.observationsLink, RESULT_OBSERVATIONS, Observation.class);
             utils.assertURLStatus(datastream.observedPropertyLink);
             utils.assertURLStatus(datastream.sensorLink);
             utils.assertURLStatus(datastream.thingLink);
@@ -285,7 +328,7 @@ public class LinksTest {
             utils.assertDtoEquals(sensor, utils.queryJson(sensor.selfLink, Sensor.class), Sensor.class);
 
             // Check sub-links existence
-            checkSubLinks(sensor.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(sensor, sensor.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
         }
     }
 
@@ -349,7 +392,7 @@ public class LinksTest {
                     ObservedProperty.class);
 
             // Check sub-links existence
-            checkSubLinks(observed.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(observed, observed.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
         }
     }
 
@@ -381,7 +424,7 @@ public class LinksTest {
                     FeatureOfInterest.class);
 
             // FIXME: observations have a timestamp, but not the feature of interest
-            checkSubLinks(feature.observationsLink, RESULT_OBSERVATIONS, Observation.class);
+            checkSubLinks(feature, feature.observationsLink, RESULT_OBSERVATIONS, Observation.class);
         }
     }
 }

@@ -42,6 +42,10 @@ public class TestUtils {
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
+
     /**
      * Constructs a DTO to use with PrototypePush
      */
@@ -74,13 +78,7 @@ public class TestUtils {
         final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
         final HttpResponse<String> response = client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
-        try {
-            return mapper.createParser(response.body()).readValueAs(resultType);
-        } catch (Throwable t) {
-            System.err.println("Error querying URL " + targetUri);
-            System.err.println("===>\n" + response.body());
-            throw t;
-        }
+        return mapper.createParser(response.body()).readValueAs(resultType);
     }
 
     public <T> T queryJson(final String path, final Class<T> resultType) throws IOException, InterruptedException {
