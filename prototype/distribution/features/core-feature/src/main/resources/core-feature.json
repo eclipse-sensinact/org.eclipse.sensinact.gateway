@@ -1,0 +1,18 @@
+{
+  "id":"org.eclipse.sensinact.gateway.distribution.features:core-feature:osgifeature:0.0.1-SNAPSHOT",
+  "bundles":[
+    { "id": "org.eclipse.sensinact.gateway.core:annotation:0.0.1-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.core:api:0.0.1-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.core:impl:0.0.1-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.core:models:0.0.1-SNAPSHOT" },
+    { "id": "org.osgi:org.osgi.service.typedevent:1.0.0" },
+    { "id": "org.osgi:org.osgi.util.pushstream:1.0.2" },
+    { "id": "org.eclipse.emf:org.eclipse.emf.common:2.23.0" },
+    { "id": "org.eclipse.emf:org.eclipse.emf.ecore:2.25.0" },
+    { "id": "org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.16.0" },
+    { "id": "org.geckoprojects.emf:org.gecko.emf.osgi.api:4.3.0" },
+    { "id": "org.geckoprojects.emf:org.gecko.emf.osgi.component:4.3.0" },
+    { "id": "org.apache.aries.component-dsl:org.apache.aries.component-dsl.component-dsl:1.2.2" },
+    { "id": "org.apache.aries.typedevent:org.apache.aries.typedevent.bus:0.0.2-SNAPSHOT" }
+  ]
+}

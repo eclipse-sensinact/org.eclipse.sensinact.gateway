@@ -20,11 +20,10 @@
   <artifactId>core-feature</artifactId>
   <name>Eclipse sensiNact core Feature</name>
   <description>This project contains a feature representing the core of sensiNact</description>
-
+  <packaging>pom</packaging>
   <properties>
     <gateway.version>0.0.1-SNAPSHOT</gateway.version>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -55,6 +54,10 @@
       <artifactId>org.osgi.service.typedevent</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.pushstream</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.aries.typedevent</groupId>
       <artifactId>org.apache.aries.typedevent.bus</artifactId>
     </dependency>
@@ -79,12 +82,60 @@
       <artifactId>org.gecko.emf.osgi.component</artifactId>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>slingfeature-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>gather-test-features</id>
+            <configuration>
+              <skip>false</skip>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>gogo-shell-feature</artifactId>
+                  <version>0.0.1-SNAPSHOT</version>
+                  <type>json</type>
+                  <classifier>osgifeature</classifier>
+                  <destFileName>gogo-shell-feature.json</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>create-test-repo</id>
+            <configuration>
+              <skip>false</skip>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>gogo-shell-feature</artifactId>
+                  <version>0.0.1-SNAPSHOT</version>
+                  <type>zip</type>
+                  <classifier>osgifeaturerepo</classifier>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
