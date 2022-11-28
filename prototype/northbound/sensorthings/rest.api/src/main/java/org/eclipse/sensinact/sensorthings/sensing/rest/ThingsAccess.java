@@ -112,7 +112,7 @@ public interface ThingsAccess {
         return getThingHistoricalLocation(id, id2);
     }
 
-    @Path("HistoricalLocation({id2})/Thing")
+    @Path("HistoricalLocations({id2})/Thing")
     @GET
     public Thing getThingHistoricalLocationsThing(@PathParam("id") String id, @PathParam("id2") String id2);
 
