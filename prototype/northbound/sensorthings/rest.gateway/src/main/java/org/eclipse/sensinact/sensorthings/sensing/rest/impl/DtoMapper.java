@@ -38,6 +38,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.UriInfo;
 
 public class DtoMapper {
@@ -152,6 +153,10 @@ public class DtoMapper {
 
     public static Datastream toDatastream(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
             ResourceDescription resource) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
         Datastream datastream = new Datastream();
 
         datastream.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
@@ -184,6 +189,10 @@ public class DtoMapper {
     }
 
     public static Sensor toSensor(UriInfo uriInfo, ResourceDescription resource) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
         Sensor sensor = new Sensor();
 
         sensor.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
@@ -205,6 +214,10 @@ public class DtoMapper {
     }
 
     public static Observation toObservation(UriInfo uriInfo, ResourceDescription resource) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
         Observation observation = new Observation();
 
         observation.id = String.format("%s~%s~%s~%s", resource.provider, resource.service, resource.resource,
