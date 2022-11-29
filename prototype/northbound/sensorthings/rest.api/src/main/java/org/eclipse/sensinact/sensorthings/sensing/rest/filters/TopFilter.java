@@ -32,7 +32,7 @@ import jakarta.ws.rs.core.Response.Status;
 /**
  * This filter implements the $top query parameter
  */
-@Priority(ENTITY_CODER + 4)
+@Priority(ENTITY_CODER + 1)
 public class TopFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final String TOP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.top";

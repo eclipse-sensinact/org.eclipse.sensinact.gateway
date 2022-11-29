@@ -30,7 +30,7 @@ import jakarta.ws.rs.core.Response.Status;
 /**
  * Implements handling of the $count query parameter
  */
-@Priority(ENTITY_CODER + 1)
+@Priority(ENTITY_CODER + 4)
 public class CountFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final String COUNT_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.count";

@@ -32,7 +32,7 @@ import jakarta.ws.rs.core.Response.Status;
 /**
  * This filter implements the $skip query parameter
  */
-@Priority(ENTITY_CODER + 3)
+@Priority(ENTITY_CODER + 2)
 public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
