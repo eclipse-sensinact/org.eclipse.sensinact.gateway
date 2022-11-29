@@ -27,6 +27,7 @@
   <modules>
     <module>gogo-shell-feature</module>
     <module>core-feature</module>
+    <module>jakarta-servlet-whiteboard-feature</module>
     <!-- <module>jakarta-rest-whiteboard-feature</module> -->
   </modules>
 
