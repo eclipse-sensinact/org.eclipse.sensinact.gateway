@@ -15,13 +15,16 @@ package org.eclipse.sensinact.gateway.feature.integration.core;
 import static java.lang.ProcessBuilder.Redirect.PIPE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,11 +132,20 @@ public class CoreFeatureTest {
     }
 
     @Test
-    void checkAllResolved() throws IOException {
+    void checkAllResolved() throws Exception {
         sendCommand("lb");
 
+        // A short wait as lb can take time to complete its output
+        Thread.sleep(100);
+
         String bundles = readAllInput();
+        assertFalse(bundles.isBlank());
         assertFalse(bundles.contains("Installed"), "Some bundles were not resolved:\n" + bundles);
+
+        // There should be 36 lines (32 bundles, 2 header lines and 2 trailing lines)
+        try (BufferedReader br = new BufferedReader(new StringReader(bundles))) {
+            assertEquals(36, br.lines().count());
+        }
     }
 
 }
