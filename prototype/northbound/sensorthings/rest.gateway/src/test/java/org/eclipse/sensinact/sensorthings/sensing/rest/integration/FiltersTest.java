@@ -13,17 +13,21 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -33,6 +37,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +56,9 @@ public class FiltersTest {
     }
 
     private static final TypeReference<ResultList<AnyIdDTO>> RESULT_ANY = new TypeReference<>() {
+    };
+
+    private static final TypeReference<ResultList<Self>> RESULT_SELF = new TypeReference<>() {
     };
 
     private static final String USER = "user";
@@ -128,11 +136,10 @@ public class FiltersTest {
         Collections.reverse(reversedProviderIds);
 
         sortedProviderIds.stream().forEach(id -> {
-            Instant now = Instant.now();
-            session.setResourceValue(id, "svcA", "rcA", id, now);
-            session.setResourceValue(id, "svcB", "rcA", id + 256, now);
-            session.setResourceValue(id, "svcA", "rcB", id, now);
-            session.setResourceValue(id, "svcB", "rcB", id + 256, now);
+            session.setResourceValue(id, "svcA", "rcA", id);
+            session.setResourceValue(id, "svcB", "rcA", id + 256);
+            session.setResourceValue(id, "svcA", "rcB", id);
+            session.setResourceValue(id, "svcB", "rcB", id + 256);
         });
 
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
@@ -172,5 +179,135 @@ public class FiltersTest {
             assertTrue(resultList.count >= nbProviders);
             assertEquals(reversedProviderIds, extractProviderIds(resultList));
         }
+    }
+
+    @Test
+    void testRef() throws IOException, InterruptedException {
+        final String provider = "refTester";
+        final String svc = "sensor";
+        final String rc = "rc";
+        session.setResourceValue(provider, svc, rc, 42);
+
+        // Parsing will fail if there is any other JSON property
+        ResultList<Self> resultList = utils.queryJson(String.format("/Things(%s)/Datastreams/$ref", provider),
+                RESULT_SELF);
+        assertNull(resultList.count);
+
+        List<Self> references = resultList.value.stream()
+                .filter(s -> s.selfLink.endsWith(String.format("Datastreams(%s)", String.join("~", provider, svc, rc))))
+                .collect(Collectors.toList());
+        assertEquals(1, references.size());
+
+        // Add the count
+        resultList = utils.queryJson(String.format("/Things(%s)/Datastreams/$ref?$count=true", provider), RESULT_SELF);
+        assertEquals(resultList.value.size(), resultList.count);
+        references = resultList.value.stream()
+                .filter(s -> s.selfLink.endsWith(String.format("Datastreams(%s)", String.join("~", provider, svc, rc))))
+                .collect(Collectors.toList());
+        assertEquals(1, references.size());
+    }
+
+    @Test
+    void testProp() throws IOException, InterruptedException {
+        final Instant creationTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+        final String provider = "propTester";
+        final String svc = "sensor";
+        final String rc = "rc";
+        final int value = random.nextInt();
+        session.setResourceValue(provider, svc, rc, value, creationTime);
+
+        ResultList<Self> observations = utils
+                .queryJson(String.format("/FeaturesOfInterest(%s)/Observations/$ref", provider), RESULT_SELF);
+        String baseUrl = observations.value.stream()
+                .filter(s -> s.selfLink.contains(String.join("~", provider, svc, rc))).findFirst().get().selfLink;
+
+        String property = "resultTime";
+        Map<?, ?> rawResult = utils.queryJson(baseUrl + "/" + property, Map.class);
+        assertEquals(Set.of(property), rawResult.keySet());
+        assertEquals(creationTime.toString(), rawResult.get(property));
+
+        property = "result";
+        rawResult = utils.queryJson(baseUrl + "/" + property, Map.class);
+        assertEquals(Set.of(property), rawResult.keySet());
+        assertEquals(value, rawResult.get(property));
+    }
+
+    @Test
+    void testSelect() throws IOException, InterruptedException {
+        final String provider = "selectTester";
+        final String svc = "sensor";
+        final String rc = "rc";
+        session.setResourceValue(provider, svc, rc, 42);
+
+        Set<String> selectedFields = Set.of("result", "resultTime");
+        Map<?, ?> rawResultList = utils.queryJson("/Observations/?$select=" + String.join(",", selectedFields),
+                Map.class);
+        List<?> items = (List<?>) rawResultList.get("value");
+        assertFalse(items.isEmpty());
+        for (Object rawItem : items) {
+            Map<?, ?> item = utils.getMapper().convertValue(rawItem, Map.class);
+            assertEquals(selectedFields, item.keySet());
+        }
+    }
+
+    @Test
+    void testSkipTop() throws IOException, InterruptedException {
+        // Register the resources
+        final String provider = "skipTopFilter";
+        final String svc = "sensor";
+        final String rcPrefix = "rc";
+        final int nbRc = 5;
+        for (int i = 0; i < nbRc; i++) {
+            session.setResourceValue(provider, svc, rcPrefix + i, i);
+        }
+
+        // List all datastreams (should be more or as many as our resources)
+        final ResultList<AnyIdDTO> allStreams = utils
+                .queryJson(String.format("/Things(%s)/Datastreams?$count=true", provider), RESULT_ANY);
+        final int nbIds = allStreams.count;
+        final List<String> allIds = allStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+        assertTrue(allIds.size() >= nbRc);
+        assertEquals(allIds.size(), nbIds);
+
+        // Test top
+        int topVal = 2;
+        ResultList<AnyIdDTO> subStreams = utils
+                .queryJson(String.format("/Things(%s)/Datastreams?$top=%d", provider, topVal), RESULT_ANY);
+        List<String> ids = subStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+        assertNull(subStreams.count);
+        assertEquals(topVal, ids.size());
+        assertEquals(allIds.subList(0, topVal), ids);
+
+        subStreams = utils.queryJson(String.format("/Things(%s)/Datastreams?$top=%d&$count=true", provider, topVal),
+                RESULT_ANY);
+        assertEquals(ids, subStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList()));
+        assertEquals(nbIds, subStreams.count);
+
+        // Test skip
+        int skipVal = 2;
+        subStreams = utils.queryJson(String.format("/Things(%s)/Datastreams?$skip=%d", provider, skipVal), RESULT_ANY);
+        ids = subStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+        assertNull(subStreams.count);
+        assertEquals(nbIds - skipVal, ids.size());
+        assertEquals(allIds.subList(skipVal, allIds.size()), ids);
+
+        subStreams = utils.queryJson(String.format("/Things(%s)/Datastreams?$skip=%d&$count=true", provider, skipVal),
+                RESULT_ANY);
+        assertEquals(ids, subStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList()));
+        assertEquals(nbIds, subStreams.count);
+
+        // Test both
+        subStreams = utils.queryJson(
+                String.format("/Things(%s)/Datastreams?$top=%d&$skip=%d", provider, topVal, skipVal), RESULT_ANY);
+        ids = subStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+        assertNull(subStreams.count);
+        assertEquals(topVal, ids.size());
+        assertEquals(allIds.subList(skipVal, skipVal + topVal), ids);
+
+        subStreams = utils.queryJson(
+                String.format("/Things(%s)/Datastreams?$top=%d&$skip=%d&$count=true", provider, topVal, skipVal),
+                RESULT_ANY);
+        assertEquals(ids, subStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList()));
+        assertEquals(nbIds, subStreams.count);
     }
 }
