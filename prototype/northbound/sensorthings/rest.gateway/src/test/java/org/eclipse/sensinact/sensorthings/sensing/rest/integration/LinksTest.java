@@ -12,15 +12,22 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
@@ -30,6 +37,7 @@ import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -50,6 +58,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Tests that all links related to a thing are valid
  */
 public class LinksTest {
+
+    private static final TypeReference<ResultList<Datastream>> RESULT_DATASTREAMS = new TypeReference<ResultList<Datastream>>() {
+    };
+
+    private static final TypeReference<ResultList<HistoricalLocation>> RESULT_HISTORICAL_LOCATIONS = new TypeReference<ResultList<HistoricalLocation>>() {
+    };
+
+    private static final TypeReference<ResultList<Location>> RESULT_LOCATIONS = new TypeReference<ResultList<Location>>() {
+    };
+
+    private static final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<ResultList<Observation>>() {
+    };
+
+    private static final TypeReference<ResultList<Sensor>> RESULT_SENSORS = new TypeReference<ResultList<Sensor>>() {
+    };
+
+    private static final TypeReference<ResultList<Thing>> RESULT_THINGS = new TypeReference<ResultList<Thing>>() {
+    };
+
     private static final String USER = "user";
 
     private static final String PROVIDER = "linkTester";
@@ -60,8 +87,6 @@ public class LinksTest {
 
     @InjectService
     PrototypePush push;
-
-    final ObjectMapper mapper = new ObjectMapper();
 
     final TestUtils utils = new TestUtils();
 
@@ -79,6 +104,134 @@ public class LinksTest {
     void stop() {
         SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.activeListeners().keySet().forEach(session::removeListener);
+    }
+
+    /**
+     * Check if the mirror access works
+     */
+    private <S extends Id> void checkMirror(String mirrorBaseUrl, S srcObject, Class<S> srcType)
+            throws IOException, InterruptedException {
+        // Single element
+        String mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName());
+        try {
+            S mirrorAccess = utils.queryJson(mirrorUrl, srcType);
+            utils.assertDtoEquals(srcObject, mirrorAccess, srcType);
+            return;
+        } catch (IOException ex) {
+            // ... ignore HTTP error
+        }
+
+        // List of elements
+        mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName() + "s");
+        Map<?, ?> base = utils.queryJson(mirrorUrl, Map.class);
+        List<?> mirrorAccess = utils.getMapper().convertValue(base.get("value"), List.class);
+
+        boolean found = false;
+        for (Object rawItem : mirrorAccess) {
+            S item = utils.getMapper().convertValue(rawItem, srcType);
+            if (srcObject.id.equals(item.id)) {
+                found = true;
+                utils.assertDtoEquals(srcObject, item, srcType);
+                break;
+            }
+        }
+        assertTrue(found, "Source object not found in mirror list");
+        return;
+    }
+
+    private String toPluralLink(final String kindOfLink) {
+        switch (kindOfLink) {
+        case "FeatureOfInterest":
+            return "FeaturesOfInterest";
+
+        default:
+            return kindOfLink.replaceFirst("y$", "ie") + "s";
+        }
+    }
+
+    private String fromPluralLink(final String kindOfLink) {
+        switch (kindOfLink) {
+        case "FeaturesOfInterest":
+            return "FeatureOfInterest";
+
+        default:
+            return kindOfLink.replaceFirst("ies$", "y").replaceFirst("s$", "");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends Id> Class<T> getDTOType(final String simpleName) throws ClassNotFoundException {
+        return (Class<T>) Class.forName(Id.class.getPackageName() + "." + simpleName);
+    }
+
+    private <T extends Id> Set<Object> listIdsFromURL(final String url, Class<T> linkType)
+            throws IOException, InterruptedException {
+
+        // Result List root
+        final ObjectMapper mapper = utils.getMapper();
+        List<?> values = (List<?>) utils.queryJson(url, Map.class).get("value");
+        return values.stream().map(o -> mapper.convertValue(o, linkType).id).collect(Collectors.toSet());
+    }
+
+    /**
+     * Checks if the access to the data stream works
+     */
+    private <S extends Id, T extends Id> void checkSubLinks(S srcObject, String listUrl,
+            TypeReference<ResultList<T>> resultListType, Class<T> resultType) throws IOException, InterruptedException {
+        ResultList<T> results = utils.queryJson(listUrl, resultListType);
+        assertNotNull(results);
+        assertFalse(results.value.isEmpty(), "No " + resultType.getSimpleName() + " found");
+
+        @SuppressWarnings("unchecked")
+        Class<S> srcType = (Class<S>) srcObject.getClass();
+
+        final ObjectMapper mapper = utils.getMapper();
+
+        for (T item : results.value) {
+            // Check access from source object
+            String directAccessItemUrl = String.format("%s(%s)", listUrl, item.id);
+            T directAccessItem = utils.queryJson(directAccessItemUrl, resultType);
+            utils.assertDtoEquals(item, directAccessItem, resultType);
+
+            // Check mirror
+            checkMirror(String.format("%s(%s)", listUrl, item.id), srcObject, srcType);
+
+            // Check deeper access
+            for (Field field : item.getClass().getFields()) {
+                String fieldName = field.getName();
+                if (!fieldName.endsWith("Link") || "selfLink".equals(fieldName)) {
+                    continue;
+                }
+
+                String kindOfLink = fieldName.substring(0, fieldName.length() - "Link".length());
+                kindOfLink = Character.toUpperCase(kindOfLink.charAt(0)) + kindOfLink.substring(1);
+                try {
+                    if (kindOfLink.endsWith("s") || kindOfLink.startsWith("Features")) {
+                        // Returns a result list
+                        String singularLink = fromPluralLink(kindOfLink);
+                        Class<? extends Id> linkType = getDTOType(singularLink);
+                        Set<Object> linkedItemsIds = listIdsFromURL(
+                                String.format("%s/%s", directAccessItemUrl, kindOfLink), linkType);
+                        Set<Object> allItemsIds = listIdsFromURL(kindOfLink, linkType);
+                        assertTrue(allItemsIds.containsAll(linkedItemsIds),
+                                linkedItemsIds + " not a subset of " + allItemsIds);
+                    } else {
+                        // Returns a single item
+                        Class<? extends Id> linkType = getDTOType(kindOfLink);
+                        Id linkedDto = mapper.convertValue(
+                                utils.queryJson(String.format("%s/%s", directAccessItemUrl, kindOfLink), Map.class),
+                                linkType);
+
+                        Id directDto = mapper.convertValue(utils.queryJson(
+                                String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id), Map.class), linkType);
+
+                        utils.assertDtoEquals(directDto, linkedDto, linkType);
+                    }
+                } catch (ClassNotFoundException | ClassCastException e) {
+                    fail(e);
+                }
+            }
+        }
     }
 
     /**
@@ -110,8 +263,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new things
-        ResultList<Thing> things = utils.queryJson("/Things", new TypeReference<ResultList<Thing>>() {
-        });
+        ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
         assertNotNull(things);
         assertFalse(things.value.isEmpty(), "No thing found");
 
@@ -125,9 +277,59 @@ public class LinksTest {
             utils.assertDtoEquals(thing, utils.queryJson(thing.selfLink, Thing.class), Thing.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(thing.datastreamsLink);
-            utils.assertURLStatus(thing.historicalLocationsLink);
-            utils.assertURLStatus(thing.locationsLink);
+            checkSubLinks(thing, thing.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(thing, thing.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
+            checkSubLinks(thing, thing.locationsLink, RESULT_LOCATIONS, Location.class);
+
+            // Check mirrors
+            Set<Object> datastreamIDs = listIdsFromURL(thing.datastreamsLink, Datastream.class);
+            Set<Object> locationIDs = listIdsFromURL(thing.locationsLink, Location.class);
+            Set<Object> historicalLocationsIDs = listIdsFromURL(thing.historicalLocationsLink,
+                    HistoricalLocation.class);
+
+            for (Object dsId : datastreamIDs) {
+                Set<Object> dsThingStreamIDs = listIdsFromURL(String.format("/Datastreams(%s)/Thing/Datastreams", dsId),
+                        Datastream.class);
+                assertEquals(datastreamIDs, dsThingStreamIDs);
+
+                Set<Object> dsThingLocationIDs = listIdsFromURL(String.format("/Datastreams(%s)/Thing/Locations", dsId),
+                        Location.class);
+                assertEquals(locationIDs, dsThingLocationIDs);
+
+                Set<Object> dsThingHistoricalLocationIDs = listIdsFromURL(
+                        String.format("/Datastreams(%s)/Thing/HistoricalLocations", dsId), HistoricalLocation.class);
+                assertEquals(historicalLocationsIDs, dsThingHistoricalLocationIDs);
+            }
+
+            for (Object locId : locationIDs) {
+                Set<Object> dsThingStreamIDs = listIdsFromURL(
+                        String.format("/Locations(%s)/Things(%s)/Datastreams", locId, thing.id), Datastream.class);
+                assertEquals(datastreamIDs, dsThingStreamIDs);
+
+                Set<Object> dsThingLocationIDs = listIdsFromURL(
+                        String.format("/Locations(%s)/Things(%s)/Locations", locId, thing.id), Location.class);
+                assertEquals(locationIDs, dsThingLocationIDs);
+
+                Set<Object> dsThingHistoricalLocationIDs = listIdsFromURL(
+                        String.format("/Locations(%s)/Things(%s)/HistoricalLocations", locId, thing.id),
+                        HistoricalLocation.class);
+                assertEquals(historicalLocationsIDs, dsThingHistoricalLocationIDs);
+            }
+
+            for (Object histLocId : historicalLocationsIDs) {
+                Set<Object> dsThingStreamIDs = listIdsFromURL(
+                        String.format("/HistoricalLocations(%s)/Thing/Datastreams", histLocId), Datastream.class);
+                assertEquals(datastreamIDs, dsThingStreamIDs);
+
+                Set<Object> dsThingLocationIDs = listIdsFromURL(
+                        String.format("/HistoricalLocations(%s)/Thing/Locations", histLocId), Location.class);
+                assertEquals(locationIDs, dsThingLocationIDs);
+
+                Set<Object> dsThingHistoricalLocationIDs = listIdsFromURL(
+                        String.format("/HistoricalLocations(%s)/Thing/HistoricalLocations", histLocId),
+                        HistoricalLocation.class);
+                assertEquals(historicalLocationsIDs, dsThingHistoricalLocationIDs);
+            }
         }
     }
 
@@ -142,8 +344,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Location> locations = utils.queryJson("/Locations", new TypeReference<ResultList<Location>>() {
-        });
+        ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
         assertNotNull(locations);
         assertFalse(locations.value.isEmpty(), "No location found");
 
@@ -157,8 +358,9 @@ public class LinksTest {
             utils.assertDtoEquals(location, utils.queryJson(location.selfLink, Location.class), Location.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(location.historicalLocationsLink);
-            utils.assertURLStatus(location.thingsLink);
+            checkSubLinks(location, location.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS,
+                    HistoricalLocation.class);
+            checkSubLinks(location, location.thingsLink, RESULT_THINGS, Thing.class);
         }
     }
 
@@ -177,8 +379,7 @@ public class LinksTest {
 
         // Get the new locations
         ResultList<HistoricalLocation> historicalLocations = utils.queryJson("/HistoricalLocations",
-                new TypeReference<ResultList<HistoricalLocation>>() {
-                });
+                RESULT_HISTORICAL_LOCATIONS);
         assertNotNull(historicalLocations);
         assertFalse(historicalLocations.value.isEmpty(), "No historical location found");
 
@@ -193,7 +394,7 @@ public class LinksTest {
                     utils.queryJson(historicalLocation.selfLink, HistoricalLocation.class), HistoricalLocation.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(historicalLocation.locationsLink);
+            checkSubLinks(historicalLocation, historicalLocation.locationsLink, RESULT_LOCATIONS, Location.class);
             utils.assertURLStatus(historicalLocation.thingLink);
         }
     }
@@ -209,9 +410,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Datastream> datastreams = utils.queryJson("/Datastreams",
-                new TypeReference<ResultList<Datastream>>() {
-                });
+        ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
         assertNotNull(datastreams);
         assertFalse(datastreams.value.isEmpty(), "No datastream found");
 
@@ -225,11 +424,31 @@ public class LinksTest {
             utils.assertURLStatus(datastream.selfLink);
             utils.assertDtoEquals(datastream, utils.queryJson(datastream.selfLink, Datastream.class), Datastream.class);
 
-            // Check sub-links existence
-            utils.assertURLStatus(datastream.observationsLink);
-            utils.assertURLStatus(datastream.observedPropertyLink);
-            utils.assertURLStatus(datastream.sensorLink);
-            utils.assertURLStatus(datastream.thingLink);
+            // Check sub-links
+            checkSubLinks(datastream, datastream.observationsLink, RESULT_OBSERVATIONS, Observation.class);
+            ObservedProperty obsProp = utils.queryJson(datastream.observedPropertyLink, ObservedProperty.class);
+            Sensor sensor = utils.queryJson(datastream.sensorLink, Sensor.class);
+            Thing thing = utils.queryJson(datastream.thingLink, Thing.class);
+
+            // Check mirrors
+            ResultList<Observation> observations = utils.queryJson(datastream.observationsLink, RESULT_OBSERVATIONS);
+            Set<Object> observationIDs = observations.value.stream().map(o -> o.id).collect(Collectors.toSet());
+            for (Observation obs : observations.value) {
+                Set<Object> obsDatastreamObsIDs = listIdsFromURL(
+                        String.format("/Observations(%s)/Datastream/Observations", obs.id), Observation.class);
+                assertEquals(observationIDs, obsDatastreamObsIDs);
+
+                utils.assertDtoEquals(obsProp,
+                        utils.queryJson(String.format("/Observations(%s)/Datastream/ObservedProperty", obs.id),
+                                ObservedProperty.class),
+                        ObservedProperty.class);
+                utils.assertDtoEquals(sensor,
+                        utils.queryJson(String.format("/Observations(%s)/Datastream/Sensor", obs.id), Sensor.class),
+                        Sensor.class);
+                utils.assertDtoEquals(thing,
+                        utils.queryJson(String.format("/Observations(%s)/Datastream/Thing", obs.id), Thing.class),
+                        Thing.class);
+            }
         }
     }
 
@@ -244,8 +463,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Sensor> sensors = utils.queryJson("/Sensors", new TypeReference<ResultList<Sensor>>() {
-        });
+        ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
         assertNotNull(sensors);
         assertFalse(sensors.value.isEmpty(), "No sensor found");
 
@@ -259,7 +477,14 @@ public class LinksTest {
             utils.assertDtoEquals(sensor, utils.queryJson(sensor.selfLink, Sensor.class), Sensor.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(sensor.datastreamsLink);
+            checkSubLinks(sensor, sensor.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+
+            Set<Object> datastreamIDs = listIdsFromURL(sensor.datastreamsLink, Datastream.class);
+            for (Object dsId : datastreamIDs) {
+                Set<Object> dsStreamIDs = listIdsFromURL(String.format("/Datastreams(%s)/Sensor/Datastreams", dsId),
+                        Datastream.class);
+                assertEquals(datastreamIDs, dsStreamIDs);
+            }
         }
     }
 
@@ -274,9 +499,7 @@ public class LinksTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Get the new locations
-        ResultList<Observation> observations = utils.queryJson("/Observations",
-                new TypeReference<ResultList<Observation>>() {
-                });
+        ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
         assertNotNull(observations);
         assertFalse(observations.value.isEmpty(), "No observation found");
 
@@ -325,7 +548,14 @@ public class LinksTest {
                     ObservedProperty.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(observed.datastreamsLink);
+            checkSubLinks(observed, observed.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+
+            Set<Object> datastreamIDs = listIdsFromURL(observed.datastreamsLink, Datastream.class);
+            for (Object dsId : datastreamIDs) {
+                Set<Object> dsStreamIDs = listIdsFromURL(
+                        String.format("/Datastreams(%s)/ObservedProperty/Datastreams", dsId), Datastream.class);
+                assertEquals(datastreamIDs, dsStreamIDs);
+            }
         }
     }
 
@@ -356,8 +586,16 @@ public class LinksTest {
             utils.assertDtoEquals(feature, utils.queryJson(feature.selfLink, FeatureOfInterest.class),
                     FeatureOfInterest.class);
 
-            // Check sub-links existence
-            utils.assertURLStatus(feature.observationsLink);
+            // Observations have a timestamp, but not the feature of interest
+            checkSubLinks(feature, feature.observationsLink, RESULT_OBSERVATIONS, Observation.class);
+
+            ResultList<Observation> observations = utils.queryJson(feature.observationsLink, RESULT_OBSERVATIONS);
+            Set<Object> observationIDs = observations.value.stream().map(o -> o.id).collect(Collectors.toSet());
+            for (Observation obs : observations.value) {
+                Set<Object> obsFeaturesObsIDs = listIdsFromURL(
+                        String.format("/Observations(%s)/FeatureOfInterest/Observations", obs.id), Observation.class);
+                assertEquals(observationIDs, obsFeaturesObsIDs);
+            }
         }
     }
 }

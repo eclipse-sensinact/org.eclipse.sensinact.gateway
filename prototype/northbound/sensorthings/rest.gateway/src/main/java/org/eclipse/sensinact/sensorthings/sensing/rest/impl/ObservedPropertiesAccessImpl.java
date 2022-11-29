@@ -131,7 +131,8 @@ public class ObservedPropertiesAccessImpl implements ObservedPropertiesAccess {
     @Override
     public Thing getObservedPropertyDatastreamThing(String id, String id2) {
         String provider = extractFirstIdSegment(id);
-        if (!provider.equals(id2)) {
+        String provider2 = extractFirstIdSegment(id2);
+        if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
         return DtoMapper.toThing(getSession(), uriInfo, provider);

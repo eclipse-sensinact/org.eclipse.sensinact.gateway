@@ -134,7 +134,7 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
         }
 
         String service = extractFirstIdSegment(id2.substring(provider2.length() + 1));
-        String resource = extractFirstIdSegment(provider2.substring(provider.length() + service.length() + 2));
+        String resource = extractFirstIdSegment(id2.substring(provider.length() + service.length() + 2));
 
         SensiNactSession userSession = getSession();
         Datastream d;
@@ -145,7 +145,7 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
             throw new NotFoundException();
         }
 
-        if (!id2.equals(d.id)) {
+        if (!String.join("~", provider, service, resource).equals(d.id)) {
             throw new NotFoundException();
         }
 

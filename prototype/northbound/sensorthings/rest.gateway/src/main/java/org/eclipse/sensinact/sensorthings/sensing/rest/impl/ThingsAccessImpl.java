@@ -103,7 +103,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
     @Override
     public ResultList<Observation> getThingDatastreamObservations(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+        String provider = extractFirstIdSegment(id2);
 
         if (!id.equals(provider)) {
             throw new NotFoundException();
@@ -111,8 +111,8 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         SensiNactSession userSession = getSession();
 
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = extractFirstIdSegment(id2.substring(provider.length() + 1));
+        String resource = extractFirstIdSegment(id2.substring(provider.length() + service.length() + 2));
 
         ResultList<Observation> list = new ResultList<>();
         list.value = List
@@ -122,7 +122,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
     @Override
     public ObservedProperty getThingDatastreamObservedProperty(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+        String provider = extractFirstIdSegment(id2);
 
         if (!id.equals(provider)) {
             throw new NotFoundException();
@@ -130,13 +130,13 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         SensiNactSession userSession = getSession();
 
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = extractFirstIdSegment(id2.substring(provider.length() + 1));
+        String resource = extractFirstIdSegment(id2.substring(provider.length() + service.length() + 2));
 
         ObservedProperty o = DtoMapper.toObservedProperty(uriInfo,
                 userSession.describeResource(provider, service, resource));
 
-        if (!id.equals(o.id)) {
+        if (!id2.equals(o.id)) {
             throw new NotFoundException();
         }
 
@@ -145,7 +145,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
     @Override
     public Sensor getThingDatastreamSensor(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+        String provider = extractFirstIdSegment(id2);
 
         if (!id.equals(provider)) {
             throw new NotFoundException();
@@ -153,12 +153,12 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         SensiNactSession userSession = getSession();
 
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = extractFirstIdSegment(id2.substring(provider.length() + 1));
+        String resource = extractFirstIdSegment(id2.substring(provider.length() + service.length() + 2));
 
         Sensor s = DtoMapper.toSensor(uriInfo, userSession.describeResource(provider, service, resource));
 
-        if (!id.equals(s.id)) {
+        if (!id2.equals(s.id)) {
             throw new NotFoundException();
         }
 
@@ -167,7 +167,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
     @Override
     public Thing getThingDatastreamThing(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+        String provider = extractFirstIdSegment(id2);
 
         if (!id.equals(provider)) {
             throw new NotFoundException();
@@ -280,7 +280,7 @@ public class ThingsAccessImpl implements ThingsAccess {
 
     @Override
     public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+        String provider = extractFirstIdSegment(id2);
 
         HistoricalLocation hl;
         try {

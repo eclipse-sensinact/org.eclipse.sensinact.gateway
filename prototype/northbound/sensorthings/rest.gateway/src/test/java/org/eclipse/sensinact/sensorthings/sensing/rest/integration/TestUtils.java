@@ -29,6 +29,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
@@ -40,6 +41,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public class TestUtils {
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
 
     /**
      * Constructs a DTO to use with PrototypePush
@@ -73,13 +78,7 @@ public class TestUtils {
         final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
         final HttpResponse<String> response = client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
-        try {
-            return mapper.createParser(response.body()).readValueAs(resultType);
-        } catch (Throwable t) {
-            System.err.println("Error querying URL " + targetUri);
-            System.err.println("===>\n" + response.body());
-            throw t;
-        }
+        return mapper.createParser(response.body()).readValueAs(resultType);
     }
 
     public <T> T queryJson(final String path, final Class<T> resultType) throws IOException, InterruptedException {
@@ -174,7 +173,7 @@ public class TestUtils {
                     Object expectedFieldValue = field.get(expected);
                     Object actualFieldValue = field.get(actual);
 
-                    if (fieldType.getDeclaredMethods().length == 0
+                    if (Arrays.stream(fieldType.getDeclaredMethods()).filter(m -> !m.isSynthetic()).count() == 0
                             && fieldType.getMethods().length == objectMethods.length
                             && fieldType.getFields().length > 0) {
                         // We have found another DTO: no method, only public fields
@@ -183,10 +182,15 @@ public class TestUtils {
                                         path + "/" + field.getName(), field.getName(), fieldType.getSimpleName(),
                                         expectedFieldValue, actualFieldValue));
                     } else {
-                        assertEquals(field.get(expected), field.get(actual),
-                                String.format("%s: field <%s> (%s) differs: expected <%s> but was <%s>", path,
-                                        field.getName(), fieldType.getSimpleName(), expectedFieldValue,
-                                        actualFieldValue));
+                        try {
+                            assertEquals(field.get(expected), field.get(actual),
+                                    String.format("%s: field <%s> (%s) differs: expected <%s> but was <%s>", path,
+                                            field.getName(), fieldType.getSimpleName(), expectedFieldValue,
+                                            actualFieldValue));
+                        } catch (Throwable t) {
+                            System.out.println("Failed on field:" + field);
+                            fail(t);
+                        }
                     }
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     e.printStackTrace();

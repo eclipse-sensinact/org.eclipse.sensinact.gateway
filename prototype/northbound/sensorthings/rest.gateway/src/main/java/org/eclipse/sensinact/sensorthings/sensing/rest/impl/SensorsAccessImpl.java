@@ -130,7 +130,7 @@ public class SensorsAccessImpl implements SensorsAccess {
     public Thing getSensorDatastreamThing(String id, String id2) {
         String provider = extractFirstIdSegment(id);
         Thing t = DtoMapper.toThing(getSession(), uriInfo, provider);
-        if (!id2.equals(t.id)) {
+        if (!provider.equals(t.id)) {
             throw new NotFoundException();
         }
         return t;

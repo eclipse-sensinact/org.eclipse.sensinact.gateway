@@ -14,7 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
 
 import java.util.List;
 
@@ -172,7 +171,6 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
     public ResultList<HistoricalLocation> getDatastreamThingHistoricalLocations(String id) {
         SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
 
         HistoricalLocation hl;
         try {
@@ -190,7 +188,6 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
     public ResultList<Location> getDatastreamThingLocations(String id) {
         SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
 
         Location hl;
         try {
