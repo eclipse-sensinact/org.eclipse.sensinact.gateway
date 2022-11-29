@@ -295,10 +295,9 @@ public class DtoMapper {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest();
 
         final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, false);
-        final Instant time = location.getTimestamp();
         final GeoJsonObject object = location.getValue();
 
-        featureOfInterest.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
+        featureOfInterest.id = providerName;
 
         String friendlyName = getProperty(object, "name");
         featureOfInterest.name = Objects.requireNonNullElse(friendlyName, providerName);
