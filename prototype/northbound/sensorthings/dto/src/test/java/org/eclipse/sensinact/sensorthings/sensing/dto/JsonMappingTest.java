@@ -220,9 +220,9 @@ class JsonMappingTest {
             assertEquals(description, datastream.description);
             assertEquals(observationType, datastream.observationType);
             assertNull(datastream.observedArea);
-            assertEquals("{TOT}", datastream.unitOfMeasurement.get("symbol"));
-            assertEquals(unitName, datastream.unitOfMeasurement.get("name"));
-            assertEquals("http://unitsofmeasure.org/ucum.html#para-50", datastream.unitOfMeasurement.get("definition"));
+            assertEquals("{TOT}", datastream.unitOfMeasurement.symbol);
+            assertEquals(unitName, datastream.unitOfMeasurement.name);
+            assertEquals("http://unitsofmeasure.org/ucum.html#para-50", datastream.unitOfMeasurement.definition);
             assertEquals(observations, datastream.observationsLink);
             assertEquals(observedProperty, datastream.observedPropertyLink);
             assertEquals(sensor, datastream.sensorLink);
@@ -436,7 +436,12 @@ class JsonMappingTest {
             datastream.name = "7203:Harrison/Dovercourt:available_bikes";
             datastream.description = "The datastream of available bikes count for the Toronto bike share station Harrison/Dovercourt";
             datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation";
-            datastream.unitOfMeasurement = Map.of("symbol", "{TOT}", "name", "bike count", "definition", "http://unitsofmeasure.org/ucum.html#para-50");
+
+            UnitOfMeasurement unit = new UnitOfMeasurement();
+            unit.symbol = "{TOT}";
+            unit.name = "bike count";
+            unit.definition = "http://unitsofmeasure.org/ucum.html#para-50";
+            datastream.unitOfMeasurement = unit;
 
             datastream.observationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/Observations";
             datastream.observedPropertyLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1512)/ObservedProperty";

@@ -27,7 +27,7 @@ public class Datastream extends NameDescription {
 
     public String observationType;
 
-    public Map<String, Object> unitOfMeasurement;
+    public UnitOfMeasurement unitOfMeasurement;
 
     @JsonInclude(NON_NULL)
     public Polygon observedArea;

@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import java.time.Instant;
-import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -33,6 +32,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -167,10 +167,11 @@ public class DtoMapper {
         // TODO can we make this more fine-grained
         datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
 
-        datastream.unitOfMeasurement = Map.of(
-                "symbol", String.valueOf(resource.metadata.get("unit")),
-                "name", String.valueOf(resource.metadata.get("sensorthings.unit.name")),
-                "definition", String.valueOf(resource.metadata.get("sensorthings.unit.definition")));
+        UnitOfMeasurement unit = new UnitOfMeasurement();
+        unit.symbol = String.valueOf(resource.metadata.get("unit"));
+        unit.name = String.valueOf(resource.metadata.get("sensorthings.unit.name"));
+        unit.definition = String.valueOf(resource.metadata.get("sensorthings.unit.definition"));
+        datastream.unitOfMeasurement = unit;
 
         datastream.observedArea = getObservedArea(
                 getLocation(userSession, mapper, resource.provider, false).getValue());
