@@ -40,6 +40,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class TestUtils {
 
+    private final Method[] objectMethods = Object.class.getMethods();
+
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     public ObjectMapper getMapper() {
@@ -162,11 +164,8 @@ public class TestUtils {
         }
         assertNotNull(actual, message);
 
-        Method[] objectMethods = Object.class.getMethods();
-
         // Look at class public fields
         for (final Field field : type.getFields()) {
-            assertEquals(field.canAccess(expected), field.canAccess(actual));
             if (field.canAccess(expected)) {
                 try {
                     Class<?> fieldType = field.getType();
