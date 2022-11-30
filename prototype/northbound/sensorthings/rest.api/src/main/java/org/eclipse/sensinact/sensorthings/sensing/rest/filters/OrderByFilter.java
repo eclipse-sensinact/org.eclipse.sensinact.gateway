@@ -35,7 +35,7 @@ import jakarta.ws.rs.core.Response.Status;
 /**
  * Implements the $orderby query parameter
  */
-@Priority(ENTITY_CODER + 2)
+@Priority(ENTITY_CODER + 3)
 public class OrderByFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final String ORDERBY_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.orderby";

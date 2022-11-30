@@ -28,7 +28,7 @@ import jakarta.ws.rs.core.Response.Status;
 /**
  * Implements handling (in this case rejection of) the $filter parameter
  */
-@Priority(ENTITY_CODER)
+@Priority(ENTITY_CODER + 5)
 public class FilterFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     @Override

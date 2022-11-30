@@ -14,9 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
-
-import java.time.Instant;
 
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -59,7 +56,6 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
         String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
 
         FeatureOfInterest foi;
         try {
@@ -76,7 +72,6 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
     @Override
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
         String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
 
         SensiNactSession userSession = getSession();
         ResultList<Observation> list = new ResultList<>();
@@ -93,12 +88,6 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
         String provider = extractFirstIdSegment(id);
         String provider2 = extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
-        }
-
-        Instant timestamp = getTimestampFromId(id);
-        Instant timestamp2 = getTimestampFromId(id2);
-        if (!timestamp.equals(timestamp2)) {
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }
 
@@ -124,12 +113,6 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
         String provider = extractFirstIdSegment(id);
         String provider2 = extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
-        }
-
-        Instant timestamp = getTimestampFromId(id);
-        Instant timestamp2 = getTimestampFromId(id2);
-        if (!timestamp.equals(timestamp2)) {
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }
 

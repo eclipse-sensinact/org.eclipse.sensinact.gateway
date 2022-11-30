@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import java.time.Instant;
-import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -33,11 +32,13 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.UriInfo;
 
 public class DtoMapper {
@@ -152,6 +153,10 @@ public class DtoMapper {
 
     public static Datastream toDatastream(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
             ResourceDescription resource) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
         Datastream datastream = new Datastream();
 
         datastream.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
@@ -162,10 +167,11 @@ public class DtoMapper {
         // TODO can we make this more fine-grained
         datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
 
-        datastream.unitOfMeasurement = Map.of(
-                "symbol", String.valueOf(resource.metadata.get("unit")),
-                "name", String.valueOf(resource.metadata.get("sensorthings.unit.name")),
-                "definition", String.valueOf(resource.metadata.get("sensorthings.unit.definition")));
+        UnitOfMeasurement unit = new UnitOfMeasurement();
+        unit.symbol = String.valueOf(resource.metadata.get("unit"));
+        unit.name = String.valueOf(resource.metadata.get("sensorthings.unit.name"));
+        unit.definition = String.valueOf(resource.metadata.get("sensorthings.unit.definition"));
+        datastream.unitOfMeasurement = unit;
 
         datastream.observedArea = getObservedArea(
                 getLocation(userSession, mapper, resource.provider, false).getValue());
@@ -184,6 +190,10 @@ public class DtoMapper {
     }
 
     public static Sensor toSensor(UriInfo uriInfo, ResourceDescription resource) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
         Sensor sensor = new Sensor();
 
         sensor.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
@@ -205,6 +215,10 @@ public class DtoMapper {
     }
 
     public static Observation toObservation(UriInfo uriInfo, ResourceDescription resource) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
         Observation observation = new Observation();
 
         observation.id = String.format("%s~%s~%s~%s", resource.provider, resource.service, resource.resource,
@@ -295,10 +309,9 @@ public class DtoMapper {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest();
 
         final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, false);
-        final Instant time = location.getTimestamp();
         final GeoJsonObject object = location.getValue();
 
-        featureOfInterest.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
+        featureOfInterest.id = providerName;
 
         String friendlyName = getProperty(object, "name");
         featureOfInterest.name = Objects.requireNonNullElse(friendlyName, providerName);

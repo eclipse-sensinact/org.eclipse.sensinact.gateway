@@ -18,6 +18,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.get
 
 import java.util.List;
 
+import org.eclipse.sensinact.prototype.ProviderDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -71,8 +72,13 @@ public class ThingsAccessImpl implements ThingsAccess {
 
         SensiNactSession userSession = getSession();
 
+        ProviderDescription providerDescription = userSession.describeProvider(id);
+        if (providerDescription == null) {
+            throw new NotFoundException("Unknown provider");
+        }
+
         ResultList<Datastream> list = new ResultList<>();
-        list.value = userSession.describeProvider(id).services.stream()
+        list.value = providerDescription.services.stream()
                 .map(s -> userSession.describeService(id, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
                 .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());

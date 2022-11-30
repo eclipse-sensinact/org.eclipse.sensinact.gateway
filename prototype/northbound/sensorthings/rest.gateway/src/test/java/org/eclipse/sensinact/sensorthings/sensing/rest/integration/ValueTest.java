@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.sensinact.prototype.SensiNactSession;
@@ -114,5 +115,37 @@ public class ValueTest {
         assertEquals(newValue, obs.result);
         assertTrue(valueUpdateInstant.isAfter(firstResultTime));
         assertFalse(valueUpdateInstant.isAfter(obs.resultTime));
+    }
+
+    @Test
+    void testObservationUnit() throws IOException, InterruptedException {
+        // Create resource
+        final String svcName = "sensor";
+        final String rcName = "rcWithUnit";
+        final int value = random.nextInt(1024);
+        session.setResourceValue(PROVIDER, svcName, rcName, value);
+
+        // No unit by default
+        Datastream ds = utils.queryJson(
+                String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", PROVIDER, svcName, rcName)),
+                Datastream.class);
+        assertEquals("null", ds.unitOfMeasurement.name);
+        assertEquals("null", ds.unitOfMeasurement.symbol);
+        assertEquals("null", ds.unitOfMeasurement.definition);
+
+        // Set its unit
+        final String unitName = "degree Celsius";
+        final String unitSymbol = "°C";
+        final String unitDefinition = "http://unitsofmeasure.org/ucum.html#para-30";
+        session.setResourceMetadata(PROVIDER, svcName, rcName, Map.of("unit", unitSymbol, "sensorthings.unit.name",
+                unitName, "sensorthings.unit.definition", unitDefinition));
+
+        // Check in datastream
+        ds = utils.queryJson(
+                String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", PROVIDER, svcName, rcName)),
+                Datastream.class);
+        assertEquals(unitName, ds.unitOfMeasurement.name);
+        assertEquals(unitSymbol, ds.unitOfMeasurement.symbol);
+        assertEquals(unitDefinition, ds.unitOfMeasurement.definition);
     }
 }

@@ -15,25 +15,19 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -51,6 +45,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -58,6 +53,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Tests that all links related to a thing are valid
  */
 public class LinksTest {
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class AnyIdDTO extends Id {
+    }
+
+    private static final TypeReference<ResultList<AnyIdDTO>> RESULT_ANY = new TypeReference<>() {
+    };
 
     private static final TypeReference<ResultList<Datastream>> RESULT_DATASTREAMS = new TypeReference<ResultList<Datastream>>() {
     };
@@ -80,30 +82,25 @@ public class LinksTest {
     private static final String USER = "user";
 
     private static final String PROVIDER = "linkTester";
-    private static final String PROVIDER_TOPIC = PROVIDER + "/*";
+
+    private final Map<String, Class<? extends Id>> dtoClassCache = new HashMap<>();
 
     @InjectService
     SensiNactSessionManager sessionManager;
-
-    @InjectService
-    PrototypePush push;
+    SensiNactSession session;
 
     final TestUtils utils = new TestUtils();
 
-    BlockingQueue<ResourceDataNotification> queue;
-
     @BeforeEach
     void start() throws InterruptedException {
-        queue = new ArrayBlockingQueue<>(32);
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
-        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
+        session = sessionManager.getDefaultSession(USER);
     }
 
     @AfterEach
     void stop() {
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.activeListeners().keySet().forEach(session::removeListener);
+        dtoClassCache.clear();
+        classFields.clear();
+        session = null;
     }
 
     /**
@@ -149,29 +146,27 @@ public class LinksTest {
         }
     }
 
-    private String fromPluralLink(final String kindOfLink) {
-        switch (kindOfLink) {
-        case "FeaturesOfInterest":
-            return "FeatureOfInterest";
-
-        default:
-            return kindOfLink.replaceFirst("ies$", "y").replaceFirst("s$", "");
-        }
-    }
-
     @SuppressWarnings("unchecked")
-    private <T extends Id> Class<T> getDTOType(final String simpleName) throws ClassNotFoundException {
-        return (Class<T>) Class.forName(Id.class.getPackageName() + "." + simpleName);
+    private <T extends Id> Class<T> getDTOType(final String simpleName) {
+        Class<T> clazz = (Class<T>) dtoClassCache.computeIfAbsent(simpleName, (k) -> {
+            try {
+                return (Class<T>) Class.forName(Id.class.getPackageName() + "." + simpleName);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        });
+
+        if (clazz == null) {
+            fail("Class not found " + simpleName);
+        }
+        return clazz;
     }
 
-    private <T extends Id> Set<Object> listIdsFromURL(final String url, Class<T> linkType)
-            throws IOException, InterruptedException {
-
-        // Result List root
-        final ObjectMapper mapper = utils.getMapper();
-        List<?> values = (List<?>) utils.queryJson(url, Map.class).get("value");
-        return values.stream().map(o -> mapper.convertValue(o, linkType).id).collect(Collectors.toSet());
+    private Set<Object> listIdsFromURL(final String url) throws IOException, InterruptedException {
+        return utils.queryJson(url, RESULT_ANY).value.stream().map(o -> o.id).collect(Collectors.toSet());
     }
+
+    private final Map<Class<?>, List<String>> classFields = new HashMap<>();
 
     /**
      * Checks if the access to the data stream works
@@ -187,6 +182,15 @@ public class LinksTest {
 
         final ObjectMapper mapper = utils.getMapper();
 
+        List<String> fields = List.of();
+        if (!results.value.isEmpty()) {
+            Class<?> itemType = results.value.get(0).getClass();
+            fields = classFields.computeIfAbsent(itemType, (k) -> Arrays.stream(itemType.getFields()).filter((f) -> {
+                String fieldName = f.getName();
+                return fieldName.endsWith("Link") && !"selfLink".equals(fieldName);
+            }).map(f -> f.getName()).collect(Collectors.toList()));
+        }
+
         for (T item : results.value) {
             // Check access from source object
             String directAccessItemUrl = String.format("%s(%s)", listUrl, item.id);
@@ -197,38 +201,28 @@ public class LinksTest {
             checkMirror(String.format("%s(%s)", listUrl, item.id), srcObject, srcType);
 
             // Check deeper access
-            for (Field field : item.getClass().getFields()) {
-                String fieldName = field.getName();
-                if (!fieldName.endsWith("Link") || "selfLink".equals(fieldName)) {
-                    continue;
-                }
-
+            for (String fieldName : fields) {
                 String kindOfLink = fieldName.substring(0, fieldName.length() - "Link".length());
                 kindOfLink = Character.toUpperCase(kindOfLink.charAt(0)) + kindOfLink.substring(1);
-                try {
-                    if (kindOfLink.endsWith("s") || kindOfLink.startsWith("Features")) {
-                        // Returns a result list
-                        String singularLink = fromPluralLink(kindOfLink);
-                        Class<? extends Id> linkType = getDTOType(singularLink);
-                        Set<Object> linkedItemsIds = listIdsFromURL(
-                                String.format("%s/%s", directAccessItemUrl, kindOfLink), linkType);
-                        Set<Object> allItemsIds = listIdsFromURL(kindOfLink, linkType);
-                        assertTrue(allItemsIds.containsAll(linkedItemsIds),
-                                linkedItemsIds + " not a subset of " + allItemsIds);
-                    } else {
-                        // Returns a single item
-                        Class<? extends Id> linkType = getDTOType(kindOfLink);
-                        Id linkedDto = mapper.convertValue(
-                                utils.queryJson(String.format("%s/%s", directAccessItemUrl, kindOfLink), Map.class),
-                                linkType);
+                if (kindOfLink.endsWith("s") || kindOfLink.startsWith("Features")) {
+                    // Returns a result list
+                    Set<Object> linkedItemsIds = listIdsFromURL(
+                            String.format("%s/%s", directAccessItemUrl, kindOfLink));
+                    Set<Object> allItemsIds = listIdsFromURL(kindOfLink);
+                    assertTrue(allItemsIds.containsAll(linkedItemsIds),
+                            linkedItemsIds + " not a subset of " + allItemsIds);
+                } else {
+                    // Returns a single item
+                    Class<? extends Id> linkType = getDTOType(kindOfLink);
+                    Id linkedDto = mapper.convertValue(
+                            utils.queryJson(String.format("%s/%s", directAccessItemUrl, kindOfLink), Map.class),
+                            linkType);
 
-                        Id directDto = mapper.convertValue(utils.queryJson(
-                                String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id), Map.class), linkType);
+                    Id directDto = mapper.convertValue(
+                            utils.queryJson(String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id), Map.class),
+                            linkType);
 
-                        utils.assertDtoEquals(directDto, linkedDto, linkType);
-                    }
-                } catch (ClassNotFoundException | ClassCastException e) {
-                    fail(e);
+                    utils.assertDtoEquals(directDto, linkedDto, linkType);
                 }
             }
         }
@@ -258,9 +252,7 @@ public class LinksTest {
     @Test
     void testLinksFromThings() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
 
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
@@ -282,52 +274,49 @@ public class LinksTest {
             checkSubLinks(thing, thing.locationsLink, RESULT_LOCATIONS, Location.class);
 
             // Check mirrors
-            Set<Object> datastreamIDs = listIdsFromURL(thing.datastreamsLink, Datastream.class);
-            Set<Object> locationIDs = listIdsFromURL(thing.locationsLink, Location.class);
-            Set<Object> historicalLocationsIDs = listIdsFromURL(thing.historicalLocationsLink,
-                    HistoricalLocation.class);
+            Set<Object> datastreamIDs = listIdsFromURL(thing.datastreamsLink);
+            Set<Object> locationIDs = listIdsFromURL(thing.locationsLink);
+            Set<Object> historicalLocationsIDs = listIdsFromURL(thing.historicalLocationsLink);
 
             for (Object dsId : datastreamIDs) {
-                Set<Object> dsThingStreamIDs = listIdsFromURL(String.format("/Datastreams(%s)/Thing/Datastreams", dsId),
-                        Datastream.class);
+                Set<Object> dsThingStreamIDs = listIdsFromURL(
+                        String.format("/Datastreams(%s)/Thing/Datastreams", dsId));
                 assertEquals(datastreamIDs, dsThingStreamIDs);
 
-                Set<Object> dsThingLocationIDs = listIdsFromURL(String.format("/Datastreams(%s)/Thing/Locations", dsId),
-                        Location.class);
+                Set<Object> dsThingLocationIDs = listIdsFromURL(
+                        String.format("/Datastreams(%s)/Thing/Locations", dsId));
                 assertEquals(locationIDs, dsThingLocationIDs);
 
                 Set<Object> dsThingHistoricalLocationIDs = listIdsFromURL(
-                        String.format("/Datastreams(%s)/Thing/HistoricalLocations", dsId), HistoricalLocation.class);
+                        String.format("/Datastreams(%s)/Thing/HistoricalLocations", dsId));
                 assertEquals(historicalLocationsIDs, dsThingHistoricalLocationIDs);
             }
 
             for (Object locId : locationIDs) {
                 Set<Object> dsThingStreamIDs = listIdsFromURL(
-                        String.format("/Locations(%s)/Things(%s)/Datastreams", locId, thing.id), Datastream.class);
+                        String.format("/Locations(%s)/Things(%s)/Datastreams", locId, thing.id));
                 assertEquals(datastreamIDs, dsThingStreamIDs);
 
                 Set<Object> dsThingLocationIDs = listIdsFromURL(
-                        String.format("/Locations(%s)/Things(%s)/Locations", locId, thing.id), Location.class);
+                        String.format("/Locations(%s)/Things(%s)/Locations", locId, thing.id));
                 assertEquals(locationIDs, dsThingLocationIDs);
 
                 Set<Object> dsThingHistoricalLocationIDs = listIdsFromURL(
-                        String.format("/Locations(%s)/Things(%s)/HistoricalLocations", locId, thing.id),
-                        HistoricalLocation.class);
+                        String.format("/Locations(%s)/Things(%s)/HistoricalLocations", locId, thing.id));
                 assertEquals(historicalLocationsIDs, dsThingHistoricalLocationIDs);
             }
 
             for (Object histLocId : historicalLocationsIDs) {
                 Set<Object> dsThingStreamIDs = listIdsFromURL(
-                        String.format("/HistoricalLocations(%s)/Thing/Datastreams", histLocId), Datastream.class);
+                        String.format("/HistoricalLocations(%s)/Thing/Datastreams", histLocId));
                 assertEquals(datastreamIDs, dsThingStreamIDs);
 
                 Set<Object> dsThingLocationIDs = listIdsFromURL(
-                        String.format("/HistoricalLocations(%s)/Thing/Locations", histLocId), Location.class);
+                        String.format("/HistoricalLocations(%s)/Thing/Locations", histLocId));
                 assertEquals(locationIDs, dsThingLocationIDs);
 
                 Set<Object> dsThingHistoricalLocationIDs = listIdsFromURL(
-                        String.format("/HistoricalLocations(%s)/Thing/HistoricalLocations", histLocId),
-                        HistoricalLocation.class);
+                        String.format("/HistoricalLocations(%s)/Thing/HistoricalLocations", histLocId));
                 assertEquals(historicalLocationsIDs, dsThingHistoricalLocationIDs);
             }
         }
@@ -339,9 +328,7 @@ public class LinksTest {
     @Test
     void testLinksFromLocations() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
@@ -370,9 +357,8 @@ public class LinksTest {
     @Test
     void testLinksFromHistoricalLocations() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+
         final SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.setResourceValue(PROVIDER, "admin", "location",
                 "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}");
@@ -405,9 +391,7 @@ public class LinksTest {
     @Test
     void testLinksFromDatastreams() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
@@ -435,7 +419,7 @@ public class LinksTest {
             Set<Object> observationIDs = observations.value.stream().map(o -> o.id).collect(Collectors.toSet());
             for (Observation obs : observations.value) {
                 Set<Object> obsDatastreamObsIDs = listIdsFromURL(
-                        String.format("/Observations(%s)/Datastream/Observations", obs.id), Observation.class);
+                        String.format("/Observations(%s)/Datastream/Observations", obs.id));
                 assertEquals(observationIDs, obsDatastreamObsIDs);
 
                 utils.assertDtoEquals(obsProp,
@@ -458,9 +442,7 @@ public class LinksTest {
     @Test
     void testLinksFromSensors() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
@@ -479,10 +461,9 @@ public class LinksTest {
             // Check sub-links existence
             checkSubLinks(sensor, sensor.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
 
-            Set<Object> datastreamIDs = listIdsFromURL(sensor.datastreamsLink, Datastream.class);
+            Set<Object> datastreamIDs = listIdsFromURL(sensor.datastreamsLink);
             for (Object dsId : datastreamIDs) {
-                Set<Object> dsStreamIDs = listIdsFromURL(String.format("/Datastreams(%s)/Sensor/Datastreams", dsId),
-                        Datastream.class);
+                Set<Object> dsStreamIDs = listIdsFromURL(String.format("/Datastreams(%s)/Sensor/Datastreams", dsId));
                 assertEquals(datastreamIDs, dsStreamIDs);
             }
         }
@@ -494,9 +475,7 @@ public class LinksTest {
     @Test
     void testLinksFromObservations() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
@@ -526,9 +505,7 @@ public class LinksTest {
     @Test
     void testLinksFromObservedProperties() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<ObservedProperty> observedProperties = utils.queryJson("/ObservedProperties",
@@ -550,10 +527,10 @@ public class LinksTest {
             // Check sub-links existence
             checkSubLinks(observed, observed.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
 
-            Set<Object> datastreamIDs = listIdsFromURL(observed.datastreamsLink, Datastream.class);
+            Set<Object> datastreamIDs = listIdsFromURL(observed.datastreamsLink);
             for (Object dsId : datastreamIDs) {
                 Set<Object> dsStreamIDs = listIdsFromURL(
-                        String.format("/Datastreams(%s)/ObservedProperty/Datastreams", dsId), Datastream.class);
+                        String.format("/Datastreams(%s)/ObservedProperty/Datastreams", dsId));
                 assertEquals(datastreamIDs, dsStreamIDs);
             }
         }
@@ -565,9 +542,7 @@ public class LinksTest {
     @Test
     void testLinksFromFeaturesOfInterest() throws IOException, InterruptedException {
         // Add a resource
-        GenericDto dto = utils.makeDto(PROVIDER, "sensor", "data", 42, Integer.class);
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        session.setResourceValue(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<FeatureOfInterest> features = utils.queryJson("/FeaturesOfInterest",
@@ -593,7 +568,7 @@ public class LinksTest {
             Set<Object> observationIDs = observations.value.stream().map(o -> o.id).collect(Collectors.toSet());
             for (Observation obs : observations.value) {
                 Set<Object> obsFeaturesObsIDs = listIdsFromURL(
-                        String.format("/Observations(%s)/FeatureOfInterest/Observations", obs.id), Observation.class);
+                        String.format("/Observations(%s)/FeatureOfInterest/Observations", obs.id));
                 assertEquals(observationIDs, obsFeaturesObsIDs);
             }
         }
