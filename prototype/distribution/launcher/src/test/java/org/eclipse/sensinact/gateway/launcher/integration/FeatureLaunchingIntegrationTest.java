@@ -18,9 +18,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URI;
@@ -39,29 +36,25 @@ class FeatureLaunchingIntegrationTest {
 
     private static Process OSGI_PROCESS;
 
+    private static Thread outputThread;
+
     @BeforeAll
     static void startServer() throws Exception {
 
-        OSGI_PROCESS = new ProcessBuilder("java", "-Dsensinact.config.dir=src/it/resources/config",
+        String javaCmd = ProcessHandle.current().info().command().orElse("java");
+        OSGI_PROCESS = new ProcessBuilder(javaCmd, "-Dsensinact.config.dir=src/it/resources/config",
                 "-jar", "target/export.jar")
                 .redirectInput(PIPE)
                 .redirectOutput(PIPE)
                 .redirectErrorStream(true)
                 .start();
+
+        outputThread = new Thread(new InputStreamConsumer(OSGI_PROCESS.getInputStream()));
+        outputThread.start();
     }
 
     @AfterAll
     static void stopServer() throws Exception {
-
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            InputStream is = OSGI_PROCESS.getInputStream();
-
-            do {
-                baos.writeBytes(is.readNBytes(is.available()));
-            } while(is.available() > 0);
-
-            System.out.print(baos.toString(UTF_8));
-        } catch (IOException ioe) { }
 
         try {
             OutputStream stream = OSGI_PROCESS.getOutputStream();
@@ -69,10 +62,12 @@ class FeatureLaunchingIntegrationTest {
             stream.flush();
             OSGI_PROCESS.waitFor(5, SECONDS);
         } finally {
-            if(OSGI_PROCESS.isAlive()) {
+            if (OSGI_PROCESS.isAlive()) {
                 OSGI_PROCESS.destroyForcibly();
             }
         }
+
+        outputThread.join(1000);
     }
 
     @Test
@@ -83,6 +78,10 @@ class FeatureLaunchingIntegrationTest {
 
         // Try a few times to check an Http endpoint is there
         for (int i = 0; i < 10; i++) {
+            if (!OSGI_PROCESS.isAlive()) {
+                fail("Server process lost");
+            }
+
             try {
                 HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
                 assertEquals(404, response.statusCode());
