@@ -29,6 +29,7 @@
     <module>core-feature</module>
     <module>jakarta-servlet-whiteboard-feature</module>
     <module>jakarta-rest-whiteboard-feature</module>
+    <module>northbound-rest-feature</module>
   </modules>
 
   <properties>

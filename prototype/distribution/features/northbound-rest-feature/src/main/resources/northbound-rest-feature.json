@@ -1,0 +1,11 @@
+{
+  "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-rest:osgifeature:0.0.1-SNAPSHOT",
+  "bundles":[
+    { "id": "org.eclipse.sensinact.gateway.northbound:rest:0.0.1-SNAPSHOT" },
+    { "id": "com.fasterxml.jackson.core:jackson-annotations:2.14.0" },
+    { "id": "com.fasterxml.jackson.core:jackson-core:2.14.0" },
+    { "id": "com.fasterxml.jackson.core:jackson-databind:2.14.0" },
+    { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.14.0" },
+    { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.14.0" }
+  ]
+}

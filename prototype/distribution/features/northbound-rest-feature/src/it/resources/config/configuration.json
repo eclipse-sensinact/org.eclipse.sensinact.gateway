@@ -1,0 +1,22 @@
+{
+  ":configurator:resource-version": 1,
+  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.northboundrest.test",
+  ":configurator:version": "0.0.1",
+  "sensinact.launcher": {
+    "features": [
+      "core-feature",
+      "jakarta-servlet-whiteboard-feature",
+      "jakarta-rest-whiteboard-feature",
+      "northbound-rest-feature"
+    ],
+    "repository": "target/it/repository",
+    "featureDir": "target/it/features"
+  },
+  "org.apache.felix.http": {
+    "org.osgi.service.http.port": 8083
+  },
+  "JakartarsServletWhiteboardRuntimeComponent": {
+    "osgi.jakartars.name": "sensiNact.rest",
+    "osgi.http.whiteboard.target": "(osgi.http.endpoint=*)"
+  }
+}
