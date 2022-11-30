@@ -36,6 +36,8 @@ public class TestUtils {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    static final HttpClient client = HttpClient.newHttpClient();
+
     /**
      * Constructs a DTO to use with PrototypePush
      */
@@ -62,7 +64,6 @@ public class TestUtils {
             targetUri = URI.create("http://localhost:8185/sensinact/" + path);
         }
 
-        final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
         final HttpResponse<InputStream> response = client.send(req, (x) -> BodySubscribers.ofInputStream());
         return mapper.createParser(response.body()).readValueAs(resultType);
@@ -81,7 +82,6 @@ public class TestUtils {
             targetUri = URI.create("http://localhost:8185/sensinact/" + path);
         }
 
-        final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest req = HttpRequest.newBuilder(targetUri).header("Content-Type", "application/json")
                 .POST(BodyPublishers.ofString(mapper.writeValueAsString(body))).build();
         final HttpResponse<InputStream> response = client.send(req, (x) -> BodySubscribers.ofInputStream());

@@ -44,6 +44,8 @@ public class TestUtils {
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
+    static final HttpClient client = HttpClient.newHttpClient();
+
     public ObjectMapper getMapper() {
         return mapper;
     }
@@ -77,7 +79,6 @@ public class TestUtils {
             targetUri = URI.create("http://localhost:8185/v1.1/" + path);
         }
 
-        final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
         final HttpResponse<String> response = client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
         return mapper.createParser(response.body()).readValueAs(resultType);
@@ -105,7 +106,6 @@ public class TestUtils {
             targetUri = URI.create("http://localhost:8185/sensinact/" + path);
         }
 
-        final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest req = HttpRequest.newBuilder(targetUri).header("Content-Type", "application/json")
                 .POST(BodyPublishers.ofString(mapper.writeValueAsString(body))).build();
         final HttpResponse<InputStream> response = client.send(req, (x) -> BodySubscribers.ofInputStream());
@@ -135,7 +135,6 @@ public class TestUtils {
      */
     public void assertURLStatus(final String url, final int expectedStatusCode) {
         final URI targetUri = URI.create(url);
-        final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
 
         try {
