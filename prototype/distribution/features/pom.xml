@@ -36,6 +36,15 @@
     <launcher.version>0.0.1-SNAPSHOT</launcher.version>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+      <artifactId>test-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <pluginManagement>
       <plugins>

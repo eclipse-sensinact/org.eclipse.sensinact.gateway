@@ -24,6 +24,7 @@
   <description>This project contains code for launching sensiNact gateway instances</description>
 
   <modules>
+    <module>test-utils</module>
     <module>launcher</module>
     <module>features</module>
     <module>assembly</module>

@@ -12,15 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.feature.integration.jakartarest;
 
-import static java.lang.ProcessBuilder.Redirect.PIPE;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -34,6 +30,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 
 import org.eclipse.sensinact.gateway.feature.integration.jakartarest.resource.Resource;
+import org.eclipse.sensinact.gateway.feature.utilities.test.ServerProcessHandler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -42,52 +39,27 @@ import org.osgi.framework.Constants;
 
 class RestWhiteboardIntegrationTest {
 
-    private static Process OSGI_PROCESS;
-
-    private static Thread outputThread;
+    private static ServerProcessHandler server = new ServerProcessHandler();
 
     @BeforeAll
     static void startServer() throws Exception {
 
-        String javaCmd = ProcessHandle.current().info().command().orElse("java");
-        OSGI_PROCESS = new ProcessBuilder(javaCmd, "-Dsensinact.config.dir=src/it/resources/config",
-                "-jar", "target/it/launcher.jar")
-                .redirectInput(PIPE)
-                .redirectOutput(PIPE)
-                .redirectErrorStream(true)
-                .start();
-
-        outputThread = new Thread(new InputStreamConsumer(OSGI_PROCESS.getInputStream()));
-        outputThread.start();
+        server.startSensinact();
 
         try (InputStream is = TinyBundles.bundle()
                 .symbolicName("org.eclipse.sensinact.gateway.feature.integration.jakartarest").add(Resource.class)
                 .set(Constants.BUNDLE_VERSION, "0.0.1").set("-noee", "true").build(TinyBundles.withBnd())) {
             Files.copy(is, Paths.get("target/it/test.jar"), REPLACE_EXISTING);
 
-            OutputStream stream = OSGI_PROCESS.getOutputStream();
-            stream.write(("\nb = install file:target/it/test.jar\n").getBytes(UTF_8));
-            stream.flush();
-
+            server.write("\nb = install file:target/it/test.jar\n");
             // Slightly odd, but the previous output is "Bundle ID: <id>"
-            stream.write("\nstart ($b substring 11)\n".getBytes(UTF_8));
-            stream.flush();
+            server.write("\nstart ($b substring 11)\n");
         }
     }
 
     @AfterAll
     static void stopServer() throws Exception {
-
-        try {
-            OSGI_PROCESS.destroy();
-            OSGI_PROCESS.waitFor(5, SECONDS);
-        } finally {
-            if (OSGI_PROCESS.isAlive()) {
-                OSGI_PROCESS.destroyForcibly();
-            }
-        }
-
-        outputThread.join(1000);
+        server.stopSensinact();
     }
 
     @Test
@@ -98,7 +70,7 @@ class RestWhiteboardIntegrationTest {
 
         // Try a few times to check an Http endpoint is there
         for (int i = 0; i < 10; i++) {
-            if (!OSGI_PROCESS.isAlive()) {
+            if (!server.isAlive()) {
                 fail("Server process lost");
             }
 
