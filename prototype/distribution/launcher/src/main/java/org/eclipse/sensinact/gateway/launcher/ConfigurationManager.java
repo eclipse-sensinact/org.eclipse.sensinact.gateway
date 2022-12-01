@@ -123,7 +123,7 @@ public class ConfigurationManager {
                     // there has been a change, so assume there has
                     executor.submit(this::reloadConfigFile);
                     break;
-                } else if (Files.isSameFile(configFile, (Path) watchEvent.context())) {
+                } else if (Files.isSameFile(configFile.getFileName(), (Path) watchEvent.context())) {
                     // There has been a change to the config file
                     executor.submit(this::reloadConfigFile);
                     break;
