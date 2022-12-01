@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.gateway.launcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +29,7 @@ import java.util.ServiceLoader;
 
 import org.eclipse.sensinact.gateway.launcher.FeatureLauncher.Config;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.feature.FeatureService;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,7 +71,7 @@ class FeatureLaunchingTest {
         Mockito.when(config.featureDir()).thenReturn("src/test/resources/features");
         Mockito.when(config.repository()).thenReturn("src/test/resources/repository");
 
-        Mockito.when(context.installBundle(Mockito.anyString(), Mockito.any())).thenAnswer(i -> {
+        Mockito.lenient().when(context.installBundle(Mockito.anyString(), Mockito.any())).thenAnswer(i -> {
             String fromIs;
             try (BufferedReader br = new BufferedReader(new InputStreamReader(i.getArgument(1, InputStream.class)))) {
                 fromIs = br.readLine();
@@ -105,7 +107,7 @@ class FeatureLaunchingTest {
             "1.0.1,feature,,bundle,", "1.0.1,json,feature,jar,bundle", "1.0.2-SNAPSHOT,,,,",
             "1.0.2-SNAPSHOT,feature,,bundle,", "1.0.2-SNAPSHOT,json,feature,jar,bundle" })
     void installFeatureWithMavenCoordinates(String version, String type, String classifier, String bundleType,
-            String bundleClassifier) throws BundleException {
+            String bundleClassifier) throws Exception {
 
         Mockito.when(config.features())
                 .thenReturn(new String[] { getIdString(GROUP_ID, "fizz", version, type, classifier) });
@@ -121,7 +123,7 @@ class FeatureLaunchingTest {
     }
 
     @Test
-    void installFeatureSimpleName() throws BundleException {
+    void installFeatureSimpleName() throws Exception {
         Mockito.when(config.features()).thenReturn(new String[] { "foo" });
         fl.start(context, config);
 
@@ -140,7 +142,7 @@ class FeatureLaunchingTest {
     }
 
     @Test
-    void cleanupOnStop() throws BundleException {
+    void cleanupOnStop() throws Exception {
         installFeatureSimpleName();
 
         fl.stop();
@@ -157,7 +159,7 @@ class FeatureLaunchingTest {
     }
 
     @Test
-    void installFeatureListedTwice() throws BundleException {
+    void installFeatureListedTwice() throws Exception {
         Mockito.when(config.features()).thenReturn(new String[] { "foo", "foo" });
         fl.start(context, config);
 
@@ -178,7 +180,7 @@ class FeatureLaunchingTest {
     }
 
     @Test
-    void installOverlappingFeatures() throws BundleException {
+    void installOverlappingFeatures() throws Exception {
         Mockito.when(config.features()).thenReturn(new String[] { "foo", "foobar", "bar" });
         fl.start(context, config);
 
@@ -218,7 +220,7 @@ class FeatureLaunchingTest {
     }
 
     @Test
-    void updateThatRemovesOverlappingFeatures() throws BundleException {
+    void updateThatRemovesOverlappingFeatures() throws Exception {
 
         Mockito.when(config.features()).thenReturn(new String[] { "foo", "foobar", "bar" });
         fl.start(context, config);
@@ -263,5 +265,94 @@ class FeatureLaunchingTest {
         order.verify(installed.get(bundleId)).uninstall();
         order.verify(installed.get(bundleId3)).uninstall();
         order.verifyNoMoreInteractions();
+    }
+
+    @Nested
+    class FeatureDependencies {
+
+        @Test
+        void testSingleDependencySatisfied() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "foo", "need_foo" });
+            fl.start(context, config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            String bundleId = getIdString(GROUP_ID, "buzz", "1.0.0", null, null);
+            String bundleId2 = getIdString(GROUP_ID, "buzz", "1.0.1", null, null);
+            String bundleId3 = getIdString(GROUP_ID, "buzz", "1.0.2-SNAPSHOT", null, null);
+
+            InOrder order = Mockito.inOrder(context, installed.get(bundleId), installed.get(bundleId2),
+                    installed.get(bundleId3));
+
+            order.verify(context).installBundle(eq(bundleId), any());
+            order.verify(context).installBundle(eq(bundleId2), any());
+
+            order.verify(installed.get(bundleId)).start();
+            order.verify(installed.get(bundleId2)).start();
+
+            order.verify(context).installBundle(eq(bundleId3), any());
+
+            order.verify(installed.get(bundleId3)).start();
+        }
+
+        @Test
+        void testSingleDependencySatisfiedMavenCoords() throws Exception {
+            Mockito.when(config.features())
+                    .thenReturn(new String[] { "org.eclipse.sensinact.gateway.launcher.test:fizz:1.0.0", "need_fizz" });
+            fl.start(context, config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            String bundleId = getIdString(GROUP_ID, "buzz", "1.0.0", null, null);
+            String bundleId2 = getIdString(GROUP_ID, "buzz", "1.0.1", null, null);
+
+            InOrder order = Mockito.inOrder(context, installed.get(bundleId), installed.get(bundleId2));
+
+            order.verify(context).installBundle(eq(bundleId), any());
+            order.verify(installed.get(bundleId)).start();
+
+            order.verify(context).installBundle(eq(bundleId2), any());
+            order.verify(installed.get(bundleId2)).start();
+        }
+
+        @Test
+        void testSingleDependencyNotSatisfied() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "need_foo" });
+
+            ConfigurationException exception = assertThrows(ConfigurationException.class,
+                    () -> fl.start(context, config));
+
+            assertEquals("features", exception.getProperty());
+        }
+
+        @Test
+        void testSingleDependencyWrongOrder() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "need_foo", "foo" });
+
+            ConfigurationException exception = assertThrows(ConfigurationException.class,
+                    () -> fl.start(context, config));
+
+            assertEquals("features", exception.getProperty());
+        }
+
+        @Test
+        void testDependencyWrongType() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "bad_depends_type" });
+
+            ConfigurationException exception = assertThrows(ConfigurationException.class,
+                    () -> fl.start(context, config));
+
+            assertEquals("features", exception.getProperty());
+        }
+
+        @Test
+        void testDependencyUnknownMandatoryExtension() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "unkown_extension" });
+
+            ConfigurationException exception = assertThrows(ConfigurationException.class,
+                    () -> fl.start(context, config));
+
+            assertEquals("features", exception.getProperty());
+        }
     }
 }
