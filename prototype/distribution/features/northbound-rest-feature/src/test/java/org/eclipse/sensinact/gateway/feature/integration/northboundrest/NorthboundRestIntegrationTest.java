@@ -13,26 +13,17 @@
 package org.eclipse.sensinact.gateway.feature.integration.northboundrest;
 
 import static java.lang.ProcessBuilder.Redirect.PIPE;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 
 import org.junit.jupiter.api.AfterAll;
@@ -43,26 +34,25 @@ class NorthboundRestIntegrationTest {
 
     private static Process OSGI_PROCESS;
 
+    private static Thread outputThread;
+
     @BeforeAll
     static void startServer() throws Exception {
 
-        OSGI_PROCESS = new ProcessBuilder("java", "-Dsensinact.config.dir=src/it/resources/config", "-jar",
-                "target/it/launcher.jar").redirectInput(PIPE).redirectOutput(PIPE).redirectErrorStream(true).start();
+        String javaCmd = ProcessHandle.current().info().command().orElse("java");
+        OSGI_PROCESS = new ProcessBuilder(javaCmd, "-Dsensinact.config.dir=src/it/resources/config",
+                "-jar", "target/it/launcher.jar")
+                .redirectInput(PIPE)
+                .redirectOutput(PIPE)
+                .redirectErrorStream(true)
+                .start();
+
+        outputThread = new Thread(new InputStreamConsumer(OSGI_PROCESS.getInputStream()));
+        outputThread.start();
     }
 
     @AfterAll
     static void stopServer() throws Exception {
-
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            InputStream is = OSGI_PROCESS.getInputStream();
-
-            do {
-                baos.writeBytes(is.readNBytes(is.available()));
-            } while (is.available() > 0);
-
-            System.out.print(baos.toString(UTF_8));
-        } catch (IOException ioe) {
-        }
 
         try {
             OSGI_PROCESS.destroy();
@@ -72,6 +62,8 @@ class NorthboundRestIntegrationTest {
                 OSGI_PROCESS.destroyForcibly();
             }
         }
+
+        outputThread.join(1000);
     }
 
     @Test
@@ -82,6 +74,10 @@ class NorthboundRestIntegrationTest {
 
         // Try a few times to check an Http endpoint is there
         for (int i = 0; i < 10; i++) {
+            if (!OSGI_PROCESS.isAlive()) {
+                fail("Server process lost");
+            }
+
             try {
                 HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
                 if (200 == response.statusCode()) {
