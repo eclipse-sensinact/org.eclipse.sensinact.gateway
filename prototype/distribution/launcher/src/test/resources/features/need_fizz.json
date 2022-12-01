@@ -1,0 +1,20 @@
+{
+  "feature-resource-version": "1.0",
+  "id": "org.eclipse.sensinact.gateway.launcher.test:need_fizz:1.0.0",
+  "bundles": [
+    {
+      "id": "org.eclipse.sensinact.gateway.launcher.test:buzz:1.0.1"
+    }
+  ],
+  "extensions": {
+    "sensinact.feature.depends": {
+      "kind": "mandatory",
+      "type": "artifacts",
+      "artifacts": [
+        {
+          "id": "org.eclipse.sensinact.gateway.launcher.test:fizz:1.0.0"
+        }
+      ]
+    }
+  }
+}

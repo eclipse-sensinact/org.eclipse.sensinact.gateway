@@ -16,6 +16,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
+import static org.osgi.service.feature.FeatureExtension.Kind.MANDATORY;
+import static org.osgi.service.feature.FeatureExtension.Type.ARTIFACTS;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -39,13 +42,16 @@ import java.util.regex.Pattern;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.feature.Feature;
+import org.osgi.service.feature.FeatureArtifact;
 import org.osgi.service.feature.FeatureBundle;
+import org.osgi.service.feature.FeatureExtension;
 import org.osgi.service.feature.FeatureService;
 import org.osgi.service.feature.ID;
 import org.slf4j.Logger;
@@ -64,10 +70,14 @@ public class FeatureLauncher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureLauncher.class);
 
+    private static final String SENSINACT_FEATURE_DEPENDENCY = "sensinact.feature.depends";
+
     @Reference
     FeatureService featureService;
 
     private BundleContext context;
+
+    private FeatureExtension noDependencies;
 
     /**
      * The bundles installed by this launcher
@@ -88,15 +98,18 @@ public class FeatureLauncher {
     private Path featureDir;
 
     @Activate
-    void start(BundleContext context, Config config) {
+    void start(BundleContext context, Config config) throws ConfigurationException {
 
         this.context = context;
+
+        this.noDependencies = featureService.getBuilderFactory()
+                .newExtensionBuilder(SENSINACT_FEATURE_DEPENDENCY, ARTIFACTS, MANDATORY).build();
 
         update(config);
     }
 
     @Modified
-    void update(Config config) {
+    void update(Config config) throws ConfigurationException {
         repository = Paths.get(config.repository());
         featureDir = Paths.get(config.featureDir());
 
@@ -116,7 +129,11 @@ public class FeatureLauncher {
         removeFeatures(removed);
 
         // Second do all add/updates
-        newFeatures.forEach(this::addOrUpdate);
+        List<String> installProgress = new ArrayList<>(newFeatures.size());
+        for (String newFeature : newFeatures) {
+            addOrUpdate(newFeature, installProgress);
+            installProgress.add(newFeature);
+        }
 
         features.clear();
         features.addAll(newFeatures);
@@ -181,9 +198,11 @@ public class FeatureLauncher {
         }
     }
 
-    private void addOrUpdate(String feature) {
+    private void addOrUpdate(String feature, List<String> installProgress) throws ConfigurationException {
 
         Feature featureModel = loadFeature(feature);
+
+        validateFeatureModel(feature, featureModel, installProgress);
 
         List<String> bundles = featureModel.getBundles().stream().map(fb -> fb.getID().toString()).collect(toList());
         if (featuresToBundles.containsKey(feature)) {
@@ -243,13 +262,63 @@ public class FeatureLauncher {
             try (Reader fr = Files.newBufferedReader(featureFile, UTF_8)) {
                 return featureService.readFeature(fr);
             } catch (IOException ioe) {
-                LOGGER.warn("Failed to parse feature {} from file {}", feature, featureFile, ioe);
+                LOGGER.error("Failed to parse feature {} from file {}", feature, featureFile, ioe);
             }
         } else {
-            LOGGER.warn("No feature file for feature {}", feature);
+            LOGGER.error("No feature file for feature {}", feature);
         }
 
         return null;
+    }
+
+    private void validateFeatureModel(String feature, Feature featureModel, List<String> installProgress)
+            throws ConfigurationException {
+        if (featureModel == null) {
+            LOGGER.error("Unable to locate a valid feature " + feature);
+            throw new ConfigurationException("features",
+                    "The feature " + feature + "cannot be deployed as it cannot be found.");
+        } else {
+            // Check feature dependencies
+            FeatureExtension dependencies = featureModel.getExtensions().getOrDefault(SENSINACT_FEATURE_DEPENDENCY,
+                    noDependencies);
+            if (dependencies.getType() != ARTIFACTS) {
+                LOGGER.error("The feature {} includes a sensinact.feature.depends extension of the wrong type {}",
+                        feature, dependencies.getType());
+                throw new ConfigurationException("features",
+                        "The feature " + feature + "contains a sensinact.feature.depends extension of the wrong type.");
+            }
+
+            List<ID> unsatisfied = new ArrayList<>();
+            for (FeatureArtifact featureArtifact : dependencies.getArtifacts()) {
+                ID id = featureArtifact.getID();
+
+                if (installProgress.contains(id.getArtifactId())) {
+                    LOGGER.debug("The feature {} depends on the feature {}, which is installed", feature,
+                            id.getArtifactId());
+                } else if (installProgress.contains(id.toString())) {
+                    LOGGER.debug("The feature {} depends on the feature {}, which is installed", feature,
+                            id.toString());
+                } else {
+                    LOGGER.error("The feature {} depends on the feature {} which is not installed before it", feature,
+                            id.toString());
+                    unsatisfied.add(id);
+                }
+            }
+            if (!unsatisfied.isEmpty()) {
+                throw new ConfigurationException("features", "The feature " + feature
+                        + "contains a sensinact.feature.depends extension which is not satisfied. The unsatisfied dependencies are"
+                        + unsatisfied.toString());
+            }
+
+            List<String> unknownMandatory = featureModel.getExtensions().entrySet().stream()
+                    .filter(e -> e.getValue().getKind() == MANDATORY).map(Entry::getKey)
+                    .filter(s -> !SENSINACT_FEATURE_DEPENDENCY.equals(s)).collect(toList());
+            if (!unknownMandatory.isEmpty()) {
+                LOGGER.error("The feature {} has mandatory extensions {} which are not understood by sensiNact");
+                throw new ConfigurationException("features", "The feature " + feature
+                        + "contains mandatory extension(s) " + unsatisfied.toString() + " which are not understood.");
+            }
+        }
     }
 
     private Bundle installBundle(ID bundleIdentifier) {
