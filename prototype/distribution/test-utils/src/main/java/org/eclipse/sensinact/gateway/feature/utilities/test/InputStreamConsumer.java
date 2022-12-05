@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.gateway.feature.integration.northboundrest;
+package org.eclipse.sensinact.gateway.feature.utilities.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
