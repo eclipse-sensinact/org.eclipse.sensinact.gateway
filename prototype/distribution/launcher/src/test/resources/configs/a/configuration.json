@@ -1,0 +1,13 @@
+{
+  ":configurator:resource-version": 1,
+  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.gogo.test",
+  ":configurator:version": "0.0.1",
+  "test.pid": {
+    "foo": "bar",
+    "fizzbuzz": 42
+  },
+  "test.factory.pid~boo": {
+    "fizz": "buzz",
+    "foobar": 24
+  }
+}
