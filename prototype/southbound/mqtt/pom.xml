@@ -26,5 +26,6 @@
 
   <modules>
     <module>mqtt-client</module>
+    <module>mqtt-device-factory</module>
   </modules>
 </project>
