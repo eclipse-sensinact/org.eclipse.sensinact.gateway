@@ -66,9 +66,9 @@ public class CoreFeatureTest {
         assertFalse(bundles.isBlank());
         assertFalse(bundles.contains("Installed"), "Some bundles were not resolved:\n" + bundles);
 
-        // There should be 36 lines (32 bundles, 2 header lines and 2 trailing lines)
+        // There should be 40 lines (36 bundles, 2 header lines and 2 trailing lines)
         try (BufferedReader br = new BufferedReader(new StringReader(bundles))) {
-            assertEquals(36, br.lines().count());
+            assertEquals(40, br.lines().count());
         }
     }
 }

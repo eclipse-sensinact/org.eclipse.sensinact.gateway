@@ -30,6 +30,7 @@
     <module>jakarta-servlet-whiteboard-feature</module>
     <module>jakarta-rest-whiteboard-feature</module>
     <module>northbound-rest-feature</module>
+    <module>northbound-ogc-sensorthings-feature</module>
   </modules>
 
   <properties>
