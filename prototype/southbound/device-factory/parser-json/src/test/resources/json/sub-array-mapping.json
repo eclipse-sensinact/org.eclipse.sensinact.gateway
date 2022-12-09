@@ -1,0 +1,19 @@
+{
+  "parser": "json",
+  "parser.options": {
+    "base": "0"
+  },
+  "mapping": {
+    "@provider": "Name",
+    "data/value": "Value",
+    "@latitude": "Latitude",
+    "@longitude": "Longitude",
+    "@altitude": "Altitude",
+    "@date": "Date",
+    "@time": "Time"
+  },
+  "mapping.options": {
+    "format.date": "d.M.y",
+    "format.time": "H:m"
+  }
+}

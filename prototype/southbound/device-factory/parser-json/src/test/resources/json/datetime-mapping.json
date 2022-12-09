@@ -1,0 +1,11 @@
+{
+  "parser": "json",
+  "mapping": {
+    "@provider": "Name",
+    "@datetime": "Date",
+    "data/value": "Value"
+  },
+  "mapping.options": {
+    "format.datetime": "d/M/y'@'H:m:s"
+  }
+}
