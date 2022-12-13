@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.extract.impl;
 
@@ -99,6 +99,26 @@ public class GenericDtoExtractorTest {
             AbstractUpdateDto extracted = updates.get(0);
 
             checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertNull(dud.type);
+        }
+
+        @Test
+        void integerValueWithTimestamp() {
+            Instant timestamp = Instant.ofEpochMilli(1234567890L);
+            List<? extends AbstractUpdateDto> updates = extractor()
+                    .getUpdates(makeTestDto(PROVIDER, SERVICE, RESOURCE, VALUE, null, null, timestamp));
+
+            assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
+
+            AbstractUpdateDto extracted = updates.get(0);
+
+            checkCommonFields(extracted, timestamp);
 
             assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
 
@@ -334,11 +354,24 @@ public class GenericDtoExtractorTest {
     }
 
     private void checkCommonFields(AbstractUpdateDto extracted, boolean use1) {
+        checkCommonFields(extracted, use1, Instant.now(), false);
+    }
+
+    private void checkCommonFields(AbstractUpdateDto extracted, Instant timestamp) {
+        checkCommonFields(extracted, true, timestamp, true);
+    }
+
+    private void checkCommonFields(AbstractUpdateDto extracted, boolean use1, Instant timestamp,
+            boolean exactTimestamp) {
         assertEquals(use1 ? PROVIDER : PROVIDER_2, extracted.provider);
         assertEquals(use1 ? SERVICE : SERVICE_2, extracted.service);
         assertEquals(use1 ? RESOURCE : RESOURCE_2, extracted.resource);
-        assertTrue(Duration.between(extracted.timestamp, Instant.now()).minusMillis(100).isNegative(),
-                () -> "The timestamp was not set properly got: " + extracted.timestamp + " now is: " + Instant.now());
+        if (exactTimestamp) {
+            assertEquals(extracted.timestamp, timestamp);
+        } else {
+            assertTrue(Duration.between(extracted.timestamp, timestamp).minusMillis(100).isNegative(),
+                    () -> "The timestamp was not set properly got: " + extracted.timestamp + " used was: " + timestamp);
+        }
     }
 
     private GenericDtoDataExtractor extractor() {
@@ -351,6 +384,11 @@ public class GenericDtoExtractorTest {
 
     private GenericDto makeTestDto(String provider, String service, String resource, Object data, Class<?> dataType,
             Map<String, Object> metadata) {
+        return makeTestDto(provider, service, resource, data, dataType, metadata, null);
+    }
+
+    private GenericDto makeTestDto(String provider, String service, String resource, Object data, Class<?> dataType,
+            Map<String, Object> metadata, Instant timestamp) {
         GenericDto dto = new GenericDto();
         dto.provider = provider;
         dto.service = service;
@@ -358,6 +396,7 @@ public class GenericDtoExtractorTest {
         dto.value = data;
         dto.type = dataType;
         dto.metadata = metadata;
+        dto.timestamp = timestamp;
         return dto;
     }
 }

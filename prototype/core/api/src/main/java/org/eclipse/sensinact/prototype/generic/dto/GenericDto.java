@@ -8,9 +8,11 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.generic.dto;
+
+import java.time.Instant;
 
 /**
  * A special update dto type where the data is found in "value" with an optional
@@ -24,5 +26,10 @@ public final class GenericDto extends BaseValueDto {
     public Class<?> type;
 
     public Object value;
+
+    /**
+     * The timestamp for the data. If null then Instant.now will be used.
+     */
+    public Instant timestamp;
 
 }
