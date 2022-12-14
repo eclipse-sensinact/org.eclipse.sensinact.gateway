@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.extract.impl;
 
@@ -30,7 +30,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
 
         List<AbstractUpdateDto> list = new ArrayList<>();
 
-        Instant instant = null;
+        Instant instant = dto.timestamp == null ? Instant.now() : dto.timestamp;
 
         if (dto.value != null) {
             DataUpdateDto dud = new DataUpdateDto();
@@ -57,7 +57,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
         dud.provider = dto.provider;
         dud.service = dto.service;
         dud.resource = dto.resource;
-        dud.timestamp = instant == null ? instant = Instant.now() : instant;
+        dud.timestamp = instant;
         return instant;
     }
 
