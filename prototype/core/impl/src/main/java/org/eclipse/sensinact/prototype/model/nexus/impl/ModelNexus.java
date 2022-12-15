@@ -237,7 +237,9 @@ public class ModelNexus {
             accumulator.addResource(providerName, serviceFeature.getName(), resourceFeature.getName());
         }
 
-        if (metadata == null || metadata.getTimestamp().isBefore(timestamp)) {
+        // Allow an update if the resource didn't exist or if the update timestamp is
+        // equal to or after the one of the current value
+        if (metadata == null || !metadata.getTimestamp().isAfter(timestamp)) {
             service.eSet(resourceFeature, data);
             accumulator.resourceValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldValue,
                     data, timestamp);
