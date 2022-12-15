@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.launcher;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Map.of;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +39,9 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -55,6 +56,8 @@ class ConfigurationManagerTest {
 
     private final Map<String, Configuration> configs = new HashMap<>();
 
+    private final Map<String, Configuration> activeConfigs = new HashMap<>();
+
     private final Semaphore semaphore = new Semaphore(0);
 
     @BeforeEach
@@ -64,7 +67,15 @@ class ConfigurationManagerTest {
             String pid = i.getArgument(0, String.class);
             Configuration mock = Mockito.mock(Configuration.class, pid);
             Mockito.when(mock.getPid()).thenReturn(pid);
+            Mockito.doAnswer(new Answer<Object>() {
+                @Override
+                public Object answer(InvocationOnMock invocation) throws Throwable {
+                    activeConfigs.remove(pid);
+                    return null;
+                }
+            }).when(mock).delete();
             configs.put(pid, mock);
+            activeConfigs.put(pid, mock);
             semaphore.release();
             return mock;
         });
@@ -75,18 +86,27 @@ class ConfigurationManagerTest {
                     Configuration mock = Mockito.mock(Configuration.class, pid);
                     Mockito.when(mock.getFactoryPid()).thenReturn(factoryPid);
                     Mockito.when(mock.getPid()).thenReturn(pid);
+                    Mockito.doAnswer(new Answer<Object>() {
+                        @Override
+                        public Object answer(InvocationOnMock invocation) throws Throwable {
+                            activeConfigs.remove(pid);
+                            return null;
+                        }
+                    }).when(mock).delete();
                     configs.put(pid, mock);
+                    activeConfigs.put(pid, mock);
                     semaphore.release();
                     return mock;
                 });
         Mockito.lenient().when(configAdmin.listConfigurations(eq("(.sensinact.config=true)"))).then(i -> {
-            return configs.values().toArray(Configuration[]::new);
+            return activeConfigs.values().toArray(Configuration[]::new);
         });
     }
 
     @AfterEach
     void stop() {
         configs.clear();
+        activeConfigs.clear();
         if (manager != null)
             manager.stop();
     }
@@ -144,13 +164,13 @@ class ConfigurationManagerTest {
             Mockito.verify(configs.get("test.factory.pid~boo"), Mockito.timeout(500))
                     .update(argThat(isConfig(of("fizz", "buzz", "foobar", 24L, ".sensinact.config", true))));
 
-            Files.copy(path.resolve("configuration-update.json"), configFile, REPLACE_EXISTING);
+            Files.newInputStream(path.resolve("configuration-update.json")).transferTo(Files.newOutputStream(configFile));
 
             // Mockito timeout as there is no creation of configurations
-            Mockito.verify(configs.get("test.pid"), Mockito.timeout(20000))
+            Mockito.verify(configs.get("test.pid"), Mockito.timeout(500).atLeast(1))
                     .updateIfDifferent(argThat(isConfig(of("bar", "foo", "fizzbuzz", 84L, ".sensinact.config", true))));
             Mockito.verify(configs.get("test.pid.temp"), Mockito.timeout(500)).delete();
-            Mockito.verify(configs.get("test.factory.pid~boo"), Mockito.timeout(500))
+            Mockito.verify(configs.get("test.factory.pid~boo"), Mockito.timeout(500).atLeast(1))
                     .updateIfDifferent(argThat(isConfig(of("buzz", "fizz", "foobar", 48L, ".sensinact.config", true))));
         }
 
