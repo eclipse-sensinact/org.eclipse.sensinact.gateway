@@ -140,7 +140,7 @@
     <osgi.test.version>1.2.1</osgi.test.version>
 
     <!-- plugin dependency versions -->
-    <bnd.version>6.4.0-SNAPSHOT</bnd.version>
+    <bnd.version>7.0.0-SNAPSHOT</bnd.version>
   </properties>
 
   <repositories>

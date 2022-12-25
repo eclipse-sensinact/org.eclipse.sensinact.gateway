@@ -13,12 +13,23 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.junit.jupiter.api.BeforeEach;
@@ -144,4 +155,5 @@ public class SubscriptionTest {
             Mockito.verifyNoMoreInteractions(accumulator);
         }
     }
-}
+
+

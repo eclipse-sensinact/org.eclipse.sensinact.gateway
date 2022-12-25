@@ -43,6 +43,23 @@
       <groupId>org.geckoprojects.emf</groupId>
       <artifactId>org.gecko.emf.osgi.component</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>biz.aQute.bnd</groupId>
+      <artifactId>biz.aQute.bnd.maven</artifactId>
+      <version>${bnd.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
