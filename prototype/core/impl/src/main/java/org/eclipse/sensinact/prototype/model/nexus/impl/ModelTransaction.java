@@ -96,3 +96,4 @@ class ModelTransaction {
         this.resourceState = resourceState;
     }
 }
+

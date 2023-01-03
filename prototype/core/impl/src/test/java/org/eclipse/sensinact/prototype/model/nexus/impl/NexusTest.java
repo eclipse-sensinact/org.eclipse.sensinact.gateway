@@ -261,4 +261,62 @@ public class NexusTest {
             assertEquals(value, valueObject);
         }
     }
+
+    @Nested
+    public class LinkedProviderTests {
+
+        @Test
+        void addLink() {
+
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
+                    Instant.now());
+
+            nexus.handleDataUpdate("TestModelNew", "testproviderNew", "testservice2", "testValue", String.class,
+                    "test2", Instant.now());
+
+            nexus.handleDataUpdate(null, "something_else", "whatever", "testValue", String.class, "test2",
+                    Instant.now());
+
+            nexus.linkProviders("TestModel", "testprovider", "TestModelNew", "testproviderNew", Instant.now());
+
+            Provider provider = nexus.getProvider("TestModel", "testprovider");
+
+            assertEquals(1, provider.getLinkedProviders().size());
+
+            nexus.linkProviders("TestModel", "testprovider", null, "something_else", Instant.now());
+
+            assertEquals(2, provider.getLinkedProviders().size());
+        }
+
+        @Test
+        void removeLink() {
+
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
+                    Instant.now());
+
+            nexus.handleDataUpdate("TestModelNew", "testproviderNew", "testservice2", "testValue", String.class,
+                    "test2", Instant.now());
+
+            nexus.handleDataUpdate(null, "something_else", "whatever", "testValue", String.class, "test2",
+                    Instant.now());
+
+            nexus.linkProviders("TestModel", "testprovider", "TestModelNew", "testproviderNew", Instant.now());
+
+            Provider provider = nexus.getProvider("TestModel", "testprovider");
+
+            assertEquals(1, provider.getLinkedProviders().size());
+
+            nexus.linkProviders("TestModel", "testprovider", null, "something_else", Instant.now());
+
+            assertEquals(2, provider.getLinkedProviders().size());
+
+            nexus.unlinkProviders("TestModel", "testprovider", "TestModelNew", "testproviderNew", Instant.now());
+            assertEquals(1, provider.getLinkedProviders().size());
+        }
+    }
 }
+

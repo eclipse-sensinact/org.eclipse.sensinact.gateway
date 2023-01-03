@@ -166,6 +166,92 @@ public class ModelNexus {
         resourceSet.getResources().clear();
     }
 
+    /**
+     * Will associate the given Parent provider with the given child. If parent or
+     * child do not exist, they will be created.
+     *
+     * @param parentModel    name of the type of providers for the parent. Can be
+     *                       <code>null</code>
+     * @param parentProvider The provider name of the parent. The name will be used
+     *                       as ID and in the first setup as the friendlyname for
+     *                       the Admin Service
+     * @param childModel     name of the type of providers for the parent. Can be
+     *                       <code>null</code>
+     * @param childProvider  The provider name of the child. The name will be used
+     *                       as ID and in the first setup as the friendlyname for
+     *                       the Admin service
+     * @param timestamp      the timestamp when the link is created. If null, the
+     *                       current timestamp is used.
+     */
+    public void linkProviders(String parentModel, String parentProvider, String childModel, String childProvider,
+            Instant timestamp) {
+
+        if (parentModel == null) {
+            parentModel = parentProvider;
+        }
+        if (childModel == null) {
+            childModel = childProvider;
+        }
+
+        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
+
+        NotificationAccumulator accumulator = notificationAccumulator.get();
+
+        ProviderTypeWrapper parentWrapper = getOrCreateProviderType(parentModel, DEFAULT_URI, metaTimestamp,
+                accumulator);
+        Provider parent = getProvider(parentWrapper, parentModel, parentProvider, timestamp, accumulator, true);
+
+        ProviderTypeWrapper childWrapper = getOrCreateProviderType(childModel, DEFAULT_URI, metaTimestamp, accumulator);
+        Provider child = getProvider(childWrapper, childModel, childProvider, timestamp, accumulator, true);
+
+        parent.getLinkedProviders().add(child);
+    }
+
+    /**
+     * Will disassociate the given Parent provider with the given child.
+     *
+     * @param parentModel    name of the type of providers for the parent. Can be
+     *                       <code>null</code>.
+     * @param parentProvider The provider name of the parent.
+     * @param childModel     name of the type of providers for the parent. Can be
+     *                       <code>null</code>.
+     * @param childProvider  The provider name of the child.
+     * @param timestamp      the timestamp when the link is created. If null, the
+     *                       current timestamp is used.
+     */
+    public void unlinkProviders(String parentModel, String parentProvider, String childModel, String childProvider,
+            Instant timestamp) {
+
+        if (parentModel == null) {
+            parentModel = parentProvider;
+        }
+        if (childModel == null) {
+            childModel = childProvider;
+        }
+
+        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
+
+        NotificationAccumulator accumulator = notificationAccumulator.get();
+
+        ProviderTypeWrapper parentWrapper = getProviderType(parentModel, DEFAULT_URI, metaTimestamp, accumulator,
+                false);
+        Provider parent = parentWrapper == null ? null
+                : getProvider(parentWrapper, parentModel, parentProvider, timestamp, accumulator, false);
+
+        if (parent == null) {
+            throw new IllegalArgumentException("parent Provider " + parentProvider + " does not exist");
+        }
+
+        ProviderTypeWrapper childWrapper = getProviderType(childModel, DEFAULT_URI, metaTimestamp, accumulator, false);
+        Provider child = childWrapper == null ? null
+                : getProvider(childWrapper, childModel, childProvider, timestamp, accumulator, false);
+
+        if (child == null) {
+            throw new IllegalArgumentException("child Provider " + childProvider + " does not exist");
+        }
+        parent.getLinkedProviders().remove(child);
+    }
+
     public void handleDataUpdate(String model, String provider, String service, String resource, Class<?> type,
             Object data, Instant timestamp) {
         if (model == null) {
@@ -176,7 +262,7 @@ public class ModelNexus {
 
         NotificationAccumulator accumulator = notificationAccumulator.get();
 
-        ProviderTypeWrapper wrapper = getOrCreateProvider(model, DEFAULT_URI, metaTimestamp, accumulator);
+        ProviderTypeWrapper wrapper = getOrCreateProviderType(model, DEFAULT_URI, metaTimestamp, accumulator);
         ModelTransaction transaction = getOrCreateService(service, wrapper, metaTimestamp, accumulator);
         transaction = getOrCreateResource(wrapper, resource, type, transaction, metaTimestamp, accumulator);
         updateInstances(wrapper, transaction);
@@ -189,28 +275,7 @@ public class ModelNexus {
      */
     private void setData(ProviderTypeWrapper wrapper, ModelTransaction transaction, String modelName,
             String providerName, Object data, Instant timestamp, NotificationAccumulator accumulator) {
-        URI instanceUri = createURI(modelName, providerName);
-        Provider provider = wrapper.getInstances().get(instanceUri);
-        if (provider == null) {
-            provider = (Provider) EcoreUtil.create(wrapper.getProviderType());
-            provider.setId(providerName);
-
-            final Admin adminSvc = sensinactPackage.getSensiNactFactory().createAdmin();
-            provider.setAdmin(adminSvc);
-            adminSvc.setFriendlyName(providerName);
-
-            // Set a timestamp to admin resources to indicate them as valued
-            for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
-                Metadata metadata = sensinactPackage.getSensiNactFactory().createMetadata();
-                metadata.setFeature(resourceFeature);
-                metadata.setSource(provider.getAdmin());
-                metadata.setTimestamp(timestamp);
-                adminSvc.getMetadata().put(resourceFeature, metadata);
-            }
-
-            wrapper.getInstances().put(instanceUri, provider);
-            accumulator.addProvider(providerName);
-        }
+        Provider provider = getProvider(wrapper, modelName, providerName, timestamp, accumulator, true);
 
         EStructuralFeature serviceFeature = transaction.getFeaturePath().get(0);
 
@@ -260,6 +325,41 @@ public class ModelNexus {
 
         accumulator.metadataValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldMetaData,
                 newMetaData, timestamp);
+    }
+
+    /**
+     * @param wrapper
+     * @param modelName
+     * @param providerName
+     * @param timestamp
+     * @param accumulator
+     * @return
+     */
+    private Provider getProvider(ProviderTypeWrapper wrapper, String modelName, String providerName, Instant timestamp,
+            NotificationAccumulator accumulator, boolean create) {
+        URI instanceUri = createURI(modelName, providerName);
+        Provider provider = wrapper.getInstances().get(instanceUri);
+        if (provider == null && create) {
+            provider = (Provider) EcoreUtil.create(wrapper.getProviderType());
+            provider.setId(providerName);
+
+            final Admin adminSvc = sensinactPackage.getSensiNactFactory().createAdmin();
+            provider.setAdmin(adminSvc);
+            adminSvc.setFriendlyName(providerName);
+
+            // Set a timestamp to admin resources to indicate them as valued
+            for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
+                Metadata metadata = sensinactPackage.getSensiNactFactory().createMetadata();
+                metadata.setFeature(resourceFeature);
+                metadata.setSource(provider.getAdmin());
+                metadata.setTimestamp(timestamp);
+                adminSvc.getMetadata().put(resourceFeature, metadata);
+            }
+
+            wrapper.getInstances().put(instanceUri, provider);
+            accumulator.addProvider(providerName);
+        }
+        return provider;
     }
 
     public Provider getProvider(String providerName) {
@@ -350,14 +450,21 @@ public class ModelNexus {
         return transaction;
     }
 
-    private ProviderTypeWrapper getOrCreateProvider(String rawProviderName, String thePackageUri, Instant timestamp,
+    private ProviderTypeWrapper getOrCreateProviderType(String rawProviderName, String thePackageUri, Instant timestamp,
             NotificationAccumulator accumulator) {
+        return getProviderType(rawProviderName, thePackageUri, timestamp, accumulator, true);
+    }
+
+    private ProviderTypeWrapper getProviderType(String rawProviderName, String thePackageUri, Instant timestamp,
+            NotificationAccumulator accumulator, boolean create) {
         String providerName = firstToUpper(rawProviderName);
         URI packageUri = URI.createURI(thePackageUri);
         EPackage ePackage = packageCache.get(packageUri);
         EClass providerClass = (EClass) ePackage.getEClassifier(providerName);
         if (providerClass != null) {
             return providerCache.get(EcoreUtil.getURI(providerClass));
+        } else if (!create) {
+            return null;
         }
 
         providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),
@@ -524,4 +631,15 @@ public class ModelNexus {
         extra.add(customMetadata);
     }
 
+    public void addEPackage(EPackage ePackage) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void removeEPakcage(EPackage ePackage) {
+        // TODO Auto-generated method stub
+
+    }
+
 }
+

@@ -46,3 +46,4 @@ class ProviderTypeWrapper {
         return instances;
     }
 }
+
