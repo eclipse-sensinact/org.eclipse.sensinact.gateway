@@ -27,5 +27,6 @@
   <modules>
     <module>device-factory</module>
     <module>mqtt</module>
+    <module>virtual</module>
   </modules>
 </project>
