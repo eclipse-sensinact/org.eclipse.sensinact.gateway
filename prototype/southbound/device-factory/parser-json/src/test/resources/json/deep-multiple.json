@@ -1,0 +1,87 @@
+{
+  "nhits": 51,
+  "parameters": {
+    "dataset": "test2",
+    "timezone": "UTC",
+    "rows": 51,
+    "start": 0,
+    "format": "json",
+    "facet": [
+      "date",
+      "name",
+      "type",
+      "value"
+    ]
+  },
+  "records": [
+    {
+      "datasetid": "test2",
+      "recordid": "14a489fe93443d9febd13971d5b24e976f852eec",
+      "fields": {
+        "name": "Sensor O",
+        "id": "1452",
+        "type": "GOOSE",
+        "value": 0,
+        "date": "2021-10-26T15:28:00+00:00",
+        "geo": [
+          48.849577,
+          2.350867
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.350867,
+          48.849577
+        ]
+      },
+      "record_timestamp": "2021-10-26T15:29:08.889000+00:00"
+    },
+    {
+      "datasetid": "test2",
+      "recordid": "69a8e6410e64b573c9b2e20a40f5987615088ca6",
+      "fields": {
+        "name": "Sensor R",
+        "id": "1851",
+        "type": "DUCK",
+        "value": 7,
+        "date": "2021-10-26T15:27:00+00:00",
+        "geo": [
+          48.858396,
+          2.350484
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.350484,
+          48.858396
+        ]
+      },
+      "record_timestamp": "2021-10-26T15:29:03.729000+00:00"
+    },
+    {
+      "datasetid": "test2",
+      "recordid": "31d312d5482e37829b5ade69387e2a392d1fd6a7",
+      "fields": {
+        "name": "Sensor C",
+        "id": "1401",
+        "type": "GOOSE",
+        "value": 178,
+        "date": "2021-10-26T15:27:00+00:00",
+        "geo": [
+          48.871505,
+          2.333759
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.333759,
+          48.871505
+        ]
+      },
+      "record_timestamp": "2021-10-26T15:29:07.744000+00:00"
+    }
+  ]
+}

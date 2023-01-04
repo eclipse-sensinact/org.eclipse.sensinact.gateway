@@ -1,0 +1,19 @@
+[
+  {
+    "Date": "20.10.2021",
+    "Time": "18:14",
+    "Name": "JsonMultiple1",
+    "Latitude": 1.2,
+    "Longitude": 3.4,
+    "Value": 94
+  },
+  {
+    "Date": "20.10.2021",
+    "Time": "18:17",
+    "Name": "JsonMultiple2",
+    "Latitude": 5.6,
+    "Longitude": 7.8,
+    "Altitude": 1.5,
+    "Value": 28
+  }
+]
