@@ -241,7 +241,7 @@ public class NexusTest {
 
             assertObject(nexus, "TestModel", "testprovider", "testservice", "testValue", "test");
             assertObject(nexus, "TestModelNew", "testproviderNew", "testservice2", "testValue", "test2");
-            assertObject(nexus, "Something_else", "something_else", "whatever", "testValue", "test2");
+            assertObject(nexus, "something_else", "something_else", "whatever", "testValue", "test2");
 
         }
 
@@ -319,4 +319,3 @@ public class NexusTest {
         }
     }
 }
-

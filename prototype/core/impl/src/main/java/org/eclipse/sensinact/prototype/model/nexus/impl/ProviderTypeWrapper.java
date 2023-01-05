@@ -21,11 +21,22 @@ import org.eclipse.sensinact.model.core.Provider;
 
 class ProviderTypeWrapper {
 
-    private EClass provider;
-    Map<URI, Provider> instances = new ConcurrentHashMap<>();
+    private final EClass provider;
+    private final String model;
+    private final Map<URI, Provider> instances = new ConcurrentHashMap<>();
 
-    public ProviderTypeWrapper(EClass provider) {
+    public ProviderTypeWrapper(String model, EClass provider) {
+        this.model = model;
         this.provider = provider;
+    }
+
+    /**
+     * Returns the model.
+     *
+     * @return the model
+     */
+    public String getModel() {
+        return model;
     }
 
     /**
@@ -46,4 +57,3 @@ class ProviderTypeWrapper {
         return instances;
     }
 }
-

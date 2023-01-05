@@ -137,7 +137,9 @@ public class ModelNexus {
                     Provider provider = (Provider) resource.getContents().get(0);
                     EClass eClass = provider.eClass();
                     URI providerUri = EcoreUtil.getURI(eClass);
-                    ProviderTypeWrapper wrapper = new ProviderTypeWrapper(eClass);
+                    URI instanceUri = EcoreUtil.getURI(provider);
+                    ProviderTypeWrapper wrapper = new ProviderTypeWrapper(
+                            instanceUri.segment(instanceUri.segmentCount() - 2), eClass);
                     ProviderTypeWrapper temp = providerCache.putIfAbsent(providerUri, wrapper);
                     wrapper = temp == null ? wrapper : temp;
                     uri = createURI(provider);
@@ -363,7 +365,8 @@ public class ModelNexus {
     }
 
     public Provider getProvider(String providerName) {
-        return getProvider(providerName, providerName);
+        return providerCache.values().stream().map((w) -> w.getInstances().get(createURI(w.getModel(), providerName)))
+                .filter(p -> p != null).findFirst().orElse(null);
     }
 
     public Provider getProvider(String model, String providerName) {
@@ -377,7 +380,7 @@ public class ModelNexus {
      * Lists know providers
      */
     public List<Provider> getProviders() {
-        return providerCache.values().stream().flatMap((wrapper) -> wrapper.instances.values().stream())
+        return providerCache.values().stream().flatMap((wrapper) -> wrapper.getInstances().values().stream())
                 .collect(Collectors.toList());
     }
 
@@ -394,7 +397,8 @@ public class ModelNexus {
     }
 
     private URI createURI(Provider provider) {
-        return createURI(provider.eClass().getName(), provider.getId());
+        URI instanceUri = EcoreUtil.getURI(provider);
+        return createURI(instanceUri.segment(instanceUri.segmentCount() - 2), provider.getId());
     }
 
     /**
@@ -469,7 +473,7 @@ public class ModelNexus {
 
         providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),
                 sensinactPackage.getProvider());
-        ProviderTypeWrapper wrapper = new ProviderTypeWrapper(providerClass);
+        ProviderTypeWrapper wrapper = new ProviderTypeWrapper(rawProviderName, providerClass);
         providerCache.put(EcoreUtil.getURI(providerClass), wrapper);
         return wrapper;
     }
@@ -642,4 +646,3 @@ public class ModelNexus {
     }
 
 }
-

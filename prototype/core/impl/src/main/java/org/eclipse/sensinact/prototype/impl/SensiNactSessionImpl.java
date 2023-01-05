@@ -201,7 +201,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
         // FIXME: pass the model as argument
-        return executeGetCommand((m) -> m.getResourceValue(provider, provider, service, resource, clazz),
+        return executeGetCommand((m) -> m.getResourceValue(provider, service, resource, clazz),
                 (timedVal) -> timedVal.getValue());
     }
 
@@ -217,8 +217,8 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 @Override
                 public Promise<Object> call(SensinactModel model, PromiseFactory pf) {
                     // FIXME: pass the model as argument
-                    model.setOrCreateResource(provider, provider, service, resource,
-                            o != null ? o.getClass() : Float.class, o, instant);
+                    model.setOrCreateResource(provider, service, resource, o != null ? o.getClass() : Float.class, o,
+                            instant);
                     return pf.resolved(null);
                 }
             }).getValue();
@@ -252,8 +252,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             thread.execute(new GetCommand<Void>() {
                 @Override
                 public Promise<Void> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, provider, service,
-                            resource);
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
                     if (sensinactResource != null && sensinactResource.isValid()) {
                         Promise<Void> chainedPromises = null;
                         for (Entry<String, Object> entry : metadata.entrySet()) {
@@ -289,8 +288,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             return thread.execute(new GetCommand<Map<String, Object>>() {
                 @Override
                 public Promise<Map<String, Object>> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, provider, service,
-                            resource);
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
                     if (sensinactResource != null && sensinactResource.isValid()) {
                         return sensinactResource.getMetadataValues();
                     } else {
@@ -312,8 +310,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             thread.execute(new GetCommand<Void>() {
                 @Override
                 public Promise<Void> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, provider, service,
-                            resource);
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
                     if (sensinactResource != null && sensinactResource.isValid()) {
                         return sensinactResource.setMetadataValue(metadata, value, timestamp);
                     } else {
@@ -340,10 +337,9 @@ public class SensiNactSessionImpl implements SensiNactSession {
             return thread.execute(new GetCommand<ResourceDescription>() {
                 @Override
                 public Promise<ResourceDescription> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, provider, service,
-                            resource);
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
                     if (sensinactResource != null) {
-                        final TimedValue<Object> val = model.getResourceValue(provider, provider, service, resource,
+                        final TimedValue<Object> val = model.getResourceValue(provider, service, resource,
                                 Object.class);
                         final ResourceDescription result = new ResourceDescription();
                         result.provider = sensinactResource.getService().getProvider().getName();
@@ -375,7 +371,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
         // FIXME: pass the model as argument
-        return executeGetCommand((m) -> m.getResource(provider, provider, service, resource), (rc) -> {
+        return executeGetCommand((m) -> m.getResource(provider, service, resource), (rc) -> {
             final ResourceShortDescription result = new ResourceShortDescription();
             result.actMethodArgumentsTypes = null;
             result.contentType = rc.getType();
@@ -390,7 +386,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public ServiceDescription describeService(String provider, String service) {
         // FIXME: pass the model as argument
-        return executeGetCommand((m) -> m.getService(provider, provider, service), (snSvc) -> {
+        return executeGetCommand((m) -> m.getService(provider, service), (snSvc) -> {
             final ServiceDescription description = new ServiceDescription();
             description.service = snSvc.getName();
             description.provider = snSvc.getProvider().getName();
@@ -402,7 +398,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public ProviderDescription describeProvider(String provider) {
         // FIXME: pass the model as argument
-        return executeGetCommand((m) -> m.getProvider(provider, provider), (snProvider) -> {
+        return executeGetCommand((m) -> m.getProvider(provider), (snProvider) -> {
             final ProviderDescription description = new ProviderDescription();
             description.provider = snProvider.getName();
             description.services = new ArrayList<>(snProvider.getServices().keySet());
