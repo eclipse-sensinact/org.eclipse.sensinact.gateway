@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.Service;
@@ -72,8 +74,42 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     }
 
     @Override
+    public SensinactProvider getProvider(String providerName) {
+        final Provider provider = nexusImpl.getProvider(providerName);
+        if (provider == null) {
+            return null;
+        }
+
+        return toProvider(provider);
+    }
+
+    @Override
     public SensinactService getService(String model, String providerName, String service) {
-        final Provider provider = nexusImpl.getProvider(model, providerName);
+        return getService(nexusImpl.getProvider(model, providerName), model, service);
+    }
+
+    @Override
+    public SensinactService getService(String providerName, String service) {
+        Provider provider = nexusImpl.getProvider(providerName);
+        return getService(provider, getProviderModel(provider), service);
+    }
+
+    private String getProviderModel(Provider provider) {
+
+        if (provider == null) {
+            return null;
+        }
+
+        URI instanceUri = EcoreUtil.getURI(provider);
+        if (instanceUri.segmentCount() < 2) {
+            // TODO is this correct?
+            return provider.getId();
+        } else {
+            return instanceUri.segment(instanceUri.segmentCount() - 2);
+        }
+    }
+
+    private SensinactService getService(Provider provider, String model, String service) {
         if (provider == null) {
             return null;
         }
@@ -84,14 +120,22 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         }
         final Service svc = (Service) provider.eGet(svcFeature);
 
-        final SensinactProviderImpl snProvider = new SensinactProviderImpl(new AtomicBoolean(true), model,
-                providerName);
+        final SensinactProviderImpl snProvider = new SensinactProviderImpl(new AtomicBoolean(true),
+                provider.eClass().getName(), provider.getId());
         return toService(snProvider, svc);
     }
 
     @Override
     public SensinactResource getResource(String model, String providerName, String service, String resource) {
-        final Provider provider = nexusImpl.getProvider(model, providerName);
+        return getResource(nexusImpl.getProvider(model, providerName), model, service, resource);
+    }
+
+    public SensinactResource getResource(String providerName, String service, String resource) {
+        Provider provider = nexusImpl.getProvider(providerName);
+        return getResource(provider, getProviderModel(provider), service, resource);
+    }
+
+    private SensinactResource getResource(Provider provider, String model, String service, String resource) {
         if (provider == null) {
             return null;
         }
@@ -107,7 +151,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
 
         // Construct the resource
         final AtomicBoolean active = new AtomicBoolean(rcFeature != null);
-        final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, providerName);
+        final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, provider.getId());
         final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, snProvider,
                 svc.eContainingFeature().getName());
         snProvider.setServices(List.of(snSvc));
@@ -128,11 +172,18 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     @Override
     public <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
             Class<T> type) {
+        return getResourceValue(nexusImpl.getProvider(model, providerName), service, resource, type);
+    }
+
+    public <T> TimedValue<T> getResourceValue(String providerName, String service, String resource, Class<T> type) {
+        return getResourceValue(nexusImpl.getProvider(providerName), service, resource, type);
+    }
+
+    public <T> TimedValue<T> getResourceValue(Provider provider, String service, String resource, Class<T> type) {
         if (type == null) {
             throw new IllegalArgumentException("Resource type must not be null");
         }
 
-        final Provider provider = nexusImpl.getProvider(model, providerName);
         if (provider == null) {
             return null;
         }
@@ -178,6 +229,22 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         nexusImpl.handleDataUpdate(model, providerName, service, resource, type, value, instant);
     }
 
+    public void setOrCreateResource(String providerName, String service, String resource, Class<?> type, Object value,
+            Instant instant) {
+        checkValid();
+
+        Provider provider = nexusImpl.getProvider(providerName);
+
+        String modelName;
+        if (provider != null) {
+            modelName = getProviderModel(provider);
+        } else {
+            modelName = providerName;
+        }
+
+        nexusImpl.handleDataUpdate(modelName, providerName, service, resource, type, value, instant);
+    }
+
     private SensinactProviderImpl toProvider(final Provider modelProvider) {
         return toProvider(modelProvider, true);
     }
@@ -185,7 +252,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     private SensinactProviderImpl toProvider(final Provider modelProvider, boolean loadServices) {
         // Construct the provider bean
         final SensinactProviderImpl snProvider = new SensinactProviderImpl(new AtomicBoolean(true),
-                modelProvider.eClass().getName(), modelProvider.getId());
+                getProviderModel(modelProvider), modelProvider.getId());
 
         if (loadServices) {
             // List services
