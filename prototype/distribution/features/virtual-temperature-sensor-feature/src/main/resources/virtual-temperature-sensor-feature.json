@@ -1,0 +1,17 @@
+{
+  "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-rest-feature:osgifeature:0.0.1-SNAPSHOT",
+  "bundles":[
+    { "id": "org.eclipse.sensinact.gateway.southbound.virtual:virtual-temperature-sensor:0.0.1-SNAPSHOT" }
+  ],
+  "extensions": {
+    "sensinact.feature.depends": {
+      "kind": "mandatory",
+      "type": "artifacts",
+      "artifacts": [
+        {
+          "id": "org.eclipse.sensinact.gateway.distribution.features:core-feature:osgifeature:0.0.1-SNAPSHOT"
+        }
+      ]
+    }
+  }
+}
