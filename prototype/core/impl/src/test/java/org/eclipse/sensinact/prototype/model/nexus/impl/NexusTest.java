@@ -155,7 +155,7 @@ public class NexusTest {
             assertEquals(provider, updatedProvider);
 
             Service updateService = (Service) updatedProvider.eGet(serviceFeature);
-            assertNotEquals(service, updateService);
+            assertEquals(service, updateService);
 
             EStructuralFeature valueFeature = updateService.eClass().getEStructuralFeature("testValue2");
 
@@ -180,7 +180,7 @@ public class NexusTest {
                     Instant.now());
             Provider updatedProvider = nexus.getProvider("TestModel", "testprovider");
 
-            assertNotEquals(provider, updatedProvider);
+            assertEquals(provider, updatedProvider);
 
             EStructuralFeature serviceFeature = updatedProvider.eClass().getEStructuralFeature("testservice2");
             Service service = (Service) updatedProvider.eGet(serviceFeature);

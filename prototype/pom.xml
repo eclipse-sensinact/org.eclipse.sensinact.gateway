@@ -119,9 +119,9 @@
     <osgi.feature.version>1.0.0</osgi.feature.version>
     <osgi.converter.version>1.0.9</osgi.converter.version>
     <gecko.emf.version>4.4.0</gecko.emf.version>
-    <emf.common.version>2.23.0</emf.common.version>
-    <emf.ecore.version>2.25.0</emf.ecore.version>
-    <emf.ecore.xmi.version>2.16.0</emf.ecore.xmi.version>
+    <emf.common.version>2.27.0</emf.common.version>
+    <emf.ecore.version>2.33.0</emf.ecore.version>
+    <emf.ecore.xmi.version>2.17.0</emf.ecore.xmi.version>
     <slf4j.version>1.7.36</slf4j.version>
     <jackson.version>2.14.0</jackson.version>
 
@@ -174,6 +174,17 @@
       <url>https://repository.apache.org/snapshots/</url>
       <releases>
         <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>emf-snapshots</id>
+      <name>EMF Snapshots</name>
+      <url>https://ci.eclipse.org/emf/job/maven-publish/lastSuccessfulBuild/artifact/releng/org.eclipse.emf.releng/publish/target/repository/final/</url>
+      <releases>
+        <enabled>true</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>

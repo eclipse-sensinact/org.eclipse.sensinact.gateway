@@ -63,37 +63,38 @@
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-generate-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
-        <configuration>
-          <externalPlugins>
-            <dependency>
-              <groupId>org.geckoprojects.emf</groupId>
-              <artifactId>org.gecko.emf.osgi.codegen</artifactId>
-            </dependency>
-          </externalPlugins>
-          <steps>
-            <step>
-              <trigger>src/main/resources/model/sensinact.genmodel</trigger>
-              <generateCommand>geckoEMF</generateCommand>
-              <output>src/main/java</output>
-              <properties>
-                <genmodel>src/main/resources/model/sensinact.genmodel</genmodel>
-              </properties>
-            </step>
-          </steps>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>biz.aQute.bnd</groupId>-->
+<!--        <artifactId>bnd-generate-maven-plugin</artifactId>-->
+<!--        <version>${bnd.version}</version>-->
+<!--        <configuration>-->
+<!--          <externalPlugins>-->
+<!--            <dependency>-->
+<!--              <groupId>org.geckoprojects.emf</groupId>-->
+<!--              <artifactId>org.gecko.emf.osgi.codegen</artifactId>-->
+<!--            </dependency>-->
+<!--          </externalPlugins>-->
+<!--          <steps>-->
+<!--            <step>-->
+<!--              <trigger>src/main/resources/model/sensinact.genmodel</trigger>-->
+<!--              <generateCommand>geckoEMF</generateCommand>-->
+<!--              <output>src/main/java</output>-->
+<!--              <clear>false</clear>-->
+<!--              <properties>-->
+<!--                <genmodel>src/main/resources/model/sensinact.genmodel</genmodel>-->
+<!--              </properties>-->
+<!--            </step>-->
+<!--          </steps>-->
+<!--        </configuration>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <phase>generate-sources</phase>-->
+<!--            <goals>-->
+<!--              <goal>generate</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
     </plugins>
   </build>
 </project>

@@ -19,12 +19,9 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -33,8 +30,11 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.EFactoryImpl;
+import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -47,7 +47,6 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelTransaction.ModelTransactionState;
 import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
-import org.eclipse.sensinact.prototype.model.nexus.impl.emf.SensinactCopier;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +86,16 @@ public class ModelNexus {
 
         defaultPackage = packageOptional
                 .orElseGet(() -> EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", this.resourceSet));
+
+        defaultPackage.setEFactoryInstance(new EFactoryImpl() {
+            @Override
+            protected EObject basicCreate(EClass eClass) {
+                return eClass.getInstanceClassName() == "java.util.Map$Entry"
+                        ? new MinimalEObjectImpl.Container.Dynamic.BasicEMapEntry<String, String>(eClass)
+                        : new MinimalEObjectImpl.Container.Dynamic.Permissive(eClass);
+            }
+        });
+
         packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
         loadInstances();
     }
@@ -265,7 +274,7 @@ public class ModelNexus {
         ProviderTypeWrapper wrapper = getOrCreateProviderType(model, DEFAULT_URI, metaTimestamp, accumulator);
         ModelTransaction transaction = getOrCreateService(service, wrapper, metaTimestamp, accumulator);
         transaction = getOrCreateResource(wrapper, resource, type, transaction, metaTimestamp, accumulator);
-        updateInstances(wrapper, transaction);
+//        updateInstances(wrapper, transaction);
         setData(wrapper, transaction, model, provider, data, metaTimestamp, accumulator);
     }
 
@@ -395,33 +404,6 @@ public class ModelNexus {
 
     private URI createURI(Provider provider) {
         return createURI(provider.eClass().getName(), provider.getId());
-    }
-
-    /**
-     * @param wrapper
-     * @param transaction
-     */
-    private void updateInstances(ProviderTypeWrapper wrapper, ModelTransaction transaction) {
-        if (transaction.getServiceState() != ModelTransactionState.NONE
-                || transaction.getResourceState() != ModelTransactionState.NONE) {
-            Set<Entry<URI, Provider>> entrySet = wrapper.getInstances().entrySet();
-            for (Iterator<Entry<URI, Provider>> iterator = entrySet.iterator(); iterator.hasNext();) {
-                Entry<URI, Provider> entry = iterator.next();
-                Provider provider = entry.getValue();
-                // we have to create a copy, so the instances know about the updated model
-                Provider updatedProvider = provider;
-                if (transaction.getServiceState() == ModelTransactionState.NEW) {
-                    updatedProvider = SensinactCopier.copySelective(provider);
-                    entry.setValue(updatedProvider);
-                }
-                if (transaction.getResourceState() == ModelTransactionState.NEW
-                        && updatedProvider.eIsSet(transaction.getFeaturePath().get(0))) {
-                    Service service = (Service) updatedProvider.eGet(transaction.getFeaturePath().get(0));
-                    Service updatedService = SensinactCopier.copySelective(service);
-                    updatedProvider.eSet(transaction.getFeaturePath().get(0), updatedService);
-                }
-            }
-        }
     }
 
     /**
@@ -642,4 +624,3 @@ public class ModelNexus {
     }
 
 }
-
