@@ -17,9 +17,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.Service;
@@ -91,22 +89,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     @Override
     public SensinactService getService(String providerName, String service) {
         Provider provider = nexusImpl.getProvider(providerName);
-        return getService(provider, getProviderModel(provider), service);
-    }
-
-    private String getProviderModel(Provider provider) {
-
-        if (provider == null) {
-            return null;
-        }
-
-        URI instanceUri = EcoreUtil.getURI(provider);
-        if (instanceUri.segmentCount() < 2) {
-            // TODO is this correct?
-            return provider.getId();
-        } else {
-            return instanceUri.segment(instanceUri.segmentCount() - 2);
-        }
+        return getService(provider, nexusImpl.getProviderModel(providerName), service);
     }
 
     private SensinactService getService(Provider provider, String model, String service) {
@@ -120,8 +103,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         }
         final Service svc = (Service) provider.eGet(svcFeature);
 
-        final SensinactProviderImpl snProvider = new SensinactProviderImpl(new AtomicBoolean(true),
-                provider.eClass().getName(), provider.getId());
+        final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, provider.getId());
         return toService(snProvider, svc);
     }
 
@@ -132,7 +114,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
 
     public SensinactResource getResource(String providerName, String service, String resource) {
         Provider provider = nexusImpl.getProvider(providerName);
-        return getResource(provider, getProviderModel(provider), service, resource);
+        return getResource(provider, nexusImpl.getProviderModel(providerName), service, resource);
     }
 
     private SensinactResource getResource(Provider provider, String model, String service, String resource) {
@@ -150,7 +132,6 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resource);
 
         // Construct the resource
-        final AtomicBoolean active = new AtomicBoolean(rcFeature != null);
         final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, provider.getId());
         final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, snProvider,
                 svc.eContainingFeature().getName());
@@ -237,7 +218,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
 
         String modelName;
         if (provider != null) {
-            modelName = getProviderModel(provider);
+            modelName = nexusImpl.getProviderModel(providerName);
         } else {
             modelName = providerName;
         }
@@ -251,8 +232,8 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
 
     private SensinactProviderImpl toProvider(final Provider modelProvider, boolean loadServices) {
         // Construct the provider bean
-        final SensinactProviderImpl snProvider = new SensinactProviderImpl(new AtomicBoolean(true),
-                getProviderModel(modelProvider), modelProvider.getId());
+        final SensinactProviderImpl snProvider = new SensinactProviderImpl(active,
+                nexusImpl.getProviderModel(modelProvider.getId()), modelProvider.getId());
 
         if (loadServices) {
             // List services
@@ -266,7 +247,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     }
 
     private SensinactService toService(final SensinactProvider parent, final Service svcObject) {
-        final SensinactServiceImpl snSvc = new SensinactServiceImpl(new AtomicBoolean(true), parent,
+        final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, parent,
                 svcObject.eContainingFeature().getName());
 
         // List resources
@@ -276,7 +257,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     }
 
     private SensinactResource toResource(final SensinactService parent, final EStructuralFeature rcFeature) {
-        return new SensinactResourceImpl(new AtomicBoolean(true), parent, rcFeature.getName(),
-                rcFeature.getEType().getInstanceClass(), accumulator, nexusImpl, pf);
+        return new SensinactResourceImpl(active, parent, rcFeature.getName(), rcFeature.getEType().getInstanceClass(),
+                accumulator, nexusImpl, pf);
     }
 }
