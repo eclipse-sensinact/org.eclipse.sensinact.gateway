@@ -1,0 +1,6 @@
+-includeresource: @moquette-broker-0.15.jar
+
+Import-Package: \
+    !com.bugsnag, \
+    !com.librato.metrics.reporter, \
+    *

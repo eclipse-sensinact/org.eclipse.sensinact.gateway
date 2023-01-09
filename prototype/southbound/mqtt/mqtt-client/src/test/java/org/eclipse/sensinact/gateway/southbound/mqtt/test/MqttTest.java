@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -38,6 +39,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import io.moquette.BrokerConstants;
+import io.moquette.broker.Server;
+import io.moquette.broker.config.IConfig;
+import io.moquette.broker.config.MemoryConfig;
+
 /**
  * Tests of the MQTT southbound
  */
@@ -53,9 +59,17 @@ public class MqttTest {
      */
     private final List<MqttClientHandler> handlers = new ArrayList<>();
 
+    private Server server;
+
     @BeforeEach
     void start() throws Exception {
-        client = new MqttClient("tcp://broker.hivemq.com", MqttClient.generateClientId());
+        server = new Server();
+        IConfig config = new MemoryConfig(new Properties());
+        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, "127.0.0.1");
+        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "2183");
+        server.startServer(config);
+
+        client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
         client.connect(options);
@@ -72,14 +86,15 @@ public class MqttTest {
         for (MqttClientHandler handler : handlers) {
             handler.deactivate();
         }
+        server.stopServer();
     }
 
     MqttClientHandler setupHandler(final String handlerId, final String... topics) throws Exception {
         MqttClientHandler handler = new MqttClientHandler();
         MqttClientConfiguration mock = Mockito.mock(MqttClientConfiguration.class);
         Mockito.when(mock.id()).thenReturn(handlerId);
-        Mockito.when(mock.host()).thenReturn("broker.hivemq.com");
-        Mockito.when(mock.port()).thenReturn(1883);
+        Mockito.when(mock.host()).thenReturn("127.0.0.1");
+        Mockito.when(mock.port()).thenReturn(2183);
         Mockito.when(mock.topics()).thenReturn(topics);
         handler.activate(mock);
         return handler;

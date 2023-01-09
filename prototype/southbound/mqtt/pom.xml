@@ -28,4 +28,13 @@
     <module>mqtt-client</module>
     <module>mqtt-device-factory</module>
   </modules>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.moquette</groupId>
+      <artifactId>moquette-broker</artifactId>
+      <version>0.15</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>
