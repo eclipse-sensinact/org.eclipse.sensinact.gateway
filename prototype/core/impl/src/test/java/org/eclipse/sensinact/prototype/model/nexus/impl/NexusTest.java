@@ -16,6 +16,8 @@ package org.eclipse.sensinact.prototype.model.nexus.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -259,6 +261,33 @@ public class NexusTest {
 
             Object valueObject = serviceObject.eGet(valueFeature);
             assertEquals(value, valueObject);
+        }
+
+        @Test
+        void testFindProviderWithoutModel() {
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
+                    Instant.now());
+
+            assertEquals("TestModel", nexus.getProviderModel("testprovider"));
+
+            Provider provider = nexus.getProvider("testprovider");
+
+            assertNotNull(provider);
+            assertEquals("testprovider", provider.getId());
+            assertSame(nexus.getProvider("TestModel", "testprovider"), provider);
+        }
+
+        @Test
+        void testUnableToCreateProviderDifferentModelAndClashingId() {
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue", String.class, "test",
+                    Instant.now());
+
+            assertThrows(IllegalArgumentException.class, () -> nexus.handleDataUpdate("TestModel2", "testprovider",
+                    "testservice", "testValue", String.class, "test", Instant.now()));
         }
     }
 

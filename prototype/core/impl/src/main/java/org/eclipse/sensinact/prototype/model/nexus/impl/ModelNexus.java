@@ -199,12 +199,9 @@ public class ModelNexus {
 
         NotificationAccumulator accumulator = notificationAccumulator.get();
 
-        ProviderTypeWrapper parentWrapper = getOrCreateProviderType(parentModel, DEFAULT_URI, metaTimestamp,
-                accumulator);
-        Provider parent = getProvider(parentWrapper, parentModel, parentProvider, timestamp, accumulator, true);
+        Provider parent = getOrCreateProvider(parentModel, parentProvider, metaTimestamp, accumulator);
 
-        ProviderTypeWrapper childWrapper = getOrCreateProviderType(childModel, DEFAULT_URI, metaTimestamp, accumulator);
-        Provider child = getProvider(childWrapper, childModel, childProvider, timestamp, accumulator, true);
+        Provider child = getOrCreateProvider(childModel, childProvider, metaTimestamp, accumulator);
 
         parent.getLinkedProviders().add(child);
     }
@@ -231,53 +228,48 @@ public class ModelNexus {
             childModel = childProvider;
         }
 
-        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
-
         NotificationAccumulator accumulator = notificationAccumulator.get();
 
-        ProviderTypeWrapper parentWrapper = getProviderType(parentModel, DEFAULT_URI, metaTimestamp, accumulator,
-                false);
-        Provider parent = parentWrapper == null ? null
-                : getProvider(parentWrapper, parentModel, parentProvider, timestamp, accumulator, false);
+        Provider parent = getProvider(parentModel, parentProvider);
 
         if (parent == null) {
             throw new IllegalArgumentException("parent Provider " + parentProvider + " does not exist");
         }
 
-        ProviderTypeWrapper childWrapper = getProviderType(childModel, DEFAULT_URI, metaTimestamp, accumulator, false);
-        Provider child = childWrapper == null ? null
-                : getProvider(childWrapper, childModel, childProvider, timestamp, accumulator, false);
+        Provider child = getProvider(childModel, childProvider);
 
         if (child == null) {
             throw new IllegalArgumentException("child Provider " + childProvider + " does not exist");
         }
         parent.getLinkedProviders().remove(child);
+
+        // TODO unlink event
+        // accumulator.unlink(...)
     }
 
-    public void handleDataUpdate(String model, String provider, String service, String resource, Class<?> type,
+    public void handleDataUpdate(String model, String providerName, String service, String resource, Class<?> type,
             Object data, Instant timestamp) {
         if (model == null) {
-            model = provider;
+            model = providerName;
         }
 
         Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
 
         NotificationAccumulator accumulator = notificationAccumulator.get();
 
-        ProviderTypeWrapper wrapper = getOrCreateProviderType(model, DEFAULT_URI, metaTimestamp, accumulator);
-        ModelTransaction transaction = getOrCreateService(service, wrapper, metaTimestamp, accumulator);
-        transaction = getOrCreateResource(wrapper, resource, type, transaction, metaTimestamp, accumulator);
-        updateInstances(wrapper, transaction);
-        setData(wrapper, transaction, model, provider, data, metaTimestamp, accumulator);
+        Provider provider = getOrCreateProvider(model, providerName, metaTimestamp, accumulator);
+        ModelTransaction transaction = getOrCreateService(service, provider, metaTimestamp, accumulator);
+        transaction = getOrCreateResource(resource, type, transaction, metaTimestamp, accumulator);
+        provider = updateInstances(model, provider, transaction);
+        setData(provider, transaction, model, providerName, data, metaTimestamp, accumulator);
     }
 
     /**
      * @param transaction
      * @param data
      */
-    private void setData(ProviderTypeWrapper wrapper, ModelTransaction transaction, String modelName,
-            String providerName, Object data, Instant timestamp, NotificationAccumulator accumulator) {
-        Provider provider = getProvider(wrapper, modelName, providerName, timestamp, accumulator, true);
+    private void setData(Provider provider, ModelTransaction transaction, String modelName, String providerName,
+            Object data, Instant timestamp, NotificationAccumulator accumulator) {
 
         EStructuralFeature serviceFeature = transaction.getFeaturePath().get(0);
 
@@ -337,11 +329,20 @@ public class ModelNexus {
      * @param accumulator
      * @return
      */
-    private Provider getProvider(ProviderTypeWrapper wrapper, String modelName, String providerName, Instant timestamp,
-            NotificationAccumulator accumulator, boolean create) {
-        URI instanceUri = createURI(modelName, providerName);
-        Provider provider = wrapper.getInstances().get(instanceUri);
-        if (provider == null && create) {
+    private Provider getOrCreateProvider(String modelName, String providerName, Instant timestamp,
+            NotificationAccumulator accumulator) {
+
+        Provider provider = getProvider(modelName, providerName);
+
+        if (provider == null) {
+            String existingModel = getProviderModel(providerName);
+            if (existingModel != null) {
+                throw new IllegalArgumentException(
+                        "The provider " + providerName + " already exists with the model " + existingModel);
+            }
+            ProviderTypeWrapper wrapper = getProviderType(modelName, DEFAULT_URI)
+                    .orElseGet(() -> createProviderType(modelName, DEFAULT_URI, timestamp, accumulator));
+
             provider = (Provider) EcoreUtil.create(wrapper.getProviderType());
             provider.setId(providerName);
 
@@ -358,15 +359,22 @@ public class ModelNexus {
                 adminSvc.getMetadata().put(resourceFeature, metadata);
             }
 
-            wrapper.getInstances().put(instanceUri, provider);
+            wrapper.getInstances().put(createURI(modelName, providerName), provider);
             accumulator.addProvider(providerName);
         }
+
         return provider;
     }
 
     public Provider getProvider(String providerName) {
         return providerCache.values().stream().map((w) -> w.getInstances().get(createURI(w.getModel(), providerName)))
                 .filter(p -> p != null).findFirst().orElse(null);
+    }
+
+    public String getProviderModel(String providerName) {
+        return providerCache.values().stream()
+                .filter((w) -> w.getInstances().containsKey(createURI(w.getModel(), providerName)))
+                .map(w -> w.getModel()).findFirst().orElse(null);
     }
 
     public Provider getProvider(String model, String providerName) {
@@ -405,7 +413,9 @@ public class ModelNexus {
      * @param wrapper
      * @param transaction
      */
-    private void updateInstances(ProviderTypeWrapper wrapper, ModelTransaction transaction) {
+    private Provider updateInstances(String model, Provider existingProvider, ModelTransaction transaction) {
+        Provider toReturn = existingProvider;
+        ProviderTypeWrapper wrapper = getProviderType(model, DEFAULT_URI).get();
         if (transaction.getServiceState() != ModelTransactionState.NONE
                 || transaction.getResourceState() != ModelTransactionState.NONE) {
             Set<Entry<URI, Provider>> entrySet = wrapper.getInstances().entrySet();
@@ -417,6 +427,9 @@ public class ModelNexus {
                 if (transaction.getServiceState() == ModelTransactionState.NEW) {
                     updatedProvider = SensinactCopier.copySelective(provider);
                     entry.setValue(updatedProvider);
+                    if (existingProvider == provider) {
+                        toReturn = updatedProvider;
+                    }
                 }
                 if (transaction.getResourceState() == ModelTransactionState.NEW
                         && updatedProvider.eIsSet(transaction.getFeaturePath().get(0))) {
@@ -426,6 +439,7 @@ public class ModelNexus {
                 }
             }
         }
+        return toReturn;
     }
 
     /**
@@ -435,8 +449,8 @@ public class ModelNexus {
      * @param transaction
      * @return
      */
-    private ModelTransaction getOrCreateResource(ProviderTypeWrapper wrapper, String resource, Class<?> type,
-            ModelTransaction transaction, Instant timestamp, NotificationAccumulator accumulator) {
+    private ModelTransaction getOrCreateResource(String resource, Class<?> type, ModelTransaction transaction,
+            Instant timestamp, NotificationAccumulator accumulator) {
         EClass service = transaction.getService();
         EAttribute feature = (EAttribute) service.getEStructuralFeature(resource);
         if (feature == null) {
@@ -454,46 +468,46 @@ public class ModelNexus {
         return transaction;
     }
 
-    private ProviderTypeWrapper getOrCreateProviderType(String rawProviderName, String thePackageUri, Instant timestamp,
-            NotificationAccumulator accumulator) {
-        return getProviderType(rawProviderName, thePackageUri, timestamp, accumulator, true);
-    }
-
-    private ProviderTypeWrapper getProviderType(String rawProviderName, String thePackageUri, Instant timestamp,
-            NotificationAccumulator accumulator, boolean create) {
+    private Optional<ProviderTypeWrapper> getProviderType(String rawProviderName, String thePackageUri) {
         String providerName = firstToUpper(rawProviderName);
         URI packageUri = URI.createURI(thePackageUri);
         EPackage ePackage = packageCache.get(packageUri);
         EClass providerClass = (EClass) ePackage.getEClassifier(providerName);
         if (providerClass != null) {
-            return providerCache.get(EcoreUtil.getURI(providerClass));
-        } else if (!create) {
-            return null;
+            return Optional.ofNullable(providerCache.get(EcoreUtil.getURI(providerClass)));
+        } else {
+            return Optional.empty();
         }
+    }
 
-        providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),
+    private ProviderTypeWrapper createProviderType(String rawProviderName, String thePackageUri, Instant timestamp,
+            NotificationAccumulator accumulator) {
+        String providerName = firstToUpper(rawProviderName);
+        URI packageUri = URI.createURI(thePackageUri);
+        EPackage ePackage = packageCache.get(packageUri);
+        EClass providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),
                 sensinactPackage.getProvider());
         ProviderTypeWrapper wrapper = new ProviderTypeWrapper(rawProviderName, providerClass);
         providerCache.put(EcoreUtil.getURI(providerClass), wrapper);
         return wrapper;
     }
 
-    private ModelTransaction getOrCreateService(String serviceName, ProviderTypeWrapper wrapper, Instant timestamp,
+    private ModelTransaction getOrCreateService(String serviceName, Provider provider, Instant timestamp,
             NotificationAccumulator accumulator) {
         ModelTransaction transaction = new ModelTransaction();
-        EClass provider = wrapper.getProviderType();
+        EClass providerClass = provider.eClass();
         EClass service = null;
-        EStructuralFeature feature = provider.getEStructuralFeature(serviceName);
+        EStructuralFeature feature = providerClass.getEStructuralFeature(serviceName);
         if (feature == null) {
             // The EClass does not have a reference to the service. This means we need to
             // create an EClass representing the Service and add a reference to our provider
             // EClass
             transaction.setServiceState(ModelTransactionState.NEW);
-            EPackage ePackage = wrapper.getProviderType().getEPackage();
-            updateMetadata(provider);
-            service = EMFUtil.createEClass(constructServiceEClassName(provider.getName(), serviceName), ePackage,
+            EPackage ePackage = providerClass.getEPackage();
+            updateMetadata(providerClass);
+            service = EMFUtil.createEClass(constructServiceEClassName(providerClass.getName(), serviceName), ePackage,
                     (ec) -> createEClassAnnotations(timestamp), sensinactPackage.getService());
-            feature = EMFUtil.createEReference(provider, serviceName, service, true,
+            feature = EMFUtil.createEReference(providerClass, serviceName, service, true,
                     ef -> createEFeatureAnnotation(ef, timestamp));
         } else {
             service = (EClass) feature.getEType();

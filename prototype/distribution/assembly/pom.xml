@@ -98,6 +98,13 @@
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>virtual-temperature-sensor-feature</artifactId>
+                  <version>0.0.1-SNAPSHOT</version>
+                  <type>zip</type>
+                  <classifier>osgifeaturerepo</classifier>
+                </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
@@ -157,6 +164,14 @@
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>northbound-ogc-sensorthings-feature.json</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>virtual-temperature-sensor-feature</artifactId>
+                  <version>0.0.1-SNAPSHOT</version>
+                  <type>json</type>
+                  <classifier>osgifeature</classifier>
+                  <destFileName>virtual-temperature-sensor-feature.json</destFileName>
                 </artifactItem>
               </artifactItems>
             </configuration>
