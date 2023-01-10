@@ -1,0 +1,21 @@
+{
+  "parser": "csv",
+  "parser.options": {
+    "header": true
+  },
+  "mapping": {
+    "@provider": "Name",
+    "@latitude": {
+      "path": "Latitude",
+      "type": "float"
+    },
+    "@longitude": {
+      "path": "Longitude",
+      "type": "float"
+    },
+    "data/value": {
+      "path": "Value",
+      "type": "int"
+    }
+  }
+}
