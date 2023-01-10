@@ -1,0 +1,13 @@
+{
+  "parser": "csv",
+  "parser.options": {
+    "header": true
+  },
+  "mapping": {
+    "@provider": "Name",
+    "data/value": {
+      "path": "Value",
+      "type": "int"
+    }
+  }
+}
