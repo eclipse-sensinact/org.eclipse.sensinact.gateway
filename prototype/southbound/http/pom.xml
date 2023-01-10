@@ -13,21 +13,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.eclipse.sensinact.gateway</groupId>
-    <artifactId>sensinact-parent</artifactId>
+    <groupId>org.eclipse.sensinact.gateway.southbound</groupId>
+    <artifactId>southbound</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>org.eclipse.sensinact.gateway.southbound</groupId>
-  <artifactId>southbound</artifactId>
+  <groupId>org.eclipse.sensinact.gateway.southbound.http</groupId>
+  <artifactId>http-parent</artifactId>
   <packaging>pom</packaging>
 
-  <name>Southbound Connectors</name>
-  <description>This reactor contains southbound connectors that are used to gather data from various protocols</description>
+  <name>Southbound HTTP :: Parent</name>
+  <description>Parent project of sensiNact southbound HTTP bundles</description>
 
   <modules>
-    <module>device-factory</module>
-    <module>http</module>
-    <module>mqtt</module>
-    <module>virtual</module>
+    <module>http-device-factory</module>
   </modules>
 </project>
