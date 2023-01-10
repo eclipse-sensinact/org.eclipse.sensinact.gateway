@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +35,9 @@ import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,16 +49,21 @@ import org.osgi.test.junit5.cm.ConfigurationExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.moquette.BrokerConstants;
+import io.moquette.broker.Server;
+import io.moquette.broker.config.IConfig;
+import io.moquette.broker.config.MemoryConfig;
+
 /**
  * Tests for the MQTT device factory
  */
 @ExtendWith(ConfigurationExtension.class)
 @WithFactoryConfiguration(factoryPid = "sensinact.southbound.mqtt", name = "h1", location = "?", properties = {
-        @Property(key = "id", value = "handler1"), @Property(key = "host", value = "broker.hivemq.com"),
-        @Property(key = "port", value = "1883"), @Property(key = "topics", value = "sensinact/mqtt/test1/+"), })
+        @Property(key = "id", value = "handler1"), @Property(key = "host", value = "127.0.0.1"),
+        @Property(key = "port", value = "2183"), @Property(key = "topics", value = "sensinact/mqtt/test1/+"), })
 @WithFactoryConfiguration(factoryPid = "sensinact.southbound.mqtt", name = "h2", location = "?", properties = {
-        @Property(key = "id", value = "handler2"), @Property(key = "host", value = "broker.hivemq.com"),
-        @Property(key = "port", value = "1883"), @Property(key = "topics", value = "sensinact/mqtt/test2/+"), })
+        @Property(key = "id", value = "handler2"), @Property(key = "host", value = "127.0.0.1"),
+        @Property(key = "port", value = "2183"), @Property(key = "topics", value = "sensinact/mqtt/test2/+"), })
 @WithConfiguration(pid = "sensinact.mqtt.device.factory", location = "?", properties = {
         @Property(key = "mqtt.handler.id", value = "handler1"),
         @Property(key = "mapping", value = "{\n" + "  \"parser\": \"csv\",\n"
@@ -70,11 +78,27 @@ public class MqttDeviceFactoryTest {
 
     private static final String USER = "user";
 
+    private static Server server;
+
     @InjectService
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
 
     BlockingQueue<ResourceDataNotification> queue;
+
+    @BeforeAll
+    static void startBroker() throws IOException {
+        server = new Server();
+        IConfig config = new MemoryConfig(new Properties());
+        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, "127.0.0.1");
+        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "2183");
+        server.startServer(config);
+    }
+
+    @AfterAll
+    static void stopBroker() throws IOException {
+        server.stopServer();
+    }
 
     @BeforeEach
     void start() throws InterruptedException {
@@ -117,7 +141,7 @@ public class MqttDeviceFactoryTest {
         byte[] csvContent = readFile("csv-header-typed.csv");
 
         // Send MQTT message on handler 1
-        final MqttClient client = new MqttClient("tcp://broker.hivemq.com:1883", MqttClient.generateClientId());
+        final MqttClient client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());
         client.connect();
         try {
             client.publish("sensinact/mqtt/test1/handler", csvContent, 1, false);
