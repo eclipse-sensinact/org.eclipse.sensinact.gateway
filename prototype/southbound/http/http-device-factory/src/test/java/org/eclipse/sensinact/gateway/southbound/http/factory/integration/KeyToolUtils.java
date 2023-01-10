@@ -36,7 +36,7 @@ public class KeyToolUtils {
             tool += ".exe";
         }
 
-        execPath = javaBinDir.resolve(tool).toString();
+        execPath = javaBinDir.resolve(tool).toAbsolutePath().toString();
     }
 
     public int runTool(final Object... args) throws IOException {
@@ -51,10 +51,10 @@ public class KeyToolUtils {
         final ProcessBuilder builder = new ProcessBuilder(allArgs);
         if (input != null) {
             builder.redirectInput(input);
-            builder.redirectErrorStream();
         }
         if (output != null) {
             builder.redirectOutput(output);
+            builder.redirectErrorStream();
         }
 
         final Process process = builder.start();

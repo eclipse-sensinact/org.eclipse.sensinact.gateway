@@ -68,7 +68,7 @@ public class HttpDeviceFactoryTest {
     @InjectService
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
-    BlockingQueue<ResourceDataNotification> queue;
+    BlockingQueue<ResourceDataNotification> queue, queue2;
 
     @InjectService
     ConfigurationAdmin configAdmin;
@@ -99,6 +99,7 @@ public class HttpDeviceFactoryTest {
     void start() throws InterruptedException {
         session = sessionManager.getDefaultSession("user");
         queue = new ArrayBlockingQueue<>(32);
+        queue2 = new ArrayBlockingQueue<>(32);
     }
 
     @AfterEach
@@ -106,6 +107,16 @@ public class HttpDeviceFactoryTest {
         session.activeListeners().keySet().forEach(session::removeListener);
         session = null;
         handler.clear();
+    }
+
+    void setupProvidersHandling(final String provider1, final String provider2) {
+        assertNull(session.describeProvider(provider1));
+        session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
+
+        if (provider2 != null) {
+            assertNull(session.describeProvider(provider2));
+            session.addListener(List.of(provider1 + "/*"), (t, e) -> queue2.offer(e), null, null, null);
+        }
     }
 
     /**
@@ -124,13 +135,7 @@ public class HttpDeviceFactoryTest {
         final String provider2 = "typed-provider2";
 
         // Register listener
-        session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
-        final ArrayBlockingQueue<ResourceDataNotification> queue2 = new ArrayBlockingQueue<>(32);
-        session.addListener(List.of(provider1 + "/*"), (t, e) -> queue2.offer(e), null, null, null);
-
-        // Providers shouldn't exist yet
-        assertNull(session.describeProvider(provider1));
-        assertNull(session.describeProvider(provider2));
+        setupProvidersHandling(provider1, provider2);
 
         final String inputFileName = "csv-header-typed";
         final String mappingConfig = new String(readFile(inputFileName + "-mapping.json"));
@@ -187,11 +192,7 @@ public class HttpDeviceFactoryTest {
         final String provider2 = "dynamic-provider2";
 
         // Register listener
-        session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
-
-        // Providers shouldn't exist yet
-        assertNull(session.describeProvider(provider1));
-        assertNull(session.describeProvider(provider2));
+        setupProvidersHandling(provider1, provider2);
 
         final String inputFileName = "csv-header-dynamic";
         final String template = new String(readFile(inputFileName + ".csv"));
@@ -226,6 +227,7 @@ public class HttpDeviceFactoryTest {
 
             // Clear the queue
             queue.clear();
+            queue2.clear();
 
             // Update value
             content = template.replace("$val1$", "10").replace("$val2$", "20");
@@ -233,6 +235,7 @@ public class HttpDeviceFactoryTest {
 
             // Wait for an update (wait 4 seconds to be fair with the 2-seconds poll)
             assertNotNull(queue.poll(4, TimeUnit.SECONDS));
+            assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
 
             // Check timestamp
             final Instant secondTimestamp = session.describeResource(provider1, "data", "value").timestamp;
@@ -257,11 +260,7 @@ public class HttpDeviceFactoryTest {
         final String provider2 = "station2";
 
         // Register listener
-        session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
-
-        // Providers shouldn't exist yet
-        assertNull(session.describeProvider(provider1));
-        assertNull(session.describeProvider(provider2));
+        setupProvidersHandling(provider1, provider2);
 
         final String staticInputFileName = "csv-station-static";
         handler.setData("/static", readFile(staticInputFileName + ".csv"));
@@ -307,6 +306,7 @@ public class HttpDeviceFactoryTest {
                     break;
                 }
             }
+            assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
 
             // 2 calls should have been made yet
             assertEquals(2, handler.nbVisitedPaths());
@@ -335,9 +335,11 @@ public class HttpDeviceFactoryTest {
 
             // Clear the queue to wait for next event
             queue.clear();
+            queue2.clear();
 
             // Wait for an update (wait 4 seconds to be fair with the 2-seconds poll)
             assertNotNull(queue.poll(4, TimeUnit.SECONDS));
+            assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
 
             // Check timestamp
             final Instant secondTimestamp = session.describeResource(provider1, "data", "value").timestamp;
