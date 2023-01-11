@@ -98,11 +98,11 @@ public class RequestHandler extends AbstractHandler {
 
         byte[] content = serverData.get(target);
         if (content != null) {
+            serverVisits.computeIfAbsent(target, (k) -> new AtomicInteger()).incrementAndGet();
             response.setStatus(200);
             response.setContentLength(content.length);
             response.getOutputStream().write(content);
             response.flushBuffer();
-            serverVisits.computeIfAbsent(target, (k) -> new AtomicInteger()).incrementAndGet();
         } else {
             response.sendError(404);
         }
