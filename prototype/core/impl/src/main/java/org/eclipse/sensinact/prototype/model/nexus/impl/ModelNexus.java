@@ -348,16 +348,20 @@ public class ModelNexus {
 
             final Admin adminSvc = sensinactPackage.getSensiNactFactory().createAdmin();
             provider.setAdmin(adminSvc);
-            adminSvc.setFriendlyName(providerName);
 
             // Set a timestamp to admin resources to indicate them as valued
             for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
                 Metadata metadata = sensinactPackage.getSensiNactFactory().createMetadata();
                 metadata.setFeature(resourceFeature);
                 metadata.setSource(provider.getAdmin());
-                metadata.setTimestamp(timestamp);
+                metadata.setTimestamp(Instant.EPOCH);
                 adminSvc.getMetadata().put(resourceFeature, metadata);
             }
+
+            // Set the friendlyName value
+            adminSvc.setFriendlyName(providerName);
+            adminSvc.getMetadata().get(adminSvc.eClass().getEStructuralFeature(SensiNactPackage.ADMIN__FRIENDLY_NAME))
+                    .setTimestamp(timestamp);
 
             wrapper.getInstances().put(createURI(modelName, providerName), provider);
             accumulator.addProvider(providerName);
