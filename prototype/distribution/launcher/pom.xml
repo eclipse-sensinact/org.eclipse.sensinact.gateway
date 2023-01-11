@@ -77,7 +77,8 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-export-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
+        <!-- Use 6.4.0 to avoid requiring Java 17 to run -->
+        <version>6.4.0</version>
         <executions>
           <execution>
             <id>export</id>
@@ -94,7 +95,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.3.0</version>
         <executions>
           <execution>
             <id>generate-repo</id>
