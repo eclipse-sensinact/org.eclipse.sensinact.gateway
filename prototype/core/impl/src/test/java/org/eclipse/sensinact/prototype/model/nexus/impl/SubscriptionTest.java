@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -62,6 +62,8 @@ public class SubscriptionTest {
         void basicTest() {
 
             ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            // Ignore the setup of the sensiNact provider
+            Mockito.clearInvocations(accumulator);
 
             Instant now = Instant.now();
             nexus.handleDataUpdate("TestModel", TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, String.class, TEST_VALUE,
@@ -85,6 +87,8 @@ public class SubscriptionTest {
         void basicServiceExtensionTest() {
 
             ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            // Ignore the setup of the sensiNact provider
+            Mockito.clearInvocations(accumulator);
 
             Instant now = Instant.now();
             Instant before = now.minus(Duration.ofHours(1));
@@ -116,6 +120,8 @@ public class SubscriptionTest {
         void basicSecondServiceTest() {
 
             ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            // Ignore the setup of the sensiNact provider
+            Mockito.clearInvocations(accumulator);
 
             Instant now = Instant.now();
             Instant before = now.minus(Duration.ofHours(1));
@@ -145,4 +151,3 @@ public class SubscriptionTest {
         }
     }
 }
-

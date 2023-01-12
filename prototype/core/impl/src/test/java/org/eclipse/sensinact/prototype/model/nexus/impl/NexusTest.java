@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
+import java.util.List;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -135,6 +137,46 @@ public class NexusTest {
 
             Object value = service.eGet(valueFeature);
             assertEquals("test", value);
+        }
+
+        @Test
+        void sensiNactProvider() {
+
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+
+            List<Provider> providers = nexus.getProviders();
+
+            assertEquals(1, providers.size());
+            Provider provider = providers.get(0);
+
+            assertNotNull(provider.getAdmin());
+            assertEquals("sensiNact", provider.getAdmin().getFriendlyName());
+
+            EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("system");
+            assertNotNull(serviceFeature);
+            assertEquals("system", serviceFeature.getName());
+            EClass eClass = (EClass) serviceFeature.getEType();
+
+            Service service = (Service) provider.eGet(serviceFeature);
+
+            assertNotNull(service);
+
+            EStructuralFeature versionFeature = eClass.getEStructuralFeature("version");
+
+            assertNotNull(versionFeature);
+            assertEquals(EcorePackage.Literals.EDOUBLE, versionFeature.getEType());
+
+            Object value = service.eGet(versionFeature);
+            assertEquals(0.1D, value);
+
+            EStructuralFeature startedFeature = eClass.getEStructuralFeature("started");
+
+            assertNotNull(startedFeature);
+            assertEquals(startedFeature.getEType(), SensiNactPackage.eINSTANCE.getEInstant());
+
+            Instant started = (Instant) service.eGet(startedFeature);
+            assertNotNull(started);
+            assertEquals(Instant.now().truncatedTo(DAYS), started.truncatedTo(DAYS));
         }
 
         @Test
