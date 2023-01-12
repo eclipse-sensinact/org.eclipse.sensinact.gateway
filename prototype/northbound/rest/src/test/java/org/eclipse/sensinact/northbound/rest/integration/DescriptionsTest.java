@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -146,7 +146,7 @@ public class DescriptionsTest {
         // Check the list of providers
         ResultProvidersListDTO result = utils.queryJson("/providers", ResultProvidersListDTO.class);
         utils.assertResultSuccess(result, "PROVIDERS_LIST");
-        assertEquals(result.providers, List.of(PROVIDER));
+        assertEquals(Set.of("sensiNact", PROVIDER), Set.copyOf(result.providers));
 
         // Add another provider
         dto.provider = PROVIDER_2;
@@ -157,7 +157,7 @@ public class DescriptionsTest {
         // Check the new list
         result = utils.queryJson("/providers", ResultProvidersListDTO.class);
         utils.assertResultSuccess(result, "PROVIDERS_LIST");
-        assertEquals(Set.of(PROVIDER, PROVIDER_2), Set.copyOf(result.providers));
+        assertEquals(Set.of("sensiNact", PROVIDER, PROVIDER_2), Set.copyOf(result.providers));
     }
 
     /**

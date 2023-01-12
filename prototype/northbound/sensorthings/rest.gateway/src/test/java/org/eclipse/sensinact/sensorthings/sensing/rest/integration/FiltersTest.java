@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
@@ -128,14 +129,17 @@ public class FiltersTest {
     @Test
     void testOrderBy() throws IOException, InterruptedException {
         final String prefix = "orderTester_";
-        final List<String> sortedProviderIds = List.copyOf(IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id)
-                .sorted(Comparator.naturalOrder()).collect(Collectors.toList()));
+        final List<String> sortedProviderIds = Stream
+                .concat(IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id), Stream.of("sensiNact"))
+                .sorted(Comparator.naturalOrder()).collect(Collectors.toList());
         final int nbProviders = sortedProviderIds.size();
 
         final List<String> reversedProviderIds = new ArrayList<>(sortedProviderIds);
         Collections.reverse(reversedProviderIds);
 
-        sortedProviderIds.stream().forEach(id -> {
+        sortedProviderIds.stream()
+        .filter(id -> id.startsWith(prefix))
+        .forEach(id -> {
             session.setResourceValue(id, "svcA", "rcA", id);
             session.setResourceValue(id, "svcB", "rcA", id + 256);
             session.setResourceValue(id, "svcA", "rcB", id);

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 *
 * Contributors:
 *   Data In Motion - initial API and implementation
+*   Kentyou - fixes and updates to include a basic sensiNact provider
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
@@ -89,6 +90,7 @@ public class ModelNexus {
                 .orElseGet(() -> EMFUtil.createPackage("base", DEFAULT_URI, "sensinactBase", this.resourceSet));
         packageCache.put(DEFAULT_URI_OBJECT, defaultPackage);
         loadInstances();
+        setupSensinactProvider();
     }
 
     private Optional<EPackage> loadDefaultPackage(Path fileName) {
@@ -152,6 +154,14 @@ public class ModelNexus {
             LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error loading provider from Path: {}", path, e);
             throw new RuntimeException(e);
         }
+
+    }
+
+    private void setupSensinactProvider() {
+
+        Instant now = Instant.now();
+        handleDataUpdate("sensinact", "sensiNact", "system", "version", double.class, 0.1D, now);
+        handleDataUpdate("sensinact", "sensiNact", "system", "started", Instant.class, now, now);
 
     }
 

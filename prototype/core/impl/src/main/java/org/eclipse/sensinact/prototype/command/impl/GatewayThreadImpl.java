@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.notification.impl.ImmediateNotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.NotificationAccumulatorImpl;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -88,7 +89,8 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     private NotificationAccumulator getCurrentAccumulator() {
         WorkItem<?> workItem = currentItem.get();
-        return workItem == null ? null : workItem.command.getAccumulator();
+        return workItem == null ? new ImmediateNotificationAccumulator(typedEventBus)
+                : workItem.command.getAccumulator();
     }
 
     @Override
