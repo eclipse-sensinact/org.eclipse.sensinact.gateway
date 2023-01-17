@@ -16,16 +16,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 import org.eclipse.sensinact.gateway.launcher.FeatureLauncher.Config;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -55,6 +61,9 @@ class FeatureLaunchingTest {
     @Mock
     Config config;
 
+    @Mock
+    ConfigurationManager manager;
+
     FeatureLauncher fl = new FeatureLauncher();
 
     private FeatureService fs;
@@ -68,8 +77,8 @@ class FeatureLaunchingTest {
         ServiceLoader<FeatureService> loader = ServiceLoader.load(FeatureService.class);
         fs = loader.findFirst().get();
 
-        Mockito.when(config.featureDir()).thenReturn("src/test/resources/features");
-        Mockito.when(config.repository()).thenReturn("src/test/resources/repository");
+        Mockito.lenient().when(config.featureDir()).thenReturn("src/test/resources/features");
+        Mockito.lenient().when(config.repository()).thenReturn("src/test/resources/repository");
 
         Mockito.lenient().when(context.installBundle(Mockito.anyString(), Mockito.any())).thenAnswer(i -> {
             String fromIs;
@@ -87,7 +96,7 @@ class FeatureLaunchingTest {
         });
 
         fl.featureService = fs;
-
+        fl.configManager = manager;
     }
 
     String getIdString(String groupId, String artifactId, String version, String type, String classifier) {
@@ -156,6 +165,11 @@ class FeatureLaunchingTest {
         order.verify(bundle).stop();
         order.verify(bundle2).uninstall();
         order.verify(bundle).uninstall();
+
+        if (manager.configFile != null) {
+            Files.deleteIfExists(manager.configFile);
+            manager.configFile = null;
+        }
     }
 
     @Test
@@ -353,6 +367,179 @@ class FeatureLaunchingTest {
                     () -> fl.start(context, config));
 
             assertEquals("features", exception.getProperty());
+        }
+    }
+
+    @Nested
+    class FeatureConfiguration {
+        @Test
+        void testFillInVariables() throws Exception {
+            final Map<String, Object> values = new HashMap<>();
+            values.put("constant.str", "constant");
+            values.put("constant.int", 1);
+            values.put("var.missing", "${missing}");
+            values.put("var.int", "${value.int}");
+            values.put("var.combine", "${value.prefix}-${value.int}");
+            values.put("var.semi-missing", "${value.prefix}-${missing}");
+
+            fl.fillInVariables(values, Map.of("value.int", 42, "value.prefix", "hello"));
+
+            assertEquals("constant", values.get("constant.str"));
+            assertEquals(1, values.get("constant.int"));
+            assertEquals("${missing}", values.get("var.missing"));
+            assertEquals(42, values.get("var.int"));
+            assertEquals("hello-42", values.get("var.combine"));
+            assertEquals("hello-${missing}", values.get("var.semi-missing"));
+        }
+
+        @Test
+        void testSimpleConfig() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "config_simple" });
+            fl.start(context, config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            String bundleId = getIdString(GROUP_ID, "buzz", "1.0.2-SNAPSHOT", null, null);
+            String bundleId2 = getIdString(GROUP_ID, "buzz", "1.0.0", null, null);
+
+            InOrder order = Mockito.inOrder(manager, context, installed.get(bundleId), installed.get(bundleId2));
+
+            // Check updated configuration and order
+            final Map<String, Hashtable<String, Object>> expectedConfs = Map.of("test-A",
+                    new Hashtable<>(Map.of("test", "A", "value", 42)), "test-merged",
+                    new Hashtable<>(Map.of("test", "merged", "value", 0, "value-A", 5L)));
+            order.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)), eq(null));
+
+            order.verify(context).installBundle(eq(bundleId), any());
+            order.verify(context).installBundle(eq(bundleId2), any());
+
+            order.verify(installed.get(bundleId)).start();
+            order.verify(installed.get(bundleId2)).start();
+        }
+
+        @Test
+        void testConfigOnly() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "config_only" });
+            fl.start(context, config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            // Check updated configuration and order
+            Map<String, Hashtable<String, Object>> expectedConfs = Map.of("test-only1",
+                    new Hashtable<>(Map.of("test", "A", "value", 21)), "test-fixed",
+                    new Hashtable<>(Map.of("test", "B", "value", 42)));
+            Mockito.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)), eq(null));
+            Mockito.verify(context, Mockito.never()).installBundle(any());
+        }
+
+        @Test
+        void testConfigUpdate() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "config_only" });
+            fl.start(context, config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            // Check configuration
+            Map<String, Hashtable<String, Object>> expectedConfs = Map.of("test-only1",
+                    new Hashtable<>(Map.of("test", "A", "value", 21)), "test-fixed",
+                    new Hashtable<>(Map.of("test", "B", "value", 42)));
+            Mockito.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)), eq(null));
+            Mockito.verify(context, Mockito.never()).installBundle(any());
+
+            Mockito.when(config.features()).thenReturn(new String[] { "config_only_update" });
+            fl.update(config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            // Check updated configuration and order
+            InOrder order = Mockito.inOrder(manager);
+            expectedConfs = Map.of("test-only2", new Hashtable<>(Map.of("test", "C", "value", 21)), "test-fixed",
+                    new Hashtable<>(Map.of("test", "B", "value", 43)));
+            order.verify(manager).updateConfigurations(eq(null), eq(Set.of("test-only1", "test-fixed")));
+            order.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)), eq(null));
+            Mockito.verify(context, Mockito.never()).installBundle(any());
+        }
+
+        @Test
+        void testConfigWithVars() throws Exception {
+            Mockito.when(config.features()).thenReturn(new String[] { "config_vars" });
+            fl.start(context, config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            // Check updated configuration and order
+            Map<String, Hashtable<String, Object>> expectedConfs = new HashMap<>(
+                    Map.of("test-A", new Hashtable<>(Map.of("test", "A", "value", 42)), "test-vars", new Hashtable<>(
+                            Map.of("test", "vars", "value", 42, "text", "Hello_World", "missing", "${missing}"))));
+            Mockito.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)),
+                    eq(null));
+            Mockito.verify(context, Mockito.never()).installBundle(any());
+        }
+
+        @Test
+        void testConfigOverride() throws Exception {
+            InOrder order = Mockito.inOrder(manager);
+
+            Mockito.when(config.features()).thenReturn(new String[] { "config_only", "config_only_2" });
+            fl.start(context, config);
+
+            assertTrue(failures.isEmpty(), () -> failures.toString());
+
+            // First "config_only"
+            Map<String, Hashtable<String, Object>> expectedConfs = Map.of("test-only1",
+                    new Hashtable<>(Map.of("test", "A", "value", 21)), "test-fixed",
+                    new Hashtable<>(Map.of("test", "B", "value", 42)));
+            order.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)), eq(null));
+
+            // Then "config_only_2"
+            expectedConfs = Map.of("test-only2", new Hashtable<>(Map.of("test", "Only2", "value", 15)), "test-fixed",
+                    new Hashtable<>(Map.of("test", "Override", "value", 451)));
+            order.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)), eq(null));
+        }
+    }
+
+    class MapConfigArgumentMatcher implements ArgumentMatcher<Map<String, Hashtable<String, Object>>> {
+        final Map<String, Hashtable<String, Object>> expected;
+
+        MapConfigArgumentMatcher(Map<String, Hashtable<String, Object>> expected) {
+            this.expected = expected;
+        }
+
+        @Override
+        public boolean matches(Map<String, Hashtable<String, Object>> arg) {
+            if (!arg.keySet().equals(expected.keySet())) {
+                return false;
+            }
+
+            for (final String pid : arg.keySet()) {
+                final Hashtable<String, Object> expectedValues = expected.get(pid);
+                final Hashtable<String, Object> argValues = arg.get(pid);
+                if (!argValues.keySet().equals(expectedValues.keySet())) {
+                    System.out.println("Different keys");
+                    return false;
+                }
+
+                for (final String argKey : argValues.keySet()) {
+                    final Object expectedValue = expectedValues.get(argKey);
+                    final Object argValue = argValues.get(argKey);
+
+                    if (!Objects.equals(expectedValue, argValue)) {
+                        if (expectedValue instanceof Number && argValue instanceof Number) {
+                            // We don't use floats in the tests
+                            if (((Number) expectedValue).longValue() == ((Number) argValue).longValue()) {
+                                continue;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(this.expected);
         }
     }
 }

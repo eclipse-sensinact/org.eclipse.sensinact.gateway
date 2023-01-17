@@ -20,6 +20,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -30,6 +31,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,6 +39,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.apache.felix.cm.json.ConfigurationReader;
@@ -51,7 +54,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component
+@Component(service = ConfigurationManager.class)
 public class ConfigurationManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationManager.class);
@@ -63,7 +66,10 @@ public class ConfigurationManager {
 
     ExecutorService executor;
 
-    private Path configFile;
+    Path configFile;
+
+    private boolean expectedInterruption = false;
+    private AtomicReference<Thread> currentWatchThread = new AtomicReference<>();
 
     @Activate
     void start() throws IOException {
@@ -108,11 +114,24 @@ public class ConfigurationManager {
 
     private void watch() {
         try {
+            // Keep track of current watch thread
+            currentWatchThread.set(Thread.currentThread());
+
             WatchKey key;
             try {
                 key = watchService.take();
-            } catch (ClosedWatchServiceException | InterruptedException e) {
+            } catch (ClosedWatchServiceException e) {
                 LOGGER.error("No longer able to monitor the configuration file {}", configFile, e);
+                return;
+            } catch (InterruptedException e) {
+                if (expectedInterruption) {
+                    LOGGER.debug("Forced configuration reload");
+                    Thread.interrupted();
+                    executor.submit(this::reloadConfigFile);
+                    executor.submit(this::watch);
+                } else {
+                    LOGGER.error("Interrupted while monitoring the configuration file {}", configFile, e);
+                }
                 return;
             }
 
@@ -139,27 +158,35 @@ public class ConfigurationManager {
         } catch (Exception e) {
             LOGGER.error("An unexpected error occurred watching the configuration file {}", configFile, e);
             executor.submit(this::watch);
+        } finally {
+            currentWatchThread.set(null);
         }
+    }
+
+    private ConfigurationResource loadConfigFile() throws IOException {
+        final ConfigurationResource config;
+        if (Files.exists(configFile)) {
+            try (Reader reader = Files.newBufferedReader(configFile)) {
+                ConfigurationReader configReader = Configurations.buildReader()
+                        .withConfiguratorPropertyHandler((a, b, c) -> {
+                        }).build(reader);
+
+                config = configReader.readConfigurationResource();
+
+                for (String warning : configReader.getIgnoredErrors()) {
+                    LOGGER.warn("Configuration file parsing warning. Error was\n{}", warning);
+                }
+            }
+        } else {
+            config = new ConfigurationResource();
+        }
+
+        return config;
     }
 
     private void reloadConfigFile() {
         try {
-            ConfigurationResource config;
-            if (Files.exists(configFile)) {
-                try (Reader reader = Files.newBufferedReader(configFile)) {
-                    ConfigurationReader configReader = Configurations.buildReader()
-                            .withConfiguratorPropertyHandler((a, b, c) -> {
-                            }).build(reader);
-
-                    config = configReader.readConfigurationResource();
-
-                    for (String warning : configReader.getIgnoredErrors()) {
-                        LOGGER.warn("Configuration file parsing warning. Error was\n{}", warning);
-                    }
-                }
-            } else {
-                config = new ConfigurationResource();
-            }
+            ConfigurationResource config = loadConfigFile();
 
             Map<String, Configuration> existingConfigs = Optional
                     .ofNullable(configAdmin.listConfigurations("(.sensinact.config=true)")).map(Arrays::stream)
@@ -196,4 +223,69 @@ public class ConfigurationManager {
         }
         cfg.update(value);
     }
+
+    private Hashtable<String, Object> mergeConfigs(final Map<String, Object> currentValues,
+            final Map<String, Object> defaultValues) {
+        final Hashtable<String, Object> newValues = new Hashtable<>(defaultValues);
+        newValues.putAll(currentValues);
+        return newValues;
+    }
+
+    public void updateConfigurations(final Map<String, Hashtable<String, Object>> newConfigurations,
+            Collection<String> removedConfigurations) throws IOException {
+
+        // Load current status
+        final ConfigurationResource configResource = loadConfigFile();
+        final Map<String, Hashtable<String, Object>> allConfigurations = configResource.getConfigurations();
+
+        // Ensure that the configuration resource has the mandatory properties
+        final Map<String, Object> configProperties = configResource.getProperties();
+        if(configProperties.isEmpty()) {
+            // Generate the mandatory properties
+            configResource.getProperties().put(":configurator:resource-version", 1);
+            // TODO: use the bundle context to get those?
+            configResource.getProperties().put(":configurator:symbolic-name", "org.eclipse.sensinact.gateway.launcher");
+            configResource.getProperties().put(":configurator:version", "0.0.1");
+        }
+
+        // Remove configuration
+        if (removedConfigurations != null) {
+            removedConfigurations.stream().forEach(allConfigurations::remove);
+        }
+
+        // Merge new configurations with the current values
+        if (newConfigurations != null) {
+            final Map<String, Hashtable<String, Object>> mergedConfigs = new Hashtable<>(newConfigurations.size());
+            for (final Entry<String, Hashtable<String, Object>> entry : newConfigurations.entrySet()) {
+                final String pid = entry.getKey();
+                final Hashtable<String, Object> newConfig = entry.getValue();
+                final Hashtable<String, Object> rcConfigProps = allConfigurations.get(pid);
+                if (rcConfigProps == null) {
+                    mergedConfigs.put(pid, newConfig);
+                } else {
+                    LOGGER.debug("Reusing configuration properties for PID %s", pid);
+                    mergedConfigs.put(pid, mergeConfigs(rcConfigProps, newConfig));
+                }
+            }
+
+            // Update configuration resource content
+            allConfigurations.putAll(mergedConfigs);
+        }
+
+        // Write down the new configuration
+        try (Writer writer = Files.newBufferedWriter(configFile)) {
+            configResource.getProperties().put(":configurator:resource-version", 1);
+            // configResource.getProperties().put(":configurator:symbolic-name", "org.eclipse.sensinact.gateway.feature.config.test");
+            // configResource.getProperties().put(":configurator:version", "0.0.1");
+            Configurations.buildWriter().build(writer).writeConfigurationResource(configResource);
+        }
+
+        // Force reload (in right thread)
+        final Thread watchThread = currentWatchThread.get();
+        if (watchThread != null) {
+            expectedInterruption = true;
+            watchThread.interrupt();
+        }
+    }
+
 }
