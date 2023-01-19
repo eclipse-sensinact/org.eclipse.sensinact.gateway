@@ -29,5 +29,6 @@
     <module>http</module>
     <module>mqtt</module>
     <module>virtual</module>
+    <module>history</module>
   </modules>
 </project>
