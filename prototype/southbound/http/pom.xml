@@ -26,5 +26,6 @@
 
   <modules>
     <module>http-device-factory</module>
+    <module>http-callback-whiteboard</module>
   </modules>
 </project>
