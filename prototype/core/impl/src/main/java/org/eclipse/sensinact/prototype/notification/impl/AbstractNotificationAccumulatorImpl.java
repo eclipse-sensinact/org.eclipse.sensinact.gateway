@@ -40,9 +40,10 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         }
     }
 
-    protected LifecycleNotification createLifecycleNotification(Status status, String provider, String service,
-            String resource, Object initialValue, Map<String, Object> initialMetadata) {
+    protected LifecycleNotification createLifecycleNotification(Status status, String model, String provider,
+            String service, String resource, Object initialValue, Map<String, Object> initialMetadata) {
         LifecycleNotification ln = new LifecycleNotification();
+        ln.model = model;
         ln.provider = provider;
         ln.service = service;
         ln.resource = resource;
@@ -52,9 +53,11 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         return ln;
     }
 
-    protected ResourceMetaDataNotification createResourceMetaDataNotification(String provider, String service,
-            String resource, Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
+    protected ResourceMetaDataNotification createResourceMetaDataNotification(String model, String provider,
+            String service, String resource, Map<String, Object> oldValues, Map<String, Object> newValues,
+            Instant timestamp) {
         ResourceMetaDataNotification rn = new ResourceMetaDataNotification();
+        rn.model = model;
         rn.provider = provider;
         rn.service = service;
         rn.resource = resource;
@@ -64,21 +67,24 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         return rn;
     }
 
-    protected ResourceDataNotification createResourceDataNotification(String provider, String service, String resource,
-            Object oldValue, Object newValue, Instant timestamp) {
+    protected ResourceDataNotification createResourceDataNotification(String model, String provider, String service,
+            String resource, Class<?> type, Object oldValue, Object newValue, Instant timestamp) {
         ResourceDataNotification rn = new ResourceDataNotification();
+        rn.model = model;
         rn.provider = provider;
         rn.service = service;
         rn.resource = resource;
+        rn.type = type;
         rn.oldValue = oldValue;
         rn.newValue = newValue;
         rn.timestamp = timestamp;
         return rn;
     }
 
-    protected ResourceActionNotification createResourceActionNotification(String provider, String service,
+    protected ResourceActionNotification createResourceActionNotification(String model, String provider, String service,
             String resource, Instant timestamp) {
         ResourceActionNotification rn = new ResourceActionNotification();
+        rn.model = model;
         rn.provider = provider;
         rn.service = service;
         rn.resource = resource;

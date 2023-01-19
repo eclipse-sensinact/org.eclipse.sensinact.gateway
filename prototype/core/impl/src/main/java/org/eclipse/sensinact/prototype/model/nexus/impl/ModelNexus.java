@@ -287,7 +287,7 @@ public class ModelNexus {
         if (service == null) {
             service = (Service) EcoreUtil.create((EClass) serviceFeature.getEType());
             provider.eSet(serviceFeature, service);
-            accumulator.addService(providerName, serviceFeature.getName());
+            accumulator.addService(modelName, providerName, serviceFeature.getName());
         }
 
         EStructuralFeature resourceFeature = transaction.getFeaturePath().get(1);
@@ -303,15 +303,16 @@ public class ModelNexus {
             oldMetaData.put("value", oldValue);
         }
         if (oldValue == null) {
-            accumulator.addResource(providerName, serviceFeature.getName(), resourceFeature.getName());
+            accumulator.addResource(modelName, providerName, serviceFeature.getName(), resourceFeature.getName());
         }
 
         // Allow an update if the resource didn't exist or if the update timestamp is
         // equal to or after the one of the current value
         if (metadata == null || !metadata.getTimestamp().isAfter(timestamp)) {
             service.eSet(resourceFeature, data);
-            accumulator.resourceValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldValue,
-                    data, timestamp);
+            accumulator.resourceValueUpdate(modelName, providerName, serviceFeature.getName(),
+                    resourceFeature.getName(), resourceFeature.getEType().getInstanceClass(), oldValue, data,
+                    timestamp);
         } else {
             return;
         }
@@ -327,8 +328,8 @@ public class ModelNexus {
         Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata);
         newMetaData.put("value", data);
 
-        accumulator.metadataValueUpdate(providerName, serviceFeature.getName(), resourceFeature.getName(), oldMetaData,
-                newMetaData, timestamp);
+        accumulator.metadataValueUpdate(modelName, providerName, serviceFeature.getName(), resourceFeature.getName(),
+                oldMetaData, newMetaData, timestamp);
     }
 
     /**
@@ -374,7 +375,7 @@ public class ModelNexus {
                     .setTimestamp(timestamp);
 
             wrapper.getInstances().put(createURI(modelName, providerName), provider);
-            accumulator.addProvider(providerName);
+            accumulator.addProvider(modelName, providerName);
         }
 
         return provider;

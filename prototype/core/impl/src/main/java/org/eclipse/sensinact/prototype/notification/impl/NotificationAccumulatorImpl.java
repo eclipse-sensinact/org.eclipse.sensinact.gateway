@@ -65,13 +65,14 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * <li>DELETED: then an added event is added next</li>
      * </ul>
      *
-     * @param name the provider name
+     * @param model the provider model
+     * @param name  the provider name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void addProvider(String name) {
-        doLifecycleMerge(PROVIDER_CREATED, name, null, null, null, null, false);
+    public void addProvider(String model, String name) {
+        doLifecycleMerge(PROVIDER_CREATED, model, name, null, null, null, null, false);
     }
 
     /**
@@ -81,13 +82,14 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * <li>DELETED: then the events are collapsed</li>
      * </ul>
      *
-     * @param name the provider name
+     * @param model the provider model
+     * @param name  the provider name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void removeProvider(String name) {
-        doLifecycleMerge(PROVIDER_DELETED, name, null, null, null, null, true);
+    public void removeProvider(String model, String name) {
+        doLifecycleMerge(PROVIDER_DELETED, model, name, null, null, null, null, true);
     }
 
     /**
@@ -97,14 +99,15 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * <li>DELETED: then an added event is added next</li>
      * </ul>
      *
+     * @param model    the provider model
      * @param provider the provider name
      * @param name     the service name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void addService(String provider, String name) {
-        doLifecycleMerge(SERVICE_CREATED, provider, name, null, null, null, false);
+    public void addService(String model, String provider, String name) {
+        doLifecycleMerge(SERVICE_CREATED, model, provider, name, null, null, null, false);
     }
 
     /**
@@ -114,14 +117,15 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * <li>DELETED: then the events are collapsed</li>
      * </ul>
      *
+     * @param model    the provider model
      * @param provider the provider name
      * @param name     the service name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void removeService(String provider, String name) {
-        doLifecycleMerge(SERVICE_DELETED, provider, name, null, null, null, true);
+    public void removeService(String model, String provider, String name) {
+        doLifecycleMerge(SERVICE_DELETED, model, provider, name, null, null, null, true);
     }
 
     /**
@@ -131,6 +135,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * <li>DELETED: then an added event is added next</li>
      * </ul>
      *
+     * @param model    the provider model
      * @param provider the provider name
      * @param service  the service name
      * @param name     the resource name
@@ -138,8 +143,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void addResource(String provider, String service, String name) {
-        doLifecycleMerge(RESOURCE_CREATED, provider, service, name, null, null, false);
+    public void addResource(String model, String provider, String service, String name) {
+        doLifecycleMerge(RESOURCE_CREATED, model, provider, service, name, null, null, false);
     }
 
     /**
@@ -149,6 +154,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * <li>DELETED: then the events are collapsed</li>
      * </ul>
      *
+     * @param model    the provider model
      * @param provider the provider name
      * @param service  the service name
      * @param name     the resource name
@@ -156,16 +162,16 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void removeResource(String provider, String service, String name) {
-        doLifecycleMerge(RESOURCE_DELETED, provider, service, name, null, null, true);
+    public void removeResource(String model, String provider, String service, String name) {
+        doLifecycleMerge(RESOURCE_DELETED, model, provider, service, name, null, null, true);
     }
 
-    private void doLifecycleMerge(Status status, String provider, String service, String resource, Object initialValue,
-            Map<String, Object> initialMetadata, boolean isDelete) {
+    private void doLifecycleMerge(Status status, String model, String provider, String service, String resource,
+            Object initialValue, Map<String, Object> initialMetadata, boolean isDelete) {
         check();
         notifications.compute(new NotificationKey(provider, service, resource, LifecycleNotification.class), (a, b) -> {
-            LifecycleNotification ln = createLifecycleNotification(status, provider, service, resource, initialValue,
-                    initialMetadata);
+            LifecycleNotification ln = createLifecycleNotification(status, model, provider, service, resource,
+                    initialValue, initialMetadata);
             if (b != null) {
                 // Check the status of the last entry
                 Status s = ((LifecycleNotification) b.get(b.size() - 1)).status;
@@ -188,6 +194,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * Called to update metadata - provides the complete snapshot of metadata before
      * and after
      *
+     * @param model     the provider model
      * @param provider  the provider name
      * @param service   the service name
      * @param resource  the resource name
@@ -201,8 +208,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                                  {@link #completeAndSend()}
      */
     @Override
-    public void metadataValueUpdate(String provider, String service, String resource, Map<String, Object> oldValues,
-            Map<String, Object> newValues, Instant timestamp) {
+    public void metadataValueUpdate(String model, String provider, String service, String resource,
+            Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
         check();
 
         final Map<String, Object> nonNullOldValues = oldValues == null ? emptyMap() : oldValues;
@@ -228,8 +235,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                         newValuesToUse = nonNullNewValues;
                         timestampToUse = timestamp;
                     }
-                    return List.of(createResourceMetaDataNotification(provider, service, resource, oldValuesToUse,
-                            newValuesToUse, timestampToUse));
+                    return List.of(createResourceMetaDataNotification(model, provider, service, resource,
+                            oldValuesToUse, newValuesToUse, timestampToUse));
                 });
     }
 
@@ -237,9 +244,11 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * Called to update a resource value. If multiple updates occur they will be
      * collapsed into single events
      *
+     * @param model     the provider model
      * @param provider  the provider name
      * @param service   the service name
      * @param resource  the resource name
+     * @param type      the resource type
      * @param oldValue  the value before the update
      * @param newValue  the value after the update
      * @param timestamp the latest timestamp of the value after the update
@@ -250,8 +259,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                                  {@link #completeAndSend()}
      */
     @Override
-    public void resourceValueUpdate(String provider, String service, String resource, Object oldValue, Object newValue,
-            Instant timestamp) {
+    public void resourceValueUpdate(String model, String provider, String service, String resource, Class<?> type,
+            Object oldValue, Object newValue, Instant timestamp) {
         check();
         Objects.requireNonNull(timestamp);
         notifications.compute(new NotificationKey(provider, service, resource, ResourceDataNotification.class),
@@ -266,8 +275,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     } else {
                         oldValueToUse = oldValue;
                     }
-                    return List.of(createResourceDataNotification(provider, service, resource, oldValueToUse, newValue,
-                            timestamp));
+                    return List.of(createResourceDataNotification(model, provider, service, resource, type,
+                            oldValueToUse, newValue, timestamp));
                 });
     }
 
@@ -275,6 +284,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      * Called to notify of a resource action - if multiple actions occur they will
      * be sorted into timestamp order
      *
+     * @param model     the provider model
      * @param provider  the provider name
      * @param service   the service name
      * @param resource  the resource name
@@ -286,13 +296,13 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void resourceAction(String provider, String service, String resource, Instant timestamp) {
+    public void resourceAction(String model, String provider, String service, String resource, Instant timestamp) {
         check();
         Objects.requireNonNull(timestamp);
         notifications.compute(new NotificationKey(provider, service, resource, ResourceActionNotification.class),
                 (a, b) -> {
-                    ResourceActionNotification ran = createResourceActionNotification(provider, service, resource,
-                            timestamp);
+                    ResourceActionNotification ran = createResourceActionNotification(model, provider, service,
+                            resource, timestamp);
                     if (b != null) {
                         return Stream.concat(b.stream(), Stream.of(ran)).map(ResourceActionNotification.class::cast)
                                 .sorted((i, j) -> i.timestamp.compareTo(j.timestamp)).collect(Collectors.toList());
