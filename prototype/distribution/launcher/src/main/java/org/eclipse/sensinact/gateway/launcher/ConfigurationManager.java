@@ -131,8 +131,6 @@ public class ConfigurationManager {
             } catch (InterruptedException e) {
                 if (expectedInterruption.getAndSet(false)) {
                     LOGGER.debug("Forced configuration reload");
-                    // Clear the interruption flag as it was an internal signal
-                    Thread.interrupted();
                     executor.submit(this::reloadConfigFile);
                     executor.submit(this::watch);
                 } else {
