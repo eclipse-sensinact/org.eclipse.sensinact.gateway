@@ -286,10 +286,6 @@ public class ConfigurationManager {
 
         // Write down the new configuration
         try (Writer writer = Files.newBufferedWriter(configFile)) {
-            configResource.getProperties().put(":configurator:resource-version", 1);
-            // configResource.getProperties().put(":configurator:symbolic-name",
-            // "org.eclipse.sensinact.gateway.feature.config.test");
-            // configResource.getProperties().put(":configurator:version", "0.0.1");
             Configurations.buildWriter().build(writer).writeConfigurationResource(configResource);
         }
 
