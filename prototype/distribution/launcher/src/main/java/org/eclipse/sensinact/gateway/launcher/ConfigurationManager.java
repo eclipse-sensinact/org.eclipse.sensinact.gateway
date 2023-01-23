@@ -30,17 +30,22 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.apache.felix.cm.json.ConfigurationReader;
 import org.apache.felix.cm.json.ConfigurationResource;
@@ -68,7 +73,7 @@ public class ConfigurationManager {
 
     Path configFile;
 
-    private boolean expectedInterruption = false;
+    private AtomicBoolean expectedInterruption = new AtomicBoolean();
     private AtomicReference<Thread> currentWatchThread = new AtomicReference<>();
 
     @Activate
@@ -124,8 +129,9 @@ public class ConfigurationManager {
                 LOGGER.error("No longer able to monitor the configuration file {}", configFile, e);
                 return;
             } catch (InterruptedException e) {
-                if (expectedInterruption) {
+                if (expectedInterruption.getAndSet(false)) {
                     LOGGER.debug("Forced configuration reload");
+                    // Clear the interruption flag as it was an internal signal
                     Thread.interrupted();
                     executor.submit(this::reloadConfigFile);
                     executor.submit(this::watch);
@@ -237,10 +243,12 @@ public class ConfigurationManager {
         // Load current status
         final ConfigurationResource configResource = loadConfigFile();
         final Map<String, Hashtable<String, Object>> allConfigurations = configResource.getConfigurations();
+        // allConfiguration should a LinkedHashMap in Apache Felix implementation
+        final List<String> orderedConfigKeys = new ArrayList<>(allConfigurations.keySet());
 
         // Ensure that the configuration resource has the mandatory properties
         final Map<String, Object> configProperties = configResource.getProperties();
-        if(configProperties.isEmpty()) {
+        if (configProperties.isEmpty()) {
             // Generate the mandatory properties
             configResource.getProperties().put(":configurator:resource-version", 1);
             // TODO: use the bundle context to get those?
@@ -251,14 +259,18 @@ public class ConfigurationManager {
         // Remove configuration
         if (removedConfigurations != null) {
             removedConfigurations.stream().forEach(allConfigurations::remove);
+            removedConfigurations.stream().filter(Predicate.not(newConfigurations::containsKey))
+                    .forEach(orderedConfigKeys::remove);
         }
 
         // Merge new configurations with the current values
         if (newConfigurations != null) {
-            final Map<String, Hashtable<String, Object>> mergedConfigs = new Hashtable<>(newConfigurations.size());
-            for (final Entry<String, Hashtable<String, Object>> entry : newConfigurations.entrySet()) {
-                final String pid = entry.getKey();
-                final Hashtable<String, Object> newConfig = entry.getValue();
+            newConfigurations.keySet().stream().filter(Predicate.not(orderedConfigKeys::contains))
+                    .forEachOrdered(orderedConfigKeys::add);
+
+            final Map<String, Hashtable<String, Object>> mergedConfigs = new LinkedHashMap<>(newConfigurations.size());
+            for (final String pid : orderedConfigKeys) {
+                final Hashtable<String, Object> newConfig = newConfigurations.get(pid);
                 final Hashtable<String, Object> rcConfigProps = allConfigurations.get(pid);
                 if (rcConfigProps == null) {
                     mergedConfigs.put(pid, newConfig);
@@ -275,7 +287,8 @@ public class ConfigurationManager {
         // Write down the new configuration
         try (Writer writer = Files.newBufferedWriter(configFile)) {
             configResource.getProperties().put(":configurator:resource-version", 1);
-            // configResource.getProperties().put(":configurator:symbolic-name", "org.eclipse.sensinact.gateway.feature.config.test");
+            // configResource.getProperties().put(":configurator:symbolic-name",
+            // "org.eclipse.sensinact.gateway.feature.config.test");
             // configResource.getProperties().put(":configurator:version", "0.0.1");
             Configurations.buildWriter().build(writer).writeConfigurationResource(configResource);
         }
@@ -283,7 +296,7 @@ public class ConfigurationManager {
         // Force reload (in right thread)
         final Thread watchThread = currentWatchThread.get();
         if (watchThread != null) {
-            expectedInterruption = true;
+            expectedInterruption.set(true);
             watchThread.interrupt();
         }
     }
