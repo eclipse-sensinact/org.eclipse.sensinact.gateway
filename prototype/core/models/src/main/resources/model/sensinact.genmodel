@@ -8,6 +8,8 @@
   <foreignModel>sensinact.ecore</foreignModel>
   <genPackages prefix="SensiNact" basePackage="org.eclipse.sensinact.model" resource="XMI"
       disposableProviderFactory="true" literalsInterface="false" ecorePackage="sensinact.ecore#/">
+    <genDataTypes ecoreDataType="sensinact.ecore#//EGeoJsonObject" create="try { return new com.fasterxml.jackson.databind.ObjectMapper().readValue(it, GeoJsonObject.class); } catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalArgumentException(e); }"
+        convert="try { return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(it); } catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalArgumentException(e); }"/>
     <genDataTypes ecoreDataType="sensinact.ecore#//EInstant" create="return Instant.parse(it);"
         convert="return it.toString();"/>
     <genClasses ecoreClass="sensinact.ecore#//Provider">
