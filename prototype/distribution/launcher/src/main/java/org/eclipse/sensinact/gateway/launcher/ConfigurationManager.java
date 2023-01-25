@@ -289,8 +289,7 @@ public class ConfigurationManager {
 
         // Force reload (in right thread)
         final Thread watchThread = currentWatchThread.get();
-        if (watchThread != null) {
-            expectedInterruption.set(true);
+        if (watchThread != null && expectedInterruption.compareAndSet(false, true)) {
             watchThread.interrupt();
         }
     }
