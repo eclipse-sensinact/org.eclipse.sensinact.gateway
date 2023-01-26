@@ -39,8 +39,6 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class TemperatureSensorTest {
 
@@ -80,8 +78,8 @@ public class TemperatureSensorTest {
         assertEquals("admin", notification.service);
         assertEquals("location", notification.resource);
         assertNull(notification.oldValue);
-        assertInstanceOf(String.class, notification.newValue);
-        Point p = new ObjectMapper().readValue((String) notification.newValue, Point.class);
+        assertInstanceOf(Point.class, notification.newValue);
+        Point p = (Point) notification.newValue;
         assertEquals(1.0d, p.coordinates.latitude);
         assertEquals(2.0d, p.coordinates.longitude);
 
