@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
 import org.eclipse.sensinact.northbound.rest.dto.AccessMethodCallParameterDTO;
 import org.eclipse.sensinact.northbound.rest.dto.AccessMethodDTO;
@@ -130,7 +131,8 @@ public class RestNorthbound implements IRestNorthbound {
                 providerDto.name = provider;
                 providerDto.services = new ArrayList<>(providerDescription.services.size());
 
-                final String location = userSession.getResourceValue(provider, "admin", "location", String.class);
+                final GeoJsonObject location = userSession.getResourceValue(provider, "admin", "location",
+                        GeoJsonObject.class);
                 if (location != null) {
                     providerDto.location = location;
                 }
