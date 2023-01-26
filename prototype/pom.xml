@@ -96,6 +96,7 @@
   <modules>
     <module>core</module>
     <module>northbound</module>
+    <module>southbound</module>
     <module>examples</module>
     <module>sensinact-bom</module>
     <module>distribution</module>
@@ -298,6 +299,11 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>

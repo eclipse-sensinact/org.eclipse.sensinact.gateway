@@ -12,9 +12,10 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="linkedProviders" upperBound="-1"
         eType="#//Provider"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EDataType" name="EGeoJsonObject" instanceClassName="org.eclipse.sensinact.gateway.geojson.GeoJsonObject"/>
   <eClassifiers xsi:type="ecore:EClass" name="Admin" eSuperTypes="#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="friendlyName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="#//EGeoJsonObject"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Service">
     <eStructuralFeatures xsi:type="ecore:EReference" name="metadata" upperBound="-1"

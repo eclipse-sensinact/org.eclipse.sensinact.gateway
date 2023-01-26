@@ -27,17 +27,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -51,6 +56,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.feature.Feature;
 import org.osgi.service.feature.FeatureArtifact;
 import org.osgi.service.feature.FeatureBundle;
+import org.osgi.service.feature.FeatureConfiguration;
 import org.osgi.service.feature.FeatureExtension;
 import org.osgi.service.feature.FeatureService;
 import org.osgi.service.feature.ID;
@@ -72,8 +78,13 @@ public class FeatureLauncher {
 
     private static final String SENSINACT_FEATURE_DEPENDENCY = "sensinact.feature.depends";
 
+    private final Pattern variablePattern = Pattern.compile("\\$\\{([^\\{\\}\\$]+)\\}");
+
     @Reference
     FeatureService featureService;
+
+    @Reference
+    ConfigurationManager configManager;
 
     private BundleContext context;
 
@@ -88,6 +99,11 @@ public class FeatureLauncher {
      * The lists of artifacts for each feature installed
      */
     private final Map<String, List<String>> featuresToBundles = new HashMap<>();
+
+    /**
+     * The list of configurations for each feature installed
+     */
+    private final Map<String, Collection<String>> featuresConfigurations = new HashMap<>();
 
     /**
      * The list of installed features in installation order
@@ -127,8 +143,13 @@ public class FeatureLauncher {
 
         // First remove all removes
         removeFeatures(removed);
+        try {
+            removeFeaturesConfigurations(removed);
+        } catch (IOException e) {
+            LOGGER.error("Error removing configurations of features: {}", removed, e);
+        }
 
-        // Second do all add/updates
+        // Finally do all add/updates
         List<String> installProgress = new ArrayList<>(newFeatures.size());
         for (String newFeature : newFeatures) {
             addOrUpdate(newFeature, installProgress);
@@ -156,6 +177,7 @@ public class FeatureLauncher {
     private void removeFeatures(List<String> removed) {
 
         // Get all the bundles to remove in "install order", clearing the features map
+        // Also get all associated configurations
         Set<String> bundles = new LinkedHashSet<>();
         for (String feature : removed) {
             bundles.addAll(featuresToBundles.remove(feature));
@@ -204,6 +226,23 @@ public class FeatureLauncher {
 
         validateFeatureModel(feature, featureModel, installProgress);
 
+        // Update configuration
+        final Map<String, Hashtable<String, Object>> featureConfs = loadFeatureConfigurations(featureModel);
+        Collection<String> removedConfs = featuresConfigurations.remove(feature);
+        if(removedConfs != null) {
+            removedConfs = removedConfs.stream().filter(pid -> !featureConfs.containsKey(pid))
+                    .collect(Collectors.toList());
+        }
+        featuresConfigurations.put(feature, featureConfs.keySet());
+
+        if (!featureConfs.isEmpty() || (removedConfs != null && !removedConfs.isEmpty())) {
+            try {
+                configManager.updateConfigurations(featureConfs, removedConfs);
+            } catch (IOException e) {
+                LOGGER.error("Error updating configuration for feature {}", feature, e);
+            }
+        }
+
         List<String> bundles = featureModel.getBundles().stream().map(fb -> fb.getID().toString()).collect(toList());
         if (featuresToBundles.containsKey(feature)) {
             LOGGER.debug("Updating feature {}", feature);
@@ -239,7 +278,6 @@ public class FeatureLauncher {
                 LOGGER.warn("An error occurred starting a bundle in feature {}", feature, e);
             }
         }
-
     }
 
     private Feature loadFeature(String feature) {
@@ -276,7 +314,7 @@ public class FeatureLauncher {
         if (featureModel == null) {
             LOGGER.error("Unable to locate a valid feature " + feature);
             throw new ConfigurationException("features",
-                    "The feature " + feature + "cannot be deployed as it cannot be found.");
+                    "The feature " + feature + " cannot be deployed as it cannot be found.");
         } else {
             // Check feature dependencies
             FeatureExtension dependencies = featureModel.getExtensions().getOrDefault(SENSINACT_FEATURE_DEPENDENCY,
@@ -385,4 +423,49 @@ public class FeatureLauncher {
         return file;
     }
 
+    private void removeFeaturesConfigurations(final Collection<String> removedFeatures) throws IOException {
+        final Set<String> removedPids = removedFeatures.stream().map(featuresConfigurations::remove)
+                .filter(Objects::nonNull).flatMap(pids -> pids.stream()).collect(Collectors.toSet());
+        if (!removedPids.isEmpty()) {
+            configManager.updateConfigurations(null, removedPids);
+        }
+    }
+
+    private Map<String, Hashtable<String, Object>> loadFeatureConfigurations(final Feature feature) {
+        final Map<String, Object> variables = feature.getVariables();
+
+        final Map<String, Hashtable<String, Object>> result = new HashMap<>();
+        for (final Entry<String, FeatureConfiguration> entry : feature.getConfigurations().entrySet()) {
+            final Hashtable<String, Object> values = new Hashtable<>(entry.getValue().getValues());
+            fillInVariables(values, variables);
+            result.put(entry.getKey(), values);
+        }
+        return result;
+    }
+
+    void fillInVariables(final Map<String, Object> config, final Map<String, Object> vars) {
+        for (Entry<String, Object> entry : config.entrySet()) {
+            final Object rawValue = entry.getValue();
+            if (rawValue instanceof String) {
+                entry.setValue(fillInVariables((String) rawValue, vars));
+            }
+        }
+    }
+
+    private Object fillInVariables(final String value, final Map<String, Object> vars) {
+        final Matcher matcher = variablePattern.matcher(value);
+
+        String newValue = value;
+        while (matcher.find()) {
+            if(matcher.start() == 0 && matcher.end() == value.length()) {
+                // Replace the whole entry
+                return vars.getOrDefault(matcher.group(1), matcher.group());
+            } else {
+                newValue = newValue.replace(matcher.group(),
+                        String.valueOf(vars.getOrDefault(matcher.group(1), matcher.group())));
+            }
+        }
+
+        return newValue;
+    }
 }

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 *
 * Contributors:
 *   Data In Motion - initial API and implementation
+*   Kentyou - fixes and updates to include a basic sensiNact provider
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl.emf;
 
@@ -23,6 +24,7 @@ import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EModelElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -34,6 +36,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.ModelMetadata;
+import org.eclipse.sensinact.model.core.SensiNactPackage;
 
 /**
  * Some Helper methods to work with Ecores.
@@ -46,6 +49,10 @@ public class EMFUtil {
     private static final Map<Class<?>, EClassifier> typeMap = new HashMap<Class<?>, EClassifier>();
     static {
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
+        EDataType eInstant = SensiNactPackage.eINSTANCE.getEInstant();
+        typeMap.put(eInstant.getInstanceClass(), eInstant);
+        EDataType eGeoJsonObject = SensiNactPackage.eINSTANCE.getEGeoJsonObject();
+        typeMap.put(eGeoJsonObject.getInstanceClass(), eGeoJsonObject);
     }
 
     public static Map<String, Object> toEObjectAttributesToMap(EObject eObject) {
@@ -170,5 +177,17 @@ public class EMFUtil {
         return getVersion((EClass) feature.eContainer());
     }
 
-}
+    public static Object convertToTargetType(EClassifier targetType, Object o) {
 
+        if (o == null) {
+            return targetType.getInstanceClass().isPrimitive() ? targetType.getDefaultValue() : o;
+        } else {
+            EClassifier type = typeMap.get(o.getClass());
+            if (type == null) {
+                throw new IllegalArgumentException("Unknown data type " + o.getClass());
+            }
+            String string = type.getEPackage().getEFactoryInstance().convertToString((EDataType) type, o);
+            return targetType.getEPackage().getEFactoryInstance().createFromString((EDataType) targetType, string);
+        }
+    }
+}

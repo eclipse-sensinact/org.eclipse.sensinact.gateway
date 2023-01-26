@@ -61,6 +61,7 @@
 	org.eclipse.parsson.jakarta.json;version='[1.1.1,1.1.2)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.rest;version='[0.0.1,0.0.2)',\

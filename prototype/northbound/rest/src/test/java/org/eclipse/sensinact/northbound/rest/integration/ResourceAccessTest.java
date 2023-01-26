@@ -23,6 +23,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.rest.dto.AccessMethodCallParameterDTO;
 import org.eclipse.sensinact.northbound.rest.dto.GetResponse;
 import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
@@ -210,7 +211,7 @@ public class ResourceAccessTest {
                 ResultTypedResponseDTO.class);
         utils.assertResultSuccess(result, "GET_RESPONSE", PROVIDER, "admin", "location");
         response = utils.convert(result, GetResponse.class);
-        assertEquals(String.class.getName(), response.type);
+        assertEquals(GeoJsonObject.class.getName(), response.type);
         assertNull(response.value);
     }
 }

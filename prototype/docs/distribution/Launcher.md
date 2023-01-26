@@ -96,9 +96,43 @@ When dependencies are expressed in this way then all dependencies must be instal
 
 ### Configuration in features
 
-The Feature Service provides features with a way to include configuration inside the feature.
+The Feature Service provides features with a way to include configuration inside the feature, as defined in [Feature Service Specification](https://docs.osgi.org/specification/osgi.cmpn/8.1.0/service.feature.html).
+Configuration variables are also supported, but only with those declared in the feature description.
+It is possible to define a configuration-only feature, in which case the `bundles` can be omitted from the file.
 
-Currently this configuration is ignored by the feature manager.
+Here is an example of configuration in a feature:
+
+```js
+  {
+    "feature-resource-version": "1.0",
+    "id": "org.example:feature_id:1.0.0",
+    "configurations": {
+      "pid1": {
+        "text": "Some string value",
+        "value": 42
+      },
+      "sensinact.http.device.factory~1": {
+        "tasks.oneshot": [
+          {
+            "url": "http://example.org:${http.port}/data.json",
+            "mapping": {
+              "parser": "json",
+              "mapping": {
+                "@provider": "Name",
+                "@latitude": "Latitude",
+                "@longitude": "Longitude",
+                "data/value": "Value"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "variables": {
+      "http.port": 8080
+    }
+  }
+```
 
 ### Adding your own features
 

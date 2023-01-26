@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
@@ -26,6 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.junit5.service.ServiceExtension;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests the behavior around the admin service
@@ -63,14 +67,16 @@ public class AdminServiceTest {
         // Create resource & provider
         session.setResourceValue(PROVIDER, SERVICE, RESOURCE, 42, timestamp);
 
-        // Admin resources must have the same timestamp
+        // Admin resources must have a timestamp
+        // friendlyName has a set value, so it's timestamp is set
         ResourceDescription descr = session.describeResource(PROVIDER, "admin", "friendlyName");
         assertEquals(PROVIDER, descr.value);
         assertEquals(timestamp, descr.timestamp);
 
+        // location is not set, so it's timestamp is EPOCH
         descr = session.describeResource(PROVIDER, "admin", "location");
         assertNull(descr.value);
-        assertEquals(timestamp, descr.timestamp);
+        assertEquals(Instant.EPOCH, descr.timestamp);
 
         // Ensure we reject setting a value with an earlier timestamp
         session.setResourceValue(PROVIDER, "admin", "friendlyName", "foo", timestamp.minusSeconds(1));
@@ -78,7 +84,15 @@ public class AdminServiceTest {
         assertEquals(PROVIDER, descr.value);
         assertEquals(timestamp, descr.timestamp);
 
-        session.setResourceValue(PROVIDER, "admin", "location", "bar", timestamp.minusSeconds(1));
+        // Location can now be set to null (new timestamp)
+        session.setResourceValue(PROVIDER, "admin", "location", null, timestamp);
+        descr = session.describeResource(PROVIDER, "admin", "location");
+        assertNull(descr.value);
+        assertEquals(timestamp, descr.timestamp);
+
+        // Reject earlier values
+        session.setResourceValue(PROVIDER, "admin", "location",
+                "{\"type\":\"Point\",\"coordinates\":[-0.119700, 51.503300]}", timestamp.minusSeconds(1));
         descr = session.describeResource(PROVIDER, "admin", "location");
         assertNull(descr.value);
         assertEquals(timestamp, descr.timestamp);
@@ -89,9 +103,11 @@ public class AdminServiceTest {
         assertEquals("foo", descr.value);
         assertEquals(timestamp, descr.timestamp);
 
-        session.setResourceValue(PROVIDER, "admin", "location", "bar", timestamp);
+        session.setResourceValue(PROVIDER, "admin", "location",
+                "{\"type\":\"Point\",\"coordinates\":[-0.119700, 51.503300]}", timestamp);
         descr = session.describeResource(PROVIDER, "admin", "location");
-        assertEquals("bar", descr.value);
+        assertEquals(Map.of("type", "Point", "coordinates", List.of(-0.119700d, 51.503300d)),
+                new ObjectMapper().convertValue(descr.value, Map.class));
         assertEquals(timestamp, descr.timestamp);
 
         // Set the value with a future timestamp
@@ -100,10 +116,11 @@ public class AdminServiceTest {
         descr = session.describeResource(PROVIDER, "admin", "friendlyName");
         assertEquals("eclipse", descr.value);
         assertEquals(future, descr.timestamp);
-
-        session.setResourceValue(PROVIDER, "admin", "location", "sensiNact", future);
+        session.setResourceValue(PROVIDER, "admin", "location",
+                "{\"type\":\"Point\",\"coordinates\":[2.295049, 48.873785]}", future);
         descr = session.describeResource(PROVIDER, "admin", "location");
-        assertEquals("sensiNact", descr.value);
+        assertEquals(Map.of("type", "Point", "coordinates", List.of(2.295049d, 48.873785d)),
+                new ObjectMapper().convertValue(descr.value, Map.class));
         assertEquals(future, descr.timestamp);
     }
 }

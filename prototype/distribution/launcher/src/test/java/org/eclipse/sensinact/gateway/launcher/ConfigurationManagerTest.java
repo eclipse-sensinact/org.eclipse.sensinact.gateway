@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.launcher;
 
 import static java.util.Map.of;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -26,6 +27,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
@@ -174,6 +176,53 @@ class ConfigurationManagerTest {
                     .updateIfDifferent(argThat(isConfig(of("buzz", "fizz", "foobar", 48L, ".sensinact.config", true))));
         }
 
+    }
+
+    @Nested
+    class ConfigFileUpdate {
+
+        Path tmpFolder;
+        Path configFile;
+
+        @BeforeEach
+        void setup() throws Exception {
+            tmpFolder = Files.createTempDirectory("sensinact-config-test");
+            System.setProperty("sensinact.config.dir", tmpFolder.toString());
+            configFile = tmpFolder.resolve("configuration.json");
+            if (Files.exists(configFile)) {
+                Files.delete(configFile);
+            }
+
+            manager.start();
+        }
+
+        @AfterEach
+        void cleanup() throws Exception {
+            if (configFile != null && Files.exists(configFile)) {
+                Files.delete(configFile);
+            }
+
+            Files.delete(tmpFolder);
+        }
+
+        @Test
+        void testNullProtection() throws Exception {
+            manager.updateConfigurations(null, null);
+            assertTrue(activeConfigs.isEmpty());
+        }
+
+        @Test
+        void testAddition() throws Exception {
+            Map<String, Hashtable<String, Object>> addedConfs = Map.of("test1",
+                    new Hashtable<>(Map.of("txt", "A", "value", 21)), "test2",
+                    new Hashtable<>(Map.of("txt", "B", "value", 42)));
+
+            manager.updateConfigurations(addedConfs, null);
+            assertTrue(semaphore.tryAcquire(2, 1, SECONDS));
+            assertTrue(activeConfigs.containsKey("test1"));
+            assertTrue(activeConfigs.containsKey("test2"));
+            assertEquals(2, activeConfigs.size());
+        }
     }
 
     ArgumentMatcher<Dictionary<String, Object>> isConfig(Map<String, Object> config) {

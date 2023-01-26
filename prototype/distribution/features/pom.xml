@@ -31,6 +31,7 @@
     <module>jakarta-rest-whiteboard-feature</module>
     <module>northbound-rest-feature</module>
     <module>northbound-ogc-sensorthings-feature</module>
+    <module>virtual-temperature-sensor-feature</module>
   </modules>
 
   <properties>

@@ -22,14 +22,22 @@ public interface SensinactModel extends CommandScoped {
 
     List<SensinactProvider> getProviders();
 
+    SensinactProvider getProvider(String providerName);
+
     SensinactProvider getProvider(String model, String providerName);
 
     SensinactService getService(String model, String providerName, String service);
 
+    SensinactService getService(String providerName, String service);
+
     SensinactResource getResource(String model, String providerName, String service, String resource);
+
+    SensinactResource getResource(String providerName, String service, String resource);
 
     <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
             Class<T> type);
+
+    <T> TimedValue<T> getResourceValue(String providerName, String service, String resource, Class<T> type);
 
     /**
      * Sets the value of resource. Creates it if necessary
@@ -45,5 +53,8 @@ public interface SensinactModel extends CommandScoped {
      */
     void setOrCreateResource(String model, String provider, String service, String resource, Class<?> type,
             Object value, Instant instant);
+
+    void setOrCreateResource(String provider, String service, String resource, Class<?> type, Object value,
+            Instant instant);
 
 }
