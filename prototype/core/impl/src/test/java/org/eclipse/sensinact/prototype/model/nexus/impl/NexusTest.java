@@ -15,7 +15,6 @@ package org.eclipse.sensinact.prototype.model.nexus.impl;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -192,6 +191,14 @@ public class NexusTest {
             EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice");
             Service service = (Service) provider.eGet(serviceFeature);
 
+            EStructuralFeature valueFeature = service.eClass().getEStructuralFeature("testValue");
+
+            assertNotNull(valueFeature);
+            assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
+
+            Object value = service.eGet(valueFeature);
+            assertEquals("test", value);
+
             nexus.handleDataUpdate("TestModel", "testprovider", "testservice", "testValue2", String.class, "test",
                     Instant.now());
 
@@ -201,13 +208,16 @@ public class NexusTest {
             Service updateService = (Service) updatedProvider.eGet(serviceFeature);
             assertEquals(service, updateService);
 
-            EStructuralFeature valueFeature = updateService.eClass().getEStructuralFeature("testValue2");
-
-            assertNotNull(valueFeature);
-            assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
-
-            Object value = updateService.eGet(valueFeature);
+            value = updateService.eGet(valueFeature);
             assertEquals("test", value);
+
+            EStructuralFeature valueFeature2 = updateService.eClass().getEStructuralFeature("testValue2");
+
+            assertNotNull(valueFeature2);
+            assertEquals(valueFeature2.getEType(), EcorePackage.Literals.ESTRING);
+
+            Object value2 = updateService.eGet(valueFeature2);
+            assertEquals("test", value2);
         }
 
         @Test
@@ -220,14 +230,9 @@ public class NexusTest {
 
             Provider provider = nexus.getProvider("TestModel", "testprovider");
             assertNotNull(provider);
-            nexus.handleDataUpdate("TestModel", "testprovider", "testservice2", "testValue", String.class, "test2",
-                    Instant.now());
-            Provider updatedProvider = nexus.getProvider("TestModel", "testprovider");
 
-            assertEquals(provider, updatedProvider);
-
-            EStructuralFeature serviceFeature = updatedProvider.eClass().getEStructuralFeature("testservice2");
-            Service service = (Service) updatedProvider.eGet(serviceFeature);
+            EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice");
+            Service service = (Service) provider.eGet(serviceFeature);
 
             EStructuralFeature valueFeature = service.eClass().getEStructuralFeature("testValue");
 
@@ -235,7 +240,33 @@ public class NexusTest {
             assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
 
             Object value = service.eGet(valueFeature);
-            assertEquals("test2", value);
+            assertEquals("test", value);
+
+            nexus.handleDataUpdate("TestModel", "testprovider", "testservice2", "testValue", String.class, "test2",
+                    Instant.now());
+
+            Provider updatedProvider = nexus.getProvider("TestModel", "testprovider");
+            service = (Service) updatedProvider.eGet(serviceFeature);
+            assertNotNull(valueFeature);
+            assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
+
+            value = service.eGet(valueFeature);
+            assertEquals("test", value);
+
+            // now check the new feature
+
+            assertEquals(provider, updatedProvider);
+
+            EStructuralFeature serviceFeature2 = updatedProvider.eClass().getEStructuralFeature("testservice2");
+            Service service2 = (Service) updatedProvider.eGet(serviceFeature2);
+
+            EStructuralFeature valueFeature2 = service2.eClass().getEStructuralFeature("testValue");
+
+            assertNotNull(valueFeature2);
+            assertEquals(valueFeature2.getEType(), EcorePackage.Literals.ESTRING);
+
+            Object value2 = service2.eGet(valueFeature2);
+            assertEquals("test2", value2);
         }
 
         @Test
@@ -243,6 +274,8 @@ public class NexusTest {
             ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
             for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
                 for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
+                    System.out.println("Calling update with model_" + modelIdx + ", provider_" + modelIdx + ", service_"
+                            + svcIdx + ", resource , 42...");
                     nexus.handleDataUpdate("model_" + modelIdx, "provider_" + modelIdx, "service_" + svcIdx, "resource",
                             Integer.class, 42, Instant.now());
                 }
