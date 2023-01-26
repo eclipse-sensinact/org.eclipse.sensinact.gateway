@@ -110,11 +110,10 @@ public class JSONParserTest {
         assertEquals(timestamp2, session.describeResource(provider2, "data", "value").timestamp);
 
         // Ensure location update (and its timestamp)
-        final ObjectMapper mapper = new ObjectMapper();
         ResourceDescription location1 = session.describeResource(provider1, "admin", "location");
         assertEquals(timestamp1, location1.timestamp);
         assertNotNull(location1.value);
-        Point geoPoint = mapper.readValue(String.valueOf(location1.value), Point.class);
+        Point geoPoint = (Point) location1.value;
         assertEquals(1.2, geoPoint.coordinates.latitude, 0.001);
         assertEquals(3.4, geoPoint.coordinates.longitude, 0.001);
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
@@ -122,7 +121,7 @@ public class JSONParserTest {
         ResourceDescription location2 = session.describeResource(provider2, "admin", "location");
         assertNotNull(location2.value);
         assertEquals(timestamp2, location2.timestamp);
-        geoPoint = mapper.readValue(String.valueOf(location2.value), Point.class);
+        geoPoint = (Point) location2.value;
         assertEquals(5.6, geoPoint.coordinates.latitude, 0.001);
         assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
         assertEquals(1.5, geoPoint.coordinates.elevation, 0.001);
@@ -164,11 +163,10 @@ public class JSONParserTest {
         assertEquals(timestamp2, session.describeResource(provider2, "data", "value").timestamp);
 
         // Ensure location update (and its timestamp)
-        final ObjectMapper mapper = new ObjectMapper();
         ResourceDescription location1 = session.describeResource(provider1, "admin", "location");
         assertEquals(timestamp1, location1.timestamp);
         assertNotNull(location1.value);
-        Point geoPoint = mapper.readValue(String.valueOf(location1.value), Point.class);
+        Point geoPoint = (Point) location1.value;
         assertEquals(1.2, geoPoint.coordinates.latitude, 0.001);
         assertEquals(3.4, geoPoint.coordinates.longitude, 0.001);
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
@@ -176,7 +174,7 @@ public class JSONParserTest {
         ResourceDescription location2 = session.describeResource(provider2, "admin", "location");
         assertNotNull(location2.value);
         assertEquals(timestamp2, location2.timestamp);
-        geoPoint = mapper.readValue(String.valueOf(location2.value), Point.class);
+        geoPoint = (Point) location2.value;
         assertEquals(5.6, geoPoint.coordinates.latitude, 0.001);
         assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
@@ -213,11 +211,10 @@ public class JSONParserTest {
         assertEquals(timestamp, session.describeResource(provider, "data", "value").timestamp);
 
         // Ensure location update (and its timestamp)
-        final ObjectMapper mapper = new ObjectMapper();
         ResourceDescription location = session.describeResource(provider, "admin", "location");
         assertEquals(timestamp, location.timestamp);
         assertNotNull(location.value);
-        Point geoPoint = mapper.readValue(String.valueOf(location.value), Point.class);
+        Point geoPoint = (Point) location.value;
         assertEquals(45.199, geoPoint.coordinates.latitude, 0.001);
         assertEquals(5.725, geoPoint.coordinates.longitude, 0.001);
         assertEquals(476, geoPoint.coordinates.elevation);
@@ -278,11 +275,10 @@ public class JSONParserTest {
         assertEquals(timestamp, session.describeResource(provider1, "data", type1 + "_value").timestamp);
 
         // Ensure location update (and its timestamp)
-        final ObjectMapper mapper = new ObjectMapper();
         ResourceDescription location = session.describeResource(provider1, "admin", "location");
         assertEquals(timestamp, location.timestamp);
         assertNotNull(location.value);
-        Point geoPoint = mapper.readValue(String.valueOf(location.value), Point.class);
+        Point geoPoint = (Point) location.value;
         assertEquals(48.849577, geoPoint.coordinates.latitude, 0.001);
         assertEquals(2.350867, geoPoint.coordinates.longitude, 0.001);
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
@@ -298,7 +294,7 @@ public class JSONParserTest {
         location = session.describeResource(provider2, "admin", "location");
         assertEquals(timestamp, location.timestamp);
         assertNotNull(location.value);
-        geoPoint = mapper.readValue(String.valueOf(location.value), Point.class);
+        geoPoint = (Point) location.value;
         assertEquals(48.858396, geoPoint.coordinates.latitude, 0.001);
         assertEquals(2.350484, geoPoint.coordinates.longitude, 0.001);
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));

@@ -51,6 +51,8 @@ public class EMFUtil {
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
         EDataType eInstant = SensiNactPackage.eINSTANCE.getEInstant();
         typeMap.put(eInstant.getInstanceClass(), eInstant);
+        EDataType eGeoJsonObject = SensiNactPackage.eINSTANCE.getEGeoJsonObject();
+        typeMap.put(eGeoJsonObject.getInstanceClass(), eGeoJsonObject);
     }
 
     public static Map<String, Object> toEObjectAttributesToMap(EObject eObject) {
@@ -175,4 +177,17 @@ public class EMFUtil {
         return getVersion((EClass) feature.eContainer());
     }
 
+    public static Object convertToTargetType(EClassifier targetType, Object o) {
+
+        if (o == null) {
+            return targetType.getInstanceClass().isPrimitive() ? targetType.getDefaultValue() : o;
+        } else {
+            EClassifier type = typeMap.get(o.getClass());
+            if (type == null) {
+                throw new IllegalArgumentException("Unknown data type " + o.getClass());
+            }
+            String string = type.getEPackage().getEFactoryInstance().convertToString((EDataType) type, o);
+            return targetType.getEPackage().getEFactoryInstance().createFromString((EDataType) targetType, string);
+        }
+    }
 }

@@ -34,6 +34,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -309,10 +311,14 @@ public class ModelNexus {
         // Allow an update if the resource didn't exist or if the update timestamp is
         // equal to or after the one of the current value
         if (metadata == null || !metadata.getTimestamp().isAfter(timestamp)) {
-            service.eSet(resourceFeature, data);
+            EClassifier resourceType = resourceFeature.getEType();
+            if (data == null || resourceType.isInstance(data)) {
+                service.eSet(resourceFeature, data);
+            } else {
+                service.eSet(resourceFeature, EMFUtil.convertToTargetType(resourceType, data));
+            }
             accumulator.resourceValueUpdate(modelName, providerName, serviceFeature.getName(),
-                    resourceFeature.getName(), resourceFeature.getEType().getInstanceClass(), oldValue, data,
-                    timestamp);
+                    resourceFeature.getName(), resourceType.getInstanceClass(), oldValue, data, timestamp);
         } else {
             return;
         }

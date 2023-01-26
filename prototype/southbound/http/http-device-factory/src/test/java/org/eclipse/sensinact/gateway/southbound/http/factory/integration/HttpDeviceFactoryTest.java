@@ -164,7 +164,7 @@ public class HttpDeviceFactoryTest {
             ResourceDescription location1 = session.describeResource(provider1, "admin", "location");
             assertEquals(timestamp1, location1.timestamp);
             assertNotNull(location1.value);
-            Point geoPoint = mapper.readValue(String.valueOf(location1.value), Point.class);
+            Point geoPoint = (Point) location1.value;
             assertEquals(1.2, geoPoint.coordinates.latitude, 0.001);
             assertEquals(3.4, geoPoint.coordinates.longitude, 0.001);
             assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
@@ -172,7 +172,7 @@ public class HttpDeviceFactoryTest {
             ResourceDescription location2 = session.describeResource(provider2, "admin", "location");
             assertNotNull(location2.value);
             assertEquals(timestamp2, location2.timestamp);
-            geoPoint = mapper.readValue(String.valueOf(location2.value), Point.class);
+            geoPoint = (Point) location2.value;
             assertEquals(5.6, geoPoint.coordinates.latitude, 0.001);
             assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
             assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
@@ -325,7 +325,7 @@ public class HttpDeviceFactoryTest {
             ResourceDescription location1 = session.describeResource(provider1, "admin", "location");
             final Instant firstLocationTimestamp = location1.timestamp;
             assertNotNull(location1.value);
-            Point geoPoint = mapper.readValue(String.valueOf(location1.value), Point.class);
+            Point geoPoint = (Point) location1.value;
             assertEquals(45.185, geoPoint.coordinates.latitude, 0.001);
             assertEquals(5.735, geoPoint.coordinates.longitude, 0.001);
             assertTrue(Double.isNaN(geoPoint.coordinates.elevation));

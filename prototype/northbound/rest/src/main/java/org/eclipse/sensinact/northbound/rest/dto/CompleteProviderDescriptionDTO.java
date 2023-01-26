@@ -16,6 +16,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import java.util.List;
 
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class CompleteProviderDescriptionDTO {
@@ -29,7 +31,7 @@ public class CompleteProviderDescriptionDTO {
      * Provider location, if available
      */
     @JsonInclude(NON_NULL)
-    public String location;
+    public GeoJsonObject location;
 
     /**
      * Provider icon, if available
