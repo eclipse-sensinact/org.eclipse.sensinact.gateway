@@ -239,6 +239,32 @@ public class NexusTest {
         }
 
         @Test
+        void basicFullProviderTest() {
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
+                for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
+                    nexus.handleDataUpdate("model_" + modelIdx, "provider_" + modelIdx, "service_" + svcIdx, "resource",
+                            Integer.class, 42, Instant.now());
+                }
+            }
+
+            for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
+                Provider provider = nexus.getProvider("model_" + modelIdx, "provider_" + modelIdx);
+                assertNotNull(provider);
+
+                for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
+                    EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("service_" + svcIdx);
+                    Service service = (Service) provider.eGet(serviceFeature);
+                    EStructuralFeature valueFeature = service.eClass().getEStructuralFeature("resource");
+                    assertNotNull(valueFeature);
+                    assertEquals(valueFeature.getEType(), EcorePackage.Literals.EINTEGER_OBJECT);
+                    Object value = service.eGet(valueFeature);
+                    assertEquals(42, value);
+                }
+            }
+        }
+
+        @Test
         void basicPersistanceTest() throws IOException {
 
             ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
