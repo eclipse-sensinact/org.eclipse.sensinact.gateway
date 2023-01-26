@@ -15,63 +15,44 @@ package org.eclipse.sensinact.gateway.southbound.virtual.temperature;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.sensinact.gateway.geojson.Coordinates;
-import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.promise.Promise;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-@Component(configurationPid = "sensinact.virtual.temperature", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class VirtualTemperatureSensor {
 
-    public @interface Config {
+    private final PrototypePush push;
 
-        public long interval() default 30000L;
+    private final String name;
 
-        public double min() default 0.0d;
+    private final Random random;
 
-        public double max() default 30.0d;
+    private final long interval;
 
-        public double latitude();
+    private final double min;
 
-        public double longitude();
-
-        public String name();
-    }
-
-    @Reference
-    PrototypePush push;
-
-    private Config config;
-
-    private Random random = new Random();
+    private final double max;
 
     private final AtomicBoolean active = new AtomicBoolean(true);
 
-    @Activate
-    void start(Config config) throws Exception {
+    VirtualTemperatureSensor(PrototypePush push, String name, Random random, long interval, double min, double max,
+            GeoJsonObject location) throws Exception {
 
-        this.config = config;
+        this.push = push;
+        this.name = name;
+        this.random = random;
+        this.interval = interval;
+        this.min = min;
+        this.max = max;
 
         GenericDto dto = new GenericDto();
         dto.model = VirtualTemperatureDto.VIRTUAL_TEMPERATURE_MODEL;
-        dto.provider = config.name();
+        dto.provider = name;
         dto.service = "admin";
         dto.resource = "location";
-
-        Point point = new Point();
-        point.coordinates = new Coordinates();
-        point.coordinates.latitude = config.latitude();
-        point.coordinates.longitude = config.longitude();
-
-        dto.value = new ObjectMapper().writeValueAsString(point);
+        dto.value = location;
 
         push.pushUpdate(dto).getValue();
 
@@ -85,14 +66,14 @@ public class VirtualTemperatureSensor {
     }
 
     private Promise<Void> repeatedUpdate() {
-        return update().delay(config.interval()).then(p -> active.get() ? repeatedUpdate() : p);
+        return update().delay(interval).then(p -> active.get() ? repeatedUpdate() : p);
     }
 
     Promise<Void> update() {
 
         VirtualTemperatureDto dto = new VirtualTemperatureDto();
-        dto.provider = config.name();
-        dto.temperature = config.min() + ((config.max() - config.min()) * random.nextDouble());
+        dto.provider = name;
+        dto.temperature = min + ((max - min) * random.nextDouble());
 
         return push.pushUpdate(dto).map(x -> null);
     }
