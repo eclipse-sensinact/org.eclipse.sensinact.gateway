@@ -68,6 +68,7 @@
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
       </plugin>
+<!--
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-generate-maven-plugin</artifactId>
@@ -84,6 +85,7 @@
               <trigger>src/main/resources/model/sensinact.genmodel</trigger>
               <generateCommand>geckoEMF</generateCommand>
               <output>src/main/java</output>
+              <clear>false</clear>
               <properties>
                 <genmodel>src/main/resources/model/sensinact.genmodel</genmodel>
               </properties>
@@ -99,6 +101,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
     </plugins>
   </build>
 </project>
