@@ -110,7 +110,7 @@ public class NexusTest {
         @Test
         void basicTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
             EClass model = nexus.createModel("TestModel", now, accumulator);
@@ -149,7 +149,7 @@ public class NexusTest {
         @Test
         void sensiNactProvider() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             Collection<Provider> providers = nexus.getProviders();
 
@@ -189,7 +189,7 @@ public class NexusTest {
         @Test
         void basicServiceExtensionTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
             EClass model = nexus.createModel("TestModel", now, accumulator);
@@ -238,7 +238,7 @@ public class NexusTest {
         @Test
         void basicSecondServiceTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
             EClass model = nexus.createModel("TestModel", now, accumulator);
@@ -291,7 +291,7 @@ public class NexusTest {
 
         @Test
         void basicFullProviderTest() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
                 EClass model = nexus.createModel("model_" + modelIdx, Instant.now(), accumulator);
                 for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
@@ -331,7 +331,7 @@ public class NexusTest {
         @Test
         void basicPersistanceTest() throws IOException {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now, accumulator);
@@ -348,7 +348,7 @@ public class NexusTest {
 
             nexus.shutDown();
 
-            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             Provider provider = nexus.getProvider("TestModel", "testprovider");
             assertNotNull(provider);
             EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice2");
@@ -367,7 +367,7 @@ public class NexusTest {
         @Test
         void basicPersistanceTestMultiple() throws IOException {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now, accumulator);
@@ -392,7 +392,7 @@ public class NexusTest {
 
             nexus.shutDown();
 
-            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             assertObject(nexus, "TestModel", "testprovider", "testservice", "testValue", "test");
             assertObject(nexus, "TestModelNew", "testproviderNew", "testservice2", "testValue", "test2");
@@ -418,7 +418,7 @@ public class NexusTest {
 
         @Test
         void testFindProviderWithoutModel() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now, accumulator);
@@ -440,7 +440,7 @@ public class NexusTest {
 
         @Test
         void testUnableToCreateProviderNoModel() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 
@@ -450,7 +450,7 @@ public class NexusTest {
 
         @Test
         void testUnableToCreateProviderDifferentModelAndClashingId() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 
@@ -469,7 +469,7 @@ public class NexusTest {
         @Test
         void addLink() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now, accumulator);
@@ -505,7 +505,7 @@ public class NexusTest {
         @Test
         void removeLink() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 

@@ -10,24 +10,14 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.model;
+package org.eclipse.sensinact.prototype.command.impl;
 
-import java.time.Instant;
+import java.util.Map;
 
-/**
- * A builder for programmatically registering models
- */
-public interface ServiceBuilder<T> {
+import org.osgi.util.promise.Promise;
 
-    ServiceBuilder<T> exclusivelyOwned(boolean exclusive);
+public interface ActionHandler {
 
-    ServiceBuilder<T> withAutoDeletion(boolean autoDelete);
-
-    ServiceBuilder<T> withCreationTime(Instant creationTime);
-
-    ResourceBuilder<ServiceBuilder<T>, Object> withResource(String name);
-
-    T build();
-
-    void buildAll();
+    public Promise<Object> act(String model, String provider, String service, String resource,
+            Map<String, Object> parameters);
 }

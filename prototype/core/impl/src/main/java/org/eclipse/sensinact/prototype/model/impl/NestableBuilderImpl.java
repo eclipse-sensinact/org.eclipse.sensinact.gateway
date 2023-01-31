@@ -37,4 +37,12 @@ public abstract class NestableBuilderImpl<T, B, R> extends AbstractBuilderImpl<T
     }
 
     protected abstract R doBuild(B builtParent);
+
+    public final void buildAll() {
+        Object built = build();
+        while (built instanceof AbstractBuilderImpl<?>) {
+            built = ((AbstractBuilderImpl<?>) built).build();
+        }
+        return;
+    }
 }

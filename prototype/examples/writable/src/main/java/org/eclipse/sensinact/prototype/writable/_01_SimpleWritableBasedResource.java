@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.writable;
 
@@ -27,10 +27,10 @@ public class _01_SimpleWritableBasedResource {
 
     /**
      * A GET method for a service and resource
-     * 
+     *
      * @return
      */
-    @SET(service = "example", resource = "default")
+    @SET(model = "model", service = "example", resource = "default")
     public void setValue(Double d) {
         // Set the value for the device
     }

@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;

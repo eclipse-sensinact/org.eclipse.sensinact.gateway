@@ -24,6 +24,7 @@ import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
+import org.eclipse.sensinact.prototype.model.impl.ResourceImpl;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
@@ -70,15 +71,16 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     @Override
     public ResourceType getResourceType() {
         checkValid();
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceImpl.findResourceType(resource);
     }
 
     @Override
-    public List<Class<?>> getArguments() {
+    public List<Map.Entry<String, Class<?>>> getArguments() {
         checkValid();
-        // TODO Auto-generated method stub
-        return null;
+        if (getResourceType() != ResourceType.ACTION) {
+            throw new IllegalArgumentException("This is not an action resource");
+        }
+        return ResourceImpl.findActionParameters(resource);
     }
 
     @Override
@@ -91,6 +93,10 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     public Promise<Void> setValue(Object value, Instant timestamp) {
         checkValid();
 
+        if (getResourceType() == ResourceType.ACTION) {
+            return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
+        }
+
         modelNexus.handleDataUpdate(modelNexus.getModelName(provider.eClass()), provider, service, resource, value,
                 timestamp);
         return promiseFactory.resolved(null);
@@ -99,6 +105,10 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     @Override
     public Promise<TimedValue<?>> getValue() {
         checkValid();
+
+        if (getResourceType() == ResourceType.ACTION) {
+            return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
+        }
 
         final Service svc = (Service) provider.eGet(service);
         final Instant timestamp;
@@ -160,6 +170,18 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         } else {
             return promiseFactory.resolved(resourceMetadata);
         }
+    }
+
+    @Override
+    public Promise<Object> act(Map<String, Object> parameters) {
+        checkValid();
+        if (getResourceType() != ResourceType.ACTION) {
+            throw new UnsupportedOperationException(
+                    "Resource " + String.format("%s/%s/%s", provider.getId(), svc.getName(), getName())
+                            + " is not an ACTION. Only ACTION resources can use the ACT operation");
+        }
+
+        return modelNexus.act(provider, service, resource, parameters);
     }
 
 }

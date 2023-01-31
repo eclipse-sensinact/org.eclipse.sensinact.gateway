@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.prototype.model;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -73,14 +75,14 @@ public interface ResourceBuilder<B, T> {
     ResourceBuilder<B, T> withResourceType(ResourceType resourceType);
 
     /**
-     * Set an action function to be called, including the types of any arguments
+     * Set a whiteboard action to be called, including the types of any arguments
      * that should be passed
      *
-     * @param action
-     * @param arguments
+     * @param returnType
+     * @param namedParameterTypes
      * @return
      */
-    ResourceBuilder<B, T> withAction(Function<Object[], T> action, Class<?>... argumentTypes);
+    ResourceBuilder<B, T> withAction(List<Entry<String, Class<?>>> namedParameterTypes);
 
     /**
      * Set a getter function to be called
@@ -106,4 +108,6 @@ public interface ResourceBuilder<B, T> {
      *                                  a getter and an action.
      */
     B build();
+
+    void buildAll();
 }

@@ -28,7 +28,10 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
+import org.eclipse.sensinact.prototype.model.Model;
+import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.SensinactModelManager;
+import org.eclipse.sensinact.prototype.model.Service;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.SensinactResource;
@@ -110,60 +113,118 @@ public class GatewayThreadImplTest {
 
     @Nested
     class LifecycleTests {
+        @Nested
+        class TwinLifecycleTests {
 
-        @Test
-        void testSensinactProviderClosed() throws Exception {
+            @Test
+            void testSensinactProviderClosed() throws Exception {
 
-            SensinactProvider sp = thread.execute(new AbstractSensinactCommand<SensinactProvider>() {
+                SensinactProvider sp = thread.execute(new AbstractSensinactCommand<SensinactProvider>() {
 
-                @Override
-                protected Promise<SensinactProvider> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                        PromiseFactory promiseFactory) {
-                    modelMgr.createModel("providerModel").withService("bar").withResource("foobar")
-                            .withType(Integer.class).withInitialValue(42).build().build().build();
-                    twin.createProvider("providerModel", "providerFoo");
-                    return promiseFactory.resolved(twin.getProvider("providerFoo"));
-                }
-            }).getValue();
+                    @Override
+                    protected Promise<SensinactProvider> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                            PromiseFactory promiseFactory) {
+                        modelMgr.createModel("providerModel").withService("bar").withResource("foobar")
+                                .withType(Integer.class).withInitialValue(42).build().build().build();
+                        twin.createProvider("providerModel", "providerFoo");
+                        return promiseFactory.resolved(twin.getProvider("providerFoo"));
+                    }
+                }).getValue();
 
-            assertFalse(sp.isValid());
+                assertFalse(sp.isValid());
+            }
+
+            @Test
+            void testSensinactServiceClosed() throws Exception {
+
+                SensinactService ss = thread.execute(new AbstractSensinactCommand<SensinactService>() {
+
+                    @Override
+                    protected Promise<SensinactService> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                            PromiseFactory promiseFactory) {
+                        modelMgr.createModel("serviceModel").withService("bar").withResource("foobar")
+                                .withType(Integer.class).withInitialValue(42).build().build().build();
+                        twin.createProvider("serviceModel", "serviceFoo");
+                        return promiseFactory.resolved(twin.getService("serviceFoo", "bar"));
+                    }
+                }).getValue();
+
+                assertFalse(ss.isValid());
+            }
+
+            @Test
+            void testSensinactResourceClosed() throws Exception {
+
+                SensinactResource sr = thread.execute(new AbstractSensinactCommand<SensinactResource>() {
+
+                    @Override
+                    protected Promise<SensinactResource> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                            PromiseFactory promiseFactory) {
+                        modelMgr.createModel("resourceModel").withService("bar").withResource("foobar")
+                                .withType(Integer.class).withInitialValue(42).build().build().build();
+                        twin.createProvider("resourceModel", "resourceFoo");
+                        return promiseFactory.resolved(twin.getResource("resourceFoo", "bar", "foobar"));
+                    }
+                }).getValue();
+
+                assertFalse(sr.isValid());
+            }
         }
 
-        @Test
-        void testSensinactServiceClosed() throws Exception {
+        @Nested
+        class ModelLifecycleTests {
 
-            SensinactService ss = thread.execute(new AbstractSensinactCommand<SensinactService>() {
+            @Test
+            void testModelClosed() throws Exception {
 
-                @Override
-                protected Promise<SensinactService> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                        PromiseFactory promiseFactory) {
-                    modelMgr.createModel("serviceModel").withService("bar").withResource("foobar")
-                            .withType(Integer.class).withInitialValue(42).build().build().build();
-                    twin.createProvider("serviceModel", "serviceFoo");
-                    return promiseFactory.resolved(twin.getService("serviceFoo", "bar"));
-                }
-            }).getValue();
+                Model m = thread.execute(new AbstractSensinactCommand<Model>() {
 
-            assertFalse(ss.isValid());
+                    @Override
+                    protected Promise<Model> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                            PromiseFactory promiseFactory) {
+                        Model mo = modelMgr.createModel("providerModel").withService("bar").withResource("foobar")
+                                .withType(Integer.class).withInitialValue(42).build().build().build();
+                        return promiseFactory.resolved(mo);
+                    }
+                }).getValue();
+
+                assertFalse(m.isValid());
+            }
+
+            @Test
+            void testServiceClosed() throws Exception {
+
+                Service s = thread.execute(new AbstractSensinactCommand<Service>() {
+
+                    @Override
+                    protected Promise<Service> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                            PromiseFactory promiseFactory) {
+                        modelMgr.createModel("serviceModel").withService("bar").withResource("foobar")
+                                .withType(Integer.class).withInitialValue(42).build().build().build();
+                        return promiseFactory.resolved(modelMgr.getModel("serviceModel").getServices().get("bar"));
+                    }
+                }).getValue();
+
+                assertFalse(s.isValid());
+            }
+
+            @Test
+            void testResourceClosed() throws Exception {
+
+                Resource r = thread.execute(new AbstractSensinactCommand<Resource>() {
+
+                    @Override
+                    protected Promise<Resource> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                            PromiseFactory promiseFactory) {
+                        modelMgr.createModel("resourceModel").withService("bar").withResource("foobar")
+                                .withType(Integer.class).withInitialValue(42).build().build().build();
+                        return promiseFactory.resolved(modelMgr.getModel("resourceModel").getServices().get("bar")
+                                .getResources().get("foobar"));
+                    }
+                }).getValue();
+
+                assertFalse(r.isValid());
+            }
         }
-
-        @Test
-        void testSensinactResourceClosed() throws Exception {
-
-            SensinactResource sr = thread.execute(new AbstractSensinactCommand<SensinactResource>() {
-
-                @Override
-                protected Promise<SensinactResource> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                        PromiseFactory promiseFactory) {
-                    modelMgr.createModel("resourceModel").withService("bar").withResource("foobar")
-                            .withType(Integer.class).withInitialValue(42).build().build().build();
-                    twin.createProvider("resourceModel", "resourceFoo");
-                    return promiseFactory.resolved(twin.getResource("resourceFoo", "bar", "foobar"));
-                }
-            }).getValue();
-
-            assertFalse(sr.isValid());
-        }
-
     }
 }

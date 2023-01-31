@@ -16,7 +16,10 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.Executors.newScheduledThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayThread;
+import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -35,6 +38,8 @@ import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.ImmediateNotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.NotificationAccumulatorImpl;
 import org.eclipse.sensinact.prototype.twin.impl.SensinactDigitalTwinImpl;
+import org.eclipse.sensinact.prototype.whiteboard.impl.SensinactWhiteboard;
+import org.osgi.service.component.AnyService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -53,6 +58,8 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     private final TypedEventBus typedEventBus;
 
+    private final SensinactWhiteboard whiteboard;
+
     private final ModelNexus nexusImpl;
 
     // TODO decide if we should just use an infinite queue
@@ -70,7 +77,8 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     public GatewayThreadImpl(@Reference TypedEventBus typedEventBus, @Reference ResourceSet resourceSet,
             @Reference SensiNactPackage sensinactPackage) {
         this.typedEventBus = typedEventBus;
-        nexusImpl = new ModelNexus(resourceSet, sensinactPackage, this::getCurrentAccumulator);
+        this.whiteboard = new SensinactWhiteboard(this);
+        nexusImpl = new ModelNexus(resourceSet, sensinactPackage, this::getCurrentAccumulator, this::performAction);
         start();
     }
 
@@ -116,10 +124,46 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
         nexusImpl.removeEPakcage(ePackage);
     }
 
+    @Reference(service = AnyService.class, target = "(sensiNact.whiteboard.resource=true)", cardinality = MULTIPLE, policy = DYNAMIC)
+    void addWhiteboardService(Object service, Map<String, Object> props) {
+        whiteboard.addWhiteboardService(service, props);
+    }
+
+    void updatedWhiteboardService(Object service, Map<String, Object> props) {
+        whiteboard.updatedWhiteboardService(service, props);
+    }
+
+    void removeWhiteboardService(Object service, Map<String, Object> props) {
+        whiteboard.removeWhiteboardService(service, props);
+    }
+
     private NotificationAccumulator getCurrentAccumulator() {
         WorkItem<?> workItem = currentItem.get();
         return workItem == null ? new ImmediateNotificationAccumulator(typedEventBus)
                 : workItem.command.getAccumulator();
+    }
+
+    private Promise<Object> performAction(String model, String provider, String service, String resource,
+            Map<String, Object> args) {
+        Deferred<Object> d = getPromiseFactory().deferred();
+        try {
+            this.promiseFactory.executor().execute(() -> {
+                try {
+                    Object result = this.whiteboard.act(model, provider, service, resource, args);
+                    if (result instanceof Promise) {
+                        d.resolveWith((Promise<?>) result);
+                    } else {
+                        d.resolve(result);
+                    }
+                } catch (Exception e) {
+                    d.fail(e);
+                }
+            });
+        } catch (Exception e) {
+            d.fail(e);
+        }
+
+        return d.getPromise();
     }
 
     @Override

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.action;
 
@@ -27,9 +27,9 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = _03_MultiActionResource.class)
 public class _03_MultiActionResource {
 
-    @ACT(service = "example", resource = "fizz")
-    @ACT(service = "example", resource = "buzz")
-    @ACT(service = "example2", resource = "fizzbuzz")
+    @ACT(model = "testModel", service = "example", resource = "fizz")
+    @ACT(model = "testModel", service = "example", resource = "buzz")
+    @ACT(model = "testModel", service = "example2", resource = "fizzbuzz")
     public void setValue(@UriParam(UriSegment.PROVIDER) String provider, @UriParam(UriSegment.SERVICE) String service,
             @UriParam(UriSegment.RESOURCE) String resource) {
         // Get the actual value from the sensor

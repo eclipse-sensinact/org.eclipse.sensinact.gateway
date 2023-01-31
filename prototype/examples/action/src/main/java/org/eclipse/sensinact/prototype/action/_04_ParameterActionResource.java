@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.action;
 
@@ -30,10 +30,10 @@ public class _04_ParameterActionResource {
 
     /**
      * A GET method for a service and resource
-     * 
+     *
      * @return
      */
-    @ACT(service = "example", resource = "default")
+    @ACT(model = "testModel", service = "example", resource = "default")
     public List<Long> doAction(Instant fromTime, Instant toTime) {
         // Run the action and return the result
         return null;

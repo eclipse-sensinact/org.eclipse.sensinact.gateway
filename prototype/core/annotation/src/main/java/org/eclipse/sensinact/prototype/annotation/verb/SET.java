@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.annotation.verb;
 
@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 
 /**
  * Used to define a SET method for writable values
- * 
+ *
  * Can be repeated if a single method can write values for more than one
  * service/resource.
  */
@@ -31,15 +31,22 @@ import java.lang.annotation.Target;
 public @interface SET {
 
     /**
+     * The model that this SET method applies to
+     *
+     * @return
+     */
+    String model();
+
+    /**
      * The service that this SET method applies to
-     * 
+     *
      * @return
      */
     String service();
 
     /**
      * The resource that this SET method applies to
-     * 
+     *
      * @return
      */
     String resource();
@@ -47,7 +54,7 @@ public @interface SET {
     /**
      * The type of the resource data. If not set then the received parameter type of
      * the method is used.
-     * 
+     *
      * @return
      */
     Class<?> type() default Object.class;

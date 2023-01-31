@@ -13,11 +13,13 @@
 package org.eclipse.sensinact.prototype.model.impl;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 import org.eclipse.sensinact.prototype.model.ResourceType;
@@ -35,6 +37,7 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     private Object initialValue;
     private Instant timestamp;
     private ResourceType resourceType = null;
+    private List<Entry<String, Class<?>>> namedParameterTypes;
 
     public ResourceBuilderImpl(AtomicBoolean active, R parent, ServiceImpl builtParent, String name,
             ModelNexus nexusImpl, NotificationAccumulator accumulator) {
@@ -96,9 +99,11 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     }
 
     @Override
-    public ResourceBuilder<R, T> withAction(Function<Object[], T> action, Class<?>... argumentTypes) {
+    public ResourceBuilder<R, T> withAction(List<Entry<String, Class<?>>> namedParameterTypes) {
         checkValid();
-        throw new RuntimeException("Not implemented");
+        resourceType = ResourceType.ACTION;
+        this.namedParameterTypes = namedParameterTypes;
+        return this;
     }
 
     @Override
@@ -121,6 +126,10 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
         }
 
         if (resourceType == ResourceType.SENSOR) {
+            if (namedParameterTypes != null) {
+                throw new IllegalArgumentException("Action details cannot be set for a SENSOR resource");
+            }
+
             if (type == null && initialValue == null) {
                 throw new IllegalArgumentException("The resource " + name + " must define a type or a value");
             } else if (type == null) {
@@ -129,13 +138,36 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
                 throw new IllegalArgumentException("The initial value " + initialValue + " for resource " + name
                         + " is not compatible with the type " + type.getName());
             }
+        } else if (resourceType == ResourceType.ACTION) {
+            if (type == null) {
+                throw new IllegalArgumentException("The action resource " + name + " must define a type");
+            }
+            if (namedParameterTypes == null) {
+                throw new IllegalArgumentException("The action resource " + name + " must define parameters");
+            }
+        } else {
+            throw new RuntimeException("No implemented support for type " + resourceType);
         }
     }
 
     @Override
     protected Resource doBuild(ServiceImpl builtParent) {
-        return new ResourceImpl(active, builtParent, nexusImpl.createResource(builtParent.getServiceEClass(), name,
-                type, timestamp, initialValue, accumulator));
+        EAttribute createResource;
+        switch (resourceType) {
+        case ACTION:
+            createResource = nexusImpl.createActionResource(builtParent.getServiceEClass(), name, type,
+                    namedParameterTypes);
+            break;
+        case SENSOR:
+            createResource = nexusImpl.createResource(builtParent.getServiceEClass(), name, type, timestamp,
+                    initialValue, accumulator);
+            break;
+        case PROPERTY:
+        case STATE_VARIABLE:
+        default:
+            throw new RuntimeException("Should be unreachable");
+        }
+        return new ResourceImpl(active, builtParent, createResource);
     }
 
 }

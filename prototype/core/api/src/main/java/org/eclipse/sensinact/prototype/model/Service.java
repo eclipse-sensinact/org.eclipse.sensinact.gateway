@@ -14,10 +14,12 @@ package org.eclipse.sensinact.prototype.model;
 
 import java.util.Map;
 
+import org.eclipse.sensinact.prototype.command.CommandScoped;
+
 /**
  * The model for a Service
  */
-public interface Service extends Modelled {
+public interface Service extends Modelled, CommandScoped {
 
     ResourceBuilder<Resource, Object> createResource(String resource);
 
