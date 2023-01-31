@@ -421,6 +421,16 @@ public class ModelNexus {
     }
 
     /**
+     * Lists know providers
+     */
+    public List<Provider> getProviders(String model) {
+        URI packageUri = URI.createURI(DEFAULT_URI);
+        URI providerUri = packageUri.appendFragment("//" + firstToUpper(model));
+        ProviderTypeWrapper wrapper = providerCache.get(providerUri);
+        return wrapper.getInstances().values().stream().collect(Collectors.toList());
+    }
+
+    /**
      * @param dto
      * @return
      */

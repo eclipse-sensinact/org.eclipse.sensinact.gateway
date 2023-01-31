@@ -19,9 +19,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
+import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,8 @@ public class AdminServiceTest {
     private static final String RESOURCE = "resource";
 
     @InjectService
+    PrototypePush push;
+    @InjectService
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
 
@@ -61,11 +65,18 @@ public class AdminServiceTest {
      * Tests admin resource creation with provider and update
      */
     @Test
-    void testAdminCreateUpdate() {
+    void testAdminCreateUpdate() throws Exception {
         final Instant timestamp = Instant.now();
 
-        // Create resource & provider
-        session.setResourceValue(PROVIDER, SERVICE, RESOURCE, 42, timestamp);
+        // Create resource & provider using a push
+        GenericDto dto = new GenericDto();
+        dto.provider = PROVIDER;
+        dto.service = SERVICE;
+        dto.resource = RESOURCE;
+        dto.value = 42;
+        dto.type = Integer.class;
+        dto.timestamp = timestamp;
+        push.pushUpdate(dto).getValue();
 
         // Admin resources must have a timestamp
         // friendlyName has a set value, so it's timestamp is set

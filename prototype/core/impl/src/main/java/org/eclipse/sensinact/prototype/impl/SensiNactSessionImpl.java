@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -192,7 +192,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     return pf.resolved(value);
                 }
             }).getValue();
-        } catch (InvocationTargetException | InterruptedException e) {
+        } catch (InvocationTargetException ite) {
+            // Re-throw cause as a runtime exception
+            throw new RuntimeException(ite.getCause());
+        } catch (InterruptedException e) {
             // Re-throw as a runtime exception
             throw new RuntimeException(e);
         }
@@ -200,9 +203,17 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
-        // FIXME: pass the model as argument
-        return executeGetCommand((m) -> m.getResourceValue(provider, service, resource, clazz),
-                (timedVal) -> timedVal.getValue());
+        return executeGetCommand(m -> m.getResource(provider, service, resource).getValue(), timedVal -> {
+            try {
+                return timedVal.map(t -> clazz.cast(t.getValue())).getValue();
+            } catch (InvocationTargetException ite) {
+                // Re-throw cause as a runtime exception
+                throw new RuntimeException(ite.getCause());
+            } catch (InterruptedException e) {
+                // Re-throw as a runtime exception
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -213,16 +224,17 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public void setResourceValue(String provider, String service, String resource, Object o, Instant instant) {
         try {
-            thread.execute(new AbstractSensinactCommand<Object>() {
+            thread.execute(new AbstractSensinactCommand<Void>() {
                 @Override
-                public Promise<Object> call(SensinactModel model, PromiseFactory pf) {
-                    // FIXME: pass the model as argument
-                    model.setOrCreateResource(provider, service, resource, o != null ? o.getClass() : Float.class, o,
-                            instant);
-                    return pf.resolved(null);
+                public Promise<Void> call(SensinactModel model, PromiseFactory pf) {
+                    return model.getResource(provider, service, resource).setValue(o, instant);
                 }
             }).getValue();
-        } catch (InvocationTargetException | InterruptedException e) {
+        } catch (InvocationTargetException ite) {
+            // Re-throw cause as a runtime exception
+            throw new RuntimeException(ite.getCause());
+        } catch (InterruptedException e) {
+            // Re-throw as a runtime exception
             throw new RuntimeException(e);
         }
     }
@@ -238,7 +250,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     return model.getResource(resource, provider, service, resource).getMetadataValues();
                 }
             }).getValue());
-        } catch (InvocationTargetException | InterruptedException e) {
+        } catch (InvocationTargetException ite) {
+            // Re-throw cause as a runtime exception
+            throw new RuntimeException(ite.getCause());
+        } catch (InterruptedException e) {
             // Re-throw as a runtime exception
             throw new RuntimeException(e);
         }
@@ -274,7 +289,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     }
                 }
             }).getValue();
-        } catch (InvocationTargetException | InterruptedException e) {
+        } catch (InvocationTargetException ite) {
+            // Re-throw cause as a runtime exception
+            throw new RuntimeException(ite.getCause());
+        } catch (InterruptedException e) {
             // Re-throw as a runtime exception
             throw new RuntimeException(e);
         }
@@ -296,7 +314,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     }
                 }
             }).getValue();
-        } catch (InvocationTargetException | InterruptedException e) {
+        } catch (InvocationTargetException ite) {
+            // Re-throw cause as a runtime exception
+            throw new RuntimeException(ite.getCause());
+        } catch (InterruptedException e) {
             // Re-throw as a runtime exception
             throw new RuntimeException(e);
         }
@@ -318,7 +339,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     }
                 }
             }).getValue();
-        } catch (InvocationTargetException | InterruptedException e) {
+        } catch (InvocationTargetException ite) {
+            // Re-throw cause as a runtime exception
+            throw new RuntimeException(ite.getCause());
+        } catch (InterruptedException e) {
             // Re-throw as a runtime exception
             throw new RuntimeException(e);
         }
@@ -339,30 +363,28 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 public Promise<ResourceDescription> call(SensinactModel model, PromiseFactory pf) {
                     final SensinactResource sensinactResource = model.getResource(provider, service, resource);
                     if (sensinactResource != null) {
-                        final TimedValue<Object> val = model.getResourceValue(provider, service, resource,
-                                Object.class);
-                        final ResourceDescription result = new ResourceDescription();
-                        result.provider = sensinactResource.getService().getProvider().getName();
-                        result.service = sensinactResource.getService().getName();
-                        result.resource = sensinactResource.getName();
-                        result.value = val.getValue();
-                        result.timestamp = val.getTimestamp();
-                        result.metadata = Map.of();
+                        final Promise<TimedValue<?>> val = sensinactResource.getValue();
+                        final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
 
-                        if (sensinactResource.isValid()) {
-                            return sensinactResource.getMetadataValues().then((metadata) -> {
-                                result.metadata = Map.copyOf(metadata.getValue());
-                                return pf.resolved(result);
-                            });
-                        } else {
+                        return val.then(x -> metadata).then(x -> {
+                            ResourceDescription result = new ResourceDescription();
+                            result.provider = provider;
+                            result.service = service;
+                            result.resource = resource;
+                            result.value = val.getValue().getValue();
+                            result.timestamp = val.getValue().getTimestamp();
+                            result.metadata = metadata.getValue();
                             return pf.resolved(result);
-                        }
+                        });
                     } else {
                         return pf.resolved(null);
                     }
                 }
             }).getValue();
-        } catch (InvocationTargetException | InterruptedException e) {
+        } catch (InvocationTargetException ite) {
+            // Re-throw cause as a runtime exception
+            throw new RuntimeException(ite.getCause());
+        } catch (InterruptedException e) {
             // Re-throw as a runtime exception
             throw new RuntimeException(e);
         }

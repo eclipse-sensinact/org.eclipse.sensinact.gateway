@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -99,10 +99,10 @@ public class GatewayThreadImplTest {
         @Test
         void testSensinactProviderClosed() throws Exception {
 
-            SensinactProvider sp = thread.execute(new AbstractSensinactCommand<SensinactProvider>() {
+            SensinactProvider sp = thread.execute(new AbstractInternalSensinactCommand<SensinactProvider>() {
 
                 @Override
-                protected Promise<SensinactProvider> call(SensinactModel model, PromiseFactory promiseFactory) {
+                protected Promise<SensinactProvider> call(SensinactModelImpl model, PromiseFactory promiseFactory) {
                     model.setOrCreateResource("foo", "bar", "foobar", Integer.class, 42, null);
                     return promiseFactory.resolved(model.getProvider("foo"));
                 }
@@ -114,10 +114,10 @@ public class GatewayThreadImplTest {
         @Test
         void testSensinactServiceClosed() throws Exception {
 
-            SensinactService ss = thread.execute(new AbstractSensinactCommand<SensinactService>() {
+            SensinactService ss = thread.execute(new AbstractInternalSensinactCommand<SensinactService>() {
 
                 @Override
-                protected Promise<SensinactService> call(SensinactModel model, PromiseFactory promiseFactory) {
+                protected Promise<SensinactService> call(SensinactModelImpl model, PromiseFactory promiseFactory) {
                     model.setOrCreateResource("foo", "bar", "foobar", Integer.class, 42, null);
                     return promiseFactory.resolved(model.getService("foo", "bar"));
                 }
@@ -129,10 +129,10 @@ public class GatewayThreadImplTest {
         @Test
         void testSensinactResourceClosed() throws Exception {
 
-            SensinactResource sr = thread.execute(new AbstractSensinactCommand<SensinactResource>() {
+            SensinactResource sr = thread.execute(new AbstractInternalSensinactCommand<SensinactResource>() {
 
                 @Override
-                protected Promise<SensinactResource> call(SensinactModel model, PromiseFactory promiseFactory) {
+                protected Promise<SensinactResource> call(SensinactModelImpl model, PromiseFactory promiseFactory) {
                     model.setOrCreateResource("foo", "bar", "foobar", Integer.class, 42, null);
                     return promiseFactory.resolved(model.getResource("foo", "bar", "foobar"));
                 }

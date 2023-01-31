@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,19 +8,35 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command;
 
 import java.util.Map;
 
-import org.eclipse.sensinact.prototype.model.Service;
+/**
+ * The digital twin of a Service instance
+ */
+public interface SensinactService extends CommandScoped {
 
-public interface SensinactService extends CommandScoped, Service {
+    /**
+     * The service name. Defined by the model
+     *
+     * @return
+     */
+    String getName();
 
-    @Override
+    /**
+     * The provider instance that owns this service instance
+     *
+     * @return
+     */
     SensinactProvider getProvider();
 
-    @Override
+    /**
+     * The resource instance that owns this service instance
+     *
+     * @return
+     */
     Map<String, ? extends SensinactResource> getResources();
 }

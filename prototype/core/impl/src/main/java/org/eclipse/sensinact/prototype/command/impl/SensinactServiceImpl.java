@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import org.eclipse.sensinact.prototype.command.SensinactProvider;
 import org.eclipse.sensinact.prototype.command.SensinactResource;
 import org.eclipse.sensinact.prototype.command.SensinactService;
-import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 
 public class SensinactServiceImpl extends CommandScopedImpl implements SensinactService {
 
@@ -39,12 +38,6 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
         super(active);
         this.provider = provider;
         this.name = name;
-    }
-
-    @Override
-    public ResourceBuilder<?> createResource(String resource) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -72,18 +65,6 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public boolean isExclusivelyOwned() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isAutoDelete() {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@ package org.eclipse.sensinact.prototype.command.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.prototype.command.SensinactProvider;
 import org.eclipse.sensinact.prototype.command.SensinactService;
-import org.eclipse.sensinact.prototype.model.ServiceBuilder;
 
 public class SensinactProviderImpl extends CommandScopedImpl implements SensinactProvider {
 
@@ -37,12 +37,6 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
         super(active);
         this.model = model;
         this.name = name;
-    }
-
-    @Override
-    public ServiceBuilder createService(String service) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -73,18 +67,6 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
-    public boolean isExclusivelyOwned() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isAutoDelete() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public String getModelName() {
         return model;
     }
@@ -92,5 +74,23 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     @Override
     public String toString() {
         return String.format("SensiNactProvider(model=%s, name=%s, services=%s)", model, name, services.keySet());
+    }
+
+    @Override
+    public List<SensinactProvider> getLinkedProviders() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void addLinkedProvider(SensinactProvider provider) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeLinkedProvider(SensinactProvider provider) {
+        // TODO Auto-generated method stub
+
     }
 }
