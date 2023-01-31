@@ -16,13 +16,16 @@ import java.util.Map;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notifier;
-
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
-
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-
-import org.eclipse.sensinact.model.core.*;
+import org.eclipse.sensinact.model.core.Admin;
+import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.model.core.ModelMetadata;
+import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.Service;
 
 /**
  * <!-- begin-user-doc -->

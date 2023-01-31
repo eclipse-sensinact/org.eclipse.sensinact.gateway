@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.model.core;
 
 import org.eclipse.emf.ecore.EFactory;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

@@ -15,7 +15,6 @@ package org.eclipse.sensinact.model.core;
 import java.time.Instant;
 
 import org.eclipse.emf.ecore.EObject;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

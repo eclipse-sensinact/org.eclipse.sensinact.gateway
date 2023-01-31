@@ -50,8 +50,8 @@
 	org.eclipse.sensinact.gateway.southbound.device-factory.parser-csv;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-device-factory;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-device-factory-tests;version='[0.0.1,0.0.2)',\
-	org.gecko.emf.osgi.api;version='[4.4.0,4.4.1)',\
-	org.gecko.emf.osgi.component;version='[4.4.0,4.4.1)',\
+	org.gecko.emf.osgi.api;version='[4.5.0,4.5.1)',\
+	org.gecko.emf.osgi.component;version='[4.5.0,4.5.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\

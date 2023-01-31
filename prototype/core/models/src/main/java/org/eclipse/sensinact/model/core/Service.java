@@ -13,10 +13,8 @@
 package org.eclipse.sensinact.model.core;
 
 import org.eclipse.emf.common.util.EMap;
-
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

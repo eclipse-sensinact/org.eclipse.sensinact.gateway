@@ -16,25 +16,18 @@ import java.util.Hashtable;
 
 import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EPackage;
-
 import org.eclipse.sensinact.model.core.SensiNactFactory;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
-
 import org.eclipse.sensinact.model.core.impl.SensiNactPackageImpl;
-
 import org.gecko.emf.osgi.EPackageConfigurator;
-
 import org.osgi.annotation.bundle.Capability;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-
 import org.osgi.service.condition.Condition;
 
 /**
@@ -92,7 +85,7 @@ public class SensiNactConfigurationComponent {
 	 *
 	 * @generated
 	 */
-	private void registerEPackageService(SensiNactPackage ePackage, EPackageConfigurator packageConfigurator, BundleContext ctx){
+	private void registerEPackageService(SensiNactPackage ePackage, SensiNactEPackageConfigurator packageConfigurator, BundleContext ctx){
 		Hashtable<String, Object> properties = new Hashtable<String, Object>();
 		properties.putAll(packageConfigurator.getServiceProperties());
 		String[] serviceClasses = new String[] {SensiNactPackage.class.getName(), EPackage.class.getName()};
@@ -104,14 +97,14 @@ public class SensiNactConfigurationComponent {
 	 *
 	 * @generated
 	 */
-	private void registerEFactoryService(SensiNactPackage ePackage, EPackageConfigurator packageConfigurator, BundleContext ctx){
+	private void registerEFactoryService(SensiNactPackage ePackage, SensiNactEPackageConfigurator packageConfigurator, BundleContext ctx){
 		Hashtable<String, Object> properties = new Hashtable<String, Object>();
 		properties.putAll(packageConfigurator.getServiceProperties());
 		String[] serviceClasses = new String[] {SensiNactFactory.class.getName(), EFactory.class.getName()};
 		eFactoryRegistration = ctx.registerService(serviceClasses, ePackage.getSensiNactFactory(), properties);
 	}
 
-	private void registerConditionService(EPackageConfigurator packageConfigurator, BundleContext ctx){
+	private void registerConditionService(SensiNactEPackageConfigurator packageConfigurator, BundleContext ctx){
 		// register the EPackage
 		Hashtable<String, Object> properties = new Hashtable<String, Object>();
 		properties.putAll(packageConfigurator.getServiceProperties());
@@ -120,7 +113,7 @@ public class SensiNactConfigurationComponent {
 	}
 
 	/**
-	 * Deactivates and unregisteres everything.
+	 * Deactivates and unregisters everything.
 	 *
 	 * @generated
 	 */

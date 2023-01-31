@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.model.core;
 
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**

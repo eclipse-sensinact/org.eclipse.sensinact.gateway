@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.sensinact.model.core.SensiNactPackage;
-
 import org.gecko.emf.osgi.EMFNamespaces;
 import org.gecko.emf.osgi.EPackageConfigurator;
 
@@ -57,11 +56,9 @@ public class SensiNactEPackageConfigurator implements EPackageConfigurator {
 	}
 	
 	/**
-	 * (non-Javadoc)
-	 * @see org.gecko.emf.osgi.EPackageConfigurator#getServiceProperties()
+	 * A method providing the Prperties the services around this Model should be registered with.
 	 * @generated
 	 */
-	@Override
 	public Map<String, Object> getServiceProperties() {
 		Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put(EMFNamespaces.EMF_MODEL_NAME, SensiNactPackage.eNAME);

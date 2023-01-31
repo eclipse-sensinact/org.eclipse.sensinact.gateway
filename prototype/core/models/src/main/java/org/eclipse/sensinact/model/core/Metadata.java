@@ -15,10 +15,8 @@ package org.eclipse.sensinact.model.core;
 import java.time.Instant;
 
 import org.eclipse.emf.common.util.EList;
-
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
