@@ -40,4 +40,9 @@ public class TimedValueImpl<T> implements TimedValue<T> {
     public T getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return String.format("TimedValue(%s, %s)", getValue(), getTimestamp());
+    }
 }

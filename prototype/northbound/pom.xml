@@ -32,6 +32,7 @@
   </properties>
 
   <modules>
+    <module>filters</module>
     <module>rest</module>
     <module>sensorthings</module>
   </modules>

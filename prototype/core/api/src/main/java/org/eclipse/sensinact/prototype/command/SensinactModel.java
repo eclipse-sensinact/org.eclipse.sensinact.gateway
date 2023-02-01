@@ -13,7 +13,14 @@
 package org.eclipse.sensinact.prototype.command;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
+
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 
 public interface SensinactModel extends CommandScoped {
 
@@ -57,4 +64,13 @@ public interface SensinactModel extends CommandScoped {
     void setOrCreateResource(String provider, String service, String resource, Class<?> type, Object value,
             Instant instant);
 
+    /**
+     * @param object
+     * @param providerFilter
+     * @param svcFilter
+     * @param rcFilter
+     * @return
+     */
+    Collection<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter, Predicate<ProviderSnapshot> providerFilter,
+            Predicate<ServiceSnapshot> svcFilter, Predicate<ResourceSnapshot> rcFilter);
 }

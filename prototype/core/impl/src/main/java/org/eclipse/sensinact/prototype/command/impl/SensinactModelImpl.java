@@ -13,11 +13,15 @@
 package org.eclipse.sensinact.prototype.command.impl;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.Service;
@@ -26,8 +30,14 @@ import org.eclipse.sensinact.prototype.command.SensinactProvider;
 import org.eclipse.sensinact.prototype.command.SensinactResource;
 import org.eclipse.sensinact.prototype.command.SensinactService;
 import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.impl.snapshot.ProviderSnapshotImpl;
+import org.eclipse.sensinact.prototype.impl.snapshot.ResourceSnapshotImpl;
+import org.eclipse.sensinact.prototype.impl.snapshot.ServiceSnapshotImpl;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactModelImpl extends CommandScopedImpl implements SensinactModel {
@@ -259,5 +269,88 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     private SensinactResource toResource(final SensinactService parent, final EStructuralFeature rcFeature) {
         return new SensinactResourceImpl(active, parent, rcFeature.getName(), rcFeature.getEType().getInstanceClass(),
                 accumulator, nexusImpl, pf);
+    }
+
+    @Override
+    public Collection<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
+            Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
+            Predicate<ResourceSnapshot> rcFilter) {
+
+        final Instant snapshotTime = Instant.now();
+
+        // Filter providers by location (raw provider)
+        Stream<Provider> rawProvidersStream = nexusImpl.getProviders().stream();
+        if (geoFilter != null) {
+            // Filter the provider location
+            rawProvidersStream = rawProvidersStream.filter(p -> geoFilter.test(p.getAdmin().getLocation()));
+        }
+
+        // Filter providers with their API model
+        Stream<ProviderSnapshotImpl> providersStream = rawProvidersStream
+                .map(p -> new ProviderSnapshotImpl(nexusImpl.getProviderModel(p.getId()), p, snapshotTime));
+        if (providerFilter != null) {
+            providersStream = providersStream.filter(providerFilter);
+        }
+
+        // Filter providers according to their services
+        providersStream = providersStream.map(p -> {
+            final Provider modelProvider = p.getModelProvider();
+            modelProvider.eClass().getEStructuralFeatures().stream().forEach((feature) -> {
+                p.add(new ServiceSnapshotImpl(p, feature.getName(), (Service) modelProvider.eGet(feature),
+                        snapshotTime));
+            });
+            return p;
+        });
+        if (svcFilter != null) {
+            providersStream = providersStream.filter(p -> p.getServices().stream().anyMatch(svcFilter));
+        }
+
+        // Filter providers according to their resources
+        providersStream = providersStream.map(p -> {
+            p.getServices().stream().forEach(s -> {
+                s.getModelService().eClass().getEStructuralFeatures().stream()
+                        .forEach(f -> s.add(new ResourceSnapshotImpl(s, f, snapshotTime)));
+            });
+            return p;
+        });
+        if (rcFilter != null) {
+            providersStream = providersStream
+                    .filter(p -> p.getServices().stream().anyMatch(s -> s.getResources().stream().anyMatch(rcFilter)));
+        }
+
+        // Add resource value
+        providersStream = providersStream.map(p -> {
+            p.getServices().stream().forEach(s -> {
+                s.getResources().stream().forEach(rc -> {
+                    // Get the resource metadata
+                    final Service svc = rc.getService().getModelService();
+                    final EStructuralFeature rcFeature = rc.getFeature();
+                    final Class<?> type = rc.getType();
+
+                    final Metadata metadata = svc.getMetadata().get(rcFeature);
+                    final Instant timestamp;
+                    if (metadata != null) {
+                        timestamp = metadata.getTimestamp();
+                    } else {
+                        timestamp = null;
+                    }
+
+                    // Check value type
+                    final Object rawValue = svc.eGet(rcFeature);
+                    if (rawValue == null) {
+                        rc.setValue(new TimedValueImpl<Object>(null, timestamp));
+                    } else if (type.isAssignableFrom(rawValue.getClass())) {
+                        rc.setValue(new TimedValueImpl<Object>(type.cast(rawValue), timestamp));
+                    }
+                });
+                s.filterNullValues();
+            });
+            p.filterEmptyServices();
+            return p;
+        });
+        // Filter out providers which only have the admin service
+        providersStream = providersStream.filter(p -> p.getServices().size() >= 1);
+
+        return providersStream.collect(Collectors.toList());
     }
 }
