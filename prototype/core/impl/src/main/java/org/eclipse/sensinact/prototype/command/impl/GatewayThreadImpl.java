@@ -12,10 +12,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
+import static java.util.concurrent.Executors.newCachedThreadPool;
+import static java.util.concurrent.Executors.newScheduledThreadPool;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayThread;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,7 +58,9 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     private final AtomicBoolean run = new AtomicBoolean(true);
 
-    private final PromiseFactory promiseFactory = new PromiseFactory(null, null);
+    private final PromiseFactory promiseFactory = new PromiseFactory(
+            newCachedThreadPool(r -> new Thread(r, "Eclipse sensiNact Gateway Worker")),
+            newScheduledThreadPool(3, r -> new Thread(r, "Eclipse sensiNact Scheduler")));
 
     private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
 
@@ -76,6 +83,26 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             Thread.currentThread().interrupt();
         }
         nexusImpl.shutDown();
+
+        ExecutorService executor = (ExecutorService) promiseFactory.executor();
+        ScheduledExecutorService scheduledExecutor = promiseFactory.scheduledExecutor();
+
+        executor.shutdown();
+        scheduledExecutor.shutdown();
+
+        try {
+            if (!executor.awaitTermination(2, SECONDS)) {
+                executor.shutdownNow();
+            }
+            if (!scheduledExecutor.awaitTermination(2, SECONDS)) {
+                scheduledExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            // Just keep going and reset our interrupt status
+            Thread.currentThread().interrupt();
+            executor.shutdownNow();
+            scheduledExecutor.shutdown();
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -22,46 +22,24 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Random;
 
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.osgi.test.common.annotation.InjectService;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Tests that resource value changes are shown correctly
  */
-public class ValueTest {
-
-    private static final String USER = "user";
+public class ValueTest extends AbstractIntegrationTest {
 
     private static final String PROVIDER = "valueTester";
     private static final String LOCATION = "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}";
 
-    @InjectService
-    SensiNactSessionManager sessionManager;
-    SensiNactSession session;
-
     final Random random = new Random();
-    final TestUtils utils = new TestUtils();
-
-    @BeforeEach
-    void start() throws InterruptedException {
-        session = sessionManager.getDefaultSession(USER);
-    }
-
-    @AfterEach
-    void stop() {
-        session = null;
-    }
 
     @Test
     void testValueUpdate() throws IOException, InterruptedException {
@@ -70,8 +48,8 @@ public class ValueTest {
         final String rcName = "data";
         final int value = random.nextInt(1024);
         Instant valueSetInstant = Instant.now();
-        session.setResourceValue(PROVIDER, svcName, rcName, value);
-        session.setResourceValue(PROVIDER, "admin", "location", LOCATION);
+        createResource(PROVIDER, svcName, rcName, value, valueSetInstant);
+        session.setResourceValue(PROVIDER, "admin", "location", LOCATION, valueSetInstant);
 
         // Check thing direct access
         Thing thing = utils.queryJson("/Things(" + PROVIDER + ")", Thing.class);
@@ -123,7 +101,7 @@ public class ValueTest {
         final String svcName = "sensor";
         final String rcName = "rcWithUnit";
         final int value = random.nextInt(1024);
-        session.setResourceValue(PROVIDER, svcName, rcName, value);
+        createResource(PROVIDER, svcName, rcName, value);
 
         // No unit by default
         Datastream ds = utils.queryJson(

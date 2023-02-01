@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -41,25 +39,15 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.osgi.test.common.annotation.InjectService;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests that all links related to a thing are valid
  */
-public class LinksTest {
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    static class AnyIdDTO extends Id {
-    }
-
-    private static final TypeReference<ResultList<AnyIdDTO>> RESULT_ANY = new TypeReference<>() {
-    };
+public class LinksTest extends AbstractIntegrationTest {
 
     private static final TypeReference<ResultList<Datastream>> RESULT_DATASTREAMS = new TypeReference<ResultList<Datastream>>() {
     };
@@ -79,28 +67,14 @@ public class LinksTest {
     private static final TypeReference<ResultList<Thing>> RESULT_THINGS = new TypeReference<ResultList<Thing>>() {
     };
 
-    private static final String USER = "user";
-
     private static final String PROVIDER = "linkTester";
 
     private final Map<String, Class<? extends Id>> dtoClassCache = new HashMap<>();
 
-    @InjectService
-    SensiNactSessionManager sessionManager;
-    SensiNactSession session;
-
-    final TestUtils utils = new TestUtils();
-
-    @BeforeEach
-    void start() throws InterruptedException {
-        session = sessionManager.getDefaultSession(USER);
-    }
-
     @AfterEach
-    void stop() {
+    void clear() {
         dtoClassCache.clear();
         classFields.clear();
-        session = null;
     }
 
     /**
@@ -252,7 +226,7 @@ public class LinksTest {
     @Test
     void testLinksFromThings() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
@@ -328,7 +302,7 @@ public class LinksTest {
     @Test
     void testLinksFromLocations() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
@@ -357,9 +331,8 @@ public class LinksTest {
     @Test
     void testLinksFromHistoricalLocations() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
-        final SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.setResourceValue(PROVIDER, "admin", "location",
                 "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}");
 
@@ -391,7 +364,7 @@ public class LinksTest {
     @Test
     void testLinksFromDatastreams() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
@@ -442,7 +415,7 @@ public class LinksTest {
     @Test
     void testLinksFromSensors() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
@@ -475,7 +448,7 @@ public class LinksTest {
     @Test
     void testLinksFromObservations() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
@@ -505,7 +478,7 @@ public class LinksTest {
     @Test
     void testLinksFromObservedProperties() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<ObservedProperty> observedProperties = utils.queryJson("/ObservedProperties",
@@ -542,7 +515,7 @@ public class LinksTest {
     @Test
     void testLinksFromFeaturesOfInterest() throws IOException, InterruptedException {
         // Add a resource
-        session.setResourceValue(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "sensor", "data", 42);
 
         // Get the new locations
         ResultList<FeatureOfInterest> features = utils.queryJson("/FeaturesOfInterest",

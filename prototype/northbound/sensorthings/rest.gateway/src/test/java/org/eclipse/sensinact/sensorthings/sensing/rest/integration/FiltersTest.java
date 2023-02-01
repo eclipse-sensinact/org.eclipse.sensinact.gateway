@@ -32,61 +32,25 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.osgi.test.common.annotation.InjectService;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Tests the ref, count, ... filters
  */
-public class FiltersTest {
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    static class AnyIdDTO extends Id {
-    }
-
-    private static final TypeReference<ResultList<AnyIdDTO>> RESULT_ANY = new TypeReference<>() {
-    };
-
-    private static final TypeReference<ResultList<Self>> RESULT_SELF = new TypeReference<>() {
-    };
-
-    private static final String USER = "user";
-
-    @InjectService
-    SensiNactSessionManager sessionManager;
-    SensiNactSession session;
+public class FiltersTest extends AbstractIntegrationTest {
 
     final Random random = new Random();
-    final TestUtils utils = new TestUtils();
-
-    @BeforeEach
-    void start() throws InterruptedException {
-        session = sessionManager.getDefaultSession(USER);
-    }
-
-    @AfterEach
-    void stop() {
-        session = null;
-    }
 
     @Test
     void testCountFilter() throws IOException, InterruptedException {
         // Create providers
         int nbProviders = 4;
         for (int i = 0; i < nbProviders; i++) {
-            session.setResourceValue("countTester_" + (i + 1), "sensor", "rc", random.nextInt());
+            createResource("countTester_" + (i + 1), "sensor", "rc", random.nextInt());
         }
 
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
@@ -137,13 +101,11 @@ public class FiltersTest {
         final List<String> reversedProviderIds = new ArrayList<>(sortedProviderIds);
         Collections.reverse(reversedProviderIds);
 
-        sortedProviderIds.stream()
-        .filter(id -> id.startsWith(prefix))
-        .forEach(id -> {
-            session.setResourceValue(id, "svcA", "rcA", id);
-            session.setResourceValue(id, "svcB", "rcA", id + 256);
-            session.setResourceValue(id, "svcA", "rcB", id);
-            session.setResourceValue(id, "svcB", "rcB", id + 256);
+        sortedProviderIds.stream().filter(id -> id.startsWith(prefix)).forEach(id -> {
+            createResource(id, "svcA", "rcA", id);
+            createResource(id, "svcB", "rcA", id + 256);
+            createResource(id, "svcA", "rcB", id);
+            createResource(id, "svcB", "rcB", id + 256);
         });
 
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
@@ -190,7 +152,7 @@ public class FiltersTest {
         final String provider = "refTester";
         final String svc = "sensor";
         final String rc = "rc";
-        session.setResourceValue(provider, svc, rc, 42);
+        createResource(provider, svc, rc, 42);
 
         // Parsing will fail if there is any other JSON property
         ResultList<Self> resultList = utils.queryJson(String.format("/Things(%s)/Datastreams/$ref", provider),
@@ -218,7 +180,7 @@ public class FiltersTest {
         final String svc = "sensor";
         final String rc = "rc";
         final int value = random.nextInt();
-        session.setResourceValue(provider, svc, rc, value, creationTime);
+        createResource(provider, svc, rc, value, creationTime);
 
         ResultList<Self> observations = utils
                 .queryJson(String.format("/FeaturesOfInterest(%s)/Observations/$ref", provider), RESULT_SELF);
@@ -241,7 +203,7 @@ public class FiltersTest {
         final String provider = "selectTester";
         final String svc = "sensor";
         final String rc = "rc";
-        session.setResourceValue(provider, svc, rc, 42);
+        createResource(provider, svc, rc, 42);
 
         Set<String> selectedFields = Set.of("result", "resultTime");
         Map<?, ?> rawResultList = utils.queryJson("/Observations/?$select=" + String.join(",", selectedFields),
@@ -262,7 +224,7 @@ public class FiltersTest {
         final String rcPrefix = "rc";
         final int nbRc = 5;
         for (int i = 0; i < nbRc; i++) {
-            session.setResourceValue(provider, svc, rcPrefix + i, i);
+            createResource(provider, svc, rcPrefix + i, i);
         }
 
         // List all datastreams (should be more or as many as our resources)

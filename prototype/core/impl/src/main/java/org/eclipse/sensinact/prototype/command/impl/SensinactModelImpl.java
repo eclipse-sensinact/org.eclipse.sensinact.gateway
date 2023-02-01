@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -53,7 +53,6 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         this.pf = pf;
     }
 
-    @Override
     public SensinactResource getOrCreateResource(String model, String provider, String service, String resource,
             Class<?> valueType) {
         checkValid();
@@ -67,12 +66,22 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     /**
      * Returns the known providers
      */
-    public List<SensinactProvider> getProviders() {
+    public List<SensinactProviderImpl> getProviders() {
+        checkValid();
         return nexusImpl.getProviders().stream().map(this::toProvider).collect(Collectors.toList());
     }
 
+    /**
+     * Returns the known providers
+     */
+    public List<SensinactProviderImpl> getProviders(String model) {
+        checkValid();
+        return nexusImpl.getProviders(model).stream().map(this::toProvider).collect(Collectors.toList());
+    }
+
     @Override
-    public SensinactProvider getProvider(String model, String providerName) {
+    public SensinactProviderImpl getProvider(String model, String providerName) {
+        checkValid();
         final Provider provider = nexusImpl.getProvider(model, providerName);
         if (provider == null) {
             return null;
@@ -82,7 +91,8 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     }
 
     @Override
-    public SensinactProvider getProvider(String providerName) {
+    public SensinactProviderImpl getProvider(String providerName) {
+        checkValid();
         final Provider provider = nexusImpl.getProvider(providerName);
         if (provider == null) {
             return null;
@@ -92,17 +102,19 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     }
 
     @Override
-    public SensinactService getService(String model, String providerName, String service) {
+    public SensinactServiceImpl getService(String model, String providerName, String service) {
+        checkValid();
         return getService(nexusImpl.getProvider(model, providerName), model, service);
     }
 
     @Override
-    public SensinactService getService(String providerName, String service) {
+    public SensinactServiceImpl getService(String providerName, String service) {
+        checkValid();
         Provider provider = nexusImpl.getProvider(providerName);
         return getService(provider, nexusImpl.getProviderModel(providerName), service);
     }
 
-    private SensinactService getService(Provider provider, String model, String service) {
+    private SensinactServiceImpl getService(Provider provider, String model, String service) {
         if (provider == null) {
             return null;
         }
@@ -118,16 +130,18 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     }
 
     @Override
-    public SensinactResource getResource(String model, String providerName, String service, String resource) {
+    public SensinactResourceImpl getResource(String model, String providerName, String service, String resource) {
+        checkValid();
         return getResource(nexusImpl.getProvider(model, providerName), model, service, resource);
     }
 
-    public SensinactResource getResource(String providerName, String service, String resource) {
+    public SensinactResourceImpl getResource(String providerName, String service, String resource) {
+        checkValid();
         Provider provider = nexusImpl.getProvider(providerName);
         return getResource(provider, nexusImpl.getProviderModel(providerName), service, resource);
     }
 
-    private SensinactResource getResource(Provider provider, String model, String service, String resource) {
+    private SensinactResourceImpl getResource(Provider provider, String model, String service, String resource) {
         if (provider == null) {
             return null;
         }
@@ -160,17 +174,18 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         return snResource;
     }
 
-    @Override
     public <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
             Class<T> type) {
+        checkValid();
         return getResourceValue(nexusImpl.getProvider(model, providerName), service, resource, type);
     }
 
     public <T> TimedValue<T> getResourceValue(String providerName, String service, String resource, Class<T> type) {
+        checkValid();
         return getResourceValue(nexusImpl.getProvider(providerName), service, resource, type);
     }
 
-    public <T> TimedValue<T> getResourceValue(Provider provider, String service, String resource, Class<T> type) {
+    private <T> TimedValue<T> getResourceValue(Provider provider, String service, String resource, Class<T> type) {
         if (type == null) {
             throw new IllegalArgumentException("Resource type must not be null");
         }
@@ -212,7 +227,6 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         }
     }
 
-    @Override
     public void setOrCreateResource(String model, String providerName, String service, String resource, Class<?> type,
             Object value, Instant instant) {
         checkValid();
@@ -256,7 +270,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         return snProvider;
     }
 
-    private SensinactService toService(final SensinactProvider parent, final Service svcObject) {
+    private SensinactServiceImpl toService(final SensinactProvider parent, final Service svcObject) {
         final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, parent,
                 svcObject.eContainingFeature().getName());
 
@@ -266,7 +280,7 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         return snSvc;
     }
 
-    private SensinactResource toResource(final SensinactService parent, final EStructuralFeature rcFeature) {
+    private SensinactResourceImpl toResource(final SensinactService parent, final EStructuralFeature rcFeature) {
         return new SensinactResourceImpl(active, parent, rcFeature.getName(), rcFeature.getEType().getInstanceClass(),
                 accumulator, nexusImpl, pf);
     }

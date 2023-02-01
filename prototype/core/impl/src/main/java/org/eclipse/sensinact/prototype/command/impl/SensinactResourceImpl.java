@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -79,26 +79,14 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
-    public boolean isExclusivelyOwned() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isAutoDelete() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public Promise<Void> setValue(Object value, Instant timestamp) {
         checkValid();
 
         SensinactService service = getService();
         SensinactProvider provider = service.getProvider();
 
-        modelNexus.handleDataUpdate(provider.getModelName(), provider.getName(), service.getName(), getName(), getType(),
-                value, timestamp);
+        modelNexus.handleDataUpdate(provider.getModelName(), provider.getName(), service.getName(), getName(),
+                getType(), value, timestamp);
         return promiseFactory.resolved(null);
     }
 
