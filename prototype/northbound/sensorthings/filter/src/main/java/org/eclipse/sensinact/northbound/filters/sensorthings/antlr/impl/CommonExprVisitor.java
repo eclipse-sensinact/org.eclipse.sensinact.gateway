@@ -1,0 +1,226 @@
+/*********************************************************************
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
+
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.AddexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.CommonexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.DivexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.FirstmemberexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.MethodcallexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.ModexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.MulexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.NegateexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.ParenexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.PrimitiveliteralContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubexprContext;
+
+/**
+ * @author thoma
+ *
+ */
+public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<Object, Object>> {
+
+    final Parser parser;
+
+    public CommonExprVisitor(Parser parser) {
+        this.parser = parser;
+    }
+
+    @Override
+    public Function<Object, Object> visitPrimitiveliteral(PrimitiveliteralContext ctx) {
+        ParserRuleContext element = ctx.getChild(ParserRuleContext.class, 0);
+        switch (element.getRuleIndex()) {
+        case ODataFilterParser.RULE_nullvalue:
+            return x -> null;
+
+        case ODataFilterParser.RULE_booleanvalue:
+            return x -> ("true".equalsIgnoreCase(ctx.getText()));
+
+        case ODataFilterParser.RULE_decimalvalue:
+        case ODataFilterParser.RULE_doublevalue: {
+            final Double value = new DoubleVisitor().visitChildren(ctx);
+            return x -> value;
+        }
+        case ODataFilterParser.RULE_sbytevalue:
+        case ODataFilterParser.RULE_bytevalue:
+        case ODataFilterParser.RULE_int16value:
+        case ODataFilterParser.RULE_int32value:
+        case ODataFilterParser.RULE_int64value: {
+            final Integer value = new IntegerVisitor().visitChildren(ctx);
+            return x -> value;
+        }
+
+        case ODataFilterParser.RULE_string_1: {
+            final String value = new StringVisitor().visitChildren(ctx);
+            return x -> value;
+        }
+
+        default:
+            throw new UnsupportedRuleException(parser, element);
+        }
+    }
+
+    @Override
+    public Function<Object, Object> visitNegateexpr(NegateexprContext ctx) {
+        Function<Object, Object> subExpr = this.visitCommonexpr(ctx.commonexpr());
+        return x -> {
+            Object res = subExpr.apply(x);
+            if (res instanceof Number) {
+                if (res instanceof Integer) {
+                    return -((Integer) res);
+                } else {
+                    return -((Number) res).doubleValue();
+                }
+            }
+
+            throw new InvalidResultTypeException("Can't negate", "number", res);
+        };
+    }
+
+    @Override
+    public Function<Object, Object> visitParenexpr(ParenexprContext ctx) {
+        return this.visitCommonexpr(ctx.commonexpr());
+    }
+
+    @Override
+    public Function<Object, Object> visitMethodcallexpr(MethodcallexprContext ctx) {
+        return new MethodCallExprVisitor(parser).visit(ctx);
+    }
+
+    @Override
+    public Function<Object, Object> visitFirstmemberexpr(FirstmemberexprContext ctx) {
+        final String path = ctx.getText();
+        return x -> {
+            // TODO: use real stuff
+            if (x instanceof Map) {
+                return ((Map<?, ?>) x).get(path);
+            } else {
+                return null;
+            }
+        };
+    }
+
+    @Override
+    public Function<Object, Object> visitCommonexpr(CommonexprContext ctx) {
+        final Function<Object, Object> firstExpr = this.visit(ctx.getChild(0));
+        if (ctx.getChildCount() == 1) {
+            // Simple expression
+            return firstExpr;
+        }
+
+        // We have an operator and a right part
+        final ParserRuleContext rightElement = ctx.getChild(ParserRuleContext.class, 1);
+        final CommonExprVisitor rightVisitor = new CommonExprVisitor(parser);
+
+        final BiFunction<Object, Object, Object> subOperation;
+        final Function<Object, Object> rightExpr;
+
+        switch (rightElement.getRuleIndex()) {
+        case ODataFilterParser.RULE_addexpr:
+            rightExpr = rightVisitor.visit(((AddexprContext) rightElement).commonexpr());
+            subOperation = this::add;
+            break;
+
+        case ODataFilterParser.RULE_subexpr:
+            rightExpr = rightVisitor.visit(((SubexprContext) rightElement).commonexpr());
+            subOperation = this::sub;
+            break;
+
+        case ODataFilterParser.RULE_mulexpr:
+            rightExpr = rightVisitor.visit(((MulexprContext) rightElement).commonexpr());
+            subOperation = this::mul;
+            break;
+
+        case ODataFilterParser.RULE_divexpr:
+            rightExpr = rightVisitor.visit(((DivexprContext) rightElement).commonexpr());
+            subOperation = this::div;
+            break;
+
+        case ODataFilterParser.RULE_modexpr:
+            rightExpr = rightVisitor.visit(((ModexprContext) rightElement).commonexpr());
+            subOperation = this::mod;
+            break;
+
+        default:
+            throw new UnsupportedRuleException("Unexpected right operator", parser, rightElement);
+        }
+
+        return x -> {
+            final Object leftValue = firstExpr.apply(x);
+            final Object rightValue = rightExpr.apply(x);
+            return subOperation.apply(leftValue, rightValue);
+        };
+    }
+
+    private Object add(Object l, Object r) {
+        if (l instanceof Number && r instanceof Number) {
+            if (l instanceof Integer && r instanceof Integer) {
+                return ((Integer) l) + ((Integer) r);
+            } else {
+                return ((Number) l).doubleValue() + ((Number) r).doubleValue();
+            }
+        } else if (l instanceof String || r instanceof String) {
+            return String.valueOf(l) + String.valueOf(r);
+        } else {
+            throw new InvalidResultTypeException("Can't add", "numbers", l, r);
+        }
+    }
+
+    private Object sub(Object l, Object r) {
+        if (l instanceof Number && r instanceof Number) {
+            if (l instanceof Integer && r instanceof Integer) {
+                return ((Integer) l) - ((Integer) r);
+            } else {
+                return ((Number) l).doubleValue() - ((Number) r).doubleValue();
+            }
+        } else {
+            throw new InvalidResultTypeException("Can't substract", "numbers", l, r);
+        }
+    }
+
+    private Object mul(Object l, Object r) {
+        if (l instanceof Number && r instanceof Number) {
+            if (l instanceof Integer && r instanceof Integer) {
+                return ((Integer) l) * ((Integer) r);
+            } else {
+                return ((Number) l).doubleValue() * ((Number) r).doubleValue();
+            }
+        } else {
+            throw new InvalidResultTypeException("Can't multiply", "numbers", l, r);
+        }
+    }
+
+    private Object div(Object l, Object r) {
+        if (l instanceof Number && r instanceof Number) {
+            return ((Number) l).doubleValue() / ((Number) r).doubleValue();
+        } else {
+            throw new InvalidResultTypeException("Can't divide", "numbers", l, r);
+        }
+    }
+
+    private Object mod(Object l, Object r) {
+        if (l instanceof Integer && r instanceof Integer) {
+            return ((Integer) l) % ((Integer) r);
+        } else {
+            throw new InvalidResultTypeException("Can't apply modulus", "integers", l, r);
+        }
+    }
+}

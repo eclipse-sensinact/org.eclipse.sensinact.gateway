@@ -24,6 +24,7 @@
 
   <modules>
     <module>dto</module>
+    <module>filter</module>
     <module>rest.api</module>
     <module>rest.gateway</module>
   </modules>
