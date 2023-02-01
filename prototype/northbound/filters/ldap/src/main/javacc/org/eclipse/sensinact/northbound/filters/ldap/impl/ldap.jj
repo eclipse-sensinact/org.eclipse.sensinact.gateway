@@ -1,0 +1,278 @@
+/*********************************************************************
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+options
+{
+  STATIC = false;
+  FORCE_LA_CHECK = true;
+  JAVA_UNICODE_ESCAPE = true;
+  DEBUG_PARSER = false;
+}
+
+PARSER_BEGIN(LdapParser)
+package org.eclipse.sensinact.northbound.filters.ldap.impl;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LdapParser
+{
+  public static ILdapCriterion parse(final String query) throws ParseException
+  {
+    LdapParser parser = new LdapParser(new StringReader(query));
+    return parser.start();
+  }
+}
+
+PARSER_END(LdapParser)
+
+TOKEN :
+{
+  < LPAR : "(" >
+| < RPAR : ")" >
+}
+
+TOKEN :
+{
+  < AND : "&" >
+| < OR : "|" >
+| < NOT : "!" >
+}
+
+TOKEN :
+{
+  < EQUAL : "=" >
+| < APPROX : "~=" >
+| < GREATER_EQ : ">=" >
+| < LESSER_EQ : "<=" >
+}
+
+TOKEN :
+{
+  < PATH_SEPARATOR : "." >
+| < STAR : "*" >
+}
+
+TOKEN :
+{
+  < MODEL : "MODEL" >
+| < PROVIDER : "PROVIDER" >
+}
+
+TOKEN :
+{
+  < PATH_ELEMENT : ([ "a"-"z", "A"-"Z", "0"-"9", "-" ])+ >
+| < OTHER_STRING_CHARS : (~[ "a"-"z", "A"-"Z", "0"-"9", "(", ")", "&", "|", "!", "=", "*", "." ])+ >
+}
+
+ILdapCriterion start() :
+{
+  ILdapCriterion root;
+}
+{
+  root = filter() < EOF >
+  {
+    return root;
+  }
+}
+
+ILdapCriterion filter() :
+{
+  ILdapCriterion criterion;
+}
+{
+  < LPAR > criterion = filterComp() < RPAR >
+  {
+    return criterion;
+  }
+}
+
+ILdapCriterion filterComp() :
+{
+  ILdapCriterion criterion;
+}
+{
+  (
+    criterion = and()
+  | criterion = or()
+  | criterion = not()
+  | criterion = simple()
+  )
+  {
+    return criterion;
+  }
+}
+
+ILdapCriterion and() :
+{
+  List < ILdapCriterion > criteria;
+}
+{
+  < AND > criteria = filterList()
+  {
+    return new LdapFilter(LdapOperator.AND, criteria);
+  }
+}
+
+ILdapCriterion or() :
+{
+  List < ILdapCriterion > criteria;
+}
+{
+  < OR > criteria = filterList()
+  {
+    return new LdapFilter(LdapOperator.OR, criteria);
+  }
+}
+
+ILdapCriterion not() :
+{
+  ILdapCriterion criterion;
+}
+{
+  < NOT > criterion = filter()
+  {
+    criterion.negate();
+    return criterion;
+  }
+}
+
+List < ILdapCriterion > filterList() :
+{
+  ILdapCriterion criterion;
+  List < ILdapCriterion > others = null;
+}
+{
+  criterion = filter() [ others = filterList() ]
+  {
+    List < ILdapCriterion > merged = new ArrayList <  > ();
+    merged.add(criterion);
+    if (others != null)
+    {
+      merged.addAll(others);
+    }
+    return merged;
+  }
+}
+
+ILdapCriterion simple() :
+{
+  SensiNactPath rcPath;
+  String value;
+  LdapComparator operator;
+}
+{
+  < MODEL > < EQUAL > value = pathElement()
+  {
+    return new CriterionProviderModel(value);
+  }
+| < PROVIDER > < EQUAL > value = pathElement()
+  {
+    return new CriterionProviderName(value);
+  }
+| rcPath = attr() operator = filterType() value = value()
+  {
+    if (operator == LdapComparator.EQUAL && "*".equals(value))
+    {
+      return new CriterionResourcePresence(rcPath);
+    }
+    else
+    {
+      return new CriterionResourceOperator(rcPath, value, operator);
+    }
+  }
+}
+
+LdapComparator filterType() :
+{}
+{
+  < EQUAL >
+  {
+    return LdapComparator.EQUAL;
+  }
+| < APPROX >
+  {
+    return LdapComparator.APPROX;
+  }
+| < GREATER_EQ >
+  {
+    return LdapComparator.GREATER_EQ;
+  }
+| < LESSER_EQ >
+  {
+    return LdapComparator.LESS_EQ;
+  }
+}
+
+SensiNactPath attr() :
+{
+  String service = null;
+  String resource = null;
+}
+{
+  (
+    < STAR > < PATH_SEPARATOR > resource = pathElement()
+  | service = pathElement() < PATH_SEPARATOR > resource = pathElement()
+  )
+  {
+    return new SensiNactPath(service, resource);
+  }
+}
+
+String pathElement() :
+{
+  Token t;
+}
+{
+  t = < PATH_ELEMENT >
+  {
+    return t.image;
+  }
+}
+
+String value() :
+{
+  String t;
+  String others = null;
+}
+{
+  t = valuePart() [ others = value() ]
+  {
+    if (others == null)
+    {
+      return t;
+    }
+    else
+    {
+      return t + others;
+    }
+  }
+}
+
+String valuePart() :
+{
+  Token t;
+}
+{
+  (
+    t = < PATH_ELEMENT >
+  | t = < PATH_SEPARATOR >
+  | t = < STAR >
+  | t = < AND >
+  | t = < OR >
+  | t = < NOT >
+  | t = < OTHER_STRING_CHARS >
+  )
+  {
+    return t.image;
+  }
+}
