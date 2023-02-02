@@ -31,8 +31,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
@@ -40,6 +40,7 @@ import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.model.core.Admin;
 import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.Metadata;
@@ -111,6 +112,7 @@ public class ModelNexus {
                 if (!resource.getContents().isEmpty()) {
                     EPackage defaultPackage = (EPackage) resource.getContents().get(0);
                     resource.setURI(URI.createURI(defaultPackage.getNsURI()));
+                    // TODO: Set URI Mapping from basic.ecore to nsURI
                     return Optional.of(defaultPackage);
                 }
             } catch (IOException e) {
@@ -176,7 +178,7 @@ public class ModelNexus {
     }
 
     public void shutDown() {
-        defaultPackage.eResource().setURI(URI.createFileURI(BASIC_BASE_ECORE));
+        defaultPackage.eResource().setURI(URI.createFileURI(Path.of(BASIC_BASE_ECORE).toAbsolutePath().toString()));
         try {
             defaultPackage.eResource().save(null);
             providerCache.values().forEach(this::saveInstance);
@@ -563,13 +565,13 @@ public class ModelNexus {
     }
 
     private void saveInstance(ProviderTypeWrapper wrapper) {
-        URI baseUri = URI.createURI(INSTANCES);
+        URI baseUri = URI.createFileURI(Path.of(INSTANCES).toAbsolutePath().toString());
         wrapper.getInstances().forEach((u, e) -> {
             URI instanceUri = baseUri.appendSegments(u.segments()).appendFileExtension("xmi");
             Resource res = resourceSet.createResource(instanceUri);
             res.getContents().add(e);
             try {
-                e.eResource().save(null);
+                e.eResource().save(Collections.singletonMap(XMLResource.OPTION_SCHEMA_LOCATION, true));
             } catch (IOException ex) {
                 LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error saving provider fro URI: {}", instanceUri,
                         e);
