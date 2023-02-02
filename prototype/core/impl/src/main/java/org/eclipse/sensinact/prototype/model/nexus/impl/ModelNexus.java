@@ -112,7 +112,9 @@ public class ModelNexus {
                 if (!resource.getContents().isEmpty()) {
                     EPackage defaultPackage = (EPackage) resource.getContents().get(0);
                     resource.setURI(URI.createURI(defaultPackage.getNsURI()));
-                    // TODO: Set URI Mapping from basic.ecore to nsURI
+                    resourceSet.getResources().remove(resource);
+                    resourceSet.getPackageRegistry().put(defaultPackage.getNsURI(), defaultPackage);
+
                     return Optional.of(defaultPackage);
                 }
             } catch (IOException e) {

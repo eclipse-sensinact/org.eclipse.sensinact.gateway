@@ -91,12 +91,12 @@ public class EMFUtil {
 
     public static EPackage createPackage(String name, String nsUri, String prefix, ResourceSet resourceSet) {
         Resource resource = new XMIResourceImpl(URI.createURI(nsUri));
-        resourceSet.getResources().add(resource);
         EPackage ePackage = EcoreFactory.eINSTANCE.createEPackage();
         resource.getContents().add(ePackage);
         ePackage.setName(name);
         ePackage.setNsPrefix(prefix);
         ePackage.setNsURI(nsUri);
+        resourceSet.getPackageRegistry().put(nsUri, ePackage);
         return ePackage;
     }
 
