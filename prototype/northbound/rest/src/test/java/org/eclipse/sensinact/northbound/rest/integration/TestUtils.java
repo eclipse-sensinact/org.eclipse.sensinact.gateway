@@ -42,8 +42,16 @@ public class TestUtils {
      * Constructs a DTO to use with PrototypePush
      */
     public GenericDto makeDto(String provider, String service, String resource, Object value, Class<?> type) {
+        return makeDto(provider, provider, service, resource, value, type);
+    }
+
+    /**
+     * Constructs a DTO to use with PrototypePush
+     */
+    public GenericDto makeDto(String model, String provider, String service, String resource, Object value,
+            Class<?> type) {
         GenericDto dto = new GenericDto();
-        dto.model = provider;
+        dto.model = model;
         dto.provider = provider;
         dto.service = service;
         dto.resource = resource;

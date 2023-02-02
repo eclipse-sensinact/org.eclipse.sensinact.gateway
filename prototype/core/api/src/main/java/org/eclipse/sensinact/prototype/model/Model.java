@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,20 +8,21 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model;
 
+import java.util.Map;
+
+import org.eclipse.sensinact.prototype.command.CommandScoped;
+
 /**
- * A builder for programmatically registering models
+ * A model for a Provider
  */
-public interface ProviderBuilder {
+public interface Model extends Modelled, CommandScoped {
 
-    ProviderBuilder exclusivelyOwned(boolean exclusive);
+    ServiceBuilder<Service> createService(String service);
 
-    ProviderBuilder withAutoDeletion(boolean autoDelete);
+    Map<String, ? extends Service> getServices();
 
-    ProviderBuilder withModelName(String name);
-
-    Provider build();
 }

@@ -142,11 +142,14 @@ public class EMFUtil {
      * @param type
      * @return
      */
-    public static EAttribute createEAttribute(EClass service, String resource, Class<?> type,
+    public static EAttribute createEAttribute(EClass service, String resource, Class<?> type, Object defaultValue,
             Function<EStructuralFeature, List<EAnnotation>> annotationCreator) {
         EAttribute attribute = EcoreFactory.eINSTANCE.createEAttribute();
         attribute.setName(resource);
         attribute.setEType(typeMap.get(type));
+        if (defaultValue != null) {
+            attribute.setDefaultValue(defaultValue);
+        }
         service.getEStructuralFeatures().add(attribute);
         if (annotationCreator != null) {
             attribute.getEAnnotations().addAll(annotationCreator.apply(attribute));

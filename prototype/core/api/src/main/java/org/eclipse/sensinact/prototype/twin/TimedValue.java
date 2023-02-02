@@ -8,21 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.model;
+package org.eclipse.sensinact.prototype.twin;
 
-import java.util.Map;
+import java.time.Instant;
 
-/**
- * A model for a Provider
- */
-public interface Provider extends Modelled {
+public interface TimedValue<T> {
 
-    ServiceBuilder createService(String service);
+    Instant getTimestamp();
 
-    Map<String, ? extends Service> getServices();
-
-    String getModelName();
-
+    T getValue();
 }

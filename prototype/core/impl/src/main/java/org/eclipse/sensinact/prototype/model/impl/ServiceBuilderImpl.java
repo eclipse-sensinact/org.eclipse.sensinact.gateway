@@ -1,0 +1,81 @@
+/*********************************************************************
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+package org.eclipse.sensinact.prototype.model.impl;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.eclipse.sensinact.prototype.model.Model;
+import org.eclipse.sensinact.prototype.model.ResourceBuilder;
+import org.eclipse.sensinact.prototype.model.Service;
+import org.eclipse.sensinact.prototype.model.ServiceBuilder;
+import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
+import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+
+public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, Model, Service> implements ServiceBuilder<P> {
+
+    private final String name;
+    private final ModelNexus nexusImpl;
+    private final NotificationAccumulator accumulator;
+    private final List<NestableBuilderImpl<?, Service, ?>> nested = new ArrayList<>();
+    private Instant creationTimestamp;
+
+    public ServiceBuilderImpl(AtomicBoolean active, P parent, Model built, String name, ModelNexus nexusImpl,
+            NotificationAccumulator accumulator) {
+        super(active, parent, built);
+        this.name = name;
+        this.nexusImpl = nexusImpl;
+        this.accumulator = accumulator;
+    }
+
+    @Override
+    public ServiceBuilder<P> exclusivelyOwned(boolean exclusive) {
+        checkValid();
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public ServiceBuilder<P> withAutoDeletion(boolean autoDelete) {
+        checkValid();
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public ServiceBuilder<P> withCreationTime(Instant creationTime) {
+        checkValid();
+        this.creationTimestamp = creationTime;
+        return this;
+    }
+
+    @Override
+    public ResourceBuilder<ServiceBuilder<P>, Object> withResource(String name) {
+        checkValid();
+        ResourceBuilderImpl<ServiceBuilder<P>, Object> rb = new ResourceBuilderImpl<>(active, this, null, name,
+                nexusImpl, accumulator);
+        nested.add(rb);
+        return rb;
+    }
+
+    protected Service doBuild(Model builtParent) {
+        checkValid();
+        Service s = new ServiceImpl(active, builtParent,
+                nexusImpl.createService(builtParent.getName(), name,
+                        creationTimestamp == null ? Instant.now() : creationTimestamp, accumulator),
+                nexusImpl, accumulator);
+        nested.forEach(n -> n.doBuild(s));
+        return s;
+    }
+
+}

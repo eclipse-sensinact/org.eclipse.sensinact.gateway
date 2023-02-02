@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,12 +8,14 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command;
 
 import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayThread;
 
+import org.eclipse.sensinact.prototype.model.SensinactModelManager;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -23,7 +25,7 @@ import org.osgi.util.promise.PromiseFactory;
  * depends upon the result of a previous parent command. This command will
  * correctly delay execution of the dependent command until the parent command
  * has completed. It will do this without blocking the Gateway Thread.
- * 
+ *
  * Notifications will not be delivered until the child command has completed.
  *
  * @param <P>
@@ -34,10 +36,11 @@ public abstract class DependentCommand<P, T> extends AbstractSensinactCommand<T>
     private AbstractSensinactCommand<P> parent;
 
     @Override
-    protected Promise<T> call(SensinactModel model, PromiseFactory promiseFactory) {
-        Promise<P> parentResult = safeCall(parent, model, promiseFactory);
+    protected Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+            PromiseFactory promiseFactory) {
+        Promise<P> parentResult = safeCall(parent, twin, modelMgr, promiseFactory);
         if (parentResult.isDone()) {
-            return safeCall(() -> call(parentResult, model, promiseFactory), promiseFactory);
+            return safeCall(() -> call(parentResult, twin, modelMgr, promiseFactory), promiseFactory);
         } else {
             GatewayThread gateway = getGatewayThread();
             Deferred<T> d = promiseFactory.deferred();
@@ -48,7 +51,8 @@ public abstract class DependentCommand<P, T> extends AbstractSensinactCommand<T>
         }
     }
 
-    protected abstract Promise<T> call(Promise<P> parentResult, SensinactModel model, PromiseFactory pf);
+    protected abstract Promise<T> call(Promise<P> parentResult, SensinactDigitalTwin twin,
+            SensinactModelManager modelMgr, PromiseFactory pf);
 
     private class ChildCommand extends AbstractSensinactCommand<T> {
 
@@ -60,8 +64,9 @@ public abstract class DependentCommand<P, T> extends AbstractSensinactCommand<T>
         }
 
         @Override
-        protected Promise<T> call(SensinactModel model, PromiseFactory promiseFactory) {
-            return DependentCommand.this.call(parentResult, model, promiseFactory);
+        protected Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                PromiseFactory promiseFactory) {
+            return DependentCommand.this.call(parentResult, twin, modelMgr, promiseFactory);
         }
     }
 }

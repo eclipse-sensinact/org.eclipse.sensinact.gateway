@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,13 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.prototype.model.SensinactModelManager;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -22,7 +24,9 @@ public class IndependentCommands<T> extends AbstractSensinactCommand<List<T>> {
 
     private List<AbstractSensinactCommand<? extends T>> commands;
 
-    private SensinactModel model;
+    private SensinactDigitalTwin twin;
+
+    private SensinactModelManager modelMgr;
 
     private PromiseFactory pf;
 
@@ -41,8 +45,10 @@ public class IndependentCommands<T> extends AbstractSensinactCommand<List<T>> {
     }
 
     @Override
-    protected Promise<List<T>> call(SensinactModel model, PromiseFactory promiseFactory) {
-        this.model = model;
+    protected Promise<List<T>> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+            PromiseFactory promiseFactory) {
+        this.twin = twin;
+        this.modelMgr = modelMgr;
         this.pf = promiseFactory;
 
         return promiseFactory.all(commands.stream().map(this::safeCall).collect(Collectors.toList()));
@@ -50,6 +56,6 @@ public class IndependentCommands<T> extends AbstractSensinactCommand<List<T>> {
 
     @SuppressWarnings("unchecked")
     private Promise<T> safeCall(AbstractSensinactCommand<? extends T> command) {
-        return (Promise<T>) safeCall(command, model, pf);
+        return (Promise<T>) safeCall(command, twin, modelMgr, pf);
     }
 }

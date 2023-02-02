@@ -21,13 +21,14 @@ import java.util.function.Predicate;
 
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.command.SensinactModel;
 import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
@@ -68,8 +69,9 @@ public class FilterTest {
         Predicate<ResourceSnapshot> rcFilter = r -> "resource".equals(r.getName());
 
         Collection<ProviderSnapshot> providers = thread
-                .execute(new AbstractSensinactCommand<Collection<ProviderSnapshot>>() {
-                    protected Promise<Collection<ProviderSnapshot>> call(SensinactModel model, PromiseFactory pf) {
+                .execute(new AbstractTwinCommand<Collection<ProviderSnapshot>>() {
+                    protected Promise<Collection<ProviderSnapshot>> call(SensinactDigitalTwin model,
+                            PromiseFactory pf) {
                         return pf.resolved(model.filteredSnapshot(null, providerFilter, svcFilter, rcFilter));
                     };
                 }).getValue();

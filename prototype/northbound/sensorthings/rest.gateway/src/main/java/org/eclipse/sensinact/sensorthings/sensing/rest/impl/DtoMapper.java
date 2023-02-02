@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.geojson.Polygon;
 import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -47,7 +47,9 @@ public class DtoMapper {
 
     private static ResourceDescription getProviderAdminField(SensiNactSession userSession, String provider,
             String resource) {
-        return userSession.describeResource(provider, "admin", resource);
+        ResourceDescription description = userSession.describeResource(provider, "admin", resource);
+        // Use an empty description to avoid NPE elsewhere
+        return description == null ? new ResourceDescription() : description;
     }
 
     private static String toString(Object o) {

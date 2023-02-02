@@ -10,11 +10,11 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command.impl;
+package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.time.Instant;
 
-import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 
 public class TimedValueImpl<T> implements TimedValue<T> {
 

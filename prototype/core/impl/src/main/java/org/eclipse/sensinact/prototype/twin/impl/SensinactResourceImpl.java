@@ -10,25 +10,27 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command.impl;
+package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.Service;
-import org.eclipse.sensinact.prototype.command.SensinactProvider;
-import org.eclipse.sensinact.prototype.command.SensinactResource;
-import org.eclipse.sensinact.prototype.command.SensinactService;
-import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.twin.SensinactProvider;
+import org.eclipse.sensinact.prototype.twin.SensinactResource;
+import org.eclipse.sensinact.prototype.twin.SensinactService;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -104,24 +106,31 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         if (svcFeature == null) {
             return null;
         }
-        final Service svc = (Service) provider.eGet(svcFeature);
 
-        final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(name);
+        final EStructuralFeature rcFeature = ((EClass) svcFeature.getEType()).getEStructuralFeature(name);
         if (rcFeature == null) {
-            // No value
-            return promiseFactory.resolved(new TimedValueImpl<Object>(null, null));
+            // This should not happen as we wouldn't create this resource
+            return null;
         }
 
-        // Get the resource metadata
-        final Metadata metadata = svc.getMetadata().get(rcFeature);
+        final Service svc = (Service) provider.eGet(svcFeature);
         final Instant timestamp;
-        if (metadata != null) {
-            timestamp = metadata.getTimestamp();
+        final Object value;
+        if (svc != null) {
+            value = svc.eGet(rcFeature);
+            // Get the resource metadata
+            final Metadata metadata = svc.getMetadata().get(rcFeature);
+            if (metadata != null) {
+                timestamp = metadata.getTimestamp();
+            } else {
+                timestamp = null;
+            }
         } else {
+            value = null;
             timestamp = null;
         }
 
-        return promiseFactory.resolved(new TimedValueImpl<Object>(svc.eGet(rcFeature), timestamp));
+        return promiseFactory.resolved(new TimedValueImpl<Object>(value, timestamp));
     }
 
     @Override

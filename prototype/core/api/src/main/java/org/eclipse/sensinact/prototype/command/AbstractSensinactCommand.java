@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command;
 
@@ -17,7 +17,9 @@ import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayTh
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -34,11 +36,11 @@ public abstract class AbstractSensinactCommand<T> {
         this.accumulator = accumulator;
     }
 
-    public final Promise<T> call(SensinactModel model) throws Exception {
+    public final Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr) throws Exception {
         GatewayThread gateway = getGatewayThread();
         if (canRun.getAndSet(false)) {
             PromiseFactory promiseFactory = gateway.getPromiseFactory();
-            return call(model, promiseFactory).onResolve(getAccumulator()::completeAndSend);
+            return call(twin, modelMgr, promiseFactory).onResolve(getAccumulator()::completeAndSend);
         } else {
             throw new IllegalStateException("Commands can only be executed once");
         }
@@ -51,12 +53,13 @@ public abstract class AbstractSensinactCommand<T> {
         return accumulator;
     }
 
-    protected abstract Promise<T> call(SensinactModel model, PromiseFactory promiseFactory);
+    protected abstract Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+            PromiseFactory promiseFactory);
 
-    protected static <R> Promise<R> safeCall(AbstractSensinactCommand<R> command, SensinactModel model,
-            PromiseFactory pf) {
+    protected static <R> Promise<R> safeCall(AbstractSensinactCommand<R> command, SensinactDigitalTwin twin,
+            SensinactModelManager modelMgr, PromiseFactory pf) {
         try {
-            return command.call(model, pf);
+            return command.call(twin, modelMgr, pf);
         } catch (Exception e) {
             return pf.failed(e);
         }

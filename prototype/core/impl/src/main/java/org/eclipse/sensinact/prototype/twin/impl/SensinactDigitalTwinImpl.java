@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command.impl;
+package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -20,16 +20,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.Service;
-import org.eclipse.sensinact.prototype.command.SensinactModel;
-import org.eclipse.sensinact.prototype.command.SensinactProvider;
-import org.eclipse.sensinact.prototype.command.SensinactResource;
-import org.eclipse.sensinact.prototype.command.SensinactService;
-import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ProviderSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ResourceSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ServiceSnapshotImpl;
@@ -38,15 +35,20 @@ import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.prototype.twin.SensinactProvider;
+import org.eclipse.sensinact.prototype.twin.SensinactResource;
+import org.eclipse.sensinact.prototype.twin.SensinactService;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SensinactModelImpl extends CommandScopedImpl implements SensinactModel {
+public class SensinactDigitalTwinImpl extends CommandScopedImpl implements SensinactDigitalTwin {
 
     private final NotificationAccumulator accumulator;
     private final ModelNexus nexusImpl;
     private final PromiseFactory pf;
 
-    public SensinactModelImpl(NotificationAccumulator accumulator, ModelNexus nexusImpl, PromiseFactory pf) {
+    public SensinactDigitalTwinImpl(NotificationAccumulator accumulator, ModelNexus nexusImpl, PromiseFactory pf) {
         super(new AtomicBoolean(true));
         this.accumulator = accumulator;
         this.nexusImpl = nexusImpl;
@@ -102,6 +104,17 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
     }
 
     @Override
+    public SensinactProvider createProvider(String model, String providerName) {
+        return toProvider(nexusImpl.createProviderInstance(model, providerName, accumulator));
+    }
+
+    @Override
+    public SensinactProvider createProvider(String model, String providerName, Instant instant) {
+        return instant == null ? createProvider(model, providerName)
+                : toProvider(nexusImpl.createProviderInstance(model, providerName, instant, accumulator));
+    }
+
+    @Override
     public SensinactServiceImpl getService(String model, String providerName, String service) {
         checkValid();
         return getService(nexusImpl.getProvider(model, providerName), model, service);
@@ -123,10 +136,9 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         if (svcFeature == null) {
             return null;
         }
-        final Service svc = (Service) provider.eGet(svcFeature);
 
         final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, provider.getId());
-        return toService(snProvider, svc);
+        return toService(snProvider, svcFeature);
     }
 
     @Override
@@ -151,26 +163,19 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
             return null;
         }
 
-        final Service svc = (Service) provider.eGet(svcFeature);
-
-        final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resource);
+        final EStructuralFeature rcFeature = ((EClass) svcFeature.getEType()).getEStructuralFeature(resource);
+        if (rcFeature == null) {
+            return null;
+        }
 
         // Construct the resource
         final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, provider.getId());
-        final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, snProvider,
-                svc.eContainingFeature().getName());
+        final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, snProvider, svcFeature.getName());
         snProvider.setServices(List.of(snSvc));
 
-        final SensinactResourceImpl snResource;
-        if (rcFeature != null) {
-            // Known resource
-            snResource = new SensinactResourceImpl(active, snSvc, rcFeature.getName(),
-                    rcFeature.getEType().getInstanceClass(), accumulator, nexusImpl, pf);
-            snSvc.setResources(List.of(snResource));
-        } else {
-            // Unknown resource
-            snResource = new SensinactResourceImpl(active, snSvc, resource, null, accumulator, nexusImpl, pf);
-        }
+        final SensinactResourceImpl snResource = new SensinactResourceImpl(active, snSvc, rcFeature.getName(),
+                rcFeature.getEType().getInstanceClass(), accumulator, nexusImpl, pf);
+        snSvc.setResources(List.of(snResource));
         return snResource;
     }
 
@@ -262,21 +267,19 @@ public class SensinactModelImpl extends CommandScopedImpl implements SensinactMo
         if (loadServices) {
             // List services
             final List<SensinactService> services = modelProvider.eClass().getEStructuralFeatures().stream()
-                    .map((feature) -> toService(snProvider, (Service) modelProvider.eGet(feature)))
-                    .collect(Collectors.toList());
-            services.add(toService(snProvider, modelProvider.getAdmin()));
+                    .map(feature -> toService(snProvider, feature)).collect(Collectors.toList());
+            services.add(toService(snProvider, modelProvider.eClass().getEStructuralFeature("admin")));
             snProvider.setServices(services);
         }
         return snProvider;
     }
 
-    private SensinactServiceImpl toService(final SensinactProvider parent, final Service svcObject) {
-        final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, parent,
-                svcObject.eContainingFeature().getName());
+    private SensinactServiceImpl toService(final SensinactProvider parent, EStructuralFeature feature) {
+        final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, parent, feature.getName());
 
         // List resources
-        snSvc.setResources(svcObject.eClass().getEStructuralFeatures().stream()
-                .map((feature) -> toResource(snSvc, feature)).collect(Collectors.toList()));
+        snSvc.setResources(((EClass) feature.getEType()).getEStructuralFeatures().stream()
+                .map(f -> toResource(snSvc, f)).collect(Collectors.toList()));
         return snSvc;
     }
 

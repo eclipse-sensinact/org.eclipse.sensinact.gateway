@@ -22,11 +22,13 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.prototype.command.SensinactModel;
-import org.eclipse.sensinact.prototype.command.SensinactProvider;
-import org.eclipse.sensinact.prototype.command.SensinactResource;
-import org.eclipse.sensinact.prototype.command.SensinactService;
+import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
+import org.eclipse.sensinact.prototype.model.SensinactModelManager;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.prototype.twin.SensinactProvider;
+import org.eclipse.sensinact.prototype.twin.SensinactResource;
+import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -72,10 +74,10 @@ public class GatewayThreadImplTest {
         final int threadWaitTime = 200;
         Semaphore sem = new Semaphore(0);
 
-        AbstractSensinactCommand<Integer> command = new AbstractSensinactCommand<Integer>() {
+        AbstractSensinactCommand<Integer> command = new AbstractTwinCommand<Integer>() {
 
             @Override
-            protected Promise<Integer> call(SensinactModel model, PromiseFactory promiseFactory) {
+            protected Promise<Integer> call(SensinactDigitalTwin model, PromiseFactory promiseFactory) {
                 try {
                     Thread.sleep(threadWaitTime);
                 } catch (InterruptedException e) {
@@ -99,12 +101,15 @@ public class GatewayThreadImplTest {
         @Test
         void testSensinactProviderClosed() throws Exception {
 
-            SensinactProvider sp = thread.execute(new AbstractInternalSensinactCommand<SensinactProvider>() {
+            SensinactProvider sp = thread.execute(new AbstractSensinactCommand<SensinactProvider>() {
 
                 @Override
-                protected Promise<SensinactProvider> call(SensinactModelImpl model, PromiseFactory promiseFactory) {
-                    model.setOrCreateResource("foo", "bar", "foobar", Integer.class, 42, null);
-                    return promiseFactory.resolved(model.getProvider("foo"));
+                protected Promise<SensinactProvider> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    modelMgr.createModel("providerModel").withService("bar").withResource("foobar")
+                            .withType(Integer.class).withInitialValue(42).build().build().build();
+                    twin.createProvider("providerModel", "providerFoo");
+                    return promiseFactory.resolved(twin.getProvider("providerFoo"));
                 }
             }).getValue();
 
@@ -114,12 +119,15 @@ public class GatewayThreadImplTest {
         @Test
         void testSensinactServiceClosed() throws Exception {
 
-            SensinactService ss = thread.execute(new AbstractInternalSensinactCommand<SensinactService>() {
+            SensinactService ss = thread.execute(new AbstractSensinactCommand<SensinactService>() {
 
                 @Override
-                protected Promise<SensinactService> call(SensinactModelImpl model, PromiseFactory promiseFactory) {
-                    model.setOrCreateResource("foo", "bar", "foobar", Integer.class, 42, null);
-                    return promiseFactory.resolved(model.getService("foo", "bar"));
+                protected Promise<SensinactService> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    modelMgr.createModel("serviceModel").withService("bar").withResource("foobar")
+                            .withType(Integer.class).withInitialValue(42).build().build().build();
+                    twin.createProvider("serviceModel", "serviceFoo");
+                    return promiseFactory.resolved(twin.getService("serviceFoo", "bar"));
                 }
             }).getValue();
 
@@ -129,12 +137,15 @@ public class GatewayThreadImplTest {
         @Test
         void testSensinactResourceClosed() throws Exception {
 
-            SensinactResource sr = thread.execute(new AbstractInternalSensinactCommand<SensinactResource>() {
+            SensinactResource sr = thread.execute(new AbstractSensinactCommand<SensinactResource>() {
 
                 @Override
-                protected Promise<SensinactResource> call(SensinactModelImpl model, PromiseFactory promiseFactory) {
-                    model.setOrCreateResource("foo", "bar", "foobar", Integer.class, 42, null);
-                    return promiseFactory.resolved(model.getResource("foo", "bar", "foobar"));
+                protected Promise<SensinactResource> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    modelMgr.createModel("resourceModel").withService("bar").withResource("foobar")
+                            .withType(Integer.class).withInitialValue(42).build().build().build();
+                    twin.createProvider("resourceModel", "resourceFoo");
+                    return promiseFactory.resolved(twin.getResource("resourceFoo", "bar", "foobar"));
                 }
             }).getValue();
 

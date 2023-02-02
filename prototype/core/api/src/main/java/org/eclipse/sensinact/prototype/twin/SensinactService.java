@@ -10,9 +10,11 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command;
+package org.eclipse.sensinact.prototype.twin;
 
 import java.util.Map;
+
+import org.eclipse.sensinact.prototype.command.CommandScoped;
 
 /**
  * The digital twin of a Service instance

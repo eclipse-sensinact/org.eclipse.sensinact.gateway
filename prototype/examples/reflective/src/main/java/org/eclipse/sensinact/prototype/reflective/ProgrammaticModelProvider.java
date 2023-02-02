@@ -8,13 +8,13 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.reflective;
 
 import java.security.SecureRandom;
 
-import org.eclipse.sensinact.prototype.model.ModelManager;
+import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.model.ModelProvider;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.osgi.service.component.annotations.Component;
@@ -25,8 +25,8 @@ public class ProgrammaticModelProvider implements ModelProvider {
     SecureRandom random = new SecureRandom();
 
     @Override
-    public void init(ModelManager manager) {
-        manager.createProvider("reflective").withAutoDeletion(true).build().createService("testService").build()
+    public void init(SensinactModelManager manager) {
+        manager.createModel("reflective").withAutoDeletion(true).build().createService("testService").build()
                 .createResource("testResource").withType(Integer.class).withGetter(() -> random.nextInt(16))
                 .withValueType(ValueType.UPDATABLE);
     }
