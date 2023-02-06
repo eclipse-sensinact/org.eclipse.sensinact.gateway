@@ -19,5 +19,5 @@ public interface ServiceSnapshot extends Snapshot {
 
     ProviderSnapshot getProvider();
 
-    List<? extends ResourceSnapshot> getResources();
+    <T extends ResourceSnapshot> List<T> getResources();
 }

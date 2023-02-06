@@ -19,5 +19,5 @@ public interface ProviderSnapshot extends Snapshot {
 
     String getModelName();
 
-    List<? extends ServiceSnapshot> getServices();
+    <T extends ServiceSnapshot> List<T> getServices();
 }
