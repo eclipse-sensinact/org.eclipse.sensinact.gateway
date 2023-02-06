@@ -37,7 +37,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
  * @author thoma
  *
  */
-public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Object>> {
+public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<ResourceValueFilterInputHolder>> {
 
     private final static double ESPILON = Math.pow(10, -6);
 
@@ -48,24 +48,24 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Obje
     }
 
     @Override
-    public Predicate<Object> visitBoolmethodcallexpr(BoolmethodcallexprContext ctx) {
+    public Predicate<ResourceValueFilterInputHolder> visitBoolmethodcallexpr(BoolmethodcallexprContext ctx) {
         return new BooleanMethodCallExprVisitor(parser).visitBoolmethodcallexpr(ctx)::apply;
     }
 
     @Override
-    public Predicate<Object> visitIsofexpr(IsofexprContext ctx) {
+    public Predicate<ResourceValueFilterInputHolder> visitIsofexpr(IsofexprContext ctx) {
         // TODO Auto-generated method stub
         return super.visitIsofexpr(ctx);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Predicate<Object> visitBoolcommonexpr(BoolcommonexprContext ctx) {
+    public Predicate<ResourceValueFilterInputHolder> visitBoolcommonexpr(BoolcommonexprContext ctx) {
         // Get the leftmost element of the expression
         final ParserRuleContext firstElement = ctx.getChild(ParserRuleContext.class, 0);
         final int nbChildren = ctx.getChildCount();
 
-        Predicate<Object> predicate = null;
+        Predicate<ResourceValueFilterInputHolder> predicate = null;
         switch (firstElement.getRuleIndex()) {
         case ODataFilterParser.RULE_isofexpr:
             predicate = visitIsofexpr(ctx.isofexpr());
@@ -80,7 +80,7 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Obje
             break;
 
         case ODataFilterParser.RULE_commonexpr: {
-            final Function<Object, Object> leftExpr = new CommonExprVisitor(parser)
+            final Function<ResourceValueFilterInputHolder, Object> leftExpr = new CommonExprVisitor(parser)
                     .visitCommonexpr((CommonexprContext) firstElement);
             if (leftExpr == null) {
                 throw new RuntimeException("Unsupported left common expression: "
@@ -93,7 +93,7 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Obje
                 final CommonExprVisitor rightVisitor = new CommonExprVisitor(parser);
 
                 final BiFunction<Object, Object, Boolean> subPredicate;
-                final Function<Object, Object> rightExpr;
+                final Function<ResourceValueFilterInputHolder, Object> rightExpr;
 
                 switch (secondElement.getRuleIndex()) {
                 case ODataFilterParser.RULE_eqexpr:
@@ -170,7 +170,7 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Obje
                 }
 
                 AndexprContext and = (AndexprContext) lastElement;
-                Predicate<Object> other = visitBoolcommonexpr(and.boolcommonexpr());
+                Predicate<ResourceValueFilterInputHolder> other = visitBoolcommonexpr(and.boolcommonexpr());
                 return predicate.and(other);
             }
 
@@ -181,7 +181,7 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Obje
                 }
 
                 OrexprContext or = (OrexprContext) lastElement;
-                Predicate<Object> other = visitBoolcommonexpr(or.boolcommonexpr());
+                Predicate<ResourceValueFilterInputHolder> other = visitBoolcommonexpr(or.boolcommonexpr());
                 return predicate.or(other);
             }
 
@@ -198,6 +198,8 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Obje
     private boolean exprEqual(Object left, Object right) {
         if (left == null) {
             return right == null;
+        } else if (right == null) {
+            return false;
         } else if (left instanceof Number && right instanceof Number) {
             return Math.abs((((Number) left).doubleValue() - ((Number) right).doubleValue())) <= ESPILON;
         } else if (left instanceof Comparable) {
@@ -211,6 +213,8 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Obje
     private boolean exprNotEqual(Object left, Object right) {
         if (left == null) {
             return right != null;
+        } else if (right == null) {
+            return true;
         } else if (left instanceof Number && right instanceof Number) {
             return Math.abs((((Number) left).doubleValue() - ((Number) right).doubleValue())) > ESPILON;
         } else if (left instanceof Comparable) {

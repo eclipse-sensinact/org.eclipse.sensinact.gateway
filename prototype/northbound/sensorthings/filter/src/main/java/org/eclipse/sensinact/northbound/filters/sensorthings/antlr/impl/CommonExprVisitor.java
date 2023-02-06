@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -36,16 +35,16 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
  * @author thoma
  *
  */
-public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<Object, Object>> {
+public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceValueFilterInputHolder, Object>> {
 
-    final Parser parser;
+    private final Parser parser;
 
     public CommonExprVisitor(Parser parser) {
         this.parser = parser;
     }
 
     @Override
-    public Function<Object, Object> visitPrimitiveliteral(PrimitiveliteralContext ctx) {
+    public Function<ResourceValueFilterInputHolder, Object> visitPrimitiveliteral(PrimitiveliteralContext ctx) {
         ParserRuleContext element = ctx.getChild(ParserRuleContext.class, 0);
         switch (element.getRuleIndex()) {
         case ODataFilterParser.RULE_nullvalue:
@@ -79,8 +78,8 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<Object, O
     }
 
     @Override
-    public Function<Object, Object> visitNegateexpr(NegateexprContext ctx) {
-        Function<Object, Object> subExpr = this.visitCommonexpr(ctx.commonexpr());
+    public Function<ResourceValueFilterInputHolder, Object> visitNegateexpr(NegateexprContext ctx) {
+        Function<ResourceValueFilterInputHolder, Object> subExpr = visitCommonexpr(ctx.commonexpr());
         return x -> {
             Object res = subExpr.apply(x);
             if (res instanceof Number) {
@@ -96,31 +95,23 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<Object, O
     }
 
     @Override
-    public Function<Object, Object> visitParenexpr(ParenexprContext ctx) {
-        return this.visitCommonexpr(ctx.commonexpr());
+    public Function<ResourceValueFilterInputHolder, Object> visitParenexpr(ParenexprContext ctx) {
+        return visitCommonexpr(ctx.commonexpr());
     }
 
     @Override
-    public Function<Object, Object> visitMethodcallexpr(MethodcallexprContext ctx) {
+    public Function<ResourceValueFilterInputHolder, Object> visitMethodcallexpr(MethodcallexprContext ctx) {
         return new MethodCallExprVisitor(parser).visit(ctx);
     }
 
     @Override
-    public Function<Object, Object> visitFirstmemberexpr(FirstmemberexprContext ctx) {
-        final String path = ctx.getText();
-        return x -> {
-            // TODO: use real stuff
-            if (x instanceof Map) {
-                return ((Map<?, ?>) x).get(path);
-            } else {
-                return null;
-            }
-        };
+    public Function<ResourceValueFilterInputHolder, Object> visitFirstmemberexpr(FirstmemberexprContext ctx) {
+        return new PathHandler(ctx.getText())::handle;
     }
 
     @Override
-    public Function<Object, Object> visitCommonexpr(CommonexprContext ctx) {
-        final Function<Object, Object> firstExpr = this.visit(ctx.getChild(0));
+    public Function<ResourceValueFilterInputHolder, Object> visitCommonexpr(CommonexprContext ctx) {
+        final Function<ResourceValueFilterInputHolder, Object> firstExpr = visit(ctx.getChild(0));
         if (ctx.getChildCount() == 1) {
             // Simple expression
             return firstExpr;
@@ -131,7 +122,7 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<Object, O
         final CommonExprVisitor rightVisitor = new CommonExprVisitor(parser);
 
         final BiFunction<Object, Object, Object> subOperation;
-        final Function<Object, Object> rightExpr;
+        final Function<ResourceValueFilterInputHolder, Object> rightExpr;
 
         switch (rightElement.getRuleIndex()) {
         case ODataFilterParser.RULE_addexpr:

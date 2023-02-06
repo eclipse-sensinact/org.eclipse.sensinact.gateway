@@ -26,7 +26,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
  * @author thoma
  *
  */
-public class BooleanMethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Object, Boolean>> {
+public class BooleanMethodCallExprVisitor extends ODataFilterBaseVisitor<Function<ResourceValueFilterInputHolder, Boolean>> {
 
     final Parser parser;
     final CommonExprVisitor visitor;
@@ -37,7 +37,7 @@ public class BooleanMethodCallExprVisitor extends ODataFilterBaseVisitor<Functio
     }
 
     @Override
-    public Function<Object, Boolean> visitBoolmethodcallexpr(BoolmethodcallexprContext ctx) {
+    public Function<ResourceValueFilterInputHolder, Boolean> visitBoolmethodcallexpr(BoolmethodcallexprContext ctx) {
         final ParserRuleContext child = ctx.getChild(ParserRuleContext.class, 0);
         // TODO: intersectsmethodcallexpr
         switch (child.getRuleIndex()) {
@@ -52,12 +52,12 @@ public class BooleanMethodCallExprVisitor extends ODataFilterBaseVisitor<Functio
         }
     }
 
-    private Function<Object, Boolean> runDualString(ParserRuleContext ctx) {
+    private Function<ResourceValueFilterInputHolder, Boolean> runDualString(ParserRuleContext ctx) {
         final CommonexprContext leftExpr = ctx.getChild(CommonexprContext.class, 0);
         final CommonexprContext rightExpr = ctx.getChild(CommonexprContext.class, 1);
 
-        final Function<Object, Object> leftFun = visitor.visitCommonexpr(leftExpr);
-        final Function<Object, Object> rightFun = visitor.visitCommonexpr(rightExpr);
+        final Function<ResourceValueFilterInputHolder, Object> leftFun = visitor.visitCommonexpr(leftExpr);
+        final Function<ResourceValueFilterInputHolder, Object> rightFun = visitor.visitCommonexpr(rightExpr);
         final BiFunction<String, String, Boolean> operation;
 
         switch (ctx.getRuleIndex()) {

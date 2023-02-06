@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
@@ -26,11 +27,16 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterLe
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolcommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolCommonExprVisitor;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.junit.jupiter.api.Test;
 
 public class OGCParserTest {
 
-    private void assertQuery(final boolean expected, final String query, final Object testObject) throws Exception {
+    private void assertQuery(final boolean expected, final String query,
+            final ResourceValueFilterInputHolder testProvider) throws Exception {
         ANTLRInputStream inStream = new ANTLRInputStream(query);
         ODataFilterLexer markupLexer = new ODataFilterLexer(inStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(markupLexer);
@@ -39,9 +45,9 @@ public class OGCParserTest {
 
         try {
             BoolCommonExprVisitor visitor = new BoolCommonExprVisitor(parser);
-            final Predicate<Object> predicate = visitor.visit(context);
+            final Predicate<ResourceValueFilterInputHolder> predicate = visitor.visit(context);
             if (predicate != null) {
-                assertEquals(expected, predicate.test(testObject),
+                assertEquals(expected, predicate.test(testProvider),
                         String.format("Expected %s for query: %s", expected, query));
             } else {
                 fail("Coudln't parse '" + query + "'");
@@ -53,7 +59,8 @@ public class OGCParserTest {
         }
     }
 
-    private void assertQueries(final Map<String, Boolean> expectations, final Object testObject) throws Exception {
+    private void assertQueries(final Map<String, Boolean> expectations, final ResourceValueFilterInputHolder testObject)
+            throws Exception {
         for (Entry<String, Boolean> expectation : expectations.entrySet()) {
             assertQuery(expectation.getValue(), expectation.getKey(), testObject);
         }
@@ -142,7 +149,14 @@ public class OGCParserTest {
     @Test
     void testPath() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
-        expectations.put("Datastream/id eq 1", true);
-        assertQueries(expectations, Map.of("Datastream/id", 1));
+        expectations.put("Datastream/id eq 'testProvider'", true);
+        expectations.put("result lt 10.00", true);
+
+        ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
+        ServiceSnapshot svc = RcUtils.addService(provider, "test");
+        ResourceSnapshot rc = RcUtils.addResource(svc, "result", 5.0);
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(provider, List.of(rc));
+        assertQueries(expectations, holder);
     }
 }

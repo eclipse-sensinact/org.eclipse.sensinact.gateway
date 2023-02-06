@@ -27,7 +27,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
  * @author thoma
  *
  */
-public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Object, Object>> {
+public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<ResourceValueFilterInputHolder, Object>> {
 
     final Parser parser;
     final CommonExprVisitor visitor;
@@ -38,7 +38,7 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Objec
     }
 
     @Override
-    public Function<Object, Object> visitMethodcallexpr(MethodcallexprContext ctx) {
+    public Function<ResourceValueFilterInputHolder, Object> visitMethodcallexpr(MethodcallexprContext ctx) {
         final ParserRuleContext child = ctx.getChild(ParserRuleContext.class, 0);
         switch (child.getRuleIndex()) {
         case ODataFilterParser.RULE_tolowermethodcallexpr:
@@ -62,9 +62,9 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Objec
         }
     }
 
-    private Function<Object, Object> runSingleString(ParserRuleContext ctx) {
+    private Function<ResourceValueFilterInputHolder, Object> runSingleString(ParserRuleContext ctx) {
         final CommonexprContext subExpr = ctx.getChild(CommonexprContext.class, 0);
-        final Function<Object, Object> targetExpr = visitor.visitCommonexpr(subExpr);
+        final Function<ResourceValueFilterInputHolder, Object> targetExpr = visitor.visitCommonexpr(subExpr);
         final Function<String, Object> operation;
 
         switch (ctx.getRuleIndex()) {
@@ -99,12 +99,12 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Objec
         };
     }
 
-    private Function<Object, Object> runDualString(ParserRuleContext ctx) {
+    private Function<ResourceValueFilterInputHolder, Object> runDualString(ParserRuleContext ctx) {
         final CommonexprContext leftExpr = ctx.getChild(CommonexprContext.class, 0);
         final CommonexprContext rightExpr = ctx.getChild(CommonexprContext.class, 1);
 
-        final Function<Object, Object> leftFun = visitor.visitCommonexpr(leftExpr);
-        final Function<Object, Object> rightFun = visitor.visitCommonexpr(rightExpr);
+        final Function<ResourceValueFilterInputHolder, Object> leftFun = visitor.visitCommonexpr(leftExpr);
+        final Function<ResourceValueFilterInputHolder, Object> rightFun = visitor.visitCommonexpr(rightExpr);
         final BiFunction<String, String, Object> operation;
 
         switch (ctx.getRuleIndex()) {
@@ -136,9 +136,9 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Objec
         };
     }
 
-    private Function<Object, Object> runSubstring(SubstringmethodcallexprContext ctx) {
-        final Function<Object, Object> stringFun = visitor.visitCommonexpr(ctx.commonexpr(0));
-        final Function<Object, Object> startPosFun = visitor.visitCommonexpr(ctx.commonexpr(1));
+    private Function<ResourceValueFilterInputHolder, Object> runSubstring(SubstringmethodcallexprContext ctx) {
+        final Function<ResourceValueFilterInputHolder, Object> stringFun = visitor.visitCommonexpr(ctx.commonexpr(0));
+        final Function<ResourceValueFilterInputHolder, Object> startPosFun = visitor.visitCommonexpr(ctx.commonexpr(1));
 
         if (ctx.commonexpr().size() == 2) {
             // String + start
@@ -158,7 +158,7 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Objec
             };
         } else {
             // String + start + length
-            final Function<Object, Object> lengthFun = visitor.visitCommonexpr(ctx.commonexpr(2));
+            final Function<ResourceValueFilterInputHolder, Object> lengthFun = visitor.visitCommonexpr(ctx.commonexpr(2));
             return x -> {
                 Object string = stringFun.apply(x);
                 Object startPos = startPosFun.apply(x);
