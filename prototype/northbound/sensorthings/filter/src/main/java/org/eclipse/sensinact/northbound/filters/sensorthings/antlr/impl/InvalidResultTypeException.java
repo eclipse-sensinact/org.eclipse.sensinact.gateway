@@ -27,8 +27,8 @@ public class InvalidResultTypeException extends RuntimeException {
     }
 
     public InvalidResultTypeException(final String message, final String expected, final Object... values) {
-        this(String.format("%s. Expected %s got: %s (%s)", message, expected,
+        this(String.format("%s. Expected %s got: %s", message, expected,
                 Arrays.stream(values).map(v -> String.format("%s (%s)", v, v != null ? v.getClass().getName() : "null"))
-                        .reduce((a, b) -> String.format("%s, %s", a, b))));
+                        .reduce((a, b) -> String.format("%s, %s", a, b)).orElse("(no value)")));
     }
 }

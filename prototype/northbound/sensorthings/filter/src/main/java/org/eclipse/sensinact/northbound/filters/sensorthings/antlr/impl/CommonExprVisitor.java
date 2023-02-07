@@ -12,6 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.Temporal;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -70,6 +75,26 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
 
         case ODataFilterParser.RULE_string_1: {
             final String value = new StringVisitor().visitChildren(ctx);
+            return x -> value;
+        }
+
+        case ODataFilterParser.RULE_datetimeoffsetvalue: {
+            final Instant value = DateTimeVisitors.dateTimeOffset(element);
+            return x -> value;
+        }
+
+        case ODataFilterParser.RULE_datevalue: {
+            final LocalDate value = DateTimeVisitors.date(element);
+            return x -> value;
+        }
+
+        case ODataFilterParser.RULE_timeofdayvalue: {
+            final LocalTime value = DateTimeVisitors.timeOfDay(element);
+            return x -> value;
+        }
+
+        case ODataFilterParser.RULE_duration: {
+            final Duration value = DateTimeVisitors.duration(element);
             return x -> value;
         }
 
@@ -171,9 +196,14 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
             }
         } else if (l instanceof String || r instanceof String) {
             return String.valueOf(l) + String.valueOf(r);
-        } else {
-            throw new InvalidResultTypeException("Can't add", "numbers", l, r);
+        } else if (r instanceof Duration) {
+            final Duration duration = (Duration) r;
+            if (l instanceof Temporal) {
+                return duration.addTo((Instant) l);
+            }
         }
+
+        throw new InvalidResultTypeException("Can't add", "numbers", l, r);
     }
 
     private Object sub(Object l, Object r) {
@@ -183,9 +213,16 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
             } else {
                 return ((Number) l).doubleValue() - ((Number) r).doubleValue();
             }
-        } else {
-            throw new InvalidResultTypeException("Can't substract", "numbers", l, r);
+        } else if (r instanceof Duration) {
+            final Duration duration = (Duration) r;
+            if (l instanceof Temporal) {
+                return duration.negated().addTo((Instant) l);
+            }
+        } else if (l instanceof Temporal && r instanceof Temporal) {
+            // Date A - Date B => Duration between B and A
+            return Duration.between((Temporal) r, (Temporal) l);
         }
+        throw new InvalidResultTypeException("Can't substract", "numbers", l, r);
     }
 
     private Object mul(Object l, Object r) {

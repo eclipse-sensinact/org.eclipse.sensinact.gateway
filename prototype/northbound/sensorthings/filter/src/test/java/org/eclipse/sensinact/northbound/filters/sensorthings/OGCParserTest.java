@@ -15,6 +15,8 @@ package org.eclipse.sensinact.northbound.filters.sensorthings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,22 +168,6 @@ public class OGCParserTest {
         assertQueries(expectations, holder);
     }
 
-//    FIXME: @Test
-    void testThingsComplex() throws Exception {
-        final Map<String, Boolean> expectations = new LinkedHashMap<>();
-        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq ‘FOI_1’ "
-                + "and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z "
-                + "and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z", true);
-
-        ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
-        ServiceSnapshot svc = RcUtils.addService(provider, "test");
-        ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0);
-
-        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, provider,
-                List.of(rc));
-        assertQueries(expectations, holder);
-    }
-
     @Test
     void testObservationsPath() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
@@ -195,6 +181,77 @@ public class OGCParserTest {
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
                 provider, rc);
+        assertQueries(expectations, holder);
+    }
+
+    @Test
+    void testDateComparison() throws Exception {
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        // Date time offset
+        expectations.put("resultTime eq 2023-02-07T15:40:30Z", true);
+        expectations.put("resultTime ge 2010-06-01T00:00:00Z", true);
+        expectations.put("resultTime gt 2010-06-01T00:00:00Z", true);
+        expectations.put("resultTime lt 2023-02-07T16:00:00Z", true);
+        expectations.put("resultTime le 2023-02-07T16:00:00Z", true);
+
+        // Date
+        expectations.put("date(resultTime) eq 2023-02-07", true);
+        expectations.put("date(resultTime) ge 2010-06-01", true);
+        expectations.put("date(resultTime) gt 2010-06-01", true);
+        expectations.put("date(resultTime) lt 2023-02-08", true);
+        expectations.put("date(resultTime) le 2023-02-07", true);
+
+        // Time
+        expectations.put("time(resultTime) eq 15:40:30", true);
+        expectations.put("time(resultTime) ge 01:00:00", true);
+        expectations.put("time(resultTime) gt 01:00:00", true);
+        expectations.put("time(resultTime) lt 16:00:00", true);
+        expectations.put("time(resultTime) le 16:00:00", true);
+
+        ProviderSnapshot provider = RcUtils.makeProvider("provider");
+        ServiceSnapshot svc = RcUtils.addService(provider, "service");
+        ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0,
+                ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
+                provider, rc);
+        assertQueries(expectations, holder);
+    }
+
+    @Test
+    void testDuration() throws Exception {
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        // Date time offset
+        expectations.put("2023-02-07T15:40:30Z add duration'PT10M' 2023-02-07T15:50:30Z", true);
+        expectations.put("2023-02-07T15:40:30Z sub duration'PT10M' 2023-02-07T15:30:30Z", true);
+        expectations.put("2023-02-07T15:40:30Z add duration'-PT10M' 2023-02-07T15:30:30Z", true);
+        expectations.put("2023-02-07T15:40:30Z sub duration'-PT10M' 2023-02-07T15:50:30Z", true);
+        expectations.put("2023-02-07T15:50:30Z sub 2023-02-07T15:40:00Z eq duration'PT10M30S'", true);
+
+        ProviderSnapshot provider = RcUtils.makeProvider("provider");
+        ServiceSnapshot svc = RcUtils.addService(provider, "service");
+        ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0,
+                ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
+                provider, rc);
+        assertQueries(expectations, holder);
+    }
+
+    @Test
+    void testThingsComplex() throws Exception {
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' "
+                + "and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z "
+                + "and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z", true);
+
+        ProviderSnapshot provider = RcUtils.makeProvider("FOI_1");
+        ServiceSnapshot svc = RcUtils.addService(provider, "sensor");
+        ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0,
+                ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneId.of("UTC")).toInstant());
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, provider,
+                List.of(rc));
         assertQueries(expectations, holder);
     }
 }
