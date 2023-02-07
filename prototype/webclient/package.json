@@ -1,0 +1,45 @@
+{
+  "name": "sensor_thing_api_map",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.1.96",
+    "axios": "^1.2.1",
+    "buefy": "^0.9.22",
+    "chart.js": "^4.1.1",
+    "chartjs-adapter-moment": "^1.0.1",
+    "core-js": "^3.8.3",
+    "leaflet": "^1.9.3",
+    "moment": "^2.29.4",
+    "v-treeview": "^0.2.1",
+    "vue": "^2.6.14",
+    "vue-chartjs": "^5.1.0",
+    "vue-class-component": "^7.2.3",
+    "vue-i18n": "^8.17.4",
+    "vue-property-decorator": "^9.1.2",
+    "vue-router": "^3.5.1",
+    "vue-tree-list": "^1.5.0",
+    "vue2-leaflet": "^2.7.1",
+    "vue2-perfect-scrollbar": "^1.5.56"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.15",
+    "@types/mocha": "^8.2.1",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-typescript": "~5.0.0",
+    "@vue/cli-plugin-unit-mocha": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "@vue/test-utils": "^1.1.3",
+    "chai": "^4.2.0",
+    "sass": "^1.32.7",
+    "sass-loader": "^12.0.0",
+    "typescript": "~4.5.5",
+    "vue-template-compiler": "^2.6.14"
+  }
+}

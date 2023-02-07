@@ -1,0 +1,38 @@
+<template>
+    <div class="plane is-vertical" v-if="data && data.data">
+      <Location v-if="data.type === 'FMM_LOC'" :data="data.data"></Location>
+      <Thing v-if="data.type === 'FMM_THING'" :data="data.data"></Thing>
+      <Datastreams v-if="data.type === 'FMM_DATASTREAM'" :data="data.data"></Datastreams>
+    </div>
+</template>
+
+<script lang="ts">
+import {Component, Prop, Vue} from "vue-property-decorator";
+import Location from "@/components/Location.vue";
+import Thing from "@/components/Thing.vue";
+import Datastreams from "@/components/Datastreams.vue";
+
+@Component({
+  components: {Datastreams, Location,Thing}
+})
+export default class PropertiesC extends Vue{
+  @Prop() readonly data:any;
+
+
+
+}
+</script>
+
+<style scoped lang="scss">
+.plane{
+  height: 100%;
+  width: 100%;
+  z-index: 500;
+  background: #3a3a3a;
+  border-radius: 2px;
+  overflow-y: auto;
+  text-align: left;
+  color: #d8d8d8;
+  position: relative;
+}
+</style>
