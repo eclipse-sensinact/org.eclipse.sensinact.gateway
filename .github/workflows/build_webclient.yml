@@ -1,5 +1,5 @@
 name: build_the_webclient
-on: 
+on:
   push:
     branches: ["webclient"]
 defaults:
@@ -16,3 +16,9 @@ jobs:
       - run: npm install
       - run: npm run generate_api
       - run: npm run build
+      - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+        with:
+          add: 'dist'
+          message: 'Build by CI Job',
+          push: true
+
