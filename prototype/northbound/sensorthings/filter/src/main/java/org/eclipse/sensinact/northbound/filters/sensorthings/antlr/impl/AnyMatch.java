@@ -41,11 +41,24 @@ public class AnyMatch {
 
     @SuppressWarnings("unchecked")
     private boolean compare(final Object other, final Predicate<Integer> checker) {
-        for (Object entry : entries) {
-            if (entry instanceof Comparable) {
-                Comparable<Object> entryCmp = (Comparable<Object>) entry;
-                if (checker.test(entryCmp.compareTo(other))) {
-                    return true;
+        if (other instanceof Number) {
+            final double otherDouble = ((Number) other).doubleValue();
+
+            for (Object entry : entries) {
+                if (entry instanceof Number) {
+                    final Double entryDouble = ((Number) entry).doubleValue();
+                    if (checker.test(entryDouble.compareTo(otherDouble))) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            for (Object entry : entries) {
+                if (entry instanceof Comparable) {
+                    Comparable<Object> entryCmp = (Comparable<Object>) entry;
+                    if (checker.test(entryCmp.compareTo(other))) {
+                        return true;
+                    }
                 }
             }
         }
@@ -141,6 +154,6 @@ public class AnyMatch {
             throw new UnsupportedRuleException("Unexpected comparison rule: " + comparatorRuleIndex);
         }
 
-        return this.entries.stream().anyMatch(comparator);
+        return comparator.test(otherValue);
     }
 }

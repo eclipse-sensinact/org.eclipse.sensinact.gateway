@@ -45,6 +45,11 @@ public class RcUtils {
             }
 
             @Override
+            public String toString() {
+                return providerName;
+            }
+
+            @Override
             public List<ServiceSnapshot> getServices() {
                 return services;
             }
@@ -71,6 +76,11 @@ public class RcUtils {
             }
 
             @Override
+            public String toString() {
+                return provider.toString() + "/" + svcName;
+            }
+
+            @Override
             public List<ResourceSnapshot> getResources() {
                 return resources;
             }
@@ -94,6 +104,11 @@ public class RcUtils {
             @Override
             public String getName() {
                 return rcName;
+            }
+
+            @Override
+            public String toString() {
+                return svc.toString() + "/" + rcName;
             }
 
             @Override

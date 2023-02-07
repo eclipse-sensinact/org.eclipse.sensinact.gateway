@@ -140,7 +140,7 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                         if (leftValue instanceof AnyMatch) {
                             return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex);
                         } else if (rightValue instanceof AnyMatch) {
-                            return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex, true);
+                            return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
                         } else {
                             return subPredicate.apply(leftValue, rightValue);
                         }

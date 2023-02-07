@@ -151,13 +151,18 @@ public class OGCParserTest {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         expectations.put("id eq 'testProvider'", true);
         expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'testProvider'", true);
+        expectations.put("Datastreams/Observations/result gt 10", true);
+        expectations.put("Datastreams/Observations/result gt 20", false);
+        expectations.put("Datastreams/Observations/result lt 5", false);
+        expectations.put("Datastreams/Observations/result le 5", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, "test");
-        ResourceSnapshot rc = RcUtils.addResource(svc, "result", 5.0);
+        ResourceSnapshot rc1 = RcUtils.addResource(svc, "value1", 5);
+        ResourceSnapshot rc2 = RcUtils.addResource(svc, "value2", 15.2);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, provider,
-                List.of(rc));
+                List.of(rc1, rc2));
         assertQueries(expectations, holder);
     }
 
@@ -170,7 +175,7 @@ public class OGCParserTest {
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, "test");
-        ResourceSnapshot rc = RcUtils.addResource(svc, "result", 5.0);
+        ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, provider,
                 List.of(rc));
@@ -181,12 +186,12 @@ public class OGCParserTest {
     void testObservationsPath() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         expectations.put("result lt 10.00", true);
-        expectations.put("Datastream/id eq 'testProvider~test~result'", true);
+        expectations.put("Datastream/id eq 'testProvider~test~value'", true);
         expectations.put("FeatureOfInterest/id eq 'testProvider'", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, "test");
-        ResourceSnapshot rc = RcUtils.addResource(svc, "result", 5.0);
+        ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
                 provider, rc);

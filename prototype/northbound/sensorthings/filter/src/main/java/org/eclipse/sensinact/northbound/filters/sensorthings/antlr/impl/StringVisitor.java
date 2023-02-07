@@ -12,9 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.Pchar_no_squoteContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.Squote_in_stringContext;
@@ -25,16 +22,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
  *
  */
 public class StringVisitor extends ODataFilterBaseVisitor<String> {
-
-    private List<String> root;
-
-    public StringVisitor() {
-        root = new ArrayList<>();
-    }
-
-    public void showOff() {
-        System.out.println("Found strings: " + root);
-    }
 
     @Override
     public String visitString_1(String_1Context ctx) {
@@ -65,6 +52,4 @@ public class StringVisitor extends ODataFilterBaseVisitor<String> {
 
         return stringContentVisitor.visit(ctx);
     }
-
-
 }

@@ -14,8 +14,6 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.DatetimeoffsetvalueContext;
@@ -25,16 +23,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
  *
  */
 public class DateTimeVisitor extends ODataFilterBaseVisitor<Instant> {
-
-    private List<String> root;
-
-    public DateTimeVisitor() {
-        root = new ArrayList<>();
-    }
-
-    public void showOff() {
-        System.out.println("Found dates: " + root);
-    }
 
     @Override
     public Instant visitDatetimeoffsetvalue(DatetimeoffsetvalueContext ctx) {
