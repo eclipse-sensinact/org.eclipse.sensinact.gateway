@@ -22,8 +22,7 @@ import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 
 /**
- * @author thoma
- *
+ * Utility methods for tests
  */
 public class RcUtils {
 
@@ -102,12 +101,17 @@ public class RcUtils {
                 return new TimedValue<Object>() {
                     @Override
                     public Instant getTimestamp() {
-                        return Instant.now();
+                        return rcTime;
                     }
 
                     @Override
                     public Object getValue() {
                         return value;
+                    }
+
+                    @Override
+                    public String toString() {
+                        return String.format("%s (%s)", value, rcTime);
                     }
                 };
             }

@@ -30,6 +30,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.ParenexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.PrimitiveliteralContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler;
 
 /**
  * @author thoma

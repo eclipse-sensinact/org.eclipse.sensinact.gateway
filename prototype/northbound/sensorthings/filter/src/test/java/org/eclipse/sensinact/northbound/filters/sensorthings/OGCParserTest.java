@@ -147,16 +147,48 @@ public class OGCParserTest {
     }
 
     @Test
-    void testPath() throws Exception {
+    void testThingsPath() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
-        expectations.put("Datastream/id eq 'testProvider'", true);
-        expectations.put("result lt 10.00", true);
+        expectations.put("Datastream/id eq 'testProvider~test~result'", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, "test");
         ResourceSnapshot rc = RcUtils.addResource(svc, "result", 5.0);
 
-        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(provider, List.of(rc));
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, provider,
+                List.of(rc));
+        assertQueries(expectations, holder);
+    }
+
+//    FIXME: @Test
+    void testThingsComplex() throws Exception {
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        expectations.put(
+                "Datastreams/Observations/FeatureOfInterest/id eq ‘FOI_1’ and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z",
+                true);
+
+        ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
+        ServiceSnapshot svc = RcUtils.addService(provider, "test");
+        ResourceSnapshot rc = RcUtils.addResource(svc, "result", 5.0);
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, provider,
+                List.of(rc));
+        assertQueries(expectations, holder);
+    }
+
+    @Test
+    void testObservationsPath() throws Exception {
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        expectations.put("result lt 10.00", true);
+        expectations.put("Datastream/id eq 'testProvider~test~result'", true);
+        expectations.put("FeatureOfInterest/id eq 'testProvider'", true);
+
+        ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
+        ServiceSnapshot svc = RcUtils.addService(provider, "test");
+        ResourceSnapshot rc = RcUtils.addResource(svc, "result", 5.0);
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
+                provider, rc);
         assertQueries(expectations, holder);
     }
 }
