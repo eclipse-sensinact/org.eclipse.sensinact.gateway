@@ -92,10 +92,11 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                 final ParserRuleContext secondElement = ctx.getChild(ParserRuleContext.class, 1);
                 final CommonExprVisitor rightVisitor = new CommonExprVisitor(parser);
 
+                final int comparatorRuleIndex = secondElement.getRuleIndex();
                 final BiFunction<Object, Object, Boolean> subPredicate;
                 final Function<ResourceValueFilterInputHolder, Object> rightExpr;
 
-                switch (secondElement.getRuleIndex()) {
+                switch (comparatorRuleIndex) {
                 case ODataFilterParser.RULE_eqexpr:
                     rightExpr = rightVisitor.visit(((EqexprContext) secondElement).commonexpr());
                     subPredicate = this::exprEqual;
@@ -123,7 +124,7 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
 
                 case ODataFilterParser.RULE_hasexpr:
                     // Uses an enumeration
-                    throw new RuntimeException("HAS not yet implemented");
+                    throw new UnsupportedRuleException("HAS not yet implemented");
 
                 default:
                     subPredicate = null;
@@ -132,7 +133,18 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                 }
 
                 if (rightExpr != null && subPredicate != null) {
-                    predicate = x -> subPredicate.apply(leftExpr.apply(x), rightExpr.apply(x));
+                    predicate = x -> {
+                        final Object leftValue = leftExpr.apply(x);
+                        final Object rightValue = rightExpr.apply(x);
+
+                        if (leftValue instanceof AnyMatch) {
+                            return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex);
+                        } else if (rightValue instanceof AnyMatch) {
+                            return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex, true);
+                        } else {
+                            return subPredicate.apply(leftValue, rightValue);
+                        }
+                    };
                 }
             }
 

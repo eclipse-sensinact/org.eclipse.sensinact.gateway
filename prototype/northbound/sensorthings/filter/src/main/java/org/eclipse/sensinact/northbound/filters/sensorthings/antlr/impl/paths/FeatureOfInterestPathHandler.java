@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
@@ -62,8 +63,8 @@ public class FeatureOfInterestPathHandler {
         if (resources.size() == 1) {
             return new ObservationPathHandler(provider, resources.get(0)).handle(path);
         } else {
-            return new MultiMatch<Object>(resources.stream()
-                    .map(r -> new ObservationPathHandler(provider, r).handle(path)).collect(Collectors.toList()));
+            return new AnyMatch(resources.stream().map(r -> new ObservationPathHandler(provider, r).handle(path))
+                    .collect(Collectors.toList()));
         }
     }
 }

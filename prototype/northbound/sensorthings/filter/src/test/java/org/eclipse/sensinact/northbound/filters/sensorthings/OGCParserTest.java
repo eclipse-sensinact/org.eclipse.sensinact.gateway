@@ -164,9 +164,9 @@ public class OGCParserTest {
 //    FIXME: @Test
     void testThingsComplex() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
-        expectations.put(
-                "Datastreams/Observations/FeatureOfInterest/id eq ‘FOI_1’ and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z",
-                true);
+        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq ‘FOI_1’ "
+                + "and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z "
+                + "and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, "test");
