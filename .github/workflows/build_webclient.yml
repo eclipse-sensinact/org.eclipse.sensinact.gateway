@@ -18,6 +18,7 @@ jobs:
       - run: npm run build
       - uses: EndBug/add-and-commit@v9 
         with:
+          add: '.'
           default_author: github_actions
           message: 'Build by CI Job'
           push: true
