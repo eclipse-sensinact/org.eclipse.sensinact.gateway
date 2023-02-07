@@ -149,7 +149,8 @@ public class OGCParserTest {
     @Test
     void testThingsPath() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
-        expectations.put("Datastream/id eq 'testProvider~test~result'", true);
+        expectations.put("id eq 'testProvider'", true);
+        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'testProvider'", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, "test");

@@ -12,8 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
+import java.util.List;
+
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 
 /**
  * @author thoma
@@ -28,13 +32,34 @@ public class PathHandler {
     }
 
     public Object handle(final ResourceValueFilterInputHolder holder) {
-        // TODO implement it correctly
+        final ProviderSnapshot provider = holder.getProvider();
+        final List<ResourceSnapshot> resources = holder.getResources();
+        final ResourceSnapshot resource = holder.getResource();
+
         switch (holder.getContext()) {
         case THINGS:
-            return new ThingPathHandler(holder.getProvider(), holder.getResources()).handle(path);
+            return new ThingPathHandler(provider, resources).handle(path);
+
+        case FEATURES_OF_INTEREST:
+            return new FeatureOfInterestPathHandler(provider, resources).handle(path);
+
+        case HISTORICAL_LOCATIONS:
+            return new HistoricalLocationPathHandler(provider, resources).handle(path);
+
+        case LOCATIONS:
+            return new LocationPathHandler(provider, resources).handle(path);
 
         case OBSERVATIONS:
-            return new ObservationPathHandler(holder.getProvider(), holder.getResource()).handle(path);
+            return new ObservationPathHandler(provider, resource).handle(path);
+
+        case DATASTREAMS:
+            return new DatastreamPathHandler(provider, resource).handle(path);
+
+        case OBSERVED_PROPERTIES:
+            return new ObservedPropertyPathHandler(provider, resource).handle(path);
+
+        case SENSORS:
+            return new SensorPathHandler(provider, resource).handle(path);
 
         default:
             throw new UnsupportedRuleException("Path of " + holder.getContext() + " is not yet supported");

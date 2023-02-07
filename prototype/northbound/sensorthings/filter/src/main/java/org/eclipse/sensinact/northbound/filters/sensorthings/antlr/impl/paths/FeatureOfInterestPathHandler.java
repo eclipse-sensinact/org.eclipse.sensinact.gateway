@@ -26,15 +26,14 @@ import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
  * @author thoma
  *
  */
-public class ThingPathHandler {
+public class FeatureOfInterestPathHandler {
 
     private final ProviderSnapshot provider;
     private final List<ResourceSnapshot> resources;
 
-    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams,
-            "locations", this::subLocations);
+    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("observations", this::subObservations);
 
-    public ThingPathHandler(final ProviderSnapshot provider, final List<ResourceSnapshot> resources) {
+    public FeatureOfInterestPathHandler(final ProviderSnapshot provider, final List<ResourceSnapshot> resources) {
         this.provider = provider;
         this.resources = resources;
     }
@@ -59,16 +58,12 @@ public class ThingPathHandler {
         }
     }
 
-    private Object subDatastreams(final String path) {
+    private Object subObservations(final String path) {
         if (resources.size() == 1) {
-            return new DatastreamPathHandler(provider, resources.get(0)).handle(path);
+            return new ObservationPathHandler(provider, resources.get(0)).handle(path);
         } else {
             return new MultiMatch<Object>(resources.stream()
-                    .map(r -> new DatastreamPathHandler(provider, r).handle(path)).collect(Collectors.toList()));
+                    .map(r -> new ObservationPathHandler(provider, r).handle(path)).collect(Collectors.toList()));
         }
-    }
-
-    private Object subLocations(final String path) {
-        return new LocationPathHandler(provider, resources).handle(path);
     }
 }

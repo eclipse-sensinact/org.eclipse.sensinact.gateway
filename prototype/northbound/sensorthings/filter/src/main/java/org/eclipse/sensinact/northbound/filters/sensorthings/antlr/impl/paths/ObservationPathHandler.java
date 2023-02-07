@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -29,7 +30,7 @@ public class ObservationPathHandler {
     private final ProviderSnapshot provider;
     private final ResourceSnapshot resource;
 
-    private final Map<String, Function<String[], Object>> subPartHandlers = Map.of("datastream", this::subDatastream,
+    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastream", this::subDatastream,
             "featureofinterest", this::subFeatureOfInterest);
 
     public ObservationPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
@@ -40,53 +41,29 @@ public class ObservationPathHandler {
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
         if (parts.length == 1) {
-            switch (path) {
+            switch (parts[0]) {
             case "id":
                 // Provider~Service~Resource~Timestamp
                 return String.join("~", provider.getName(), resource.getService().getName(), resource.getName(),
                         PathUtils.timestampToString(resource.getValue().getTimestamp()));
 
             default:
-                return PathUtils.getResourceLevelField(provider, resource, path);
+                return PathUtils.getResourceLevelField(provider, resource, parts[0]);
             }
         } else {
-            final Function<String[], Object> handler = subPartHandlers.get(parts[0]);
+            final Function<String, Object> handler = subPartHandlers.get(parts[0]);
             if (handler == null) {
                 throw new UnsupportedRuleException("Unsupported path: " + path);
             }
-            return handler.apply(Arrays.copyOfRange(parts, 1, parts.length));
+            return handler.apply(String.join("/", Arrays.copyOfRange(parts, 1, parts.length)));
         }
     }
 
-    private Object subDatastream(final String[] parts) {
-        if (parts.length == 1) {
-            switch (parts[0]) {
-            case "id":
-                // Provider~Service~Resource
-                return String.join("~", provider.getName(), resource.getService().getName(), resource.getName());
-
-            default:
-                return PathUtils.getResourceLevelField(provider, resource, parts[0]);
-            }
-        } else {
-            throw new UnsupportedRuleException(
-                    "Unexpected field in Observation Datastream: " + String.join("/", parts));
-        }
+    private Object subDatastream(final String path) {
+        return new DatastreamPathHandler(provider, resource).handle(path);
     }
 
-    private Object subFeatureOfInterest(final String[] parts) {
-        if (parts.length == 1) {
-            switch (parts[0]) {
-            case "id":
-                // Provider
-                return provider.getName();
-
-            default:
-                return PathUtils.getResourceLevelField(provider, resource, parts[0]);
-            }
-        } else {
-            throw new UnsupportedRuleException(
-                    "Unexpected field in Observation Datastream: " + String.join("/", parts));
-        }
+    private Object subFeatureOfInterest(final String path) {
+        return new FeatureOfInterestPathHandler(provider, List.of(resource)).handle(path);
     }
 }

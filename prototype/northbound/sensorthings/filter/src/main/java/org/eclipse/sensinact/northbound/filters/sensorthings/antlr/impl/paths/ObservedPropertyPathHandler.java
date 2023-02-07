@@ -13,10 +13,8 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
@@ -26,17 +24,16 @@ import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
  * @author thoma
  *
  */
-public class ThingPathHandler {
+public class ObservedPropertyPathHandler {
 
     private final ProviderSnapshot provider;
-    private final List<ResourceSnapshot> resources;
+    private final ResourceSnapshot resource;
 
-    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams,
-            "locations", this::subLocations);
+    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams);
 
-    public ThingPathHandler(final ProviderSnapshot provider, final List<ResourceSnapshot> resources) {
+    public ObservedPropertyPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
         this.provider = provider;
-        this.resources = resources;
+        this.resource = resource;
     }
 
     public Object handle(final String path) {
@@ -44,11 +41,11 @@ public class ThingPathHandler {
         if (parts.length == 1) {
             switch (parts[0]) {
             case "id":
-                // Provider
-                return provider.getName();
+                // Provider~Service~Resource
+                return String.join("~", provider.getName(), resource.getService().getName(), resource.getName());
 
             default:
-                return PathUtils.getProviderLevelField(provider, resources, parts[0]);
+                return PathUtils.getResourceLevelField(provider, resource, parts[0]);
             }
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
@@ -60,15 +57,7 @@ public class ThingPathHandler {
     }
 
     private Object subDatastreams(final String path) {
-        if (resources.size() == 1) {
-            return new DatastreamPathHandler(provider, resources.get(0)).handle(path);
-        } else {
-            return new MultiMatch<Object>(resources.stream()
-                    .map(r -> new DatastreamPathHandler(provider, r).handle(path)).collect(Collectors.toList()));
-        }
-    }
-
-    private Object subLocations(final String path) {
-        return new LocationPathHandler(provider, resources).handle(path);
+        // Only one datastream per observed property
+        return new DatastreamPathHandler(provider, resource).handle(path);
     }
 }
