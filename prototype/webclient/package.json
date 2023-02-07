@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "generate_api":"scripts/generate_client",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {

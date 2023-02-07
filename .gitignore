@@ -16,6 +16,7 @@ nbproject
 .DS_Store
 prototype/webclient/node_modules
 prototype/webclient/dist
+prototype/webclient/openapi/client
 
 
 # local env files
