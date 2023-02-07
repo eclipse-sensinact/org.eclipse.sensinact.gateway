@@ -2,6 +2,9 @@ name: build_the_webclient
 on: 
   push:
     branches: ["webclient"]
+defaults:
+  run:
+    working-directory: prototype/webclient
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,7 +13,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '14'
-      - run: cd prototype/webclient
       - run: npm install
       - run: npm run generate_api
       - run: npm run build
