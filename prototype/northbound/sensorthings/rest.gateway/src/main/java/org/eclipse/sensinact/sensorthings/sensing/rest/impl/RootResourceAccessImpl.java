@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
-import org.eclipse.sensinact.prototype.ProviderDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
@@ -100,48 +99,44 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
     @Override
     public ResultList<Thing> getThings() {
-        SensiNactSession userSession = getSession();
         ResultList<Thing> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.THINGS);
-        list.value = providers.stream().map(p -> DtoMapper.toThing(userSession, uriInfo, p.getName())).collect(toList());
+        list.value = providers.stream().map(p -> DtoMapper.toThing(uriInfo, p)).collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<Location> getLocations() {
-        SensiNactSession userSession = getSession();
         ResultList<Location> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
-        list.value = providers.stream().map(p -> DtoMapper.toLocation(userSession, uriInfo, getMapper(), p.getName())).collect(toList());
+        list.value = providers.stream().map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p)).collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocations() {
-        SensiNactSession userSession = getSession();
         ResultList<HistoricalLocation> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
         list.value = providers.stream()
-                .map(p -> DtoMapper.toHistoricalLocation(userSession, getMapper(), uriInfo, p.getName()))
+                .map(p -> DtoMapper.toHistoricalLocation(getMapper(), uriInfo, p))
                 .collect(toList());
         return list;
     }
 
     @Override
     public ResultList<Datastream> getDatastreams() {
-        SensiNactSession userSession = getSession();
         ResultList<Datastream> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.DATASTREAMS);
         list.value = providers.stream()
                 .flatMap(p -> p.getServices().stream())
                 .flatMap(s -> s.getResources().stream())
-                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r))
+                .map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r))
                 .collect(toList());
 
         return list;
@@ -149,54 +144,53 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
     @Override
     public ResultList<Sensor> getSensors() {
-        SensiNactSession userSession = getSession();
         ResultList<Sensor> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.SENSORS);
         list.value = providers.stream()
-                .flatMap(p -> p.services.stream().map(s -> userSession.describeService(p.provider, s)))
-                .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toSensor(uriInfo, r)).collect(toList());
+                .flatMap(p -> p.getServices().stream())
+                .flatMap(s -> s.getResources().stream())
+                .map(r -> DtoMapper.toSensor(uriInfo, r))
+                .collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<Observation> getObservations() {
-        SensiNactSession userSession = getSession();
         ResultList<Observation> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.OBSERVATIONS);
         list.value = providers.stream()
-                .flatMap(p -> p.services.stream().map(s -> userSession.describeService(p.provider, s)))
-                .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toObservation(uriInfo, r)).collect(toList());
+                .flatMap(p -> p.getServices().stream())
+                .flatMap(s -> s.getResources().stream())
+                .map(r -> DtoMapper.toObservation(uriInfo, r))
+                .collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<ObservedProperty> getObservedProperties() {
-        SensiNactSession userSession = getSession();
         ResultList<ObservedProperty> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.OBSERVED_PROPERTIES);
         list.value = providers.stream()
-                .flatMap(p -> p.services.stream().map(s -> userSession.describeService(p.provider, s)))
-                .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toObservedProperty(uriInfo, r)).collect(toList());
+                .flatMap(p -> p.getServices().stream())
+                .flatMap(s -> s.getResources().stream())
+                .map(r -> DtoMapper.toObservedProperty(uriInfo, r))
+                .collect(toList());
 
         return list;
     }
 
     @Override
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
-        SensiNactSession userSession = getSession();
         ResultList<FeatureOfInterest> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
-        list.value = providers.stream()
-                .map(p -> DtoMapper.toFeatureOfInterest(userSession, uriInfo, getMapper(), p.provider)).collect(toList());
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.FEATURES_OF_INTEREST);
+        list.value = providers.stream().map(p -> DtoMapper.toFeatureOfInterest(uriInfo, getMapper(), p))
+                .collect(toList());
 
         return list;
     }
