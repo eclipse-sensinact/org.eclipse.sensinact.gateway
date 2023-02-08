@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.northbound.filters.ldap.impl.LdapParser;
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
@@ -35,6 +36,11 @@ public class LdapParserTest {
             @Override
             public String getName() {
                 return rcName;
+            }
+
+            @Override
+            public Map<String, Object> getMetadata() {
+                return Map.of();
             }
 
             @Override
@@ -76,7 +82,7 @@ public class LdapParserTest {
                     }
 
                     @Override
-                    public List<? extends ResourceSnapshot> getResources() {
+                    public List<ResourceSnapshot> getResources() {
                         return List.of(getRc());
                     }
 
@@ -99,7 +105,7 @@ public class LdapParserTest {
                             }
 
                             @Override
-                            public List<? extends ServiceSnapshot> getServices() {
+                            public List<ServiceSnapshot> getServices() {
                                 return List.of(getSvc());
                             }
 

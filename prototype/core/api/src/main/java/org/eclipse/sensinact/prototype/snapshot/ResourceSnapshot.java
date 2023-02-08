@@ -13,6 +13,8 @@
 
 package org.eclipse.sensinact.prototype.snapshot;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 
 public interface ResourceSnapshot extends Snapshot {
@@ -20,4 +22,6 @@ public interface ResourceSnapshot extends Snapshot {
     ServiceSnapshot getService();
 
     TimedValue<?> getValue();
+
+    Map<String, Object> getMetadata();
 }

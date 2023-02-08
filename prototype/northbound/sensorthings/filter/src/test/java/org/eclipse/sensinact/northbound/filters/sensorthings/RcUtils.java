@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.filters.sensorthings;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
@@ -104,6 +105,11 @@ public class RcUtils {
             @Override
             public String getName() {
                 return rcName;
+            }
+
+            @Override
+            public Map<String, Object> getMetadata() {
+                return Map.of();
             }
 
             @Override
