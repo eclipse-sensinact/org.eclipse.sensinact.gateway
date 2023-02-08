@@ -14,6 +14,7 @@ package org.eclipse.sensinact.northbound.filters.impl;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
 
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.api.IFilterHandler;
@@ -35,12 +36,13 @@ public class FilterHandler implements IFilterHandler {
     private BundleContext context;
 
     @Override
-    public ICriterion parseFilter(final String filterLanguage, final String filterQuery) throws FilterParserException {
+    public ICriterion parseFilter(final String filterLanguage, final String filterQuery,
+            final Map<String, Object> parameters) throws FilterParserException {
 
         final ServiceReference<IFilterParser> svcRef = findParser(filterLanguage);
         try {
             final IFilterParser parser = context.getService(svcRef);
-            return parser.parseFilter(filterQuery, filterLanguage);
+            return parser.parseFilter(filterQuery, filterLanguage, parameters);
         } finally {
             context.ungetService(svcRef);
         }

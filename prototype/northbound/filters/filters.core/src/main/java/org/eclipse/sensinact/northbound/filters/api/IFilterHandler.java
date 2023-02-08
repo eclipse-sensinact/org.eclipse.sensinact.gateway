@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.api;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 
 /**
@@ -27,5 +29,19 @@ public interface IFilterHandler {
      * @return Parsed filter, null if without effect
      * @throws FilterParserException Error parsing filter
      */
-    ICriterion parseFilter(String filterLanguage, String filterQuery) throws FilterParserException;
+    default ICriterion parseFilter(String filterLanguage, String filterQuery) throws FilterParserException {
+        return parseFilter(filterLanguage, filterQuery, Map.of());
+    }
+
+    /**
+     * Parses the given filter
+     *
+     * @param filterLanguage   Filter language
+     * @param filterQuery      Filter query string
+     * @param filterParameters Parameters given to the parser
+     * @return Parsed filter, null if without effect
+     * @throws FilterParserException Error parsing filter
+     */
+    ICriterion parseFilter(String filterLanguage, String filterQuery, Map<String, Object> parserParamaters)
+            throws FilterParserException;
 }
