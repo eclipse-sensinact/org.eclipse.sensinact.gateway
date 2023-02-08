@@ -15,9 +15,16 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.prototype.ProviderDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -27,10 +34,14 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.RootResourceAccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
@@ -44,6 +55,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     @Context
     Providers providers;
 
+    @Context
+    ContainerRequestContext requestContext;
+
     private ObjectMapper getMapper() {
         return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
@@ -52,13 +66,45 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
+    private ISensorthingsFilterParser getFilterParser() {
+        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    private ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
+        final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
+        if(filterString == null || filterString.isBlank()) {
+            return null;
+        }
+
+        try {
+            return getFilterParser().parseFilter(filterString, context);
+        } catch (FilterParserException e) {
+            throw new BadRequestException("Error parsing filter", e);
+        }
+    }
+
+    private List<ProviderSnapshot> listProviders(final EFilterContext context) {
+        final SensiNactSession userSession = getSession();
+        final ICriterion criterion = parseFilter(context);
+        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
+        if (criterion != null && criterion.getResourceValueFilter() != null) {
+            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
+            return providers
+                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
+                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
+                    .collect(Collectors.toList());
+        } else {
+            return providers;
+        }
+    }
+
     @Override
     public ResultList<Thing> getThings() {
         SensiNactSession userSession = getSession();
         ResultList<Thing> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
-        list.value = providers.stream().map(p -> DtoMapper.toThing(userSession, uriInfo, p.provider)).collect(toList());
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.THINGS);
+        list.value = providers.stream().map(p -> DtoMapper.toThing(userSession, uriInfo, p.getName())).collect(toList());
 
         return list;
     }

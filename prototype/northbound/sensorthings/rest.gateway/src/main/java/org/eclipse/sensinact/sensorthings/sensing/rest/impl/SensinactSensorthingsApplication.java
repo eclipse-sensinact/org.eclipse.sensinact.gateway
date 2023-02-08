@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
 import org.osgi.service.component.annotations.Component;
@@ -32,12 +33,16 @@ public class SensinactSensorthingsApplication extends Application {
     @Reference
     SensiNactSessionManager sessionManager;
 
+    @Reference
+    ISensorthingsFilterParser filterParser;
+
     @Override
     public Set<Class<?>> getClasses() {
         return Set.of(
                 // Features/extensions
                 SensorThingsFeature.class,
                 SensinactSessionProvider.class,
+                SensorthingsFilterProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
@@ -58,6 +63,6 @@ public class SensinactSensorthingsApplication extends Application {
 
     @Override
     public Map<String, Object> getProperties() {
-        return Map.of("session.manager", sessionManager);
+        return Map.of("session.manager", sessionManager, "filter.parser", filterParser);
     }
 }

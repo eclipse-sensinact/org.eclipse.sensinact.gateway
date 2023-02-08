@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -36,7 +38,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Tests the ref, count, ... filters
@@ -275,5 +280,41 @@ public class FiltersTest extends AbstractIntegrationTest {
                 RESULT_ANY);
         assertEquals(ids, subStreams.value.stream().map(s -> (String) s.id).collect(Collectors.toList()));
         assertEquals(nbIds, subStreams.count);
+    }
+
+    @Test
+    void testFilter() throws Exception {
+        // Register the resources
+        final String provider1 = "filterFilter_1";
+        final String provider2 = "filterFilter_2";
+        final String svc = "sensor";
+        final String rcPrefix = "rc";
+        final int nbRc = 5;
+        for (int i = 0; i < nbRc; i++) {
+            createResource(provider1, svc, rcPrefix + i, i);
+            createResource(provider2, svc, rcPrefix + i, 40 + i);
+        }
+
+        final TypeReference<ResultList<Thing>> RESULT_THING = new TypeReference<>() {
+        };
+
+        // Return providers with a resources values less than 30
+        ResultList<Thing> things = utils.queryJson(
+                String.format("/Things?$filter=%s",
+                        URLEncoder.encode("Datastreams/Observations/result lt 30", StandardCharsets.UTF_8)),
+                RESULT_THING);
+        List<String> allIds = things.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+        assertTrue(allIds.size() >= 1, "Not enough things returned");
+        assertTrue(allIds.contains(provider1), provider1 + " not in result");
+        assertFalse(allIds.contains(provider2), provider2 + " in result");
+
+        // Loop back on provider ID
+        things = utils.queryJson(String.format("/Things?$filter=%s", URLEncoder.encode(
+                "Datastreams/Observations/FeatureOfInterest/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
+                RESULT_THING);
+        allIds = things.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+        assertTrue(allIds.size() >= 1, "Not enough things returned");
+        assertTrue(allIds.contains(provider2), provider2 + " not in result");
+        assertFalse(allIds.contains(provider1), provider1 + " in result");
     }
 }

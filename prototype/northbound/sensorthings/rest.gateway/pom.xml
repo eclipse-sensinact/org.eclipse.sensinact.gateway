@@ -21,6 +21,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>filter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>rest.api</artifactId>
       <version>${project.version}</version>

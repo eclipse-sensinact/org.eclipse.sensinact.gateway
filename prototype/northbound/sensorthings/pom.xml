@@ -46,6 +46,11 @@
         <version>${sensinact.core.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+        <artifactId>filters.core</artifactId>
+        <version>${sensinact.core.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
