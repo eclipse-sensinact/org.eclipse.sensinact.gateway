@@ -13,9 +13,7 @@
 
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import Map from "@/views/Map.vue";
-import LocationC from "@/components/Location.vue";
 import Tree from "@/components/Tree.vue";
 
 Vue.use(VueRouter)

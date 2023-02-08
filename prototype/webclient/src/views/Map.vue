@@ -54,21 +54,21 @@ import PropertiesC from "@/components/PropertiesView/Properties.vue";
     LIcon
   }})
 export default class Map extends Vue{
-  private url:string =  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  private attribution:string =
+  private url =  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  private attribution =
       '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors';
-  private zoom:number = 15;
+  private zoom = 15;
   private center = [55.8382551745062, -4.20119980206699];
   private markerLatLng =[55.8382551745062, -4.20119980206699]
   private points:Array<Location>|undefined = [];
   private selected:Location|null = {'@iot.id':undefined};
-  private treeData:any|null = null;
+  private treeData:unknown = null;
 
   async mounted(){
     await this.load();
   }
   async load(){
-    this.points = ((await new LocationsApi().v11LocationsGet()).data as Locations)!.value;
+    this.points = ((await new LocationsApi().v11LocationsGet()).data as Locations)?.value;
   }
 
   res(arr:any){

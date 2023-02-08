@@ -45,9 +45,9 @@ import VTreeview from "v-treeview"
   }})
 export default class TreeC extends Vue{
 
-  private loading:boolean = false;
+  private loading = false;
   private location:Location|null = null;
-  private openAll:boolean = true;
+  private openAll = true;
   private treeTypes = [
     {
       type: "#",
@@ -148,22 +148,22 @@ export default class TreeC extends Vue{
         break;
       case 'FMM_THINGS':
           this.$emit('TreeSelect',{type:'FMM_THINGS',data:null})
-          const childs:Object[] = await this.getThingsTree()
-          node.model.children=[]
-          childs.forEach((child:Object)=>{
+          node.model.children=[];
+          (await this.getThingsTree()).forEach((child:unknown)=>{
             node.addNode(child)
           })
         break;
-      case 'FMM_THING':
+      case 'FMM_THING':{
         this.$emit('TreeSelect',{type:'FMM_THING',data: node.model._data})
         node.model.children=[]
-        const datastreams:Object[] = await this.getDatascreamsTree(node.model._data['@iot.id'])
+        const datastreams: unknown[] = await this.getDatascreamsTree(node.model._data['@iot.id']);
         const datastreamsNode:any = {id: Math.random()*100000, text:'DATASTREAMS', type: "FMM_DATASTREAMS", children: []}
-        datastreams.forEach((child:Object)=>{
+        datastreams.forEach((child:unknown)=>{
            datastreamsNode.children.push(child);
         })
         node.addNode(datastreamsNode)
         break;
+      }
       case 'FMM_DATASTREAMS':
         this.$emit('TreeSelect',{type:'FMM_DATASTREAMS',data:null});
         break;
@@ -178,11 +178,11 @@ export default class TreeC extends Vue{
         break;
     }
   }
-  async getThingsTree(): Promise<Object[]>{
+  async getThingsTree(): Promise<unknown[]>{
     this.loading = true;
     const things = (await new LocationsApi().v11LocationsEntityIdThingsGet(parseInt(this.$route.params.id))).data as Things
     this.loading = false;
-    let ret:Object[] = [];
+    let ret:unknown[] = [];
     things.value?.forEach((thing:Thing)=>{
       let node = {id: Math.random()*100000, text:  (thing as Thing).name, type: "FMM_THING", children: [],_data:thing}
       ret.push(node);
@@ -190,22 +190,22 @@ export default class TreeC extends Vue{
     return ret;
   }
 
-  async getDatascreamsTree(id:string): Promise<Object[]>{
+  async getDatascreamsTree(id:string): Promise<unknown[]>{
     this.loading = true;
     const datastreams = (await new ThingsApi().v11ThingsEntityIdDatastreamsGet(parseInt(id))).data as Datastreams
     this.loading = false;
-    let ret:Object[] = [];
+    let ret:unknown[] = [];
     datastreams.value?.forEach((datastream:Datastream)=>{
       let node = {id: Math.random()*100000, text:  (datastream as Datastream).name, type: "FMM_DATASTREAM", children: [],_data:datastream}
       ret.push(node);
     });
     return ret;
   }
-  async getObservationTree(id:string): Promise<Object[]>{
+  async getObservationTree(id:string): Promise<unknown[]>{
     this.loading = true;
     const observations = (await new DatastreamsApi().v11DatastreamsEntityIdObservationsGet(parseInt(id))).data as Observations
     this.loading = false;
-    let ret:Object[] = [];
+    let ret:unknown[] = [];
     observations.value?.forEach((observation:Observation)=>{
       let node = {id: Math.random()*100000, text:  (observation as Observation)["@iot.id"], type: "FMM_OBSERVATION", children: [],_data:observation}
       ret.push(node);
@@ -220,20 +220,18 @@ export default class TreeC extends Vue{
   contextSelected(command:any) {
     switch (command) {
       case "Create Basic":
-        var node = {
+        this.selectedNode.addNode({
           text: "New Basic Plan",
           type: "Basic",
           children: []
-        };
-        this.selectedNode.addNode(node);
+        });
         break;
       case "Create Top-up":
-        var node = {
+        this.selectedNode.addNode({
           text: "New Top-up",
           type: "Top-up",
           children: []
-        };
-        this.selectedNode.addNode(node);
+        });
         break;
       case "Rename":
         this.selectedNode.editName();

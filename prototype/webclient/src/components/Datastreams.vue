@@ -20,7 +20,7 @@
         <b-tab-item label="Datastream">
           <div class="dtable" v-if="data">
             <perfect-scrollbar>
-            <div class="item" v-for="(value,key) in data" v-if="key!='properties'" :key="key">
+            <div class="item" v-for="(value,key) in noprops"  :key="key">
               <div class="key cap">{{key}}:</div>
               <div class="value">{{value}}</div>
             </div>
@@ -55,19 +55,27 @@
 <script lang="ts">
 
 import {Component, Prop, Vue, Watch} from "vue-property-decorator";
-import {Datastream, Thing} from "../../openapi/client";
+import {Datastream} from "../../openapi/client";
 import Observations from "@/components/Observations.vue";
 @Component({
   components: {Observations}
 })
 export default class DatastreamsC extends Vue{
-  private loading:boolean = false;
-  private activeTab:number = 0;
+  private loading = false;
+  private activeTab = 0;
   @Prop() readonly data: Datastream | undefined;
 
   @Watch('data')
-  dataChanged(newD:any){
+  dataChanged(newD:unknown){
     console.log(newD)
+  }
+  get noprops(){
+    let ret:any = {};
+    for (const [key,atr] of Object.entries(this.data as object)){
+      if(key!=='properties')
+        ret[key]=atr;
+    }
+    return ret;
   }
 
 }

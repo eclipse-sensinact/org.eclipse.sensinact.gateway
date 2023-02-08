@@ -31,7 +31,7 @@
         <b-tab-item :label="this.$i18n.t('properties').toString()">
           <div class="dtable">
             <perfect-scrollbar>
-              <div class="item" v-for="(value,key) in data.properties" :v-key="key">
+              <div class="item" v-for="(value,key) in data.properties" :key="key">
                 <div class="key cap">{{key}}:</div>
                 <div class="value">{{value}}</div>
               </div>
@@ -48,12 +48,12 @@
 
 <script lang="ts">
 
-import {Component, Prop, Vue, Watch} from "vue-property-decorator";
+import {Component, Prop, Vue} from "vue-property-decorator";
 import { Thing} from "../../openapi/client";
 @Component
 export default class ThingC extends Vue{
-  private loading:boolean = false;
-  private activeTab:number = 0;
+  private loading = false;
+  private activeTab = 0;
   @Prop() readonly data: Thing | undefined;
 
 

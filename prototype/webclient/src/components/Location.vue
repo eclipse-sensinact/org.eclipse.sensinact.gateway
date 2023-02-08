@@ -59,18 +59,16 @@
 
 <script lang="ts">
 
-import {Component, Prop, Vue, Watch} from "vue-property-decorator";
-import {Location, LocationsApi} from "../../openapi/client";
+import {Component, Prop, Vue} from "vue-property-decorator";
 import ThingsC from "@/components/Thing.vue";
 @Component({components:{
     ThingsC
   }})
 export default class LocationC extends Vue{
 
-  private loading:boolean = false;
-  private activeTab:number = 0;
-  @Prop() readonly data:any;
-
+  private loading = false;
+  private activeTab = 0;
+  @Prop() readonly data:unknown;
 
 }
 </script>
