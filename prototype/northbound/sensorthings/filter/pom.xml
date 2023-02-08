@@ -28,7 +28,6 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
       <artifactId>filters.core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>

@@ -150,7 +150,12 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                             if (rightValue instanceof OffsetDateTime) {
                                 rightValue = ((OffsetDateTime) rightValue).toInstant();
                             }
-                            return subPredicate.apply(leftValue, rightValue);
+                            try {
+                                return subPredicate.apply(leftValue, rightValue);
+                            } catch (ClassCastException e) {
+                                // Comparing different types
+                                return false;
+                            }
                         }
                     };
                 }

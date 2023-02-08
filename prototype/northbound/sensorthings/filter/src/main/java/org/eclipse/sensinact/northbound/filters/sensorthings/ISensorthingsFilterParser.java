@@ -10,12 +10,12 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.sensorthings.impl;
+package org.eclipse.sensinact.northbound.filters.sensorthings;
 
-/**
- * @author thoma
- *
- */
-public abstract class AbstractAstPrimitive implements AstPrimitive {
+import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 
+public interface ISensorthingsFilterParser {
+
+    ICriterion parseFilter(String query, EFilterContext context) throws FilterParserException;
 }
