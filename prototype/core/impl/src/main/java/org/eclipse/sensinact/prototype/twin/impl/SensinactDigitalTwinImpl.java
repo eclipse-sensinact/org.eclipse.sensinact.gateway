@@ -364,8 +364,6 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             p.filterEmptyServices();
             return p;
         });
-        // Filter out providers which only have the admin service
-        providersStream = providersStream.filter(p -> p.getServices().size() >= 1);
 
         return providersStream.collect(Collectors.toList());
     }
