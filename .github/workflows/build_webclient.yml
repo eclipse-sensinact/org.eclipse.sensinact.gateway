@@ -39,11 +39,10 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.pull_request.base.sha }}
           FILTER_REGEX_INCLUDE: '${{ env.GITHUB_WORKSPACE }}/prototype/.*'
   licensing:
-    build:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: Check License Header
-          uses: apache/skywalking-eyes@main      # always prefer to use a revision instead of `main`.
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check License Header
+        uses: apache/skywalking-eyes@main      # always prefer to use a revision instead of `main`.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
