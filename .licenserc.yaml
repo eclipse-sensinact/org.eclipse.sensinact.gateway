@@ -54,5 +54,8 @@ header:
     - '**/*.prefs'
     - 'license.templates'
     - 'prototype/distribution/launcher/src/test/resources/repository/**'
+    - 'prototype/webclient/dist'
+    - 'prototype/webclient/node_modules'
+    - 'prototype/webclient/openapi'
 
   comment: always
