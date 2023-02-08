@@ -13,10 +13,9 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.DatetimeoffsetvalueContext;
@@ -35,9 +34,9 @@ public class DateTimeVisitors {
         return Integer.parseInt(ctx.getText());
     }
 
-    public static Instant dateTimeOffset(ParserRuleContext ruleCtx) {
+    public static OffsetDateTime dateTimeOffset(ParserRuleContext ruleCtx) {
         final DatetimeoffsetvalueContext ctx = (DatetimeoffsetvalueContext) ruleCtx;
-        return ZonedDateTime.parse(ctx.getText()).toInstant();
+        return OffsetDateTime.parse(ctx.getText());
     }
 
     public static LocalDate date(ParserRuleContext ruleCtx) {

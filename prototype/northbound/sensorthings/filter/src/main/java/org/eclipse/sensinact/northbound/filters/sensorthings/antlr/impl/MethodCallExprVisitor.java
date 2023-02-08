@@ -15,7 +15,10 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoField;
+import java.time.temporal.Temporal;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -219,77 +222,35 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
 
         final CommonexprContext subExpr = ctx.getChild(CommonexprContext.class, 0);
         final Function<ResourceValueFilterInputHolder, Object> targetExpr = visitor.visitCommonexpr(subExpr);
-        final Function<Object, Object> operation;
+        final Function<Temporal, Object> operation;
 
         switch (ctx.getRuleIndex()) {
         case ODataFilterParser.RULE_yearmethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getYear();
-                } else {
-                    return ((LocalDate) o).getYear();
-                }
-            };
+            operation = t -> t.get(ChronoField.YEAR);
             break;
 
         case ODataFilterParser.RULE_monthmethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getMonth();
-                } else {
-                    return ((LocalDate) o).getMonth();
-                }
-            };
+            operation = t -> t.get(ChronoField.MONTH_OF_YEAR);
             break;
 
         case ODataFilterParser.RULE_daymethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getDayOfMonth();
-                } else {
-                    return ((LocalDate) o).getDayOfMonth();
-                }
-            };
+            operation = t -> t.get(ChronoField.DAY_OF_MONTH);
             break;
 
         case ODataFilterParser.RULE_hourmethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getHour();
-                } else {
-                    return ((LocalTime) o).getHour();
-                }
-            };
+            operation = t -> t.get(ChronoField.HOUR_OF_DAY);
             break;
 
         case ODataFilterParser.RULE_minutemethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getMinute();
-                } else {
-                    return ((LocalTime) o).getMinute();
-                }
-            };
+            operation = t -> t.get(ChronoField.MINUTE_OF_HOUR);
             break;
 
         case ODataFilterParser.RULE_secondmethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getSecond();
-                } else {
-                    return ((LocalTime) o).getSecond();
-                }
-            };
+            operation = t -> t.get(ChronoField.SECOND_OF_MINUTE);
             break;
 
         case ODataFilterParser.RULE_fractionalsecondsmethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getNano();
-                } else {
-                    return ((LocalTime) o).getNano();
-                }
-            };
+            operation = t -> t.get(ChronoField.NANO_OF_SECOND);
             break;
 
         case ODataFilterParser.RULE_datemethodcallexpr:
@@ -303,19 +264,23 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
             break;
 
         case ODataFilterParser.RULE_timemethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).toLocalTime();
+            operation = t -> {
+                if (t instanceof OffsetDateTime) {
+                    return ((OffsetDateTime) t).toLocalTime();
+                } else if (t instanceof LocalTime) {
+                    return (LocalTime) t;
+                } else if (t instanceof Instant) {
+                    return OffsetDateTime.ofInstant((Instant) t, ZoneOffset.UTC).toLocalTime();
                 } else {
-                    return (LocalTime) o;
+                    throw new InvalidResultTypeException("Can't extract time", "datetime, time or instant", t);
                 }
             };
             break;
 
         case ODataFilterParser.RULE_totaloffsetminutesmethodcallexpr:
-            operation = o -> {
-                if (o instanceof Instant) {
-                    return ((Instant) o).atOffset(ZoneOffset.UTC).getOffset().getTotalSeconds() / 60;
+            operation = t -> {
+                if (t instanceof OffsetDateTime) {
+                    return ((OffsetDateTime) t).getOffset().getTotalSeconds() / 60;
                 } else {
                     return 0;
                 }
@@ -328,7 +293,11 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
 
         return x -> {
             Object res = targetExpr.apply(x);
-            return operation.apply(res);
+            if (res instanceof Temporal) {
+                return operation.apply((Temporal) res);
+            }
+
+            throw new InvalidResultTypeException("Can't execute date method", "temporal", res);
         };
     }
 

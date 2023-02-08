@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
+import java.time.OffsetDateTime;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -134,14 +135,21 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
 
                 if (rightExpr != null && subPredicate != null) {
                     predicate = x -> {
-                        final Object leftValue = leftExpr.apply(x);
-                        final Object rightValue = rightExpr.apply(x);
+                        Object leftValue = leftExpr.apply(x);
+                        Object rightValue = rightExpr.apply(x);
 
                         if (leftValue instanceof AnyMatch) {
                             return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex);
                         } else if (rightValue instanceof AnyMatch) {
                             return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
                         } else {
+                            // Convert dates to Instant (to compare with resource timestamps)
+                            if (leftValue instanceof OffsetDateTime) {
+                                leftValue = ((OffsetDateTime) leftValue).toInstant();
+                            }
+                            if (rightValue instanceof OffsetDateTime) {
+                                rightValue = ((OffsetDateTime) rightValue).toInstant();
+                            }
                             return subPredicate.apply(leftValue, rightValue);
                         }
                     };

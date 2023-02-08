@@ -13,9 +13,9 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.Temporal;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -79,7 +79,7 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         }
 
         case ODataFilterParser.RULE_datetimeoffsetvalue: {
-            final Instant value = DateTimeVisitors.dateTimeOffset(element);
+            final OffsetDateTime value = DateTimeVisitors.dateTimeOffset(element);
             return x -> value;
         }
 
@@ -199,7 +199,7 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         } else if (r instanceof Duration) {
             final Duration duration = (Duration) r;
             if (l instanceof Temporal) {
-                return duration.addTo((Instant) l);
+                return duration.addTo((Temporal) l);
             }
         }
 
@@ -216,7 +216,7 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         } else if (r instanceof Duration) {
             final Duration duration = (Duration) r;
             if (l instanceof Temporal) {
-                return duration.negated().addTo((Instant) l);
+                return duration.negated().addTo((Temporal) l);
             }
         } else if (l instanceof Temporal && r instanceof Temporal) {
             // Date A - Date B => Duration between B and A
