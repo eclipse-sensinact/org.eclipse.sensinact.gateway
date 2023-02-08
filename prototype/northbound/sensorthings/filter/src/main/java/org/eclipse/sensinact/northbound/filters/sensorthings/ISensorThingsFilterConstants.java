@@ -16,4 +16,5 @@ public interface ISensorThingsFilterConstants {
 
     String SENSORTHINGS_FILTER = "sensorthings";
     String OGC_FILTER = "ogc";
+    String PARAM_CONTEXT = "context";
 }

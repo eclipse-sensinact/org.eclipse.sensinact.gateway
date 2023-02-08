@@ -40,7 +40,7 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
             throws FilterParserException {
 
         EFilterContext context = null;
-        Object rawContext = parameters.get("");
+        Object rawContext = parameters.get(ISensorThingsFilterConstants.PARAM_CONTEXT);
         if (rawContext instanceof EFilterContext) {
             context = (EFilterContext) rawContext;
         } else if (rawContext instanceof String) {
