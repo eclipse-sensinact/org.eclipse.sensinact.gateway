@@ -364,7 +364,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         if (filter == null) {
             return executeGetCommand((m) -> m.filteredSnapshot(null, null, null, null), Function.identity());
         } else {
-            return executeGetCommand((m) -> m.filteredSnapshot(null, filter.getProviderFilter(),
+            return executeGetCommand((m) -> m.filteredSnapshot(filter.getLocationFilter(), filter.getProviderFilter(),
                     filter.getServiceFilter(), filter.getResourceFilter()), Function.identity());
         }
     }

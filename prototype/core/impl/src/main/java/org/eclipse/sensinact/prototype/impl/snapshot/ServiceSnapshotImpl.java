@@ -16,7 +16,6 @@ package org.eclipse.sensinact.prototype.impl.snapshot;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
@@ -67,12 +66,5 @@ public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnap
 
     public List<ResourceSnapshotImpl> getResources() {
         return List.copyOf(resources);
-    }
-
-    public void filterNullValues() {
-        final List<ResourceSnapshotImpl> filteredList = resources.stream().filter(rc -> rc.getValue() != null)
-                .collect(Collectors.toList());
-        resources.clear();
-        resources.addAll(filteredList);
     }
 }
