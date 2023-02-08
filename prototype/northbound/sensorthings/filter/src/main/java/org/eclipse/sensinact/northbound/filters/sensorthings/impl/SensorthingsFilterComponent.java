@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.impl;
 
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -35,9 +36,20 @@ import org.osgi.service.component.annotations.Component;
 public class SensorthingsFilterComponent implements IFilterParser, ISensorthingsFilterParser {
 
     @Override
-    public ICriterion parseFilter(String query, String queryLanguage) throws FilterParserException {
-        // FIXME: enhance API
-        EFilterContext context = EFilterContext.valueOf(queryLanguage);
+    public ICriterion parseFilter(String query, String queryLanguage, Map<String, Object> parameters)
+            throws FilterParserException {
+
+        EFilterContext context = null;
+        Object rawContext = parameters.get("");
+        if (rawContext instanceof EFilterContext) {
+            context = (EFilterContext) rawContext;
+        } else if (rawContext instanceof String) {
+            context = EFilterContext.valueOf((String) rawContext);
+        }
+
+        if (context == null) {
+            throw new FilterParserException("Can't parse a SensorThings filter without a context");
+        }
 
         // Return the ICriterion
         return parseFilter(query, context);

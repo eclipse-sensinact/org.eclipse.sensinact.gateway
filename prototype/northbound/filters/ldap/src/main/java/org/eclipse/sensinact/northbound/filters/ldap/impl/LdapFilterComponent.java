@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.ldap.impl;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.api.IFilterParser;
 import org.eclipse.sensinact.northbound.filters.ldap.ILdapFilterConstants;
@@ -23,7 +25,8 @@ import org.osgi.service.component.annotations.Component;
 public class LdapFilterComponent implements IFilterParser {
 
     @Override
-    public ICriterion parseFilter(String query, String queryLanguage) throws FilterParserException {
+    public ICriterion parseFilter(String query, String queryLanguage, Map<String, Object> parameters)
+            throws FilterParserException {
         try {
             return LdapParser.parse(query);
         } catch (ParseException e) {
