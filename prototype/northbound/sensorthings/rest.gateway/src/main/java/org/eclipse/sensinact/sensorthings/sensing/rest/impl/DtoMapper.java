@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -23,6 +24,7 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.geojson.Polygon;
 import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -178,6 +180,46 @@ public class DtoMapper {
         datastream.observedArea = getObservedArea(
                 getLocation(userSession, mapper, resource.provider, false).getValue());
         datastream.properties = resource.metadata;
+
+        datastream.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("Datastreams({id})")
+                .resolveTemplate("id", datastream.id).build().toString();
+        datastream.observationsLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Observations").build()
+                .toString();
+        datastream.observedPropertyLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("ObservedProperty")
+                .build().toString();
+        datastream.sensorLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Sensor").build().toString();
+        datastream.thingLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Thing").build().toString();
+
+        return datastream;
+    }
+
+    public static Datastream toDatastream(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
+            ResourceSnapshot resource) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
+        Datastream datastream = new Datastream();
+
+        final String provider = resource.getService().getProvider().getName();
+        final Map<String, Object> metadata = resource.getMetadata();
+
+        datastream.id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
+
+        datastream.name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
+        datastream.description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
+
+        // TODO can we make this more fine-grained
+        datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
+
+        UnitOfMeasurement unit = new UnitOfMeasurement();
+        unit.symbol = String.valueOf(metadata.get("unit"));
+        unit.name = String.valueOf(metadata.get("sensorthings.unit.name"));
+        unit.definition = String.valueOf(metadata.get("sensorthings.unit.definition"));
+        datastream.unitOfMeasurement = unit;
+
+        datastream.observedArea = getObservedArea(getLocation(userSession, mapper, provider, false).getValue());
+        datastream.properties = metadata;
 
         datastream.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("Datastreams({id})")
                 .resolveTemplate("id", datastream.id).build().toString();

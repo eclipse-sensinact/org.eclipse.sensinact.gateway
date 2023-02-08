@@ -114,8 +114,8 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         SensiNactSession userSession = getSession();
         ResultList<Location> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
-        list.value = providers.stream().map(p -> DtoMapper.toLocation(userSession, uriInfo, getMapper(), p.provider)).collect(toList());
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
+        list.value = providers.stream().map(p -> DtoMapper.toLocation(userSession, uriInfo, getMapper(), p.getName())).collect(toList());
 
         return list;
     }
@@ -125,9 +125,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         SensiNactSession userSession = getSession();
         ResultList<HistoricalLocation> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
         list.value = providers.stream()
-                .map(p -> DtoMapper.toHistoricalLocation(userSession, getMapper(), uriInfo, p.provider))
+                .map(p -> DtoMapper.toHistoricalLocation(userSession, getMapper(), uriInfo, p.getName()))
                 .collect(toList());
         return list;
     }
@@ -137,11 +137,12 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         SensiNactSession userSession = getSession();
         ResultList<Datastream> list = new ResultList<>();
 
-        List<ProviderDescription> providers = userSession.listProviders();
+        List<ProviderSnapshot> providers = listProviders(EFilterContext.DATASTREAMS);
         list.value = providers.stream()
-                .flatMap(p -> p.services.stream().map(s -> userSession.describeService(p.provider, s)))
-                .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
+                .flatMap(p -> p.getServices().stream())
+                .flatMap(s -> s.getResources().stream())
+                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r))
+                .collect(toList());
 
         return list;
     }
