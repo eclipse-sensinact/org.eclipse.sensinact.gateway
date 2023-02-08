@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +31,7 @@ public class AnyMatch {
     }
 
     public AnyMatch(final Collection<Object> entries, final BiFunction<Object, Object, Boolean> predicate) {
-        this.entries = List.copyOf(entries);
+        this.entries = new ArrayList<>(entries);
         this.equalityPredicate = predicate;
     }
 
