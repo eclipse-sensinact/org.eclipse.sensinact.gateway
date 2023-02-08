@@ -10,12 +10,9 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.api;
+package org.eclipse.sensinact.prototype.snapshot;
 
 import java.util.List;
-
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 
 /**
  * Filters a provider snapshot according to the value of its resources

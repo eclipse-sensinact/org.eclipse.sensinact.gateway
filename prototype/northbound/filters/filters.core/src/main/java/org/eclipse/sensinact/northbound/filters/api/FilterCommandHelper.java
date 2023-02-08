@@ -19,7 +19,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -35,7 +37,9 @@ public class FilterCommandHelper {
         try {
             providers = thread.execute(new AbstractTwinCommand<Collection<ProviderSnapshot>>() {
                 protected Promise<Collection<ProviderSnapshot>> call(SensinactDigitalTwin model, PromiseFactory pf) {
-                    return pf.resolved(model.filteredSnapshot(null, criterion.getProviderFilter(), null, null));
+                    return pf.resolved(
+                            model.filteredSnapshot(criterion.getLocationFilter(), criterion.getProviderFilter(),
+                                    criterion.getServiceFilter(), criterion.getResourceFilter()));
                 }
             }).getValue();
         } catch (InterruptedException e) {

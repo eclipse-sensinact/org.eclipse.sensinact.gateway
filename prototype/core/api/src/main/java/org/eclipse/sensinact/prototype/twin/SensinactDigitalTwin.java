@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.prototype.twin;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -123,13 +122,16 @@ public interface SensinactDigitalTwin extends CommandScoped {
     SensinactResource getResource(String providerName, String service, String resource);
 
     /**
-     * @param object
-     * @param providerFilter
-     * @param svcFilter
-     * @param rcFilter
-     * @return
+     * Returns a (filtered) snapshot of the model. All null filters are ignored, all
+     * associated items are accepted.
+     *
+     * @param geoFilter      Provider location filter
+     * @param providerFilter Provider filter (without services)
+     * @param svcFilter      Service filter (without resources)
+     * @param rcFilter       Resource filter (without values)
+     * @return The filtered snapshot
      */
-    Collection<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
+    List<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter);
 }

@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -289,7 +288,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     }
 
     @Override
-    public Collection<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
+    public List<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter) {
 

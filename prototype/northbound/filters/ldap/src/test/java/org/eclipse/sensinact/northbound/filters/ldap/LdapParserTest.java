@@ -19,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.List;
 
-import org.eclipse.sensinact.northbound.filters.api.ICriterion;
-import org.eclipse.sensinact.northbound.filters.api.ResourceValueFilter;
 import org.eclipse.sensinact.northbound.filters.ldap.impl.LdapParser;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.junit.jupiter.api.Test;

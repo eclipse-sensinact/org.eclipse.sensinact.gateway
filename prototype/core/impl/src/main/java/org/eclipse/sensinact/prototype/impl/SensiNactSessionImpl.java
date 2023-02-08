@@ -48,6 +48,8 @@ import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -355,6 +357,16 @@ public class SensiNactSessionImpl implements SensiNactSession {
             description.services = new ArrayList<>(snProvider.getServices().keySet());
             return description;
         }).collect(Collectors.toList()), List.of());
+    }
+
+    @Override
+    public List<ProviderSnapshot> filteredSnapshot(ICriterion filter) {
+        if (filter == null) {
+            return executeGetCommand((m) -> m.filteredSnapshot(null, null, null, null), Function.identity());
+        } else {
+            return executeGetCommand((m) -> m.filteredSnapshot(null, filter.getProviderFilter(),
+                    filter.getServiceFilter(), filter.getResourceFilter()), Function.identity());
+        }
     }
 
     public void notify(String topic, AbstractResourceNotification event) {

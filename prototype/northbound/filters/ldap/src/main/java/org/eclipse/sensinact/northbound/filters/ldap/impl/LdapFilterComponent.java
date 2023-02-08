@@ -13,9 +13,9 @@
 package org.eclipse.sensinact.northbound.filters.ldap.impl;
 
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
-import org.eclipse.sensinact.northbound.filters.api.ICriterion;
 import org.eclipse.sensinact.northbound.filters.api.IFilterParser;
 import org.eclipse.sensinact.northbound.filters.ldap.ILdapFilterConstants;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.osgi.service.component.annotations.Component;
 
 @Component(immediate = true, service = IFilterParser.class, property = {

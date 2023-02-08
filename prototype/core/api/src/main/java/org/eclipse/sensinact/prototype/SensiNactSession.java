@@ -21,6 +21,8 @@ import org.eclipse.sensinact.prototype.notification.ClientActionListener;
 import org.eclipse.sensinact.prototype.notification.ClientDataListener;
 import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.prototype.notification.ClientMetadataListener;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 
 public interface SensiNactSession {
 
@@ -238,4 +240,12 @@ public interface SensiNactSession {
      * @return
      */
     List<ProviderDescription> listProviders();
+
+    /**
+     * Returns a (filtered) snapshot of the model
+     *
+     * @param filter Optional filter to apply during snapshot
+     * @return A snapshot of the model
+     */
+    List<ProviderSnapshot> filteredSnapshot(ICriterion filter);
 }

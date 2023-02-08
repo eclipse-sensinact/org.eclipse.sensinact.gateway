@@ -14,9 +14,11 @@ package org.eclipse.sensinact.northbound.filters.ldap.impl;
 
 import java.util.function.Predicate;
 
-import org.eclipse.sensinact.northbound.filters.api.ResourceValueFilter;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 
 public abstract class AbstractCriterion implements ILdapCriterion {
 
@@ -31,7 +33,17 @@ public abstract class AbstractCriterion implements ILdapCriterion {
     }
 
     @Override
+    public Predicate<GeoJsonObject> getLocationFilter() {
+        return null;
+    }
+
+    @Override
     public Predicate<ProviderSnapshot> getProviderFilter() {
+        return null;
+    }
+
+    @Override
+    public Predicate<ServiceSnapshot> getServiceFilter() {
         return null;
     }
 

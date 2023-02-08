@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.ldap.impl;
 
-import org.eclipse.sensinact.northbound.filters.api.ResourceValueFilter;
+import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 
 /**
  * Comparison filter

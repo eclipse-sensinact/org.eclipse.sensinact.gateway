@@ -16,9 +16,9 @@ import java.util.Collection;
 import java.util.Comparator;
 
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
-import org.eclipse.sensinact.northbound.filters.api.ICriterion;
 import org.eclipse.sensinact.northbound.filters.api.IFilterHandler;
 import org.eclipse.sensinact.northbound.filters.api.IFilterParser;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;

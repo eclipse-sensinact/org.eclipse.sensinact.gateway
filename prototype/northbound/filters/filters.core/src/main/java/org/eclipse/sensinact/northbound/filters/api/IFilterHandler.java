@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.api;
 
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
+
 /**
  * Helper to parse a filter
  */

@@ -21,15 +21,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.northbound.filters.api.ICriterion;
-import org.eclipse.sensinact.northbound.filters.api.ResourceValueFilter;
 import org.eclipse.sensinact.northbound.filters.ldap.impl.LdapParser;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
