@@ -15,7 +15,7 @@ nbproject
 
 .DS_Store
 prototype/webclient/node_modules
-
+prototype/webclient/package-lock.json
 
 
 
