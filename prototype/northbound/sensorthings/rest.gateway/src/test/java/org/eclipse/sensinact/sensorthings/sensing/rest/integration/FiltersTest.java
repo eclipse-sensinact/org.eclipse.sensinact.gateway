@@ -311,7 +311,7 @@ public class FiltersTest extends AbstractIntegrationTest {
 
         @BeforeEach
         void setup(TestInfo testInfo) {
-         // Register the resources
+            // Register the resources
             final String testMethodName = testInfo.getTestMethod().get().getName();
             provider1 = testMethodName + "_1";
             provider2 = testMethodName + "_2";
