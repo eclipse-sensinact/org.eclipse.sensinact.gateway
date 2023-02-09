@@ -2,8 +2,6 @@ name: build_the_webclient
 on:
   push:
     branches: ["webclient"]
-  pull_request:
-    branches: [ "future/prototype" ]
 defaults:
   run:
     working-directory: prototype/webclient
