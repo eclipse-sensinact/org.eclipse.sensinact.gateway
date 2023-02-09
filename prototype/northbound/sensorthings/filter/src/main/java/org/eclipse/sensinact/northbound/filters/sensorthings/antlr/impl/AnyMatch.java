@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +43,6 @@ public class AnyMatch {
         return entries.stream().anyMatch(e -> equalityPredicate.apply(e, other));
     }
 
-    @SuppressWarnings("unchecked")
     private boolean compare(final Object other, final Predicate<Integer> checker) {
         if (other instanceof Number) {
             final double otherDouble = ((Number) other).doubleValue();
@@ -53,18 +55,51 @@ public class AnyMatch {
                     }
                 }
             }
-        } else {
-            for (Object entry : entries) {
-                if (entry instanceof Comparable) {
-                    Comparable<Object> entryCmp = (Comparable<Object>) entry;
-                    if (checker.test(entryCmp.compareTo(other))) {
+            return false;
+
+        } else if (other instanceof Temporal) {
+            final Instant otherInstant = toInstant(other);
+            if (otherInstant != null) {
+                for (Object entry : entries) {
+                    final Instant entryInstant = toInstant(entry);
+                    if (entryInstant != null && checker.test(entryInstant.compareTo(otherInstant))) {
                         return true;
                     }
+                }
+
+                return false;
+            }
+        }
+
+        if (compareComparable(other, checker)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean compareComparable(final Object other, final Predicate<Integer> checker) {
+        for (Object entry : entries) {
+            if (entry instanceof Comparable) {
+                Comparable<Object> entryCmp = (Comparable<Object>) entry;
+                if (checker.test(entryCmp.compareTo(other))) {
+                    return true;
                 }
             }
         }
 
         return false;
+    }
+
+    private Instant toInstant(final Object object) {
+        if (object instanceof Instant) {
+            return (Instant) object;
+        } else if (object instanceof OffsetDateTime) {
+            return ((OffsetDateTime) object).toInstant();
+        }
+
+        return null;
     }
 
     public boolean lessThan(final Object other) {
