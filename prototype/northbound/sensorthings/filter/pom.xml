@@ -39,6 +39,12 @@
       <artifactId>antlr4-runtime</artifactId>
       <version>${antlr.version}</version>
     </dependency>
+    <!-- Spatial4J -->
+    <dependency>
+      <groupId>org.locationtech.spatial4j</groupId>
+      <artifactId>spatial4j</artifactId>
+      <version>0.8</version>
+    </dependency>
     <!-- SL4J -->
     <dependency>
       <groupId>org.slf4j</groupId>

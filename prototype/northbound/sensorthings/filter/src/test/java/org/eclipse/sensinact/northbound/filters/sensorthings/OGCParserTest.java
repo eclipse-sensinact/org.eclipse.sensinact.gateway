@@ -28,7 +28,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterLexer;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolcommonexprContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.CommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolCommonExprVisitor;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.GeoGeographyVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
@@ -70,6 +72,18 @@ public class OGCParserTest {
 
     private void assertQueries(final Map<String, Boolean> expectations) throws Exception {
         assertQueries(expectations, null);
+    }
+
+    @Test
+    void testGeography() throws Exception {
+        ANTLRInputStream inStream = new ANTLRInputStream("geography'LINESTRING (30 10, 10 30, 40 40)'");
+        ODataFilterLexer markupLexer = new ODataFilterLexer(inStream);
+        CommonTokenStream commonTokenStream = new CommonTokenStream(markupLexer);
+        ODataFilterParser parser = new ODataFilterParser(commonTokenStream);
+        CommonexprContext ctx = parser.commonexpr();
+
+        GeoGeographyVisitor v = new GeoGeographyVisitor(parser);
+        System.out.println(v.visit(ctx));
     }
 
     @Test

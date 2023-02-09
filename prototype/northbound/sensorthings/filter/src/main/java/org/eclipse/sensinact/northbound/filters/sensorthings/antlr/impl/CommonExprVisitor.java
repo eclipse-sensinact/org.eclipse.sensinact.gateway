@@ -36,17 +36,17 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.PrimitiveliteralContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler;
+import org.locationtech.spatial4j.shape.Shape;
 
-/**
- * @author thoma
- *
- */
 public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceValueFilterInputHolder, Object>> {
 
     private final Parser parser;
 
+    private final GeoGeographyVisitor visitor;
+
     public CommonExprVisitor(Parser parser) {
         this.parser = parser;
+        visitor = new GeoGeographyVisitor(parser);
     }
 
     @Override
@@ -95,6 +95,17 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
 
         case ODataFilterParser.RULE_duration: {
             final Duration value = DateTimeVisitors.duration(element);
+            return x -> value;
+        }
+
+        case ODataFilterParser.RULE_geographycollection:
+        case ODataFilterParser.RULE_geographylinestring:
+        case ODataFilterParser.RULE_geographymultilinestring:
+        case ODataFilterParser.RULE_geographymultipoint:
+        case ODataFilterParser.RULE_geographymultipolygon:
+        case ODataFilterParser.RULE_geographypolygon:
+        case ODataFilterParser.RULE_geographypoint: {
+            final Shape value = visitor.visit(element);
             return x -> value;
         }
 

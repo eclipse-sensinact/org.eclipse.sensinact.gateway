@@ -12,19 +12,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
-import java.util.Arrays;
-
-public class InvalidResultTypeException extends RuntimeException {
+public class ParsingException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public InvalidResultTypeException(final String message) {
+    public ParsingException(final String message) {
         super(message);
     }
 
-    public InvalidResultTypeException(final String message, final String expected, final Object... values) {
-        this(String.format("%s. Expected %s got: %s", message, expected,
-                Arrays.stream(values).map(v -> String.format("%s (%s)", v, v != null ? v.getClass().getName() : "null"))
-                        .reduce((a, b) -> String.format("%s, %s", a, b)).orElse("(no value)")));
+    public ParsingException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }

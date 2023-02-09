@@ -738,7 +738,7 @@ singleenumvalue : enumerationmember | enummembervalue;
 enummembervalue : int64value;
 
 geographycollection   : geographyprefix squote fullcollectionliteral squote;
-fullcollectionliteral : sridliteral collectionliteral;
+fullcollectionliteral : sridliteral? collectionliteral;
 collectionliteral     : ((CAP_C | C) (CAP_O | O) (CAP_L | L) (CAP_L | L) (CAP_E | E) (CAP_C | C) (CAP_T | T) (CAP_I | I) (CAP_O | O) (CAP_N | N) LEFT_PAREN) geoliteral ( comma geoliteral )* close;
 geoliteral            : collectionliteral
                       | linestringliteral
@@ -749,31 +749,31 @@ geoliteral            : collectionliteral
                       | polygonliteral;
 
 geographylinestring   : geographyprefix squote fulllinestringliteral squote;
-fulllinestringliteral : sridliteral linestringliteral;
+fulllinestringliteral : sridliteral? linestringliteral;
 linestringliteral     : ((CAP_L | L) (CAP_I | I) (CAP_N | N) (CAP_E | E) (CAP_S | S) (CAP_T | T) (CAP_R | R) (CAP_I | I) (CAP_N | N) (CAP_G | G)) linestringdata;
-linestringdata        : open positionliteral ( comma positionliteral )+ close;
+linestringdata        : open bws positionliteral bws ( comma bws positionliteral bws )+ close;
 
 geographymultilinestring   : geographyprefix squote fullmultilinestringliteral squote;
-fullmultilinestringliteral : sridliteral multilinestringliteral;
+fullmultilinestringliteral : sridliteral? multilinestringliteral;
 multilinestringliteral     : ((CAP_M | M) (CAP_U | U) (CAP_L | L) (CAP_T | T) (CAP_I | I) (CAP_L | L) (CAP_I | I) (CAP_N | N) (CAP_E | E) (CAP_S | S) (CAP_T | T) (CAP_R | R) (CAP_I | I) (CAP_N | N) (CAP_G | G) LEFT_PAREN) ( linestringdata ( comma linestringdata )* )? close;
 
 geographymultipoint   : geographyprefix squote fullmultipointliteral squote;
-fullmultipointliteral : sridliteral multipointliteral;
+fullmultipointliteral : sridliteral? multipointliteral;
 multipointliteral     : ((CAP_M | M) (CAP_U | U) (CAP_L | L) (CAP_T | T) (CAP_I | I) (CAP_P | P) (CAP_O | O) (CAP_I | I) (CAP_N | N) (CAP_T | T) LEFT_PAREN) ( pointdata ( comma pointdata )* )? close;
 
 geographymultipolygon   : geographyprefix squote fullmultipolygonliteral squote;
-fullmultipolygonliteral : sridliteral multipolygonliteral;
+fullmultipolygonliteral : sridliteral? multipolygonliteral;
 multipolygonliteral     : ((CAP_M | M) (CAP_U | U) (CAP_L | L) (CAP_T | T) (CAP_I | I) (CAP_P | P) (CAP_O | O) (CAP_L | L) (CAP_Y | Y) (CAP_G | G) (CAP_O | O) (CAP_N | N) LEFT_PAREN) ( polygondata ( comma polygondata )* )? close;
 
 geographypoint   : geographyprefix squote fullpointliteral squote;
-fullpointliteral : sridliteral pointliteral;
+fullpointliteral : sridliteral? pointliteral;
 sridliteral      : ((CAP_S | S) (CAP_R | R) (CAP_I | I) (CAP_D | D)) eq (digit ((digit digit digit digit) | (digit digit digit) | (digit digit) | digit?)) semi;
-pointliteral     :((CAP_P | P) (CAP_O | O) (CAP_I | I) (CAP_N | N) (CAP_T | T)) pointdata;
-pointdata        : open positionliteral close;
-positionliteral  : doublevalue sp doublevalue;  // longitude, then latitude
+pointliteral     :((CAP_P | P) (CAP_O | O) (CAP_I | I) (CAP_N | N) (CAP_T | T)) bws pointdata;
+pointdata        : open bws positionliteral bws close;
+positionliteral  : (int16value | doublevalue) rws (int16value | doublevalue);  // longitude, then latitude
 
 geographypolygon   : geographyprefix squote fullpolygonliteral squote;
-fullpolygonliteral : sridliteral polygonliteral;
+fullpolygonliteral : sridliteral? polygonliteral;
 polygonliteral     : ((CAP_P | P) (CAP_O | O) (CAP_L | L) (CAP_Y | Y) (CAP_G | G) (CAP_O | O) (CAP_N | N)) polygondata;
 polygondata        : open ringliteral ( comma ringliteral )* close;
 ringliteral        : open positionliteral ( comma positionliteral )* close;

@@ -24,11 +24,17 @@ import java.util.function.Function;
 
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.LineString;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.CommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.MethodcallexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubstringmethodcallexprContext;
+import org.locationtech.spatial4j.context.SpatialContext;
+import org.locationtech.spatial4j.distance.DistanceCalculator;
+import org.locationtech.spatial4j.shape.Point;
+import org.locationtech.spatial4j.shape.ShapeFactory;
 
 /**
  * @author thoma
@@ -93,6 +99,12 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         case ODataFilterParser.RULE_floormethodcallexpr:
         case ODataFilterParser.RULE_ceilingmethodcallexpr:
             return runMathOps(child);
+
+        // Spatial operations
+        case ODataFilterParser.RULE_geolengthmethodcallexpr:
+            return runGeoLength(child);
+        case ODataFilterParser.RULE_distancemethodcallexpr:
+            return runGeoDistance(child);
 
         default:
             throw new UnsupportedRuleException("Unsupported method call", parser, child);
@@ -328,6 +340,66 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
             }
 
             throw new InvalidResultTypeException("Error calling math method", "number", res);
+        };
+    }
+
+    private Function<ResourceValueFilterInputHolder, Object> runGeoLength(ParserRuleContext ctx) {
+        final SpatialContext spatialContext = SpatialContext.GEO;
+
+        final CommonexprContext subExpr = ctx.getChild(CommonexprContext.class, 0);
+        final Function<ResourceValueFilterInputHolder, Object> exprFun = visitor.visitCommonexpr(subExpr);
+
+        return x -> {
+            Object obj = exprFun.apply(x);
+
+            if (!(obj instanceof LineString)) {
+                throw new InvalidResultTypeException("Unsupported operand for \"" + ctx.getText() + "\"",
+                        "geographic LineString", obj);
+            } else {
+                final LineString line = ((LineString) obj);
+                final ShapeFactory shpFactory = spatialContext.getShapeFactory();
+                final DistanceCalculator distCalc = spatialContext.getDistCalc();
+
+                double length = 0;
+                Point previousPoint = null;
+                for (Coordinates coordinates : line.coordinates) {
+                    if (previousPoint == null) {
+                        previousPoint = shpFactory.pointLatLon(coordinates.latitude, coordinates.longitude);
+                        continue;
+                    }
+
+                    final Point nextPoint = shpFactory.pointLatLon(coordinates.latitude, coordinates.longitude);
+                    length += distCalc.distance(previousPoint, nextPoint);
+                    previousPoint = nextPoint;
+                }
+
+                return length;
+            }
+        };
+    }
+
+    private Function<ResourceValueFilterInputHolder, Object> runGeoDistance(ParserRuleContext ctx) {
+        final SpatialContext spatialContext = SpatialContext.GEO;
+
+        final CommonexprContext leftExpr = ctx.getChild(CommonexprContext.class, 0);
+        final CommonexprContext rightExpr = ctx.getChild(CommonexprContext.class, 1);
+
+        final Function<ResourceValueFilterInputHolder, Object> leftFun = visitor.visitCommonexpr(leftExpr);
+        final Function<ResourceValueFilterInputHolder, Object> rightFun = visitor.visitCommonexpr(rightExpr);
+
+        return x -> {
+            Object left = leftFun.apply(x);
+            Object right = rightFun.apply(x);
+
+            if (!(left instanceof Point)) {
+                throw new InvalidResultTypeException("Unsupported left operand for \"" + ctx.getText() + "\"",
+                        "geographic Point", left);
+            } else if (!(right instanceof Point)) {
+                throw new InvalidResultTypeException("Unsupported right operand for \"" + ctx.getText() + "\"",
+                        "geographic Point", right);
+            } else {
+                return spatialContext.calcDistance((Point) left, (Point) right);
+            }
         };
     }
 }
