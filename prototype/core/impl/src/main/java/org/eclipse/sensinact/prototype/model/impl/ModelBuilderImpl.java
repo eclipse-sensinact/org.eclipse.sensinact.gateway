@@ -28,7 +28,7 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
     private final NotificationAccumulator accumulator;
     private final ModelNexus nexusImpl;
     private final String name;
-    private final List<NestableBuilderImpl<?, Model, ?>> nested = new ArrayList<>();
+    private final List<NestableBuilderImpl<?, ModelImpl, ?>> nested = new ArrayList<>();
     private Instant creationTime;
 
     public ModelBuilderImpl(AtomicBoolean active, NotificationAccumulator accumulator, ModelNexus nexusImpl,

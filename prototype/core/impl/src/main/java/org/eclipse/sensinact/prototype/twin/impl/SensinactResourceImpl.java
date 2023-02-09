@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
@@ -26,8 +25,6 @@ import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -36,17 +33,22 @@ import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactResourceImpl extends CommandScopedImpl implements SensinactResource {
 
-    private final String name;
-    private final SensinactService service;
+    private final SensinactService svc;
+    private final Provider provider;
+    private final EStructuralFeature service;
+    private final EStructuralFeature resource;
     private final Class<?> type;
     private final ModelNexus modelNexus;
     private final PromiseFactory promiseFactory;
 
-    public SensinactResourceImpl(AtomicBoolean active, SensinactService service, String name, Class<?> type,
-            NotificationAccumulator accumulator, ModelNexus nexusImpl, PromiseFactory promiseFactory) {
+    public SensinactResourceImpl(AtomicBoolean active, SensinactService svc, Provider provider,
+            EStructuralFeature service, EStructuralFeature resource, Class<?> type, ModelNexus nexusImpl,
+            PromiseFactory promiseFactory) {
         super(active);
+        this.svc = svc;
+        this.provider = provider;
         this.service = service;
-        this.name = name;
+        this.resource = resource;
         this.type = type;
         this.modelNexus = nexusImpl;
         this.promiseFactory = promiseFactory;
@@ -54,41 +56,43 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
     @Override
     public Class<?> getType() {
+        checkValid();
         return type;
     }
 
     @Override
     public ValueType getValueType() {
+        checkValid();
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public ResourceType getResourceType() {
+        checkValid();
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public List<Class<?>> getArguments() {
+        checkValid();
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getName() {
-        return name;
+        checkValid();
+        return resource.getName();
     }
 
     @Override
     public Promise<Void> setValue(Object value, Instant timestamp) {
         checkValid();
 
-        SensinactService service = getService();
-        SensinactProvider provider = service.getProvider();
-
-        modelNexus.handleDataUpdate(provider.getModelName(), provider.getName(), service.getName(), getName(),
-                getType(), value, timestamp);
+        modelNexus.handleDataUpdate(modelNexus.getModelName(provider.eClass()), provider, service, resource, value,
+                timestamp);
         return promiseFactory.resolved(null);
     }
 
@@ -96,30 +100,13 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     public Promise<TimedValue<?>> getValue() {
         checkValid();
 
-        final SensinactProvider snProvider = service.getProvider();
-        final Provider provider = modelNexus.getProvider(snProvider.getModelName(), snProvider.getName());
-        if (provider == null) {
-            return null;
-        }
-
-        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(service.getName());
-        if (svcFeature == null) {
-            return null;
-        }
-
-        final EStructuralFeature rcFeature = ((EClass) svcFeature.getEType()).getEStructuralFeature(name);
-        if (rcFeature == null) {
-            // This should not happen as we wouldn't create this resource
-            return null;
-        }
-
-        final Service svc = (Service) provider.eGet(svcFeature);
+        final Service svc = (Service) provider.eGet(service);
         final Instant timestamp;
         final Object value;
         if (svc != null) {
-            value = svc.eGet(rcFeature);
+            value = svc.eGet(resource);
             // Get the resource metadata
-            final Metadata metadata = svc.getMetadata().get(rcFeature);
+            final Metadata metadata = svc.getMetadata().get(resource);
             if (metadata != null) {
                 timestamp = metadata.getTimestamp();
             } else {
@@ -135,17 +122,16 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
     @Override
     public SensinactService getService() {
-        return service;
+        checkValid();
+        return svc;
     }
 
     @Override
     public Promise<Void> setMetadataValue(String name, Object value, Instant timestamp) {
         checkValid();
 
-        final SensinactProvider provider = service.getProvider();
         try {
-            modelNexus.setResourceMetadata(provider.getModelName(), provider.getName(), service.getName(), this.name,
-                    name, value, timestamp);
+            modelNexus.setResourceMetadata(provider, service, resource, name, value, timestamp);
             return promiseFactory.resolved(null);
         } catch (Throwable t) {
             return promiseFactory.failed(t);
@@ -156,9 +142,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     public Promise<Object> getMetadataValue(String name) {
         checkValid();
 
-        final SensinactProvider provider = service.getProvider();
-        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider.getModelName(),
-                provider.getName(), service.getName(), name);
+        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider, service, resource);
         if (resourceMetadata == null) {
             return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
         } else {
@@ -170,9 +154,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     public Promise<Map<String, Object>> getMetadataValues() {
         checkValid();
 
-        final SensinactProvider provider = service.getProvider();
-        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider.getModelName(),
-                provider.getName(), service.getName(), name);
+        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider, service, resource);
         if (resourceMetadata == null) {
             return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
         } else {

@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.Resource;
@@ -29,15 +29,15 @@ import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 public class ServiceImpl extends CommandScopedImpl implements Service {
 
     private final Model model;
-    private final EStructuralFeature feature;
+    private final EReference service;
     private final ModelNexus nexusImpl;
     private NotificationAccumulator accumulator;
 
-    public ServiceImpl(AtomicBoolean active, Model model, EStructuralFeature feature, ModelNexus nexusImpl,
+    public ServiceImpl(AtomicBoolean active, Model model, EReference service, ModelNexus nexusImpl,
             NotificationAccumulator accumulator) {
         super(active);
         this.model = model;
-        this.feature = feature;
+        this.service = service;
         this.nexusImpl = nexusImpl;
         this.accumulator = accumulator;
     }
@@ -45,7 +45,7 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
     @Override
     public String getName() {
         checkValid();
-        return feature.getName();
+        return service.getName();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
     @Override
     public Map<String, ? extends Resource> getResources() {
         checkValid();
-        return ((EClass) feature.getEType()).getEStructuralFeatures().stream()
+        return nexusImpl.getResourcesForService(getServiceEClass())
                 .collect(Collectors.toMap(f -> f.getName(), f -> new ResourceImpl(active, this, f)));
     }
 
@@ -79,4 +79,7 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
         return model;
     }
 
+    EClass getServiceEClass() {
+        return service.getEReferenceType();
+    }
 }
