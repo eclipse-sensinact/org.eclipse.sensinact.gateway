@@ -23,6 +23,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilter
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -97,6 +98,21 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         }
     }
 
+    private List<ResourceSnapshot> listResources(EFilterContext context) {
+
+        final SensiNactSession userSession = getSession();
+        final ICriterion criterion = parseFilter(context);
+        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
+        if (criterion != null && criterion.getResourceValueFilter() != null) {
+            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
+            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+                    .filter(r -> rcFilter.test(r.getService().getProvider(), List.of(r))).collect(Collectors.toList());
+        } else {
+            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+                    .collect(Collectors.toList());
+        }
+    }
+
     @Override
     public ResultList<Thing> getThings() {
         ResultList<Thing> list = new ResultList<>();
@@ -112,7 +128,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Location> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
-        list.value = providers.stream().map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p)).collect(toList());
+        list.value = providers.stream()
+                .map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p))
+                .collect(toList());
 
         return list;
     }
@@ -132,10 +150,8 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Datastream> getDatastreams() {
         ResultList<Datastream> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.DATASTREAMS);
-        list.value = providers.stream()
-                .flatMap(p -> p.getServices().stream())
-                .flatMap(s -> s.getResources().stream())
+        List<ResourceSnapshot> resources = listResources(EFilterContext.DATASTREAMS);
+        list.value = resources.stream()
                 .map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r))
                 .collect(toList());
 
@@ -146,10 +162,8 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Sensor> getSensors() {
         ResultList<Sensor> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.SENSORS);
-        list.value = providers.stream()
-                .flatMap(p -> p.getServices().stream())
-                .flatMap(s -> s.getResources().stream())
+        List<ResourceSnapshot> resources = listResources(EFilterContext.SENSORS);
+        list.value = resources.stream()
                 .map(r -> DtoMapper.toSensor(uriInfo, r))
                 .collect(toList());
 
@@ -160,12 +174,8 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Observation> getObservations() {
         ResultList<Observation> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.OBSERVATIONS);
-        list.value = providers.stream()
-                .flatMap(p -> p.getServices().stream())
-                .flatMap(s -> s.getResources().stream())
-                .map(r -> DtoMapper.toObservation(uriInfo, r))
-                .collect(toList());
+        List<ResourceSnapshot> resources = listResources(EFilterContext.OBSERVATIONS);
+        list.value = resources.stream().map(r -> DtoMapper.toObservation(uriInfo, r)).collect(toList());
 
         return list;
     }
@@ -174,10 +184,8 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<ObservedProperty> getObservedProperties() {
         ResultList<ObservedProperty> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.OBSERVED_PROPERTIES);
-        list.value = providers.stream()
-                .flatMap(p -> p.getServices().stream())
-                .flatMap(s -> s.getResources().stream())
+        List<ResourceSnapshot> resources = listResources(EFilterContext.OBSERVED_PROPERTIES);
+        list.value = resources.stream()
                 .map(r -> DtoMapper.toObservedProperty(uriInfo, r))
                 .collect(toList());
 
