@@ -10,12 +10,13 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command;
+package org.eclipse.sensinact.prototype.twin;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.prototype.command.CommandScoped;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.osgi.util.promise.Promise;

@@ -34,12 +34,9 @@ import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.ResourceShortDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.ServiceDescription;
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.command.GetCommand;
-import org.eclipse.sensinact.prototype.command.SensinactModel;
-import org.eclipse.sensinact.prototype.command.SensinactResource;
-import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.command.ResourceCommand;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.notification.AbstractResourceNotification;
@@ -51,8 +48,12 @@ import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.prototype.twin.SensinactResource;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
+import org.osgi.util.promise.Promises;
 
 public class SensiNactSessionImpl implements SensiNactSession {
 
@@ -173,25 +174,34 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return list.isEmpty() ? null : list;
     }
 
-    private <I, T> T executeGetCommand(Function<SensinactModel, I> caller, Function<I, T> converter) {
+    private <I, T> T executeGetCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter) {
         return executeGetCommand(caller, converter, null);
     }
 
-    private <I, T> T executeGetCommand(Function<SensinactModel, I> caller, Function<I, T> converter, T defaultValue) {
-        try {
-            return thread.execute(new GetCommand<T>() {
-                @Override
-                public Promise<T> call(SensinactModel model, PromiseFactory pf) {
-                    I modelValue = caller.apply(model);
-                    T value;
-                    if (modelValue != null) {
-                        value = converter.apply(modelValue);
-                    } else {
-                        value = defaultValue;
-                    }
-                    return pf.resolved(value);
+    private <I, T> T executeGetCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter,
+            T defaultValue) {
+        return safeExecute(new AbstractTwinCommand<T>() {
+            @Override
+            protected Promise<T> call(SensinactDigitalTwin model, PromiseFactory pf) {
+                I modelValue = caller.apply(model);
+                T value;
+                if (modelValue != null) {
+                    value = converter.apply(modelValue);
+                } else {
+                    value = defaultValue;
                 }
-            }).getValue();
+                return pf.resolved(value);
+            }
+        });
+    }
+
+    private <T> T safeExecute(AbstractTwinCommand<T> command) {
+        return safeGetValue(thread.execute(command));
+    }
+
+    private <T> T safeGetValue(Promise<T> promise) {
+        try {
+            return promise.getValue();
         } catch (InvocationTargetException ite) {
             // Re-throw cause as a runtime exception
             throw new RuntimeException(ite.getCause());
@@ -203,17 +213,8 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
-        return executeGetCommand(m -> m.getResource(provider, service, resource).getValue(), timedVal -> {
-            try {
-                return timedVal.map(t -> clazz.cast(t.getValue())).getValue();
-            } catch (InvocationTargetException ite) {
-                // Re-throw cause as a runtime exception
-                throw new RuntimeException(ite.getCause());
-            } catch (InterruptedException e) {
-                // Re-throw as a runtime exception
-                throw new RuntimeException(e);
-            }
-        });
+        return safeGetValue(executeGetCommand(m -> m.getResource(provider, service, resource),
+                r -> r.getValue().map(t -> clazz.cast(t.getValue())), Promises.resolved(null)));
     }
 
     @Override
@@ -223,129 +224,58 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public void setResourceValue(String provider, String service, String resource, Object o, Instant instant) {
-        try {
-            thread.execute(new AbstractSensinactCommand<Void>() {
-                @Override
-                public Promise<Void> call(SensinactModel model, PromiseFactory pf) {
-                    return model.getResource(provider, service, resource).setValue(o, instant);
-                }
-            }).getValue();
-        } catch (InvocationTargetException ite) {
-            // Re-throw cause as a runtime exception
-            throw new RuntimeException(ite.getCause());
-        } catch (InterruptedException e) {
-            // Re-throw as a runtime exception
-            throw new RuntimeException(e);
-        }
+        safeExecute(new ResourceCommand<Void>(provider, service, resource) {
+            @Override
+            protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.setValue(o, instant);
+            }
+        });
     }
 
     @Override
     public Map<String, Object> getResourceMetadata(String provider, String service, String resource) {
 
-        try {
-            return Map.copyOf(thread.execute(new AbstractSensinactCommand<Map<String, Object>>() {
-                @Override
-                public Promise<Map<String, Object>> call(SensinactModel model, PromiseFactory pf) {
-                    // FIXME: pass the model as argument
-                    return model.getResource(resource, provider, service, resource).getMetadataValues();
-                }
-            }).getValue());
-        } catch (InvocationTargetException ite) {
-            // Re-throw cause as a runtime exception
-            throw new RuntimeException(ite.getCause());
-        } catch (InterruptedException e) {
-            // Re-throw as a runtime exception
-            throw new RuntimeException(e);
-        }
+        return Map.copyOf(safeExecute(new ResourceCommand<Map<String, Object>>(provider, service, resource) {
+            @Override
+            protected Promise<Map<String, Object>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMetadataValues();
+            }
+        }));
     }
 
     @Override
     public void setResourceMetadata(String provider, String service, String resource, Map<String, Object> metadata) {
-        // FIXME: pass the model as argument
-        try {
-            final Instant timestamp = Instant.now();
-            thread.execute(new GetCommand<Void>() {
-                @Override
-                public Promise<Void> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                    if (sensinactResource != null && sensinactResource.isValid()) {
-                        Promise<Void> chainedPromises = null;
-                        for (Entry<String, Object> entry : metadata.entrySet()) {
-                            final Promise<Void> entryUpdate = sensinactResource.setMetadataValue(entry.getKey(),
-                                    entry.getValue(), timestamp);
-                            if (chainedPromises == null) {
-                                chainedPromises = entryUpdate;
-                            } else {
-                                chainedPromises = chainedPromises.then((v) -> entryUpdate);
-                            }
-                        }
-                        if (chainedPromises != null) {
-                            return chainedPromises;
-                        } else {
-                            return pf.resolved(null);
-                        }
-                    } else {
-                        return pf.failed(new IllegalArgumentException("Unknown resource"));
-                    }
-                }
-            }).getValue();
-        } catch (InvocationTargetException ite) {
-            // Re-throw cause as a runtime exception
-            throw new RuntimeException(ite.getCause());
-        } catch (InterruptedException e) {
-            // Re-throw as a runtime exception
-            throw new RuntimeException(e);
-        }
+        final Instant timestamp = Instant.now();
+        safeExecute(new ResourceCommand<Void>(provider, service, resource) {
+            @Override
+            protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                return pf.all(metadata.entrySet().stream()
+                        .map(e -> resource.setMetadataValue(e.getKey(), e.getValue(), timestamp))
+                        .collect(Collectors.toList())).map(x -> null);
+            }
+        });
     }
 
     @Override
     public Map<String, Object> getResourceMetadataValue(String provider, String service, String resource,
             String metadata) {
-        // FIXME: pass the model as argument
-        try {
-            return thread.execute(new GetCommand<Map<String, Object>>() {
-                @Override
-                public Promise<Map<String, Object>> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                    if (sensinactResource != null && sensinactResource.isValid()) {
-                        return sensinactResource.getMetadataValues();
-                    } else {
-                        return pf.failed(new IllegalArgumentException("Resource not found"));
-                    }
-                }
-            }).getValue();
-        } catch (InvocationTargetException ite) {
-            // Re-throw cause as a runtime exception
-            throw new RuntimeException(ite.getCause());
-        } catch (InterruptedException e) {
-            // Re-throw as a runtime exception
-            throw new RuntimeException(e);
-        }
+        return safeExecute(new ResourceCommand<Map<String, Object>>(provider, service, resource) {
+            @Override
+            protected Promise<Map<String, Object>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMetadataValues();
+            }
+        });
     }
 
     @Override
     public void setResourceMetadata(String provider, String service, String resource, String metadata, Object value) {
-        // FIXME: pass the model as argument
-        try {
-            final Instant timestamp = Instant.now();
-            thread.execute(new GetCommand<Void>() {
-                @Override
-                public Promise<Void> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                    if (sensinactResource != null && sensinactResource.isValid()) {
-                        return sensinactResource.setMetadataValue(metadata, value, timestamp);
-                    } else {
-                        return pf.failed(new IllegalArgumentException("Resource not found"));
-                    }
-                }
-            }).getValue();
-        } catch (InvocationTargetException ite) {
-            // Re-throw cause as a runtime exception
-            throw new RuntimeException(ite.getCause());
-        } catch (InterruptedException e) {
-            // Re-throw as a runtime exception
-            throw new RuntimeException(e);
-        }
+        final Instant timestamp = Instant.now();
+        safeExecute(new ResourceCommand<Void>(provider, service, resource) {
+            @Override
+            protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.setMetadataValue(metadata, value, timestamp);
+            }
+        });
     }
 
     @Override
@@ -356,43 +286,34 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ResourceDescription describeResource(String provider, String service, String resource) {
-        // FIXME: pass the model as argument
-        try {
-            return thread.execute(new GetCommand<ResourceDescription>() {
-                @Override
-                public Promise<ResourceDescription> call(SensinactModel model, PromiseFactory pf) {
-                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                    if (sensinactResource != null) {
-                        final Promise<TimedValue<?>> val = sensinactResource.getValue();
-                        final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
+        // Avoid ResourceCommand as we return null on missing resources, not fail
+        return safeExecute(new AbstractTwinCommand<ResourceDescription>() {
+            @Override
+            protected Promise<ResourceDescription> call(SensinactDigitalTwin model, PromiseFactory pf) {
+                final SensinactResource sensinactResource = model.getResource(provider, service, resource);
+                if (sensinactResource != null) {
+                    final Promise<TimedValue<?>> val = sensinactResource.getValue();
+                    final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
 
-                        return val.then(x -> metadata).then(x -> {
-                            ResourceDescription result = new ResourceDescription();
-                            result.provider = provider;
-                            result.service = service;
-                            result.resource = resource;
-                            result.value = val.getValue().getValue();
-                            result.timestamp = val.getValue().getTimestamp();
-                            result.metadata = metadata.getValue();
-                            return pf.resolved(result);
-                        });
-                    } else {
-                        return pf.resolved(null);
-                    }
+                    return val.then(x -> metadata).then(x -> {
+                        ResourceDescription result = new ResourceDescription();
+                        result.provider = provider;
+                        result.service = service;
+                        result.resource = resource;
+                        result.value = val.getValue().getValue();
+                        result.timestamp = val.getValue().getTimestamp();
+                        result.metadata = metadata.getValue();
+                        return pf.resolved(result);
+                    });
+                } else {
+                    return pf.resolved(null);
                 }
-            }).getValue();
-        } catch (InvocationTargetException ite) {
-            // Re-throw cause as a runtime exception
-            throw new RuntimeException(ite.getCause());
-        } catch (InterruptedException e) {
-            // Re-throw as a runtime exception
-            throw new RuntimeException(e);
-        }
+            }
+        });
     }
 
     @Override
     public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
-        // FIXME: pass the model as argument
         return executeGetCommand((m) -> m.getResource(provider, service, resource), (rc) -> {
             final ResourceShortDescription result = new ResourceShortDescription();
             result.actMethodArgumentsTypes = null;
@@ -407,7 +328,6 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ServiceDescription describeService(String provider, String service) {
-        // FIXME: pass the model as argument
         return executeGetCommand((m) -> m.getService(provider, service), (snSvc) -> {
             final ServiceDescription description = new ServiceDescription();
             description.service = snSvc.getName();
@@ -419,7 +339,6 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ProviderDescription describeProvider(String provider) {
-        // FIXME: pass the model as argument
         return executeGetCommand((m) -> m.getProvider(provider), (snProvider) -> {
             final ProviderDescription description = new ProviderDescription();
             description.provider = snProvider.getName();

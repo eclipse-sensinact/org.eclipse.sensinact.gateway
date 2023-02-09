@@ -16,9 +16,9 @@ package org.eclipse.sensinact.prototype.impl.snapshot;
 import java.time.Instant;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.sensinact.prototype.command.TimedValue;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 
 public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSnapshot {
 

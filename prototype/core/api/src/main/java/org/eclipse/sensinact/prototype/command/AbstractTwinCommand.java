@@ -10,31 +10,26 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.impl;
+package org.eclipse.sensinact.prototype.command;
 
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;
 import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
-
-    @SuppressWarnings("unused")
-    private final MetadataUpdateDto metadataUpdateDto;
-
-    public SetMetadataCommand(MetadataUpdateDto metadataUpdateDto) {
-        this.metadataUpdateDto = metadataUpdateDto;
-    }
+/**
+ * A twin command has no requirement to access or change the model and therefore
+ * does not receive a {@link SensinactModelManager}
+ *
+ * @param <T>
+ */
+public abstract class AbstractTwinCommand<T> extends AbstractSensinactCommand<T> {
 
     @Override
-    protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-            PromiseFactory promiseFactory) {
-
-        // TODO set the metadata in the model
-
-        return promiseFactory.resolved(null);
+    public final Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
+        return call(twin, pf);
     }
+
+    protected abstract Promise<T> call(SensinactDigitalTwin twin, PromiseFactory pf);
 
 }

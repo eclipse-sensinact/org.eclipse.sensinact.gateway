@@ -12,20 +12,26 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model;
 
-import java.time.Instant;
+import java.io.InputStream;
+import java.util.Map;
+
+import org.eclipse.sensinact.prototype.command.CommandScoped;
 
 /**
- * A builder for programmatically registering models
+ * The sensiNact interface used to create and discover the models
  */
-public interface ServiceBuilder<T> {
+public interface SensinactModelManager extends CommandScoped {
 
-    ServiceBuilder<T> exclusivelyOwned(boolean exclusive);
+    ModelBuilder createModel(String model);
 
-    ServiceBuilder<T> withAutoDeletion(boolean autoDelete);
+    Model getModel(String model);
 
-    ServiceBuilder<T> withCreationTime(Instant creationTime);
+    void deleteModel(String model);
 
-    ResourceBuilder<ServiceBuilder<T>, Object> withResource(String name);
+    void registerModel(String model);
 
-    T build();
+    void registerModel(InputStream model);
+
+    Map<String, Model> getModels();
+
 }

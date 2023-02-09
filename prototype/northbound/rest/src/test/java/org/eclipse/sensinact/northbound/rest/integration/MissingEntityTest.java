@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
+import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.junit.jupiter.api.AfterEach;
@@ -141,15 +143,14 @@ public class MissingEntityTest {
      */
     @Test
     void missingService() throws Exception {
+        String provider_service = PROVIDER + "_service";
         // Register the resource
-        GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        GenericDto dto = utils.makeDto(provider_service, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
 
         // Check value
         ResultTypedResponseDTO<?> result = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "GET"),
+                String.join("/", "providers", provider_service, "services", SERVICE, "resources", RESOURCE, "GET"),
                 ResultTypedResponseDTO.class);
         GetResponse<?> response = utils.convert(result, GetResponse.class);
         assertEquals(VALUE, response.value);
@@ -158,7 +159,7 @@ public class MissingEntityTest {
         ResultTypedResponseDTO<?> typedResult;
 
         // Service description
-        typedResult = utils.queryJson(String.join("/", "providers", PROVIDER, "services", missingService),
+        typedResult = utils.queryJson(String.join("/", "providers", provider_service, "services", missingService),
                 ResultTypedResponseDTO.class);
         assertEquals(404, typedResult.statusCode);
         assertNull(typedResult.response);
@@ -167,7 +168,7 @@ public class MissingEntityTest {
 
         // Resources list
         ResultResourcesListDTO rcListResult = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", missingService, "resources"),
+                String.join("/", "providers", provider_service, "services", missingService, "resources"),
                 ResultResourcesListDTO.class);
         assertEquals(404, rcListResult.statusCode);
         assertNull(rcListResult.resources);
@@ -176,7 +177,7 @@ public class MissingEntityTest {
 
         // Resource description
         typedResult = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", missingService, "resources", RESOURCE),
+                String.join("/", "providers", provider_service, "services", missingService, "resources", RESOURCE),
                 ResultTypedResponseDTO.class);
         assertEquals(404, typedResult.statusCode);
         assertNull(typedResult.response);
@@ -184,52 +185,79 @@ public class MissingEntityTest {
         assertFalse(typedResult.error.isEmpty());
 
         // Resource GET
-        typedResult = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", missingService, "resources", RESOURCE, "GET"),
-                ResultTypedResponseDTO.class);
+        typedResult = utils.queryJson(String.join("/", "providers", provider_service, "services", missingService,
+                "resources", RESOURCE, "GET"), ResultTypedResponseDTO.class);
         assertEquals(404, typedResult.statusCode);
         assertNull(typedResult.response);
         assertNotNull(typedResult.error);
         assertFalse(typedResult.error.isEmpty());
 
         // Provider description
-        typedResult = utils.queryJson(String.join("/", "providers", PROVIDER), ResultTypedResponseDTO.class);
+        typedResult = utils.queryJson(String.join("/", "providers", provider_service), ResultTypedResponseDTO.class);
         assertEquals(200, typedResult.statusCode);
         ProviderDescriptionDTO provider = utils.convert(typedResult, ProviderDescriptionDTO.class);
-        assertEquals(PROVIDER, provider.name);
+        assertEquals(provider_service, provider.name);
         assertFalse(provider.services.contains(missingService), "Missing service is registered");
 
         // Services list
-        ResultServicesListDTO svcListResult = utils.queryJson(String.join("/", "providers", PROVIDER, "services"),
-                ResultServicesListDTO.class);
+        ResultServicesListDTO svcListResult = utils
+                .queryJson(String.join("/", "providers", provider_service, "services"), ResultServicesListDTO.class);
         assertEquals(200, svcListResult.statusCode);
         assertFalse(svcListResult.services.contains(missingService), "Missing service is registered");
     }
 
     /**
-     * Missing resource should return a 204 No content
+     * Missing resource should return a 404 Not Found
      */
     @Test
     void missingResource() throws Exception {
+        String provider_resource = PROVIDER + "_resource";
         // Register the resource
-        GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        GenericDto dto = utils.makeDto(provider_resource, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
 
         final String missingResource = RESOURCE + "__missing__";
 
         // Check resources list
         ResultResourcesListDTO rcListResult = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", SERVICE, "resources"),
+                String.join("/", "providers", provider_resource, "services", SERVICE, "resources"),
                 ResultResourcesListDTO.class);
         assertEquals(200, rcListResult.statusCode);
         assertFalse(rcListResult.resources.contains(missingResource), "Missing resource is registered");
 
         // Get value
+        ResultTypedResponseDTO<?> result = utils.queryJson(String.join("/", "providers", provider_resource, "services",
+                SERVICE, "resources", missingResource, "GET"), ResultTypedResponseDTO.class);
+        assertEquals(404, result.statusCode);
+        assertNotNull(result.error, "No warning message set");
+        assertFalse(result.error.isEmpty(), "No warning message set");
+    }
+
+    /**
+     * Unset resources should return a 204 No content
+     */
+    @Test
+    void unsetResource() throws Exception {
+        String provider2 = PROVIDER + "_2";
+        // Register Resource in the model and create a second provider without it set
+        BulkGenericDto dto = new BulkGenericDto();
+        dto.dtos = List.of(utils.makeDto("model", PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class),
+                utils.makeDto("model", provider2, "admin", "friendlyName", "test", String.class));
+
+        // Push and wait for it
+        push.pushUpdate(dto).getValue();
+
+        // Check resources list
+        ResultResourcesListDTO rcListResult = utils.queryJson(
+                String.join("/", "providers", provider2, "services", SERVICE, "resources"),
+                ResultResourcesListDTO.class);
+        assertEquals(200, rcListResult.statusCode);
+        assertTrue(rcListResult.resources.contains(RESOURCE), "Resource is not registered");
+
+        // Get value
         Instant queryTime = Instant.now();
         ResultTypedResponseDTO<?> result = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", missingResource, "GET"),
+                String.join("/", "providers", provider2, "services", SERVICE, "resources", RESOURCE, "GET"),
                 ResultTypedResponseDTO.class);
         assertEquals(204, result.statusCode);
         assertNotNull(result.error, "No warning message set");

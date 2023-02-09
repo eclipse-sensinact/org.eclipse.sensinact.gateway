@@ -17,10 +17,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.command.SensinactModel;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -33,8 +33,8 @@ public class FilterCommandHelper {
             throws FilterException {
         Collection<ProviderSnapshot> providers;
         try {
-            providers = thread.execute(new AbstractSensinactCommand<Collection<ProviderSnapshot>>() {
-                protected Promise<Collection<ProviderSnapshot>> call(SensinactModel model, PromiseFactory pf) {
+            providers = thread.execute(new AbstractTwinCommand<Collection<ProviderSnapshot>>() {
+                protected Promise<Collection<ProviderSnapshot>> call(SensinactDigitalTwin model, PromiseFactory pf) {
                     return pf.resolved(model.filteredSnapshot(null, criterion.getProviderFilter(), null, null));
                 }
             }).getValue();

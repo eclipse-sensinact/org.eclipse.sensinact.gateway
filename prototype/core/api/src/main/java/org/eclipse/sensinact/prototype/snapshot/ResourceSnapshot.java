@@ -13,7 +13,7 @@
 
 package org.eclipse.sensinact.prototype.snapshot;
 
-import org.eclipse.sensinact.prototype.command.TimedValue;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 
 public interface ResourceSnapshot extends Snapshot {
 

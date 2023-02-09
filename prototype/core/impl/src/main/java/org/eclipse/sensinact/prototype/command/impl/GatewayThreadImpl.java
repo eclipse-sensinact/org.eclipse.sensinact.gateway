@@ -29,10 +29,12 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
+import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.ImmediateNotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.NotificationAccumulatorImpl;
+import org.eclipse.sensinact.prototype.twin.impl.SensinactDigitalTwinImpl;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -165,13 +167,15 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
         void doWork() {
             try {
-                SensinactModelImpl modelImpl = new SensinactModelImpl(command.getAccumulator(), nexusImpl,
+                SensinactDigitalTwinImpl twinImpl = new SensinactDigitalTwinImpl(command.getAccumulator(), nexusImpl,
                         getGatewayThread().getPromiseFactory());
+                SensinactModelManagerImpl mgrImpl = new SensinactModelManagerImpl(command.getAccumulator(), nexusImpl);
                 Promise<T> promise;
                 try {
-                    promise = command.call(modelImpl);
+                    promise = command.call(twinImpl, mgrImpl);
                 } finally {
-                    modelImpl.invalidate();
+                    twinImpl.invalidate();
+                    mgrImpl.invalidate();
                 }
                 d.resolveWith(promise);
             } catch (Exception e) {

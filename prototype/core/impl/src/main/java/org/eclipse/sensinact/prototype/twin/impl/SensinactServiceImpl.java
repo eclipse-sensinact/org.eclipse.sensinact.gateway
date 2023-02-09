@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command.impl;
+package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,9 +20,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.prototype.command.SensinactProvider;
-import org.eclipse.sensinact.prototype.command.SensinactResource;
-import org.eclipse.sensinact.prototype.command.SensinactService;
+import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
+import org.eclipse.sensinact.prototype.twin.SensinactProvider;
+import org.eclipse.sensinact.prototype.twin.SensinactResource;
+import org.eclipse.sensinact.prototype.twin.SensinactService;
 
 public class SensinactServiceImpl extends CommandScopedImpl implements SensinactService {
 

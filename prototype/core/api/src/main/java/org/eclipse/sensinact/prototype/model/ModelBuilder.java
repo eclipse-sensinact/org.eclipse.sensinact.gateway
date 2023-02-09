@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,22 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command;
+package org.eclipse.sensinact.prototype.model;
 
 import java.time.Instant;
 
-public interface TimedValue<T> {
+/**
+ * A builder for programmatically registering models
+ */
+public interface ModelBuilder {
 
-    Instant getTimestamp();
+    ModelBuilder exclusivelyOwned(boolean exclusive);
 
-    T getValue();
+    ModelBuilder withAutoDeletion(boolean autoDelete);
+
+    ModelBuilder withCreationTime(Instant creationTime);
+
+    ServiceBuilder<ModelBuilder> withService(String name);
+
+    Model build();
 }

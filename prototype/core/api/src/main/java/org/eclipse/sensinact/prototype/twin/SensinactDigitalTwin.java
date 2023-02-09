@@ -10,25 +10,27 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.command;
+package org.eclipse.sensinact.prototype.twin;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.prototype.command.CommandScoped;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 
 /**
- * The {@link SensinactModel} provides access to the in-memory digital twin and
- * is the basis for performing GET, SET, and ACT operations
+ * The {@link SensinactDigitalTwin} provides access to the in-memory digital
+ * twin and is the basis for performing GET, SET, and ACT operations
  *
  * SUBSCRIBE and UNSUBSCRIBE operations occur using notifications in the
  * TypedEventBus
  */
-public interface SensinactModel extends CommandScoped {
+public interface SensinactDigitalTwin extends CommandScoped {
 
     /**
      * List all the providers in the runtime
@@ -61,6 +63,24 @@ public interface SensinactModel extends CommandScoped {
      * @return
      */
     SensinactProvider getProvider(String model, String providerName);
+
+    /**
+     * Create a provider instance for the named model
+     *
+     * @param model
+     * @param providerName
+     * @return
+     */
+    SensinactProvider createProvider(String model, String providerName);
+
+    /**
+     * Create a provider instance for the named model
+     *
+     * @param model
+     * @param providerName
+     * @return
+     */
+    SensinactProvider createProvider(String model, String providerName, Instant created);
 
     /**
      * Get a service by model, provider name and service name

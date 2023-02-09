@@ -8,13 +8,13 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.resource;
 
 import java.security.SecureRandom;
 
-import org.eclipse.sensinact.prototype.model.ModelManager;
+import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.model.ModelProvider;
 import org.osgi.service.component.annotations.Component;
 
@@ -24,7 +24,7 @@ public class ResourceModelProvider implements ModelProvider {
     SecureRandom random = new SecureRandom();
 
     @Override
-    public void init(ModelManager manager) {
+    public void init(SensinactModelManager manager) {
         manager.registerModel("fan-resource.xml");
     }
 
