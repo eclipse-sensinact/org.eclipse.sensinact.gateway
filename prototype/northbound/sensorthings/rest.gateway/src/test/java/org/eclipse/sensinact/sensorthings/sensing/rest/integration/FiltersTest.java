@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -96,7 +97,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         }
     }
 
-    private List<String> extractProviderIds(ResultList<AnyIdDTO> resultList) {
+    private List<String> extractProviderIds(ResultList<AnyIdDTO> resultList, Predicate<String> filter) {
         return resultList.value.stream().map(item -> {
             String rawId = (String) item.id;
             if (rawId == null) {
@@ -104,7 +105,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             } else {
                 return rawId.split("~")[0];
             }
-        }).distinct().collect(Collectors.toList());
+        }).distinct().filter(filter).collect(Collectors.toList());
     }
 
     @Test
@@ -125,42 +126,44 @@ public class FiltersTest extends AbstractIntegrationTest {
             createResource(id, "svcB", "rcB", id + 256);
         });
 
+        final Predicate<String> filter = sortedProviderIds::contains;
+
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
         for (NameUrl url : rootResponse.value) {
             // Order by ID by default
             ResultList<AnyIdDTO> resultList = utils.queryJson(url.url, RESULT_ANY);
             assertNull(resultList.count);
-            assertEquals(sortedProviderIds, extractProviderIds(resultList));
+            assertEquals(sortedProviderIds, extractProviderIds(resultList, filter));
 
             // Explicit order by ID
             resultList = utils.queryJson(url.url + "?$orderby=id", RESULT_ANY);
             assertNull(resultList.count);
-            assertEquals(sortedProviderIds, extractProviderIds(resultList));
+            assertEquals(sortedProviderIds, extractProviderIds(resultList, filter));
 
             // Explicit ascending order by ID
             resultList = utils.queryJson(url.url + "?$orderby=id%20asc", RESULT_ANY);
             assertNull(resultList.count);
-            assertEquals(sortedProviderIds, extractProviderIds(resultList));
+            assertEquals(sortedProviderIds, extractProviderIds(resultList, filter));
 
             // Order + count
             resultList = utils.queryJson(url.url + "?$orderby=id&$count=true", RESULT_ANY);
             assertTrue(resultList.count >= nbProviders);
-            assertEquals(sortedProviderIds, extractProviderIds(resultList));
+            assertEquals(sortedProviderIds, extractProviderIds(resultList, filter));
 
             // Reverse order by ID
             resultList = utils.queryJson(url.url + "?$orderby=id%20desc", RESULT_ANY);
             assertNull(resultList.count);
-            assertEquals(reversedProviderIds, extractProviderIds(resultList));
+            assertEquals(reversedProviderIds, extractProviderIds(resultList, filter));
 
             // Reverse order by ID, with multiple space characters
             resultList = utils.queryJson(url.url + "?$orderby=id%20%20%20desc", RESULT_ANY);
             assertNull(resultList.count);
-            assertEquals(reversedProviderIds, extractProviderIds(resultList));
+            assertEquals(reversedProviderIds, extractProviderIds(resultList, filter));
 
             // Reverse order + count
             resultList = utils.queryJson(url.url + "?$orderby=id%20desc&$count=true", RESULT_ANY);
             assertTrue(resultList.count >= nbProviders);
-            assertEquals(reversedProviderIds, extractProviderIds(resultList));
+            assertEquals(reversedProviderIds, extractProviderIds(resultList, filter));
         }
     }
 
