@@ -17,7 +17,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
@@ -67,8 +71,13 @@ public class SubscriptionTest {
             Mockito.clearInvocations(accumulator);
 
             Instant now = Instant.now();
-            nexus.handleDataUpdate(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, String.class, TEST_VALUE,
-                    now);
+            EClass model = nexus.createModel(TEST_MODEL, now, accumulator);
+            EReference service = nexus.createService(model, TEST_SERVICE, now, accumulator);
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, now,
+                    null, accumulator);
+            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, now, accumulator);
+
+            nexus.handleDataUpdate(TEST_MODEL, p, service, resource, TEST_VALUE, now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
@@ -94,10 +103,16 @@ public class SubscriptionTest {
             Instant now = Instant.now();
             Instant before = now.minus(Duration.ofHours(1));
 
-            nexus.handleDataUpdate(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, String.class, TEST_VALUE,
-                    before);
-            nexus.handleDataUpdate(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, "testValue2", String.class, TEST_VALUE,
-                    now);
+            EClass model = nexus.createModel(TEST_MODEL, before, accumulator);
+            EReference service = nexus.createService(model, TEST_SERVICE, before, accumulator);
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, before,
+                    null, accumulator);
+            EAttribute resource2 = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE_2, String.class,
+                    before, null, accumulator);
+            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before, accumulator);
+
+            nexus.handleDataUpdate(TEST_MODEL, p, service, resource, TEST_VALUE, before);
+            nexus.handleDataUpdate(TEST_MODEL, p, service, resource2, TEST_VALUE, now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
@@ -127,10 +142,17 @@ public class SubscriptionTest {
             Instant now = Instant.now();
             Instant before = now.minus(Duration.ofHours(1));
 
-            nexus.handleDataUpdate(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE, String.class, TEST_VALUE,
-                    before);
-            nexus.handleDataUpdate(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE_2, String.class,
-                    TEST_VALUE_2, now);
+            EClass model = nexus.createModel(TEST_MODEL, before, accumulator);
+            EReference service = nexus.createService(model, TEST_SERVICE, before, accumulator);
+            EReference service2 = nexus.createService(model, TEST_SERVICE_2, before, accumulator);
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, before,
+                    null, accumulator);
+            EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_RESOURCE_2, String.class,
+                    before, null, accumulator);
+            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before, accumulator);
+
+            nexus.handleDataUpdate(TEST_MODEL, p, service, resource, TEST_VALUE, before);
+            nexus.handleDataUpdate(TEST_MODEL, p, service2, resource2, TEST_VALUE_2, now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);

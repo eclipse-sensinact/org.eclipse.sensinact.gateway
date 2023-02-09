@@ -12,70 +12,62 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.twin.impl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
+import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
+import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactServiceImpl extends CommandScopedImpl implements SensinactService {
 
-    private final SensinactProvider provider;
-    private final String name;
+    private final SensinactProvider sensinactProvider;
+    private final Provider provider;
+    private final EReference svcFeature;
+    private final ModelNexus nexus;
+    private final PromiseFactory promiseFactory;
 
-    /**
-     * Resource name -&gt; resource bean
-     */
-    private final Map<String, SensinactResource> resources = new HashMap<>();
-
-    public SensinactServiceImpl(AtomicBoolean active, SensinactProvider provider, String name) {
+    public SensinactServiceImpl(AtomicBoolean active, SensinactProvider sensinactProvider, Provider provider,
+            EReference svcFeature, ModelNexus nexus, PromiseFactory promiseFactory) {
         super(active);
+        this.sensinactProvider = sensinactProvider;
         this.provider = provider;
-        this.name = name;
+        this.svcFeature = svcFeature;
+        this.nexus = nexus;
+        this.promiseFactory = promiseFactory;
     }
 
     @Override
     public Map<String, SensinactResource> getResources() {
-        return Map.copyOf(resources);
-    }
-
-    /**
-     * Bundle-private way to populate resources
-     */
-    public void setResources(final Map<String, SensinactResource> resources) {
-        synchronized (this.resources) {
-            this.resources.clear();
-            this.resources.putAll(resources);
-        }
-    }
-
-    /**
-     * Bundle-private way to populate resources
-     */
-    public void setResources(final Collection<SensinactResource> resources) {
-        setResources(resources.stream().collect(Collectors.toMap(SensinactResource::getName, Function.identity())));
+        checkValid();
+        return nexus.getResourcesForService(svcFeature.getEReferenceType())
+                .collect(Collectors.toMap(EAttribute::getName, a -> new SensinactResourceImpl(active, this, provider,
+                        svcFeature, a, a.getEAttributeType().getInstanceClass(), nexus, promiseFactory)));
     }
 
     @Override
     public String getName() {
-        return name;
+        checkValid();
+        return svcFeature.getName();
     }
 
     @Override
     public SensinactProvider getProvider() {
-        return provider;
+        checkValid();
+        return sensinactProvider;
     }
 
     @Override
     public String toString() {
-        return String.format("SensiNactService(provider=%s, name=%s, resources=%s)", provider.getName(), name,
-                List.of());
+        checkValid();
+        return String.format("SensiNactService(provider=%s, name=%s, resources=%s)", provider.getId(), getName(),
+                getResources().keySet());
     }
 }

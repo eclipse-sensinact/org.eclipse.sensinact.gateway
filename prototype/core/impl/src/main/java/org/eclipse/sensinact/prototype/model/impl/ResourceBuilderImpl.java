@@ -21,12 +21,11 @@ import java.util.function.Supplier;
 import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 import org.eclipse.sensinact.prototype.model.ResourceType;
-import org.eclipse.sensinact.prototype.model.Service;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
-public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, Service, Resource>
+public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImpl, Resource>
         implements ResourceBuilder<R, T> {
 
     private final String name;
@@ -37,8 +36,8 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, Service, R
     private Instant timestamp;
     private ResourceType resourceType = null;
 
-    public ResourceBuilderImpl(AtomicBoolean active, R parent, Service builtParent, String name, ModelNexus nexusImpl,
-            NotificationAccumulator accumulator) {
+    public ResourceBuilderImpl(AtomicBoolean active, R parent, ServiceImpl builtParent, String name,
+            ModelNexus nexusImpl, NotificationAccumulator accumulator) {
         super(active, parent, builtParent);
         this.name = name;
         this.nexusImpl = nexusImpl;
@@ -134,9 +133,9 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, Service, R
     }
 
     @Override
-    protected Resource doBuild(Service builtParent) {
-        return new ResourceImpl(active, builtParent, nexusImpl.createResource(builtParent.getModel().getName(),
-                builtParent.getName(), name, type, initialValue, timestamp, accumulator));
+    protected Resource doBuild(ServiceImpl builtParent) {
+        return new ResourceImpl(active, builtParent, nexusImpl.createResource(builtParent.getServiceEClass(), name,
+                type, timestamp, initialValue, accumulator));
     }
 
 }

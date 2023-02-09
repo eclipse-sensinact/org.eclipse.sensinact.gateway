@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.model.core.Metadata;
@@ -37,7 +38,6 @@ import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
-import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.osgi.util.promise.PromiseFactory;
@@ -53,16 +53,6 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         this.accumulator = accumulator;
         this.nexusImpl = nexusImpl;
         this.pf = pf;
-    }
-
-    public SensinactResource getOrCreateResource(String model, String provider, String service, String resource,
-            Class<?> valueType) {
-        checkValid();
-
-        SensinactProvider p = new SensinactProviderImpl(active, model, provider);
-        SensinactService s = new SensinactServiceImpl(active, p, service);
-
-        return new SensinactResourceImpl(active, s, resource, valueType, accumulator, nexusImpl, pf);
     }
 
     /**
@@ -137,8 +127,8 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             return null;
         }
 
-        final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, provider.getId());
-        return toService(snProvider, svcFeature);
+        final SensinactProviderImpl snProvider = toProvider(provider);
+        return toService(snProvider, provider, (EReference) svcFeature);
     }
 
     @Override
@@ -169,14 +159,9 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
 
         // Construct the resource
-        final SensinactProviderImpl snProvider = new SensinactProviderImpl(active, model, provider.getId());
-        final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, snProvider, svcFeature.getName());
-        snProvider.setServices(List.of(snSvc));
-
-        final SensinactResourceImpl snResource = new SensinactResourceImpl(active, snSvc, rcFeature.getName(),
-                rcFeature.getEType().getInstanceClass(), accumulator, nexusImpl, pf);
-        snSvc.setResources(List.of(snResource));
-        return snResource;
+        final SensinactProviderImpl snProvider = toProvider(provider);
+        final SensinactServiceImpl snSvc = toService(snProvider, provider, (EReference) svcFeature);
+        return toResource(snSvc, provider, svcFeature, rcFeature);
     }
 
     public <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
@@ -232,60 +217,18 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
     }
 
-    public void setOrCreateResource(String model, String providerName, String service, String resource, Class<?> type,
-            Object value, Instant instant) {
-        checkValid();
-
-        nexusImpl.handleDataUpdate(model, providerName, service, resource, type, value, instant);
-    }
-
-    public void setOrCreateResource(String providerName, String service, String resource, Class<?> type, Object value,
-            Instant instant) {
-        checkValid();
-
-        Provider provider = nexusImpl.getProvider(providerName);
-
-        String modelName;
-        if (provider != null) {
-            modelName = nexusImpl.getProviderModel(providerName);
-        } else {
-            modelName = providerName;
-        }
-
-        nexusImpl.handleDataUpdate(modelName, providerName, service, resource, type, value, instant);
-    }
-
     private SensinactProviderImpl toProvider(final Provider modelProvider) {
-        return toProvider(modelProvider, true);
+        return new SensinactProviderImpl(active, modelProvider, nexusImpl, pf);
     }
 
-    private SensinactProviderImpl toProvider(final Provider modelProvider, boolean loadServices) {
-        // Construct the provider bean
-        final SensinactProviderImpl snProvider = new SensinactProviderImpl(active,
-                nexusImpl.getProviderModel(modelProvider.getId()), modelProvider.getId());
-
-        if (loadServices) {
-            // List services
-            final List<SensinactService> services = modelProvider.eClass().getEStructuralFeatures().stream()
-                    .map(feature -> toService(snProvider, feature)).collect(Collectors.toList());
-            services.add(toService(snProvider, modelProvider.eClass().getEStructuralFeature("admin")));
-            snProvider.setServices(services);
-        }
-        return snProvider;
+    private SensinactServiceImpl toService(final SensinactProvider parent, Provider provider, EReference ref) {
+        return new SensinactServiceImpl(active, parent, provider, ref, nexusImpl, pf);
     }
 
-    private SensinactServiceImpl toService(final SensinactProvider parent, EStructuralFeature feature) {
-        final SensinactServiceImpl snSvc = new SensinactServiceImpl(active, parent, feature.getName());
-
-        // List resources
-        snSvc.setResources(((EClass) feature.getEType()).getEStructuralFeatures().stream()
-                .map(f -> toResource(snSvc, f)).collect(Collectors.toList()));
-        return snSvc;
-    }
-
-    private SensinactResourceImpl toResource(final SensinactService parent, final EStructuralFeature rcFeature) {
-        return new SensinactResourceImpl(active, parent, rcFeature.getName(), rcFeature.getEType().getInstanceClass(),
-                accumulator, nexusImpl, pf);
+    private SensinactResourceImpl toResource(final SensinactService parent, Provider provider,
+            EStructuralFeature svcFeature, final EStructuralFeature rcFeature) {
+        return new SensinactResourceImpl(active, parent, provider, svcFeature, rcFeature,
+                rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
     }
 
     @Override

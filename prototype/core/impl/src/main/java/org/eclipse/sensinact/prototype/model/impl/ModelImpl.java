@@ -12,13 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.impl;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.Service;
@@ -72,13 +72,13 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     @Override
     public Map<String, ? extends Service> getServices() {
         checkValid();
-        // Remember to add in the provider, which is in the parent type and
-        // therefore doesn't show up in EStructuralFeatures
-        return Stream
-                .concat(Stream.of(SensiNactPackage.eINSTANCE.getProvider_Admin()),
-                        eClass.getEStructuralFeatures().stream())
-                .collect(Collectors.toMap(f -> f.getName(),
-                        f -> new ServiceImpl(active, this, f, nexusImpl, accumulator)));
+        // Use nexusImpl to get services reliably
+        return nexusImpl.getServicesForModel(eClass)
+                .collect(toMap(EReference::getName, r -> new ServiceImpl(active, this, r, nexusImpl, accumulator)));
+    }
+
+    EClass getModelEClass() {
+        return eClass;
     }
 
 }

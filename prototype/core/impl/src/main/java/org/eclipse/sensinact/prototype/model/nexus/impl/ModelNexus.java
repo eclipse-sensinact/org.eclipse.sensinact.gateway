@@ -18,14 +18,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
@@ -34,6 +37,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
@@ -48,7 +52,6 @@ import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelTransaction.ModelTransactionState;
 import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.slf4j.Logger;
@@ -75,9 +78,12 @@ public class ModelNexus {
     private final SensiNactPackage sensinactPackage;
     private final Supplier<NotificationAccumulator> notificationAccumulator;
 
-    private Map<URI, ProviderTypeWrapper> providerCache = new ConcurrentHashMap<>();
     private Map<URI, EPackage> packageCache = new ConcurrentHashMap<>();
     private EPackage defaultPackage;
+
+    private final Map<String, Provider> providers = new HashMap<>();
+
+    private final Map<String, EClass> models = new HashMap<>();
 
     public ModelNexus(ResourceSet resourceSet, SensiNactPackage sensinactPackage,
             Supplier<NotificationAccumulator> accumulator) {
@@ -152,16 +158,8 @@ public class ModelNexus {
                 if (!resource.getContents().isEmpty()) {
                     Provider provider = (Provider) resource.getContents().get(0);
                     EClass eClass = provider.eClass();
-                    URI providerUri = EcoreUtil.getURI(eClass);
-                    URI instanceUri = EcoreUtil.getURI(provider);
-                    ProviderTypeWrapper wrapper = new ProviderTypeWrapper(
-                            instanceUri.segment(instanceUri.segmentCount() - 2), eClass);
-                    ProviderTypeWrapper temp = providerCache.putIfAbsent(providerUri, wrapper);
-                    wrapper = temp == null ? wrapper : temp;
-                    uri = createURI(provider);
-                    resource.setURI(providerUri.trimFragment());
-                    wrapper.getInstances().put(uri, provider);
-
+                    models.putIfAbsent(getModelName(eClass), eClass);
+                    providers.put(provider.getId(), provider);
                 }
             }
         } catch (IOException e) {
@@ -174,8 +172,21 @@ public class ModelNexus {
     private void setupSensinactProvider() {
 
         Instant now = Instant.now();
-        handleDataUpdate("sensinact", "sensiNact", "system", "version", double.class, 0.1D, now);
-        handleDataUpdate("sensinact", "sensiNact", "system", "started", Instant.class, now, now);
+        NotificationAccumulator accumulator = notificationAccumulator.get();
+        EClass sensiNactModel = getModel("sensinact").orElseGet(() -> createModel("sensinact", now, accumulator));
+        EReference svc = Optional.ofNullable(getServiceForModel(sensiNactModel, "system"))
+                .orElseGet(() -> createService(sensiNactModel, "system", now, accumulator));
+        EClass svcClass = svc.getEReferenceType();
+        EStructuralFeature versionResource = Optional.ofNullable(svcClass.getEStructuralFeature("version"))
+                .orElseGet(() -> createResource(svcClass, "version", double.class, now, null, accumulator));
+        EStructuralFeature startedResource = Optional.ofNullable(svcClass.getEStructuralFeature("started"))
+                .orElseGet(() -> createResource(svcClass, "started", Instant.class, now, null, accumulator));
+
+        Provider provider = Optional.ofNullable(getProvider("sensiNact"))
+                .orElseGet(() -> doCreateProvider("sensinact", sensiNactModel, "sensiNact", now, accumulator));
+
+        handleDataUpdate("sensinact", provider, svc, versionResource, 0.1D, now);
+        handleDataUpdate("sensinact", provider, svc, startedResource, now, now);
 
     }
 
@@ -183,7 +194,7 @@ public class ModelNexus {
         defaultPackage.eResource().setURI(URI.createFileURI(Path.of(BASIC_BASE_ECORE).toAbsolutePath().toString()));
         try {
             defaultPackage.eResource().save(null);
-            providerCache.values().forEach(this::saveInstance);
+            providers.values().forEach(this::saveInstance);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -209,25 +220,26 @@ public class ModelNexus {
      * @param timestamp      the timestamp when the link is created. If null, the
      *                       current timestamp is used.
      */
-    public void linkProviders(String parentModel, String parentProvider, String childModel, String childProvider,
-            Instant timestamp) {
-
-        if (parentModel == null) {
-            parentModel = parentProvider;
-        }
-        if (childModel == null) {
-            childModel = childProvider;
-        }
+    public void linkProviders(String parentProvider, String childProvider, Instant timestamp) {
 
         Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
 
         NotificationAccumulator accumulator = notificationAccumulator.get();
 
-        Provider parent = getOrCreateProvider(parentModel, parentProvider, metaTimestamp, accumulator);
+        Provider parent = providers.get(parentProvider);
 
-        Provider child = getOrCreateProvider(childModel, childProvider, metaTimestamp, accumulator);
+        Provider child = providers.get(childProvider);
 
+        if (parent == null) {
+            throw new IllegalArgumentException("No parent provider " + parentProvider);
+        }
+        if (child == null) {
+            throw new IllegalArgumentException("No child provider " + childProvider);
+        }
         parent.getLinkedProviders().add(child);
+
+        // TODO link event
+        // accumulator.link(...)
     }
 
     /**
@@ -242,28 +254,21 @@ public class ModelNexus {
      * @param timestamp      the timestamp when the link is created. If null, the
      *                       current timestamp is used.
      */
-    public void unlinkProviders(String parentModel, String parentProvider, String childModel, String childProvider,
-            Instant timestamp) {
+    public void unlinkProviders(String parentProvider, String childProvider, Instant timestamp) {
 
-        if (parentModel == null) {
-            parentModel = parentProvider;
-        }
-        if (childModel == null) {
-            childModel = childProvider;
-        }
+        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
 
         NotificationAccumulator accumulator = notificationAccumulator.get();
 
-        Provider parent = getProvider(parentModel, parentProvider);
+        Provider parent = providers.get(parentProvider);
+
+        Provider child = providers.get(childProvider);
 
         if (parent == null) {
-            throw new IllegalArgumentException("parent Provider " + parentProvider + " does not exist");
+            throw new IllegalArgumentException("No parent provider " + parentProvider);
         }
-
-        Provider child = getProvider(childModel, childProvider);
-
         if (child == null) {
-            throw new IllegalArgumentException("child Provider " + childProvider + " does not exist");
+            throw new IllegalArgumentException("No child provider " + childProvider);
         }
         parent.getLinkedProviders().remove(child);
 
@@ -271,30 +276,14 @@ public class ModelNexus {
         // accumulator.unlink(...)
     }
 
-    public void handleDataUpdate(String model, String providerName, String service, String resource, Class<?> type,
-            Object data, Instant timestamp) {
-        if (model == null) {
-            model = providerName;
-        }
+    public void handleDataUpdate(String modelName, Provider provider, EStructuralFeature serviceFeature,
+            EStructuralFeature resourceFeature, Object data, Instant timestamp) {
 
         Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
 
+        String providerName = provider.getId();
+
         NotificationAccumulator accumulator = notificationAccumulator.get();
-
-        Provider provider = getOrCreateProvider(model, providerName, metaTimestamp, accumulator);
-        ModelTransaction transaction = getOrCreateService(service, provider, metaTimestamp, accumulator);
-        transaction = getOrCreateResource(resource, type, transaction, metaTimestamp, accumulator);
-        setData(provider, transaction, model, providerName, data, metaTimestamp, accumulator);
-    }
-
-    /**
-     * @param transaction
-     * @param data
-     */
-    private void setData(Provider provider, ModelTransaction transaction, String modelName, String providerName,
-            Object data, Instant timestamp, NotificationAccumulator accumulator) {
-
-        EStructuralFeature serviceFeature = transaction.getFeaturePath().get(0);
 
         Service service = (Service) provider.eGet(serviceFeature);
         if (service == null) {
@@ -302,8 +291,6 @@ public class ModelNexus {
             provider.eSet(serviceFeature, service);
             accumulator.addService(modelName, providerName, serviceFeature.getName());
         }
-
-        EStructuralFeature resourceFeature = transaction.getFeaturePath().get(1);
 
         // Handle Metadata
 
@@ -349,55 +336,40 @@ public class ModelNexus {
                 oldMetaData, newMetaData, timestamp);
     }
 
-    private Provider getOrCreateProvider(String modelName, String providerName, Instant timestamp,
+    /**
+     * Expects the caller to have checked that no provider exists for the given name
+     *
+     * @param modelName
+     * @param providerName
+     * @param timestamp
+     * @param accumulator
+     * @return
+     */
+    private Provider doCreateProvider(String modelName, EClass model, String providerName, Instant timestamp,
             NotificationAccumulator accumulator) {
 
-        Provider provider = getProvider(modelName, providerName);
+        Provider provider = (Provider) EcoreUtil.create(model);
+        provider.setId(providerName);
 
-        if (provider == null) {
-            provider = doCreateProvider(modelName, providerName, timestamp, accumulator);
+        final Admin adminSvc = sensinactPackage.getSensiNactFactory().createAdmin();
+        provider.setAdmin(adminSvc);
+
+        // Set a timestamp to admin resources to indicate them as valued
+        for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
+            Metadata metadata = sensinactPackage.getSensiNactFactory().createMetadata();
+            metadata.setFeature(resourceFeature);
+            metadata.setSource(provider.getAdmin());
+            metadata.setTimestamp(Instant.EPOCH);
+            adminSvc.getMetadata().put(resourceFeature, metadata);
         }
 
-        return provider;
-    }
+        // Set the friendlyName value
+        adminSvc.setFriendlyName(providerName);
+        adminSvc.getMetadata().get(adminSvc.eClass().getEStructuralFeature(SensiNactPackage.ADMIN__FRIENDLY_NAME))
+                .setTimestamp(timestamp);
 
-    private Provider doCreateProvider(String modelName, String providerName, Instant timestamp,
-            NotificationAccumulator accumulator) {
-
-        Provider provider = getProvider(modelName, providerName);
-
-        if (provider == null) {
-            String existingModel = getProviderModel(providerName);
-            if (existingModel != null) {
-                throw new IllegalArgumentException(
-                        "The provider " + providerName + " already exists with the model " + existingModel);
-            }
-            ProviderTypeWrapper wrapper = getProviderType(modelName, DEFAULT_URI)
-                    .orElseGet(() -> createProviderType(modelName, DEFAULT_URI, timestamp));
-
-            provider = (Provider) EcoreUtil.create(wrapper.getProviderType());
-            provider.setId(providerName);
-
-            final Admin adminSvc = sensinactPackage.getSensiNactFactory().createAdmin();
-            provider.setAdmin(adminSvc);
-
-            // Set a timestamp to admin resources to indicate them as valued
-            for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
-                Metadata metadata = sensinactPackage.getSensiNactFactory().createMetadata();
-                metadata.setFeature(resourceFeature);
-                metadata.setSource(provider.getAdmin());
-                metadata.setTimestamp(Instant.EPOCH);
-                adminSvc.getMetadata().put(resourceFeature, metadata);
-            }
-
-            // Set the friendlyName value
-            adminSvc.setFriendlyName(providerName);
-            adminSvc.getMetadata().get(adminSvc.eClass().getEStructuralFeature(SensiNactPackage.ADMIN__FRIENDLY_NAME))
-                    .setTimestamp(timestamp);
-
-            wrapper.getInstances().put(createURI(modelName, providerName), provider);
-            accumulator.addProvider(modelName, providerName);
-        }
+        providers.put(providerName, provider);
+        accumulator.addProvider(modelName, providerName);
 
         return provider;
     }
@@ -417,96 +389,65 @@ public class ModelNexus {
     public Provider createProviderInstance(String modelName, String providerName, Instant timestamp,
             NotificationAccumulator accumulator) {
 
-        Provider provider = getProvider(modelName, providerName);
+        Provider provider = getProvider(providerName);
         if (provider != null) {
-            throw new IllegalArgumentException(
-                    "The provider " + providerName + " already exists with the model " + modelName);
+            String m = getModelName(provider.eClass());
+            if (!m.equals(modelName)) {
+                throw new IllegalArgumentException(
+                        "The provider " + providerName + " already exists with a different model " + m);
+            } else {
+                throw new IllegalArgumentException(
+                        "The provider " + providerName + " already exists with the model " + modelName);
+            }
         } else {
-            provider = doCreateProvider(modelName, providerName, timestamp, accumulator);
+            provider = doCreateProvider(modelName, getMandatoryModel(modelName), providerName, timestamp, accumulator);
         }
 
         return provider;
     }
 
     public Provider getProvider(String providerName) {
-        return providerCache.values().stream().map((w) -> w.getInstances().get(createURI(w.getModel(), providerName)))
-                .filter(p -> p != null).findFirst().orElse(null);
+        return providers.get(providerName);
     }
 
     public String getProviderModel(String providerName) {
-        return providerCache.values().stream()
-                .filter((w) -> w.getInstances().containsKey(createURI(w.getModel(), providerName)))
-                .map(w -> w.getModel()).findFirst().orElse(null);
+        return Optional.ofNullable(providers.get(providerName)).map(p -> getModelName(p.eClass())).orElse(null);
     }
 
     public Provider getProvider(String model, String providerName) {
-        URI packageUri = URI.createURI(DEFAULT_URI);
-        URI providerUri = packageUri.appendFragment("//" + firstToUpper(model));
-        ProviderTypeWrapper wrapper = providerCache.get(providerUri);
-        return wrapper == null ? null : wrapper.getInstances().get(createURI(model, providerName));
+        Provider p = providers.get(providerName);
+        if (p != null) {
+            String m = getModelName(p.eClass());
+            if (!m.equals(model)) {
+                LOG.debug("Provider {} exists but with model {} not model {}", providerName, m, model);
+                p = null;
+            }
+        }
+        return p;
     }
 
     /**
      * Lists know providers
      */
-    public List<Provider> getProviders() {
-        return providerCache.values().stream().flatMap((wrapper) -> wrapper.getInstances().values().stream())
-                .collect(Collectors.toList());
+    public Collection<Provider> getProviders() {
+        return List.copyOf(providers.values());
     }
 
     /**
      * Lists know providers
      */
     public List<Provider> getProviders(String model) {
-        URI packageUri = URI.createURI(DEFAULT_URI);
-        URI providerUri = packageUri.appendFragment("//" + firstToUpper(model));
-        ProviderTypeWrapper wrapper = providerCache.get(providerUri);
-        return wrapper.getInstances().values().stream().collect(Collectors.toList());
+        EClass m = getMandatoryModel(model);
+        // Don't use isInstance as subtypes have a different model
+        return providers.values().stream().filter(p -> p.eClass() == m).collect(Collectors.toList());
     }
 
-    /**
-     * @param dto
-     * @return
-     */
-    private URI createURI(String model, String provider) {
-        if (model == null) {
-            model = provider;
-        }
-        URI uri = URI.createURI(model).appendSegment(provider).appendFragment(provider);
-        return uri;
-    }
-
-    private URI createURI(Provider provider) {
-        URI instanceUri = EcoreUtil.getURI(provider);
-        return createURI(instanceUri.segment(instanceUri.segmentCount() - 2), provider.getId());
-    }
-
-    /**
-     * @param service
-     * @param resource
-     * @param type
-     * @param transaction
-     * @return
-     */
-    private ModelTransaction getOrCreateResource(String resource, Class<?> type, ModelTransaction transaction,
-            Instant timestamp, NotificationAccumulator accumulator) {
-        EClass service = transaction.getService();
-        EAttribute feature = (EAttribute) service.getEStructuralFeature(resource);
-        if (feature == null) {
-            // The EClass does not have a reference to the service. This means we need to
-            // create an EClass representing the Service and add a reference to our provider
-            // EClass
-            if (transaction.getServiceState() != ModelTransactionState.NEW) {
-                transaction.setResourceState(ModelTransactionState.NEW);
-            }
-            feature = createResource(service, resource, type, timestamp, null, accumulator);
-        }
-        transaction.addFeature(feature);
-        return transaction;
-    }
-
-    private EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
+    public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, NotificationAccumulator accumulator) {
+        if (service.getEStructuralFeature(resource) != null) {
+            throw new IllegalArgumentException("There is an existing resource with name " + resource + " in service "
+                    + service + " in model " + getModelName(service.eContainingFeature().getEContainingClass()));
+        }
         updateMetadata(service);
         EAttribute feature = EMFUtil.createEAttribute(service, resource, type, defaultValue,
                 ef -> createEFeatureAnnotation(ef, timestamp));
@@ -514,47 +455,17 @@ public class ModelNexus {
         return feature;
     }
 
-    private Optional<ProviderTypeWrapper> getProviderType(String rawProviderName, String thePackageUri) {
-        String providerName = firstToUpper(rawProviderName);
+    private EClass createModel(String modelName, String thePackageUri, Instant timestamp) {
+        String modelClassName = firstToUpper(modelName);
         URI packageUri = URI.createURI(thePackageUri);
         EPackage ePackage = packageCache.get(packageUri);
-        EClass providerClass = (EClass) ePackage.getEClassifier(providerName);
-        if (providerClass != null) {
-            return Optional.ofNullable(providerCache.get(EcoreUtil.getURI(providerClass)));
-        } else {
-            return Optional.empty();
-        }
+        EClass model = EMFUtil.createEClass(modelClassName, ePackage,
+                (ec) -> createEClassAnnotations(modelName, timestamp), sensinactPackage.getProvider());
+        models.put(modelName, model);
+        return model;
     }
 
-    private ProviderTypeWrapper createProviderType(String rawProviderName, String thePackageUri, Instant timestamp) {
-        String providerName = firstToUpper(rawProviderName);
-        URI packageUri = URI.createURI(thePackageUri);
-        EPackage ePackage = packageCache.get(packageUri);
-        EClass providerClass = EMFUtil.createEClass(providerName, ePackage, (ec) -> createEClassAnnotations(timestamp),
-                sensinactPackage.getProvider());
-        ProviderTypeWrapper wrapper = new ProviderTypeWrapper(rawProviderName, providerClass);
-        providerCache.put(EcoreUtil.getURI(providerClass), wrapper);
-        return wrapper;
-    }
-
-    private ModelTransaction getOrCreateService(String serviceName, Provider provider, Instant timestamp,
-            NotificationAccumulator accumulator) {
-        ModelTransaction transaction = new ModelTransaction();
-        EClass providerClass = provider.eClass();
-        EStructuralFeature feature = providerClass.getEStructuralFeature(serviceName);
-        if (feature == null) {
-            // The EClass does not have a reference to the service. This means we need to
-            // create an EClass representing the Service and add a reference to our provider
-            // EClass
-            transaction.setServiceState(ModelTransactionState.NEW);
-            feature = createService(providerClass, serviceName, timestamp);
-        }
-        transaction.setService((EClass) feature.getEType());
-        transaction.addFeature(feature);
-        return transaction;
-    }
-
-    private EStructuralFeature createService(EClass model, String name, Instant timestamp) {
+    private EReference createService(EClass model, String name, Instant timestamp) {
         EPackage ePackage = model.getEPackage();
         updateMetadata(model);
         EClass service = EMFUtil.createEClass(constructServiceEClassName(model.getName(), name), ePackage,
@@ -574,6 +485,12 @@ public class ModelNexus {
         meta.setVersion(1);
         EAnnotation annotation = EMFUtil.createEAnnotation("metadata", Collections.singletonList(meta));
         return Collections.singletonList(annotation);
+    }
+
+    private List<EAnnotation> createEClassAnnotations(String model, Instant timestamp) {
+        // TODO make this part of the ModelMetadata?
+        return List.of(createEClassAnnotations(timestamp).get(0),
+                EMFUtil.createEAnnotation("model", Map.of("name", model)));
     }
 
     private List<EAnnotation> createEFeatureAnnotation(EStructuralFeature feature, Instant timestamp) {
@@ -602,39 +519,21 @@ public class ModelNexus {
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
-    private void saveInstance(ProviderTypeWrapper wrapper) {
+    private void saveInstance(Provider p) {
         URI baseUri = URI.createFileURI(Path.of(INSTANCES).toAbsolutePath().toString());
-        wrapper.getInstances().forEach((u, e) -> {
-            URI instanceUri = baseUri.appendSegments(u.segments()).appendFileExtension("xmi");
-            Resource res = resourceSet.createResource(instanceUri);
-            res.getContents().add(e);
-            try {
-                e.eResource().save(Collections.singletonMap(XMLResource.OPTION_SCHEMA_LOCATION, true));
-            } catch (IOException ex) {
-                LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error saving provider fro URI: {}", instanceUri,
-                        e);
-                throw new RuntimeException(ex);
-            }
-        });
+        URI instanceUri = baseUri.appendSegment(p.getId()).appendFileExtension("xmi");
+        Resource res = resourceSet.createResource(instanceUri);
+        res.getContents().add(p);
+        try {
+            p.eResource().save(Collections.singletonMap(XMLResource.OPTION_SCHEMA_LOCATION, true));
+        } catch (IOException ex) {
+            LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error saving provider fro URI: {}", instanceUri, p);
+            throw new RuntimeException(ex);
+        }
     }
 
-    public Map<String, Object> getResourceMetadata(String modelName, String providerName, String serviceName,
-            String resourceName) {
-        final Provider provider = getProvider(modelName, providerName);
-        if (provider == null) {
-            return null;
-        }
-
-        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(serviceName);
-        if (svcFeature == null) {
-            return null;
-        }
-
-        final EStructuralFeature rcFeature = ((EClass) svcFeature.getEType()).getEStructuralFeature(resourceName);
-        if (rcFeature == null) {
-            return null;
-        }
-
+    public Map<String, Object> getResourceMetadata(Provider provider, EStructuralFeature svcFeature,
+            final EStructuralFeature rcFeature) {
         final Service svc = (Service) provider.eGet(svcFeature);
         if (svc == null) {
             return Map.of();
@@ -653,7 +552,7 @@ public class ModelNexus {
         }
     }
 
-    public void setResourceMetadata(String modelName, String providerName, String serviceName, String resourceName,
+    public void setResourceMetadata(Provider provider, EStructuralFeature svcFeature, EStructuralFeature rcFeature,
             String metadataKey, Object value, Instant timestamp) {
         if (metadataKey == null || metadataKey.isEmpty()) {
             throw new IllegalArgumentException("Empty metadata key");
@@ -663,23 +562,9 @@ public class ModelNexus {
             throw new IllegalArgumentException("Invalid timestamp");
         }
 
-        final Provider provider = getProvider(modelName, providerName);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown provider");
-        }
-
-        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(serviceName);
-        if (svcFeature == null) {
-            throw new IllegalArgumentException("Unknown service");
-        }
-
         final Service svc = (Service) provider.eGet(svcFeature);
-        final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resourceName);
-        if (rcFeature == null) {
-            throw new IllegalArgumentException("Unknown resource");
-        }
 
-        Metadata metadata = svc.getMetadata().get(rcFeature);
+        Metadata metadata = svc == null ? null : svc.getMetadata().get(rcFeature);
         if (metadata == null) {
             throw new IllegalStateException("No existing metadata for resource");
         }
@@ -708,12 +593,12 @@ public class ModelNexus {
 
     }
 
-    public List<String> getModelNames() {
-        return providerCache.values().stream().map(ProviderTypeWrapper::getModel).collect(Collectors.toList());
+    public Set<String> getModelNames() {
+        return Set.copyOf(models.keySet());
     }
 
     public Optional<EClass> getModel(String modelName) {
-        return getProviderType(modelName, DEFAULT_URI).map(ProviderTypeWrapper::getProviderType);
+        return Optional.ofNullable(models.get(modelName));
     }
 
     private EClass getMandatoryModel(String modelName) {
@@ -721,37 +606,51 @@ public class ModelNexus {
     }
 
     public EClass createModel(String modelName, Instant timestamp, NotificationAccumulator accumulator) {
-        if (getProviderType(modelName, DEFAULT_URI).isPresent()) {
+        if (getModel(modelName).isPresent()) {
             throw new IllegalArgumentException("There is an existing model with name " + modelName);
         }
-        return createProviderType(modelName, DEFAULT_URI, timestamp).getProviderType();
+        return createModel(modelName, DEFAULT_URI, timestamp);
     }
 
-    public EStructuralFeature createService(String model, String service, Instant creationTimestamp,
+    public EReference createService(EClass model, String service, Instant creationTimestamp,
             NotificationAccumulator accumulator) {
-        EClass modelClass = getMandatoryModel(model);
-        if (modelClass.getEStructuralFeature(service) != null) {
+        if (model.getEStructuralFeature(service) != null) {
             throw new IllegalArgumentException(
                     "There is an existing service with name " + service + " in model " + model);
         }
-        return createService(modelClass, service, creationTimestamp);
+        return createService(model, service, creationTimestamp);
     }
 
-    public EStructuralFeature createResource(String model, String service, String resource, Class<?> type,
-            Object defaultValue, Instant creationTimestamp, NotificationAccumulator accumulator) {
-        EClass serviceClass = getService(model, service);
-        if (serviceClass.getEStructuralFeature(resource) != null) {
-            throw new IllegalArgumentException("There is an existing resource with name " + resource + " in service "
-                    + service + " in model " + model);
+    public String getModelName(EClass model) {
+        return model.getEAnnotation("model").getDetails().get("name");
+    }
+
+    public Stream<EReference> getServicesForModel(EClass model) {
+        EClass svcClass = sensinactPackage.getService();
+        return model.getEAllReferences().stream().filter(r -> svcClass.isSuperTypeOf(r.getEReferenceType()));
+    }
+
+    private EReference getServiceForModel(EClass model, String serviceName) {
+        EStructuralFeature feature = model.getEStructuralFeature(serviceName);
+        EClass serviceEClass = sensinactPackage.getService();
+        if (feature != null && (!(feature instanceof EReference)
+                || !serviceEClass.isSuperTypeOf(((EReference) feature).getEReferenceType()))) {
+            throw new IllegalArgumentException("The field " + serviceName + " exists in the model "
+                    + getModelName(model) + " and is not a service");
         }
-        return createResource(serviceClass, resource, type, creationTimestamp, defaultValue, accumulator);
+        return feature == null ? null : (EReference) feature;
     }
 
-    private EClass getService(String model, String service) {
-        EClass modelClass = getMandatoryModel(model);
-        return Optional.ofNullable(modelClass.getEStructuralFeature(service)).map(f -> (EClass) f.getEType())
-                .orElseThrow(
-                        () -> new IllegalArgumentException("No service with name " + service + " for model " + model));
+    public Stream<EAttribute> getResourcesForService(EClass svcClass) {
+        return svcClass.getEAllAttributes().stream().filter(a -> {
+            EAnnotation annotation = a.getEAnnotation("metadata");
+            if (annotation == null) {
+                // TODO do we have to special case admin, or should it have a metadata
+                // annotation
+                return sensinactPackage.getAdmin().equals(a.getEContainingClass());
+            } else {
+                return annotation.eContents().stream().anyMatch(ModelMetadata.class::isInstance);
+            }
+        });
     }
-
 }
