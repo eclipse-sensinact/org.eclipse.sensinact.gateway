@@ -16,3 +16,6 @@ indent_size = 2
 [*.md]
 trim_trailing_whitespace = false
 indent_size = 1
+
+[dist/*.{js,css,html}]
+trim_trailing_whitespace = false
