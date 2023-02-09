@@ -39,25 +39,19 @@ public class PathHandler {
         switch (holder.getContext()) {
         case THINGS:
             return new ThingPathHandler(provider, resources).handle(path);
-
         case FEATURES_OF_INTEREST:
             return new FeatureOfInterestPathHandler(provider, resources).handle(path);
-
         case HISTORICAL_LOCATIONS:
             return new HistoricalLocationPathHandler(provider, resources).handle(path);
-
         case LOCATIONS:
             return new LocationPathHandler(provider, resources).handle(path);
 
         case OBSERVATIONS:
             return new ObservationPathHandler(provider, resource).handle(path);
-
         case DATASTREAMS:
             return new DatastreamPathHandler(provider, resource).handle(path);
-
         case OBSERVED_PROPERTIES:
             return new ObservedPropertyPathHandler(provider, resource).handle(path);
-
         case SENSORS:
             return new SensorPathHandler(provider, resource).handle(path);
 

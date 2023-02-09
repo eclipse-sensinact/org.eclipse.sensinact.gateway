@@ -59,7 +59,7 @@ public class LocationPathHandler {
     }
 
     private Object subThings(final String path) {
-        return new ThingPathHandler(provider, resources);
+        return new ThingPathHandler(provider, resources).handle(path);
     }
 
     private Object subHistoricalLocations(final String path) {
