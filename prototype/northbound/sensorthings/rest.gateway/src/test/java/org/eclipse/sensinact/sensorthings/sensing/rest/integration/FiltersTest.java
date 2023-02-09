@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,12 +36,22 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -282,39 +294,277 @@ public class FiltersTest extends AbstractIntegrationTest {
         assertEquals(nbIds, subStreams.count);
     }
 
-    @Test
-    void testFilter() throws Exception {
-        // Register the resources
-        final String provider1 = "filterFilter_1";
-        final String provider2 = "filterFilter_2";
+    @Nested
+    class FilterFilterTest {
+
+        final List<String> above40 = new ArrayList<>();
+        final List<String> below40 = new ArrayList<>();
+
+        final int nbRc = 5;
+        String provider1 = null;
+        String provider2 = null;
         final String svc = "sensor";
         final String rcPrefix = "rc";
-        final int nbRc = 5;
-        for (int i = 0; i < nbRc; i++) {
-            createResource(provider1, svc, rcPrefix + i, i);
-            createResource(provider2, svc, rcPrefix + i, 40 + i);
+
+        @BeforeEach
+        void setup(TestInfo testInfo) {
+         // Register the resources
+            final String testMethodName = testInfo.getTestMethod().get().getName();
+            provider1 = testMethodName + "_1";
+            provider2 = testMethodName + "_2";
+            for (int i = 0; i < nbRc; i++) {
+                final String rcName = rcPrefix + i;
+                createResource(provider1, svc, rcName, i);
+                createResource(provider2, svc, rcName, 40 + i);
+                below40.add(String.join("~", provider1, svc, rcName));
+                above40.add(String.join("~", provider2, svc, rcName));
+            }
         }
 
-        final TypeReference<ResultList<Thing>> RESULT_THING = new TypeReference<>() {
-        };
+        @AfterEach
+        void cleanup() {
+            provider1 = null;
+            provider2 = null;
+            above40.clear();
+            below40.clear();
+        }
 
-        // Return providers with a resources values less than 30
-        ResultList<Thing> things = utils.queryJson(
-                String.format("/Things?$filter=%s",
-                        URLEncoder.encode("Datastreams/Observations/result lt 30", StandardCharsets.UTF_8)),
-                RESULT_THING);
-        List<String> allIds = things.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
-        assertTrue(allIds.size() >= 1, "Not enough things returned");
-        assertTrue(allIds.contains(provider1), provider1 + " not in result");
-        assertFalse(allIds.contains(provider2), provider2 + " in result");
+        @Test
+        void testFilterThings() throws Exception {
+            final TypeReference<ResultList<Thing>> RESULT_THINGS = new TypeReference<>() {
+            };
 
-        // Loop back on provider ID
-        things = utils.queryJson(String.format("/Things?$filter=%s", URLEncoder.encode(
-                "Datastreams/Observations/FeatureOfInterest/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
-                RESULT_THING);
-        allIds = things.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
-        assertTrue(allIds.size() >= 1, "Not enough things returned");
-        assertTrue(allIds.contains(provider2), provider2 + " not in result");
-        assertFalse(allIds.contains(provider1), provider1 + " in result");
+            // Return providers with a resources values less than 30
+            ResultList<Thing> things = utils.queryJson(
+                    String.format("/Things?$filter=%s",
+                            URLEncoder.encode("Datastreams/Observations/result lt 30", StandardCharsets.UTF_8)),
+                    RESULT_THINGS);
+            List<String> allIds = things.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough things returned");
+            assertTrue(allIds.contains(provider1), provider1 + " not in result");
+            assertFalse(allIds.contains(provider2), provider2 + " in result");
+
+            // Loop back on provider ID
+            things = utils.queryJson(String.format("/Things?$filter=%s", URLEncoder.encode(
+                    "Datastreams/Observations/FeatureOfInterest/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
+                    RESULT_THINGS);
+            allIds = things.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough things returned");
+            assertTrue(allIds.contains(provider2), provider2 + " not in result");
+            assertFalse(allIds.contains(provider1), provider1 + " in result");
+
+            // Sample query from the specifications
+            createResource("filterFOI_1", "some-service", "some-resource", 42,
+                    ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneOffset.UTC).toInstant());
+            things = utils.queryJson(String.format("/Things?$filter=%s",
+                    URLEncoder.encode(
+                            "Datastreams/Observations/FeatureOfInterest/id eq 'filterFOI_1' "
+                                    + "and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z "
+                                    + "and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z",
+                            StandardCharsets.UTF_8)),
+                    RESULT_THINGS);
+            assertEquals(1, things.value.size(), "Not enough things returned");
+            assertEquals("filterFOI_1", things.value.get(0).id);
+        }
+
+        @Test
+        void testFilterLocations() throws Exception {
+            final TypeReference<ResultList<Location>> RESULT_LOCATIONS = new TypeReference<>() {
+            };
+
+            // Loop back on provider ID
+            ResultList<Location> items = utils.queryJson(
+                    String.format("/Locations?$filter=%s",
+                            URLEncoder.encode("Things/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
+                    RESULT_LOCATIONS);
+            List<String> allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough locations returned");
+            for (String id : allIds) {
+                assertTrue(id.startsWith(provider2 + "~"), "Found: " + id);
+            }
+        }
+
+        @Test
+        void testFilterHistoricalLocations() throws Exception {
+            final TypeReference<ResultList<HistoricalLocation>> RESULT_HISTORICAL_LOCATIONS = new TypeReference<>() {
+            };
+
+            // Loop back on provider ID
+            ResultList<HistoricalLocation> items = utils.queryJson(
+                    String.format("/HistoricalLocations?$filter=%s",
+                            URLEncoder.encode("Things/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
+                    RESULT_HISTORICAL_LOCATIONS);
+            List<String> allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough historical locations returned");
+            for (String id : allIds) {
+                assertTrue(id.startsWith(provider2 + "~"), "Found: " + id);
+            }
+        }
+
+        @Test
+        void testFilterDatastreams() throws Exception {
+            final TypeReference<ResultList<Datastream>> RESULT_DATASTREAMS = new TypeReference<>() {
+            };
+
+            // Return providers with a resources values less than 30
+            ResultList<Datastream> items = utils.queryJson(
+                    String.format("/Datastreams?$filter=%s",
+                            URLEncoder.encode("Observations/result ge 40", StandardCharsets.UTF_8)),
+                    RESULT_DATASTREAMS);
+            List<String> allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough datastreams returned");
+            for (String below : below40) {
+                assertFalse(allIds.contains(below), below + " in result");
+            }
+            for (String above : above40) {
+                assertTrue(allIds.contains(above), above + " not in result");
+            }
+
+            // Loop back on provider ID
+            items = utils.queryJson(
+                    String.format("/Datastreams?$filter=%s", URLEncoder.encode(
+                            "Observations/FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                    RESULT_DATASTREAMS);
+            allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough datastreams returned");
+            for (String id : allIds) {
+                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+            }
+
+            // Loop back on resource ID
+            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            items = utils.queryJson(
+                    String.format("/Datastreams?$filter=%s",
+                            URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)),
+                    RESULT_DATASTREAMS);
+            allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough datastreams returned");
+            for (String id : allIds) {
+                assertEquals(expectedId, id, "Found: " + id);
+            }
+        }
+
+        @Test
+        void testFilterSensors() throws Exception {
+            final TypeReference<ResultList<Sensor>> RESULT_SENSORS = new TypeReference<>() {
+            };
+
+            // Return providers with a resources values less than 30
+            ResultList<Sensor> items = utils.queryJson(
+                    String.format("/Sensors?$filter=%s",
+                            URLEncoder.encode("Datastreams/Observations/result ge 40", StandardCharsets.UTF_8)),
+                    RESULT_SENSORS);
+            List<String> allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough sensors returned");
+            for (String below : below40) {
+                assertFalse(allIds.contains(below), below + " in result");
+            }
+            for (String above : above40) {
+                assertTrue(allIds.contains(above), above + " not in result");
+            }
+
+            // Loop back on provider ID
+            items = utils.queryJson(String.format("/Sensors?$filter=%s", URLEncoder.encode(
+                    "Datastreams/Observations/FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                    RESULT_SENSORS);
+            allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough sensors returned");
+            for (String id : allIds) {
+                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+            }
+
+            // Loop back on resource ID
+            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            items = utils.queryJson(String.format("/Sensors?$filter=%s",
+                    URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)), RESULT_SENSORS);
+            allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough sensors returned");
+            for (String id : allIds) {
+                assertEquals(expectedId, id, "Found: " + id);
+            }
+        }
+
+        @Test
+        void testFilterObservedProperties() throws Exception {
+            final TypeReference<ResultList<ObservedProperty>> RESULT_OBS_PROPS = new TypeReference<>() {
+            };
+
+            // Return providers with a resources values less than 30
+            ResultList<ObservedProperty> items = utils.queryJson(
+                    String.format("/ObservedProperties?$filter=%s",
+                            URLEncoder.encode("Datastreams/Observations/result ge 40", StandardCharsets.UTF_8)),
+                    RESULT_OBS_PROPS);
+            List<String> allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough ObservedProperties returned");
+            for (String below : below40) {
+                assertFalse(allIds.contains(below), below + " in result");
+            }
+            for (String above : above40) {
+                assertTrue(allIds.contains(above), above + " not in result");
+            }
+
+            // Loop back on provider ID
+            items = utils.queryJson(String.format("/ObservedProperties?$filter=%s", URLEncoder.encode(
+                    "Datastreams/Observations/FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                    RESULT_OBS_PROPS);
+            allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough ObservedProperties returned");
+            for (String id : allIds) {
+                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+            }
+
+            // Loop back on resource ID
+            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            items = utils.queryJson(String.format("/ObservedProperties?$filter=%s",
+                    URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)), RESULT_OBS_PROPS);
+            allIds = items.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough ObservedProperties returned");
+            for (String id : allIds) {
+                assertEquals(expectedId, id, "Found: " + id);
+            }
+        }
+
+        @Test
+        void testFilterObservations() throws Exception {
+            final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<>() {
+            };
+
+            // Return providers with a resources values less than 30
+            ResultList<Observation> obs = utils.queryJson(String.format("/Observations?$filter=%s",
+                    URLEncoder.encode("result ge 40", StandardCharsets.UTF_8)), RESULT_OBSERVATIONS);
+            List<String> allIds = obs.value.stream().map(s -> (String) s.id)
+                    .map(s -> s.substring(0, s.lastIndexOf('~'))).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough observations returned");
+            for (String below : below40) {
+                assertFalse(allIds.contains(below), below + " in result");
+            }
+            for (String above : above40) {
+                assertTrue(allIds.contains(above), above + " not in result");
+            }
+
+            // Loop back on provider ID
+            obs = utils.queryJson(
+                    String.format("/Observations?$filter=%s",
+                            URLEncoder.encode("FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                    RESULT_OBSERVATIONS);
+            allIds = obs.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= nbRc, "Not enough observations returned");
+            for (String id : allIds) {
+                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+            }
+
+            // Loop back on resource ID
+            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            obs = utils.queryJson(
+                    String.format("/Observations?$filter=%s",
+                            URLEncoder.encode("Datastream/id eq '" + expectedId + "'", StandardCharsets.UTF_8)),
+                    RESULT_OBSERVATIONS);
+            allIds = obs.value.stream().map(s -> (String) s.id).collect(Collectors.toList());
+            assertTrue(allIds.size() >= 1, "Not enough observations returned");
+            for (String id : allIds) {
+                // Ignore the timestamp
+                assertTrue(id.startsWith(expectedId + "~"), "Found: " + id);
+            }
+        }
     }
 }
