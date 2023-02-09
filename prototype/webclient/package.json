@@ -6,7 +6,9 @@
     "serve": "vue-cli-service serve",
     "generate_api": "./scripts/generate_client",
     "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit"
+    "generate_api": "scripts/generate_client",
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "eslint ./src --ext .ts,.vue"
   },
   "dependencies": {
     "@mdi/font": "^7.1.96",
@@ -30,7 +32,10 @@
   },
   "devDependencies": {
     "@types/chai": "^4.2.15",
+    "@types/leaflet": "^1.9.0",
     "@types/mocha": "^8.2.1",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-typescript": "~5.0.0",
@@ -38,6 +43,8 @@
     "@vue/cli-service": "~5.0.0",
     "@vue/test-utils": "^1.1.3",
     "chai": "^4.2.0",
+    "eslint": "^8.33.0",
+    "eslint-plugin-vue": "^9.9.0",
     "sass": "^1.32.7",
     "sass-loader": "^12.0.0",
     "typescript": "~4.5.5",

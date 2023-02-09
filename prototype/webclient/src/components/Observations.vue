@@ -1,3 +1,17 @@
+<!--
+  Copyright (c) YYYY Contributors to the  Eclipse Foundation.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+
+  Contributors:
+     Markus Hochstein
+-->
+
+
 <template>
   <div class="t1">
     <b-loading :active="loading" :can-cancel="false" :is-full-page="false"></b-loading>
@@ -11,7 +25,7 @@
 <script lang="ts">
 import 'chartjs-adapter-moment';
 import {Component, Prop, Vue, Watch} from "vue-property-decorator";
-import {Datastream, DatastreamsApi, Observations, Thing} from "../../openapi/client";
+import {DatastreamsApi, Observations} from "../../openapi/client";
 
 import { Bar } from 'vue-chartjs'
 import {Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, TimeScale} from 'chart.js'
@@ -21,7 +35,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
 
 @Component({components:{Bar}})
 export default class ObservationsC extends Vue{
-  private loading:boolean = false;
+  private loading = false;
   @Prop() readonly id: string | undefined;
   @Prop({default:()=>''}) readonly title: string | undefined ;
   private observations:Observations|null = null;
@@ -83,12 +97,12 @@ export default class ObservationsC extends Vue{
   get chartdata(){
     if(this.observations){
       return {
-        labels: this.observations.value!.map(e=>moment(e.resultTime,"YYYY-MM-DD'T'HH:mm:ss.SSSZZ")),
+        labels: this.observations.value?.map(e=>moment(e.resultTime,"YYYY-MM-DD'T'HH:mm:ss.SSSZZ")),
         datasets: [
           {
             label: this.title,
             backgroundColor: 'rgb(36,97,162)',
-            data: this.observations.value!.map(e=>e.result)
+            data: this.observations.value?.map(e=>e.result)
           }
         ]
       }

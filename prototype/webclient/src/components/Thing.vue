@@ -1,3 +1,17 @@
+<!--
+  Copyright (c) YYYY Contributors to the  Eclipse Foundation.
+
+  This program and the accompanying materials are made
+  available under the terms of the Eclipse Public License 2.0
+  which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  SPDX-License-Identifier: EPL-2.0
+
+  Contributors:
+     Markus Hochstein
+-->
+
+
 <template>
   <div class="t1">
     <b-loading :active="loading" :can-cancel="false" :is-full-page="false"></b-loading>
@@ -17,7 +31,7 @@
         <b-tab-item :label="this.$i18n.t('properties').toString()">
           <div class="dtable">
             <perfect-scrollbar>
-              <div class="item" v-for="(value,key) in data.properties" :v-key="key">
+              <div class="item" v-for="(value,key) in data.properties" :key="key">
                 <div class="key cap">{{key}}:</div>
                 <div class="value">{{value}}</div>
               </div>
@@ -34,12 +48,12 @@
 
 <script lang="ts">
 
-import {Component, Prop, Vue, Watch} from "vue-property-decorator";
+import {Component, Prop, Vue} from "vue-property-decorator";
 import { Thing} from "../../openapi/client";
 @Component
 export default class ThingC extends Vue{
-  private loading:boolean = false;
-  private activeTab:number = 0;
+  private loading = false;
+  private activeTab = 0;
   @Prop() readonly data: Thing | undefined;
 
 
