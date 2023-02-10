@@ -27,6 +27,8 @@ import java.util.function.Function;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.LineString;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
@@ -114,6 +116,25 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private <T> T convert(final ParserRuleContext ctx, final Object object, final Class<T> type,
+            final boolean allowNull, final String placeDescription) {
+        if (object == null) {
+            if (allowNull) {
+                return null;
+            } else {
+                throw new InvalidResultTypeException(placeDescription + " is null", type.getSimpleName(), object);
+            }
+        }
+
+        if (!type.isAssignableFrom(object.getClass())) {
+            throw new InvalidResultTypeException("Unsupported " + placeDescription + " for \"" + ctx.getText() + "\"",
+                    type.getSimpleName(), object);
+        }
+
+        return (T) object;
+    }
+
     private Function<ResourceValueFilterInputHolder, Object> runSingleString(ParserRuleContext ctx) {
         final CommonexprContext subExpr = ctx.getChild(CommonexprContext.class, 0);
         final Function<ResourceValueFilterInputHolder, Object> targetExpr = visitor.visitCommonexpr(subExpr);
@@ -172,18 +193,9 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         }
 
         return x -> {
-            Object left = leftFun.apply(x);
-            Object right = rightFun.apply(x);
-
-            if (!(left instanceof String)) {
-                throw new InvalidResultTypeException("Unsupported left operand for \"" + ctx.getText() + "\"", "string",
-                        left);
-            } else if (!(right instanceof String)) {
-                throw new InvalidResultTypeException("Unsupported right operand for \"" + ctx.getText() + "\"",
-                        "string", right);
-            } else {
-                return operation.apply((String) left, (String) right);
-            }
+            String left = convert(ctx, leftFun.apply(x), String.class, false, "arg1");
+            String right = convert(ctx, rightFun.apply(x), String.class, false, "arg2");
+            return operation.apply((String) left, (String) right);
         };
     }
 
@@ -194,41 +206,20 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         if (ctx.commonexpr().size() == 2) {
             // String + start
             return x -> {
-                Object string = stringFun.apply(x);
-                Object startPos = startPosFun.apply(x);
-
-                if (!(string instanceof String)) {
-                    throw new InvalidResultTypeException("Unsupported string argument for \"" + ctx.getText() + "\"",
-                            "string", string);
-                } else if (!(startPos instanceof Integer)) {
-                    throw new InvalidResultTypeException("Unsupported start argument for \"" + ctx.getText() + "\"",
-                            "int", startPos);
-                } else {
-                    return ((String) string).substring((Integer) startPos);
-                }
+                String string = convert(ctx, stringFun.apply(x), String.class, false, "string");
+                Integer startPos = convert(ctx, startPosFun.apply(x), Integer.class, false, "start");
+                return string.substring(startPos);
             };
         } else {
             // String + start + length
             final Function<ResourceValueFilterInputHolder, Object> lengthFun = visitor
                     .visitCommonexpr(ctx.commonexpr(2));
             return x -> {
-                Object string = stringFun.apply(x);
-                Object startPos = startPosFun.apply(x);
-                Object length = lengthFun.apply(x);
-
-                if (!(string instanceof String)) {
-                    throw new InvalidResultTypeException("Unsupported string argument for \"" + ctx.getText() + "\"",
-                            "string", string);
-                } else if (!(startPos instanceof Integer)) {
-                    throw new InvalidResultTypeException("Unsupported start argument for \"" + ctx.getText() + "\"",
-                            "int", startPos);
-                } else if (!(length instanceof Integer)) {
-                    throw new InvalidResultTypeException("Unsupported length argument for \"" + ctx.getText() + "\"",
-                            "int", length);
-                } else {
-                    int endPos = (Integer) startPos + (Integer) length;
-                    return ((String) string).substring((Integer) startPos, endPos);
-                }
+                String string = convert(ctx, stringFun.apply(x), String.class, false, "string");
+                Integer startPos = convert(ctx, startPosFun.apply(x), Integer.class, false, "start");
+                Integer length = convert(ctx, lengthFun.apply(x), Integer.class, false, "length");
+                int endPos = startPos + length;
+                return string.substring(startPos, endPos);
             };
         }
     }
@@ -337,12 +328,8 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         }
 
         return x -> {
-            Object res = targetExpr.apply(x);
-            if (res instanceof Number) {
-                return operation.apply((Number) res);
-            }
-
-            throw new InvalidResultTypeException("Error calling math method", "number", res);
+            Number res = convert(ctx, targetExpr.apply(x), Number.class, false, "number");
+            return operation.apply(res);
         };
     }
 
@@ -353,11 +340,12 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         final Function<ResourceValueFilterInputHolder, Object> exprFun = visitor.visitCommonexpr(subExpr);
 
         return x -> {
-            Object obj = exprFun.apply(x);
+            GeoJsonObject obj = convert(ctx, exprFun.apply(x), GeoJsonObject.class, false, "line");
 
             final ShapeFactory shpFactory = spatialContext.getShapeFactory();
             final List<org.locationtech.spatial4j.shape.Point> allPoints = new ArrayList<>();
-            if (obj instanceof LineString) {
+
+            if (obj.type == GeoJsonType.LineString) {
                 final List<Coordinates> allCoordinates = ((LineString) obj).coordinates;
                 if (allCoordinates == null) {
                     throw new InvalidResultTypeException("Null coordinates given to geo.length");
@@ -408,19 +396,9 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         final Function<ResourceValueFilterInputHolder, Object> rightFun = visitor.visitCommonexpr(rightExpr);
 
         return x -> {
-            Object left = leftFun.apply(x);
-            Object right = rightFun.apply(x);
-
-            if (!(left instanceof Point)) {
-                throw new InvalidResultTypeException("Unsupported left operand for \"" + ctx.getText() + "\"",
-                        "geographic Point", left);
-            } else if (!(right instanceof Point)) {
-                throw new InvalidResultTypeException("Unsupported right operand for \"" + ctx.getText() + "\"",
-                        "geographic Point", right);
-            } else {
-                return spatialContext.calcDistance(spatialPoint(shpFactory, (Point) left),
-                        spatialPoint(shpFactory, (Point) right));
-            }
+            Point left = convert(ctx, leftFun.apply(x), Point.class, false, "left");
+            Point right = convert(ctx, rightFun.apply(x), Point.class, false, "right");
+            return spatialContext.calcDistance(spatialPoint(shpFactory, left), spatialPoint(shpFactory, right));
         };
     }
 }

@@ -340,11 +340,30 @@ methodcallexpr : indexofmethodcallexpr
 boolmethodcallexpr : endswithmethodcallexpr
                    | startswithmethodcallexpr
                    | containsmethodcallexpr
-                   | intersectsmethodcallexpr;
+                   | intersectsmethodcallexpr
+                   | stequalsmethodcallexpr
+                   | stdisjointmethodcallexpr
+                   | sttouchesmethodcallexpr
+                   | stwithinmethodcallexpr
+                   | stoverlapsmethodcallexpr
+                   | stcrossesmethodcallexpr
+                   | stintersectsmethodcallexpr
+                   | stcontainssmethodcallexpr
+                   | strelatesmethodcallexpr;
 
 distancemethodcallexpr   : (G E O PERIOD D I S T A N C E)   open bws commonexpr bws comma bws commonexpr bws close;
 geolengthmethodcallexpr  : (G E O PERIOD L E N G T H)     open bws commonexpr bws close;
 intersectsmethodcallexpr : (G E O PERIOD I N T E R S E C T S) open bws commonexpr bws comma bws commonexpr bws close;
+
+stequalsmethodcallexpr    : (S T UNDERSCORE E Q U A L S)   open bws commonexpr bws comma bws commonexpr bws close;
+stdisjointmethodcallexpr  : (S T UNDERSCORE D I S J O I N T)   open bws commonexpr bws comma bws commonexpr bws close;
+sttouchesmethodcallexpr   : (S T UNDERSCORE T O U C H E S)   open bws commonexpr bws comma bws commonexpr bws close;
+stwithinmethodcallexpr    : (S T UNDERSCORE W I T H I N)   open bws commonexpr bws comma bws commonexpr bws close;
+stoverlapsmethodcallexpr  : (S T UNDERSCORE O V E R L A P S)   open bws commonexpr bws comma bws commonexpr bws close;
+stcrossesmethodcallexpr   : (S T UNDERSCORE C R O S S E S)   open bws commonexpr bws comma bws commonexpr bws close;
+stintersectsmethodcallexpr: (S T UNDERSCORE I N T E R S E C T S)   open bws commonexpr bws comma bws commonexpr bws close;
+stcontainssmethodcallexpr : (S T UNDERSCORE C O N T A I N S)   open bws commonexpr bws comma bws commonexpr bws close;
+strelatesmethodcallexpr   : (S T UNDERSCORE R E L A T E)   open bws commonexpr bws comma bws commonexpr bws comma bws commonexpr bws close;
 
 containsmethodcallexpr   : ((C O N T A I N S) | (S U B S T R I N G O F))   open bws commonexpr bws comma bws commonexpr bws close;
 startswithmethodcallexpr : (S T A R T S W I T H) open bws commonexpr bws comma bws commonexpr bws close;
