@@ -62,7 +62,7 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
         try {
             return shapeReader.read(ctx.getText());
         } catch (ParseException | InvalidShapeException | IOException e) {
-            throw new ParsingException("Error parsing geographic point", e);
+            throw new ParsingException("Error parsing geographic point: " + ctx.getText(), e);
         }
     }
 

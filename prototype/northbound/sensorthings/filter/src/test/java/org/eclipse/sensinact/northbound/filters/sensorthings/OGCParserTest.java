@@ -26,7 +26,9 @@ import java.util.function.Predicate;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.gateway.geojson.Polygon;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterLexer;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolcommonexprContext;
@@ -79,7 +81,10 @@ public class OGCParserTest {
         location.coordinates = new Coordinates();
         location.coordinates.longitude = lonlat[0];
         location.coordinates.latitude = lonlat[1];
+        return makeLocatedResource(location);
+    }
 
+    private ResourceSnapshot makeLocatedResource(GeoJsonObject location) {
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, "admin");
         ResourceSnapshot rc = RcUtils.addResource(svc, "location", location);
@@ -110,6 +115,36 @@ public class OGCParserTest {
         rc = makeLocatedResource(outOfCircle);
         holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, rc.getService().getProvider(), List.of(rc));
         assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
+    }
+
+    private Coordinates makeCoors(double lon, double lat) {
+        Coordinates coords = new Coordinates();
+        coords.latitude = lat;
+        coords.longitude = lon;
+        return coords;
+    }
+
+    @Test
+    void testSpatial() throws Exception {
+        final String point1 = "geography'POINT (30 10)'";
+        final String point2 = "geography'POINT (50 10)'";
+        final Polygon rect1 = new Polygon();
+        rect1.coordinates = List.of(List.of(makeCoors(0, 0), makeCoors(50, 0), makeCoors(50, 50),
+                makeCoors(00, 50), makeCoors(0, 0)));
+
+        ResourceSnapshot rc = makeLocatedResource(rect1);
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
+                rc.getService().getProvider(), List.of(rc));
+
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        expectations.put(String.format("st_equals(%s, %s)", point1, point1), true);
+        expectations.put(String.format("st_equals(%s, %s)", point1, point2), false);
+        expectations.put(String.format("st_within(%s, %s)", point1, point1), false);
+        expectations.put(String.format("st_relate(%s, %s, 'WITHIN')", point1, point1), false);
+        expectations.put(String.format("st_relate(%s, %s, 'INTERSECTS')", point1, point1), true);
+        expectations.put(String.format("st_contains(Locations/location, %s)", point1), true);
+        expectations.put(String.format("st_within(%s, Locations/location)", point1), true);
+        assertQueries(expectations, holder);
     }
 
     @Test

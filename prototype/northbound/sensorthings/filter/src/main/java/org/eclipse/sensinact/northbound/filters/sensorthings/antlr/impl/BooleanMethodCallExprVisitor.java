@@ -13,7 +13,10 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -36,12 +39,12 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolmethodcallexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.CommonexprContext;
 import org.locationtech.spatial4j.context.SpatialContext;
+import org.locationtech.spatial4j.shape.Rectangle;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.ShapeFactory.LineStringBuilder;
 import org.locationtech.spatial4j.shape.ShapeFactory.MultiLineStringBuilder;
 import org.locationtech.spatial4j.shape.ShapeFactory.MultiPointBuilder;
-import org.locationtech.spatial4j.shape.ShapeFactory.MultiPolygonBuilder;
 import org.locationtech.spatial4j.shape.ShapeFactory.MultiShapeBuilder;
 import org.locationtech.spatial4j.shape.ShapeFactory.PolygonBuilder;
 import org.locationtech.spatial4j.shape.ShapeFactory.PolygonBuilder.HoleBuilder;
@@ -174,6 +177,35 @@ public class BooleanMethodCallExprVisitor
         }
     }
 
+    private Rectangle tryMakeRectangle(final ShapeFactory factory, final List<List<Coordinates>> coordinates) {
+        if (coordinates.size() != 1) {
+            return null;
+        }
+
+        final List<Coordinates> linearRing = coordinates.get(0);
+        if (linearRing.size() != 5) {
+            return null;
+        }
+
+        final Set<Double> latitudes = new HashSet<>();
+        final Set<Double> longitudes = new HashSet<>();
+        for (Coordinates c : linearRing) {
+            latitudes.add(c.latitude);
+            longitudes.add(c.longitude);
+        }
+
+        if (latitudes.size() > 2 || longitudes.size() > 2) {
+            // Not a rectangle
+            return null;
+        }
+
+        final Double[] latArr = latitudes.toArray(new Double[2]);
+        final Double[] lonArr = longitudes.toArray(new Double[2]);
+        Arrays.sort(latArr);
+        Arrays.sort(lonArr);
+        return factory.rect(lonArr[0], lonArr[1], latArr[0], latArr[1]);
+    }
+
     private Shape spatialShape(final ShapeFactory factory, final Geometry geometry) {
         switch (geometry.type) {
         case Point: {
@@ -190,6 +222,12 @@ public class BooleanMethodCallExprVisitor
 
         case Polygon: {
             final Polygon polygon = (Polygon) geometry;
+            System.out.println("Polygon coord: " + polygon.coordinates);
+            final Rectangle rect = tryMakeRectangle(factory, polygon.coordinates);
+            if (rect != null) {
+                return rect;
+            }
+
             final PolygonBuilder builder = factory.polygon();
             polygon.coordinates.get(0).stream().forEachOrdered(c -> builder.pointLatLon(c.latitude, c.longitude));
             return builder.buildOrRect();
@@ -215,22 +253,27 @@ public class BooleanMethodCallExprVisitor
 
         case MultiPolygon: {
             final MultiPolygon polygons = (MultiPolygon) geometry;
-            final MultiPolygonBuilder builder = factory.multiPolygon();
+            final MultiShapeBuilder<Shape> builder = factory.multiShape(Shape.class);
             for (List<List<Coordinates>> subPolygon : polygons.coordinates) {
-                final PolygonBuilder initBuilder = factory.polygon();
-                subPolygon.get(0).stream().forEachOrdered(c -> initBuilder.pointLatLon(c.latitude, c.longitude));
+                final Rectangle rect = tryMakeRectangle(factory, subPolygon);
+                if (rect != null) {
+                    builder.add(rect);
+                } else {
+                    final PolygonBuilder initBuilder = factory.polygon();
+                    subPolygon.get(0).stream().forEachOrdered(c -> initBuilder.pointLatLon(c.latitude, c.longitude));
 
-                PolygonBuilder subBuilder = initBuilder;
-                final List<List<Coordinates>> holes = new ArrayList<>(subPolygon);
-                holes.remove(0);
-                if (!holes.isEmpty()) {
-                    for (List<Coordinates> hole : holes) {
-                        final HoleBuilder holeBuilder = subBuilder.hole();
-                        hole.stream().forEachOrdered(c -> holeBuilder.pointLatLon(c.latitude, c.longitude));
-                        subBuilder = holeBuilder.endHole();
+                    PolygonBuilder subBuilder = initBuilder;
+                    final List<List<Coordinates>> holes = new ArrayList<>(subPolygon);
+                    holes.remove(0);
+                    if (!holes.isEmpty()) {
+                        for (List<Coordinates> hole : holes) {
+                            final HoleBuilder holeBuilder = subBuilder.hole();
+                            hole.stream().forEachOrdered(c -> holeBuilder.pointLatLon(c.latitude, c.longitude));
+                            subBuilder = holeBuilder.endHole();
+                        }
                     }
+                    builder.add(subBuilder.build());
                 }
-                builder.add(subBuilder);
             }
             return builder.build();
         }

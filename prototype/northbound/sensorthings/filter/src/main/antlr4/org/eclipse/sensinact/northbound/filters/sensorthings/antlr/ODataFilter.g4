@@ -793,9 +793,9 @@ positionliteral  : (int16value | doublevalue) rws (int16value | doublevalue);  /
 
 geographypolygon   : geographyprefix squote fullpolygonliteral squote;
 fullpolygonliteral : sridliteral? polygonliteral;
-polygonliteral     : ((CAP_P | P) (CAP_O | O) (CAP_L | L) (CAP_Y | Y) (CAP_G | G) (CAP_O | O) (CAP_N | N)) polygondata;
-polygondata        : open ringliteral ( comma ringliteral )* close;
-ringliteral        : open positionliteral ( comma positionliteral )* close;
+polygonliteral     : ((CAP_P | P) (CAP_O | O) (CAP_L | L) (CAP_Y | Y) (CAP_G | G) (CAP_O | O) (CAP_N | N)) bws polygondata;
+polygondata        : open bws ringliteral ( bws comma bws ringliteral )* bws  close;
+ringliteral        : open bws positionliteral ( bws comma bws positionliteral )* bws close;
                    // Within each ringLiteral, the first and last positionLiteral elements MUST be an exact syntactic match to each other.
                    // Within the polygonData, the ringLiterals MUST specify their points in appropriate winding order.
                    // In order of traversal, points to the left side of the ring are interpreted as being in the polygon.
