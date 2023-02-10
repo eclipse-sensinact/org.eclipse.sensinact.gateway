@@ -342,6 +342,10 @@ boolmethodcallexpr : endswithmethodcallexpr
                    | containsmethodcallexpr
                    | intersectsmethodcallexpr;
 
+distancemethodcallexpr   : (G E O PERIOD D I S T A N C E)   open bws commonexpr bws comma bws commonexpr bws close;
+geolengthmethodcallexpr  : (G E O PERIOD L E N G T H)     open bws commonexpr bws close;
+intersectsmethodcallexpr : (G E O PERIOD I N T E R S E C T S) open bws commonexpr bws comma bws commonexpr bws close;
+
 containsmethodcallexpr   : ((C O N T A I N S) | (S U B S T R I N G O F))   open bws commonexpr bws comma bws commonexpr bws close;
 startswithmethodcallexpr : (S T A R T S W I T H) open bws commonexpr bws comma bws commonexpr bws close;
 endswithmethodcallexpr   : (E N D S W I T H)   open bws commonexpr bws comma bws commonexpr bws close;
@@ -372,10 +376,6 @@ nowmethodcallexpr         : (N O W LEFT_PAREN) bws RIGHT_PAREN;
 roundmethodcallexpr   : (R O U N D)   open bws commonexpr bws close;
 floormethodcallexpr   : (F L O O R)   open bws commonexpr bws close;
 ceilingmethodcallexpr : (C E I L I N G) open bws commonexpr bws close;
-
-distancemethodcallexpr   : (G E O PERIOD D I S T A N C E)   open bws commonexpr bws comma bws commonexpr bws close;
-geolengthmethodcallexpr  : (G E O PERIOD L E N G T H)     open bws commonexpr bws close;
-intersectsmethodcallexpr : (G E O PERIOD I N T E R S E C T S) open bws commonexpr bws comma bws commonexpr bws close;
 
 boolparenexpr : open bws boolcommonexpr bws close;
 parenexpr     : open bws commonexpr     bws close;
@@ -749,8 +749,8 @@ geoliteral            : collectionliteral
                       | polygonliteral;
 
 geographylinestring   : geographyprefix squote fulllinestringliteral squote;
-fulllinestringliteral : sridliteral? linestringliteral;
-linestringliteral     : ((CAP_L | L) (CAP_I | I) (CAP_N | N) (CAP_E | E) (CAP_S | S) (CAP_T | T) (CAP_R | R) (CAP_I | I) (CAP_N | N) (CAP_G | G)) linestringdata;
+fulllinestringliteral : sridliteral? bws linestringliteral;
+linestringliteral     : ((CAP_L | L) (CAP_I | I) (CAP_N | N) (CAP_E | E) (CAP_S | S) (CAP_T | T) (CAP_R | R) (CAP_I | I) (CAP_N | N) (CAP_G | G)) bws linestringdata;
 linestringdata        : open bws positionliteral bws ( comma bws positionliteral bws )+ close;
 
 geographymultilinestring   : geographyprefix squote fullmultilinestringliteral squote;

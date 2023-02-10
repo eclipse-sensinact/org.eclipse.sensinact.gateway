@@ -106,8 +106,16 @@ public class PathUtils {
         case "description":
             return getResourceValue(provider, "admin", "description").orElse(provider.getName());
 
+        case "location":
+            return getResourceValue(provider, "admin", "location").orElse(null);
+
         default:
-            throw new UnsupportedRuleException("Unexpected provider level field: " + path);
+            final Optional<Object> value = getResourceValue(provider, "admin", path);
+            if (value.isPresent()) {
+                return value.get();
+            } else {
+                throw new UnsupportedRuleException("Unexpected provider level field: " + path);
+            }
         }
     }
 }

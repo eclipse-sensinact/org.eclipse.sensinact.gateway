@@ -143,13 +143,22 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                         } else if (rightValue instanceof AnyMatch) {
                             return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
                         } else {
-                            // Convert dates to Instant (to compare with resource timestamps)
-                            if (leftValue instanceof OffsetDateTime) {
-                                leftValue = ((OffsetDateTime) leftValue).toInstant();
+                            if (leftValue instanceof Number && rightValue instanceof Number) {
+                                // Ensure both sides are ints or doubles
+                                if (leftValue instanceof Double || rightValue instanceof Double) {
+                                    leftValue = ((Number) leftValue).doubleValue();
+                                    rightValue = ((Number) rightValue).doubleValue();
+                                }
+                            } else {
+                                // Convert dates to Instant (to compare with resource timestamps)
+                                if (leftValue instanceof OffsetDateTime) {
+                                    leftValue = ((OffsetDateTime) leftValue).toInstant();
+                                }
+                                if (rightValue instanceof OffsetDateTime) {
+                                    rightValue = ((OffsetDateTime) rightValue).toInstant();
+                                }
                             }
-                            if (rightValue instanceof OffsetDateTime) {
-                                rightValue = ((OffsetDateTime) rightValue).toInstant();
-                            }
+
                             try {
                                 return subPredicate.apply(leftValue, rightValue);
                             } catch (ClassCastException e) {

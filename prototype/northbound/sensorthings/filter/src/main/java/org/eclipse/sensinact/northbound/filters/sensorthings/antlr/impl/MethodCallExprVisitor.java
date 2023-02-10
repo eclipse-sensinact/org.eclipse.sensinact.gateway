@@ -19,6 +19,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -26,6 +28,7 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.LineString;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.CommonexprContext;
@@ -33,7 +36,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubstringmethodcallexprContext;
 import org.locationtech.spatial4j.context.SpatialContext;
 import org.locationtech.spatial4j.distance.DistanceCalculator;
-import org.locationtech.spatial4j.shape.Point;
+import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 
 /**
@@ -352,34 +355,51 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         return x -> {
             Object obj = exprFun.apply(x);
 
-            if (!(obj instanceof LineString)) {
-                throw new InvalidResultTypeException("Unsupported operand for \"" + ctx.getText() + "\"",
-                        "geographic LineString", obj);
+            final ShapeFactory shpFactory = spatialContext.getShapeFactory();
+            final List<org.locationtech.spatial4j.shape.Point> allPoints = new ArrayList<>();
+            if (obj instanceof LineString) {
+                final List<Coordinates> allCoordinates = ((LineString) obj).coordinates;
+                if (allCoordinates == null) {
+                    throw new InvalidResultTypeException("Null coordinates given to geo.length");
+                }
+                for (Coordinates coordinates : allCoordinates) {
+                    allPoints.add(shpFactory.pointLatLon(coordinates.latitude, coordinates.longitude));
+                }
             } else {
-                final LineString line = ((LineString) obj);
-                final ShapeFactory shpFactory = spatialContext.getShapeFactory();
-                final DistanceCalculator distCalc = spatialContext.getDistCalc();
+                throw new InvalidResultTypeException("Unsupported input for geo.length", "geography linestring", obj);
+            }
 
-                double length = 0;
-                Point previousPoint = null;
-                for (Coordinates coordinates : line.coordinates) {
-                    if (previousPoint == null) {
-                        previousPoint = shpFactory.pointLatLon(coordinates.latitude, coordinates.longitude);
-                        continue;
-                    }
-
-                    final Point nextPoint = shpFactory.pointLatLon(coordinates.latitude, coordinates.longitude);
-                    length += distCalc.distance(previousPoint, nextPoint);
+            final DistanceCalculator distCalc = spatialContext.getDistCalc();
+            double length = 0;
+            org.locationtech.spatial4j.shape.Point previousPoint = null;
+            for (org.locationtech.spatial4j.shape.Point nextPoint : allPoints) {
+                if (previousPoint == null) {
                     previousPoint = nextPoint;
+                    continue;
                 }
 
-                return length;
+                double arcLength = distCalc.distance(previousPoint, nextPoint);
+                double mLength = DistanceUtils.degrees2Dist(arcLength, DistanceUtils.EARTH_MEAN_RADIUS_KM * 1000);
+                length += mLength;
+                previousPoint = nextPoint;
             }
+            return length;
+
         };
+    }
+
+    private org.locationtech.spatial4j.shape.Point spatialPoint(final ShapeFactory shpFactory, final Point geoPoint) {
+        return spatialPoint(shpFactory, geoPoint.coordinates);
+    }
+
+    private org.locationtech.spatial4j.shape.Point spatialPoint(final ShapeFactory shpFactory,
+            final Coordinates geoCoords) {
+        return shpFactory.pointLatLon(geoCoords.latitude, geoCoords.longitude);
     }
 
     private Function<ResourceValueFilterInputHolder, Object> runGeoDistance(ParserRuleContext ctx) {
         final SpatialContext spatialContext = SpatialContext.GEO;
+        final ShapeFactory shpFactory = spatialContext.getShapeFactory();
 
         final CommonexprContext leftExpr = ctx.getChild(CommonexprContext.class, 0);
         final CommonexprContext rightExpr = ctx.getChild(CommonexprContext.class, 1);
@@ -398,7 +418,8 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
                 throw new InvalidResultTypeException("Unsupported right operand for \"" + ctx.getText() + "\"",
                         "geographic Point", right);
             } else {
-                return spatialContext.calcDistance((Point) left, (Point) right);
+                return spatialContext.calcDistance(spatialPoint(shpFactory, (Point) left),
+                        spatialPoint(shpFactory, (Point) right));
             }
         };
     }

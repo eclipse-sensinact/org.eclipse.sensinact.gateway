@@ -25,12 +25,12 @@ import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterLexer;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolcommonexprContext;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.CommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolCommonExprVisitor;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.GeoGeographyVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
@@ -74,16 +74,42 @@ public class OGCParserTest {
         assertQueries(expectations, null);
     }
 
+    private ResourceSnapshot makeLocatedResource(double[] lonlat) {
+        Point location = new Point();
+        location.coordinates = new Coordinates();
+        location.coordinates.longitude = lonlat[0];
+        location.coordinates.latitude = lonlat[1];
+
+        ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
+        ServiceSnapshot svc = RcUtils.addService(provider, "admin");
+        ResourceSnapshot rc = RcUtils.addResource(svc, "location", location);
+        return rc;
+    }
+
     @Test
     void testGeography() throws Exception {
-        ANTLRInputStream inStream = new ANTLRInputStream("geography'LINESTRING (30 10, 10 30, 40 40)'");
-        ODataFilterLexer markupLexer = new ODataFilterLexer(inStream);
-        CommonTokenStream commonTokenStream = new CommonTokenStream(markupLexer);
-        ODataFilterParser parser = new ODataFilterParser(commonTokenStream);
-        CommonexprContext ctx = parser.commonexpr();
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        // Length
+        expectations.put("floor(geo.length(geography'LINESTRING (30 10, 10 30, 40 40)')) eq 5973069", true);
+        expectations.put("geo.length(geography'LINESTRING (5.69773 45.12477, 5.72047 45.19225)') gt 7000", true);
+        expectations.put("geo.length(geography'LINESTRING (-0.4478 51.4649, 0.05523 51.5052)') lt 36000.0", true);
+        // Distance
+        expectations.put("geo.distance(geography'POINT(-0.4478 51.4649)', geography'POINT(0.05523 51.5052)') lt 36000",
+                true);
 
-        GeoGeographyVisitor v = new GeoGeographyVisitor(parser);
-        System.out.println(v.visit(ctx));
+        assertQueries(expectations);
+
+        // Compare SensiNact GeoJSON location
+        double[] outOfCircle = { 4.95444599, 47.1763052 };
+        double[] inCircle = { 4.9544520269, 47.176310264 };
+        ResourceSnapshot rc = makeLocatedResource(inCircle);
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
+                rc.getService().getProvider(), List.of(rc));
+        assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
+
+        rc = makeLocatedResource(outOfCircle);
+        holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, rc.getService().getProvider(), List.of(rc));
+        assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
     }
 
     @Test
