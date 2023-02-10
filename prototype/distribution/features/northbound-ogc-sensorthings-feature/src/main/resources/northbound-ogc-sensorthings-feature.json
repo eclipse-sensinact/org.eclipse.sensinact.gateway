@@ -4,6 +4,7 @@
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:dto:0.0.1-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.filters:filters.core:0.0.1-SNAPSHOT" },
     { "id": "org.antlr:antlr4-runtime:4.5" },
+    { "id": "org.locationtech.spatial4j:spatial4j:0.8" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:filter:0.0.1-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.api:0.0.1-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.gateway:0.0.1-SNAPSHOT" },
