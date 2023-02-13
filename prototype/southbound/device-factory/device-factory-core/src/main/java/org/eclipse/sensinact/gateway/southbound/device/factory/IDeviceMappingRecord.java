@@ -20,6 +20,4 @@ public interface IDeviceMappingRecord {
     Object getField(RecordPath field);
 
     String getFieldString(RecordPath field);
-
-    Integer getFieldInt(RecordPath field);
 }

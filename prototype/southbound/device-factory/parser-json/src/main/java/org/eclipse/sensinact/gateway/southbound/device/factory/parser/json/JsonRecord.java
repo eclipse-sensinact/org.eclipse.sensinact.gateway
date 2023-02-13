@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
+ * Device factory JSON record handler
  */
 public class JsonRecord implements IDeviceMappingRecord {
 
@@ -66,6 +67,9 @@ public class JsonRecord implements IDeviceMappingRecord {
         JsonNode current = root;
         for (RecordPath part : path.parts()) {
             current = getPath(current, part);
+            if (current == null) {
+                return null;
+            }
         }
         return current;
     }
@@ -74,7 +78,11 @@ public class JsonRecord implements IDeviceMappingRecord {
     public Object getField(RecordPath field) {
         final JsonNode node = walkPath(field);
         if (node == null || node.isNull()) {
-            return null;
+            if (field.hasDefaultValue()) {
+                return field.getDefaultValue();
+            } else {
+                return null;
+            }
         }
 
         if (node.isObject()) {
@@ -107,18 +115,15 @@ public class JsonRecord implements IDeviceMappingRecord {
     @Override
     public String getFieldString(RecordPath field) {
         final JsonNode node = walkPath(field);
-        if (node.isValueNode()) {
+        if (node != null && node.isValueNode()) {
             return node.asText();
         }
-        return null;
-    }
 
-    @Override
-    public Integer getFieldInt(RecordPath field) {
-        final JsonNode node = walkPath(field);
-        if (node.canConvertToInt()) {
-            return node.asInt();
+        if (field.hasDefaultValue()) {
+            final Object defaultValue = field.getDefaultValue();
+            return defaultValue != null ? String.valueOf(defaultValue) : null;
+        } else {
+            return null;
         }
-        return null;
     }
 }

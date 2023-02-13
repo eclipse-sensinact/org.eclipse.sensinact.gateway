@@ -1,0 +1,35 @@
+{
+  "parser": "csv",
+  "parser.options": {
+    "header": true
+  },
+  "mapping": {
+    "@provider": "Name",
+    "@latitude": {
+      "path": "Latitude",
+      "type": "float"
+    },
+    "@longitude": {
+      "path": "Longitude",
+      "type": "float"
+    },
+    "@date": "Date",
+    "@time": "Time",
+    "data/value": {
+      "path": "Value",
+      "type": "int"
+    },
+    "sensor/city": {
+      "literal": "Grenoble"
+    },
+    "sensor/street": {
+      "path": "Street",
+      "default": "n/a",
+      "type": "string"
+    }
+  },
+  "mapping.options": {
+    "format.date": "d.M.y",
+    "format.time": "H:m"
+  }
+}

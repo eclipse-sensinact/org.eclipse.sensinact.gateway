@@ -15,16 +15,26 @@ package org.eclipse.sensinact.gateway.southbound.device.factory.parser.csv;
 import org.apache.commons.csv.CSVRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Device factory CSV record handler
  */
 public class CsvRecord implements IDeviceMappingRecord {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * Current CSV record
      */
     private final CSVRecord record;
 
+    /**
+     * Sets up the CSV record
+     *
+     * @param record Current parsed CSV record
+     */
     public CsvRecord(final CSVRecord record) {
         this.record = record;
     }
@@ -32,31 +42,35 @@ public class CsvRecord implements IDeviceMappingRecord {
     /**
      * Returns the value of the CSV field
      *
-     * @param path
-     * @return
+     * @param path Record path
+     * @return Record value as a string (can be null)
      */
-    private String getValue(RecordPath path) {
-        if (path == null) {
-            return null;
-        } else if (path.isInt()) {
-            return this.record.get(path.asInt());
-        } else {
-            return this.record.get(path.asString());
+    private String getValue(final RecordPath path) {
+        try {
+            if (path.isInt()) {
+                return this.record.get(path.asInt());
+            } else {
+                return this.record.get(path.asString());
+            }
+        } catch (IllegalArgumentException e) {
+            // Couldn't parse value
+            if (path.hasDefaultValue()) {
+                final Object defaultValue = path.getDefaultValue();
+                return defaultValue != null ? String.valueOf(defaultValue) : null;
+            } else {
+                logger.warn("Error reading CSV record: {} (path: {})", e.getMessage(), path);
+                return null;
+            }
         }
     }
 
     @Override
-    public Object getField(RecordPath field) {
+    public Object getField(final RecordPath field) {
         return field.convertValue(getValue(field));
     }
 
     @Override
-    public String getFieldString(RecordPath field) {
+    public String getFieldString(final RecordPath field) {
         return getValue(field);
-    }
-
-    @Override
-    public Integer getFieldInt(RecordPath field) {
-        return Integer.valueOf(getValue(field));
     }
 }
