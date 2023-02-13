@@ -255,7 +255,7 @@ public interface SensiNactPackage extends EPackage {
 	int METADATA__SOURCE = 2;
 
 	/**
-	 * The feature id for the '<em><b>Extra</b></em>' reference list.
+	 * The feature id for the '<em><b>Extra</b></em>' containment reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -365,7 +365,7 @@ public interface SensiNactPackage extends EPackage {
 	int MODEL_METADATA__SOURCE = METADATA__SOURCE;
 
 	/**
-	 * The feature id for the '<em><b>Extra</b></em>' reference list.
+	 * The feature id for the '<em><b>Extra</b></em>' containment reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -616,10 +616,10 @@ public interface SensiNactPackage extends EPackage {
 	EReference getMetadata_Source();
 
 	/**
-	 * Returns the meta object for the reference list '{@link org.eclipse.sensinact.model.core.Metadata#getExtra <em>Extra</em>}'.
+	 * Returns the meta object for the containment reference list '{@link org.eclipse.sensinact.model.core.Metadata#getExtra <em>Extra</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the meta object for the reference list '<em>Extra</em>'.
+	 * @return the meta object for the containment reference list '<em>Extra</em>'.
 	 * @see org.eclipse.sensinact.model.core.Metadata#getExtra()
 	 * @see #getMetadata()
 	 * @generated

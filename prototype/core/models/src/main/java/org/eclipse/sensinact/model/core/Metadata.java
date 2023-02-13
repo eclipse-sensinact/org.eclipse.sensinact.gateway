@@ -107,13 +107,13 @@ public interface Metadata extends EObject {
 	void setSource(EObject value);
 
 	/**
-	 * Returns the value of the '<em><b>Extra</b></em>' reference list.
+	 * Returns the value of the '<em><b>Extra</b></em>' containment reference list.
 	 * The list contents are of type {@link org.eclipse.sensinact.model.core.FeatureCustomMetadata}.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Extra</em>' reference list.
+	 * @return the value of the '<em>Extra</em>' containment reference list.
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_Extra()
-	 * @model
+	 * @model containment="true"
 	 * @generated
 	 */
 	EList<FeatureCustomMetadata> getExtra();
