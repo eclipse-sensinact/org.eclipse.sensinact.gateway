@@ -23,10 +23,6 @@ import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 
-/**
- * @author thoma
- *
- */
 public class PathUtils {
 
     public static String timestampToString(Instant timestamp) {

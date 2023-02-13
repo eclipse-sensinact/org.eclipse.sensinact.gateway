@@ -34,10 +34,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.NeexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.OrexprContext;
 
-/**
- * @author thoma
- *
- */
 public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<ResourceValueFilterInputHolder>> {
 
     private final static double ESPILON = Math.pow(10, -6);

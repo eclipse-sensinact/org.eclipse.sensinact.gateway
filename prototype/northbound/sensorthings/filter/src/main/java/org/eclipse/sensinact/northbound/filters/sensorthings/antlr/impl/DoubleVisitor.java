@@ -17,10 +17,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.DecimalvalueContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.DoublevalueContext;
 
-/**
- * @author thoma
- *
- */
 public class DoubleVisitor extends ODataFilterBaseVisitor<Double> {
 
     private Double parseDouble(ParserRuleContext ctx) {

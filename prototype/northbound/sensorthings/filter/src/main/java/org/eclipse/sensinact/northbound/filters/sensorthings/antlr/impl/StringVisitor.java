@@ -17,10 +17,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.Squote_in_stringContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.String_1Context;
 
-/**
- * @author thoma
- *
- */
 public class StringVisitor extends ODataFilterBaseVisitor<String> {
 
     @Override

@@ -24,10 +24,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.DurationvalueContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.TimeofdayvalueContext;
 
-/**
- * @author thoma
- *
- */
 public class DateTimeVisitors {
 
     public static int parseInt(ParserRuleContext ctx) {

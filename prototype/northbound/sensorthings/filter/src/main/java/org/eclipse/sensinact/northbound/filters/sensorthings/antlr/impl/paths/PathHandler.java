@@ -19,10 +19,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.Unsuppor
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 
-/**
- * @author thoma
- *
- */
 public class PathHandler {
 
     private final String path;

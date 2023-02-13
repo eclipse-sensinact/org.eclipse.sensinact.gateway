@@ -20,10 +20,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.Int64valueContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SbytevalueContext;
 
-/**
- * @author thoma
- *
- */
 public class IntegerVisitor extends ODataFilterBaseVisitor<Integer> {
 
     private Integer parseInt(ParserRuleContext ctx) {

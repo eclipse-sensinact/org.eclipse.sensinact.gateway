@@ -16,10 +16,6 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-/**
- * @author thoma
- *
- */
 public class UnsupportedRuleException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
