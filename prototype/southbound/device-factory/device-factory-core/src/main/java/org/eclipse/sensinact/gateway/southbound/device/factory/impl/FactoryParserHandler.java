@@ -12,14 +12,17 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -619,6 +622,25 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
     }
 
     /**
+     * Parse the configured timezone, UTC by default
+     *
+     * @param dateTimezone Timezone from mapping configuration
+     * @return Parsed timezone or UTC
+     */
+    private ZoneId getTimezone(final String dateTimezone) {
+        if (dateTimezone == null || dateTimezone.isBlank()) {
+            return ZoneOffset.UTC;
+        } else {
+            try {
+                return ZoneId.of(dateTimezone);
+            } catch (DateTimeException e) {
+                logger.warn("Can't parse configured timezone '{}': {}", dateTimezone, e.getMessage());
+                return ZoneOffset.UTC;
+            }
+        }
+    }
+
+    /**
      * Looks for a time value in the given record
      *
      * @param record        Record to read
@@ -640,11 +662,13 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
             }
         }
 
+        final ZoneId timezone = getTimezone(configuration.mappingOptions.dateTimezone);
+
         final IResourceMapping dateTimePath = placeholders.get("@datetime");
         if (dateTimePath != null) {
             final String strDateTime = getFieldString(record, dateTimePath);
             if (strDateTime != null && !strDateTime.isBlank()) {
-                return parseDateTime(strDateTime, configuration.mappingOptions.formatDateTime);
+                return parseDateTime(strDateTime, timezone, configuration.mappingOptions.formatDateTime);
             }
         }
 
@@ -662,7 +686,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         if (timePath != null) {
             final String strTime = getFieldString(record, timePath);
             if (strTime != null && !strTime.isBlank()) {
-                time = parseTime(strTime, configuration.mappingOptions.formatTime);
+                time = parseTime(strTime, date, timezone, configuration.mappingOptions.formatTime);
             }
         }
 
@@ -673,9 +697,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
                 return LocalDate.now().atTime(time).toInstant();
             }
         } else if (time == null) {
-            return date.atStartOfDay(ZoneOffset.UTC).toInstant();
+            return date.atStartOfDay(timezone).toInstant();
         } else {
-            return date.atTime(time).toInstant();
+            return time.atDate(date).toInstant();
         }
     }
 
@@ -695,8 +719,13 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
 
     /**
      * Extract an {@link OffsetTime} from the given parsed time
+     *
+     * @param parsedTime   Parsed input
+     * @param expectedDate Date associated to the given time
+     * @param timezone     Fallback timezone
      */
-    private OffsetTime extractTime(final TemporalAccessor parsedTime) {
+    private OffsetTime extractTime(final TemporalAccessor parsedTime, final LocalDate expectedDate,
+            final ZoneId timezone) {
         final int hour = parsedTime.get(ChronoField.HOUR_OF_DAY);
 
         int minute;
@@ -716,8 +745,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         ZoneOffset offset;
         try {
             offset = ZoneOffset.ofTotalSeconds(parsedTime.get(ChronoField.OFFSET_SECONDS));
-        } catch (Exception e) {
-            offset = ZoneOffset.UTC;
+        } catch (UnsupportedTemporalTypeException e) {
+            if (expectedDate != null) {
+                offset = timezone.getRules().getOffset(expectedDate.atTime(hour, minute, second));
+            } else {
+                offset = timezone.getRules().getOffset(Instant.now());
+            }
         }
 
         return OffsetTime.of(hour, minute, second, 0, offset);
@@ -742,27 +775,29 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
     /**
      * Parses a time string
      *
-     * @param strTime    Date string
-     * @param formatDate Custom parsing format (can be null)
+     * @param strTime    Time string
+     * @param timezone   Fallback timezone
+     * @param formatTime Custom parsing format (can be null)
      * @return The parsed date
      */
-    private OffsetTime parseTime(String strTime, String formatDate) {
+    private OffsetTime parseTime(String strTime, LocalDate expectedDate, ZoneId timezone, String formatTime) {
         DateTimeFormatter format = DateTimeFormatter.ISO_OFFSET_TIME;
-        if (formatDate != null && !formatDate.isBlank()) {
-            format = DateTimeFormatter.ofPattern(formatDate);
+        if (formatTime != null && !formatTime.isBlank()) {
+            format = DateTimeFormatter.ofPattern(formatTime);
         }
 
-        return extractTime(format.parse(strTime));
+        return extractTime(format.parse(strTime), expectedDate, timezone);
     }
 
     /**
      * Parses a date/time string
      *
      * @param strDateTime    Date/time string
+     * @param timezone       Fallback timezone
      * @param formatDateTime Custom parsing format (can be null)
      * @return The parsed date as an instant
      */
-    private Instant parseDateTime(String strDateTime, String formatDateTime) {
+    private Instant parseDateTime(String strDateTime, ZoneId timezone, String formatDateTime) {
         DateTimeFormatter format = DateTimeFormatter.ISO_DATE_TIME;
         if (formatDateTime != null && !formatDateTime.isBlank()) {
             format = DateTimeFormatter.ofPattern(formatDateTime);
@@ -770,7 +805,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
 
         final TemporalAccessor parsedTime = format.parse(strDateTime);
         final LocalDate date = extractDate(parsedTime);
-        final OffsetTime offsetTime = extractTime(parsedTime);
+        final OffsetTime offsetTime = extractTime(parsedTime, date, timezone);
         final OffsetDateTime dateTime = OffsetDateTime.of(date, offsetTime.toLocalTime(), offsetTime.getOffset());
         return dateTime.toInstant();
     }

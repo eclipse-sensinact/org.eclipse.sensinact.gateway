@@ -27,4 +27,7 @@ public class DeviceMappingOptionsDTO {
 
     @JsonProperty("format.datetime")
     public String formatDateTime;
+
+    @JsonProperty("datetime.timezone")
+    public String dateTimezone;
 }
