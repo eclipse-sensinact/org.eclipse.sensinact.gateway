@@ -74,8 +74,7 @@ public class JsonRecord implements IDeviceMappingRecord {
         return current;
     }
 
-    @Override
-    public Object getField(RecordPath field) {
+    private Object getRawField(RecordPath field) {
         final JsonNode node = walkPath(field);
         if (node == null || node.isNull()) {
             if (field.hasDefaultValue()) {
@@ -110,6 +109,16 @@ public class JsonRecord implements IDeviceMappingRecord {
         default:
             return null;
         }
+    }
+
+    @Override
+    public Object getField(RecordPath field) {
+        final Object rawValue = getRawField(field);
+        if (rawValue == null) {
+            return null;
+        }
+
+        return field.convertValue(rawValue);
     }
 
     @Override
