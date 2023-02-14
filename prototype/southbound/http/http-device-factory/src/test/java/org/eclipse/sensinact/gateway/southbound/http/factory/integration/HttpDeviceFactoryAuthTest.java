@@ -169,8 +169,9 @@ public class HttpDeviceFactoryAuthTest {
                     "[{\"url\": \"http://localhost:" + httpPort + "/static\", \"mapping\": " + staticMappingConfig
                             + ", \"auth.user\": \"user1\", \"auth.password\": \"pass1\"}]",
                     "tasks.periodic",
-                    "[{\"period\": 2, \"url\": \"http://localhost:" + httpPort + "/dynamic\", \"mapping\": "
-                            + dynamicMappingConfig + ", \"auth.user\": \"user2\", \"auth.password\": \"pass2\"}]")));
+                    "[{\"period\": 2, \"period.unit\": \"SECONDS\", \"url\": \"http://localhost:" + httpPort
+                            + "/dynamic\", \"mapping\": " + dynamicMappingConfig
+                            + ", \"auth.user\": \"user2\", \"auth.password\": \"pass2\"}]")));
 
             // Wait for the provider to fully appear
             boolean gotLocation = false;
