@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.http.factory;
 
+import java.lang.reflect.Array;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -73,24 +74,21 @@ public class HttpDeviceFactory {
     @Activate
     void activate(final HttpDeviceFactoryConfiguration configuration) throws Exception {
         scheduledExecutor = new ScheduledThreadPoolExecutor(1);
-
         final ObjectMapper mapper = new ObjectMapper();
 
-        final String rawOneShotTasks = configuration.tasks_oneshot();
-        if (rawOneShotTasks != null && !rawOneShotTasks.isBlank()) {
-            final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks = mapper.readValue(rawOneShotTasks,
-                    HttpDeviceFactoryConfigurationTaskDTO[].class);
-            for (final HttpDeviceFactoryConfigurationTaskDTO task : oneShotTasks) {
+        final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks = loadTasks(mapper,
+                HttpDeviceFactoryConfigurationTaskDTO.class, configuration.tasks_oneshot());
+        if (oneShotTasks != null) {
+            for (HttpDeviceFactoryConfigurationTaskDTO task : oneShotTasks) {
                 runTask(new ParsedHttpTask(task));
             }
         }
 
-        final String rawPeriodicTasks = configuration.tasks_periodic();
-        if (rawPeriodicTasks != null) {
-            final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks = mapper.readValue(rawPeriodicTasks,
-                    HttpDeviceFactoryConfigurationPeriodicDTO[].class);
-            for (final HttpDeviceFactoryConfigurationPeriodicDTO rawTask : periodicTasks) {
-                runScheduledTask(new ParsedHttpPeriodicTask(rawTask));
+        final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks = loadTasks(mapper,
+                HttpDeviceFactoryConfigurationPeriodicDTO.class, configuration.tasks_periodic());
+        if (periodicTasks != null) {
+            for (HttpDeviceFactoryConfigurationPeriodicDTO task : periodicTasks) {
+                runScheduledTask(new ParsedHttpPeriodicTask(task));
             }
         }
     }
@@ -104,6 +102,40 @@ public class HttpDeviceFactory {
     void deactivate() throws Exception {
         scheduledExecutor.shutdownNow();
         scheduledExecutor = null;
+    }
+
+    /**
+     * Parses a JSON array from the configuration.
+     *
+     * ConfigurationAdmin will give an array with a single string containing the
+     * JSON array of tasks. Configurator will give an array of strings, each one
+     * being the JSON object of a tasks.
+     *
+     * @param <T>      Expected configuration type
+     * @param mapper   Object mapper
+     * @param type     Class of expected configuration type
+     * @param strTasks Configuration array
+     * @return Array of parsed tasks or null
+     * @throws Exception Error parsing configuration
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T[] loadTasks(final ObjectMapper mapper, final Class<T> type, final String[] strTasks)
+            throws Exception {
+        if (strTasks != null) {
+            if (strTasks.length == 1 && strTasks[0].startsWith("[")) {
+                // Single string of array
+                return (T[]) mapper.readValue(strTasks[0], Array.newInstance(type, 0).getClass());
+            } else {
+                // Strings of objects
+                final T[] result = (T[]) Array.newInstance(type, strTasks.length);
+                int i = 0;
+                for (String rawPeriodicTask : strTasks) {
+                    result[i++] = mapper.readValue(rawPeriodicTask, type);
+                }
+                return result;
+            }
+        }
+        return null;
     }
 
     /**
