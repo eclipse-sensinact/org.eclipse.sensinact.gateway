@@ -15,7 +15,7 @@ trim_trailing_whitespace = true
 [*.{xml,json,jj}]
 indent_size = 2
 
-[*.md]
+[*.{md,g4}]
 trim_trailing_whitespace = false
 indent_size = 1
 

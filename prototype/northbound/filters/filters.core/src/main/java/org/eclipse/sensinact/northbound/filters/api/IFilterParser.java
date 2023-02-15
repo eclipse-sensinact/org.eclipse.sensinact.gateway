@@ -12,6 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.api;
 
+import java.util.Map;
+
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
+
 /**
  * Specification of a filter parser
  */
@@ -30,7 +34,20 @@ public interface IFilterParser {
      * @throws FilterParserException Error parsing filter
      */
     default ICriterion parseFilter(final String query) throws FilterParserException {
-        return parseFilter(query, null);
+        return parseFilter(query, null, Map.of());
+    }
+
+    /**
+     * Parses the given filter string
+     *
+     * @param query      Filter string
+     * @param parameters Parser parameters
+     * @return Parsed filter (can be null if the filter has no effect)
+     * @throws FilterParserException Error parsing filter
+     */
+    default ICriterion parseFilter(final String query, final Map<String, Object> parameters)
+            throws FilterParserException {
+        return parseFilter(query, null, parameters);
     }
 
     /**
@@ -38,8 +55,10 @@ public interface IFilterParser {
      *
      * @param query         Filter string
      * @param queryLanguage Filter string language (null if unknown)
+     * @param parameters    Parser parameters
      * @return Parsed filter (can be null if the filter has no effect)
      * @throws FilterParserException Error parsing filter
      */
-    ICriterion parseFilter(final String query, final String queryLanguage) throws FilterParserException;
+    ICriterion parseFilter(final String query, final String queryLanguage, final Map<String, Object> parameters)
+            throws FilterParserException;
 }

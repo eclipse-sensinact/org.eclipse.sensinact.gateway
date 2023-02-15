@@ -14,8 +14,13 @@
 package org.eclipse.sensinact.prototype.impl.snapshot;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -33,9 +38,14 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
     private final ServiceSnapshotImpl service;
 
     /**
-     * Service feature
+     * Resource feature
      */
     private final EStructuralFeature rcFeature;
+
+    /**
+     * Resource metadata
+     */
+    private final Map<String, Object> metadata;
 
     /**
      * Resource content type
@@ -48,6 +58,18 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         this.service = parent;
         this.rcFeature = rcFeature;
         this.type = rcFeature.getEType().getInstanceClass();
+
+        final Metadata rcMetadata = parent.getModelService().getMetadata().get(rcFeature);
+        if (rcMetadata == null) {
+            this.metadata = Map.of();
+        } else {
+            final Map<String, Object> rcMeta = new HashMap<>();
+            for (FeatureCustomMetadata entry : rcMetadata.getExtra()) {
+                rcMeta.put(entry.getName(), entry.getValue());
+            }
+            rcMeta.putAll(EMFUtil.toEObjectAttributesToMap(rcMetadata));
+            this.metadata = Map.copyOf(rcMeta);
+        }
     }
 
     @Override
@@ -59,6 +81,11 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
 
     public ServiceSnapshotImpl getService() {
         return service;
+    }
+
+    @Override
+    public Map<String, Object> getMetadata() {
+        return metadata;
     }
 
     public TimedValue<?> getValue() {

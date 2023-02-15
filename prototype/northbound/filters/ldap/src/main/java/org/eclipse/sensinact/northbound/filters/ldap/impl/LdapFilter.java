@@ -18,8 +18,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.northbound.filters.api.ResourceValueFilter;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 
 /**
  * Combination filter (AND or OR)

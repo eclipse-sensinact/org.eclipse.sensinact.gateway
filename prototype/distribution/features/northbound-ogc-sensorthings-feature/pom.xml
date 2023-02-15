@@ -12,13 +12,36 @@
   <packaging>pom</packaging>
 
   <properties>
+    <antlr.version>4.5</antlr.version>
+    <spatial4j.version>0.8</spatial4j.version>
+    <filters.version>0.0.1-SNAPSHOT</filters.version>
     <sensorthings.version>0.0.1-SNAPSHOT</sensorthings.version>
   </properties>
 
   <dependencies>
     <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>${antlr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.locationtech.spatial4j</groupId>
+      <artifactId>spatial4j</artifactId>
+      <version>${spatial4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+      <artifactId>filters.core</artifactId>
+      <version>${filters.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>dto</artifactId>
+      <version>${sensorthings.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
+      <artifactId>filter</artifactId>
       <version>${sensorthings.version}</version>
     </dependency>
     <dependency>

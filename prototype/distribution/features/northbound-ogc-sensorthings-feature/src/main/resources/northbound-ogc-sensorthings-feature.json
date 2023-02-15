@@ -2,6 +2,10 @@
   "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-ogc-sensorthings-feature:osgifeature:0.0.1-SNAPSHOT",
   "bundles":[
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:dto:0.0.1-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.filters:filters.core:0.0.1-SNAPSHOT" },
+    { "id": "org.antlr:antlr4-runtime:4.5" },
+    { "id": "org.locationtech.spatial4j:spatial4j:0.8" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:filter:0.0.1-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.api:0.0.1-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.gateway:0.0.1-SNAPSHOT" },
     { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0" },

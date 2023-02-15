@@ -10,17 +10,24 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.api;
+package org.eclipse.sensinact.prototype.snapshot;
 
 import java.util.function.Predicate;
 
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 /**
  * Provides the various parts of a parsed filter
  */
 public interface ICriterion {
+
+    /**
+     * Early provider predicate executed during the snapshot. Only the location of
+     * the provider are available when the predicate is called.
+     * <p>
+     * This predicate is executed in the gateway thread.
+     */
+    Predicate<GeoJsonObject> getLocationFilter();
 
     /**
      * Early provider predicate executed during the snapshot. Only the model and
@@ -29,6 +36,15 @@ public interface ICriterion {
      * This predicate is executed in the gateway thread.
      */
     Predicate<ProviderSnapshot> getProviderFilter();
+
+    /**
+     * Early service filter executed during the snapshot. The resources of the
+     * service are not available when the predicate is called. Useful to filter out
+     * unwanted services by name.
+     * <p>
+     * This predicate is executed in the gateway thread.
+     */
+    Predicate<ServiceSnapshot> getServiceFilter();
 
     /**
      * Early resource filter executed during the snapshot. The value of the resource

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,13 +15,15 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 import static jakarta.ws.rs.Priorities.ENTITY_CODER;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -29,22 +31,20 @@ import jakarta.ws.rs.core.Response.Status;
  * Implements handling (in this case rejection of) the $filter parameter
  */
 @Priority(ENTITY_CODER + 5)
-public class FilterFilter implements ContainerRequestFilter, ContainerResponseFilter {
-
-    @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
-            throws IOException {
-        // TODO filter the returned results
-    }
+public class FilterFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-
         List<String> list = requestContext.getUriInfo().getQueryParameters().getOrDefault("$filter", List.of());
-        if (!list.isEmpty()) {
+        int nbFilters = list.size();
+        if (nbFilters == 1) {
+            // Store the decoded filter
+            final String filter = URLDecoder.decode(list.get(0), StandardCharsets.UTF_8);
+            requestContext.setProperty(IFilterConstants.PROP_FILTER_STRING, filter);
+        } else if (nbFilters > 1) {
             requestContext.abortWith(Response
-                    .status(Status.NOT_IMPLEMENTED)
-                    .entity("Filtering is not implemented yet")
+                    .status(Status.BAD_REQUEST)
+                    .entity("Only one filter can be given at a time")
                     .build());
         }
     }

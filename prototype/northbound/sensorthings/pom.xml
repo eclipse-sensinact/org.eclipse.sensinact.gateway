@@ -24,6 +24,7 @@
 
   <modules>
     <module>dto</module>
+    <module>filter</module>
     <module>rest.api</module>
     <module>rest.gateway</module>
   </modules>
@@ -42,6 +43,11 @@
       <dependency>
         <groupId>org.eclipse.sensinact.gateway.core</groupId>
         <artifactId>geo-json</artifactId>
+        <version>${sensinact.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+        <artifactId>filters.core</artifactId>
         <version>${sensinact.core.version}</version>
       </dependency>
       <dependency>

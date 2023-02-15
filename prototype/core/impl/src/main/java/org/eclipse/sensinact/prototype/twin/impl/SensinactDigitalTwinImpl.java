@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -232,7 +231,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     }
 
     @Override
-    public Collection<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
+    public List<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter) {
 
@@ -285,7 +284,6 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                     // Get the resource metadata
                     final Service svc = rc.getService().getModelService();
                     final EStructuralFeature rcFeature = rc.getFeature();
-                    final Class<?> type = rc.getType();
 
                     final Metadata metadata = svc.getMetadata().get(rcFeature);
                     final Instant timestamp;
@@ -295,21 +293,12 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                         timestamp = null;
                     }
 
-                    // Check value type
-                    final Object rawValue = svc.eGet(rcFeature);
-                    if (rawValue == null) {
-                        rc.setValue(new TimedValueImpl<Object>(null, timestamp));
-                    } else if (type.isAssignableFrom(rawValue.getClass())) {
-                        rc.setValue(new TimedValueImpl<Object>(type.cast(rawValue), timestamp));
-                    }
+                    rc.setValue(new TimedValueImpl<Object>(svc.eGet(rcFeature), timestamp));
                 });
-                s.filterNullValues();
             });
             p.filterEmptyServices();
             return p;
         });
-        // Filter out providers which only have the admin service
-        providersStream = providersStream.filter(p -> p.getServices().size() >= 1);
 
         return providersStream.collect(Collectors.toList());
     }

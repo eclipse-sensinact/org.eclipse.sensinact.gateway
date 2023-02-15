@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.sensinact.northbound.filters.api.FilterCommandHelper;
-import org.eclipse.sensinact.northbound.filters.api.ICriterion;
 import org.eclipse.sensinact.northbound.filters.api.IFilterHandler;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
+import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
