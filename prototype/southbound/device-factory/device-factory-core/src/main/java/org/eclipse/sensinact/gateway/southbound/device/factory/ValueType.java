@@ -13,29 +13,51 @@
 package org.eclipse.sensinact.gateway.southbound.device.factory;
 
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum ValueType {
     /**
      * Represent available types
      */
     AS_IS("any", null),
-    STRING("string", String::valueOf),
-    INT("int", (v) -> Integer.valueOf(String.valueOf(v))),
-    LONG("long", (v) -> Long.valueOf(String.valueOf(v))),
-    FLOAT("float", (v) -> Float.valueOf(String.valueOf(v))),
-    DOUBLE("double", (v) -> Double.valueOf(String.valueOf(v))),
-    STRING_ARRAY("string[]", (v) -> asList(v, STRING.converter)),
-    INT_ARRAY("int[]", (v) -> asList(v, INT.converter)),
-    LONG_ARRAY("long[]", (v) -> asList(v, LONG.converter)),
-    FLOAT_ARRAY("float[]", (v) -> asList(v, FLOAT.converter)),
-    DOUBLE_ARRAY("double[]", (v) -> asList(v, DOUBLE.converter));
+    STRING("string", (v, o) -> String.valueOf(v)),
+    INT("int", (v, o) -> {
+        final Number parsed = parseNumber(v, true, o);
+        return parsed != null ? parsed.intValue() : null;
+    }),
+    LONG("long", (v, o) -> {
+        final Number parsed = parseNumber(v, true, o);
+        return parsed != null ? parsed.longValue() : null;
+    }),
+    FLOAT("float", (v, o) -> {
+        final Number parsed = parseNumber(v, false, o);
+        return parsed != null ? parsed.floatValue() : null;
+    }),
+    DOUBLE("double", (v, o) -> {
+        final Number parsed = parseNumber(v, false, o);
+        return parsed != null ? parsed.doubleValue() : null;
+    }),
+    STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING.converter)),
+    INT_ARRAY("int[]", (v, o) -> asList(v, o, INT.converter)),
+    LONG_ARRAY("long[]", (v, o) -> asList(v, o, LONG.converter)),
+    FLOAT_ARRAY("float[]", (v, o) -> asList(v, o, FLOAT.converter)),
+    DOUBLE_ARRAY("double[]", (v, o) -> asList(v, o, DOUBLE.converter));
+
+    private static final Logger logger = LoggerFactory.getLogger(ValueType.class);
 
     /**
      * String representation
@@ -45,14 +67,92 @@ public enum ValueType {
     /**
      * Converter function
      */
-    private final Function<Object, Object> converter;
+    private final BiFunction<Object, DeviceMappingOptionsDTO, Object> converter;
+
+    /**
+     * Try to find the number format matching the given locale
+     *
+     * @param options Mapping options
+     * @return The number format for the given locale or null
+     */
+    private static NumberFormat getNumberFormat(final DeviceMappingOptionsDTO options, boolean integers) {
+        final String strLocale = options.numbersLocale;
+        if (strLocale == null || strLocale.isBlank()) {
+            return null;
+        }
+
+        final String[] parts = strLocale.split("_");
+        final Locale locale;
+        switch (parts.length) {
+        case 1:
+            locale = new Locale(parts[0]);
+            break;
+
+        case 2:
+            locale = new Locale(parts[0], parts[1]);
+            break;
+
+        case 3:
+            locale = new Locale(parts[0], parts[1], parts[2]);
+            break;
+
+        default:
+            logger.warn("Unhandled number locale {}", strLocale);
+            return null;
+        }
+
+        if (integers) {
+            return NumberFormat.getIntegerInstance(locale);
+        } else {
+            return NumberFormat.getNumberInstance(locale);
+        }
+    }
+
+    /**
+     * Parses an number
+     *
+     * @param value   Object value
+     * @param options Mapping options (can define a locale)
+     * @return The parsed long
+     * @throws NumberFormatException Error parsing long
+     */
+    private static Number parseNumber(final Object value, final boolean expectInteger,
+            final DeviceMappingOptionsDTO options) {
+        if (value == null) {
+            return null;
+        }
+
+        String strValue = String.valueOf(value).trim();
+        if (strValue.isEmpty()) {
+            return null;
+        }
+
+        final NumberFormat format = getNumberFormat(options, expectInteger);
+        if (format instanceof DecimalFormat) {
+            final DecimalFormat decimalFormat = (DecimalFormat) format;
+            strValue = strValue.replace("-", decimalFormat.getNegativePrefix());
+            strValue = strValue.replace("+", decimalFormat.getPositivePrefix());
+        }
+
+        if (format != null) {
+            try {
+                return format.parse(strValue);
+            } catch (ParseException e) {
+                throw new NumberFormatException(String.format("Error parsing number '%s': %s", value, e.getMessage()));
+            }
+        } else if (expectInteger) {
+            return Long.parseLong(strValue);
+        } else {
+            return Double.parseDouble(strValue);
+        }
+    }
 
     /**
      * Sets up the custom enumeration
      *
      * @param strRepr
      */
-    ValueType(final String strRepr, final Function<Object, Object> converter) {
+    ValueType(final String strRepr, final BiFunction<Object, DeviceMappingOptionsDTO, Object> converter) {
         this.repr = strRepr;
         this.converter = converter;
     }
@@ -65,16 +165,17 @@ public enum ValueType {
     /**
      * Converts the given object to the right value type
      *
-     * @param value Input value
+     * @param value   Input value
+     * @param options Mapping options
      * @return Converted value
      */
-    public Object convert(final Object value) {
+    public Object convert(final Object value, final DeviceMappingOptionsDTO options) {
         if (value == null) {
             return null;
         } else if (converter == null) {
             return value;
         } else {
-            return converter.apply(value);
+            return converter.apply(value, options);
         }
     }
 
@@ -82,10 +183,12 @@ public enum ValueType {
      * Converts input value to a list
      *
      * @param value         Input value
+     * @param options       Mapping options
      * @param itemConverter Input array item converter
      * @return The converted list
      */
-    private static Object asList(Object value, final Function<Object, Object> itemConverter) {
+    private static Object asList(Object value, DeviceMappingOptionsDTO options,
+            final BiFunction<Object, DeviceMappingOptionsDTO, Object> itemConverter) {
         Stream<?> stream;
         if (value instanceof String) {
             stream = Arrays.stream(((String) value).split(";|,"));
@@ -101,10 +204,10 @@ public enum ValueType {
             stream = arrayAsList.stream();
         } else {
             // Maybe a single item
-            return List.of(itemConverter.apply(value));
+            return List.of(itemConverter.apply(value, options));
         }
 
-        return stream.map(itemConverter).collect(Collectors.toList());
+        return stream.map(v -> itemConverter.apply(v, options)).collect(Collectors.toList());
     }
 
     /**

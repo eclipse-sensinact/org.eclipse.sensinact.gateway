@@ -55,6 +55,7 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.ResourceRecordMap
 import org.eclipse.sensinact.gateway.southbound.device.factory.VariableNotFoundException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.VariableSolver;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
@@ -206,15 +207,17 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      *
      * @param record  Current record
      * @param mapping Resource mapping
+     * @param options Device mapping options
      * @return The value as a string (can be null)
      */
-    private String getFieldString(final IDeviceMappingRecord record, final IResourceMapping mapping) {
+    private String getFieldString(final IDeviceMappingRecord record, final IResourceMapping mapping,
+            final DeviceMappingOptionsDTO options) {
         if (mapping.isLiteral()) {
             final Object value = ((ResourceLiteralMapping) mapping).getValue();
             return value != null ? String.valueOf(value) : null;
         } else {
             final RecordPath path = ((ResourceRecordMapping) mapping).getRecordPath();
-            return record.getFieldString(path);
+            return record.getFieldString(path, options);
         }
     }
 
@@ -223,14 +226,16 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      *
      * @param record  Current record
      * @param mapping Resource mapping
+     * @param options Device mapping options
      * @return The value as is (can be null)
      */
-    private Object getFieldValue(final IDeviceMappingRecord record, final IResourceMapping mapping) {
+    private Object getFieldValue(final IDeviceMappingRecord record, final IResourceMapping mapping,
+            final DeviceMappingOptionsDTO options) {
         if (mapping.isLiteral()) {
             return ((ResourceLiteralMapping) mapping).getValue();
         } else {
             final RecordPath path = ((ResourceRecordMapping) mapping).getRecordPath();
-            return record.getField(path);
+            return record.getField(path, options);
         }
     }
 
@@ -249,10 +254,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final IDeviceMappingRecord record) throws InvalidResourcePathException, ParserException,
             VariableNotFoundException, JsonMappingException, JsonProcessingException {
 
+        final DeviceMappingOptionsDTO options = configuration.mappingOptions;
         final RecordState recordState = computeRecordState(configuration, globalState, record);
 
         // Extract the provider
-        final String rawProvider = getFieldString(record, recordState.placeholders.get(KEY_PROVIDER));
+        final String rawProvider = getFieldString(record, recordState.placeholders.get(KEY_PROVIDER), options);
         if (rawProvider == null || rawProvider.isBlank()) {
             return Promises.failed(new IllegalArgumentException("Empty provider field."));
         }
@@ -268,7 +274,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Get the friendly name
         final IResourceMapping nameKey = recordState.placeholders.get(KEY_NAME);
         if (nameKey != null) {
-            final String name = getFieldString(record, nameKey);
+            final String name = getFieldString(record, nameKey, options);
             if (name != null) {
                 bulk.dtos.add(makeDto(provider, "admin", "friendlyName", name, timestamp));
             }
@@ -277,7 +283,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Compute location, if any
         final GeoJsonObject location;
         try {
-            location = computeLocation(record, recordState.placeholders);
+            location = computeLocation(record, recordState.placeholders, configuration.mappingOptions);
             if (location != null) {
                 bulk.dtos.add(makeDto(provider, "admin", "location", location, timestamp));
             }
@@ -289,11 +295,15 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         for (final ResourceRecordMapping rcMapping : recordState.rcMappings) {
             final String service = rcMapping.getService();
             final String rcName = rcMapping.getResource();
-            final Object value = record.getField(rcMapping.getRecordPath());
-            if (rcMapping.isMetadata()) {
-                logger.warn("Metadata update not supported.");
-            } else {
-                bulk.dtos.add(makeDto(provider, service, rcName, value, timestamp));
+            try {
+                final Object value = record.getField(rcMapping.getRecordPath(), options);
+                if (rcMapping.isMetadata()) {
+                    logger.warn("Metadata update not supported.");
+                } else {
+                    bulk.dtos.add(makeDto(provider, service, rcName, value, timestamp));
+                }
+            } catch (Exception e) {
+                logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
             }
         }
 
@@ -301,11 +311,15 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         for (final ResourceLiteralMapping rcLiteral : recordState.rcLiterals) {
             final String service = rcLiteral.getService();
             final String rcName = rcLiteral.getResource();
-            final Object value = rcLiteral.getValue();
-            if (rcLiteral.isMetadata()) {
-                logger.warn("Metadata update not supported.");
-            } else {
-                bulk.dtos.add(makeDto(provider, service, rcName, value, timestamp));
+            try {
+                final Object value = rcLiteral.getValue();
+                if (rcLiteral.isMetadata()) {
+                    logger.warn("Metadata update not supported.");
+                } else {
+                    bulk.dtos.add(makeDto(provider, service, rcName, value, timestamp));
+                }
+            } catch (Exception e) {
+                logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
             }
         }
 
@@ -449,6 +463,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final IDeviceMappingRecord record, final Map<String, IResourceMapping> rawVariables)
             throws ParserException {
 
+        final DeviceMappingOptionsDTO options = configuration.mappingOptions;
+
         Set<String> previouslyRemaining = new HashSet<>();
         final Set<String> remainingVars = new HashSet<>(rawVariables.keySet());
         final Map<String, String> resolvedVars = new HashMap<>();
@@ -492,7 +508,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                         } while (matcher.find());
                     } else {
                         // Direct field access
-                        resolvedVars.put(varName, getFieldString(record, mapping));
+                        resolvedVars.put(varName, getFieldString(record, mapping, options));
                         resolved.add(varName);
                     }
                 }
@@ -509,14 +525,17 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      *
      * @param record       Record to read
      * @param placeholders Defined mapping placeholders
+     * @param options      Mapping options
      * @return The parsed location as a GeoJSON string or null
      * @throws JsonProcessingException Error parsing GeoJSON
      */
     private GeoJsonObject computeLocation(final IDeviceMappingRecord record,
-            final Map<String, IResourceMapping> placeholders) throws JsonProcessingException {
+            final Map<String, IResourceMapping> placeholders, final DeviceMappingOptionsDTO options)
+            throws JsonProcessingException {
+
         final IResourceMapping locationPath = placeholders.get(KEY_LOCATION);
         if (locationPath != null) {
-            final Object locationValue = getFieldValue(record, locationPath);
+            final Object locationValue = getFieldValue(record, locationPath, options);
             if (locationValue != null) {
                 if (locationValue instanceof String) {
                     final String strLocation = (String) locationValue;
@@ -545,13 +564,13 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             return null;
         }
 
-        final Object latitude = getFieldValue(record, latitudePath);
-        final Object longitude = getFieldValue(record, longitudePath);
+        final Object latitude = getFieldValue(record, latitudePath, options);
+        final Object longitude = getFieldValue(record, longitudePath, options);
         Object altitude = null;
 
         final IResourceMapping altitudePath = placeholders.get(KEY_ALTITUDE);
         if (altitudePath != null) {
-            altitude = getFieldValue(record, altitudePath);
+            altitude = getFieldValue(record, altitudePath, options);
         }
 
         return makeLocation(latitude, longitude, altitude);
@@ -653,12 +672,14 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * @param configuration Mapping configuration
      * @return The parsed timestamp or the current time
      */
-    private Instant computeTimestamp(IDeviceMappingRecord record, Map<String, IResourceMapping> placeholders,
-            DeviceMappingConfigurationDTO configuration) {
+    private Instant computeTimestamp(final IDeviceMappingRecord record,
+            final Map<String, IResourceMapping> placeholders, final DeviceMappingConfigurationDTO configuration) {
+
+        final DeviceMappingOptionsDTO options = configuration.mappingOptions;
 
         final IResourceMapping timestampPath = placeholders.get(KEY_TIMESTAMP);
         if (timestampPath != null) {
-            final Long timestamp = toLong(getFieldValue(record, timestampPath));
+            final Long timestamp = toLong(getFieldValue(record, timestampPath, options));
             if (timestamp != null) {
                 final Instant parsed = convertTimestamp(timestamp);
                 if (parsed != null) {
@@ -671,7 +692,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
 
         final IResourceMapping dateTimePath = placeholders.get(KEY_DATETIME);
         if (dateTimePath != null) {
-            final String strDateTime = getFieldString(record, dateTimePath);
+            final String strDateTime = getFieldString(record, dateTimePath, options);
             if (strDateTime != null && !strDateTime.isBlank()) {
                 return parseDateTime(strDateTime, timezone, configuration.mappingOptions.formatDateTime);
             }
@@ -680,7 +701,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         LocalDate date = null;
         final IResourceMapping datePath = placeholders.get(KEY_DATE);
         if (datePath != null) {
-            final String strDate = getFieldString(record, datePath);
+            final String strDate = getFieldString(record, datePath, options);
             if (strDate != null && !strDate.isBlank()) {
                 date = parseDate(strDate, configuration.mappingOptions.formatDate);
             }
@@ -689,7 +710,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         OffsetTime time = null;
         final IResourceMapping timePath = placeholders.get(KEY_TIME);
         if (timePath != null) {
-            final String strTime = getFieldString(record, timePath);
+            final String strTime = getFieldString(record, timePath, options);
             if (strTime != null && !strTime.isBlank()) {
                 time = parseTime(strTime, date, timezone, configuration.mappingOptions.formatTime);
             }

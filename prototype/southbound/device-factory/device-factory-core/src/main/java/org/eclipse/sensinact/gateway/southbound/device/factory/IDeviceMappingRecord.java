@@ -12,12 +12,28 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory;
 
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
+
 /**
  * Represents an entry in a parsed device mapping input
  */
 public interface IDeviceMappingRecord {
 
-    Object getField(RecordPath field);
+    /**
+     * Returns the field value, converted in the expected type
+     *
+     * @param field   Field path
+     * @param options Mapping options
+     * @return The field value, in the expected type
+     */
+    Object getField(final RecordPath field, final DeviceMappingOptionsDTO options);
 
-    String getFieldString(RecordPath field);
+    /**
+     * Returns the field value as a string
+     *
+     * @param field   Field path
+     * @param options Mapping options
+     * @return The field value as a string
+     */
+    String getFieldString(final RecordPath field, final DeviceMappingOptionsDTO options);
 }

@@ -15,6 +15,7 @@ package org.eclipse.sensinact.gateway.southbound.device.factory.parser.csv;
 import org.apache.commons.csv.CSVRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,12 +66,12 @@ public class CsvRecord implements IDeviceMappingRecord {
     }
 
     @Override
-    public Object getField(final RecordPath field) {
-        return field.convertValue(getValue(field));
+    public Object getField(final RecordPath field, final DeviceMappingOptionsDTO options) {
+        return field.convertValue(getValue(field), options);
     }
 
     @Override
-    public String getFieldString(final RecordPath field) {
+    public String getFieldString(final RecordPath field, final DeviceMappingOptionsDTO options) {
         return getValue(field);
     }
 }

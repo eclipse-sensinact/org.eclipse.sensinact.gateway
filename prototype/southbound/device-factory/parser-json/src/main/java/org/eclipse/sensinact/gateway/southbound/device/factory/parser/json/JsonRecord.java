@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -112,17 +113,17 @@ public class JsonRecord implements IDeviceMappingRecord {
     }
 
     @Override
-    public Object getField(RecordPath field) {
+    public Object getField(RecordPath field, final DeviceMappingOptionsDTO options) {
         final Object rawValue = getRawField(field);
         if (rawValue == null) {
             return null;
         }
 
-        return field.convertValue(rawValue);
+        return field.convertValue(rawValue, options);
     }
 
     @Override
-    public String getFieldString(RecordPath field) {
+    public String getFieldString(RecordPath field, final DeviceMappingOptionsDTO options) {
         final JsonNode node = walkPath(field);
         if (node != null && node.isValueNode()) {
             return node.asText();

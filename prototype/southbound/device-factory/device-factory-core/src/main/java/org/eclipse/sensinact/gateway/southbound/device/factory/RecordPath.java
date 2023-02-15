@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
+
 /**
  * Represents a record path
  */
@@ -220,12 +222,13 @@ public class RecordPath {
     /**
      * Converts the given path value to the excepted type
      *
-     * @param value Value to convert
+     * @param value   Value to convert
+     * @param options Mapping options
      * @return The read value in the excepted type
      * @throws ClassCastException Couldn't convert to the excepted type
      */
-    public Object convertValue(Object value) throws ClassCastException {
-        return valueType.convert(value);
+    public Object convertValue(final Object value, final DeviceMappingOptionsDTO options) throws ClassCastException {
+        return valueType.convert(value, options);
     }
 
     @Override

@@ -30,4 +30,7 @@ public class DeviceMappingOptionsDTO {
 
     @JsonProperty("datetime.timezone")
     public String dateTimezone;
+
+    @JsonProperty("numbers.locale")
+    public String numbersLocale;
 }
