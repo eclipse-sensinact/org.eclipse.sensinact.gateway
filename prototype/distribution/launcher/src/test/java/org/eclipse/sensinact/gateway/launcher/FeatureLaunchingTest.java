@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.sensinact.gateway.launcher;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -23,7 +24,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -495,6 +499,29 @@ class FeatureLaunchingTest {
             expectedConfs = Map.of("test-only2", new Hashtable<>(Map.of("test", "Only2", "value", 15)), "test-fixed",
                     new Hashtable<>(Map.of("test", "Override", "value", 451)));
             order.verify(manager).updateConfigurations(argThat(new MapConfigArgumentMatcher(expectedConfs)), eq(null));
+        }
+
+        @Test
+        void testPathUserInjection() throws Exception {
+            final Path targetPath = Paths.get(System.getProperty("user.home"), "test");
+            assertEquals(targetPath, fl.getPath(targetPath.toString()));
+            assertEquals(targetPath, fl.getPath("~/test"));
+        }
+
+        @Test
+        void testPathVariablesInjections() throws Exception {
+            final Path targetPath = Paths.get(System.getProperty("user.home"), "test");
+
+            String homeEnv = null;
+            for (String possibleHomeEnv : Arrays.asList("HOME", "USERPROFILE")) {
+                if (System.getenv(possibleHomeEnv) != null) {
+                    homeEnv = possibleHomeEnv;
+                    break;
+                }
+            }
+
+            assumeTrue(homeEnv != null, "No home environment variable found");
+            assertEquals(targetPath, fl.getPath("${" + homeEnv + "}/test"));
         }
     }
 
