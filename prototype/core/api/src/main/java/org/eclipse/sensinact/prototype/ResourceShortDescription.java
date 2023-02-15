@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.prototype;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
@@ -27,5 +28,5 @@ public class ResourceShortDescription {
 
     public Class<?> contentType;
 
-    public List<Class<?>> actMethodArgumentsTypes;
+    public List<Entry<String, Class<?>>> actMethodArgumentsTypes;
 }

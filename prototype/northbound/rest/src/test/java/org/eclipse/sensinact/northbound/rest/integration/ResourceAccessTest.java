@@ -14,11 +14,14 @@ package org.eclipse.sensinact.northbound.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -26,16 +29,21 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.rest.dto.AccessMethodCallParameterDTO;
 import org.eclipse.sensinact.northbound.rest.dto.GetResponse;
+import org.eclipse.sensinact.northbound.rest.dto.ResultActResponse;
 import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
+import org.eclipse.sensinact.prototype.annotation.verb.ACT;
+import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.junit5.service.ServiceExtension;
 
@@ -213,5 +221,37 @@ public class ResourceAccessTest {
         response = utils.convert(result, GetResponse.class);
         assertEquals(GeoJsonObject.class.getName(), response.type);
         assertNull(response.value);
+    }
+
+    public static class TestAction {
+        @ACT(model = PROVIDER, service = SERVICE, resource = "action")
+        public Double toDoubleDouble(@ActParam(name = "input") Long longValue) {
+            return longValue.doubleValue() * 2.0d;
+        }
+    }
+
+    @Test
+    void resourceAct(@InjectBundleContext BundleContext context) throws Exception {
+
+        context.registerService(TestAction.class, new TestAction(),
+                new Hashtable<>(Map.of("sensiNact.whiteboard.resource", true)));
+
+        GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
+
+        AccessMethodCallParameterDTO param = new AccessMethodCallParameterDTO();
+        param.name = "input";
+        param.type = Long.class.getName();
+        param.value = 123L;
+
+        ResultActResponse<?> response = utils.queryJson(
+                String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", "action", "ACT"),
+                List.of(param), ResultActResponse.class);
+
+        assertNotNull(response);
+        assertEquals(200, response.statusCode);
+        assertNotNull(response.response);
+        assertEquals(246d, response.response);
+
     }
 }

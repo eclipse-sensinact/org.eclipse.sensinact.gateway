@@ -281,9 +281,13 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     @Override
-    public Object actOnResource(String provider, String service, String resource, Object[] parameters) {
-        // TODO Auto-generated method stub
-        return null;
+    public Object actOnResource(String provider, String service, String resource, Map<String, Object> parameters) {
+        return safeExecute(new ResourceCommand<Object>(provider, service, resource) {
+            @Override
+            protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.act(parameters);
+            }
+        });
     }
 
     @Override
@@ -294,7 +298,9 @@ public class SensiNactSessionImpl implements SensiNactSession {
             protected Promise<ResourceDescription> call(SensinactDigitalTwin model, PromiseFactory pf) {
                 final SensinactResource sensinactResource = model.getResource(provider, service, resource);
                 if (sensinactResource != null) {
-                    final Promise<TimedValue<?>> val = sensinactResource.getValue();
+                    ResourceType resourceType = sensinactResource.getResourceType();
+                    final Promise<TimedValue<?>> val = resourceType == ResourceType.ACTION ? pf.resolved(null)
+                            : sensinactResource.getValue();
                     final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
 
                     return val.then(x -> metadata).then(x -> {
@@ -302,8 +308,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         result.provider = provider;
                         result.service = service;
                         result.resource = resource;
-                        result.value = val.getValue().getValue();
-                        result.timestamp = val.getValue().getTimestamp();
+                        if (resourceType != ResourceType.ACTION) {
+                            result.value = val.getValue().getValue();
+                            result.timestamp = val.getValue().getTimestamp();
+                        }
+                        // TODO - how do we say that this is an action and list the parameters?
                         result.metadata = metadata.getValue();
                         return pf.resolved(result);
                     });
@@ -318,12 +327,15 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
         return executeGetCommand((m) -> m.getResource(provider, service, resource), (rc) -> {
             final ResourceShortDescription result = new ResourceShortDescription();
-            result.actMethodArgumentsTypes = null;
             result.contentType = rc.getType();
             result.name = rc.getName();
-            // TODO: get it from the description
-            result.resourceType = ResourceType.PROPERTY;
-            result.valueType = ValueType.UPDATABLE;
+            result.resourceType = rc.getResourceType();
+            if (result.resourceType == ResourceType.ACTION) {
+                result.actMethodArgumentsTypes = rc.getArguments();
+            } else {
+                // TODO: get it from the description
+                result.valueType = ValueType.UPDATABLE;
+            }
             return result;
         });
     }
