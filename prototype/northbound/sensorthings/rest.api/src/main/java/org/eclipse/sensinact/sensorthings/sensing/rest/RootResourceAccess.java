@@ -54,7 +54,10 @@ public interface RootResourceAccess {
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/top",
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/skip",
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/pagination",
-                "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/count"
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/count",
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/filter",
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-filter-operations",
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-query-functions"
             );
 
         response.value = List.of(
