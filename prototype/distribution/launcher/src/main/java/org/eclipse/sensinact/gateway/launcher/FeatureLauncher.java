@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -124,10 +124,33 @@ public class FeatureLauncher {
         update(config);
     }
 
+    Path getPath(String initialPath) {
+        String newPath = Paths.get(initialPath).normalize().toString();
+
+        // Inject variables
+        Pattern envVarsPattern = Pattern.compile("\\$\\{([^\\}]+)\\}");
+        Matcher matcher = envVarsPattern.matcher(newPath);
+        while (matcher.find()) {
+            final String innerVar = matcher.group(1);
+            final String resolvedEnv = System.getenv(innerVar);
+            if (resolvedEnv != null) {
+                newPath = newPath.replace(matcher.group(), resolvedEnv);
+            }
+        }
+
+        // Replace user home
+        newPath = Paths
+                .get(newPath.replaceFirst("^~(" + Pattern.quote(File.separator) + "|/)",
+                        Matcher.quoteReplacement(System.getProperty("user.home") + File.separator)))
+                .normalize().toString();
+
+        return Paths.get(newPath).normalize();
+    }
+
     @Modified
     void update(Config config) throws ConfigurationException {
-        repository = Paths.get(config.repository());
-        featureDir = Paths.get(config.featureDir());
+        repository = getPath(config.repository());
+        featureDir = getPath(config.featureDir());
 
         List<String> newFeatures = stream(config.features()).collect(toList());
 
