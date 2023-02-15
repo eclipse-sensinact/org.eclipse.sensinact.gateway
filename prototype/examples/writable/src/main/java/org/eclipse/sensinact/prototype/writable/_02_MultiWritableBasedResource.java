@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.writable;
 
@@ -27,15 +27,15 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = _02_MultiWritableBasedResource.class)
 public class _02_MultiWritableBasedResource {
 
-    @SET(service = "example", resource = "fizz")
+    @SET(model = "model", service = "example", resource = "fizz")
     public void setFizz(@UriParam(UriSegment.PROVIDER) String provider, String value) {
     }
 
-    @SET(service = "example", resource = "buzz")
+    @SET(model = "model", service = "example", resource = "buzz")
     public void setBuzz(@UriParam(UriSegment.PROVIDER) String provider, Long value) {
     }
 
-    @SET(service = "example", resource = "fizzbuzz")
+    @SET(model = "model", service = "example", resource = "fizzbuzz")
     public void setFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider, Double value) {
     }
 }

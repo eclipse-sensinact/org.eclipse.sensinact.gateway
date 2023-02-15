@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.writable;
 
@@ -27,9 +27,9 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = _03_MultiWritableBasedResource.class)
 public class _03_MultiWritableBasedResource {
 
-    @SET(service = "example", resource = "fizz", type = String.class)
-    @SET(service = "example", resource = "buzz", type = Long.class)
-    @SET(service = "example2", resource = "fizzbuzz", type = Double.class)
+    @SET(model = "model", service = "example", resource = "fizz", type = String.class)
+    @SET(model = "model", service = "example", resource = "buzz", type = Long.class)
+    @SET(model = "model", service = "example2", resource = "fizzbuzz", type = Double.class)
     public void setValue(@UriParam(UriSegment.PROVIDER) String provider, @UriParam(UriSegment.SERVICE) String service,
             @UriParam(UriSegment.RESOURCE) String resource, Object value) {
         // Get the actual value from the sensor

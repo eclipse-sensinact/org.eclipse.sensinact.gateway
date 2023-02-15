@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.prototype.model;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.prototype.command.CommandScoped;
 
@@ -48,7 +49,7 @@ public interface Resource extends Modelled, CommandScoped {
      * @return
      * @throws IllegalStateException if this resource is not an action resource
      */
-    List<Class<?>> getArguments();
+    List<Map.Entry<String, Class<?>>> getArguments();
 
     Service getService();
 

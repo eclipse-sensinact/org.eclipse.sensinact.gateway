@@ -57,7 +57,7 @@ public interface SensinactResource extends CommandScoped {
      * @return
      * @throws IllegalStateException if this resource is not an action resource
      */
-    List<Class<?>> getArguments();
+    List<Map.Entry<String, Class<?>>> getArguments();
 
     /**
      * Set the value of the resource
@@ -119,5 +119,13 @@ public interface SensinactResource extends CommandScoped {
      * @return
      */
     SensinactService getService();
+
+    /**
+     * Act on this resource
+     *
+     * @param parameters
+     * @return
+     */
+    Promise<Object> act(Map<String, Object> parameters);
 
 }

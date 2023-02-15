@@ -37,6 +37,8 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.osgi.util.converter.Converter;
+import org.osgi.util.converter.Converters;
 
 /**
  * Some Helper methods to work with Ecores.
@@ -46,8 +48,10 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
  */
 public class EMFUtil {
 
+    private static final Converter converter;
     private static final Map<Class<?>, EClassifier> typeMap = new HashMap<Class<?>, EClassifier>();
     static {
+        converter = Converters.standardConverter();
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
         EDataType eInstant = SensiNactPackage.eINSTANCE.getEInstant();
         typeMap.put(eInstant.getInstanceClass(), eInstant);
@@ -181,16 +185,23 @@ public class EMFUtil {
     }
 
     public static Object convertToTargetType(EClassifier targetType, Object o) {
+        return convertToTargetType(targetType.getInstanceClass(), o);
+    }
 
+    public static Object convertToTargetType(Class<?> targetType, Object o) {
+        Object converted;
         if (o == null) {
-            return targetType.getInstanceClass().isPrimitive() ? targetType.getDefaultValue() : o;
+            converted = o;
         } else {
             EClassifier type = typeMap.get(o.getClass());
-            if (type == null) {
-                throw new IllegalArgumentException("Unknown data type " + o.getClass());
+            EClassifier target = typeMap.get(targetType);
+            if (type == null || target == null) {
+                converted = converter.convert(o).to(targetType);
+            } else {
+                String string = type.getEPackage().getEFactoryInstance().convertToString((EDataType) type, o);
+                converted = target.getEPackage().getEFactoryInstance().createFromString((EDataType) target, string);
             }
-            String string = type.getEPackage().getEFactoryInstance().convertToString((EDataType) type, o);
-            return targetType.getEPackage().getEFactoryInstance().createFromString((EDataType) targetType, string);
         }
+        return converted;
     }
 }

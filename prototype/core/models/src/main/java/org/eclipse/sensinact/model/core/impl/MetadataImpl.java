@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Collection;
 
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.notify.NotificationChain;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -23,7 +24,8 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
-import org.eclipse.emf.ecore.util.EObjectResolvingEList;
+import org.eclipse.emf.ecore.util.EObjectContainmentEList;
+import org.eclipse.emf.ecore.util.InternalEList;
 import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
@@ -86,7 +88,7 @@ public class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	protected EObject source;
 
 	/**
-	 * The cached value of the '{@link #getExtra() <em>Extra</em>}' reference list.
+	 * The cached value of the '{@link #getExtra() <em>Extra</em>}' containment reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #getExtra()
@@ -225,9 +227,23 @@ public class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	@Override
 	public EList<FeatureCustomMetadata> getExtra() {
 		if (extra == null) {
-			extra = new EObjectResolvingEList<FeatureCustomMetadata>(FeatureCustomMetadata.class, this, SensiNactPackage.METADATA__EXTRA);
+			extra = new EObjectContainmentEList<FeatureCustomMetadata>(FeatureCustomMetadata.class, this, SensiNactPackage.METADATA__EXTRA);
 		}
 		return extra;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
+		switch (featureID) {
+			case SensiNactPackage.METADATA__EXTRA:
+				return ((InternalEList<?>)getExtra()).basicRemove(otherEnd, msgs);
+		}
+		return super.eInverseRemove(otherEnd, featureID, msgs);
 	}
 
 	/**

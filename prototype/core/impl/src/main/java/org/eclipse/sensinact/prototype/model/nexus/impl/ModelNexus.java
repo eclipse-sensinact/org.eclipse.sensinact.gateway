@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,8 +53,11 @@ import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.prototype.command.impl.ActionHandler;
+import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.osgi.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,11 +89,14 @@ public class ModelNexus {
 
     private final Map<String, EClass> models = new HashMap<>();
 
+    private final ActionHandler actionHandler;
+
     public ModelNexus(ResourceSet resourceSet, SensiNactPackage sensinactPackage,
-            Supplier<NotificationAccumulator> accumulator) {
+            Supplier<NotificationAccumulator> accumulator, ActionHandler actionHandler) {
         this.resourceSet = resourceSet;
         this.sensinactPackage = sensinactPackage;
         this.notificationAccumulator = accumulator;
+        this.actionHandler = actionHandler;
         // TODO we need a general Working Directory for such data
         Optional<EPackage> packageOptional = loadDefaultPackage(Paths.get(BASIC_BASE_ECORE));
 
@@ -444,13 +451,23 @@ public class ModelNexus {
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, NotificationAccumulator accumulator) {
+        FeatureCustomMetadata resourceType = sensinactPackage.getSensiNactFactory().createFeatureCustomMetadata();
+        resourceType.setName("resourceType");
+        resourceType.setValue(ResourceType.SENSOR);
+        resourceType.setTimestamp(Instant.EPOCH);
+
+        return doCreateResource(service, resource, type, timestamp, defaultValue, List.of(resourceType), accumulator);
+    }
+
+    private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
+            Object defaultValue, List<FeatureCustomMetadata> metadata, NotificationAccumulator accumulator) {
         if (service.getEStructuralFeature(resource) != null) {
             throw new IllegalArgumentException("There is an existing resource with name " + resource + " in service "
                     + service + " in model " + getModelName(service.eContainingFeature().getEContainingClass()));
         }
         updateMetadata(service);
         EAttribute feature = EMFUtil.createEAttribute(service, resource, type, defaultValue,
-                ef -> createEFeatureAnnotation(ef, timestamp));
+                ef -> createEFeatureAnnotation(ef, timestamp, metadata));
         service.getEStructuralFeatures().add(feature);
         return feature;
     }
@@ -470,7 +487,8 @@ public class ModelNexus {
         updateMetadata(model);
         EClass service = EMFUtil.createEClass(constructServiceEClassName(model.getName(), name), ePackage,
                 (ec) -> createEClassAnnotations(timestamp), sensinactPackage.getService());
-        return EMFUtil.createEReference(model, name, service, true, ef -> createEFeatureAnnotation(ef, timestamp));
+        return EMFUtil.createEReference(model, name, service, true,
+                ef -> createEFeatureAnnotation(ef, timestamp, List.of()));
     }
 
     private void updateMetadata(EClass provider) {
@@ -493,10 +511,12 @@ public class ModelNexus {
                 EMFUtil.createEAnnotation("model", Map.of("name", model)));
     }
 
-    private List<EAnnotation> createEFeatureAnnotation(EStructuralFeature feature, Instant timestamp) {
+    private List<EAnnotation> createEFeatureAnnotation(EStructuralFeature feature, Instant timestamp,
+            List<FeatureCustomMetadata> metadata) {
         ModelMetadata meta = sensinactPackage.getSensiNactFactory().createModelMetadata();
         meta.setTimestamp(timestamp);
         meta.setVersion(EMFUtil.getContainerVersion(feature));
+        meta.getExtra().addAll(metadata);
         EAnnotation annotation = EMFUtil.createEAnnotation("metadata", Collections.singletonList(meta));
         return Collections.singletonList(annotation);
     }
@@ -572,7 +592,6 @@ public class ModelNexus {
         // Remove current value, if any
         final List<FeatureCustomMetadata> extra = metadata.getExtra();
         extra.stream().filter(e -> metadataKey.equals(e.getName())).findFirst().ifPresent(extra::remove);
-        ;
 
         // Store new metadata
         final FeatureCustomMetadata customMetadata = sensinactPackage.getSensiNactFactory()
@@ -652,5 +671,27 @@ public class ModelNexus {
                 return annotation.eContents().stream().anyMatch(ModelMetadata.class::isInstance);
             }
         });
+    }
+
+    public EAttribute createActionResource(EClass serviceEClass, String name, Class<?> type,
+            List<Entry<String, Class<?>>> namedParameterTypes) {
+        FeatureCustomMetadata resourceType = sensinactPackage.getSensiNactFactory().createFeatureCustomMetadata();
+        resourceType.setName("resourceType");
+        resourceType.setValue(ResourceType.ACTION);
+        resourceType.setTimestamp(Instant.EPOCH);
+
+        FeatureCustomMetadata parameters = sensinactPackage.getSensiNactFactory().createFeatureCustomMetadata();
+        parameters.setName("parameters");
+        parameters.setValue(List.copyOf(namedParameterTypes));
+        parameters.setTimestamp(Instant.EPOCH);
+
+        return doCreateResource(serviceEClass, name, type, Instant.now(), null, List.of(resourceType, parameters),
+                notificationAccumulator.get());
+    }
+
+    public Promise<Object> act(Provider provider, EStructuralFeature service, EStructuralFeature resource,
+            Map<String, Object> parameters) {
+        return actionHandler.act(getModelName(provider.eClass()), provider.getId(), service.getName(),
+                resource.getName(), parameters);
     }
 }

@@ -267,6 +267,11 @@
         <version>${osgi.feature.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.util.converter</artifactId>
+        <version>${osgi.converter.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.api</artifactId>
         <version>${gecko.emf.version}</version>
@@ -371,12 +376,6 @@
         <groupId>org.apache.johnzon</groupId>
         <artifactId>johnzon-core</artifactId>
         <version>${johnzon.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.util.converter</artifactId>
-        <version>${osgi.converter.version}</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.annotation.verb;
 
@@ -22,10 +22,10 @@ import org.eclipse.sensinact.prototype.annotation.dto.NullAction;
 
 /**
  * Used to define a GET method for "pull based" querying of values
- * 
+ *
  * Can be repeated if a single method can return results for more than one
  * service/resource.
- * 
+ *
  * @see UriParam
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -36,23 +36,31 @@ public @interface GET {
     /**
      * Whether this method returns a raw value, or a DTO containing multiple data
      * values
-     * 
+     *
      * @return
      */
     ReturnType value() default ReturnType.VALUE;
 
     /**
+     * The model that this GET method applies to, can be omitted if {@link #value()}
+     * is {@link ReturnType#DTO} and the dto defines the model names
+     *
+     * @return
+     */
+    String model() default "<<NOT_SET>>";
+
+    /**
      * The service that this GET method applies to, can be omitted if
-     * {@link #value()} is {@link ReturnType#DTO} and the dto defines the
-     * service/resource names
-     * 
+     * {@link #value()} is {@link ReturnType#DTO} and the dto defines the service
+     * name(s)
+     *
      * @return
      */
     String service() default "<<NOT_SET>>";
 
     /**
      * The resource that this GET method applies to
-     * 
+     *
      * @return
      */
     String resource() default "<<NOT_SET>>";
@@ -60,7 +68,7 @@ public @interface GET {
     /**
      * The type of the resource data. If not set then the return type of the method
      * is used.
-     * 
+     *
      * @return
      */
     Class<?> type() default Object.class;

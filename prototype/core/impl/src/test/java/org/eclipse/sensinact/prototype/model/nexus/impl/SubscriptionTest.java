@@ -66,7 +66,7 @@ public class SubscriptionTest {
         @Test
         void basicTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -96,7 +96,7 @@ public class SubscriptionTest {
         @Test
         void basicServiceExtensionTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -135,7 +135,7 @@ public class SubscriptionTest {
         @Test
         void basicSecondServiceTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator);
+            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 

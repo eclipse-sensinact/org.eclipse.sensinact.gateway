@@ -13,9 +13,12 @@
 package org.eclipse.sensinact.prototype.model.impl;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceType;
@@ -66,13 +69,36 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
     @Override
     public ResourceType getResourceType() {
         checkValid();
-        throw new RuntimeException("Not implemented");
+        // Check the metadata, Sensor if no info
+        return findResourceType(feature);
+    }
+
+    public static ResourceType findResourceType(EStructuralFeature feature) {
+        return getModelMetadata(feature).map(ModelMetadata::getExtra)
+                .flatMap(l -> l.stream().filter(f -> "resourceType".equals(f.getName())).findFirst())
+                .map(f -> (ResourceType) f.getValue()).orElse(ResourceType.SENSOR);
     }
 
     @Override
-    public List<Class<?>> getArguments() {
+    public List<Map.Entry<String, Class<?>>> getArguments() {
         checkValid();
-        throw new RuntimeException("Not implemented");
+        if (getResourceType() != ResourceType.ACTION) {
+            throw new IllegalArgumentException("This is not an action resource");
+        }
+        return findActionParameters(feature);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Map.Entry<String, Class<?>>> findActionParameters(EStructuralFeature feature) {
+        return getModelMetadata(feature).map(ModelMetadata::getExtra)
+                .flatMap(l -> l.stream().filter(f -> "parameters".equals(f.getName())).findFirst())
+                .map(f -> (List<Map.Entry<String, Class<?>>>) f.getValue())
+                .orElseThrow(() -> new IllegalArgumentException("No parameter data available"));
+    }
+
+    private static Optional<ModelMetadata> getModelMetadata(EStructuralFeature feature) {
+        return Optional.ofNullable(feature.getEAnnotation("metadata")).flatMap(ann -> ann.eContents().stream()
+                .filter(ModelMetadata.class::isInstance).map(ModelMetadata.class::cast).findFirst());
     }
 
     @Override

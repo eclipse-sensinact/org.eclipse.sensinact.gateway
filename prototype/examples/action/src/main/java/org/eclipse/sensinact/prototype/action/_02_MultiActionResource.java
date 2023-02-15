@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.action;
 
@@ -27,15 +27,15 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = _02_MultiActionResource.class)
 public class _02_MultiActionResource {
 
-    @ACT(service = "example", resource = "fizz")
+    @ACT(model = "testModel", service = "example", resource = "fizz")
     public void setFizz(@UriParam(UriSegment.PROVIDER) String provider) {
     }
 
-    @ACT(service = "example", resource = "buzz")
+    @ACT(model = "testModel", service = "example", resource = "buzz")
     public void setBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
     }
 
-    @ACT(service = "example", resource = "fizzbuzz")
+    @ACT(model = "testModel", service = "example", resource = "fizzbuzz")
     public void setFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
     }
 }

@@ -46,6 +46,10 @@
       <artifactId>org.osgi.service.typedevent</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.util.converter</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.geckoprojects.emf</groupId>
       <artifactId>org.gecko.emf.osgi.api</artifactId>
     </dependency>

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.annotation.verb;
 
@@ -27,7 +27,7 @@ public @interface UriParam {
 
     /**
      * What part of the URI should be passed
-     * 
+     *
      * @return
      */
     UriSegment value() default UriSegment.URI;
@@ -35,6 +35,8 @@ public @interface UriParam {
     public enum UriSegment {
         /** The whole URI */
         URI,
+        /** The model name */
+        MODEL,
         /** The provider name */
         PROVIDER,
         /** The service name */
