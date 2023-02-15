@@ -1,0 +1,24 @@
+{
+  "parser": "json",
+  "mapping": {
+    "@provider": "Name",
+    "data/value": "Value",
+    "sensor/city": {
+      "literal": "Grenoble"
+    },
+    "sensor/street": {
+      "path": "Street",
+      "default": "n/a",
+      "type": "string"
+    },
+    "@latitude": "Latitude",
+    "@longitude": "Longitude",
+    "@altitude": "Altitude",
+    "@date": "Date",
+    "@time": "Time"
+  },
+  "mapping.options": {
+    "format.date": "d.M.y",
+    "format.time": "H:m"
+  }
+}

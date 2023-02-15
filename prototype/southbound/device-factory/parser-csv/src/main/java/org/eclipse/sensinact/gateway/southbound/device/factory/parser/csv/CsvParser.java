@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.eclipse.sensinact.gateway.southbound.device.factory.EncodingUtils;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingParser;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.ParserException;
@@ -48,7 +49,14 @@ public class CsvParser implements IDeviceMappingParser {
             charset = StandardCharsets.UTF_8;
         }
 
-        final String csvContent = new String(rawInput, charset);
+        final byte[] input;
+        if (StandardCharsets.UTF_8.equals(charset) && rawInput.length > 3) {
+            input = EncodingUtils.removeBOM(rawInput);
+        } else {
+            input = rawInput;
+        }
+
+        final String csvContent = new String(input, charset);
 
         // Prepare parser
         CSVFormat.Builder format = CSVFormat.DEFAULT.builder();
@@ -67,7 +75,7 @@ public class CsvParser implements IDeviceMappingParser {
             for (CSVRecord record : parser) {
                 records.add(new CsvRecord(record));
             }
-        } catch (IOException e) {
+        } catch (IllegalStateException | IOException e) {
             throw new ParserException("Error reading CSV content", e);
         }
         return records;

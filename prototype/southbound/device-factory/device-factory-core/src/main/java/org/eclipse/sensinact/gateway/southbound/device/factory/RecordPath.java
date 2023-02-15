@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,232 +12,128 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 
 /**
  * Represents a record path
  */
 public class RecordPath {
 
-    public static enum ValueType {
-        /**
-         * Represent available types
-         */
-        AS_IS("any", null), STRING("string", String::valueOf), INT("int", (v) -> Integer.valueOf(String.valueOf(v))),
-        LONG("long", (v) -> Long.valueOf(String.valueOf(v))), FLOAT("float", (v) -> Float.valueOf(String.valueOf(v))),
-        DOUBLE("double", (v) -> Double.valueOf(String.valueOf(v))),
-        STRING_ARRAY("string[]", (v) -> asList(v, STRING.converter)),
-        INT_ARRAY("int[]", (v) -> asList(v, INT.converter)), LONG_ARRAY("long[]", (v) -> asList(v, LONG.converter)),
-        FLOAT_ARRAY("float[]", (v) -> asList(v, FLOAT.converter)),
-        DOUBLE_ARRAY("double[]", (v) -> asList(v, DOUBLE.converter));
-
-        /**
-         * String representation
-         */
-        private final String repr;
-
-        /**
-         * Converter function
-         */
-        private final Function<Object, Object> converter;
-
-        /**
-         * Sets up the custom enumeration
-         *
-         * @param strRepr
-         */
-        ValueType(final String strRepr, final Function<Object, Object> converter) {
-            this.repr = strRepr;
-            this.converter = converter;
+    /**
+     * Creates a {@link RecordPath} according to the value of <code>rawPath</code>
+     *
+     * @param rawPath   Path as parsed
+     * @param valueType Expected value type
+     * @return A {@link RecordPath}
+     */
+    public static RecordPath fromObject(final Object rawPath, final ValueType valueType) {
+        if (rawPath instanceof Number) {
+            return new RecordPath((Number) rawPath, valueType);
+        } else if (rawPath instanceof String) {
+            return new RecordPath((String) rawPath, valueType);
+        } else {
+            throw new IllegalArgumentException("Not a string nor a number: " + rawPath);
         }
+    }
 
-        @Override
-        public String toString() {
-            return repr;
-        }
-
-        /**
-         * Converts the given object to the right value type
-         *
-         * @param value Input value
-         * @return Converted value
-         */
-        public Object convert(final Object value) {
-            if (value == null) {
-                return null;
-            } else if (converter == null) {
-                return value;
-            } else {
-                return converter.apply(value);
-            }
-        }
-
-        /**
-         * Converts input value to a list
-         *
-         * @param value         Input value
-         * @param itemConverter Input array item converter
-         * @return The converted list
-         */
-        private static Object asList(Object value, final Function<Object, Object> itemConverter) {
-            Stream<?> stream;
-            if (value instanceof String) {
-                stream = Arrays.stream(((String) value).split(";|,"));
-            } else if (value instanceof Collection) {
-                stream = ((Collection<?>) value).stream();
-            } else if (value.getClass().isArray()) {
-                // Reflect array
-                final int length = Array.getLength(value);
-                final List<Object> arrayAsList = new ArrayList<>(length);
-                for (int i = 0; i < length; i++) {
-                    arrayAsList.add(Array.get(value, i));
-                }
-                stream = arrayAsList.stream();
-            } else {
-                // Maybe a single item
-                return List.of(itemConverter.apply(value));
-            }
-
-            return stream.map(itemConverter).collect(Collectors.toList());
-        }
-
-        /**
-         * Returns the {@link ValueType} matching the given string representation, or
-         * null
-         *
-         * @param strName String representation of the value type
-         * @return The type associated to the representation or null
-         */
-        public static ValueType fromString(final String strName) {
-            if (strName == null || strName.isBlank()) {
-                return AS_IS;
-            }
-
-            for (ValueType type : ValueType.values()) {
-                if (type.repr.equals(strName)) {
-                    return type;
-                }
-            }
-
-            return AS_IS;
-        }
+    /**
+     * Creates a {@link RecordPath} according to the value of <code>rawPath</code>
+     *
+     * @param rawPath Path as parsed
+     * @return A {@link RecordPath}
+     */
+    public static RecordPath fromObject(final Object rawPath) {
+        return fromObject(rawPath, ValueType.AS_IS);
     }
 
     /**
      * Record path string version
      */
-    private String strPath;
+    private final String strPath;
 
     /**
      * Record path integer value (if given as integer)
      */
-    private Integer intPath;
+    private final Integer intPath;
 
     /**
      * True if the path is an integer
      */
-    private boolean isInteger;
+    private final boolean isInteger;
 
     /**
      * Value type
      */
-    private ValueType valueType = ValueType.AS_IS;
+    private final ValueType valueType;
+
+    /**
+     * True if the default value has been set
+     */
+    private boolean hasDefaultValue = false;
+
+    /**
+     * Default value to return if we don't find the resource value
+     */
+    private Object defaultValue = null;
 
     /**
      * Use for copy
      */
-    private RecordPath() {
+    private RecordPath(final RecordPath other) {
+        this.defaultValue = other.defaultValue;
+        this.hasDefaultValue = other.hasDefaultValue;
+        this.intPath = other.intPath;
+        this.isInteger = other.isInteger;
+        this.strPath = other.strPath;
+        this.valueType = other.valueType;
     }
 
     /**
-     * @param rawPath Path as parsed from mapping configuration
+     * @param path String path in the record
      */
-    public RecordPath(final Object rawPath) throws IllegalArgumentException {
-        this.valueType = ValueType.AS_IS;
+    public RecordPath(final String path) {
+        this(path, ValueType.AS_IS);
+    }
+
+    /**
+     * @param path      String path in the record
+     * @param valueType Expected value type
+     */
+    public RecordPath(final String path, final ValueType valueType) {
+        this.valueType = valueType != null ? valueType : ValueType.AS_IS;
         this.isInteger = false;
-        loadPathType(rawPath, true);
+        this.strPath = path;
+        this.intPath = null;
     }
 
     /**
-     * @param rawPath   Path as parsed from mapping configuration
-     * @param valueType Excepted value type
+     * @param path Integer path in the record (column index, ...)
      */
-    public RecordPath(final Object rawPath, final String valueType) {
-        this(rawPath, ValueType.fromString(valueType));
+    public RecordPath(final Number path) {
+        this(path, ValueType.AS_IS);
     }
 
     /**
-     * @param rawPath   Path as parsed from mapping configuration
-     * @param valueType Excepted value type
+     * @param path      Integer path in the record (column index, ...)
+     * @param valueType Expected value type
      */
-    public RecordPath(final Object rawPath, final ValueType valueType) {
-        this.isInteger = false;
-        loadPathType(rawPath, true);
-        if (valueType != null) {
-            this.valueType = valueType;
-        } else {
-            this.valueType = ValueType.AS_IS;
-        }
+    public RecordPath(final Number path, final ValueType valueType) {
+        this.valueType = valueType != null ? valueType : ValueType.AS_IS;
+        this.isInteger = true;
+        this.intPath = path.intValue();
+        this.strPath = path.toString();
     }
 
     /**
      * Makes a copy of the current path
      */
     private RecordPath copy() {
-        RecordPath path = new RecordPath();
-        path.strPath = strPath;
-        path.intPath = intPath;
-        path.isInteger = isInteger;
-        path.valueType = valueType;
-        return path;
-    }
-
-    /**
-     * Parses the path type
-     *
-     * @param rawPath  Path as read from the configuration
-     * @param allowMap Allow parsing a map configuration (only at configuration
-     *                 root)
-     * @throws IllegalArgumentException Unsupported kind of path
-     */
-    private void loadPathType(final Object rawPath, boolean allowMap) throws IllegalArgumentException {
-        if (rawPath instanceof RecordPath) {
-            final RecordPath path = (RecordPath) rawPath;
-            this.strPath = path.strPath;
-            this.intPath = path.intPath;
-            this.isInteger = path.isInteger;
-            this.valueType = path.valueType;
-        } else if (rawPath instanceof String) {
-            // Simple string path
-            this.strPath = (String) rawPath;
-            this.isInteger = false;
-        } else if (rawPath instanceof Number) {
-            // Got an integer
-            this.intPath = ((Number) rawPath).intValue();
-            this.strPath = String.valueOf(this.intPath);
-            this.isInteger = true;
-        } else if (allowMap && rawPath instanceof Map) {
-            // Complex configuration
-            final Map<?, ?> pathDescription = (Map<?, ?>) rawPath;
-            loadPathType(pathDescription.get("path"), false);
-
-            Object valueType = pathDescription.get("type");
-            if (valueType != null) {
-                this.valueType = ValueType.fromString(String.valueOf(valueType));
-            } else {
-                this.valueType = ValueType.AS_IS;
-            }
-        } else {
-            throw new IllegalArgumentException("Unsupported path type: " + rawPath + " / " + rawPath.getClass());
-        }
+        return new RecordPath(this);
     }
 
     /**
@@ -276,6 +172,39 @@ public class RecordPath {
     }
 
     /**
+     * Returns true if this record path has a default value
+     */
+    public boolean hasDefaultValue() {
+        return hasDefaultValue;
+    }
+
+    /**
+     * Returns the default value (check with {@link #hasDefaultValue} if it has
+     * meaning
+     */
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
+    /**
+     * Sets the default value
+     *
+     * @param defaultValue the default value to set
+     */
+    public void setDefaultValue(final Object defaultValue) {
+        this.hasDefaultValue = true;
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * Removes the default value flag
+     */
+    public void unsetDefaultValue() {
+        this.hasDefaultValue = false;
+        this.defaultValue = null;
+    }
+
+    /**
      * Returns a new instance of the record path with resolved variables
      *
      * @param variables Resolved variables
@@ -293,12 +222,13 @@ public class RecordPath {
     /**
      * Converts the given path value to the excepted type
      *
-     * @param value Value to convert
+     * @param value   Value to convert
+     * @param options Mapping options
      * @return The read value in the excepted type
      * @throws ClassCastException Couldn't convert to the excepted type
      */
-    public Object convertValue(Object value) throws ClassCastException {
-        return valueType.convert(value);
+    public Object convertValue(final Object value, final DeviceMappingOptionsDTO options) throws ClassCastException {
+        return valueType.convert(value, options);
     }
 
     @Override

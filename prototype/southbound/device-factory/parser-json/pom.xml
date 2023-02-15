@@ -39,11 +39,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
 
     <!-- OSGi -->
     <dependency>
@@ -62,51 +57,9 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
-
-    <!-- Test -->
-    <dependency>
-      <groupId>org.eclipse.sensinact.gateway.core</groupId>
-      <artifactId>impl</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- OSGi -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.configadmin</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.configurator</artifactId>
-      <version>1.0.18</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.cm.json</artifactId>
-      <version>2.0.0</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- SPI fly / Service loader -->
-    <dependency>
-      <groupId>org.apache.aries.spifly</groupId>
-      <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- JSON provider -->
-    <dependency>
-      <groupId>org.eclipse.parsson</groupId>
-      <artifactId>jakarta.json</artifactId>
-      <version>1.1.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -124,15 +77,6 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-resolver-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-run-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
-        <configuration>
-          <includeDependencyManagement>true</includeDependencyManagement>
-          <bndrun>integration-test.bndrun</bndrun>
-        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -13,13 +13,23 @@
 package org.eclipse.sensinact.gateway.southbound.device.factory;
 
 /**
- * Exception thrown when a path variable wasn't found
+ *
  */
-public class VariableNotFoundException extends DeviceFactoryException {
+public class NamingUtils {
 
-    private static final long serialVersionUID = 1L;
+    public static String sanitizeName(final String name, final boolean isPath) {
+        if (name == null) {
+            return null;
+        }
 
-    public VariableNotFoundException(final String message) {
-        super(message);
+        final String rejectedPattern;
+        if (isPath) {
+            // Allow slash in path
+            rejectedPattern = "[^-A-Za-z0-9/]";
+        } else {
+            rejectedPattern = "[^-A-Za-z0-9]";
+        }
+
+        return name.replaceAll(rejectedPattern, "-");
     }
 }

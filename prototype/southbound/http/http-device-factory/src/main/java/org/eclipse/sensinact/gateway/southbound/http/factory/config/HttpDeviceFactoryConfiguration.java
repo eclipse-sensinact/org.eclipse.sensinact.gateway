@@ -17,7 +17,7 @@ package org.eclipse.sensinact.gateway.southbound.http.factory.config;
  */
 public @interface HttpDeviceFactoryConfiguration {
 
-    String tasks_oneshot();
+    String[] tasks_oneshot();
 
-    String tasks_periodic();
+    String[] tasks_periodic();
 }

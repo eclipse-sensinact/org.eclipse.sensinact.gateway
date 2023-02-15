@@ -12,6 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.http.factory.config;
 
+import java.time.temporal.ChronoUnit;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Root configuration of a device factory
  */
@@ -21,4 +25,10 @@ public class HttpDeviceFactoryConfigurationPeriodicDTO extends HttpDeviceFactory
      * Refresh period in seconds (5 minutes by default)
      */
     public int period = 300;
+
+    /**
+     * Refresh period unit
+     */
+    @JsonProperty("period.unit")
+    public ChronoUnit periodUnit = ChronoUnit.SECONDS;
 }

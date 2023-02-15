@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,11 +17,13 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
+ * Device factory JSON record handler
  */
 public class JsonRecord implements IDeviceMappingRecord {
 
@@ -66,15 +68,21 @@ public class JsonRecord implements IDeviceMappingRecord {
         JsonNode current = root;
         for (RecordPath part : path.parts()) {
             current = getPath(current, part);
+            if (current == null) {
+                return null;
+            }
         }
         return current;
     }
 
-    @Override
-    public Object getField(RecordPath field) {
+    private Object getRawField(RecordPath field) {
         final JsonNode node = walkPath(field);
         if (node == null || node.isNull()) {
-            return null;
+            if (field.hasDefaultValue()) {
+                return field.getDefaultValue();
+            } else {
+                return null;
+            }
         }
 
         if (node.isObject()) {
@@ -105,20 +113,27 @@ public class JsonRecord implements IDeviceMappingRecord {
     }
 
     @Override
-    public String getFieldString(RecordPath field) {
-        final JsonNode node = walkPath(field);
-        if (node.isValueNode()) {
-            return node.asText();
+    public Object getField(RecordPath field, final DeviceMappingOptionsDTO options) {
+        final Object rawValue = getRawField(field);
+        if (rawValue == null) {
+            return null;
         }
-        return null;
+
+        return field.convertValue(rawValue, options);
     }
 
     @Override
-    public Integer getFieldInt(RecordPath field) {
+    public String getFieldString(RecordPath field, final DeviceMappingOptionsDTO options) {
         final JsonNode node = walkPath(field);
-        if (node.canConvertToInt()) {
-            return node.asInt();
+        if (node != null && node.isValueNode()) {
+            return node.asText();
         }
-        return null;
+
+        if (field.hasDefaultValue()) {
+            final Object defaultValue = field.getDefaultValue();
+            return defaultValue != null ? String.valueOf(defaultValue) : null;
+        } else {
+            return null;
+        }
     }
 }
