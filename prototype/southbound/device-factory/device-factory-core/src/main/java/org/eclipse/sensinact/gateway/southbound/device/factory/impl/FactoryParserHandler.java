@@ -356,7 +356,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 placeholders.put(key, mapping);
             } else if (key.startsWith("$")) {
                 // Variable
-                variablesMappings.put(key, mapping);
+                if (VariableSolver.isValidKey(key)) {
+                    variablesMappings.put(key, mapping);
+                } else {
+                    throw new InvalidResourcePathException(String.format("Invalid variable format: '%s'", key));
+                }
             } else {
                 // Mapping
                 if (mapping.isLiteral()) {
@@ -466,7 +470,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     }
                 } else {
                     final String path = ((ResourceRecordMapping) mapping).getRecordPath().asString();
-                    final Matcher matcher = VariableSolver.varPattern.matcher(path);
+                    final Matcher matcher = VariableSolver.varUsePattern.matcher(path);
                     if (matcher.find()) {
                         String newPath = path;
                         boolean fullyResolved = true;
