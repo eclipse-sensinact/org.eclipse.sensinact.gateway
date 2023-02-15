@@ -42,6 +42,7 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.DeviceFactoryExce
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingHandler;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingParser;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
+import org.eclipse.sensinact.gateway.southbound.device.factory.IPlaceHolderKeys;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
 import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.MissingParserException;
@@ -75,7 +76,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Handles the common code of device factory
  */
 @Component(immediate = true, service = IDeviceMappingHandler.class)
-public class FactoryParserHandler implements IDeviceMappingHandler {
+public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolderKeys {
 
     /**
      * Logger
@@ -177,7 +178,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         final RecordState globalState = computeInitialState(configuration);
 
         // Check if a provider is set
-        if (globalState.placeholders.get("@provider") == null) {
+        if (globalState.placeholders.get(KEY_PROVIDER) == null) {
             throw new IllegalArgumentException("No provider mapping given");
         }
 
@@ -251,7 +252,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         final RecordState recordState = computeRecordState(configuration, globalState, record);
 
         // Extract the provider
-        final String rawProvider = getFieldString(record, recordState.placeholders.get("@provider"));
+        final String rawProvider = getFieldString(record, recordState.placeholders.get(KEY_PROVIDER));
         if (rawProvider == null || rawProvider.isBlank()) {
             return Promises.failed(new IllegalArgumentException("Empty provider field."));
         }
@@ -265,7 +266,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         final Instant timestamp = computeTimestamp(record, recordState.placeholders, configuration);
 
         // Get the friendly name
-        final IResourceMapping nameKey = recordState.placeholders.get("@name");
+        final IResourceMapping nameKey = recordState.placeholders.get(KEY_NAME);
         if (nameKey != null) {
             final String name = getFieldString(record, nameKey);
             if (name != null) {
@@ -509,7 +510,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
      */
     private GeoJsonObject computeLocation(final IDeviceMappingRecord record,
             final Map<String, IResourceMapping> placeholders) throws JsonProcessingException {
-        final IResourceMapping locationPath = placeholders.get("@location");
+        final IResourceMapping locationPath = placeholders.get(KEY_LOCATION);
         if (locationPath != null) {
             final Object locationValue = getFieldValue(record, locationPath);
             if (locationValue != null) {
@@ -533,8 +534,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         }
 
         // Fallback on fields
-        final IResourceMapping latitudePath = placeholders.get("@latitude");
-        final IResourceMapping longitudePath = placeholders.get("@longitude");
+        final IResourceMapping latitudePath = placeholders.get(KEY_LATITUDE);
+        final IResourceMapping longitudePath = placeholders.get(KEY_LONGITUDE);
         if (latitudePath == null || longitudePath == null) {
             // No lat/lon data
             return null;
@@ -544,7 +545,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         final Object longitude = getFieldValue(record, longitudePath);
         Object altitude = null;
 
-        final IResourceMapping altitudePath = placeholders.get("@altitude");
+        final IResourceMapping altitudePath = placeholders.get(KEY_ALTITUDE);
         if (altitudePath != null) {
             altitude = getFieldValue(record, altitudePath);
         }
@@ -651,7 +652,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
     private Instant computeTimestamp(IDeviceMappingRecord record, Map<String, IResourceMapping> placeholders,
             DeviceMappingConfigurationDTO configuration) {
 
-        final IResourceMapping timestampPath = placeholders.get("@timestamp");
+        final IResourceMapping timestampPath = placeholders.get(KEY_TIMESTAMP);
         if (timestampPath != null) {
             final Long timestamp = toLong(getFieldValue(record, timestampPath));
             if (timestamp != null) {
@@ -664,7 +665,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
 
         final ZoneId timezone = getTimezone(configuration.mappingOptions.dateTimezone);
 
-        final IResourceMapping dateTimePath = placeholders.get("@datetime");
+        final IResourceMapping dateTimePath = placeholders.get(KEY_DATETIME);
         if (dateTimePath != null) {
             final String strDateTime = getFieldString(record, dateTimePath);
             if (strDateTime != null && !strDateTime.isBlank()) {
@@ -673,7 +674,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         }
 
         LocalDate date = null;
-        final IResourceMapping datePath = placeholders.get("@date");
+        final IResourceMapping datePath = placeholders.get(KEY_DATE);
         if (datePath != null) {
             final String strDate = getFieldString(record, datePath);
             if (strDate != null && !strDate.isBlank()) {
@@ -682,7 +683,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler {
         }
 
         OffsetTime time = null;
-        final IResourceMapping timePath = placeholders.get("@time");
+        final IResourceMapping timePath = placeholders.get(KEY_TIME);
         if (timePath != null) {
             final String strTime = getFieldString(record, timePath);
             if (strTime != null && !strTime.isBlank()) {
