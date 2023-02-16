@@ -16,6 +16,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -307,15 +308,13 @@ public class RestNorthbound implements IRestNorthbound {
             final AccessMethodDTO actMethod = new AccessMethodDTO();
             actMethod.name = "ACT";
 
-            final List<Class<?>> actMethodArgumentsTypes = rcShortDesc.actMethodArgumentsTypes;
+            final List<Entry<String, Class<?>>> actMethodArgumentsTypes = rcShortDesc.actMethodArgumentsTypes;
             final List<AccessMethodParameterDTO> actParams = new ArrayList<>(actMethodArgumentsTypes.size());
-            int idx = 0;
-            for (final Class<?> argClass : actMethodArgumentsTypes) {
+            for (final Entry<String, Class<?>> entry : actMethodArgumentsTypes) {
                 final AccessMethodParameterDTO param = new AccessMethodParameterDTO();
-                param.name = String.valueOf(idx);
-                param.type = argClass.getName();
+                param.name = entry.getKey();
+                param.type = entry.getValue().getName();
                 actParams.add(param);
-                idx++;
             }
             actMethod.parameters = actParams;
             methods.add(actMethod);
@@ -541,40 +540,36 @@ public class RestNorthbound implements IRestNorthbound {
         return result;
     }
 
-    private Object[] extractActParams(final List<Class<?>> actMethodArgumentsTypes,
+    private Map<String, Object> extractActParams(final List<Entry<String, Class<?>>> actMethodArgumentsTypes,
             final List<AccessMethodCallParameterDTO> parameters) {
-        final Object[] params = new Object[actMethodArgumentsTypes.size()];
+        final Map<String, Object> params = new HashMap<>();
 
-        int idx = 0;
-        boolean allowIdx = true;
+        boolean named = false;
+        boolean indexed = false;
         for (final AccessMethodCallParameterDTO param : parameters) {
-            int givenIdx = -1;
+            String name;
             try {
-                givenIdx = Integer.parseInt(param.name);
+                int givenIdx = Integer.parseInt(param.name);
                 // Reject named arguments if one of name is indexed
-                allowIdx = false;
-            } catch (NumberFormatException e) {
-                if (!allowIdx) {
+                if (named) {
                     throw new IllegalArgumentException("Cannot mix positional and named arguments");
                 }
-
-                givenIdx = idx + 1;
+                indexed = true;
+                if (givenIdx < 0 || givenIdx >= actMethodArgumentsTypes.size()) {
+                    throw new IllegalArgumentException("Given argument index is out of bounds: " + givenIdx);
+                }
+                name = actMethodArgumentsTypes.get(givenIdx).getKey();
+            } catch (NumberFormatException e) {
+                if (indexed) {
+                    throw new IllegalArgumentException("Cannot mix positional and named arguments");
+                }
+                name = param.name;
             }
 
-            if (givenIdx < 0 || givenIdx >= params.length) {
-                throw new IllegalArgumentException("Given argument index is out of bounds: " + givenIdx);
+            if (params.containsKey(name)) {
+                throw new IllegalArgumentException("Trying to overwrite given argument: " + name);
             }
-
-            if (params[givenIdx] != null) {
-                throw new IllegalArgumentException("Trying to overwrite given argument: " + givenIdx);
-            }
-
-            final Object paramValue = param.value;
-            if (paramValue != null && !actMethodArgumentsTypes.get(givenIdx).isAssignableFrom(paramValue.getClass())) {
-                throw new IllegalArgumentException("Invalid parameter type: " + paramValue.getClass());
-            }
-
-            params[givenIdx] = paramValue;
+            params.put(param.name, param.value);
         }
 
         return params;
@@ -590,10 +585,11 @@ public class RestNorthbound implements IRestNorthbound {
         result.type = "ACT_RESPONSE";
 
         try {
-            final List<Class<?>> actMethodArgumentsTypes = userSession.describeResourceShort(providerId, serviceName,
-                    rcName).actMethodArgumentsTypes;
-            final Object[] params = extractActParams(actMethodArgumentsTypes, parameters);
+            final List<Entry<String, Class<?>>> actMethodArgumentsTypes = userSession.describeResourceShort(providerId,
+                    serviceName, rcName).actMethodArgumentsTypes;
+            final Map<String, Object> params = extractActParams(actMethodArgumentsTypes, parameters);
             result.response = userSession.actOnResource(providerId, serviceName, rcName, params);
+            result.statusCode = 200;
         } catch (Exception e) {
             result.statusCode = 500;
             final StringWriter stringWriter = new StringWriter();

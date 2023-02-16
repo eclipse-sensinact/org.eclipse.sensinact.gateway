@@ -196,7 +196,7 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    Object actOnResource(String provider, String service, String resource, Object[] parameters);
+    Object actOnResource(String provider, String service, String resource, Map<String, Object> parameters);
 
     /**
      * Get the description of a resource
