@@ -13,7 +13,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl.emf;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,7 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
@@ -203,5 +207,48 @@ public class EMFUtil {
             }
         }
         return converted;
+    }
+
+    /**
+     * @param eObject
+     * @return
+     */
+    public static String getID(EObject eObject) {
+        String result = EcoreUtil.getID(eObject);
+        if (result != null) {
+            return result;
+        } else {
+            return findProviderName(eObject);
+        }
+    }
+
+    /**
+     * @param eObject
+     * @return
+     */
+    private static String findProviderName(EObject eObject) {
+        return eObject.eClass().getEAttributes().stream().filter(a -> a.getEAnnotation("ProviderName") != null)
+                .findFirst().filter(eObject::eIsSet)
+                .map(a -> EcoreUtil.convertToString(a.getEAttributeType(), eObject.eGet(a))).orElseGet(() -> null);
+    }
+
+    /**
+     * @param eObject
+     */
+    public static Instant getTimestamp(EObject eObject) {
+        return eObject.eClass().getEAttributes().stream().filter(a -> a.getEAnnotation("Timestamp") != null).findFirst()
+                .filter(eObject::eIsSet).map(eObject::eGet).map(EMFUtil::toInstant).orElseGet(Instant::now);
+
+    }
+
+    private static Instant toInstant(Object o) {
+        if (o instanceof Instant) {
+            return (Instant) o;
+        } else if (o instanceof Date) {
+            return ((Date) o).toInstant();
+        } else if (o instanceof Long) {
+            return Instant.EPOCH.plus((long) o, ChronoUnit.MILLIS);
+        }
+        return null;
     }
 }

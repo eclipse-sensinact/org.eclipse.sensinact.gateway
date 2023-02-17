@@ -191,6 +191,17 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>dim-nexus</id>
+      <name>Data In Motion Nexus</name>
+      <url>https://devel.data-in-motion.biz/nexus/repository/maven-releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <pluginRepositories>

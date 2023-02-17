@@ -20,8 +20,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
@@ -36,6 +38,7 @@ import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.prototype.twin.SensinactObject;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -301,5 +304,18 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         });
 
         return providersStream.collect(Collectors.toList());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin#getSensinactObject(
+     * org.eclipse.emf.ecore.EClass, java.lang.String)
+     */
+    @Override
+    public SensinactObject getSensinactObject(EClass eClass, String id) {
+        EObject snapshot = nexusImpl.getEObject(eClass, id).map(EcoreUtil::copy).orElseGet(() -> null);
+        return new SensinactObjectImpl(active, snapshot, nexusImpl, pf);
     }
 }

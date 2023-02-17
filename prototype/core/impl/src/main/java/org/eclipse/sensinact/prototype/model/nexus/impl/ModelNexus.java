@@ -694,4 +694,14 @@ public class ModelNexus {
         return actionHandler.act(getModelName(provider.eClass()), provider.getId(), service.getName(),
                 resource.getName(), parameters);
     }
+
+    /**
+     * @param eClass
+     * @param id
+     * @return
+     */
+    public Optional<EObject> getEObject(EClass eClass, String id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

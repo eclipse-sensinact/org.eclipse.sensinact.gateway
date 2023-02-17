@@ -14,7 +14,7 @@ package org.eclipse.sensinact.prototype.dto.impl;
 
 import java.time.Instant;
 
-public abstract class AbstractUpdateDto {
+public abstract class AbstractUpdateDto extends AbstractBaseDto {
 
     /**
      * The model to use, if null then a unique model may be created

@@ -22,7 +22,7 @@ import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.command.IndependentCommands;
-import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
+import org.eclipse.sensinact.prototype.dto.impl.AbstractBaseDto;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;
 import org.eclipse.sensinact.prototype.extract.impl.BulkGenericDtoDataExtractor;
@@ -57,7 +57,7 @@ public class PrototypePushImpl implements PrototypePush {
             extractor = cachedExtractors.computeIfAbsent(updateClazz, this::createDataExtractor);
         }
 
-        List<? extends AbstractUpdateDto> updates = extractor.getUpdates(o);
+        List<? extends AbstractBaseDto> updates = extractor.getUpdates(o);
 
         return thread.execute(new IndependentCommands<>(updates.stream().map(this::toCommand).collect(toList())));
     }
@@ -72,7 +72,7 @@ public class PrototypePushImpl implements PrototypePush {
         }
     }
 
-    private AbstractSensinactCommand<Void> toCommand(AbstractUpdateDto dto) {
+    private AbstractSensinactCommand<Void> toCommand(AbstractBaseDto dto) {
         if (dto instanceof DataUpdateDto) {
             return new SetValueCommand((DataUpdateDto) dto);
         } else if (dto instanceof MetadataUpdateDto) {
