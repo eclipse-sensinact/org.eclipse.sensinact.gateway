@@ -7,7 +7,18 @@
     copyrightFields="false" operationReflection="true" importOrganizing="true" oSGiCompatible="true">
   <foreignModel>sensinact.ecore</foreignModel>
   <genPackages prefix="SensiNact" basePackage="org.eclipse.sensinact.model" resource="XMI"
-      disposableProviderFactory="true" literalsInterface="false" ecorePackage="sensinact.ecore#/">
+      disposableProviderFactory="true" ecorePackage="sensinact.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="sensinact.ecore#//ResourceType">
+      <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ResourceType/ACTION"/>
+      <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ResourceType/PROPERTY"/>
+      <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ResourceType/SENSOR"/>
+      <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ResourceType/STATE_VARIABLE"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="sensinact.ecore#//ValueType">
+      <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ValueType/FIXED"/>
+      <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ValueType/OBSERVABLE"/>
+      <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ValueType/MODIFIABLE"/>
+    </genEnums>
     <genDataTypes ecoreDataType="sensinact.ecore#//EGeoJsonObject" create="try { return new com.fasterxml.jackson.databind.ObjectMapper().readValue(it, GeoJsonObject.class); } catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalArgumentException(e); }"
         convert="try { return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(it); } catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalArgumentException(e); }"/>
     <genDataTypes ecoreDataType="sensinact.ecore#//EInstant" create="return Instant.parse(it);"
@@ -25,22 +36,33 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Service/metadata"/>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//Metadata">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//Metadata/feature"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Metadata/timestamp"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//Metadata/source"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//Metadata/extra"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Metadata/locked"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Metadata/originalName"/>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//FeatureMetadata">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureMetadata/key"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureMetadata/value"/>
     </genClasses>
-    <genClasses ecoreClass="sensinact.ecore#//ModelMetadata">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ModelMetadata/version"/>
-    </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//AnnotationMetadata"/>
     <genClasses ecoreClass="sensinact.ecore#//FeatureCustomMetadata">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/value"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/timestamp"/>
     </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//ResourceAttribute">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceAttribute/resourceType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceAttribute/valueType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceAttribute/externalGet"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceAttribute/externalSet"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceAttribute/stale"/>
+    </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//ServiceReference"/>
+    <genClasses ecoreClass="sensinact.ecore#//Action"/>
+    <genClasses ecoreClass="sensinact.ecore#//ActionParameter"/>
+    <genClasses image="false" ecoreClass="sensinact.ecore#//Timestamped">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Timestamped/timestamp"/>
+    </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//ResourceMetadata"/>
   </genPackages>
 </genmodel:GenModel>

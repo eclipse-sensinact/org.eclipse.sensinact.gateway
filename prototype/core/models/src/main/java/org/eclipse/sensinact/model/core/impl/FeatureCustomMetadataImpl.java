@@ -113,7 +113,7 @@ public class FeatureCustomMetadataImpl extends MinimalEObjectImpl.Container.Dyna
 	 */
 	@Override
 	protected EClass eStaticClass() {
-		return SensiNactPackage.eINSTANCE.getFeatureCustomMetadata();
+		return SensiNactPackage.Literals.FEATURE_CUSTOM_METADATA;
 	}
 
 	/**

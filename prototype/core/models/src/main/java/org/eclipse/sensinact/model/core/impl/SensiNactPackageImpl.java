@@ -18,18 +18,27 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
+import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.model.core.Action;
+import org.eclipse.sensinact.model.core.ActionParameter;
 import org.eclipse.sensinact.model.core.Admin;
+import org.eclipse.sensinact.model.core.AnnotationMetadata;
 import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.ResourceAttribute;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
+import org.eclipse.sensinact.model.core.ResourceType;
 import org.eclipse.sensinact.model.core.SensiNactFactory;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.ServiceReference;
+import org.eclipse.sensinact.model.core.Timestamped;
+import org.eclipse.sensinact.model.core.ValueType;
 
 /**
  * <!-- begin-user-doc -->
@@ -78,7 +87,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private EClass modelMetadataEClass = null;
+	private EClass annotationMetadataEClass = null;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -86,6 +95,62 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	private EClass featureCustomMetadataEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass resourceAttributeEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass serviceReferenceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass actionEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass actionParameterEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass timestampedEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass resourceMetadataEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EEnum resourceTypeEEnum = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EEnum valueTypeEEnum = null;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -268,7 +333,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	@Override
-	public EReference getMetadata_Feature() {
+	public EReference getMetadata_Extra() {
 		return (EReference)metadataEClass.getEStructuralFeatures().get(0);
 	}
 
@@ -278,7 +343,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	@Override
-	public EAttribute getMetadata_Timestamp() {
+	public EAttribute getMetadata_Locked() {
 		return (EAttribute)metadataEClass.getEStructuralFeatures().get(1);
 	}
 
@@ -288,18 +353,8 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	@Override
-	public EReference getMetadata_Source() {
-		return (EReference)metadataEClass.getEStructuralFeatures().get(2);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EReference getMetadata_Extra() {
-		return (EReference)metadataEClass.getEStructuralFeatures().get(3);
+	public EAttribute getMetadata_OriginalName() {
+		return (EAttribute)metadataEClass.getEStructuralFeatures().get(2);
 	}
 
 	/**
@@ -338,18 +393,8 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	@Override
-	public EClass getModelMetadata() {
-		return modelMetadataEClass;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getModelMetadata_Version() {
-		return (EAttribute)modelMetadataEClass.getEStructuralFeatures().get(0);
+	public EClass getAnnotationMetadata() {
+		return annotationMetadataEClass;
 	}
 
 	/**
@@ -390,6 +435,146 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	@Override
 	public EAttribute getFeatureCustomMetadata_Timestamp() {
 		return (EAttribute)featureCustomMetadataEClass.getEStructuralFeatures().get(2);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EClass getResourceAttribute() {
+		return resourceAttributeEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getResourceAttribute_ResourceType() {
+		return (EAttribute)resourceAttributeEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getResourceAttribute_ValueType() {
+		return (EAttribute)resourceAttributeEClass.getEStructuralFeatures().get(1);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getResourceAttribute_ExternalGet() {
+		return (EAttribute)resourceAttributeEClass.getEStructuralFeatures().get(2);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getResourceAttribute_ExternalSet() {
+		return (EAttribute)resourceAttributeEClass.getEStructuralFeatures().get(3);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getResourceAttribute_Stale() {
+		return (EAttribute)resourceAttributeEClass.getEStructuralFeatures().get(4);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EClass getServiceReference() {
+		return serviceReferenceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EClass getAction() {
+		return actionEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EClass getActionParameter() {
+		return actionParameterEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EClass getTimestamped() {
+		return timestampedEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getTimestamped_Timestamp() {
+		return (EAttribute)timestampedEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EClass getResourceMetadata() {
+		return resourceMetadataEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EEnum getResourceType() {
+		return resourceTypeEEnum;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EEnum getValueType() {
+		return valueTypeEEnum;
 	}
 
 	/**
@@ -454,22 +639,42 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		createEReference(serviceEClass, SERVICE__METADATA);
 
 		metadataEClass = createEClass(METADATA);
-		createEReference(metadataEClass, METADATA__FEATURE);
-		createEAttribute(metadataEClass, METADATA__TIMESTAMP);
-		createEReference(metadataEClass, METADATA__SOURCE);
 		createEReference(metadataEClass, METADATA__EXTRA);
+		createEAttribute(metadataEClass, METADATA__LOCKED);
+		createEAttribute(metadataEClass, METADATA__ORIGINAL_NAME);
 
 		featureMetadataEClass = createEClass(FEATURE_METADATA);
 		createEReference(featureMetadataEClass, FEATURE_METADATA__KEY);
 		createEReference(featureMetadataEClass, FEATURE_METADATA__VALUE);
 
-		modelMetadataEClass = createEClass(MODEL_METADATA);
-		createEAttribute(modelMetadataEClass, MODEL_METADATA__VERSION);
+		annotationMetadataEClass = createEClass(ANNOTATION_METADATA);
 
 		featureCustomMetadataEClass = createEClass(FEATURE_CUSTOM_METADATA);
 		createEAttribute(featureCustomMetadataEClass, FEATURE_CUSTOM_METADATA__NAME);
 		createEAttribute(featureCustomMetadataEClass, FEATURE_CUSTOM_METADATA__VALUE);
 		createEAttribute(featureCustomMetadataEClass, FEATURE_CUSTOM_METADATA__TIMESTAMP);
+
+		resourceAttributeEClass = createEClass(RESOURCE_ATTRIBUTE);
+		createEAttribute(resourceAttributeEClass, RESOURCE_ATTRIBUTE__RESOURCE_TYPE);
+		createEAttribute(resourceAttributeEClass, RESOURCE_ATTRIBUTE__VALUE_TYPE);
+		createEAttribute(resourceAttributeEClass, RESOURCE_ATTRIBUTE__EXTERNAL_GET);
+		createEAttribute(resourceAttributeEClass, RESOURCE_ATTRIBUTE__EXTERNAL_SET);
+		createEAttribute(resourceAttributeEClass, RESOURCE_ATTRIBUTE__STALE);
+
+		serviceReferenceEClass = createEClass(SERVICE_REFERENCE);
+
+		actionEClass = createEClass(ACTION);
+
+		actionParameterEClass = createEClass(ACTION_PARAMETER);
+
+		timestampedEClass = createEClass(TIMESTAMPED);
+		createEAttribute(timestampedEClass, TIMESTAMPED__TIMESTAMP);
+
+		resourceMetadataEClass = createEClass(RESOURCE_METADATA);
+
+		// Create enums
+		resourceTypeEEnum = createEEnum(RESOURCE_TYPE);
+		valueTypeEEnum = createEEnum(VALUE_TYPE);
 
 		// Create data types
 		eGeoJsonObjectEDataType = createEDataType(EGEO_JSON_OBJECT);
@@ -505,7 +710,17 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 
 		// Add supertypes to classes
 		adminEClass.getESuperTypes().add(this.getService());
-		modelMetadataEClass.getESuperTypes().add(this.getMetadata());
+		metadataEClass.getESuperTypes().add(this.getTimestamped());
+		annotationMetadataEClass.getESuperTypes().add(this.getMetadata());
+		resourceAttributeEClass.getESuperTypes().add(ecorePackage.getEAttribute());
+		resourceAttributeEClass.getESuperTypes().add(this.getMetadata());
+		serviceReferenceEClass.getESuperTypes().add(ecorePackage.getEReference());
+		serviceReferenceEClass.getESuperTypes().add(this.getMetadata());
+		actionEClass.getESuperTypes().add(ecorePackage.getEOperation());
+		actionEClass.getESuperTypes().add(this.getMetadata());
+		actionParameterEClass.getESuperTypes().add(ecorePackage.getEParameter());
+		actionParameterEClass.getESuperTypes().add(this.getTimestamped());
+		resourceMetadataEClass.getESuperTypes().add(this.getMetadata());
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(providerEClass, Provider.class, "Provider", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -520,23 +735,51 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		initEClass(serviceEClass, Service.class, "Service", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getService_Metadata(), this.getFeatureMetadata(), null, "metadata", null, 0, -1, Service.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
-		initEClass(metadataEClass, Metadata.class, "Metadata", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEReference(getMetadata_Feature(), ecorePackage.getEStructuralFeature(), null, "feature", null, 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getMetadata_Timestamp(), this.getEInstant(), "timestamp", null, 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEReference(getMetadata_Source(), ecorePackage.getEObject(), null, "source", null, 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEClass(metadataEClass, Metadata.class, "Metadata", IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getMetadata_Extra(), this.getFeatureCustomMetadata(), null, "extra", null, 0, -1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getMetadata_Locked(), ecorePackage.getEBoolean(), "locked", "false", 0, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getMetadata_OriginalName(), ecorePackage.getEString(), "originalName", null, 1, 1, Metadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(featureMetadataEClass, Map.Entry.class, "FeatureMetadata", !IS_ABSTRACT, !IS_INTERFACE, !IS_GENERATED_INSTANCE_CLASS);
-		initEReference(getFeatureMetadata_Key(), ecorePackage.getEStructuralFeature(), null, "key", null, 0, 1, Map.Entry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEReference(getFeatureMetadata_Value(), this.getMetadata(), null, "value", null, 0, 1, Map.Entry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getFeatureMetadata_Key(), ecorePackage.getETypedElement(), null, "key", null, 0, 1, Map.Entry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getFeatureMetadata_Value(), this.getResourceMetadata(), null, "value", null, 0, 1, Map.Entry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
-		initEClass(modelMetadataEClass, ModelMetadata.class, "ModelMetadata", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEAttribute(getModelMetadata_Version(), ecorePackage.getEInt(), "version", null, 0, 1, ModelMetadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEClass(annotationMetadataEClass, AnnotationMetadata.class, "AnnotationMetadata", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 
 		initEClass(featureCustomMetadataEClass, FeatureCustomMetadata.class, "FeatureCustomMetadata", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getFeatureCustomMetadata_Name(), ecorePackage.getEString(), "name", null, 0, 1, FeatureCustomMetadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getFeatureCustomMetadata_Value(), ecorePackage.getEJavaObject(), "value", null, 0, 1, FeatureCustomMetadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getFeatureCustomMetadata_Timestamp(), this.getEInstant(), "timestamp", null, 0, 1, FeatureCustomMetadata.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(resourceAttributeEClass, ResourceAttribute.class, "ResourceAttribute", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getResourceAttribute_ResourceType(), this.getResourceType(), "resourceType", "SENSOR", 0, 1, ResourceAttribute.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getResourceAttribute_ValueType(), this.getValueType(), "valueType", "MODIFIABLE", 0, 1, ResourceAttribute.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getResourceAttribute_ExternalGet(), ecorePackage.getEBoolean(), "externalGet", null, 0, 1, ResourceAttribute.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getResourceAttribute_ExternalSet(), ecorePackage.getEBoolean(), "externalSet", null, 0, 1, ResourceAttribute.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getResourceAttribute_Stale(), ecorePackage.getEInt(), "stale", null, 0, 1, ResourceAttribute.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(serviceReferenceEClass, ServiceReference.class, "ServiceReference", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+		initEClass(actionEClass, Action.class, "Action", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+		initEClass(actionParameterEClass, ActionParameter.class, "ActionParameter", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+		initEClass(timestampedEClass, Timestamped.class, "Timestamped", IS_ABSTRACT, IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getTimestamped_Timestamp(), this.getEInstant(), "timestamp", null, 0, 1, Timestamped.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(resourceMetadataEClass, ResourceMetadata.class, "ResourceMetadata", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+		// Initialize enums and add enum literals
+		initEEnum(resourceTypeEEnum, ResourceType.class, "ResourceType");
+		addEEnumLiteral(resourceTypeEEnum, ResourceType.ACTION);
+		addEEnumLiteral(resourceTypeEEnum, ResourceType.PROPERTY);
+		addEEnumLiteral(resourceTypeEEnum, ResourceType.SENSOR);
+		addEEnumLiteral(resourceTypeEEnum, ResourceType.STATE_VARIABLE);
+
+		initEEnum(valueTypeEEnum, ValueType.class, "ValueType");
+		addEEnumLiteral(valueTypeEEnum, ValueType.FIXED);
+		addEEnumLiteral(valueTypeEEnum, ValueType.OBSERVABLE);
+		addEEnumLiteral(valueTypeEEnum, ValueType.MODIFIABLE);
 
 		// Initialize data types
 		initEDataType(eGeoJsonObjectEDataType, GeoJsonObject.class, "EGeoJsonObject", IS_SERIALIZABLE, !IS_GENERATED_INSTANCE_CLASS);
@@ -548,6 +791,8 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		// Create annotations
 		// http://www.eclipse.org/OCL/Import
 		createImportAnnotations();
+		// http://www.eclipse.org/emf/2002/GenModel
+		createGenModelAnnotations();
 	}
 
 	/**
@@ -563,6 +808,22 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		   source,
 		   new String[] {
 			   "ecore", "http://www.eclipse.org/emf/2002/Ecore"
+		   });
+	}
+
+	/**
+	 * Initializes the annotations for <b>http://www.eclipse.org/emf/2002/GenModel</b>.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void createGenModelAnnotations() {
+		String source = "http://www.eclipse.org/emf/2002/GenModel";
+		addAnnotation
+		  (getResourceAttribute_Stale(),
+		   source,
+		   new String[] {
+			   "documentation", "Indicator when an external get needs to be triggered and the internal data chache becomes stale. Negative values are never stale, 0 is always stale and postive values indicate the number milliseconds till the last get."
 		   });
 	}
 

@@ -17,9 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EOperation;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.ResourceType;
@@ -36,15 +40,14 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
     private final SensinactService svc;
     private final Provider provider;
-    private final EStructuralFeature service;
-    private final EStructuralFeature resource;
+    private final EReference service;
+    private final ETypedElement resource;
     private final Class<?> type;
     private final ModelNexus modelNexus;
     private final PromiseFactory promiseFactory;
 
-    public SensinactResourceImpl(AtomicBoolean active, SensinactService svc, Provider provider,
-            EStructuralFeature service, EStructuralFeature resource, Class<?> type, ModelNexus nexusImpl,
-            PromiseFactory promiseFactory) {
+    public SensinactResourceImpl(AtomicBoolean active, SensinactService svc, Provider provider, EReference service,
+            ETypedElement resource, Class<?> type, ModelNexus nexusImpl, PromiseFactory promiseFactory) {
         super(active);
         this.svc = svc;
         this.provider = provider;
@@ -64,8 +67,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     @Override
     public ValueType getValueType() {
         checkValid();
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceImpl.findValueType(resource);
     }
 
     @Override
@@ -80,7 +82,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         if (getResourceType() != ResourceType.ACTION) {
             throw new IllegalArgumentException("This is not an action resource");
         }
-        return ResourceImpl.findActionParameters(resource);
+        return ResourceImpl.findActionParameters((EOperation) resource);
     }
 
     @Override
@@ -97,8 +99,8 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
         }
 
-        modelNexus.handleDataUpdate(modelNexus.getModelName(provider.eClass()), provider, service, resource, value,
-                timestamp);
+        modelNexus.handleDataUpdate(modelNexus.getModelName(provider.eClass()), provider, service,
+                (EStructuralFeature) resource, value, timestamp);
         return promiseFactory.resolved(null);
     }
 
@@ -114,9 +116,9 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         final Instant timestamp;
         final Object value;
         if (svc != null) {
-            value = svc.eGet(resource);
+            value = svc.eGet((EAttribute) resource);
             // Get the resource metadata
-            final Metadata metadata = svc.getMetadata().get(resource);
+            final ResourceMetadata metadata = svc.getMetadata().get(resource);
             if (metadata != null) {
                 timestamp = metadata.getTimestamp();
             } else {

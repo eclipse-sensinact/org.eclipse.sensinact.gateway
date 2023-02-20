@@ -16,16 +16,20 @@ import java.util.Map;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notifier;
+
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
+
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EModelElement;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
+import org.eclipse.emf.ecore.EParameter;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.sensinact.model.core.Admin;
-import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
-import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.ModelMetadata;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.emf.ecore.ETypedElement;
+
+import org.eclipse.sensinact.model.core.*;
 
 /**
  * <!-- begin-user-doc -->
@@ -100,16 +104,72 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 				return createMetadataAdapter();
 			}
 			@Override
-			public Adapter caseFeatureMetadata(Map.Entry<EStructuralFeature, Metadata> object) {
+			public Adapter caseFeatureMetadata(Map.Entry<ETypedElement, ResourceMetadata> object) {
 				return createFeatureMetadataAdapter();
 			}
 			@Override
-			public Adapter caseModelMetadata(ModelMetadata object) {
-				return createModelMetadataAdapter();
+			public Adapter caseAnnotationMetadata(AnnotationMetadata object) {
+				return createAnnotationMetadataAdapter();
 			}
 			@Override
 			public Adapter caseFeatureCustomMetadata(FeatureCustomMetadata object) {
 				return createFeatureCustomMetadataAdapter();
+			}
+			@Override
+			public Adapter caseResourceAttribute(ResourceAttribute object) {
+				return createResourceAttributeAdapter();
+			}
+			@Override
+			public Adapter caseServiceReference(ServiceReference object) {
+				return createServiceReferenceAdapter();
+			}
+			@Override
+			public Adapter caseAction(Action object) {
+				return createActionAdapter();
+			}
+			@Override
+			public Adapter caseActionParameter(ActionParameter object) {
+				return createActionParameterAdapter();
+			}
+			@Override
+			public Adapter caseTimestamped(Timestamped object) {
+				return createTimestampedAdapter();
+			}
+			@Override
+			public Adapter caseResourceMetadata(ResourceMetadata object) {
+				return createResourceMetadataAdapter();
+			}
+			@Override
+			public Adapter caseEModelElement(EModelElement object) {
+				return createEModelElementAdapter();
+			}
+			@Override
+			public Adapter caseENamedElement(ENamedElement object) {
+				return createENamedElementAdapter();
+			}
+			@Override
+			public Adapter caseETypedElement(ETypedElement object) {
+				return createETypedElementAdapter();
+			}
+			@Override
+			public Adapter caseEStructuralFeature(EStructuralFeature object) {
+				return createEStructuralFeatureAdapter();
+			}
+			@Override
+			public Adapter caseEAttribute(EAttribute object) {
+				return createEAttributeAdapter();
+			}
+			@Override
+			public Adapter caseEReference(EReference object) {
+				return createEReferenceAdapter();
+			}
+			@Override
+			public Adapter caseEOperation(EOperation object) {
+				return createEOperationAdapter();
+			}
+			@Override
+			public Adapter caseEParameter(EParameter object) {
+				return createEParameterAdapter();
 			}
 			@Override
 			public Adapter defaultCase(EObject object) {
@@ -202,16 +262,16 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 	}
 
 	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.ModelMetadata <em>Model Metadata</em>}'.
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.AnnotationMetadata <em>Annotation Metadata</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see org.eclipse.sensinact.model.core.ModelMetadata
+	 * @see org.eclipse.sensinact.model.core.AnnotationMetadata
 	 * @generated
 	 */
-	public Adapter createModelMetadataAdapter() {
+	public Adapter createAnnotationMetadataAdapter() {
 		return null;
 	}
 
@@ -226,6 +286,202 @@ public class SensiNactAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createFeatureCustomMetadataAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.ResourceAttribute <em>Resource Attribute</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.ResourceAttribute
+	 * @generated
+	 */
+	public Adapter createResourceAttributeAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.ServiceReference <em>Service Reference</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.ServiceReference
+	 * @generated
+	 */
+	public Adapter createServiceReferenceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.Action <em>Action</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.Action
+	 * @generated
+	 */
+	public Adapter createActionAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.ActionParameter <em>Action Parameter</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.ActionParameter
+	 * @generated
+	 */
+	public Adapter createActionParameterAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.Timestamped <em>Timestamped</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.Timestamped
+	 * @generated
+	 */
+	public Adapter createTimestampedAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.model.core.ResourceMetadata <em>Resource Metadata</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.model.core.ResourceMetadata
+	 * @generated
+	 */
+	public Adapter createResourceMetadataAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.EModelElement <em>EModel Element</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.EModelElement
+	 * @generated
+	 */
+	public Adapter createEModelElementAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.ENamedElement <em>ENamed Element</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.ENamedElement
+	 * @generated
+	 */
+	public Adapter createENamedElementAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.ETypedElement <em>ETyped Element</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.ETypedElement
+	 * @generated
+	 */
+	public Adapter createETypedElementAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.EStructuralFeature <em>EStructural Feature</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.EStructuralFeature
+	 * @generated
+	 */
+	public Adapter createEStructuralFeatureAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.EAttribute <em>EAttribute</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.EAttribute
+	 * @generated
+	 */
+	public Adapter createEAttributeAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.EReference <em>EReference</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.EReference
+	 * @generated
+	 */
+	public Adapter createEReferenceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.EOperation <em>EOperation</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.EOperation
+	 * @generated
+	 */
+	public Adapter createEOperationAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.emf.ecore.EParameter <em>EParameter</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.emf.ecore.EParameter
+	 * @generated
+	 */
+	public Adapter createEParameterAdapter() {
 		return null;
 	}
 

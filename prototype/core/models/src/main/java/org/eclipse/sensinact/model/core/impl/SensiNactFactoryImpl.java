@@ -19,18 +19,24 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.model.core.Action;
+import org.eclipse.sensinact.model.core.ActionParameter;
 import org.eclipse.sensinact.model.core.Admin;
+import org.eclipse.sensinact.model.core.AnnotationMetadata;
 import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
-import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.ModelMetadata;
 import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.ResourceAttribute;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
+import org.eclipse.sensinact.model.core.ResourceType;
 import org.eclipse.sensinact.model.core.SensiNactFactory;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.ServiceReference;
+import org.eclipse.sensinact.model.core.ValueType;
 
 /**
  * <!-- begin-user-doc -->
@@ -79,10 +85,14 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 			case SensiNactPackage.PROVIDER: return createProvider();
 			case SensiNactPackage.ADMIN: return createAdmin();
 			case SensiNactPackage.SERVICE: return createService();
-			case SensiNactPackage.METADATA: return createMetadata();
 			case SensiNactPackage.FEATURE_METADATA: return (EObject)createFeatureMetadata();
-			case SensiNactPackage.MODEL_METADATA: return createModelMetadata();
+			case SensiNactPackage.ANNOTATION_METADATA: return createAnnotationMetadata();
 			case SensiNactPackage.FEATURE_CUSTOM_METADATA: return createFeatureCustomMetadata();
+			case SensiNactPackage.RESOURCE_ATTRIBUTE: return createResourceAttribute();
+			case SensiNactPackage.SERVICE_REFERENCE: return createServiceReference();
+			case SensiNactPackage.ACTION: return createAction();
+			case SensiNactPackage.ACTION_PARAMETER: return createActionParameter();
+			case SensiNactPackage.RESOURCE_METADATA: return createResourceMetadata();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -96,6 +106,10 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 	@Override
 	public Object createFromString(EDataType eDataType, String initialValue) {
 		switch (eDataType.getClassifierID()) {
+			case SensiNactPackage.RESOURCE_TYPE:
+				return createResourceTypeFromString(eDataType, initialValue);
+			case SensiNactPackage.VALUE_TYPE:
+				return createValueTypeFromString(eDataType, initialValue);
 			case SensiNactPackage.EGEO_JSON_OBJECT:
 				return createEGeoJsonObjectFromString(eDataType, initialValue);
 			case SensiNactPackage.EINSTANT:
@@ -113,6 +127,10 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 	@Override
 	public String convertToString(EDataType eDataType, Object instanceValue) {
 		switch (eDataType.getClassifierID()) {
+			case SensiNactPackage.RESOURCE_TYPE:
+				return convertResourceTypeToString(eDataType, instanceValue);
+			case SensiNactPackage.VALUE_TYPE:
+				return convertValueTypeToString(eDataType, instanceValue);
 			case SensiNactPackage.EGEO_JSON_OBJECT:
 				return convertEGeoJsonObjectToString(eDataType, instanceValue);
 			case SensiNactPackage.EINSTANT:
@@ -160,18 +178,7 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	@Override
-	public Metadata createMetadata() {
-		MetadataImpl metadata = new MetadataImpl();
-		return metadata;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public Map.Entry<EStructuralFeature, Metadata> createFeatureMetadata() {
+	public Map.Entry<ETypedElement, ResourceMetadata> createFeatureMetadata() {
 		FeatureMetadataImpl featureMetadata = new FeatureMetadataImpl();
 		return featureMetadata;
 	}
@@ -182,9 +189,9 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 	 * @generated
 	 */
 	@Override
-	public ModelMetadata createModelMetadata() {
-		ModelMetadataImpl modelMetadata = new ModelMetadataImpl();
-		return modelMetadata;
+	public AnnotationMetadata createAnnotationMetadata() {
+		AnnotationMetadataImpl annotationMetadata = new AnnotationMetadataImpl();
+		return annotationMetadata;
 	}
 
 	/**
@@ -196,6 +203,101 @@ public class SensiNactFactoryImpl extends EFactoryImpl implements SensiNactFacto
 	public FeatureCustomMetadata createFeatureCustomMetadata() {
 		FeatureCustomMetadataImpl featureCustomMetadata = new FeatureCustomMetadataImpl();
 		return featureCustomMetadata;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public ResourceAttribute createResourceAttribute() {
+		ResourceAttributeImpl resourceAttribute = new ResourceAttributeImpl();
+		return resourceAttribute;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public ServiceReference createServiceReference() {
+		ServiceReferenceImpl serviceReference = new ServiceReferenceImpl();
+		return serviceReference;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Action createAction() {
+		ActionImpl action = new ActionImpl();
+		return action;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public ActionParameter createActionParameter() {
+		ActionParameterImpl actionParameter = new ActionParameterImpl();
+		return actionParameter;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public ResourceMetadata createResourceMetadata() {
+		ResourceMetadataImpl resourceMetadata = new ResourceMetadataImpl();
+		return resourceMetadata;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public ResourceType createResourceTypeFromString(EDataType eDataType, String initialValue) {
+		ResourceType result = ResourceType.get(initialValue);
+		if (result == null) throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '" + eDataType.getName() + "'");
+		return result;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String convertResourceTypeToString(EDataType eDataType, Object instanceValue) {
+		return instanceValue == null ? null : instanceValue.toString();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public ValueType createValueTypeFromString(EDataType eDataType, String initialValue) {
+		ValueType result = ValueType.get(initialValue);
+		if (result == null) throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '" + eDataType.getName() + "'");
+		return result;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String convertValueTypeToString(EDataType eDataType, Object instanceValue) {
+		return instanceValue == null ? null : instanceValue.toString();
 	}
 
 	/**

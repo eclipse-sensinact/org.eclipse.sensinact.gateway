@@ -12,13 +12,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.impl;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.sensinact.model.core.ModelMetadata;
+import org.eclipse.emf.ecore.EOperation;
+import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.model.core.ResourceAttribute;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceType;
@@ -28,9 +30,9 @@ import org.eclipse.sensinact.prototype.model.ValueType;
 public class ResourceImpl extends CommandScopedImpl implements Resource {
 
     private final Service service;
-    private final EStructuralFeature feature;
+    private final ETypedElement feature;
 
-    public ResourceImpl(AtomicBoolean active, Service service, EStructuralFeature feature) {
+    public ResourceImpl(AtomicBoolean active, Service service, ETypedElement feature) {
         super(active);
         this.service = service;
         this.feature = feature;
@@ -69,14 +71,18 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
     @Override
     public ResourceType getResourceType() {
         checkValid();
-        // Check the metadata, Sensor if no info
+
         return findResourceType(feature);
     }
 
-    public static ResourceType findResourceType(EStructuralFeature feature) {
-        return getModelMetadata(feature).map(ModelMetadata::getExtra)
-                .flatMap(l -> l.stream().filter(f -> "resourceType".equals(f.getName())).findFirst())
-                .map(f -> (ResourceType) f.getValue()).orElse(ResourceType.SENSOR);
+    public static ResourceType findResourceType(ETypedElement feature) {
+        // Check the metadata, Sensor if no info
+        if (feature instanceof EOperation) {
+            return ResourceType.ACTION;
+        } else if (feature instanceof ResourceAttribute) {
+            return ResourceType.valueOf(((ResourceAttribute) feature).getResourceType().getName());
+        }
+        return ResourceType.PROPERTY;
     }
 
     @Override
@@ -85,26 +91,29 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         if (getResourceType() != ResourceType.ACTION) {
             throw new IllegalArgumentException("This is not an action resource");
         }
-        return findActionParameters(feature);
+        return findActionParameters((EOperation) feature);
     }
 
-    @SuppressWarnings("unchecked")
-    public static List<Map.Entry<String, Class<?>>> findActionParameters(EStructuralFeature feature) {
-        return getModelMetadata(feature).map(ModelMetadata::getExtra)
-                .flatMap(l -> l.stream().filter(f -> "parameters".equals(f.getName())).findFirst())
-                .map(f -> (List<Map.Entry<String, Class<?>>>) f.getValue())
-                .orElseThrow(() -> new IllegalArgumentException("No parameter data available"));
-    }
-
-    private static Optional<ModelMetadata> getModelMetadata(EStructuralFeature feature) {
-        return Optional.ofNullable(feature.getEAnnotation("metadata")).flatMap(ann -> ann.eContents().stream()
-                .filter(ModelMetadata.class::isInstance).map(ModelMetadata.class::cast).findFirst());
+    public static List<Map.Entry<String, Class<?>>> findActionParameters(EOperation operation) {
+        List<Map.Entry<String, Class<?>>> result = operation.getEParameters().stream()
+                .map(ep -> new AbstractMap.SimpleImmutableEntry<String, Class<?>>(ep.getName(),
+                        ep.getEType().getInstanceClass()))
+                .collect(Collectors.toList());
+        return result;
     }
 
     @Override
     public Service getService() {
         checkValid();
         return service;
+    }
+
+    public static ValueType findValueType(ETypedElement feature) {
+        // Check the metadata, Sensor if no info
+        if (feature instanceof ResourceAttribute) {
+            return ValueType.valueOf(((ResourceAttribute) feature).getValueType().getName());
+        }
+        throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
     }
 
 }

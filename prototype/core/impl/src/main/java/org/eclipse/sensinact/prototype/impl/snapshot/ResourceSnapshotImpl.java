@@ -17,9 +17,8 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
-import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
 import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
@@ -40,7 +39,7 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
     /**
      * Resource feature
      */
-    private final EStructuralFeature rcFeature;
+    private final ETypedElement rcFeature;
 
     /**
      * Resource metadata
@@ -52,23 +51,20 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
      */
     private final Class<?> type;
 
-    public ResourceSnapshotImpl(final ServiceSnapshotImpl parent, final EStructuralFeature rcFeature,
+    public ResourceSnapshotImpl(final ServiceSnapshotImpl parent, final ETypedElement rcFeature,
             final Instant snapshotInstant) {
         super(rcFeature.getName(), snapshotInstant);
         this.service = parent;
         this.rcFeature = rcFeature;
         this.type = rcFeature.getEType().getInstanceClass();
 
-        final Metadata rcMetadata = parent.getModelService().getMetadata().get(rcFeature);
+        final ResourceMetadata rcMetadata = parent.getModelService().getMetadata().get(rcFeature);
         if (rcMetadata == null) {
             this.metadata = Map.of();
         } else {
             final Map<String, Object> rcMeta = new HashMap<>();
-            for (FeatureCustomMetadata entry : rcMetadata.getExtra()) {
-                rcMeta.put(entry.getName(), entry.getValue());
-            }
             rcMeta.putAll(EMFUtil.toEObjectAttributesToMap(rcMetadata));
-            this.metadata = Map.copyOf(rcMeta);
+            this.metadata = rcMeta;
         }
     }
 
@@ -100,7 +96,7 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         return type;
     }
 
-    public EStructuralFeature getFeature() {
+    public ETypedElement getFeature() {
         return rcFeature;
     }
 }

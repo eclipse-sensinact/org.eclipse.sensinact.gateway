@@ -13,10 +13,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl.emf;
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 
 import org.eclipse.emf.common.util.URI;
@@ -25,7 +28,6 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
-import org.eclipse.emf.ecore.EModelElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -35,8 +37,14 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.sensinact.model.core.ModelMetadata;
+import org.eclipse.sensinact.model.core.Action;
+import org.eclipse.sensinact.model.core.ActionParameter;
+import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.model.core.ResourceAttribute;
+import org.eclipse.sensinact.model.core.SensiNactFactory;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.ServiceReference;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.Converters;
 
@@ -53,16 +61,38 @@ public class EMFUtil {
     static {
         converter = Converters.standardConverter();
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
-        EDataType eInstant = SensiNactPackage.eINSTANCE.getEInstant();
-        typeMap.put(eInstant.getInstanceClass(), eInstant);
-        EDataType eGeoJsonObject = SensiNactPackage.eINSTANCE.getEGeoJsonObject();
-        typeMap.put(eGeoJsonObject.getInstanceClass(), eGeoJsonObject);
+        SensiNactPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
     }
 
     public static Map<String, Object> toEObjectAttributesToMap(EObject eObject) {
+        return toEObjectAttributesToMap(eObject, false);
+    }
+
+    public static Map<String, Object> toEObjectAttributesToMap(EObject eObject, boolean ignoreUnset) {
         Map<String, Object> result = new HashMap<String, Object>();
-        eObject.eClass().getEAttributes().forEach(a -> result.put(a.getName(), eObject.eGet(a)));
+        eObject.eClass().getEAllAttributes().stream()
+                // We don't want attributes from EObject and anything above
+                .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
+                .filter(ea -> !ignoreUnset || eObject.eIsSet(ea))
+                .forEach(a -> result.put(a.getName(), eObject.eGet(a)));
         return result;
+    }
+
+    public static ActionParameter createActionParameter(Entry<String, Class<?>> entry) {
+        ActionParameter parameter = SensiNactFactory.eINSTANCE.createActionParameter();
+        parameter.setName(entry.getKey());
+        parameter.setTimestamp(Instant.now());
+        parameter.setEType(convertClass(entry.getValue()));
+        return parameter;
+    }
+
+    public static EClassifier convertClass(Class<?> clazz) {
+        EClassifier eClassifier = typeMap.get(clazz);
+        if (eClassifier == null) {
+            throw new IllegalArgumentException(
+                    "Can't convert " + clazz + " to EClassifier. The class is unknwon to us");
+        }
+        return eClassifier;
     }
 
     /**
@@ -118,12 +148,6 @@ public class EMFUtil {
         return annotation;
     }
 
-    /**
-     * @param serviceName
-     * @param service
-     * @param b
-     * @return
-     */
     public static EReference createEReference(EClass parent, String refName, EClass type, boolean containment,
             Function<EStructuralFeature, List<EAnnotation>> annotationCreator) {
         EReference feature = EcoreFactory.eINSTANCE.createEReference();
@@ -138,19 +162,22 @@ public class EMFUtil {
         return feature;
     }
 
-    /**
-     * TODO: What should we do if the type is unkwon?
-     *
-     * @param service
-     * @param resource
-     * @param type
-     * @return
-     */
+    public static ServiceReference createServiceReference(EClass parent, String refName, EClass type,
+            boolean containment) {
+        ServiceReference feature = SensiNactFactory.eINSTANCE.createServiceReference();
+        feature.setName(refName);
+        feature.setEType(type);
+        feature.setContainment(containment);
+        parent.getEStructuralFeatures().add(feature);
+
+        return feature;
+    }
+
     public static EAttribute createEAttribute(EClass service, String resource, Class<?> type, Object defaultValue,
             Function<EStructuralFeature, List<EAnnotation>> annotationCreator) {
         EAttribute attribute = EcoreFactory.eINSTANCE.createEAttribute();
         attribute.setName(resource);
-        attribute.setEType(typeMap.get(type));
+        attribute.setEType(convertClass(type));
         if (defaultValue != null) {
             attribute.setDefaultValue(defaultValue);
         }
@@ -161,27 +188,16 @@ public class EMFUtil {
         return attribute;
     }
 
-    /**
-     * @param feature
-     * @return
-     */
-    public static int getVersion(EModelElement eModelElement) {
-        EAnnotation eAnnotation = eModelElement.getEAnnotation("metadata");
-        if (eAnnotation == null) {
-            return -1;
+    public static ResourceAttribute createResourceAttribute(EClass service, String resource, Class<?> type,
+            Object defaultValue) {
+        ResourceAttribute attribute = SensiNactFactory.eINSTANCE.createResourceAttribute();
+        attribute.setName(resource);
+        attribute.setEType(convertClass(type));
+        if (defaultValue != null) {
+            attribute.setDefaultValue(defaultValue);
         }
-        return ((ModelMetadata) eAnnotation.getContents().get(0)).getVersion();
-    }
-
-    /**
-     * Returns the Version of the containing {@link EClass} of the
-     * {@link EStructuralFeature}
-     *
-     * @param feature the Feature
-     * @return the version of the container
-     */
-    public static int getContainerVersion(EStructuralFeature feature) {
-        return getVersion((EClass) feature.eContainer());
+        service.getEStructuralFeatures().add(attribute);
+        return attribute;
     }
 
     public static Object convertToTargetType(EClassifier targetType, Object o) {
@@ -203,5 +219,23 @@ public class EMFUtil {
             }
         }
         return converted;
+    }
+
+    public static void fillMetadata(Metadata meta, Instant timestamp, boolean locked, String name,
+            Collection<? extends FeatureCustomMetadata> extra) {
+        meta.setTimestamp(timestamp);
+        meta.setLocked(locked);
+        meta.setOriginalName(name);
+        meta.getExtra().addAll(extra);
+
+    }
+
+    public static Action createAction(EClass serviceEClass, String name, Class<?> type, List<ActionParameter> params) {
+        Action operation = SensiNactFactory.eINSTANCE.createAction();
+        operation.setName(name);
+        operation.setEType(convertClass(type));
+        operation.getEParameters().addAll(params);
+        serviceEClass.getEOperations().add(operation);
+        return operation;
     }
 }

@@ -1,5 +1,8 @@
 -tester: biz.aQute.tester.junit-platform
 
+-runproperties: \
+	org.osgi.service.http.port=-1
+
 -runrequires: \
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
 	bnd.identity;id='slf4j.simple',\

@@ -79,8 +79,17 @@ public class GatewayThreadImplTest {
     }
 
     @AfterEach
-    void teardown() {
+    void teardown() throws IOException {
         thread.deactivate();
+        Path path = Paths.get("data", "instances");
+        if (Files.isDirectory(path)) {
+            Files.walk(path, 1).filter(Files::isRegularFile).forEach(t -> {
+                try {
+                    Files.delete(t);
+                } catch (IOException e) {
+                }
+            });
+        }
     }
 
     @Test

@@ -98,7 +98,7 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	 */
 	@Override
 	protected EClass eStaticClass() {
-		return SensiNactPackage.eINSTANCE.getProvider();
+		return SensiNactPackage.Literals.PROVIDER;
 	}
 
 	/**

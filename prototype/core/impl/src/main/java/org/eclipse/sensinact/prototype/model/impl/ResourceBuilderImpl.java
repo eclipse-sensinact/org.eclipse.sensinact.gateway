@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 import org.eclipse.sensinact.prototype.model.ResourceType;
@@ -152,7 +152,7 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
 
     @Override
     protected Resource doBuild(ServiceImpl builtParent) {
-        EAttribute createResource;
+        ETypedElement createResource;
         switch (resourceType) {
         case ACTION:
             createResource = nexusImpl.createActionResource(builtParent.getServiceEClass(), name, type,
