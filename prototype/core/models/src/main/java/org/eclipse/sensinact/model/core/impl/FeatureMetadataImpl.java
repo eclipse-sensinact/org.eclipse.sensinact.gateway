@@ -18,11 +18,11 @@ import org.eclipse.emf.common.util.BasicEMap;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
-import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 
 /**
@@ -39,7 +39,7 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
  *
  * @generated
  */
-public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Permissive implements BasicEMap.Entry<EStructuralFeature,Metadata> {
+public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Permissive implements BasicEMap.Entry<ETypedElement,ResourceMetadata> {
 	/**
 	 * The cached value of the '{@link #getTypedKey() <em>Key</em>}' reference.
 	 * <!-- begin-user-doc -->
@@ -48,7 +48,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * @generated
 	 * @ordered
 	 */
-	protected EStructuralFeature key;
+	protected ETypedElement key;
 
 	/**
 	 * The cached value of the '{@link #getTypedValue() <em>Value</em>}' containment reference.
@@ -58,7 +58,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * @generated
 	 * @ordered
 	 */
-	protected Metadata value;
+	protected ResourceMetadata value;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -76,7 +76,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 */
 	@Override
 	protected EClass eStaticClass() {
-		return SensiNactPackage.eINSTANCE.getFeatureMetadata();
+		return SensiNactPackage.Literals.FEATURE_METADATA;
 	}
 
 	/**
@@ -84,10 +84,10 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public EStructuralFeature getTypedKey() {
+	public ETypedElement getTypedKey() {
 		if (key != null && key.eIsProxy()) {
 			InternalEObject oldKey = (InternalEObject)key;
-			key = (EStructuralFeature)eResolveProxy(oldKey);
+			key = (ETypedElement)eResolveProxy(oldKey);
 			if (key != oldKey) {
 				if (eNotificationRequired())
 					eNotify(new ENotificationImpl(this, Notification.RESOLVE, SensiNactPackage.FEATURE_METADATA__KEY, oldKey, key));
@@ -101,7 +101,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public EStructuralFeature basicGetTypedKey() {
+	public ETypedElement basicGetTypedKey() {
 		return key;
 	}
 
@@ -110,8 +110,8 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public void setTypedKey(EStructuralFeature newKey) {
-		EStructuralFeature oldKey = key;
+	public void setTypedKey(ETypedElement newKey) {
+		ETypedElement oldKey = key;
 		key = newKey;
 		if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.FEATURE_METADATA__KEY, oldKey, key));
@@ -122,7 +122,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public Metadata getTypedValue() {
+	public ResourceMetadata getTypedValue() {
 		return value;
 	}
 
@@ -131,8 +131,8 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public NotificationChain basicSetTypedValue(Metadata newValue, NotificationChain msgs) {
-		Metadata oldValue = value;
+	public NotificationChain basicSetTypedValue(ResourceMetadata newValue, NotificationChain msgs) {
+		ResourceMetadata oldValue = value;
 		value = newValue;
 		if (eNotificationRequired()) {
 			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, SensiNactPackage.FEATURE_METADATA__VALUE, oldValue, newValue);
@@ -146,7 +146,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public void setTypedValue(Metadata newValue) {
+	public void setTypedValue(ResourceMetadata newValue) {
 		if (newValue != value) {
 			NotificationChain msgs = null;
 			if (value != null)
@@ -200,10 +200,10 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
 			case SensiNactPackage.FEATURE_METADATA__KEY:
-				setTypedKey((EStructuralFeature)newValue);
+				setTypedKey((ETypedElement)newValue);
 				return;
 			case SensiNactPackage.FEATURE_METADATA__VALUE:
-				setTypedValue((Metadata)newValue);
+				setTypedValue((ResourceMetadata)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -218,10 +218,10 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	public void eUnset(int featureID) {
 		switch (featureID) {
 			case SensiNactPackage.FEATURE_METADATA__KEY:
-				setTypedKey((EStructuralFeature)null);
+				setTypedKey((ETypedElement)null);
 				return;
 			case SensiNactPackage.FEATURE_METADATA__VALUE:
-				setTypedValue((Metadata)null);
+				setTypedValue((ResourceMetadata)null);
 				return;
 		}
 		super.eUnset(featureID);
@@ -280,7 +280,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * @generated
 	 */
 	@Override
-	public EStructuralFeature getKey() {
+	public ETypedElement getKey() {
 		return getTypedKey();
 	}
 
@@ -290,7 +290,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * @generated
 	 */
 	@Override
-	public void setKey(EStructuralFeature key) {
+	public void setKey(ETypedElement key) {
 		setTypedKey(key);
 	}
 
@@ -300,7 +300,7 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * @generated
 	 */
 	@Override
-	public Metadata getValue() {
+	public ResourceMetadata getValue() {
 		return getTypedValue();
 	}
 
@@ -310,8 +310,8 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * @generated
 	 */
 	@Override
-	public Metadata setValue(Metadata value) {
-		Metadata oldValue = getValue();
+	public ResourceMetadata setValue(ResourceMetadata value) {
+		ResourceMetadata oldValue = getValue();
 		setTypedValue(value);
 		return oldValue;
 	}
@@ -322,9 +322,9 @@ public class FeatureMetadataImpl extends MinimalEObjectImpl.Container.Dynamic.Pe
 	 * @generated
 	 */
 	@SuppressWarnings("unchecked")
-	public EMap<EStructuralFeature, Metadata> getEMap() {
+	public EMap<ETypedElement, ResourceMetadata> getEMap() {
 		EObject container = eContainer();
-		return container == null ? null : (EMap<EStructuralFeature, Metadata>)container.eGet(eContainmentFeature());
+		return container == null ? null : (EMap<ETypedElement, ResourceMetadata>)container.eGet(eContainmentFeature());
 	}
 
 } //FeatureMetadataImpl

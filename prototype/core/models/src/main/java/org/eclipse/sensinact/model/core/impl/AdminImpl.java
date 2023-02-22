@@ -90,7 +90,7 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	 */
 	@Override
 	protected EClass eStaticClass() {
-		return SensiNactPackage.eINSTANCE.getAdmin();
+		return SensiNactPackage.Literals.ADMIN;
 	}
 
 	/**

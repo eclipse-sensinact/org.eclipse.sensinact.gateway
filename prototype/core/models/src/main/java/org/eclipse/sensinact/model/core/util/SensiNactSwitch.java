@@ -14,17 +14,20 @@ package org.eclipse.sensinact.model.core.util;
 
 import java.util.Map;
 
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EModelElement;
+import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EParameter;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
+
 import org.eclipse.emf.ecore.util.Switch;
-import org.eclipse.sensinact.model.core.Admin;
-import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
-import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.ModelMetadata;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
+
+import org.eclipse.sensinact.model.core.*;
 
 /**
  * <!-- begin-user-doc -->
@@ -105,25 +108,90 @@ public class SensiNactSwitch<T> extends Switch<T> {
 			case SensiNactPackage.METADATA: {
 				Metadata metadata = (Metadata)theEObject;
 				T result = caseMetadata(metadata);
+				if (result == null) result = caseTimestamped(metadata);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
 			case SensiNactPackage.FEATURE_METADATA: {
-				@SuppressWarnings("unchecked") Map.Entry<EStructuralFeature, Metadata> featureMetadata = (Map.Entry<EStructuralFeature, Metadata>)theEObject;
+				@SuppressWarnings("unchecked") Map.Entry<ETypedElement, ResourceMetadata> featureMetadata = (Map.Entry<ETypedElement, ResourceMetadata>)theEObject;
 				T result = caseFeatureMetadata(featureMetadata);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
-			case SensiNactPackage.MODEL_METADATA: {
-				ModelMetadata modelMetadata = (ModelMetadata)theEObject;
-				T result = caseModelMetadata(modelMetadata);
-				if (result == null) result = caseMetadata(modelMetadata);
+			case SensiNactPackage.ANNOTATION_METADATA: {
+				AnnotationMetadata annotationMetadata = (AnnotationMetadata)theEObject;
+				T result = caseAnnotationMetadata(annotationMetadata);
+				if (result == null) result = caseMetadata(annotationMetadata);
+				if (result == null) result = caseTimestamped(annotationMetadata);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
 			case SensiNactPackage.FEATURE_CUSTOM_METADATA: {
 				FeatureCustomMetadata featureCustomMetadata = (FeatureCustomMetadata)theEObject;
 				T result = caseFeatureCustomMetadata(featureCustomMetadata);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case SensiNactPackage.RESOURCE_ATTRIBUTE: {
+				ResourceAttribute resourceAttribute = (ResourceAttribute)theEObject;
+				T result = caseResourceAttribute(resourceAttribute);
+				if (result == null) result = caseEAttribute(resourceAttribute);
+				if (result == null) result = caseMetadata(resourceAttribute);
+				if (result == null) result = caseEStructuralFeature(resourceAttribute);
+				if (result == null) result = caseTimestamped(resourceAttribute);
+				if (result == null) result = caseETypedElement(resourceAttribute);
+				if (result == null) result = caseENamedElement(resourceAttribute);
+				if (result == null) result = caseEModelElement(resourceAttribute);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case SensiNactPackage.SERVICE_REFERENCE: {
+				ServiceReference serviceReference = (ServiceReference)theEObject;
+				T result = caseServiceReference(serviceReference);
+				if (result == null) result = caseEReference(serviceReference);
+				if (result == null) result = caseMetadata(serviceReference);
+				if (result == null) result = caseEStructuralFeature(serviceReference);
+				if (result == null) result = caseTimestamped(serviceReference);
+				if (result == null) result = caseETypedElement(serviceReference);
+				if (result == null) result = caseENamedElement(serviceReference);
+				if (result == null) result = caseEModelElement(serviceReference);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case SensiNactPackage.ACTION: {
+				Action action = (Action)theEObject;
+				T result = caseAction(action);
+				if (result == null) result = caseEOperation(action);
+				if (result == null) result = caseMetadata(action);
+				if (result == null) result = caseETypedElement(action);
+				if (result == null) result = caseTimestamped(action);
+				if (result == null) result = caseENamedElement(action);
+				if (result == null) result = caseEModelElement(action);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case SensiNactPackage.ACTION_PARAMETER: {
+				ActionParameter actionParameter = (ActionParameter)theEObject;
+				T result = caseActionParameter(actionParameter);
+				if (result == null) result = caseEParameter(actionParameter);
+				if (result == null) result = caseTimestamped(actionParameter);
+				if (result == null) result = caseETypedElement(actionParameter);
+				if (result == null) result = caseENamedElement(actionParameter);
+				if (result == null) result = caseEModelElement(actionParameter);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case SensiNactPackage.TIMESTAMPED: {
+				Timestamped timestamped = (Timestamped)theEObject;
+				T result = caseTimestamped(timestamped);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case SensiNactPackage.RESOURCE_METADATA: {
+				ResourceMetadata resourceMetadata = (ResourceMetadata)theEObject;
+				T result = caseResourceMetadata(resourceMetadata);
+				if (result == null) result = caseMetadata(resourceMetadata);
+				if (result == null) result = caseTimestamped(resourceMetadata);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -202,22 +270,22 @@ public class SensiNactSwitch<T> extends Switch<T> {
 	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
 	 * @generated
 	 */
-	public T caseFeatureMetadata(Map.Entry<EStructuralFeature, Metadata> object) {
+	public T caseFeatureMetadata(Map.Entry<ETypedElement, ResourceMetadata> object) {
 		return null;
 	}
 
 	/**
-	 * Returns the result of interpreting the object as an instance of '<em>Model Metadata</em>'.
+	 * Returns the result of interpreting the object as an instance of '<em>Annotation Metadata</em>'.
 	 * <!-- begin-user-doc -->
 	 * This implementation returns null;
 	 * returning a non-null result will terminate the switch.
 	 * <!-- end-user-doc -->
 	 * @param object the target of the switch.
-	 * @return the result of interpreting the object as an instance of '<em>Model Metadata</em>'.
+	 * @return the result of interpreting the object as an instance of '<em>Annotation Metadata</em>'.
 	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
 	 * @generated
 	 */
-	public T caseModelMetadata(ModelMetadata object) {
+	public T caseAnnotationMetadata(AnnotationMetadata object) {
 		return null;
 	}
 
@@ -233,6 +301,216 @@ public class SensiNactSwitch<T> extends Switch<T> {
 	 * @generated
 	 */
 	public T caseFeatureCustomMetadata(FeatureCustomMetadata object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Resource Attribute</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Resource Attribute</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseResourceAttribute(ResourceAttribute object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Service Reference</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Service Reference</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseServiceReference(ServiceReference object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Action</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Action</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseAction(Action object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Action Parameter</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Action Parameter</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseActionParameter(ActionParameter object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Timestamped</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Timestamped</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseTimestamped(Timestamped object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Resource Metadata</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Resource Metadata</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseResourceMetadata(ResourceMetadata object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>EModel Element</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>EModel Element</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseEModelElement(EModelElement object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>ENamed Element</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>ENamed Element</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseENamedElement(ENamedElement object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>ETyped Element</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>ETyped Element</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseETypedElement(ETypedElement object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>EStructural Feature</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>EStructural Feature</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseEStructuralFeature(EStructuralFeature object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>EAttribute</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>EAttribute</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseEAttribute(EAttribute object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>EReference</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>EReference</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseEReference(EReference object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>EOperation</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>EOperation</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseEOperation(EOperation object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>EParameter</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>EParameter</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseEParameter(EParameter object) {
 		return null;
 	}
 

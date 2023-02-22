@@ -27,7 +27,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
@@ -44,9 +43,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.typedevent.TypedEventBus;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
@@ -113,15 +109,6 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             executor.shutdownNow();
             scheduledExecutor.shutdown();
         }
-    }
-
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
-    void addEPackage(EPackage ePackage) {
-        nexusImpl.addEPackage(ePackage);
-    }
-
-    void removeEPackage(EPackage ePackage) {
-        nexusImpl.removeEPakcage(ePackage);
     }
 
     @Reference(service = AnyService.class, target = "(sensiNact.whiteboard.resource=true)", cardinality = MULTIPLE, policy = DYNAMIC)

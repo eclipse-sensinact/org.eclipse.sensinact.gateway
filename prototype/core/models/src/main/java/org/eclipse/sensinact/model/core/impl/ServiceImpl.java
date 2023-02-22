@@ -16,11 +16,12 @@ import org.eclipse.emf.common.notify.NotificationChain;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.emf.ecore.util.InternalEList;
-import org.eclipse.sensinact.model.core.Metadata;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
 
@@ -46,7 +47,7 @@ public class ServiceImpl extends MinimalEObjectImpl.Container.Dynamic.Permissive
 	 * @generated
 	 * @ordered
 	 */
-	protected EMap<EStructuralFeature, Metadata> metadata;
+	protected EMap<ETypedElement, ResourceMetadata> metadata;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -64,7 +65,7 @@ public class ServiceImpl extends MinimalEObjectImpl.Container.Dynamic.Permissive
 	 */
 	@Override
 	protected EClass eStaticClass() {
-		return SensiNactPackage.eINSTANCE.getService();
+		return SensiNactPackage.Literals.SERVICE;
 	}
 
 	/**
@@ -73,9 +74,9 @@ public class ServiceImpl extends MinimalEObjectImpl.Container.Dynamic.Permissive
 	 * @generated
 	 */
 	@Override
-	public EMap<EStructuralFeature, Metadata> getMetadata() {
+	public EMap<ETypedElement, ResourceMetadata> getMetadata() {
 		if (metadata == null) {
-			metadata = new EcoreEMap<EStructuralFeature,Metadata>(SensiNactPackage.eINSTANCE.getFeatureMetadata(), FeatureMetadataImpl.class, this, SensiNactPackage.SERVICE__METADATA);
+			metadata = new EcoreEMap<ETypedElement,ResourceMetadata>(SensiNactPackage.Literals.FEATURE_METADATA, FeatureMetadataImpl.class, this, SensiNactPackage.SERVICE__METADATA);
 		}
 		return metadata;
 	}

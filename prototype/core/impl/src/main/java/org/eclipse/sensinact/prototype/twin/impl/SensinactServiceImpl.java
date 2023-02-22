@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
@@ -48,8 +48,8 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
     public Map<String, SensinactResource> getResources() {
         checkValid();
         return nexus.getResourcesForService(svcFeature.getEReferenceType())
-                .collect(Collectors.toMap(EAttribute::getName, a -> new SensinactResourceImpl(active, this, provider,
-                        svcFeature, a, a.getEAttributeType().getInstanceClass(), nexus, promiseFactory)));
+                .collect(Collectors.toMap(ETypedElement::getName, a -> new SensinactResourceImpl(active, this, provider,
+                        svcFeature, a, a.getEType().getInstanceClass(), nexus, promiseFactory)));
     }
 
     @Override

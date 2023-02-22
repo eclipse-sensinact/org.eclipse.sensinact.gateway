@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.model.core;
 
 import org.eclipse.emf.ecore.EFactory;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -61,22 +62,13 @@ public interface SensiNactFactory extends EFactory {
 	Service createService();
 
 	/**
-	 * Returns a new object of class '<em>Metadata</em>'.
+	 * Returns a new object of class '<em>Annotation Metadata</em>'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return a new object of class '<em>Metadata</em>'.
+	 * @return a new object of class '<em>Annotation Metadata</em>'.
 	 * @generated
 	 */
-	Metadata createMetadata();
-
-	/**
-	 * Returns a new object of class '<em>Model Metadata</em>'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return a new object of class '<em>Model Metadata</em>'.
-	 * @generated
-	 */
-	ModelMetadata createModelMetadata();
+	AnnotationMetadata createAnnotationMetadata();
 
 	/**
 	 * Returns a new object of class '<em>Feature Custom Metadata</em>'.
@@ -86,6 +78,51 @@ public interface SensiNactFactory extends EFactory {
 	 * @generated
 	 */
 	FeatureCustomMetadata createFeatureCustomMetadata();
+
+	/**
+	 * Returns a new object of class '<em>Resource Attribute</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Resource Attribute</em>'.
+	 * @generated
+	 */
+	ResourceAttribute createResourceAttribute();
+
+	/**
+	 * Returns a new object of class '<em>Service Reference</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Service Reference</em>'.
+	 * @generated
+	 */
+	ServiceReference createServiceReference();
+
+	/**
+	 * Returns a new object of class '<em>Action</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Action</em>'.
+	 * @generated
+	 */
+	Action createAction();
+
+	/**
+	 * Returns a new object of class '<em>Action Parameter</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Action Parameter</em>'.
+	 * @generated
+	 */
+	ActionParameter createActionParameter();
+
+	/**
+	 * Returns a new object of class '<em>Resource Metadata</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Resource Metadata</em>'.
+	 * @generated
+	 */
+	ResourceMetadata createResourceMetadata();
 
 	/**
 	 * Returns the package supported by this factory.

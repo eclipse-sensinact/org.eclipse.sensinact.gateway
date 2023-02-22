@@ -14,6 +14,7 @@ package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,9 +23,11 @@ import java.util.stream.Stream;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
 import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ProviderSnapshotImpl;
@@ -147,19 +150,26 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             return null;
         }
 
-        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(service);
+        final EReference svcFeature = (EReference) provider.eClass().getEStructuralFeature(service);
         if (svcFeature == null) {
             return null;
         }
 
-        final EStructuralFeature rcFeature = ((EClass) svcFeature.getEType()).getEStructuralFeature(resource);
+        final EClass serviceEClass = svcFeature.getEReferenceType();
+
+        final ETypedElement rcFeature = Optional.ofNullable(serviceEClass.getEStructuralFeature(resource))
+                .map(ETypedElement.class::cast)
+                .or(() -> serviceEClass.getEOperations().stream()
+                        .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
+                        .filter(o -> resource.equals(o.getName())).map(ETypedElement.class::cast).findFirst())
+                .orElseGet(() -> null);
         if (rcFeature == null) {
             return null;
         }
 
         // Construct the resource
         final SensinactProviderImpl snProvider = toProvider(provider);
-        final SensinactServiceImpl snSvc = toService(snProvider, provider, (EReference) svcFeature);
+        final SensinactServiceImpl snSvc = toService(snProvider, provider, svcFeature);
         return toResource(snSvc, provider, svcFeature, rcFeature);
     }
 
@@ -196,7 +206,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
 
         // Get the resource metadata
-        final Metadata metadata = svc.getMetadata().get(rcFeature);
+        final ResourceMetadata metadata = svc.getMetadata().get(rcFeature);
         final Instant timestamp;
         if (metadata != null) {
             timestamp = metadata.getTimestamp();
@@ -224,8 +234,8 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return new SensinactServiceImpl(active, parent, provider, ref, nexusImpl, pf);
     }
 
-    private SensinactResourceImpl toResource(final SensinactService parent, Provider provider,
-            EStructuralFeature svcFeature, final EStructuralFeature rcFeature) {
+    private SensinactResourceImpl toResource(final SensinactService parent, Provider provider, EReference svcFeature,
+            final ETypedElement rcFeature) {
         return new SensinactResourceImpl(active, parent, provider, svcFeature, rcFeature,
                 rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
     }
@@ -283,9 +293,9 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                 s.getResources().stream().forEach(rc -> {
                     // Get the resource metadata
                     final Service svc = rc.getService().getModelService();
-                    final EStructuralFeature rcFeature = rc.getFeature();
+                    final ETypedElement rcFeature = rc.getFeature();
 
-                    final Metadata metadata = svc.getMetadata().get(rcFeature);
+                    final ResourceMetadata metadata = svc.getMetadata().get(rcFeature);
                     final Instant timestamp;
                     if (metadata != null) {
                         timestamp = metadata.getTimestamp();
@@ -293,7 +303,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                         timestamp = null;
                     }
 
-                    rc.setValue(new TimedValueImpl<Object>(svc.eGet(rcFeature), timestamp));
+                    rc.setValue(new TimedValueImpl<Object>(svc.eGet((EStructuralFeature) rcFeature), timestamp));
                 });
             });
             p.filterEmptyServices();

@@ -13,10 +13,15 @@
 package org.eclipse.sensinact.model.core.util;
 
 import org.eclipse.emf.common.util.URI;
+
 import org.eclipse.emf.ecore.resource.Resource;
+
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
+
 import org.eclipse.sensinact.model.core.SensiNactPackage;
+
 import org.gecko.emf.osgi.annotation.provide.ProvideEMFResourceConfigurator;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;

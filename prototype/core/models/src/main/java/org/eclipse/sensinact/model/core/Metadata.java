@@ -12,11 +12,8 @@
  */
 package org.eclipse.sensinact.model.core;
 
-import java.time.Instant;
-
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -28,84 +25,17 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.model.core.Metadata#getFeature <em>Feature</em>}</li>
- *   <li>{@link org.eclipse.sensinact.model.core.Metadata#getTimestamp <em>Timestamp</em>}</li>
- *   <li>{@link org.eclipse.sensinact.model.core.Metadata#getSource <em>Source</em>}</li>
  *   <li>{@link org.eclipse.sensinact.model.core.Metadata#getExtra <em>Extra</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.model.core.Metadata#isLocked <em>Locked</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.model.core.Metadata#getOriginalName <em>Original Name</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata()
- * @model
+ * @model abstract="true"
  * @generated
  */
 @ProviderType
-public interface Metadata extends EObject {
-	/**
-	 * Returns the value of the '<em><b>Feature</b></em>' reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Feature</em>' reference.
-	 * @see #setFeature(EStructuralFeature)
-	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_Feature()
-	 * @model
-	 * @generated
-	 */
-	EStructuralFeature getFeature();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Metadata#getFeature <em>Feature</em>}' reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Feature</em>' reference.
-	 * @see #getFeature()
-	 * @generated
-	 */
-	void setFeature(EStructuralFeature value);
-
-	/**
-	 * Returns the value of the '<em><b>Timestamp</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Timestamp</em>' attribute.
-	 * @see #setTimestamp(Instant)
-	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_Timestamp()
-	 * @model dataType="org.eclipse.sensinact.model.core.EInstant"
-	 * @generated
-	 */
-	Instant getTimestamp();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Metadata#getTimestamp <em>Timestamp</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Timestamp</em>' attribute.
-	 * @see #getTimestamp()
-	 * @generated
-	 */
-	void setTimestamp(Instant value);
-
-	/**
-	 * Returns the value of the '<em><b>Source</b></em>' reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Source</em>' reference.
-	 * @see #setSource(EObject)
-	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_Source()
-	 * @model
-	 * @generated
-	 */
-	EObject getSource();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Metadata#getSource <em>Source</em>}' reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Source</em>' reference.
-	 * @see #getSource()
-	 * @generated
-	 */
-	void setSource(EObject value);
-
+public interface Metadata extends Timestamped {
 	/**
 	 * Returns the value of the '<em><b>Extra</b></em>' containment reference list.
 	 * The list contents are of type {@link org.eclipse.sensinact.model.core.FeatureCustomMetadata}.
@@ -117,5 +47,50 @@ public interface Metadata extends EObject {
 	 * @generated
 	 */
 	EList<FeatureCustomMetadata> getExtra();
+
+	/**
+	 * Returns the value of the '<em><b>Locked</b></em>' attribute.
+	 * The default value is <code>"false"</code>.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Locked</em>' attribute.
+	 * @see #setLocked(boolean)
+	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_Locked()
+	 * @model default="false"
+	 * @generated
+	 */
+	boolean isLocked();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Metadata#isLocked <em>Locked</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Locked</em>' attribute.
+	 * @see #isLocked()
+	 * @generated
+	 */
+	void setLocked(boolean value);
+
+	/**
+	 * Returns the value of the '<em><b>Original Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Original Name</em>' attribute.
+	 * @see #setOriginalName(String)
+	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_OriginalName()
+	 * @model required="true"
+	 * @generated
+	 */
+	String getOriginalName();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Metadata#getOriginalName <em>Original Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Original Name</em>' attribute.
+	 * @see #getOriginalName()
+	 * @generated
+	 */
+	void setOriginalName(String value);
 
 } // Metadata
