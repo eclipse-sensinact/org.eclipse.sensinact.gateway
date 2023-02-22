@@ -13,19 +13,12 @@
 package org.eclipse.sensinact.gateway.southbound.history.timescale.integration;
 
 import static java.time.Duration.ofDays;
-import static java.util.Arrays.stream;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.abort;
 
-import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,7 +26,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
@@ -50,6 +42,7 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -61,13 +54,15 @@ public class TimescaleHistoryTest {
 
     @BeforeAll
     static void check() throws Exception {
-        String path = System.getenv().get("PATH");
-
-        // Add in local bin which isn't included in Eclipse
-        Optional<Path> findFirst = concat(stream(path.split(File.pathSeparator)), of("/usr/local/bin")).map(Paths::get)
-                .filter(p -> Files.exists(p.resolve("docker"))).findFirst();
-
-        assumeTrue(findFirst.isPresent(), "No docker executable on the path, so tests will be skipped");
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(TimescaleHistoryTest.class.getClassLoader());
+        try {
+            DockerClientFactory.lazyClient().versionCmd().exec();
+        } catch (Throwable t) {
+            abort("No docker executable on the path, so tests will be skipped");
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
+        }
     }
 
     @BeforeEach
