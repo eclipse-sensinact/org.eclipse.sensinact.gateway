@@ -193,7 +193,7 @@ public class TimescaleHistoricalStore {
                     "CREATE TABLE IF NOT EXISTS sensinact.numeric_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data NUMERIC )");
             s.execute("SELECT create_hypertable('sensinact.numeric_data', 'time');");
             s.execute(
-                    "CREATE TABLE IF NOT EXISTS sensinact.text_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data VARCHAR(512) )");
+                    "CREATE TABLE IF NOT EXISTS sensinact.text_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data text )");
             s.execute("SELECT create_hypertable('sensinact.text_data', 'time');");
             s.execute("CREATE EXTENSION Postgis;");
             s.execute(

@@ -554,6 +554,16 @@ public class TimescaleHistoryTest {
                         assertEquals(TS_2012.plus(ofDays(i)), result.get(i).getTimestamp());
                     }
 
+                    // same query, skip 50
+                    result = safeGet(resource.act(Map.of("provider", "bar", "service", "foobar", "resource",
+                            "foofoobarbar", "fromTime", TS_2012.atOffset(ZoneOffset.UTC), "toTime",
+                            TS_2013.atOffset(ZoneOffset.UTC), "skip", 50)).map(List.class::cast));
+                    assertEquals(317, result.size());
+                    for (int i = 0; i < 317; i++) {
+                        assertEquals(String.valueOf(i + 50), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i + 50)), result.get(i).getTimestamp());
+                    }
+
                     // No Limit
                     result = safeGet(resource.act(Map.of("provider", "bar", "service", "foobar", "resource",
                             "foofoobarbar", "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC)))
@@ -593,6 +603,47 @@ public class TimescaleHistoryTest {
         }
 
         @Test
+        void manyStringCount() throws Exception {
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.text_data", 1000);
+
+            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
+
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // If equal, return the value
+                    Long result = safeGet(resource
+                            .act(Map.of("provider", "bar", "service", "foobar", "resource", "foofoobarbar", "fromTime",
+                                    TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(367, result);
+
+                    // No Limit
+                    result = safeGet(resource.act(Map.of("provider", "bar", "service", "foobar", "resource",
+                            "foofoobarbar", "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(999, result);
+
+                    // No start - get the latest 500 before the to time
+                    result = safeGet(resource.act(Map.of("provider", "bar", "service", "foobar", "resource",
+                            "foofoobarbar", "toTime", TS_2014.atOffset(ZoneOffset.UTC))).map(Long.class::cast));
+                    assertEquals(366 + 365 + 1, result);
+
+                    // No start or end - get the latest 500
+                    result = safeGet(
+                            resource.act(Map.of("provider", "bar", "service", "foobar", "resource", "foofoobarbar"))
+                                    .map(Long.class::cast));
+                    assertEquals(1000, result);
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
         void manyNumberData() throws Exception {
             for (int i = 0; i < 1000; i++) {
                 push.pushUpdate(getDto(i, TS_2012.plus(ofDays(i)))).getValue();
@@ -613,6 +664,16 @@ public class TimescaleHistoryTest {
                     for (int i = 0; i < 367; i++) {
                         assertEquals(Long.valueOf(i), result.get(i).getValue());
                         assertEquals(TS_2012.plus(ofDays(i)), result.get(i).getTimestamp());
+                    }
+
+                    // same query, skip 50
+                    result = safeGet(resource.act(Map.of("provider", "buzz", "service", "fizzbuzz", "resource",
+                            "fizzfizzbuzzbuzz", "fromTime", TS_2012.atOffset(ZoneOffset.UTC), "toTime",
+                            TS_2013.atOffset(ZoneOffset.UTC), "skip", 50)).map(List.class::cast));
+                    assertEquals(317, result.size());
+                    for (int i = 0; i < 317; i++) {
+                        assertEquals(Long.valueOf(i + 50), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i + 50)), result.get(i).getTimestamp());
                     }
 
                     // No Limit
@@ -655,6 +716,47 @@ public class TimescaleHistoryTest {
         }
 
         @Test
+        void manyNumberCount() throws Exception {
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(i, TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.text_data", 1000);
+
+            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
+
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // If equal, return the value
+                    Long result = safeGet(resource.act(Map.of("provider", "buzz", "service", "fizzbuzz", "resource",
+                            "fizzfizzbuzzbuzz", "fromTime", TS_2012.atOffset(ZoneOffset.UTC), "toTime",
+                            TS_2013.atOffset(ZoneOffset.UTC))).map(Long.class::cast));
+                    assertEquals(367, result);
+
+                    // No Limit
+                    result = safeGet(resource
+                            .act(Map.of("provider", "buzz", "service", "fizzbuzz", "resource", "fizzfizzbuzzbuzz",
+                                    "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(999, result);
+
+                    // No start
+                    result = safeGet(resource.act(Map.of("provider", "buzz", "service", "fizzbuzz", "resource",
+                            "fizzfizzbuzzbuzz", "toTime", TS_2014.atOffset(ZoneOffset.UTC))).map(Long.class::cast));
+                    assertEquals(366 + 365 + 1, result);
+
+                    // No start or end
+                    result = safeGet(resource
+                            .act(Map.of("provider", "buzz", "service", "fizzbuzz", "resource", "fizzfizzbuzzbuzz"))
+                            .map(Long.class::cast));
+                    assertEquals(1000, result);
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
         void manyDecimalData() throws Exception {
             for (int i = 0; i < 1000; i++) {
                 push.pushUpdate(getDto(1.0001d * i, TS_2012.plus(ofDays(i)))).getValue();
@@ -676,6 +778,16 @@ public class TimescaleHistoryTest {
                     for (int i = 0; i < 367; i++) {
                         assertEquals(Double.valueOf(1.0001d * i), (double) result.get(i).getValue(), 0.0001d);
                         assertEquals(TS_2012.plus(ofDays(i)), result.get(i).getTimestamp());
+                    }
+
+                    // same query, skip 50
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "Magic",
+                            "fromTime", TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC),
+                            "skip", 50)).map(List.class::cast));
+                    assertEquals(317, result.size());
+                    for (int i = 0; i < 317; i++) {
+                        assertEquals(Double.valueOf(1.0001d * (i + 50)), (double) result.get(i).getValue(), 0.0001d);
+                        assertEquals(TS_2012.plus(ofDays(i + 50)), result.get(i).getTimestamp());
                     }
 
                     // No Limit
@@ -709,6 +821,45 @@ public class TimescaleHistoryTest {
                         assertEquals(Double.valueOf(1.0001d * (500 + i)), (double) result.get(i).getValue(), 0.0001d);
                         assertEquals(TS_2012.plus(ofDays(500 + i)), result.get(i).getTimestamp());
                     }
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
+        void manyDecimalCount() throws Exception {
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(1.0001d * i, TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.text_data", 1000);
+
+            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
+
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // If equal, return the value
+                    Long result = safeGet(resource
+                            .act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "Magic", "fromTime",
+                                    TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(367, result);
+
+                    // No Limit
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "Magic",
+                            "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC))).map(Long.class::cast));
+                    assertEquals(999, result);
+
+                    // No start
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "Magic",
+                            "toTime", TS_2014.atOffset(ZoneOffset.UTC))).map(Long.class::cast));
+                    assertEquals(366 + 365 + 1, result);
+
+                    // No start or end
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "Magic"))
+                            .map(Long.class::cast));
+                    assertEquals(1000, result);
 
                     return pf.resolved(null);
                 }

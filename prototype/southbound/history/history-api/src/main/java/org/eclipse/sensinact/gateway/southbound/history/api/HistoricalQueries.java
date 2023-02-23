@@ -59,14 +59,35 @@ public interface HistoricalQueries {
      *                 values before <code>toTime</code> will be returned
      * @param toTime   the time to finish at. If <code>null</code> then there is no
      *                 finishing time limit.
+     * @param skip     the number of values to skip in the result set. If fromTime
+     *                 is <code>null</code> then this will be skipped from the end
+     *                 not the start of the results.
      * @return A {@link List&lt;TimedValue&gt;} of results in chronological order.
-     *         There will be a maximum of 500 data values in the list. If more than
-     *         500 data points exist then the 501st value in the list will be a
-     *         {@link TimedValue} with a null timestamp and value to indicate that
-     *         the data continues.
+     *         There will be a maximum of 500 data values in the list. If a from
+     *         time is provided and more than 500 data points exist then the 501st
+     *         value in the list will be a {@link TimedValue} with a null timestamp
+     *         and value to indicate that the data continues.
      */
     @ACT(model = "sensiNactHistory", service = "history", resource = "range")
     List<TimedValue<?>> getValueRange(@ActParam(name = "provider") String provider,
             @ActParam(name = "service") String service, @ActParam(name = "resource") String resource,
-            @ActParam(name = "fromTime") ZonedDateTime fromTime, @ActParam(name = "toTime") ZonedDateTime toTime);
+            @ActParam(name = "fromTime") ZonedDateTime fromTime, @ActParam(name = "toTime") ZonedDateTime toTime,
+            @ActParam(name = "skip") Integer skip);
+
+    /**
+     * Get the number of stored values for a given resource
+     *
+     * @param provider
+     * @param service
+     * @param resource
+     * @param fromTime the time to start from. If <code>null</code> then all values
+     *                 before <code>toTime</code> will be counted
+     * @param toTime   the time to finish at. If <code>null</code> then there is no
+     *                 finishing time limit.
+     * @return
+     */
+    @ACT(model = "sensiNactHistory", service = "history", resource = "count")
+    Long getStoredValueCount(@ActParam(name = "provider") String provider, @ActParam(name = "service") String service,
+            @ActParam(name = "resource") String resource, @ActParam(name = "fromTime") ZonedDateTime fromTime,
+            @ActParam(name = "toTime") ZonedDateTime toTime);
 }

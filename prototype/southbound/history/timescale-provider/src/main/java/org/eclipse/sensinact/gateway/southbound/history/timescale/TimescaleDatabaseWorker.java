@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -56,33 +57,62 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
             + ") results ORDER BY time DESC LIMIT 1;";
 
     private static final String RANGE_TEMPLATE = "SELECT time, num, text, geo FROM ( "
-            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ORDER BY time ASC LIMIT 501 ) "
+            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ORDER BY time ASC ) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ORDER BY time ASC LIMIT 501 ) "
+            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ORDER BY time ASC ) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ORDER BY time ASC LIMIT 501 ) "
-            + ") results ORDER BY time ASC LIMIT 501;";
+            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ORDER BY time ASC ) "
+            + ") results ORDER BY time ASC OFFSET ? LIMIT 501;";
     private static final String RANGE_TEMPLATE_WITHOUT_LIMIT = "SELECT time, num, text, geo FROM ( "
-            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ORDER BY time ASC LIMIT 501 ) "
+            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ORDER BY time ASC ) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ORDER BY time ASC LIMIT 501 ) "
+            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ORDER BY time ASC ) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ORDER BY time ASC LIMIT 501 ) "
-            + ") results ORDER BY time ASC LIMIT 501;";
+            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ORDER BY time ASC ) "
+            + ") results ORDER BY time ASC OFFSET ? LIMIT 501;";
     private static final String RANGE_TEMPLATE_WITHOUT_START = "SELECT reverse.* from ( SELECT time, num, text, geo FROM ( "
-            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ORDER BY time DESC LIMIT 500 ) "
+            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ORDER BY time DESC ) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ORDER BY time DESC LIMIT 500 ) "
+            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ORDER BY time DESC ) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ORDER BY time DESC LIMIT 500 ) "
-            + ") results ORDER BY time DESC LIMIT 500 ) reverse ORDER BY time ASC;";
+            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ORDER BY time DESC ) "
+            + ") results ORDER BY time DESC OFFSET ? LIMIT 500 ) reverse ORDER BY time ASC;";
     private static final String RANGE_TEMPLATE_WITHOUT_START_OR_LIMIT = "SELECT reverse.* from ( SELECT time, num, text, geo FROM ( "
-            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? ORDER BY time DESC LIMIT 500 ) "
+            + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? ORDER BY time DESC) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? ORDER BY time DESC LIMIT 500 ) "
+            + "( SELECT time, NULL AS num, data AS text, NULL AS geo FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? ORDER BY time DESC ) "
             + "UNION ALL "
-            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? ORDER BY time DESC LIMIT 500 ) "
-            + ") results ORDER BY time DESC LIMIT 500 ) reverse ORDER BY time ASC;";
+            + "( SELECT time, NULL AS num, NULL AS text, ST_AsGeoJSON(data) AS geo FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? ORDER BY time DESC ) "
+            + ") results ORDER BY time DESC OFFSET ? LIMIT 500 ) reverse ORDER BY time ASC;";
+
+    private static final String COUNT_TEMPLATE = "SELECT SUM(c) FROM ( "
+            + "( SELECT COUNT(time) as c FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? AND time >= ? ) "
+            + ") results;";
+    private static final String COUNT_TEMPLATE_WITHOUT_LIMIT = "SELECT SUM(c) FROM ( "
+            + "( SELECT COUNT(time) as c FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time >= ? ) "
+            + ") results;";
+    private static final String COUNT_TEMPLATE_WITHOUT_START = "SELECT SUM(c) FROM ( "
+            + "( SELECT COUNT(time) as c FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ) "
+            + ") results;";
+    private static final String COUNT_TEMPLATE_WITHOUT_START_OR_LIMIT = "SELECT SUM(c) FROM ( "
+            + "( SELECT COUNT(time) as c FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.text_data WHERE provider = ? AND service = ? AND resource = ? ) "
+            + "UNION ALL "
+            + "( SELECT COUNT(time) as c FROM sensinact.geo_data WHERE provider = ? AND service = ? AND resource = ? ) "
+            + ") results;";
 
     private static final Logger logger = LoggerFactory.getLogger(TimescaleDatabaseWorker.class);
 
@@ -188,29 +218,11 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                 PreparedStatement ps;
                 if (time == null) {
                     ps = conn.prepareStatement(SINGLE_TEMPLATE_WITHOUT_TIME);
-                    ps.setString(1, provider);
-                    ps.setString(2, service);
-                    ps.setString(3, resource);
-                    ps.setString(4, provider);
-                    ps.setString(5, service);
-                    ps.setString(6, resource);
-                    ps.setString(7, provider);
-                    ps.setString(8, service);
-                    ps.setString(9, resource);
+                    setVariables(ps, provider, service, resource);
                 } else {
                     ps = conn.prepareStatement(SINGLE_TEMPLATE);
-                    ps.setString(1, provider);
-                    ps.setString(2, service);
-                    ps.setString(3, resource);
-                    ps.setTimestamp(4, Timestamp.from(time == null ? Instant.now() : time.toInstant()));
-                    ps.setString(5, provider);
-                    ps.setString(6, service);
-                    ps.setString(7, resource);
-                    ps.setTimestamp(8, Timestamp.from(time == null ? Instant.now() : time.toInstant()));
-                    ps.setString(9, provider);
-                    ps.setString(10, service);
-                    ps.setString(11, resource);
-                    ps.setTimestamp(12, Timestamp.from(time == null ? Instant.now() : time.toInstant()));
+                    setVariables(ps, provider, service, resource,
+                            Timestamp.from(time == null ? Instant.now() : time.toInstant()));
                 }
 
                 ResultSet rs = ps.executeQuery();
@@ -228,6 +240,15 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                 logger.warn("Unable to locate data for {} {} {}", provider, service, resource, e);
             }
             throw new RuntimeException(e);
+        }
+    }
+
+    private void setVariables(PreparedStatement ps, Object... variables) throws SQLException {
+        int idx = 1;
+        for (int i = 0; i < 3; i++) {
+            for (Object o : variables) {
+                ps.setObject(idx++, o);
+            }
         }
     }
 
@@ -257,7 +278,8 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
 
     @Override
     public List<TimedValue<?>> getValueRange(String provider, String service, String resource, ZonedDateTime fromTime,
-            ZonedDateTime toTime) {
+            ZonedDateTime toTime, Integer skip) {
+        Integer toSkip = skip == null ? Integer.valueOf(0) : skip;
         Connection conn = connectionSupplier.get();
 
         try {
@@ -269,62 +291,23 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                 if (toTime == null) {
                     if (fromTime == null) {
                         ps = conn.prepareStatement(RANGE_TEMPLATE_WITHOUT_START_OR_LIMIT);
-                        ps.setString(1, provider);
-                        ps.setString(2, service);
-                        ps.setString(3, resource);
-                        ps.setString(4, provider);
-                        ps.setString(5, service);
-                        ps.setString(6, resource);
-                        ps.setString(7, provider);
-                        ps.setString(8, service);
-                        ps.setString(9, resource);
+                        setVariables(ps, provider, service, resource);
+                        ps.setInt(10, toSkip);
                     } else {
                         ps = conn.prepareStatement(RANGE_TEMPLATE_WITHOUT_LIMIT);
-                        ps.setString(1, provider);
-                        ps.setString(2, service);
-                        ps.setString(3, resource);
-                        ps.setTimestamp(4, Timestamp.from(fromTime.toInstant()));
-                        ps.setString(5, provider);
-                        ps.setString(6, service);
-                        ps.setString(7, resource);
-                        ps.setTimestamp(8, Timestamp.from(fromTime.toInstant()));
-                        ps.setString(9, provider);
-                        ps.setString(10, service);
-                        ps.setString(11, resource);
-                        ps.setTimestamp(12, Timestamp.from(fromTime.toInstant()));
+                        setVariables(ps, provider, service, resource, Timestamp.from(fromTime.toInstant()));
+                        ps.setInt(13, toSkip);
                     }
                 } else {
                     if (fromTime == null) {
                         ps = conn.prepareStatement(RANGE_TEMPLATE_WITHOUT_START);
-                        ps.setString(1, provider);
-                        ps.setString(2, service);
-                        ps.setString(3, resource);
-                        ps.setTimestamp(4, Timestamp.from(toTime.toInstant()));
-                        ps.setString(5, provider);
-                        ps.setString(6, service);
-                        ps.setString(7, resource);
-                        ps.setTimestamp(8, Timestamp.from(toTime.toInstant()));
-                        ps.setString(9, provider);
-                        ps.setString(10, service);
-                        ps.setString(11, resource);
-                        ps.setTimestamp(12, Timestamp.from(toTime.toInstant()));
+                        setVariables(ps, provider, service, resource, Timestamp.from(toTime.toInstant()));
+                        ps.setInt(13, toSkip);
                     } else {
                         ps = conn.prepareStatement(RANGE_TEMPLATE);
-                        ps.setString(1, provider);
-                        ps.setString(2, service);
-                        ps.setString(3, resource);
-                        ps.setTimestamp(4, Timestamp.from(toTime.toInstant()));
-                        ps.setTimestamp(5, Timestamp.from(fromTime.toInstant()));
-                        ps.setString(6, provider);
-                        ps.setString(7, service);
-                        ps.setString(8, resource);
-                        ps.setTimestamp(9, Timestamp.from(toTime.toInstant()));
-                        ps.setTimestamp(10, Timestamp.from(fromTime.toInstant()));
-                        ps.setString(11, provider);
-                        ps.setString(12, service);
-                        ps.setString(13, resource);
-                        ps.setTimestamp(14, Timestamp.from(toTime.toInstant()));
-                        ps.setTimestamp(15, Timestamp.from(fromTime.toInstant()));
+                        setVariables(ps, provider, service, resource, Timestamp.from(toTime.toInstant()),
+                                Timestamp.from(fromTime.toInstant()));
+                        ps.setInt(16, toSkip);
                     }
                 }
 
@@ -347,6 +330,46 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
         } catch (Exception e) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Unable to locate data for {} {} {}", provider, service, resource, e);
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Long getStoredValueCount(String provider, String service, String resource, ZonedDateTime fromTime,
+            ZonedDateTime toTime) {
+        Connection conn = connectionSupplier.get();
+
+        try {
+            return txControl.required(() -> {
+
+                PreparedStatement ps;
+                if (toTime == null) {
+                    if (fromTime == null) {
+                        ps = conn.prepareStatement(COUNT_TEMPLATE_WITHOUT_START_OR_LIMIT);
+                        setVariables(ps, provider, service, resource);
+                    } else {
+                        ps = conn.prepareStatement(COUNT_TEMPLATE_WITHOUT_LIMIT);
+                        setVariables(ps, provider, service, resource, Timestamp.from(fromTime.toInstant()));
+                    }
+                } else {
+                    if (fromTime == null) {
+                        ps = conn.prepareStatement(COUNT_TEMPLATE_WITHOUT_START);
+                        setVariables(ps, provider, service, resource, Timestamp.from(toTime.toInstant()));
+                    } else {
+                        ps = conn.prepareStatement(COUNT_TEMPLATE);
+                        setVariables(ps, provider, service, resource, Timestamp.from(toTime.toInstant()),
+                                Timestamp.from(fromTime.toInstant()));
+                    }
+                }
+
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                return rs.getLong(1);
+            });
+        } catch (Exception e) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Unable to count data for {} {} {}", provider, service, resource, e);
             }
             throw new RuntimeException(e);
         }
