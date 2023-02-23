@@ -40,6 +40,7 @@
 	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.southbound.history.history-api;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider-tests;version='[0.0.1,0.0.2)',\
 	org.gecko.emf.osgi.api;version='[4.5.0,4.5.1)',\
