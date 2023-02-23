@@ -674,4 +674,18 @@ public class ModelNexus {
         return actionHandler.act(getModelName(provider.eClass()), provider.getId(), service.getName(),
                 resource.getName(), parameters);
     }
+
+    public void deleteProvider(String model, String name) {
+        String m = getProviderModel(name);
+        if (m != null) {
+            if (m.equals(model)) {
+                providers.remove(name);
+                notificationAccumulator.get().removeProvider(model, name);
+            } else {
+                LOG.warn("Unable to remove the provider {} with model {} as the actual model was {}", name, model, m);
+            }
+        } else {
+            LOG.info("The provider {} does not exist and cannot be removed", name);
+        }
+    }
 }

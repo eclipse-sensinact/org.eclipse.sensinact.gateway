@@ -87,4 +87,10 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
         checkValid();
         nexus.unlinkProviders(getName(), provider.getName(), Instant.now());
     }
+
+    @Override
+    public void delete() {
+        checkValid();
+        nexus.deleteProvider(getModelName(), getName());
+    }
 }
