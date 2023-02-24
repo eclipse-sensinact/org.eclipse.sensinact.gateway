@@ -23,7 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- *
+ * Tests variable handling
  */
 public class VariablesTest {
 
