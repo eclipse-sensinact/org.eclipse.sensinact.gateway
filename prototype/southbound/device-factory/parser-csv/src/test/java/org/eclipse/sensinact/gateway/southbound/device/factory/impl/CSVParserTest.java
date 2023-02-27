@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentServiceObjects;
+import org.osgi.util.promise.Promises;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -60,7 +61,7 @@ public class CSVParserTest {
         Mockito.when(deviceMapper.prototypePush.pushUpdate(Mockito.any())).thenAnswer(i -> {
             final BulkGenericDto dto = i.getArgument(0, BulkGenericDto.class);
             bulks.add(dto);
-            return new BulkDTOPromise(dto);
+            return Promises.resolved(dto);
         });
 
         final CsvParser parser = new CsvParser();
