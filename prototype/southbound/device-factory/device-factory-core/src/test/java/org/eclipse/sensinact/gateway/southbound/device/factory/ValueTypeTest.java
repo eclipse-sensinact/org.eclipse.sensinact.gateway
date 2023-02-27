@@ -20,7 +20,7 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMapping
 import org.junit.jupiter.api.Test;
 
 /**
- *
+ * Tests value type conversion
  */
 public class ValueTypeTest {
 

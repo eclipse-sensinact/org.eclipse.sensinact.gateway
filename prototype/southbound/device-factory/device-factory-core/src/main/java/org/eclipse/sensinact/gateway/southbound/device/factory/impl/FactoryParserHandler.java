@@ -232,7 +232,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     private Object getFieldValue(final IDeviceMappingRecord record, final IResourceMapping mapping,
             final DeviceMappingOptionsDTO options) {
         if (mapping.isLiteral()) {
-            return ((ResourceLiteralMapping) mapping).getValue();
+            return ((ResourceLiteralMapping) mapping).getTypedValue(options);
         } else {
             final RecordPath path = ((ResourceRecordMapping) mapping).getRecordPath();
             return record.getField(path, options);
@@ -264,6 +264,19 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
         final String provider = NamingUtils.sanitizeName(rawProvider, false);
 
+        // Extract the model
+        final String model;
+        if (recordState.placeholders.containsKey(KEY_MODEL)) {
+            final String rawModel = getFieldString(record, recordState.placeholders.get(KEY_MODEL), options);
+            if (rawModel == null || rawModel.isBlank()) {
+                return Promises.failed(new IllegalArgumentException("Empty model field."));
+            } else {
+                model = NamingUtils.sanitizeName(rawModel, false);
+            }
+        } else {
+            model = provider;
+        }
+
         // Bulk update preparation
         final BulkGenericDto bulk = new BulkGenericDto();
         bulk.dtos = new ArrayList<>();
@@ -276,7 +289,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (nameKey != null) {
             final String name = getFieldString(record, nameKey, options);
             if (name != null) {
-                bulk.dtos.add(makeDto(provider, "admin", "friendlyName", name, timestamp));
+                bulk.dtos.add(makeDto(model, provider, "admin", "friendlyName", name, timestamp));
             }
         }
 
@@ -285,7 +298,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         try {
             location = computeLocation(record, recordState.placeholders, configuration.mappingOptions);
             if (location != null) {
-                bulk.dtos.add(makeDto(provider, "admin", "location", location, timestamp));
+                bulk.dtos.add(makeDto(model, provider, "admin", "location", location, timestamp));
             }
         } catch (JsonProcessingException e) {
             throw new ParserException("Error parsing location", e);
@@ -300,7 +313,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 if (rcMapping.isMetadata()) {
                     logger.warn("Metadata update not supported.");
                 } else {
-                    bulk.dtos.add(makeDto(provider, service, rcName, value, timestamp));
+                    bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
                 }
             } catch (Exception e) {
                 logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
@@ -312,11 +325,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final String service = rcLiteral.getService();
             final String rcName = rcLiteral.getResource();
             try {
-                final Object value = rcLiteral.getValue();
+                final Object value = rcLiteral.getTypedValue(options);
                 if (rcLiteral.isMetadata()) {
                     logger.warn("Metadata update not supported.");
                 } else {
-                    bulk.dtos.add(makeDto(provider, service, rcName, value, timestamp));
+                    bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
                 }
             } catch (Exception e) {
                 logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
@@ -330,9 +343,10 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Prepares a generic DTO from the given information
      */
-    private GenericDto makeDto(final String provider, final String service, final String resource, final Object value,
-            Instant timestamp) {
+    private GenericDto makeDto(final String model, final String provider, final String service, final String resource,
+            final Object value, Instant timestamp) {
         final GenericDto dto = new GenericDto();
+        dto.model = model;
         dto.provider = provider;
         dto.service = service;
         dto.resource = resource;

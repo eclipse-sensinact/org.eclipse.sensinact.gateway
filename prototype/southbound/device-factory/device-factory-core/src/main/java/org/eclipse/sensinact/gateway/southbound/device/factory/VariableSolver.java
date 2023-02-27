@@ -73,24 +73,22 @@ public class VariableSolver {
             throws VariableNotFoundException {
         final Matcher matcher = varUsePattern.matcher(strValue);
         String newValue = strValue;
-        if (matcher.find()) {
-            do {
-                final String innerVar = matcher.group(1);
-                final Object resolvedPath = variables.get("$" + innerVar);
-                if (resolvedPath == null) {
-                    throw new VariableNotFoundException("Variable not found $" + innerVar + " in value: " + strValue);
-                }
+        while (matcher.find()) {
+            final String innerVar = matcher.group(1);
+            final Object resolvedPath = variables.get("$" + innerVar);
+            if (resolvedPath == null) {
+                throw new VariableNotFoundException("Variable not found $" + innerVar + " in value: " + strValue);
+            }
 
-                final String injectedValue;
-                if (matcher.group(2) != null) {
-                    // Got a substring group
-                    injectedValue = applySubstring(String.valueOf(resolvedPath), matcher);
-                } else {
-                    injectedValue = String.valueOf(resolvedPath);
-                }
+            final String injectedValue;
+            if (matcher.group(2) != null) {
+                // Got a substring group
+                injectedValue = applySubstring(String.valueOf(resolvedPath), matcher);
+            } else {
+                injectedValue = String.valueOf(resolvedPath);
+            }
 
-                newValue = newValue.replace(matcher.group(), injectedValue);
-            } while (matcher.find());
+            newValue = newValue.replace(matcher.group(), injectedValue);
         }
 
         return newValue;

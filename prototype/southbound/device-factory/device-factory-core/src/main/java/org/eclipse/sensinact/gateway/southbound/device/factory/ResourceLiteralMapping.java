@@ -14,6 +14,8 @@ package org.eclipse.sensinact.gateway.southbound.device.factory;
 
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
+
 /**
  * Parses a resource path and associates it to a literal
  */
@@ -55,10 +57,20 @@ public class ResourceLiteralMapping extends AbstractResourceMapping {
     }
 
     /**
-     * Returns the literal value
+     * Returns the raw literal value
      */
     public Object getValue() {
         return value;
+    }
+
+    /**
+     * Returns the typed literal value
+     *
+     * @param options Mapping options
+     * @return Converted literal value
+     */
+    public Object getTypedValue(final DeviceMappingOptionsDTO options) {
+        return valueType.convert(value, options);
     }
 
     /**
@@ -80,7 +92,7 @@ public class ResourceLiteralMapping extends AbstractResourceMapping {
      * @throws InvalidResourcePathException Invalid resolved path
      * @throws VariableNotFoundException    Couldn't resolve a variable
      */
-    public ResourceLiteralMapping fillInVariables(Map<String, String> variables)
+    public ResourceLiteralMapping fillInVariables(final Map<String, String> variables)
             throws InvalidResourcePathException, VariableNotFoundException {
 
         final Object newValue;
