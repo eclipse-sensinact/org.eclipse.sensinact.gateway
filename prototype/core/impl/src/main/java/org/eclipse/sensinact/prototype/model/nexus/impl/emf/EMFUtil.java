@@ -14,6 +14,7 @@
 package org.eclipse.sensinact.prototype.model.nexus.impl.emf;
 
 import java.time.Instant;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,7 +47,10 @@ import org.eclipse.sensinact.model.core.SensiNactFactory;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.ServiceReference;
 import org.osgi.util.converter.Converter;
+import org.osgi.util.converter.ConverterFunction;
 import org.osgi.util.converter.Converters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Some Helper methods to work with Ecores.
@@ -56,12 +60,22 @@ import org.osgi.util.converter.Converters;
  */
 public class EMFUtil {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EMFUtil.class);
+
     private static final Converter converter;
     private static final Map<Class<?>, EClassifier> typeMap = new HashMap<Class<?>, EClassifier>();
     static {
-        converter = Converters.standardConverter();
+        converter = Converters.newConverterBuilder().errorHandler(EMFUtil::fallbackConversion).build();
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
         SensiNactPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
+    }
+
+    private static Object fallbackConversion(Object o, Type t) {
+        try {
+            return converter.convert(o.toString()).to(t);
+        } catch (Exception e) {
+            return ConverterFunction.CANNOT_HANDLE;
+        }
     }
 
     public static Map<String, Object> toEObjectAttributesToMap(EObject eObject) {
@@ -86,11 +100,14 @@ public class EMFUtil {
         return parameter;
     }
 
-    public static EClassifier convertClass(Class<?> clazz) {
+    private static EClassifier convertClass(Class<?> clazz) {
         EClassifier eClassifier = typeMap.get(clazz);
         if (eClassifier == null) {
-            throw new IllegalArgumentException(
-                    "Can't convert " + clazz + " to EClassifier. The class is unknwon to us");
+            LOG.warn("The class {} has no matching EClassifier. Creating an anonymous EDataType", clazz);
+            EDataType dataType = EcorePackage.eINSTANCE.getEcoreFactory().createEDataType();
+            dataType.setInstanceClass(clazz);
+            dataType.setName("Anonymous EDataType for class " + clazz.getName());
+            eClassifier = dataType;
         }
         return eClassifier;
     }

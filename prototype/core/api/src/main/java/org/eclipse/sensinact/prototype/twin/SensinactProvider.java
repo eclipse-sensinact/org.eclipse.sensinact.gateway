@@ -63,4 +63,9 @@ public interface SensinactProvider extends CommandScoped {
      * @param provider
      */
     void removeLinkedProvider(SensinactProvider provider);
+
+    /**
+     * Delete this provider from the Digital Twin
+     */
+    void delete();
 }

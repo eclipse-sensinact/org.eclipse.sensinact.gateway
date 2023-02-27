@@ -72,7 +72,9 @@ public class SensinactWhiteboard {
 
         Class<?> clz = service.getClass();
 
-        List<Method> actMethods = Arrays.stream(clz.getMethods())
+        List<Method> actMethods = Stream
+                .concat(Arrays.stream(clz.getMethods()),
+                        Arrays.stream(clz.getInterfaces()).flatMap(c -> Arrays.stream(c.getMethods())))
                 .filter(m -> m.isAnnotationPresent(ACT.class) || m.isAnnotationPresent(ACTs.class))
                 .collect(Collectors.toList());
 

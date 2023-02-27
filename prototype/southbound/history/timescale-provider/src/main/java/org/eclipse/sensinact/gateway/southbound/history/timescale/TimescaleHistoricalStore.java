@@ -15,17 +15,15 @@ package org.eclipse.sensinact.gateway.southbound.history.timescale;
 import static org.osgi.service.typedevent.TypedEventConstants.TYPED_EVENT_TOPICS;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
+import org.eclipse.sensinact.prototype.command.GatewayThread;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -39,21 +37,19 @@ import org.osgi.service.transaction.control.jdbc.JDBCConnectionProvider;
 import org.osgi.service.transaction.control.jdbc.JDBCConnectionProviderFactory;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.osgi.service.typedevent.annotations.RequireTypedEvent;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Component(service = {}, immediate = true, configurationPid = "sensinact.history.timescale", configurationPolicy = ConfigurationPolicy.REQUIRE)
 @RequireTypedEvent
-public class TimescaleDatastore implements TypedEventHandler<ResourceDataNotification> {
+public class TimescaleHistoricalStore {
 
-    private static final String INSERT_TEMPLATE = "INSERT INTO %s ( time, model, provider, service, resource, data ) values ( ?, ?, ?, ?, ?, %s );";
     private static final String NOT_SET = "<<NOT_SET>>";
 
-    private static final Logger logger = LoggerFactory.getLogger(TimescaleDatastore.class);
+    private static final Logger logger = LoggerFactory.getLogger(TimescaleHistoricalStore.class);
 
     public @interface Config {
 
@@ -62,6 +58,8 @@ public class TimescaleDatastore implements TypedEventHandler<ResourceDataNotific
         String user() default NOT_SET;
 
         String _password() default NOT_SET;
+
+        String provider() default "timescale-history";
     }
 
     @Reference
@@ -70,6 +68,9 @@ public class TimescaleDatastore implements TypedEventHandler<ResourceDataNotific
     @Reference
     JDBCConnectionProviderFactory providerFactory;
 
+    @Reference
+    GatewayThread gatewayThread;
+
     private Config config;
 
     private JDBCConnectionProvider provider;
@@ -77,8 +78,6 @@ public class TimescaleDatastore implements TypedEventHandler<ResourceDataNotific
     private final AtomicReference<Connection> connection = new AtomicReference<>();
 
     private ServiceRegistration<?> reg;
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Activate
     void start(BundleContext ctx, Config config) {
@@ -217,8 +216,9 @@ public class TimescaleDatastore implements TypedEventHandler<ResourceDataNotific
             if (logger.isDebugEnabled()) {
                 logger.debug("Registering listener for data update events");
             }
-            reg = ctx.registerService(TypedEventHandler.class, this,
-                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, "DATA/*")));
+            reg = ctx.registerService(TypedEventHandler.class, new TimescaleDatabaseWorker(txControl, connection::get),
+                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, "DATA/*", "sensiNact.whiteboard.resource", true,
+                            "sensiNact.provider.name", config.provider())));
             synchronized (this) {
                 if (this.reg == null) {
                     this.reg = reg;
@@ -226,90 +226,21 @@ public class TimescaleDatastore implements TypedEventHandler<ResourceDataNotific
                 }
             }
             safeUnregister(reg);
+
+            gatewayThread.execute(new AbstractTwinCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                    if (twin.getProvider(config.provider()) == null) {
+                        twin.createProvider("sensiNactHistory", config.provider());
+                    }
+                    return null;
+                }
+            });
+
         } else {
             if (logger.isDebugEnabled()) {
                 logger.debug("Listener is already registered for data update events");
             }
         }
-    }
-
-    @Override
-    public void notify(String topic, ResourceDataNotification event) {
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Update received for topic {} and the data will be stored", topic);
-        }
-
-        String command;
-        Object value;
-
-        if (isGeographic(event)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Event is geographic");
-            }
-            command = String.format(INSERT_TEMPLATE, "sensinact.geo_data",
-                    "(SELECT ST_GeomFromGeoJSON( ? )::geography)");
-            String tmpValue;
-            if (event.newValue == null) {
-                tmpValue = "{\"type\":\"Point\", \"coordinates\":[]}";
-            } else if (event.newValue instanceof GeoJsonObject) {
-                try {
-                    tmpValue = mapper.writeValueAsString(event.newValue);
-                } catch (JsonProcessingException e) {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("Unable to serialize geographic data for {}", topic, e);
-                    }
-                    return;
-                }
-            } else {
-                tmpValue = event.newValue.toString();
-            }
-            value = tmpValue;
-        } else if (isNumber(event.type)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Event is numeric");
-            }
-            command = String.format(INSERT_TEMPLATE, "sensinact.numeric_data", "?");
-            value = event.newValue;
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Event is being treated as text");
-            }
-            command = String.format(INSERT_TEMPLATE, "sensinact.text_data", "?");
-            value = event.newValue == null ? null : event.newValue.toString();
-        }
-        Connection conn = connection.get();
-
-        try {
-            txControl.required(() -> {
-
-                PreparedStatement ps = conn.prepareStatement(command);
-                ps.setTimestamp(1, Timestamp.from(event.timestamp));
-                ps.setString(2, event.model);
-                ps.setString(3, event.provider);
-                ps.setString(4, event.service);
-                ps.setString(5, event.resource);
-                ps.setObject(6, value);
-
-                return ps.execute();
-            });
-        } catch (Exception e) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("Unable to store data for {}", topic, e);
-            }
-        }
-
-    }
-
-    private boolean isGeographic(ResourceDataNotification event) {
-        // TODO this should be type based but isn't yet
-        return "admin".equals(event.service) && "location".equals(event.resource);
-    }
-
-    private static final Set<Class<?>> primitiveNumbers = Set.of(byte.class, short.class, int.class, long.class,
-            float.class, double.class);
-
-    private boolean isNumber(Class<?> type) {
-        return primitiveNumbers.contains(type) || Number.class.isAssignableFrom(type);
     }
 }

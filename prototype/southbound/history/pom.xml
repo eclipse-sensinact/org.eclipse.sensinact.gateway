@@ -26,6 +26,7 @@
 
   <modules>
     <module>timescale-provider</module>
+    <module>history-api</module>
   </modules>
 
   <dependencyManagement>

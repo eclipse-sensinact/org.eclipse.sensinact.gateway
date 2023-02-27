@@ -40,7 +40,7 @@ public abstract class AbstractSensinactCommand<T> {
         GatewayThread gateway = getGatewayThread();
         if (canRun.getAndSet(false)) {
             PromiseFactory promiseFactory = gateway.getPromiseFactory();
-            return call(twin, modelMgr, promiseFactory).onResolve(getAccumulator()::completeAndSend);
+            return safeCall(this, twin, modelMgr, promiseFactory).onResolve(getAccumulator()::completeAndSend);
         } else {
             throw new IllegalStateException("Commands can only be executed once");
         }
@@ -60,8 +60,8 @@ public abstract class AbstractSensinactCommand<T> {
             SensinactModelManager modelMgr, PromiseFactory pf) {
         try {
             return command.call(twin, modelMgr, pf);
-        } catch (Exception e) {
-            return pf.failed(e);
+        } catch (Throwable t) {
+            return pf.failed(t);
         }
     }
 
