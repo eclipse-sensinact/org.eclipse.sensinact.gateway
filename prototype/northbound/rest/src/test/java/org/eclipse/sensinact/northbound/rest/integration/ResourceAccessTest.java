@@ -40,7 +40,6 @@ import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
@@ -70,18 +69,13 @@ public class ResourceAccessTest {
 
     final TestUtils utils = new TestUtils();
 
-    @BeforeEach
-    void start() throws InterruptedException {
-        queue = new ArrayBlockingQueue<>(32);
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
-        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
-    }
-
     @AfterEach
     void stop() {
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.activeListeners().keySet().forEach(session::removeListener);
+        if (queue != null) {
+            SensiNactSession session = sessionManager.getDefaultSession(USER);
+            session.activeListeners().keySet().forEach(session::removeListener);
+            queue = null;
+        }
     }
 
     /**
@@ -91,10 +85,8 @@ public class ResourceAccessTest {
     void resourceGet() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
         Instant updateTime = Instant.now();
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check for success
         TypedResponse<?> result = utils.queryJson(
@@ -115,11 +107,8 @@ public class ResourceAccessTest {
     void resourceUpdate() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
         Instant firstTime = Instant.now();
-
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check response
         TypedResponse<?> result = utils.queryJson(
@@ -131,11 +120,8 @@ public class ResourceAccessTest {
 
         // Update value
         dto.value = VALUE_2;
-        push.pushUpdate(dto);
         Instant secondTime = Instant.now();
-
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check for success
         result = utils.queryJson(
@@ -153,10 +139,8 @@ public class ResourceAccessTest {
     void resourceSet() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
         Instant firstUpdateTime = Instant.now();
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check response
         TypedResponse<?> result = utils.queryJson(
@@ -167,6 +151,11 @@ public class ResourceAccessTest {
 
         Instant firstTimestamp = Instant.ofEpochMilli(response.timestamp);
         assertFalse(firstUpdateTime.isBefore(firstTimestamp), "Timestamp wasn't updated");
+
+        queue = new ArrayBlockingQueue<>(32);
+        SensiNactSession session = sessionManager.getDefaultSession(USER);
+        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
+        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
         AccessMethodCallParameterDTO param = new AccessMethodCallParameterDTO();
         param.name = "value";
@@ -201,9 +190,7 @@ public class ResourceAccessTest {
     void adminDefaultValues() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // friendlyName should be the provider name
         TypedResponse<?> result = utils.queryJson(
@@ -253,6 +240,5 @@ public class ResourceAccessTest {
         assertEquals(200, response.statusCode);
         assertNotNull(response.response);
         assertEquals(246d, response.response);
-
     }
 }

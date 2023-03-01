@@ -14,15 +14,11 @@ package org.eclipse.sensinact.northbound.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.northbound.query.api.EResultType;
@@ -36,12 +32,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
@@ -50,40 +41,17 @@ import org.osgi.test.junit5.service.ServiceExtension;
 @ExtendWith(ServiceExtension.class)
 public class DescriptionsTest {
 
-    private static final String USER = "user";
-
     private static final String PROVIDER = "RestDescriptionProvider";
     private static final String PROVIDER_2 = PROVIDER + "_2";
     private static final String PROVIDER_3 = PROVIDER + "_3";
-    private static final String PROVIDER_TOPIC = PROVIDER + "/*";
-    private static final String PROVIDER_2_TOPIC = PROVIDER_2 + "/*";
     private static final String SERVICE = "service";
     private static final String RESOURCE = "resource";
     private static final Integer VALUE = 42;
 
     @InjectService
-    SensiNactSessionManager sessionManager;
-
-    @InjectService
     PrototypePush push;
 
-    BlockingQueue<ResourceDataNotification> queue;
-
     final TestUtils utils = new TestUtils();
-
-    @BeforeEach
-    void start() throws InterruptedException {
-        queue = new ArrayBlockingQueue<>(32);
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.addListener(List.of(PROVIDER_TOPIC, PROVIDER_2_TOPIC), (t, e) -> queue.offer(e), null, null, null);
-        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
-    }
-
-    @AfterEach
-    void stop() {
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.activeListeners().keySet().forEach(session::removeListener);
-    }
 
     /**
      * Check the <code>/sensinact/</code> endpoint: full description of providers,
@@ -93,9 +61,7 @@ public class DescriptionsTest {
     void completeList() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check for success
         final ResultDescribeProvidersDTO result = utils.queryJson("/", ResultDescribeProvidersDTO.class);
@@ -142,9 +108,7 @@ public class DescriptionsTest {
     void providersList() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         ResultListProvidersDTO result = utils.queryJson("/providers", ResultListProvidersDTO.class);
@@ -156,8 +120,7 @@ public class DescriptionsTest {
         // Add another provider
         dto.provider = PROVIDER_2;
         dto.model = dto.provider;
-        push.pushUpdate(dto);
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check the new list
         result = utils.queryJson("/providers", ResultListProvidersDTO.class);
@@ -175,9 +138,7 @@ public class DescriptionsTest {
     void providerDescription() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         TypedResponse<?> result = utils.queryJson("/providers/" + PROVIDER, TypedResponse.class);
@@ -195,9 +156,7 @@ public class DescriptionsTest {
     void servicesList() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         ResultListServicesDTO result = utils.queryJson("/providers/" + PROVIDER + "/services",
@@ -214,9 +173,7 @@ public class DescriptionsTest {
     void serviceDescription() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         TypedResponse<?> result = utils.queryJson("/providers/" + PROVIDER + "/services/" + SERVICE,
@@ -236,9 +193,7 @@ public class DescriptionsTest {
     void resourcesList() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         ResultListResourcesDTO result = utils.queryJson(
@@ -256,9 +211,7 @@ public class DescriptionsTest {
     void resourceDescription() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         TypedResponse<?> result = utils.queryJson(
