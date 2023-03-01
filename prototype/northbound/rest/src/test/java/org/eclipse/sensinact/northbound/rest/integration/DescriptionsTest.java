@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.northbound.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -53,6 +54,7 @@ public class DescriptionsTest {
 
     private static final String PROVIDER = "RestDescriptionProvider";
     private static final String PROVIDER_2 = PROVIDER + "_2";
+    private static final String PROVIDER_3 = PROVIDER + "_3";
     private static final String PROVIDER_TOPIC = PROVIDER + "/*";
     private static final String PROVIDER_2_TOPIC = PROVIDER_2 + "/*";
     private static final String SERVICE = "service";
@@ -147,7 +149,9 @@ public class DescriptionsTest {
         // Check the list of providers
         ResultListProvidersDTO result = utils.queryJson("/providers", ResultListProvidersDTO.class);
         utils.assertResultSuccess(result, EResultType.PROVIDERS_LIST);
-        assertEquals(Set.of("sensiNact", PROVIDER), Set.copyOf(result.providers));
+        assertFalse(result.providers.contains(PROVIDER_2), "Unexpected provider is present");
+        assertTrue(result.providers.contains("sensiNact"), "sensiNact provider is missing");
+        assertTrue(result.providers.contains(PROVIDER), "Expected provider is missing");
 
         // Add another provider
         dto.provider = PROVIDER_2;
@@ -158,7 +162,9 @@ public class DescriptionsTest {
         // Check the new list
         result = utils.queryJson("/providers", ResultListProvidersDTO.class);
         utils.assertResultSuccess(result, EResultType.PROVIDERS_LIST);
-        assertEquals(Set.of("sensiNact", PROVIDER, PROVIDER_2), Set.copyOf(result.providers));
+        assertTrue(result.providers.contains("sensiNact"), "sensiNact provider is missing");
+        assertTrue(result.providers.contains(PROVIDER), "Expected provider is missing");
+        assertTrue(result.providers.contains(PROVIDER_2), "Expected provider 2 is missing");
     }
 
     /**
@@ -259,5 +265,34 @@ public class DescriptionsTest {
                 "/providers/" + PROVIDER + "/services/" + SERVICE + "/resources/" + RESOURCE, TypedResponse.class);
         utils.assertResultSuccess(result, EResultType.DESCRIBE_RESOURCE, PROVIDER, SERVICE, RESOURCE);
         assertEquals(RESOURCE, utils.convert(result, ResponseDescribeResourceDTO.class).name);
+    }
+
+    /**
+     * Check filter passing
+     */
+    @Test
+    void filterTest() throws Exception {
+        // Register the resource
+        GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, 12345678, Integer.class);
+        push.pushUpdate(dto).getValue();
+
+        GenericDto dto2 = utils.makeDto(PROVIDER_3, SERVICE, RESOURCE, 12345679, Integer.class);
+        push.pushUpdate(dto2).getValue();
+
+        ResultDescribeProvidersDTO result = utils.queryJson(
+                "/?filter=(" + SERVICE + "." + RESOURCE + "=" + dto.value + ")", ResultDescribeProvidersDTO.class);
+        utils.assertResultSuccess(result, EResultType.COMPLETE_LIST);
+
+        // Check content
+        assertEquals(1, result.providers.size());
+        assertEquals(PROVIDER, result.providers.get(0).name);
+
+        result = utils.queryJson("/?filter=(" + SERVICE + "." + RESOURCE + "=" + dto2.value + ")",
+                ResultDescribeProvidersDTO.class);
+        utils.assertResultSuccess(result, EResultType.COMPLETE_LIST);
+
+        // Check content
+        assertEquals(1, result.providers.size());
+        assertEquals(PROVIDER_3, result.providers.get(0).name);
     }
 }

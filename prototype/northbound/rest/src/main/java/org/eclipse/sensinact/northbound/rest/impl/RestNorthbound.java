@@ -37,6 +37,8 @@ import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
 
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
 import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;
@@ -54,6 +56,12 @@ public class RestNorthbound implements IRestNorthbound {
      */
     @Context
     Providers providers;
+
+    /**
+     * URI info
+     */
+    @Context
+    UriInfo uriInfo;
 
     /**
      * Returns a user session
@@ -79,10 +87,41 @@ public class RestNorthbound implements IRestNorthbound {
         return getQueryHandler().handleQuery(getSession(), query);
     }
 
+    /**
+     * Injects the query filter in a description query
+     *
+     * @param query Query to update
+     */
+    private void injectFilter(final QueryDescribeDTO query) {
+        final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
+        query.filter = queryParameters.getFirst("filter");
+        if (queryParameters.containsKey("filterLanguage")) {
+            query.filterLanguage = queryParameters.getFirst("filterLanguage");
+        } else {
+            query.filterLanguage = "ldap";
+        }
+    }
+
+    /**
+     * Injects the query filter in a list query
+     *
+     * @param query Query to update
+     */
+    private void injectFilter(final QueryListDTO query) {
+        final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
+        query.filter = queryParameters.getFirst("filter");
+        if (queryParameters.containsKey("filterLanguage")) {
+            query.filterLanguage = queryParameters.getFirst("filterLanguage");
+        } else {
+            query.filterLanguage = "ldap";
+        }
+    }
+
     @Override
     public AbstractResultDTO describeProviders() {
         final QueryDescribeDTO query = new QueryDescribeDTO();
         query.uri = new SensinactPath();
+        injectFilter(query);
         return handleQuery(query);
     }
 
@@ -90,6 +129,7 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO listProviders() {
         final QueryListDTO query = new QueryListDTO();
         query.uri = new SensinactPath();
+        injectFilter(query);
         return handleQuery(query);
     }
 
@@ -97,6 +137,7 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO describeProvider(final String providerId) {
         final QueryDescribeDTO query = new QueryDescribeDTO();
         query.uri = new SensinactPath(providerId);
+        injectFilter(query);
         return handleQuery(query);
     }
 
@@ -104,6 +145,7 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO listServices(final String providerId) {
         final QueryListDTO query = new QueryListDTO();
         query.uri = new SensinactPath(providerId);
+        injectFilter(query);
         return handleQuery(query);
     }
 
@@ -111,6 +153,7 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO describeService(final String providerId, final String serviceName) {
         final QueryDescribeDTO query = new QueryDescribeDTO();
         query.uri = new SensinactPath(providerId, serviceName);
+        injectFilter(query);
         return handleQuery(query);
     }
 
@@ -118,6 +161,7 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO listResources(final String providerId, final String serviceName) {
         final QueryListDTO query = new QueryListDTO();
         query.uri = new SensinactPath(providerId, serviceName);
+        injectFilter(query);
         return handleQuery(query);
     }
 
@@ -125,6 +169,7 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO describeResource(final String providerId, final String serviceName, final String rcName) {
         final QueryDescribeDTO query = new QueryDescribeDTO();
         query.uri = new SensinactPath(providerId, serviceName, rcName);
+        injectFilter(query);
         return handleQuery(query);
     }
 
