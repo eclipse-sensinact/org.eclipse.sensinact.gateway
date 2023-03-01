@@ -63,6 +63,7 @@
 	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.northbound.filters.filters.core;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.rest;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.rest-tests;version='[0.0.1,0.0.2)',\

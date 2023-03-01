@@ -39,8 +39,9 @@ public class RestAccessApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(SensinactSessionProvider.class, QueryHandlerProvider.class, ObjectMapperProvider.class,
-                JacksonJsonProvider.class, JacksonXmlBindJsonProvider.class, RestNorthbound.class);
+        return Set.of(StatusCodeFilter.class, SensinactSessionProvider.class, QueryHandlerProvider.class,
+                ObjectMapperProvider.class, JacksonJsonProvider.class, JacksonXmlBindJsonProvider.class,
+                RestNorthbound.class);
     }
 
     public SensiNactSessionManager getSessionManager() {
