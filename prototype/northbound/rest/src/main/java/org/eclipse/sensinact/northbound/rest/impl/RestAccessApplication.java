@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.rest.impl;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -33,10 +34,13 @@ public class RestAccessApplication extends Application {
     @Reference
     SensiNactSessionManager sessionManager;
 
+    @Reference
+    IQueryHandler queryHandler;
+
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(SensinactSessionProvider.class, ObjectMapperProvider.class, JacksonJsonProvider.class,
-                JacksonXmlBindJsonProvider.class, RestNorthbound.class);
+        return Set.of(SensinactSessionProvider.class, QueryHandlerProvider.class, ObjectMapperProvider.class,
+                JacksonJsonProvider.class, JacksonXmlBindJsonProvider.class, RestNorthbound.class);
     }
 
     public SensiNactSessionManager getSessionManager() {
@@ -45,6 +49,6 @@ public class RestAccessApplication extends Application {
 
     @Override
     public Map<String, Object> getProperties() {
-        return Map.of("session.manager", sessionManager);
+        return Map.of("session.manager", sessionManager, "query.handler", queryHandler);
     }
 }

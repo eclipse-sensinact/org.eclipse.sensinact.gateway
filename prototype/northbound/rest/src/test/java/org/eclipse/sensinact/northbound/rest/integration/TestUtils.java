@@ -25,8 +25,9 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
 
-import org.eclipse.sensinact.northbound.rest.dto.ResultRootDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
+import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
+import org.eclipse.sensinact.northbound.query.api.EResultType;
+import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 
@@ -99,7 +100,7 @@ public class TestUtils {
     /**
      * Converts the content of the parsed response
      */
-    public <T> T convert(final ResultTypedResponseDTO<?> dto, Class<T> type) {
+    public <T> T convert(final TypedResponse<?> dto, Class<T> type) {
         return mapper.convertValue(dto.response, type);
     }
 
@@ -117,7 +118,8 @@ public class TestUtils {
     /**
      * Checks if the parsed result is successful
      */
-    public void assertResultSuccess(final ResultRootDTO result, final String expectedType, final String... uriParts) {
+    public void assertResultSuccess(final AbstractResultDTO result, final EResultType expectedType,
+            final String... uriParts) {
         assertEquals(200, result.statusCode, "Invalid status code");
         assertNull(result.error, "Got an error");
         assertEquals(expectedType, result.type, "Invalid result type");

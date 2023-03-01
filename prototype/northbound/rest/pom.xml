@@ -32,6 +32,11 @@
       <artifactId>geo-json</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>query-handler</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <!-- SL4J -->
     <dependency>

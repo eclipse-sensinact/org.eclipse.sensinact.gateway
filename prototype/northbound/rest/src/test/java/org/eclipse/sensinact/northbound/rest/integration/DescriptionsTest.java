@@ -24,15 +24,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.northbound.rest.dto.CompleteProviderDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.CompleteResourceDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.CompleteServiceDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ProviderDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultCompleteListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultProvidersListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultResourcesListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultServicesListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
+import org.eclipse.sensinact.northbound.query.api.EResultType;
+import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProviderDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourceDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
@@ -95,8 +96,8 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check for success
-        final ResultCompleteListDTO result = utils.queryJson("/", ResultCompleteListDTO.class);
-        utils.assertResultSuccess(result, "COMPLETE_LIST");
+        final ResultDescribeProvidersDTO result = utils.queryJson("/", ResultDescribeProvidersDTO.class);
+        utils.assertResultSuccess(result, EResultType.COMPLETE_LIST);
 
         // Check content
         final CompleteProviderDescriptionDTO providerDto = result.providers.stream()
@@ -106,7 +107,7 @@ public class DescriptionsTest {
         boolean gotAdmin = false;
         boolean gotService = false;
 
-        for (final CompleteServiceDescriptionDTO svc : providerDto.services) {
+        for (final ResponseDescribeServiceDTO svc : providerDto.services) {
             final List<String> resources = svc.resources.stream().map((r) -> r.name).collect(Collectors.toList());
 
             switch (svc.name) {
@@ -144,8 +145,8 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the list of providers
-        ResultProvidersListDTO result = utils.queryJson("/providers", ResultProvidersListDTO.class);
-        utils.assertResultSuccess(result, "PROVIDERS_LIST");
+        ResultListProvidersDTO result = utils.queryJson("/providers", ResultListProvidersDTO.class);
+        utils.assertResultSuccess(result, EResultType.PROVIDERS_LIST);
         assertEquals(Set.of("sensiNact", PROVIDER), Set.copyOf(result.providers));
 
         // Add another provider
@@ -155,8 +156,8 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the new list
-        result = utils.queryJson("/providers", ResultProvidersListDTO.class);
-        utils.assertResultSuccess(result, "PROVIDERS_LIST");
+        result = utils.queryJson("/providers", ResultListProvidersDTO.class);
+        utils.assertResultSuccess(result, EResultType.PROVIDERS_LIST);
         assertEquals(Set.of("sensiNact", PROVIDER, PROVIDER_2), Set.copyOf(result.providers));
     }
 
@@ -173,9 +174,9 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the list of providers
-        ResultTypedResponseDTO<?> result = utils.queryJson("/providers/" + PROVIDER, ResultTypedResponseDTO.class);
-        utils.assertResultSuccess(result, "DESCRIBE_PROVIDER", PROVIDER);
-        ProviderDescriptionDTO descr = utils.convert(result, ProviderDescriptionDTO.class);
+        TypedResponse<?> result = utils.queryJson("/providers/" + PROVIDER, TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.DESCRIBE_PROVIDER, PROVIDER);
+        ResponseDescribeProviderDTO descr = utils.convert(result, ResponseDescribeProviderDTO.class);
         assertEquals(PROVIDER, descr.name);
         assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
     }
@@ -193,9 +194,9 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the list of providers
-        ResultServicesListDTO result = utils.queryJson("/providers/" + PROVIDER + "/services",
-                ResultServicesListDTO.class);
-        utils.assertResultSuccess(result, "SERVICES_LIST", PROVIDER);
+        ResultListServicesDTO result = utils.queryJson("/providers/" + PROVIDER + "/services",
+                ResultListServicesDTO.class);
+        utils.assertResultSuccess(result, EResultType.SERVICES_LIST, PROVIDER);
         assertEquals(Set.of("admin", SERVICE), Set.copyOf(result.services));
     }
 
@@ -212,10 +213,10 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the list of providers
-        ResultTypedResponseDTO<?> result = utils.queryJson("/providers/" + PROVIDER + "/services/" + SERVICE,
-                ResultTypedResponseDTO.class);
-        utils.assertResultSuccess(result, "DESCRIBE_SERVICE", PROVIDER, SERVICE);
-        CompleteServiceDescriptionDTO descr = utils.convert(result, CompleteServiceDescriptionDTO.class);
+        TypedResponse<?> result = utils.queryJson("/providers/" + PROVIDER + "/services/" + SERVICE,
+                TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.DESCRIBE_SERVICE, PROVIDER, SERVICE);
+        ResponseDescribeServiceDTO descr = utils.convert(result, ResponseDescribeServiceDTO.class);
         assertEquals(SERVICE, descr.name);
         assertEquals(List.of(RESOURCE), descr.resources.stream().map((r) -> r.name).collect(Collectors.toList()));
     }
@@ -234,9 +235,9 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the list of providers
-        ResultResourcesListDTO result = utils.queryJson(
-                "/providers/" + PROVIDER + "/services/" + SERVICE + "/resources", ResultResourcesListDTO.class);
-        utils.assertResultSuccess(result, "RESOURCES_LIST", PROVIDER, SERVICE);
+        ResultListResourcesDTO result = utils.queryJson(
+                "/providers/" + PROVIDER + "/services/" + SERVICE + "/resources", ResultListResourcesDTO.class);
+        utils.assertResultSuccess(result, EResultType.RESOURCES_LIST, PROVIDER, SERVICE);
         assertEquals(List.of(RESOURCE), result.resources);
     }
 
@@ -254,10 +255,9 @@ public class DescriptionsTest {
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the list of providers
-        ResultTypedResponseDTO<?> result = utils.queryJson(
-                "/providers/" + PROVIDER + "/services/" + SERVICE + "/resources/" + RESOURCE,
-                ResultTypedResponseDTO.class);
-        utils.assertResultSuccess(result, "DESCRIBE_RESOURCE", PROVIDER, SERVICE, RESOURCE);
-        assertEquals(RESOURCE, utils.convert(result, CompleteResourceDescriptionDTO.class).name);
+        TypedResponse<?> result = utils.queryJson(
+                "/providers/" + PROVIDER + "/services/" + SERVICE + "/resources/" + RESOURCE, TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.DESCRIBE_RESOURCE, PROVIDER, SERVICE, RESOURCE);
+        assertEquals(RESOURCE, utils.convert(result, ResponseDescribeResourceDTO.class).name);
     }
 }
