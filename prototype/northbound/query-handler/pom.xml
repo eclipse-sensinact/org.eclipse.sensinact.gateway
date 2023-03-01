@@ -120,6 +120,15 @@
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-resolver-maven-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-run-maven-plugin</artifactId>
+        <version>${bnd.version}</version>
+        <configuration>
+          <includeDependencyManagement>true</includeDependencyManagement>
+          <bndrun>integration-test.bndrun</bndrun>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

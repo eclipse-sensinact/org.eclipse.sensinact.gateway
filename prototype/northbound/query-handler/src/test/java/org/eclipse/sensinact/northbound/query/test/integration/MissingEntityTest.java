@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
@@ -128,8 +129,9 @@ public class MissingEntityTest {
         push.pushUpdate(dto).getValue();
 
         final String missingService = SERVICE + "__missing__";
-        final SensinactPath rcPath = new SensinactPath(PROVIDER, missingService, RESOURCE);
-        for (SensinactPath missingProviderPath : Arrays.asList(new SensinactPath(PROVIDER, missingService), rcPath)) {
+        final SensinactPath rcPath = new SensinactPath(provider_service, missingService, RESOURCE);
+        for (SensinactPath missingProviderPath : Arrays.asList(new SensinactPath(provider_service, missingService),
+                rcPath)) {
             // Item description
             final QueryDescribeDTO describeQuery = new QueryDescribeDTO();
             describeQuery.uri = missingProviderPath;
@@ -159,7 +161,7 @@ public class MissingEntityTest {
 
         // Provider description
         final QueryDescribeDTO describeQuery = new QueryDescribeDTO();
-        describeQuery.uri = new SensinactPath(PROVIDER);
+        describeQuery.uri = new SensinactPath(provider_service);
         result = handler.handleQuery(session, describeQuery);
         assertEquals(200, result.statusCode);
         assertEquals(EResultType.DESCRIBE_PROVIDER, result.type);
@@ -172,10 +174,10 @@ public class MissingEntityTest {
 
         // Services list
         final QueryListDTO listQuery = new QueryListDTO();
-        describeQuery.uri = new SensinactPath(PROVIDER);
+        listQuery.uri = new SensinactPath(provider_service);
         result = handler.handleQuery(session, listQuery);
         assertEquals(200, result.statusCode);
-        assertEquals(EResultType.DESCRIBE_PROVIDER, result.type);
+        assertEquals(EResultType.SERVICES_LIST, result.type);
         assertNull(result.error);
 
         ResultListServicesDTO svcListResult = (ResultListServicesDTO) result;
@@ -197,14 +199,14 @@ public class MissingEntityTest {
 
         // Check resources list
         final QueryListDTO listQuery = new QueryListDTO();
-        listQuery.uri = new SensinactPath(PROVIDER, SERVICE);
+        listQuery.uri = new SensinactPath(provider_resource, SERVICE);
         ResultListResourcesDTO rcListResult = (ResultListResourcesDTO) handler.handleQuery(session, listQuery);
         assertEquals(200, rcListResult.statusCode);
         assertFalse(rcListResult.resources.contains(missingResource), "Missing resource is registered");
 
         // Get value
         final QueryGetDTO getQuery = new QueryGetDTO();
-        getQuery.uri = new SensinactPath(PROVIDER, SERVICE, missingResource);
+        getQuery.uri = new SensinactPath(provider_resource, SERVICE, missingResource);
         ErrorResultDTO result = (ErrorResultDTO) handler.handleQuery(session, getQuery);
         assertEquals(404, result.statusCode);
         assertNotNull(result.error, "No warning message set");
@@ -233,7 +235,7 @@ public class MissingEntityTest {
         assertTrue(rcListResult.resources.contains(RESOURCE), "Resource is not registered");
 
         // Get value
-        Instant queryTime = Instant.now();
+        Instant queryTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
         final QueryGetDTO getQuery = new QueryGetDTO();
         getQuery.uri = new SensinactPath(provider2, SERVICE, RESOURCE);
@@ -245,6 +247,10 @@ public class MissingEntityTest {
 
         ResponseGetDTO response = utils.convert((TypedResponse<?>) result, ResponseGetDTO.class);
         assertNotNull(response, "No empty value response");
+
+        System.out.println("Query time: " + queryTime);
+        System.out.println("Response time: " + Instant.ofEpochMilli(response.timestamp));
+
         assertFalse(queryTime.isAfter(Instant.ofEpochMilli(response.timestamp)), "Missing resource has a timestamp");
         assertNull(response.value, "Got a value for a missing resource");
     }

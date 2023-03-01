@@ -81,14 +81,14 @@ public class ResourceAccessTest {
     @BeforeEach
     void start() throws Exception {
         session = sessionManager.getDefaultSession(USER);
-        queue = new ArrayBlockingQueue<>(32);
-        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
-        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
     }
 
     @AfterEach
     void stop() {
-        session.activeListeners().keySet().forEach(session::removeListener);
+        if (queue != null) {
+            session.activeListeners().keySet().forEach(session::removeListener);
+            queue = null;
+        }
         session = null;
     }
 
@@ -168,6 +168,12 @@ public class ResourceAccessTest {
         query.uri = new SensinactPath(PROVIDER, SERVICE, RESOURCE);
         query.valueType = Integer.class.getName();
         query.value = VALUE_2;
+
+        queue = new ArrayBlockingQueue<>(32);
+        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
+        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
+
+        result = (TypedResponse<?>) handler.handleQuery(session, query);
 
         utils.assertResultSuccess(result, EResultType.SET_RESPONSE, PROVIDER, SERVICE, RESOURCE);
         response = utils.convert(result, ResponseGetDTO.class);
