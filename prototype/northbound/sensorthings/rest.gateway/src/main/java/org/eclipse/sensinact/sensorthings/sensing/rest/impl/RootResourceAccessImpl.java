@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,17 +14,22 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
+import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -40,8 +45,10 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.RootResourceAccess;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
@@ -72,7 +79,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
     private ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
         final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
-        if(filterString == null || filterString.isBlank()) {
+        if (filterString == null || filterString.isBlank()) {
             return null;
         }
 
@@ -128,9 +135,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Location> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
-        list.value = providers.stream()
-                .map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p))
-                .collect(toList());
+        list.value = providers.stream().map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p)).collect(toList());
 
         return list;
     }
@@ -140,8 +145,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<HistoricalLocation> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
-        list.value = providers.stream()
-                .map(p -> DtoMapper.toHistoricalLocation(getMapper(), uriInfo, p))
+        list.value = providers.stream().map(p -> DtoMapper.toHistoricalLocation(getMapper(), uriInfo, p))
                 .collect(toList());
         return list;
     }
@@ -151,9 +155,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Datastream> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listResources(EFilterContext.DATASTREAMS);
-        list.value = resources.stream()
-                .map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r))
-                .collect(toList());
+        list.value = resources.stream().map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r)).collect(toList());
 
         return list;
     }
@@ -163,13 +165,12 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Sensor> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listResources(EFilterContext.SENSORS);
-        list.value = resources.stream()
-                .map(r -> DtoMapper.toSensor(uriInfo, r))
-                .collect(toList());
+        list.value = resources.stream().map(r -> DtoMapper.toSensor(uriInfo, r)).collect(toList());
 
         return list;
     }
 
+    // No history as it is *live* observation data not a data stream
     @Override
     public ResultList<Observation> getObservations() {
         ResultList<Observation> list = new ResultList<>();
@@ -185,9 +186,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<ObservedProperty> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listResources(EFilterContext.OBSERVED_PROPERTIES);
-        list.value = resources.stream()
-                .map(r -> DtoMapper.toObservedProperty(uriInfo, r))
-                .collect(toList());
+        list.value = resources.stream().map(r -> DtoMapper.toObservedProperty(uriInfo, r)).collect(toList());
 
         return list;
     }
@@ -199,6 +198,58 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         List<ProviderSnapshot> providers = listProviders(EFilterContext.FEATURES_OF_INTEREST);
         list.value = providers.stream().map(p -> DtoMapper.toFeatureOfInterest(uriInfo, getMapper(), p))
                 .collect(toList());
+
+        return list;
+    }
+
+    @SuppressWarnings("unchecked")
+    static ResultList<Observation> getObservationList(SensiNactSession userSession, UriInfo uriInfo,
+            Application application, String provider, String service, String resource) {
+
+        ResourceDescription rd;
+        try {
+            rd = userSession.describeResource(provider, service, resource);
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException(iae);
+        }
+
+        ResultList<Observation> list = new ResultList<>();
+
+        String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
+        Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
+
+        List<Observation> results = new ArrayList<>();
+
+        if (historyProvider != null) {
+            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count",
+                    Map.of("provider", provider, "service", service, "resource", resource));
+
+            Map<String, Object> params = new HashMap<>(
+                    Map.of("provider", provider, "service", service, "resource", resource));
+            Integer skip = Integer.valueOf(0);
+
+            List<TimedValue<?>> timed;
+            do {
+                params.put("skip", skip);
+
+                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
+
+                results.addAll(0, DtoMapper.toObservationList(uriInfo, historyProvider, service, resource, timed));
+
+                if (timed.isEmpty()) {
+                    break;
+                } else if (timed.size() == 500) {
+                    skip = results.size();
+                }
+
+            } while (results.size() < count && results.size() < maxResults);
+        }
+
+        if (results.isEmpty()) {
+            results.add(DtoMapper.toObservation(uriInfo, rd));
+        }
+
+        list.value = results;
 
         return list;
     }

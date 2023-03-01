@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,10 +24,12 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
@@ -40,6 +42,9 @@ public class SensorsAccessImpl implements SensorsAccess {
 
     @Context
     Providers providers;
+
+    @Context
+    Application application;
 
     /**
      * Returns a user session
@@ -84,6 +89,7 @@ public class SensorsAccessImpl implements SensorsAccess {
                 userSession.describeResource(provider, service, resource));
     }
 
+    @PaginationLimit(500)
     @Override
     public ResultList<Observation> getSensorDatastreamObservations(String id, String id2) {
         if (!id.equals(id2)) {
@@ -93,10 +99,8 @@ public class SensorsAccessImpl implements SensorsAccess {
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        ResultList<Observation> list = new ResultList<>();
-        list.value = List
-                .of(DtoMapper.toObservation(uriInfo, getSession().describeResource(provider, service, resource)));
-        return list;
+        return RootResourceAccessImpl.getObservationList(getSession(), uriInfo, application, provider, service,
+                resource);
     }
 
     @Override

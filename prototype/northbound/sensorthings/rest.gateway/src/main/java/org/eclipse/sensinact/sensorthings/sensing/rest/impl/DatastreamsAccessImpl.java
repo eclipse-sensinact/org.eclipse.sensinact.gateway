@@ -28,10 +28,12 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.DatastreamsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
@@ -44,6 +46,9 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Context
     Providers providers;
+
+    @Context
+    Application application;
 
     private ObjectMapper getMapper() {
         return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
@@ -59,9 +64,11 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
         String provider = extractFirstIdSegment(id);
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-        return DtoMapper.toDatastream(userSession, getMapper(), uriInfo, userSession.describeResource(provider, service, resource));
+        return DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
+                userSession.describeResource(provider, service, resource));
     }
 
+    @PaginationLimit(500)
     @Override
     public ResultList<Observation> getDatastreamObservations(String id) {
         SensiNactSession userSession = getSession();
@@ -69,10 +76,8 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        ResultList<Observation> list = new ResultList<>();
-        list.value = List
-                .of(DtoMapper.toObservation(uriInfo, userSession.describeResource(provider, service, resource)));
-        return list;
+        return RootResourceAccessImpl.getObservationList(userSession, uriInfo, application, provider, service,
+                resource);
     }
 
     @Override

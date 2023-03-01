@@ -40,11 +40,13 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
             throws IOException {
         Boolean addCount = (Boolean) requestContext.getProperty(COUNT_PROP);
 
-        if(addCount != null && addCount) {
+        if (addCount != null && addCount) {
             Object entity = responseContext.getEntity();
-            if(entity instanceof ResultList) {
+            if (entity instanceof ResultList) {
                 ResultList<?> resultList = (ResultList<?>) entity;
-                resultList.count = resultList.value.size();
+                if (resultList.count == null) {
+                    resultList.count = resultList.value.size();
+                }
             }
         }
     }
@@ -54,20 +56,16 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
         boolean addCount = false;
 
         List<String> list = requestContext.getUriInfo().getQueryParameters().getOrDefault("$count", List.of());
-        if(list.size() > 1) {
-            requestContext.abortWith(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("Only one $count parameter may be provided")
-                    .build());
+        if (list.size() > 1) {
+            requestContext.abortWith(
+                    Response.status(Status.BAD_REQUEST).entity("Only one $count parameter may be provided").build());
         } else if (!list.isEmpty()) {
             String s = list.get(0);
-            if("true".equals(s)) {
+            if ("true".equals(s)) {
                 addCount = true;
-            } else if(!"false".equals(s)) {
-                requestContext.abortWith(Response
-                        .status(Status.BAD_REQUEST)
-                        .entity("The $count parameter must be \"true\" or \"false\"")
-                        .build());
+            } else if (!"false".equals(s)) {
+                requestContext.abortWith(Response.status(Status.BAD_REQUEST)
+                        .entity("The $count parameter must be \"true\" or \"false\"").build());
             }
         }
         requestContext.setProperty(COUNT_PROP, addCount);
