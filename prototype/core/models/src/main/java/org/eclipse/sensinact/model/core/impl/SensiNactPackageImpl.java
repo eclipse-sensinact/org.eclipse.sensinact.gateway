@@ -303,6 +303,16 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 	 * @generated
 	 */
 	@Override
+	public EAttribute getAdmin_ModelUri() {
+		return (EAttribute)adminEClass.getEStructuralFeatures().get(2);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public EClass getService() {
 		return serviceEClass;
 	}
@@ -634,6 +644,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		adminEClass = createEClass(ADMIN);
 		createEAttribute(adminEClass, ADMIN__FRIENDLY_NAME);
 		createEAttribute(adminEClass, ADMIN__LOCATION);
+		createEAttribute(adminEClass, ADMIN__MODEL_URI);
 
 		serviceEClass = createEClass(SERVICE);
 		createEReference(serviceEClass, SERVICE__METADATA);
@@ -731,6 +742,7 @@ public class SensiNactPackageImpl extends EPackageImpl implements SensiNactPacka
 		initEClass(adminEClass, Admin.class, "Admin", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getAdmin_FriendlyName(), ecorePackage.getEString(), "friendlyName", null, 0, 1, Admin.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getAdmin_Location(), this.getEGeoJsonObject(), "location", null, 0, 1, Admin.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getAdmin_ModelUri(), ecorePackage.getEString(), "modelUri", null, 0, 1, Admin.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(serviceEClass, Service.class, "Service", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getService_Metadata(), this.getFeatureMetadata(), null, "metadata", null, 0, -1, Service.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

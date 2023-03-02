@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.prototype.command.CommandScoped;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
@@ -53,6 +54,15 @@ public interface SensinactDigitalTwin extends CommandScoped {
      * @return
      */
     SensinactProvider getProvider(String providerName);
+
+    /**
+     * Get a provider by name and its concrete model class
+     *
+     * @param model
+     * @param providerName
+     * @return
+     */
+    SensinactProvider getProvider(EClass model, String id);
 
     /**
      * Get a provider by name and model
@@ -134,4 +144,5 @@ public interface SensinactDigitalTwin extends CommandScoped {
     List<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter);
+
 }

@@ -10,7 +10,7 @@
 * Contributors:
 *   Data In Motion - initial API and implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.model.nexus.impl;
+package org.eclipse.sensinact.prototype.model.nexus;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

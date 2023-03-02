@@ -27,6 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <ul>
  *   <li>{@link org.eclipse.sensinact.model.core.Admin#getFriendlyName <em>Friendly Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.model.core.Admin#getLocation <em>Location</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.model.core.Admin#getModelUri <em>Model Uri</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.model.core.SensiNactPackage#getAdmin()
@@ -78,5 +79,27 @@ public interface Admin extends Service {
 	 * @generated
 	 */
 	void setLocation(GeoJsonObject value);
+
+	/**
+	 * Returns the value of the '<em><b>Model Uri</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Model Uri</em>' attribute.
+	 * @see #setModelUri(String)
+	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getAdmin_ModelUri()
+	 * @model
+	 * @generated
+	 */
+	String getModelUri();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.model.core.Admin#getModelUri <em>Model Uri</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Model Uri</em>' attribute.
+	 * @see #getModelUri()
+	 * @generated
+	 */
+	void setModelUri(String value);
 
 } // Admin

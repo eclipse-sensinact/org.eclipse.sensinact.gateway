@@ -20,23 +20,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 import org.eclipse.sensinact.prototype.model.Service;
 import org.eclipse.sensinact.prototype.model.ServiceBuilder;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 
 public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, Service> implements ServiceBuilder<P> {
 
     private final String name;
     private final ModelNexus nexusImpl;
-    private final NotificationAccumulator accumulator;
     private final List<NestableBuilderImpl<?, ServiceImpl, ?>> nested = new ArrayList<>();
     private Instant creationTimestamp;
 
-    public ServiceBuilderImpl(AtomicBoolean active, P parent, ModelImpl built, String name, ModelNexus nexusImpl,
-            NotificationAccumulator accumulator) {
+    public ServiceBuilderImpl(AtomicBoolean active, P parent, ModelImpl built, String name, ModelNexus nexusImpl) {
         super(active, parent, built);
         this.name = name;
         this.nexusImpl = nexusImpl;
-        this.accumulator = accumulator;
     }
 
     @Override
@@ -62,17 +58,15 @@ public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, Ser
     public ResourceBuilder<ServiceBuilder<P>, Object> withResource(String name) {
         checkValid();
         ResourceBuilderImpl<ServiceBuilder<P>, Object> rb = new ResourceBuilderImpl<>(active, this, null, name,
-                nexusImpl, accumulator);
+                nexusImpl);
         nested.add(rb);
         return rb;
     }
 
     protected Service doBuild(ModelImpl builtParent) {
         checkValid();
-        ServiceImpl s = new ServiceImpl(active, builtParent,
-                nexusImpl.createService(builtParent.getModelEClass(), name,
-                        creationTimestamp == null ? Instant.now() : creationTimestamp, accumulator),
-                nexusImpl, accumulator);
+        ServiceImpl s = new ServiceImpl(active, builtParent, nexusImpl.createService(builtParent.getModelEClass(), name,
+                creationTimestamp == null ? Instant.now() : creationTimestamp), nexusImpl);
         nested.forEach(n -> n.doBuild(s));
         return s;
     }

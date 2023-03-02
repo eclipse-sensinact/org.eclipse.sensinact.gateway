@@ -21,9 +21,11 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
+import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactProviderImpl extends CommandScopedImpl implements SensinactProvider {
@@ -58,7 +60,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     @Override
     public String getModelName() {
         checkValid();
-        return nexus.getModelName(provider.eClass());
+        return EMFUtil.getModelName(provider.eClass());
     }
 
     @Override
@@ -92,5 +94,20 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     public void delete() {
         checkValid();
         nexus.deleteProvider(getModelName(), getName());
+    }
+
+    public Promise<Void> update(Provider newVersion) {
+
+        checkValid();
+
+        if (!newVersion.eClass().equals(newVersion.eClass())) {
+            return promiseFactory.failed(new IllegalArgumentException(
+                    "The given Object is of type " + newVersion.eClass() + " but expected " + provider.eClass()));
+        }
+
+        nexus.save(newVersion);
+
+        return promiseFactory.resolved(null);
+
     }
 }

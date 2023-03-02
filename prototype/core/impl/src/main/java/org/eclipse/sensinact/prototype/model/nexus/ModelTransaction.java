@@ -10,7 +10,7 @@
 * Contributors:
 *   Data In Motion - initial API and implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.model.nexus.impl;
+package org.eclipse.sensinact.prototype.model.nexus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,4 +96,3 @@ class ModelTransaction {
         this.resourceState = resourceState;
     }
 }
-

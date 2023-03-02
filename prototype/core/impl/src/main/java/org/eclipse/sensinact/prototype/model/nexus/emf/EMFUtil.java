@@ -11,7 +11,7 @@
 *   Data In Motion - initial API and implementation
 *   Kentyou - fixes and updates to include a basic sensiNact provider
 **********************************************************************/
-package org.eclipse.sensinact.prototype.model.nexus.impl.emf;
+package org.eclipse.sensinact.prototype.model.nexus.emf;
 
 import java.time.Instant;
 import java.lang.reflect.Type;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
@@ -37,6 +38,7 @@ import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.Action;
 import org.eclipse.sensinact.model.core.ActionParameter;
@@ -84,12 +86,21 @@ public class EMFUtil {
 
     public static Map<String, Object> toEObjectAttributesToMap(EObject eObject, boolean ignoreUnset) {
         Map<String, Object> result = new HashMap<String, Object>();
-        eObject.eClass().getEAllAttributes().stream()
-                // We don't want attributes from EObject and anything above
-                .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
-                .filter(ea -> !ignoreUnset || eObject.eIsSet(ea))
+        streamAttributes(eObject.eClass()).filter(ea -> !ignoreUnset || eObject.eIsSet(ea))
                 .forEach(a -> result.put(a.getName(), eObject.eGet(a)));
         return result;
+    }
+
+    /**
+     * Provides a {@link Stream} of all {@link EAttribute}s, filtering out all
+     * Attributes that are part of {@link EObject} and above
+     * 
+     * @param eClass the {@link EClass} to get Attributes from
+     */
+    public static Stream<EAttribute> streamAttributes(EClass eClass) {
+        return eClass.getEAllAttributes().stream()
+                // We don't want attributes from EObject and anything above
+                .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE);
     }
 
     public static ActionParameter createActionParameter(Entry<String, Class<?>> entry) {
@@ -254,5 +265,29 @@ public class EMFUtil {
         operation.getEParameters().addAll(params);
         serviceEClass.getEOperations().add(operation);
         return operation;
+    }
+
+    /**
+     * Checks if an Attribute is Marked to have a special Provider name. If not it
+     * uses the ID Attribute
+     * 
+     * @param eObject the {@link EObject} to check
+     * @return the providerName or null
+     */
+    public static String getProviderName(EObject eObject) {
+        return eObject.eClass().getEAllAttributes().stream().filter(ea -> ea.getEAnnotation("ProviderName") != null)
+                .findFirst()
+                .map(ea -> !eObject.eIsSet(ea) ? null
+                        : EcoreUtil.convertToString(ea.getEAttributeType(), eObject.eGet(ea)))
+                .orElseGet(() -> EcoreUtil.getID(eObject));
+    }
+
+    public static String getModelName(EClass model) {
+        EAnnotation modelAnnotation = model.getEAnnotation("model");
+        if (modelAnnotation != null) {
+            return model.getEAnnotation("model").getDetails().get("name");
+        } else {
+            return model.getName();
+        }
     }
 }

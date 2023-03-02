@@ -1,0 +1,5 @@
+Provide-Capability: \
+    org.eclipse.emf.ecore.generated_package;\
+        class="org.eclipse.sensinact.model.core.SensiNactPackage";\
+        uri="https://eclipse.org/sensinact/core/1.0";\
+        genModel="/model/sensinact.genmodel"

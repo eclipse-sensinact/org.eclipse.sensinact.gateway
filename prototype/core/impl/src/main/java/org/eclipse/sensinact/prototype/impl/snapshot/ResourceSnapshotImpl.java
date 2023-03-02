@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.twin.TimedValue;

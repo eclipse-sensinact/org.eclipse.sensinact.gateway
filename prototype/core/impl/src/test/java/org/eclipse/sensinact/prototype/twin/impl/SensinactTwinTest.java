@@ -29,7 +29,7 @@ import org.eclipse.sensinact.prototype.command.impl.ActionHandler;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -77,8 +77,8 @@ public class SensinactTwinTest {
     void start() {
         resourceSet = EMFTestUtil.createResourceSet();
         nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, actionHandler);
-        manager = new SensinactModelManagerImpl(accumulator, nexus);
-        twinImpl = new SensinactDigitalTwinImpl(accumulator, nexus, promiseFactory);
+        manager = new SensinactModelManagerImpl(nexus);
+        twinImpl = new SensinactDigitalTwinImpl(nexus, promiseFactory);
 
         manager.createModel(TEST_MODEL).withService(TEST_SERVICE).withResource(TEST_RESOURCE).withType(Integer.class)
                 .build().withResource(TEST_ACTION_RESOURCE).withType(Double.class)

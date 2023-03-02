@@ -203,13 +203,22 @@ public interface SensiNactPackage extends EPackage {
 	int ADMIN__LOCATION = SERVICE_FEATURE_COUNT + 1;
 
 	/**
+	 * The feature id for the '<em><b>Model Uri</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int ADMIN__MODEL_URI = SERVICE_FEATURE_COUNT + 2;
+
+	/**
 	 * The number of structural features of the '<em>Admin</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int ADMIN_FEATURE_COUNT = SERVICE_FEATURE_COUNT + 2;
+	int ADMIN_FEATURE_COUNT = SERVICE_FEATURE_COUNT + 3;
 
 	/**
 	 * The number of operations of the '<em>Admin</em>' class.
@@ -1661,6 +1670,17 @@ public interface SensiNactPackage extends EPackage {
 	EAttribute getAdmin_Location();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.model.core.Admin#getModelUri <em>Model Uri</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Model Uri</em>'.
+	 * @see org.eclipse.sensinact.model.core.Admin#getModelUri()
+	 * @see #getAdmin()
+	 * @generated
+	 */
+	EAttribute getAdmin_ModelUri();
+
+	/**
 	 * Returns the meta object for class '{@link org.eclipse.sensinact.model.core.Service <em>Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -2061,6 +2081,14 @@ public interface SensiNactPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute ADMIN__LOCATION = eINSTANCE.getAdmin_Location();
+
+		/**
+		 * The meta object literal for the '<em><b>Model Uri</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute ADMIN__MODEL_URI = eINSTANCE.getAdmin_ModelUri();
 
 		/**
 		 * The meta object literal for the '{@link org.eclipse.sensinact.model.core.impl.ServiceImpl <em>Service</em>}' class.

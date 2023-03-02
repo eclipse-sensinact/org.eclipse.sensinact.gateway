@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.eclipse.sensinact.prototype.annotation.verb.UriParam;
-import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 
 class ActMethod {
     private final Method method;

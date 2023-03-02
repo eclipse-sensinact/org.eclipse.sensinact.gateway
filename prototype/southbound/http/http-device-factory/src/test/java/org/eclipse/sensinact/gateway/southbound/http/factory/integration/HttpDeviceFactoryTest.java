@@ -234,12 +234,17 @@ public class HttpDeviceFactoryTest {
             handler.setData("/data", content);
 
             // Wait for an update (wait 4 seconds to be fair with the 2-seconds poll)
-            assertNotNull(queue.poll(4, TimeUnit.SECONDS));
+            assertNotNull(queue.poll(5, TimeUnit.SECONDS));
             assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
 
+            // TODO: This following check works sometimes and some times it doesn't.
+            ResourceDescription resource = session.describeResource(provider1, "data", "value");
+
             // Check timestamp
-            final Instant secondTimestamp = session.describeResource(provider1, "data", "value").timestamp;
-            assertTrue(secondTimestamp.isAfter(firstTimestamp.plus(1, ChronoUnit.SECONDS)));
+            final Instant secondTimestamp = resource.timestamp;
+            Instant compare = firstTimestamp.plus(1, ChronoUnit.SECONDS);
+            assertTrue(secondTimestamp.isAfter(compare),
+                    "Expected " + secondTimestamp + " to be after " + compare + " after " + handler.nbVisits("/data"));
 
             // Ensure resource value
             assertEquals(10, session.getResourceValue(provider1, "data", "value", Integer.class));

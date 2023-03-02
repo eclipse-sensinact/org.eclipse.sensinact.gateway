@@ -29,7 +29,8 @@ import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.model.impl.ResourceImpl;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -99,7 +100,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
         }
 
-        modelNexus.handleDataUpdate(modelNexus.getModelName(provider.eClass()), provider, service,
+        modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
                 (EStructuralFeature) resource, value, timestamp);
         return promiseFactory.resolved(null);
     }

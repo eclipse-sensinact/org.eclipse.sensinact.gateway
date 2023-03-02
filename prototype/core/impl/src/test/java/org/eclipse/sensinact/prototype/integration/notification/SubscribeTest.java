@@ -21,6 +21,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
@@ -83,6 +84,23 @@ public class SubscribeTest {
         push.pushUpdate(dto);
 
         ResourceDataNotification notification = queue.poll(1, TimeUnit.SECONDS);
+
+        assertNotNull(notification);
+
+        assertEquals(PROVIDER, notification.provider);
+        assertEquals(SensiNactPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), notification.resource);
+        assertEquals(null, notification.oldValue);
+        assertEquals(PROVIDER, notification.newValue);
+
+        notification = queue.poll(1, TimeUnit.SECONDS);
+
+        assertEquals(PROVIDER, notification.provider);
+        assertEquals(SensiNactPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), notification.resource);
+        assertEquals(null, notification.oldValue);
+
+        notification = queue.poll(1, TimeUnit.SECONDS);
 
         assertNotNull(notification);
 

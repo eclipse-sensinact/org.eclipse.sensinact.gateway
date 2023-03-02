@@ -21,9 +21,11 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -71,15 +73,31 @@ public class SubscriptionTest {
             Mockito.clearInvocations(accumulator);
 
             Instant now = Instant.now();
-            EClass model = nexus.createModel(TEST_MODEL, now, accumulator);
-            EReference service = nexus.createService(model, TEST_SERVICE, now, accumulator);
+            EClass model = nexus.createModel(TEST_MODEL, now);
+            EReference service = nexus.createService(model, TEST_SERVICE, now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, now);
 
             nexus.handleDataUpdate(TEST_MODEL, p, service, resource, TEST_VALUE, now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
+            Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName());
+            Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER, now);
+            Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
+                    EcoreUtil.getURI(model).toString(), now);
+            Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             // TODO - this is missing
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
@@ -103,18 +121,35 @@ public class SubscriptionTest {
             Instant now = Instant.now();
             Instant before = now.minus(Duration.ofHours(1));
 
-            EClass model = nexus.createModel(TEST_MODEL, before, accumulator);
-            EReference service = nexus.createService(model, TEST_SERVICE, before, accumulator);
+            EClass model = nexus.createModel(TEST_MODEL, before);
+            EReference service = nexus.createService(model, TEST_SERVICE, before);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, before,
-                    null, accumulator);
+                    null);
             EAttribute resource2 = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE_2, String.class,
-                    before, null, accumulator);
-            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before, accumulator);
+                    before, null);
+            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before);
 
             nexus.handleDataUpdate(TEST_MODEL, p, service, resource, TEST_VALUE, before);
             nexus.handleDataUpdate(TEST_MODEL, p, service, resource2, TEST_VALUE, now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
+            Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName());
+            Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
+                    before);
+            Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
+                    EcoreUtil.getURI(model).toString(), before);
+
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             // TODO - these are missing
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
@@ -142,19 +177,36 @@ public class SubscriptionTest {
             Instant now = Instant.now();
             Instant before = now.minus(Duration.ofHours(1));
 
-            EClass model = nexus.createModel(TEST_MODEL, before, accumulator);
-            EReference service = nexus.createService(model, TEST_SERVICE, before, accumulator);
-            EReference service2 = nexus.createService(model, TEST_SERVICE_2, before, accumulator);
+            EClass model = nexus.createModel(TEST_MODEL, before);
+            EReference service = nexus.createService(model, TEST_SERVICE, before);
+            EReference service2 = nexus.createService(model, TEST_SERVICE_2, before);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, before,
-                    null, accumulator);
+                    null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_RESOURCE_2, String.class,
-                    before, null, accumulator);
-            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before, accumulator);
+                    before, null);
+            Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before);
 
             nexus.handleDataUpdate(TEST_MODEL, p, service, resource, TEST_VALUE, before);
             nexus.handleDataUpdate(TEST_MODEL, p, service2, resource2, TEST_VALUE_2, now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
+            Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName());
+            Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
+                    before);
+            Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
+                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
+                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
+                    EcoreUtil.getURI(model).toString(), before);
+
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2);
             // TODO - these are missing

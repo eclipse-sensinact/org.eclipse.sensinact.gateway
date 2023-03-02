@@ -24,15 +24,13 @@ import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 
 public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImpl, Resource>
         implements ResourceBuilder<R, T> {
 
     private final String name;
     private final ModelNexus nexusImpl;
-    private final NotificationAccumulator accumulator;
     private Class<?> type;
     private Object initialValue;
     private Instant timestamp;
@@ -40,11 +38,10 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     private List<Entry<String, Class<?>>> namedParameterTypes;
 
     public ResourceBuilderImpl(AtomicBoolean active, R parent, ServiceImpl builtParent, String name,
-            ModelNexus nexusImpl, NotificationAccumulator accumulator) {
+            ModelNexus nexusImpl) {
         super(active, parent, builtParent);
         this.name = name;
         this.nexusImpl = nexusImpl;
-        this.accumulator = accumulator;
     }
 
     @Override
@@ -160,7 +157,7 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
             break;
         case SENSOR:
             createResource = nexusImpl.createResource(builtParent.getServiceEClass(), name, type, timestamp,
-                    initialValue, accumulator);
+                    initialValue);
             break;
         case PROPERTY:
         case STATE_VARIABLE:

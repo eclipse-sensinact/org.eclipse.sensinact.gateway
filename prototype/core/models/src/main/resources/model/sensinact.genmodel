@@ -31,6 +31,7 @@
     <genClasses ecoreClass="sensinact.ecore#//Admin">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/friendlyName"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/location"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/modelUri"/>
     </genClasses>
     <genClasses image="false" ecoreClass="sensinact.ecore#//Service">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Service/metadata"/>

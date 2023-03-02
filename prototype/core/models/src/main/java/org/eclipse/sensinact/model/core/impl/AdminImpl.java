@@ -29,6 +29,7 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
  * <ul>
  *   <li>{@link org.eclipse.sensinact.model.core.impl.AdminImpl#getFriendlyName <em>Friendly Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.model.core.impl.AdminImpl#getLocation <em>Location</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.model.core.impl.AdminImpl#getModelUri <em>Model Uri</em>}</li>
  * </ul>
  *
  * @generated
@@ -73,6 +74,26 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	 * @ordered
 	 */
 	protected GeoJsonObject location = LOCATION_EDEFAULT;
+
+	/**
+	 * The default value of the '{@link #getModelUri() <em>Model Uri</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getModelUri()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String MODEL_URI_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getModelUri() <em>Model Uri</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getModelUri()
+	 * @generated
+	 * @ordered
+	 */
+	protected String modelUri = MODEL_URI_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -145,12 +166,37 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	 * @generated
 	 */
 	@Override
+	public String getModelUri() {
+		return modelUri;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setModelUri(String newModelUri) {
+		String oldModelUri = modelUri;
+		modelUri = newModelUri;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__MODEL_URI, oldModelUri, modelUri));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
 			case SensiNactPackage.ADMIN__FRIENDLY_NAME:
 				return getFriendlyName();
 			case SensiNactPackage.ADMIN__LOCATION:
 				return getLocation();
+			case SensiNactPackage.ADMIN__MODEL_URI:
+				return getModelUri();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -168,6 +214,9 @@ public class AdminImpl extends ServiceImpl implements Admin {
 				return;
 			case SensiNactPackage.ADMIN__LOCATION:
 				setLocation((GeoJsonObject)newValue);
+				return;
+			case SensiNactPackage.ADMIN__MODEL_URI:
+				setModelUri((String)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -187,6 +236,9 @@ public class AdminImpl extends ServiceImpl implements Admin {
 			case SensiNactPackage.ADMIN__LOCATION:
 				setLocation(LOCATION_EDEFAULT);
 				return;
+			case SensiNactPackage.ADMIN__MODEL_URI:
+				setModelUri(MODEL_URI_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -203,6 +255,8 @@ public class AdminImpl extends ServiceImpl implements Admin {
 				return FRIENDLY_NAME_EDEFAULT == null ? friendlyName != null : !FRIENDLY_NAME_EDEFAULT.equals(friendlyName);
 			case SensiNactPackage.ADMIN__LOCATION:
 				return LOCATION_EDEFAULT == null ? location != null : !LOCATION_EDEFAULT.equals(location);
+			case SensiNactPackage.ADMIN__MODEL_URI:
+				return MODEL_URI_EDEFAULT == null ? modelUri != null : !MODEL_URI_EDEFAULT.equals(modelUri);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -221,6 +275,8 @@ public class AdminImpl extends ServiceImpl implements Admin {
 		result.append(friendlyName);
 		result.append(", location: ");
 		result.append(location);
+		result.append(", modelUri: ");
+		result.append(modelUri);
 		result.append(')');
 		return result.toString();
 	}
