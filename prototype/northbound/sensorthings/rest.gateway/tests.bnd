@@ -1,0 +1,19 @@
+-includeresource: \
+    @postgresql-1.17.6.jar, \
+    @jdbc-1.17.6.jar, \
+    @database-commons-1.17.6.jar, \
+    @testcontainers-1.17.6.jar, \
+    @docker-java-api-3.2.13.jar, \
+    @docker-java-transport-zerodep-3.2.13.jar, \
+    @docker-java-transport-3.2.13.jar,\
+    @duct-tape-1.0.8.jar
+
+Import-Package: \
+    !com.github.dockerjava.zerodep.*,\
+    !com.google.appengine.*,\
+    !com.google.apphosting.*,\
+    !io.r2dbc.*,\
+    !javax.annotation, \
+    !org.conscrypt, \
+    !org.testcontainers.r2dbc.*, \
+    *

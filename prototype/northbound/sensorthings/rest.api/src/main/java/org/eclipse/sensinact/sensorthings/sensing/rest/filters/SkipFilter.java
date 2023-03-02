@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
 import static jakarta.ws.rs.Priorities.ENTITY_CODER;
-import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +34,7 @@ import jakarta.ws.rs.core.Response.Status;
 @Priority(ENTITY_CODER + 2)
 public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
+    static final String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
@@ -46,10 +45,11 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
         }
 
         Object entity = responseContext.getEntity();
-        if(entity instanceof ResultList) {
+        if (entity instanceof ResultList) {
             @SuppressWarnings("unchecked")
             ResultList<Self> resultList = (ResultList<Self>) entity;
-            resultList.value = resultList.value.stream().skip(skip).collect(toList());
+            int size = resultList.value.size();
+            resultList.value = resultList.value.subList(Math.min(skip, size), size);
         }
     }
 
@@ -62,28 +62,22 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
             return;
         }
 
-        if(list.size() > 1) {
-            requestContext.abortWith(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("Only one $skip parameter may be provided")
-                    .build());
+        if (list.size() > 1) {
+            requestContext.abortWith(
+                    Response.status(Status.BAD_REQUEST).entity("Only one $skip parameter may be provided").build());
         } else if (!list.isEmpty()) {
             String s = list.get(0);
             try {
                 skip = Integer.parseInt(s);
             } catch (NumberFormatException nfe) {
-                requestContext.abortWith(Response
-                        .status(Status.BAD_REQUEST)
-                        .entity("The $skip parameter must be an integer greater than zero")
-                        .build());
+                requestContext.abortWith(Response.status(Status.BAD_REQUEST)
+                        .entity("The $skip parameter must be an integer greater than zero").build());
             }
         }
 
-        if(skip < 0) {
-            requestContext.abortWith(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("The $skip parameter must be an integer greater than zero")
-                    .build());
+        if (skip < 0) {
+            requestContext.abortWith(Response.status(Status.BAD_REQUEST)
+                    .entity("The $skip parameter must be an integer greater than zero").build());
         }
 
         requestContext.setProperty(SKIP_PROP, skip);

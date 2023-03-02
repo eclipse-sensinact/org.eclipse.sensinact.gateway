@@ -17,15 +17,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import jakarta.ws.rs.NameBinding;
-
 /**
- * This annotation indicates that the resource method returns a value which
- * should be filtered to contain only the self link
+ * This annotation indicates that the resource method has a maximum supported
+ * page size for use with the <code>$top</code> request property.
  */
-@NameBinding
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
-public @interface RefFilter {
-
+@Target(ElementType.METHOD)
+public @interface PaginationLimit {
+    int value();
 }

@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -157,8 +159,7 @@ public class DtoMapper {
         return location;
     }
 
-    public static Location toLocation(UriInfo uriInfo, ObjectMapper mapper,
-            ProviderSnapshot provider) {
+    public static Location toLocation(UriInfo uriInfo, ObjectMapper mapper, ProviderSnapshot provider) {
         Location location = new Location();
 
         final String providerName = provider.getName();
@@ -211,8 +212,8 @@ public class DtoMapper {
         return historicalLocation;
     }
 
-    public static HistoricalLocation toHistoricalLocation(ObjectMapper mapper,
-            UriInfo uriInfo, ProviderSnapshot provider) {
+    public static HistoricalLocation toHistoricalLocation(ObjectMapper mapper, UriInfo uriInfo,
+            ProviderSnapshot provider) {
         HistoricalLocation historicalLocation = new HistoricalLocation();
 
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
@@ -400,6 +401,40 @@ public class DtoMapper {
         observation.featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink)
                 .path("FeatureOfInterest").build().toString();
 
+        return observation;
+    }
+
+    public static List<Observation> toObservationList(UriInfo uriInfo, String provider, String service, String resource,
+            List<TimedValue<?>> observations) {
+        if (resource == null) {
+            throw new NotFoundException();
+        }
+
+        List<Observation> list = new ArrayList<>(observations.size());
+        for (TimedValue<?> tv : observations) {
+            list.add(toObservation(uriInfo, provider, service, resource, tv));
+        }
+
+        return list;
+    }
+
+    public static Observation toObservation(UriInfo uriInfo, String provider, String service, String resource,
+            TimedValue<?> tv) {
+        Observation observation = new Observation();
+
+        observation.id = String.format("%s~%s~%s~%s", provider, service, resource,
+                Long.toString(tv.getTimestamp().toEpochMilli(), 16));
+
+        observation.resultTime = tv.getTimestamp();
+        observation.result = tv.getValue();
+        observation.phenomenonTime = tv.getTimestamp();
+
+        observation.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("Observations({id})")
+                .resolveTemplate("id", observation.id).build().toString();
+        observation.datastreamLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink).path("Datastream")
+                .build().toString();
+        observation.featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink)
+                .path("FeatureOfInterest").build().toString();
         return observation;
     }
 

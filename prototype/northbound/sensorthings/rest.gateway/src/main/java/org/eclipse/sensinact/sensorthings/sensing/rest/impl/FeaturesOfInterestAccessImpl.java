@@ -69,6 +69,7 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
         return foi;
     }
 
+    // No history as it is *live* observation data not a data stream
     @Override
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
         String provider = extractFirstIdSegment(id);
