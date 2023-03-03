@@ -17,11 +17,23 @@ package org.eclipse.sensinact.northbound.query.dto.notification;
  */
 public abstract class AbstractResourceNotificationDTO {
 
+    /**
+     * Resource provider
+     */
     public String provider;
 
+    /**
+     * Resource service
+     */
     public String service;
 
+    /**
+     * Resource name
+     */
     public String resource;
 
+    /**
+     * Notification time stamp
+     */
     public long timestamp;
 }

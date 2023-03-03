@@ -248,9 +248,6 @@ public class MissingEntityTest {
         ResponseGetDTO response = utils.convert((TypedResponse<?>) result, ResponseGetDTO.class);
         assertNotNull(response, "No empty value response");
 
-        System.out.println("Query time: " + queryTime);
-        System.out.println("Response time: " + Instant.ofEpochMilli(response.timestamp));
-
         assertFalse(queryTime.isAfter(Instant.ofEpochMilli(response.timestamp)), "Missing resource has a timestamp");
         assertNull(response.value, "Got a value for a missing resource");
     }

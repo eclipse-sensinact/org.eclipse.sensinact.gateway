@@ -19,8 +19,14 @@ import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
  */
 public class ResourceDataNotificationDTO extends AbstractResourceNotificationDTO {
 
+    /**
+     * Previous resource value
+     */
     public Object oldValue;
 
+    /**
+     * New resource value
+     */
     public Object newValue;
 
     public ResourceDataNotificationDTO() {

@@ -22,8 +22,14 @@ import org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status
  */
 public class ResourceLifecycleNotificationDTO extends AbstractResourceNotificationDTO {
 
+    /**
+     * Event type
+     */
     public Status status;
 
+    /**
+     * Initial value of the resource
+     */
     public Object initialValue;
 
     public ResourceLifecycleNotificationDTO() {

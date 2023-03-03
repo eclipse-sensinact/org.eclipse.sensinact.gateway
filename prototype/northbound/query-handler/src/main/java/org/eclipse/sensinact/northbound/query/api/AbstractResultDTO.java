@@ -12,12 +12,40 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.api;
 
+import org.eclipse.sensinact.northbound.query.dto.notification.ResultResourceNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultSubscribeDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultUnsubscribeDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
  * Represents a Northbound query response
  */
+@JsonSubTypes({ @Type(value = ErrorResultDTO.class, name = "ERROR"),
+        @Type(value = ResultDescribeProvidersDTO.class, name = "COMPLETE_LIST"),
+        @Type(value = ResultListProvidersDTO.class, name = "PROVIDERS_LIST"),
+        @Type(value = ResultListServicesDTO.class, name = "SERVICES_LIST"),
+        @Type(value = ResultListResourcesDTO.class, name = "RESOURCES_LIST"),
+        @Type(value = TypedResponse.class, names = { "DESCRIBE_PROVIDER", "DESCRIBE_SERVICE", "DESCRIBE_RESOURCE",
+                "GET_RESPONSE", "SET_RESPONSE" }),
+        @Type(value = ResultActDTO.class, name = "ACT_RESPONSE"),
+        @Type(value = ResultSubscribeDTO.class, name = "SUBSCRIPTION_RESPONSE"),
+        @Type(value = ResultResourceNotificationDTO.class, name = "SUBSCRIPTION_NOTIFICATION"),
+        @Type(value = ResultUnsubscribeDTO.class, name = "UNSUBSCRIPTION_RESPONSE") })
+@JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type")
 public abstract class AbstractResultDTO {
 
     /**

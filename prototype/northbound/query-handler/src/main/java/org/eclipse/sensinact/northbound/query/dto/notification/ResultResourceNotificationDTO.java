@@ -15,6 +15,8 @@ package org.eclipse.sensinact.northbound.query.dto.notification;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Notification result DTO send on each event
  */
@@ -28,6 +30,7 @@ public class ResultResourceNotificationDTO extends AbstractResultDTO {
     /**
      * Notification content
      */
+    @JsonDeserialize(using = ResourceNotificationDeserializer.class)
     public AbstractResourceNotificationDTO notification;
 
     public ResultResourceNotificationDTO() {
