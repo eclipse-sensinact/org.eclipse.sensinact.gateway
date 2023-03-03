@@ -1,8 +1,6 @@
 {
     ":configurator:resource-version": 1,
-    "JakartarsWhiteboardComponent": {
-        "jersey.port": 8185,
-        "jersey.jakartars.whiteboard.name": "root",
-        "jersey.context.path": "/"
+    "org.apache.felix.http": {
+      "org.osgi.service.http.port": 14001
     }
 }
