@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
- * Represents a WebSocket query response
+ * Represents a Northbound query response
  */
 public abstract class AbstractResultDTO {
 
