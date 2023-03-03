@@ -48,7 +48,7 @@ public abstract class AbstractQueryDTO {
     /**
      * Kind of operation
      */
-    public final EOperation operation;
+    public final EQueryType operation;
 
     /**
      * Placeholder for a user-given request ID
@@ -61,7 +61,7 @@ public abstract class AbstractQueryDTO {
      *
      * @param operation Operation type
      */
-    public AbstractQueryDTO(final EOperation operation) {
+    public AbstractQueryDTO(final EQueryType operation) {
         this.operation = operation;
     }
 }

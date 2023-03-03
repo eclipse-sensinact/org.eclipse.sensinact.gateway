@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.northbound.query.dto.query;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
-import org.eclipse.sensinact.northbound.query.api.EOperation;
+import org.eclipse.sensinact.northbound.query.api.EQueryType;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -35,6 +35,6 @@ public class QuerySubscribeDTO extends AbstractQueryDTO {
     public String filterLanguage;
 
     public QuerySubscribeDTO() {
-        super(EOperation.SUBSCRIBE);
+        super(EQueryType.SUBSCRIBE);
     }
 }

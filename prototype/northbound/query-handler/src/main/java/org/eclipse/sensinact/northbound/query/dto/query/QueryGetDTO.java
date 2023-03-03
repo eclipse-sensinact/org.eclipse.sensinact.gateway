@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.northbound.query.dto.query;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
-import org.eclipse.sensinact.northbound.query.api.EOperation;
+import org.eclipse.sensinact.northbound.query.api.EQueryType;
 
 /**
  *
@@ -21,6 +21,6 @@ import org.eclipse.sensinact.northbound.query.api.EOperation;
 public class QueryGetDTO extends AbstractQueryDTO {
 
     public QueryGetDTO() {
-        super(EOperation.GET);
+        super(EQueryType.GET);
     }
 }

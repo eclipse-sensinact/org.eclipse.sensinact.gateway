@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.northbound.query.dto.query;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
-import org.eclipse.sensinact.northbound.query.api.EOperation;
+import org.eclipse.sensinact.northbound.query.api.EQueryType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -34,6 +34,6 @@ public class QueryDescribeDTO extends AbstractQueryDTO {
     public String filterLanguage;
 
     public QueryDescribeDTO() {
-        super(EOperation.DESCRIBE);
+        super(EQueryType.DESCRIBE);
     }
 }

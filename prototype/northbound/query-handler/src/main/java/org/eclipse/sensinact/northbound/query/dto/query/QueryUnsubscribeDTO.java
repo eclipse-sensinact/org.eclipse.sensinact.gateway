@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.northbound.query.dto.query;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
-import org.eclipse.sensinact.northbound.query.api.EOperation;
+import org.eclipse.sensinact.northbound.query.api.EQueryType;
 
 /**
  * Unsubscription query
@@ -26,6 +26,6 @@ public class QueryUnsubscribeDTO extends AbstractQueryDTO {
     public String subscriptionId;
 
     public QueryUnsubscribeDTO() {
-        super(EOperation.UNSUBSCRIBE);
+        super(EQueryType.UNSUBSCRIBE);
     }
 }

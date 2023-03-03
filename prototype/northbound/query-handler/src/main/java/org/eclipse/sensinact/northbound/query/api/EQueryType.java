@@ -17,7 +17,7 @@ import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 /**
  * Operation to apply on a {@link SensinactPath}
  */
-public enum EOperation {
+public enum EQueryType {
     /**
      * List items
      */

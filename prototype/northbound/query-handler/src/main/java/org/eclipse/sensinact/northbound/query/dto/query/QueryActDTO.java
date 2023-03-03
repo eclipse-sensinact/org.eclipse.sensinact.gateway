@@ -15,7 +15,7 @@ package org.eclipse.sensinact.northbound.query.dto.query;
 import java.util.Map;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
-import org.eclipse.sensinact.northbound.query.api.EOperation;
+import org.eclipse.sensinact.northbound.query.api.EQueryType;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -31,6 +31,6 @@ public class QueryActDTO extends AbstractQueryDTO {
     public Map<String, Object> parameters;
 
     public QueryActDTO() {
-        super(EOperation.ACT);
+        super(EQueryType.ACT);
     }
 }
