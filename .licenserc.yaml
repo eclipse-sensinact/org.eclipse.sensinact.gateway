@@ -54,5 +54,12 @@ header:
     - '**/*.prefs'
     - 'license.templates'
     - 'prototype/distribution/launcher/src/test/resources/repository/**'
+    - 'prototype/webclient/dist'
+    - 'prototype/webclient/node_modules'
+    - 'prototype/webclient/openapi'
+    - 'prototype/webclient/.*'
+    - 'prototype/webclient/scripts'
+    - 'prototype/webclient/babel.config.js'
+    - 'prototype/webclient/vue.config.js'
 
   comment: always
