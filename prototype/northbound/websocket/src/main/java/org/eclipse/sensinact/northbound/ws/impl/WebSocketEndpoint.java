@@ -275,7 +275,7 @@ public class WebSocketEndpoint {
         try {
             final ResultResourceNotificationDTO result = new ResultResourceNotificationDTO();
             result.statusCode = 200;
-            result.uri = String.join("/", notification.provider, notification.service, notification.resource);
+            result.uri = new SensinactPath(notification.provider, notification.service, notification.resource).toUri();
             result.subscriptionId = listenerId;
             result.notification = notification;
             wsSession.getRemote().sendString(mapper.writeValueAsString(result));
