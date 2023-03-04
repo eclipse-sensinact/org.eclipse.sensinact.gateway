@@ -20,7 +20,7 @@
   <artifactId>websocket</artifactId>
   <name>SensiNact Northbound WebSocket</name>
   <description>Northbound WebSocket access to sensiNact</description>
-  
+
   <properties>
     <jakarta.ws.version>2.1.0</jakarta.ws.version>
     <jetty.version>11.0.15-SNAPSHOT</jetty.version>
@@ -49,7 +49,6 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-    
 
     <!-- SL4J -->
     <dependency>
@@ -151,7 +150,7 @@
       <artifactId>jakarta.json</artifactId>
       <scope>test</scope>
     </dependency>
-    
+
     <!-- Websockets -->
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -181,7 +180,6 @@
       <artifactId>websocket-jetty-client</artifactId>
       <version>${jetty.version}</version>
     </dependency>
-
   </dependencies>
 
   <build>
