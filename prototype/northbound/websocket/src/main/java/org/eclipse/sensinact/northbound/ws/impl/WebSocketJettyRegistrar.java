@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.core.server.WebSocketServerComponents;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer;
@@ -37,6 +38,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 @Component(service = { Servlet.class, JettyWebSocketServlet.class })
 @RequireHttpWhiteboard
@@ -109,8 +112,15 @@ public class WebSocketJettyRegistrar extends JettyWebSocketServlet {
                 initComplete.countDown();
             }
         }
-        // Normal service resumes
-        super.service(req, res);
+        // Normal service resumes - note that we use the Jetty Context to avoid problems
+        // later, but we must not treat this like a normal servlet context as it is
+        // potentially shared between different disjoint servlet contexts.
+        super.service(new HttpServletRequestWrapper((HttpServletRequest) req) {
+            @Override
+            public ServletContext getServletContext() {
+                return ContextHandler.getCurrentContext();
+            }
+        }, res);
     }
 
     @Override
