@@ -127,6 +127,21 @@ public enum ValueType {
             return null;
         }
 
+        switch (strValue.toLowerCase()) {
+        case "nan":
+            return expectInteger ? null : Double.NaN;
+
+        case "inf":
+        case "+inf":
+            return expectInteger ? null : Double.POSITIVE_INFINITY;
+
+        case "-inf":
+            return expectInteger ? null : Double.NEGATIVE_INFINITY;
+
+        default:
+            break;
+        }
+
         final NumberFormat format = getNumberFormat(options, expectInteger);
         if (format instanceof DecimalFormat) {
             final DecimalFormat decimalFormat = (DecimalFormat) format;
