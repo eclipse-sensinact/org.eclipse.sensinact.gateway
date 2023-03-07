@@ -12,50 +12,33 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.rest.impl;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
+import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
+import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
+import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
+import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.notification.ResourceLifecycleNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
-import org.eclipse.sensinact.northbound.rest.dto.AccessMethodCallParameterDTO;
-import org.eclipse.sensinact.northbound.rest.dto.AccessMethodDTO;
-import org.eclipse.sensinact.northbound.rest.dto.AccessMethodParameterDTO;
-import org.eclipse.sensinact.northbound.rest.dto.CompleteProviderDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.CompleteResourceDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.CompleteServiceDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.EReadWriteMode;
-import org.eclipse.sensinact.northbound.rest.dto.GetResponse;
-import org.eclipse.sensinact.northbound.rest.dto.MetadataDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ProviderDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultActResponse;
-import org.eclipse.sensinact.northbound.rest.dto.ResultCompleteListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultProvidersListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultResourcesListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultServicesListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ShortResourceDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.notification.ResourceDataNotificationDTO;
-import org.eclipse.sensinact.northbound.rest.dto.notification.ResourceLifecycleNotificationDTO;
-import org.eclipse.sensinact.prototype.ProviderDescription;
-import org.eclipse.sensinact.prototype.ResourceDescription;
-import org.eclipse.sensinact.prototype.ResourceShortDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.ServiceDescription;
-import org.eclipse.sensinact.prototype.model.ResourceType;
-import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.notification.ClientDataListener;
 import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
 
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
 import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;
@@ -75,6 +58,12 @@ public class RestNorthbound implements IRestNorthbound {
     Providers providers;
 
     /**
+     * URI info
+     */
+    @Context
+    UriInfo uriInfo;
+
+    /**
      * Returns a user session
      */
     private SensiNactSession getSession() {
@@ -82,385 +71,113 @@ public class RestNorthbound implements IRestNorthbound {
     }
 
     /**
-     * Generates the complete description of a service. This description contains
-     * its name and the description of its resources.
-     *
-     * @param providerId Provider ID
-     * @param svcName    Service name
-     * @return Complete description of the service
+     * Returns the query handler
      */
-    private final CompleteServiceDescriptionDTO completeServiceDescription(final SensiNactSession userSession,
-            final String providerId, final String svcName) {
-        final ServiceDescription serviceDescription = userSession.describeService(providerId, svcName);
-        if (serviceDescription == null) {
-            return null;
-        }
-
-        final CompleteServiceDescriptionDTO svcDto = new CompleteServiceDescriptionDTO();
-        svcDto.name = serviceDescription.service;
-        svcDto.resources = new ArrayList<>(serviceDescription.resources.size());
-
-        for (final String rcName : serviceDescription.resources) {
-            final ResourceShortDescription rcDescription = userSession.describeResourceShort(providerId, svcName,
-                    rcName);
-
-            final ShortResourceDescriptionDTO rcDto = new ShortResourceDescriptionDTO();
-            svcDto.resources.add(rcDto);
-            rcDto.name = rcName;
-            rcDto.rws = EReadWriteMode.fromValueType(rcDescription.valueType);
-            rcDto.type = rcDescription.resourceType;
-        }
-
-        return svcDto;
+    private IQueryHandler getQueryHandler() {
+        return providers.getContextResolver(IQueryHandler.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
-    @Override
-    public ResultCompleteListDTO describeProviders() {
-        final SensiNactSession userSession = getSession();
-        final ResultCompleteListDTO result = new ResultCompleteListDTO();
-        result.uri = "/";
-        result.type = "COMPLETE_LIST";
-        try {
-            final List<ProviderDescription> providers = userSession.listProviders();
-            final List<CompleteProviderDescriptionDTO> descriptionsList = new ArrayList<>(providers.size());
-
-            for (final ProviderDescription providerDescription : providers) {
-                final CompleteProviderDescriptionDTO providerDto = new CompleteProviderDescriptionDTO();
-                descriptionsList.add(providerDto);
-
-                final String provider = providerDescription.provider;
-                providerDto.name = provider;
-                providerDto.services = new ArrayList<>(providerDescription.services.size());
-
-                final GeoJsonObject location = userSession.getResourceValue(provider, "admin", "location",
-                        GeoJsonObject.class);
-                if (location != null) {
-                    providerDto.location = location;
-                }
-
-                final Object icon = userSession.getResourceValue(provider, "admin", "icon", Object.class);
-                if (icon != null) {
-                    providerDto.icon = String.valueOf(icon);
-                }
-
-                for (final String svcName : providerDescription.services) {
-                    final CompleteServiceDescriptionDTO svcDescription = completeServiceDescription(userSession,
-                            provider, svcName);
-                    if (svcDescription != null) {
-                        providerDto.services.add(svcDescription);
-                    }
-                }
-
-                result.statusCode = 200;
-                result.providers = descriptionsList;
-            }
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
+    /**
+     * Runs the given query
+     *
+     * @param query Query to forwards to the handler
+     * @return
+     */
+    private AbstractResultDTO handleQuery(final AbstractQueryDTO query) {
+        return getQueryHandler().handleQuery(getSession(), query);
     }
 
-    @Override
-    public ResultProvidersListDTO listProviders() {
-        final SensiNactSession userSession = getSession();
-
-        final ResultProvidersListDTO result = new ResultProvidersListDTO();
-        result.uri = "/";
-        result.type = "PROVIDERS_LIST";
-        try {
-            result.providers = userSession.listProviders().stream().map(provider -> provider.provider)
-                    .collect(Collectors.toList());
-            result.statusCode = 200;
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-        return result;
-    }
-
-    @Override
-    public ResultTypedResponseDTO<ProviderDescriptionDTO> describeProvider(final String providerId) {
-        final SensiNactSession userSession = getSession();
-        final ResultTypedResponseDTO<ProviderDescriptionDTO> result = new ResultTypedResponseDTO<>();
-        result.uri = String.join("/", "", providerId);
-        result.type = "DESCRIBE_PROVIDER";
-        try {
-            final ProviderDescription provider = userSession.describeProvider(providerId);
-            if (provider == null) {
-                result.statusCode = 404;
-                result.error = "Unknown provider";
-            } else {
-                final ProviderDescriptionDTO response = new ProviderDescriptionDTO();
-                response.name = provider.provider;
-                response.services = provider.services;
-
-                result.statusCode = 200;
-                result.response = response;
-            }
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-        return result;
-    }
-
-    @Override
-    public ResultServicesListDTO listServices(final String providerId) {
-        final SensiNactSession userSession = getSession();
-        final ResultServicesListDTO result = new ResultServicesListDTO();
-        result.uri = String.join("/", "", providerId);
-        result.type = "SERVICES_LIST";
-
-        try {
-            final ProviderDescription provider = userSession.describeProvider(providerId);
-            if (provider == null) {
-                result.statusCode = 404;
-                result.error = "Unknown provider";
-            } else {
-                result.services = provider.services;
-                result.statusCode = 200;
-            }
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
-    }
-
-    @Override
-    public ResultTypedResponseDTO<CompleteServiceDescriptionDTO> describeService(final String providerId,
-            final String serviceName) {
-        final SensiNactSession userSession = getSession();
-        final ResultTypedResponseDTO<CompleteServiceDescriptionDTO> result = new ResultTypedResponseDTO<>();
-        result.uri = String.join("/", "", providerId, serviceName);
-        result.type = "DESCRIBE_SERVICE";
-        try {
-            result.response = completeServiceDescription(userSession, providerId, serviceName);
-            if (result.response != null) {
-                result.statusCode = 200;
-            } else {
-                result.statusCode = 404;
-                result.error = "Unknown service";
-            }
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
-    }
-
-    @Override
-    public ResultResourcesListDTO listResources(final String providerId, final String serviceName) {
-        final SensiNactSession userSession = getSession();
-        final ResultResourcesListDTO result = new ResultResourcesListDTO();
-        result.uri = String.join("/", "", providerId, serviceName);
-        result.type = "RESOURCES_LIST";
-
-        try {
-            final ServiceDescription service = userSession.describeService(providerId, serviceName);
-            if (service == null) {
-                result.statusCode = 404;
-                result.error = "Unknown service";
-            } else {
-                result.resources = service.resources;
-                result.statusCode = 200;
-            }
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
-    }
-
-    private AccessMethodParameterDTO makeParam(final String name) {
-        return makeParam(name, "string");
-    }
-
-    private AccessMethodParameterDTO makeParam(final String name, final String type) {
-        final AccessMethodParameterDTO parameterDTO = new AccessMethodParameterDTO();
-        parameterDTO.name = name;
-        parameterDTO.type = type;
-        return parameterDTO;
-    }
-
-    private List<AccessMethodDTO> computeMethods(final ResourceDescription rcDesc,
-            final ResourceShortDescription rcShortDesc) {
-        final List<AccessMethodDTO> methods = new ArrayList<>();
-        if (rcShortDesc.resourceType == ResourceType.ACTION) {
-            // Only an action is available
-            final AccessMethodDTO actMethod = new AccessMethodDTO();
-            actMethod.name = "ACT";
-
-            final List<Entry<String, Class<?>>> actMethodArgumentsTypes = rcShortDesc.actMethodArgumentsTypes;
-            final List<AccessMethodParameterDTO> actParams = new ArrayList<>(actMethodArgumentsTypes.size());
-            for (final Entry<String, Class<?>> entry : actMethodArgumentsTypes) {
-                final AccessMethodParameterDTO param = new AccessMethodParameterDTO();
-                param.name = entry.getKey();
-                param.type = entry.getValue().getName();
-                actParams.add(param);
-            }
-            actMethod.parameters = actParams;
-            methods.add(actMethod);
+    /**
+     * Injects the query filter in a description query
+     *
+     * @param query Query to update
+     */
+    private void injectFilter(final QueryDescribeDTO query) {
+        final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
+        query.filter = queryParameters.getFirst("filter");
+        if (queryParameters.containsKey("filterLanguage")) {
+            query.filterLanguage = queryParameters.getFirst("filterLanguage");
         } else {
-            // GET is available
-            final AccessMethodDTO getMethod = new AccessMethodDTO();
-            getMethod.name = "GET";
-            getMethod.parameters = List.of(makeParam("attributeName"));
-            methods.add(getMethod);
-
-            // Notifications are available
-            final AccessMethodDTO subscriptionMethod = new AccessMethodDTO();
-            subscriptionMethod.name = "SUBSCRIBE";
-            subscriptionMethod.parameters = List.of(makeParam("topics", "array"),
-                    makeParam("isDataListener", "boolean"), makeParam("isMetadataListener", "boolean"),
-                    makeParam("isLifecycleListener", "boolean"), makeParam("isActionListener", "boolean"));
-            methods.add(subscriptionMethod);
-
-            final AccessMethodDTO unsubscriptionMethod = new AccessMethodDTO();
-            unsubscriptionMethod.name = "UNSUBSCRIBE";
-            unsubscriptionMethod.parameters = List.of(makeParam("subscriptionId"));
-            methods.add(unsubscriptionMethod);
-
-            if (rcShortDesc.valueType == ValueType.MODIFIABLE) {
-                // SET is also available
-                final AccessMethodDTO setMethod = new AccessMethodDTO();
-                setMethod.name = "SET";
-                setMethod.parameters = List.of(makeParam("value",
-                        rcShortDesc.contentType != null ? rcShortDesc.contentType.getName() : Object.class.getName()));
-                methods.add(setMethod);
-            }
+            query.filterLanguage = "ldap";
         }
-
-        return methods;
     }
 
-    private List<MetadataDTO> computeAttributes(final ResourceDescription rcDesc) {
-        final Map<String, Object> metadataMap = rcDesc.metadata;
-        final List<MetadataDTO> result;
-        if (metadataMap != null) {
-            result = new ArrayList<>(metadataMap.size());
-            for (final Entry<String, Object> entry : metadataMap.entrySet()) {
-                final Object value = entry.getValue();
-
-                final MetadataDTO meta = new MetadataDTO();
-                meta.name = entry.getKey();
-                meta.value = value;
-                if (value != null) {
-                    meta.type = value.getClass().getName();
-                }
-            }
+    /**
+     * Injects the query filter in a list query
+     *
+     * @param query Query to update
+     */
+    private void injectFilter(final QueryListDTO query) {
+        final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
+        query.filter = queryParameters.getFirst("filter");
+        if (queryParameters.containsKey("filterLanguage")) {
+            query.filterLanguage = queryParameters.getFirst("filterLanguage");
         } else {
-            result = List.of();
+            query.filterLanguage = "ldap";
         }
-        return result;
     }
 
     @Override
-    public ResultTypedResponseDTO<CompleteResourceDescriptionDTO> describeResource(final String providerId,
-            final String serviceName, final String rcName) {
-        final SensiNactSession userSession = getSession();
-        final ResultTypedResponseDTO<CompleteResourceDescriptionDTO> result = new ResultTypedResponseDTO<>();
-        result.uri = String.join("/", "", providerId, serviceName, rcName);
-        result.type = "DESCRIBE_RESOURCE";
-
-        try {
-            final ResourceDescription rcDesc = userSession.describeResource(providerId, serviceName, rcName);
-            if (rcDesc == null) {
-                result.statusCode = 404;
-                result.error = "Resource not set";
-            } else {
-                final ResourceShortDescription rcShortdesc = userSession.describeResourceShort(providerId, serviceName,
-                        rcName);
-                final CompleteResourceDescriptionDTO response = new CompleteResourceDescriptionDTO();
-                response.name = rcDesc.resource;
-                response.type = rcShortdesc.resourceType;
-                response.accessMethods = computeMethods(rcDesc, rcShortdesc);
-                response.attributes = computeAttributes(rcDesc);
-
-                result.response = response;
-                result.statusCode = 200;
-            }
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
+    public AbstractResultDTO describeProviders() {
+        final QueryDescribeDTO query = new QueryDescribeDTO();
+        query.uri = new SensinactPath();
+        injectFilter(query);
+        return handleQuery(query);
     }
 
     @Override
-    public <T extends Object> ResultTypedResponseDTO<GetResponse<T>> resourceGet(final String providerId,
-            final String serviceName, final String rcName) {
-        final SensiNactSession userSession = getSession();
-        final ResultTypedResponseDTO<GetResponse<T>> result = new ResultTypedResponseDTO<>();
-        result.uri = String.join("/", "", providerId, serviceName, rcName);
-        result.type = "GET_RESPONSE";
+    public AbstractResultDTO listProviders() {
+        final QueryListDTO query = new QueryListDTO();
+        query.uri = new SensinactPath();
+        injectFilter(query);
+        return handleQuery(query);
+    }
 
-        try {
-            final ResourceDescription rcDesc = userSession.describeResource(providerId, serviceName, rcName);
-            if (rcDesc == null) {
-                // No access to the resource
-                result.error = "Unknown provider or service";
-                result.statusCode = 404;
-            } else {
-                final ResourceShortDescription rcShortDesc = userSession.describeResourceShort(providerId, serviceName,
-                        rcName);
+    @Override
+    public AbstractResultDTO describeProvider(final String providerId) {
+        final QueryDescribeDTO query = new QueryDescribeDTO();
+        query.uri = new SensinactPath(providerId);
+        injectFilter(query);
+        return handleQuery(query);
+    }
 
-                final GetResponse<T> response = new GetResponse<T>();
-                response.name = rcDesc.resource;
+    @Override
+    public AbstractResultDTO listServices(final String providerId) {
+        final QueryListDTO query = new QueryListDTO();
+        query.uri = new SensinactPath(providerId);
+        injectFilter(query);
+        return handleQuery(query);
+    }
 
-                if (rcShortDesc.contentType != null) {
-                    response.type = rcShortDesc.contentType.getName();
-                } else if (response.value != null) {
-                    response.type = response.value.getClass().getName();
-                }
+    @Override
+    public AbstractResultDTO describeService(final String providerId, final String serviceName) {
+        final QueryDescribeDTO query = new QueryDescribeDTO();
+        query.uri = new SensinactPath(providerId, serviceName);
+        injectFilter(query);
+        return handleQuery(query);
+    }
 
-                if (rcDesc.timestamp != null) {
-                    response.timestamp = rcDesc.timestamp.toEpochMilli();
-                    result.response = response;
-                    result.statusCode = 200;
+    @Override
+    public AbstractResultDTO listResources(final String providerId, final String serviceName) {
+        final QueryListDTO query = new QueryListDTO();
+        query.uri = new SensinactPath(providerId, serviceName);
+        injectFilter(query);
+        return handleQuery(query);
+    }
 
-                    // FIXME: find a way to avoid that unchecked casting
-                    // Calling userSession.getResourceValue with generic type would not return the
-                    // value timestamp
-                    response.value = (T) rcDesc.value;
-                } else {
-                    // No time stamp = no content
-                    response.timestamp = Instant.now().toEpochMilli();
-                    response.value = null;
-                    result.response = response;
+    @Override
+    public AbstractResultDTO describeResource(final String providerId, final String serviceName, final String rcName) {
+        final QueryDescribeDTO query = new QueryDescribeDTO();
+        query.uri = new SensinactPath(providerId, serviceName, rcName);
+        injectFilter(query);
+        return handleQuery(query);
+    }
 
-                    result.error = "No value set";
-                    result.statusCode = 204;
-                }
-            }
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
+    @Override
+    public AbstractResultDTO resourceGet(final String providerId, final String serviceName, final String rcName) {
+        final QueryGetDTO query = new QueryGetDTO();
+        query.uri = new SensinactPath(providerId, serviceName, rcName);
+        return handleQuery(query);
     }
 
     /**
@@ -504,40 +221,13 @@ public class RestNorthbound implements IRestNorthbound {
     }
 
     @Override
-    public ResultTypedResponseDTO<GetResponse<?>> resourceSet(final String providerId, final String serviceName,
-            final String rcName, final List<AccessMethodCallParameterDTO> parameters) {
-        final SensiNactSession userSession = getSession();
+    public AbstractResultDTO resourceSet(final String providerId, final String serviceName, final String rcName,
+            final List<AccessMethodCallParameterDTO> parameters) {
 
-        final ResultTypedResponseDTO<GetResponse<?>> result = new ResultTypedResponseDTO<>();
-        result.uri = String.join("/", "", providerId, serviceName, rcName);
-        result.type = "SET_RESPONSE";
-
-        try {
-            final Object newValue = extractSetValue(parameters);
-
-            // Force the timestamp so that we are sure we are coherent with what we return
-            final Instant timestamp = Instant.now();
-            userSession.setResourceValue(providerId, serviceName, rcName, newValue, timestamp);
-
-            final ResourceShortDescription rcShortDesc = userSession.describeResourceShort(providerId, serviceName,
-                    rcName);
-
-            final GetResponse<Object> response = new GetResponse<>();
-            response.name = rcName;
-            response.timestamp = timestamp.toEpochMilli();
-            response.type = rcShortDesc.contentType.getName();
-            response.value = newValue;
-
-            result.response = response;
-            result.statusCode = 200;
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
+        final QuerySetDTO query = new QuerySetDTO();
+        query.uri = new SensinactPath(providerId, serviceName, rcName);
+        query.value = extractSetValue(parameters);
+        return handleQuery(query);
     }
 
     private Map<String, Object> extractActParams(final List<Entry<String, Class<?>>> actMethodArgumentsTypes,
@@ -576,28 +266,16 @@ public class RestNorthbound implements IRestNorthbound {
     }
 
     @Override
-    public ResultActResponse<?> resourceAct(final String providerId, final String serviceName, final String rcName,
+    public AbstractResultDTO resourceAct(final String providerId, final String serviceName, final String rcName,
             final List<AccessMethodCallParameterDTO> parameters) {
-        final SensiNactSession userSession = getSession();
-        final ResultActResponse<Object> result = new ResultActResponse<>();
 
-        result.uri = String.join("/", "", providerId, serviceName, rcName);
-        result.type = "ACT_RESPONSE";
+        final List<Entry<String, Class<?>>> actMethodArgumentsTypes = getSession().describeResourceShort(providerId,
+                serviceName, rcName).actMethodArgumentsTypes;
 
-        try {
-            final List<Entry<String, Class<?>>> actMethodArgumentsTypes = userSession.describeResourceShort(providerId,
-                    serviceName, rcName).actMethodArgumentsTypes;
-            final Map<String, Object> params = extractActParams(actMethodArgumentsTypes, parameters);
-            result.response = userSession.actOnResource(providerId, serviceName, rcName, params);
-            result.statusCode = 200;
-        } catch (Exception e) {
-            result.statusCode = 500;
-            final StringWriter stringWriter = new StringWriter();
-            e.printStackTrace(new PrintWriter(stringWriter));
-            result.error = stringWriter.getBuffer().toString();
-        }
-
-        return result;
+        final QueryActDTO query = new QueryActDTO();
+        query.uri = new SensinactPath(providerId, serviceName, rcName);
+        query.parameters = extractActParams(actMethodArgumentsTypes, parameters);
+        return handleQuery(query);
     }
 
     @Override

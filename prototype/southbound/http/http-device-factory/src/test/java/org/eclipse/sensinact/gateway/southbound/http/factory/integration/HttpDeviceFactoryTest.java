@@ -341,12 +341,12 @@ public class HttpDeviceFactoryTest {
             // Update returned value
             handler.setData("/dynamic", template.replace("$val1$", "38").replace("$val2$", "15"));
 
-            final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
+            final Instant timeout = Instant.now().plus(10, ChronoUnit.SECONDS);
             boolean got1 = false;
             boolean got2 = false;
 
             // Wait for an update (wait 4 seconds to be fair with the 2-seconds poll)
-            while (Instant.now().isBefore(timeout) && !got1 && !got2) {
+            while (Instant.now().isBefore(timeout) && !(got1 && got2)) {
                 if (!got1) {
                     ResourceDataNotification notif = queue.poll(1, TimeUnit.SECONDS);
                     if (notif != null) {

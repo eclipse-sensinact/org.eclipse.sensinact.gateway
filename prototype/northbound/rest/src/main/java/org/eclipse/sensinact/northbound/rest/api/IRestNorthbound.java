@@ -16,17 +16,8 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.List;
 
-import org.eclipse.sensinact.northbound.rest.dto.AccessMethodCallParameterDTO;
-import org.eclipse.sensinact.northbound.rest.dto.CompleteResourceDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.CompleteServiceDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.GetResponse;
-import org.eclipse.sensinact.northbound.rest.dto.ProviderDescriptionDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultActResponse;
-import org.eclipse.sensinact.northbound.rest.dto.ResultCompleteListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultProvidersListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultResourcesListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultServicesListDTO;
-import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
+import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -43,49 +34,49 @@ public interface IRestNorthbound {
 
     @Path("")
     @GET
-    ResultCompleteListDTO describeProviders();
+    AbstractResultDTO describeProviders();
 
     @Path("providers")
     @GET
-    ResultProvidersListDTO listProviders();
+    AbstractResultDTO listProviders();
 
     @Path("providers/{providerId}")
     @GET
-    ResultTypedResponseDTO<ProviderDescriptionDTO> describeProvider(@PathParam("providerId") String providerId);
+    AbstractResultDTO describeProvider(@PathParam("providerId") String providerId);
 
     @Path("providers/{providerId}/services")
     @GET
-    ResultServicesListDTO listServices(@PathParam("providerId") String providerId);
+    AbstractResultDTO listServices(@PathParam("providerId") String providerId);
 
     @Path("providers/{providerId}/services/{serviceName}")
     @GET
-    ResultTypedResponseDTO<CompleteServiceDescriptionDTO> describeService(@PathParam("providerId") String providerId,
+    AbstractResultDTO describeService(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName);
 
     @Path("providers/{providerId}/services/{serviceName}/resources")
     @GET
-    ResultResourcesListDTO listResources(@PathParam("providerId") String providerId,
+    AbstractResultDTO listResources(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName);
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}")
     @GET
-    ResultTypedResponseDTO<CompleteResourceDescriptionDTO> describeResource(@PathParam("providerId") String providerId,
+    AbstractResultDTO describeResource(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName);
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/GET")
     @GET
-    <T> ResultTypedResponseDTO<GetResponse<T>> resourceGet(@PathParam("providerId") String providerId,
+    AbstractResultDTO resourceGet(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName);
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/SET")
     @POST
-    ResultTypedResponseDTO<GetResponse<?>> resourceSet(@PathParam("providerId") String providerId,
+    AbstractResultDTO resourceSet(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName,
             List<AccessMethodCallParameterDTO> parameters);
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/ACT")
     @POST
-    ResultActResponse<?> resourceAct(@PathParam("providerId") String providerId,
+    AbstractResultDTO resourceAct(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName,
             List<AccessMethodCallParameterDTO> parameters);
 

@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.query.dto;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -57,6 +58,22 @@ public class SensinactPath {
         this.service = service;
         this.resource = resource;
         this.metadata = metadata;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(provider, service, resource, metadata);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof SensinactPath)) {
+            return false;
+        }
+
+        final SensinactPath other = (SensinactPath) obj;
+        return Objects.equals(provider, other.provider) && Objects.equals(service, other.service)
+                && Objects.equals(resource, other.resource) && Objects.equals(metadata, other.metadata);
     }
 
     /**

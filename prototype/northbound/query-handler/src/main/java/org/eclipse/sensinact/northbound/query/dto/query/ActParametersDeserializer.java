@@ -51,7 +51,7 @@ public class ActParametersDeserializer extends StdDeserializer<Map<String, Objec
         final ObjectMapper mapper = new ObjectMapper();
         if (node.isObject()) {
             // Direct mapping
-            final Map<?, ?> rawParams = mapper.readValue(parser, Map.class);
+            final Map<?, ?> rawParams = mapper.convertValue(node, Map.class);
             final Map<String, Object> parameters = new HashMap<>();
             for (final Entry<?, ?> entry : rawParams.entrySet()) {
                 parameters.put(String.valueOf(entry.getKey()), entry.getValue());
@@ -62,10 +62,12 @@ public class ActParametersDeserializer extends StdDeserializer<Map<String, Objec
         if (node.isArray()) {
             // Convert array of arguments to named arguments
             final Map<String, Object> parameters = new HashMap<>();
-            for (final AccessMethodCallParameterDTO rawParam : mapper.readValue(parser,
-                    AccessMethodCallParameterDTO[].class)) {
+            for (final JsonNode item : node) {
+                final AccessMethodCallParameterDTO rawParam = mapper.convertValue(item,
+                        AccessMethodCallParameterDTO.class);
                 parameters.put(rawParam.name, rawParam.value);
             }
+            return parameters;
         }
 
         throw new IOException("Invalid arguments list/map");
