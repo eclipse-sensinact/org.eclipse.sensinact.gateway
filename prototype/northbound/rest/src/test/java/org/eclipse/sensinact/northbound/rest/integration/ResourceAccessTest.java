@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class ResourceAccessTest {
     void resourceGet() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        Instant updateTime = Instant.now();
+        Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         push.pushUpdate(dto).getValue();
 
         // Check for success
@@ -97,7 +98,7 @@ public class ResourceAccessTest {
         assertEquals(RESOURCE, response.name);
         assertEquals(VALUE, response.value);
         assertEquals(dto.type.getName(), response.type);
-        assertFalse(updateTime.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
+        assertFalse(Instant.ofEpochMilli(response.timestamp).isBefore(updateTime), "Timestamp wasn't updated");
     }
 
     /**
@@ -107,7 +108,7 @@ public class ResourceAccessTest {
     void resourceUpdate() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        Instant firstTime = Instant.now();
+        Instant firstTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         push.pushUpdate(dto).getValue();
 
         // Check response
@@ -116,11 +117,11 @@ public class ResourceAccessTest {
                 TypedResponse.class);
         ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(VALUE, response.value);
-        assertFalse(firstTime.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
+        assertFalse(Instant.ofEpochMilli(response.timestamp).isBefore(firstTime), "Timestamp wasn't updated");
 
         // Update value
         dto.value = VALUE_2;
-        Instant secondTime = Instant.now();
+        Instant secondTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         push.pushUpdate(dto).getValue();
 
         // Check for success
@@ -129,7 +130,7 @@ public class ResourceAccessTest {
                 TypedResponse.class);
         response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(VALUE_2, response.value);
-        assertFalse(secondTime.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
+        assertFalse(Instant.ofEpochMilli(response.timestamp).isBefore(secondTime), "Timestamp wasn't updated");
     }
 
     /**
@@ -139,7 +140,7 @@ public class ResourceAccessTest {
     void resourceSet() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        Instant firstUpdateTime = Instant.now();
+        Instant firstUpdateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         push.pushUpdate(dto).getValue();
 
         // Check response
@@ -150,7 +151,7 @@ public class ResourceAccessTest {
         assertEquals(VALUE, response.value);
 
         Instant firstTimestamp = Instant.ofEpochMilli(response.timestamp);
-        assertFalse(firstUpdateTime.isBefore(firstTimestamp), "Timestamp wasn't updated");
+        assertFalse(firstTimestamp.isBefore(firstUpdateTime), "Timestamp wasn't updated");
 
         queue = new ArrayBlockingQueue<>(32);
         SensiNactSession session = sessionManager.getDefaultSession(USER);
