@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.gateway.southbound.device.factory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
@@ -23,6 +25,24 @@ import org.junit.jupiter.api.Test;
  * Tests value type conversion
  */
 public class ValueTypeTest {
+
+    @Test
+    void testNan() {
+        final DeviceMappingOptionsDTO options = new DeviceMappingOptionsDTO();
+        for (String nan : Arrays.asList("nan", "NaN")) {
+            assertTrue(Double.isNaN((Float) ValueType.FLOAT.convert(nan, options)));
+            assertTrue(Double.isNaN((Double) ValueType.DOUBLE.convert(nan, options)));
+            assertNull(ValueType.INT.convert(nan, options));
+            assertNull(ValueType.LONG.convert(nan, options));
+        }
+
+        for (String inf : Arrays.asList("inf", "Inf", "+inf", "+Inf", "-Inf", "-inf")) {
+            assertTrue(Double.isInfinite((Float) ValueType.FLOAT.convert(inf, options)));
+            assertTrue(Double.isInfinite((Double) ValueType.DOUBLE.convert(inf, options)));
+            assertNull(ValueType.INT.convert(inf, options));
+            assertNull(ValueType.LONG.convert(inf, options));
+        }
+    }
 
     @Test
     void testNumberLocale() {
