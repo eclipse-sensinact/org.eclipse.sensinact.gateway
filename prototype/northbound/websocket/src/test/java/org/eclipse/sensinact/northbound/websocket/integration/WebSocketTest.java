@@ -268,15 +268,26 @@ public class WebSocketTest {
             unsubQuery.subscriptionId = subscribeResult.subscriptionId;
             sendDTO(session, unsubQuery);
 
+            // Wait for the result
+            final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
+            boolean found = false;
+            while (Instant.now().isBefore(timeout)) {
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                if (rawResult != null && rawResult.type == EResultType.UNSUBSCRIPTION_RESPONSE) {
+                    // Got it
+                    found = true;
+                    break;
+                }
+            }
+
+            assertTrue(found, "Didn't get the unsubscription response");
+
+            ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
+            assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
+
             // New update
             dto.value = 512;
             push.pushUpdate(dto).getValue();
-
-            // Next result is the unsubscription result
-            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            assertNotNull(rawResult, "No unsubscription result");
-            ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
-            assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
 
             // Wait of a notification
             assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
