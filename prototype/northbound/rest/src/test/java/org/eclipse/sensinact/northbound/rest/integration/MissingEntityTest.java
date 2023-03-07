@@ -94,10 +94,9 @@ public class MissingEntityTest {
         assertFalse(typedResult.error.isEmpty());
 
         // Services list
-        ResultListServicesDTO svcListResult = utils
-                .queryJson(String.join("/", "providers", missingProvider, "services"), ResultListServicesDTO.class);
+        ErrorResultDTO svcListResult = utils
+                .queryJson(String.join("/", "providers", missingProvider, "services"), ErrorResultDTO.class);
         assertEquals(404, svcListResult.statusCode);
-        assertNull(svcListResult.services);
         assertNotNull(svcListResult.error);
         assertFalse(svcListResult.error.isEmpty());
     }
@@ -130,13 +129,12 @@ public class MissingEntityTest {
         assertFalse(errorResult.error.isEmpty());
 
         // Resources list
-        ResultListResourcesDTO rcListResult = utils.queryJson(
+        errorResult = utils.queryJson(
                 String.join("/", "providers", provider_service, "services", missingService, "resources"),
-                ResultListResourcesDTO.class);
-        assertEquals(404, rcListResult.statusCode);
-        assertNull(rcListResult.resources);
-        assertNotNull(rcListResult.error);
-        assertFalse(rcListResult.error.isEmpty());
+                ErrorResultDTO.class);
+        assertEquals(404, errorResult.statusCode);
+        assertNotNull(errorResult.error);
+        assertFalse(errorResult.error.isEmpty());
 
         // Resource description
         errorResult = utils.queryJson(
