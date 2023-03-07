@@ -45,7 +45,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
         @Type(value = ResultSubscribeDTO.class, name = "SUBSCRIPTION_RESPONSE"),
         @Type(value = ResultResourceNotificationDTO.class, name = "SUBSCRIPTION_NOTIFICATION"),
         @Type(value = ResultUnsubscribeDTO.class, name = "UNSUBSCRIPTION_RESPONSE") })
-@JsonTypeInfo(use = Id.NAME, include = As.EXTERNAL_PROPERTY, property = "type")
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 public abstract class AbstractResultDTO {
 
     /**
