@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
+import org.eclipse.sensinact.gateway.southbound.device.factory.impl.VariableSolver;
 
 /**
  * Represents a record path
