@@ -12,13 +12,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.http.factory;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.lang.reflect.Array;
+import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Authentication;
 import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.api.Result;
 import org.eclipse.jetty.client.util.BasicAuthentication;
 import org.eclipse.jetty.client.util.BufferingResponseListener;
@@ -165,12 +171,22 @@ public class HttpDeviceFactory {
             }
 
             request.send(new BufferingResponseListener(task.getBufferSize()) {
+
+                private final AtomicReference<Map<String, String>> headers = new AtomicReference<>(Map.of());
+
+                @Override
+                public void onHeaders(Response response) {
+                    super.onHeaders(response);
+                    headers.set(response.getHeaders().getFieldNamesCollection().stream()
+                            .collect(toMap(Function.identity(), h -> response.getHeaders().get(h))));
+                }
+
                 @Override
                 public void onComplete(final Result result) {
                     try {
                         if (result.isSucceeded()) {
                             try {
-                                mappingHandler.handle(task.mapping, getContent());
+                                mappingHandler.handle(task.mapping, headers.get(), getContent());
                             } catch (DeviceFactoryException e) {
                                 logger.error("Error parsing input from {}", task.url, e);
                             }

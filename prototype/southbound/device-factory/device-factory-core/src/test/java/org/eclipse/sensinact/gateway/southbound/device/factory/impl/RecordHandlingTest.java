@@ -126,7 +126,7 @@ public class RecordHandlingTest {
     void testNoProviderPlaceholder() throws Exception {
         final DeviceMappingConfigurationDTO config = prepareConfig();
         try {
-            deviceMapper.handle(config, new byte[0]);
+            deviceMapper.handle(config, Map.of(), new byte[0]);
             fail("Handler accepted an empty configuration");
         } catch (IllegalArgumentException e) {
             // OK
@@ -135,14 +135,14 @@ public class RecordHandlingTest {
         config.mapping.put("@model", "toto");
         config.mapping.put("@latitude", "toto");
         try {
-            deviceMapper.handle(config, new byte[0]);
+            deviceMapper.handle(config, Map.of(), new byte[0]);
             fail("Handler accepted a configuration without a provider");
         } catch (IllegalArgumentException e) {
             // OK
         }
 
         config.mapping.put("@provider", "toto");
-        deviceMapper.handle(config, new byte[0]);
+        deviceMapper.handle(config, Map.of(), new byte[0]);
         // OK
     }
 
@@ -160,7 +160,7 @@ public class RecordHandlingTest {
         config.mapping.put("@latitude", "lat");
         config.mapping.put("@longitude", "lon");
         config.mapping.put("data/value", "val");
-        deviceMapper.handle(config, new byte[0]);
+        deviceMapper.handle(config, Map.of(), new byte[0]);
 
         GenericDto dto = getResourceValue(provider, "admin", "friendlyName");
         assertEquals("name", dto.value);
@@ -174,7 +174,7 @@ public class RecordHandlingTest {
         // Test w/ a model
         bulks.clear();
         config.mapping.put("@model", "m");
-        deviceMapper.handle(config, new byte[0]);
+        deviceMapper.handle(config, Map.of(), new byte[0]);
         dto = getResourceValue(provider, "admin", "friendlyName");
         assertEquals("name", dto.value);
         assertEquals(provider, dto.provider);
@@ -198,7 +198,7 @@ public class RecordHandlingTest {
         config.mapping.put("$other", "n");
         config.mapping.put("data/text", Map.of("literal", "${other}=${value}"));
         config.mapping.put("data/value", Map.of("literal", "${value}", "type", "int"));
-        deviceMapper.handle(config, new byte[0]);
+        deviceMapper.handle(config, Map.of(), new byte[0]);
 
         GenericDto dto = getResourceValue(provider, "admin", "friendlyName");
         assertEquals(model, dto.model);
@@ -206,5 +206,40 @@ public class RecordHandlingTest {
         assertEquals("foo", dto.value);
         assertEquals(42, getResourceValue(provider, "data", "value", Integer.class));
         assertEquals("foo=42", getResourceValue(provider, "data", "text", String.class));
+    }
+
+    @Test
+    void testContext() throws Exception {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+
+        final String model = "testModel";
+        parser.setRecords(
+                Map.of("m", model, "n", "name", "lat", 45f, "lon", 5f, "val", 42, "bar", "fizz", "foobar", "buzz"));
+
+        // Test w/o a model
+        config.mapping.put("@provider", "${context.foo}");
+        config.mapping.put("@name", "n");
+        config.mapping.put("@latitude", "lat");
+        config.mapping.put("@longitude", "lon");
+        config.mapping.put("data/value", "val");
+        deviceMapper.handle(config, Map.of("foo", "bar"), new byte[0]);
+
+        GenericDto dto = getResourceValue("fizz", "admin", "friendlyName");
+        assertEquals("name", dto.value);
+        assertEquals("fizz", dto.provider);
+        assertEquals("fizz", dto.model);
+        assertEquals(42, getResourceValue("fizz", "data", "value", Integer.class));
+        Point location = getResourceValue("fizz", "admin", "location", Point.class);
+        assertEquals(45f, location.coordinates.latitude);
+        assertEquals(5f, location.coordinates.longitude);
+
+        // Test w/ a model
+        bulks.clear();
+        config.mapping.put("@model", "m");
+        deviceMapper.handle(config, Map.of("foo", "foobar"), new byte[0]);
+        dto = getResourceValue("buzz", "admin", "friendlyName");
+        assertEquals("name", dto.value);
+        assertEquals("buzz", dto.provider);
+        assertEquals(model, dto.model);
     }
 }

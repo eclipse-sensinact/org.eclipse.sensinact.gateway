@@ -150,7 +150,7 @@ public class JSONParserTest {
         byte[] fileContent = readFile("json/literal.json");
 
         // Apply mapping
-        deviceMapper.handle(config, fileContent);
+        deviceMapper.handle(config, Map.of(), fileContent);
 
         // Ensure value and type
         assertEquals(94, getResourceValue(provider1, "data", "value", Integer.class));
@@ -181,7 +181,7 @@ public class JSONParserTest {
         byte[] fileContent = readFile("json/multiple.json");
 
         // Apply mapping
-        deviceMapper.handle(config, fileContent);
+        deviceMapper.handle(config, Map.of(), fileContent);
 
         // Ensure value and type
         assertEquals(94, getResourceValue(provider1, "data", "value", Integer.class));
@@ -229,7 +229,7 @@ public class JSONParserTest {
         byte[] fileContent = readFile("json/sub-array.json");
 
         // Apply mapping
-        deviceMapper.handle(config, fileContent);
+        deviceMapper.handle(config, Map.of(), fileContent);
 
         // Ensure value and type
         assertEquals(94, getResourceValue(provider1, "data", "value", Integer.class));
@@ -282,7 +282,7 @@ public class JSONParserTest {
         byte[] fileContent = readFile("json/single.json");
 
         // Apply mapping
-        deviceMapper.handle(config, fileContent);
+        deviceMapper.handle(config, Map.of(), fileContent);
 
         // Ensure value and type
         assertEquals(15, getResourceValue(provider, "data", "value", Integer.class));
@@ -313,7 +313,7 @@ public class JSONParserTest {
         byte[] fileContent = readFile("json/datetime.json");
 
         // Apply mapping
-        deviceMapper.handle(config, fileContent);
+        deviceMapper.handle(config, Map.of(), fileContent);
 
         // Ensure timestamp
         Instant timestamp = Instant.from(LocalDateTime.of(2022, 12, 7, 12, 1, 58).atOffset(ZoneOffset.UTC));
@@ -339,7 +339,7 @@ public class JSONParserTest {
         byte[] fileContent = readFile("json/deep-multiple.json");
 
         // Apply mapping
-        deviceMapper.handle(config, fileContent);
+        deviceMapper.handle(config, Map.of(), fileContent);
 
         // Check first provider
         assertEquals(0, getResourceValue(provider1, "data", type1 + "-value", Integer.class));

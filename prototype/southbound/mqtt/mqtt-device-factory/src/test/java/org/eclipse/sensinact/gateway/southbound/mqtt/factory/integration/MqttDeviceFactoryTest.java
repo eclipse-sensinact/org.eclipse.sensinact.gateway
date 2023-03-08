@@ -47,8 +47,6 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
@@ -72,6 +70,7 @@ import io.moquette.broker.config.MemoryConfig;
                 + "    \"@latitude\": { \"path\": \"Latitude\", \"type\": \"float\" },\n"
                 + "    \"@longitude\": { \"path\": \"Longitude\", \"type\": \"float\" },\n"
                 + "    \"@date\": \"Date\", \"@time\": \"Time\",\n"
+                + "    \"data/testName\": { \"literal\": \"${context.topic-2}\" },\n"
                 + "    \"data/value\": { \"path\": \"Value\", \"type\": \"int\" }\n" + "  },\n"
                 + "  \"mapping.options\": { \"format.date\": \"d.M.y\", \"format.time\": \"H:m\" }\n" + "}"), })
 public class MqttDeviceFactoryTest {
@@ -180,6 +179,10 @@ public class MqttDeviceFactoryTest {
         assertEquals(5.6, geoPoint.coordinates.latitude, 0.001);
         assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+
+        // Ensure resources from context
+        assertEquals("test1", session.getResourceValue(provider1, "data", "testName", String.class));
+        assertEquals("test1", session.getResourceValue(provider2, "data", "testName", String.class));
     }
 
     /**
