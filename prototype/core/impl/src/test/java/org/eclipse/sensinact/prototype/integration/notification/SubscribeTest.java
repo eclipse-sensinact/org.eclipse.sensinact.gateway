@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.integration.notification;
 
@@ -60,7 +60,7 @@ public class SubscribeTest {
 
     /**
      * Show that data updates result in events received by subscribers
-     * 
+     *
      * @throws Exception
      */
     @Test

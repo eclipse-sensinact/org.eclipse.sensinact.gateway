@@ -74,7 +74,7 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.sensinact.prototype.model.SensinactModelManager#getModel(org.
      * eclipse.emf.ecore.EClass)
@@ -89,7 +89,7 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.sensinact.prototype.model.SensinactModelManager#createModel(org.
      * eclipse.emf.ecore.EClass)

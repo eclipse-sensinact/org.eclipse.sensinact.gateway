@@ -378,7 +378,6 @@ public class ModelNexus {
 
         provider.eAdapters().add(new ProviderChangeAdapter(notificationAccumulator));
         notificationAccumulator.get().addProvider(modelName, providerName);
-
         createAdminServiceForProvider(provider, timestamp);
 
         providers.put(providerName, provider);

@@ -65,7 +65,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin#getProvider(org.
      * eclipse.emf.ecore.EClass, java.lang.String)

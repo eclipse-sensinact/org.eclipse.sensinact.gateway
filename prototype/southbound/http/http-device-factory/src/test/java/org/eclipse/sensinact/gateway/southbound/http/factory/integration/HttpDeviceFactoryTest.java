@@ -243,8 +243,8 @@ public class HttpDeviceFactoryTest {
             // Check timestamp
             final Instant secondTimestamp = resource.timestamp;
             Instant compare = firstTimestamp.plus(1, ChronoUnit.SECONDS);
-            assertTrue(secondTimestamp.isAfter(compare),
-                    "Expected " + secondTimestamp + " to be after " + compare + " after " + handler.nbVisits("/data"));
+            assertTrue(secondTimestamp.isAfter(compare), "Expected " + secondTimestamp + " to be after " + compare
+                    + " after " + handler.nbVisits("/data") + " visits to /data");
 
             // Ensure resource value
             assertEquals(10, session.getResourceValue(provider1, "data", "value", Integer.class));

@@ -17,6 +17,7 @@
 	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
+	com.google.guava;version='[15.0.0,15.0.1)',\
 	com.sun.jna;version='[5.8.0,5.8.1)',\
 	junit-jupiter-api;version='[5.9.0,5.9.1)',\
 	junit-jupiter-engine;version='[5.9.0,5.9.1)',\
@@ -24,6 +25,7 @@
 	junit-platform-commons;version='[1.9.0,1.9.1)',\
 	junit-platform-engine;version='[1.9.0,1.9.1)',\
 	junit-platform-launcher;version='[1.9.0,1.9.1)',\
+	log4j.over.slf4j;version='[1.7.36,1.7.37)',\
 	net.bytebuddy.byte-buddy;version='[1.12.13,1.12.14)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.12.13,1.12.14)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
@@ -33,6 +35,7 @@
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
 	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
 	org.eclipse.emf.common;version='[2.28.0,2.28.1)',\
+	org.eclipse.emf.compare;version='[3.5.3,3.5.4)',\
 	org.eclipse.emf.ecore;version='[2.33.0,2.33.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.17.0,2.17.1)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.1,0.0.2)',\

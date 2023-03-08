@@ -152,6 +152,10 @@ public class DescriptionsTest {
         dto.provider = PROVIDER_2;
         dto.model = dto.provider;
         push.pushUpdate(dto);
+
+        // skip friendlyName and modelUri
+        queue.poll(1, TimeUnit.SECONDS);
+        queue.poll(1, TimeUnit.SECONDS);
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check the new list
@@ -209,7 +213,13 @@ public class DescriptionsTest {
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
         push.pushUpdate(dto);
         // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        // First will be admin friendlyName
+        ResourceDataNotification localNotif = queue.poll(1, TimeUnit.SECONDS);
+        // second will be will be admin modelURI
+        localNotif = queue.poll(1, TimeUnit.SECONDS);
+        // now ours should arrive
+        localNotif = queue.poll(1, TimeUnit.SECONDS);
+        utils.assertNotification(dto, localNotif);
 
         // Check the list of providers
         ResultTypedResponseDTO<?> result = utils.queryJson("/providers/" + PROVIDER + "/services/" + SERVICE,

@@ -26,6 +26,8 @@ import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
+import com.google.common.base.Objects;
+
 public class ServiceChangeAdapter extends AdapterImpl {
 
     private Supplier<NotificationAccumulator> accumulatorSupplier;
@@ -36,7 +38,7 @@ public class ServiceChangeAdapter extends AdapterImpl {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.emf.common.notify.impl.AdapterImpl#notifyChanged(org.eclipse.emf.
      * common.notify.Notification)
@@ -63,13 +65,12 @@ public class ServiceChangeAdapter extends AdapterImpl {
             String modelName = EMFUtil.getModelName(container.eClass());
             String providerName = ((Provider) container).getId();
             String serviceName = service.eContainingFeature().getName();
-            if (msg.getEventType() == Notification.SET) {
+            if (msg.getEventType() == Notification.SET && Objects.equal(oldValue, resource.getDefaultValue())) {
                 accumulator.addResource(modelName, providerName, serviceName, resource.getName());
             }
             Metadata metadata = service.getMetadata().get(resource);
 
             Instant timestamp = metadata == null ? Instant.now() : metadata.getTimestamp();
-
             accumulator.resourceValueUpdate(modelName, providerName, serviceName, resource.getName(),
                     resource.getEAttributeType().getInstanceClass(), oldValue, msg.getNewValue(),
                     timestamp == null ? Instant.now() : timestamp);

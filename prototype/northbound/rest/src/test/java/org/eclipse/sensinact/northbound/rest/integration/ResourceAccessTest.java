@@ -118,7 +118,13 @@ public class ResourceAccessTest {
         Instant firstTime = Instant.now();
 
         // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        // First will be admin friendlyName
+        ResourceDataNotification localNotif = queue.poll(1, TimeUnit.SECONDS);
+        // second will be will be admin modelURI
+        localNotif = queue.poll(1, TimeUnit.SECONDS);
+        // now ours should arrive
+        localNotif = queue.poll(1, TimeUnit.SECONDS);
+        utils.assertNotification(dto, localNotif);
 
         // Check response
         ResultTypedResponseDTO<?> result = utils.queryJson(

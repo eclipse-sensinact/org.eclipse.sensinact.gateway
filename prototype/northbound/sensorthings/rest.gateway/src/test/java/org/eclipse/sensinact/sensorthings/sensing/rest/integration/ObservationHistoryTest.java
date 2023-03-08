@@ -135,7 +135,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 4000; i++) {
             createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 1000);
+        waitForRowCount("sensinact.text_data", 1002);
         waitForRowCount("sensinact.numeric_data", 4000);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",

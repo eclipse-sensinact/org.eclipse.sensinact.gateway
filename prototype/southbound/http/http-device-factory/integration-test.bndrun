@@ -34,6 +34,7 @@
 	org.apache.aries.typedevent.bus;version='[0.0.2,0.0.3)',\
 	org.apache.commons.commons-csv;version='[1.9.0,1.9.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
+	org.apache.felix.http.servlet-api;version='[2.1.0,2.1.1)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
 	org.eclipse.emf.common;version='[2.28.0,2.28.1)',\
 	org.eclipse.emf.compare;version='[3.5.3,3.5.4)',\
@@ -45,7 +46,6 @@
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.servlet-api;version='[5.0.2,5.0.3)',\
 	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.1,0.0.2)',\

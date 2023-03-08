@@ -109,7 +109,7 @@
                 <artifactItem>
                   <groupId>org.apache.felix</groupId>
                   <artifactId>org.apache.felix.http.jetty</artifactId>
-                  <version>5.0.0-RC1</version>
+                  <version>5.0.0</version>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.apache.felix</groupId>
