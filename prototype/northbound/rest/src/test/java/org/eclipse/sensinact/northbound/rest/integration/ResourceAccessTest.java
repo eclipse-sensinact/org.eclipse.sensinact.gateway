@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +28,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.rest.dto.AccessMethodCallParameterDTO;
-import org.eclipse.sensinact.northbound.rest.dto.GetResponse;
-import org.eclipse.sensinact.northbound.rest.dto.ResultActResponse;
-import org.eclipse.sensinact.northbound.rest.dto.ResultTypedResponseDTO;
+import org.eclipse.sensinact.northbound.query.api.EResultType;
+import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
@@ -39,7 +41,6 @@ import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
@@ -69,18 +70,13 @@ public class ResourceAccessTest {
 
     final TestUtils utils = new TestUtils();
 
-    @BeforeEach
-    void start() throws InterruptedException {
-        queue = new ArrayBlockingQueue<>(32);
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
-        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
-    }
-
     @AfterEach
     void stop() {
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
-        session.activeListeners().keySet().forEach(session::removeListener);
+        if (queue != null) {
+            SensiNactSession session = sessionManager.getDefaultSession(USER);
+            session.activeListeners().keySet().forEach(session::removeListener);
+            queue = null;
+        }
     }
 
     /**
@@ -90,21 +86,19 @@ public class ResourceAccessTest {
     void resourceGet() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        Instant updateTime = Instant.now();
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        push.pushUpdate(dto).getValue();
 
         // Check for success
-        ResultTypedResponseDTO<?> result = utils.queryJson(
+        TypedResponse<?> result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "GET"),
-                ResultTypedResponseDTO.class);
-        utils.assertResultSuccess(result, "GET_RESPONSE", PROVIDER, SERVICE, RESOURCE);
-        GetResponse<?> response = utils.convert(result, GetResponse.class);
+                TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, SERVICE, RESOURCE);
+        ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(RESOURCE, response.name);
         assertEquals(VALUE, response.value);
         assertEquals(dto.type.getName(), response.type);
-        assertFalse(updateTime.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
+        assertFalse(Instant.ofEpochMilli(response.timestamp).isBefore(updateTime), "Timestamp wasn't updated");
     }
 
     /**
@@ -115,40 +109,28 @@ public class ResourceAccessTest {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
         push.pushUpdate(dto);
-        Instant firstTime = Instant.now();
-
-        // Wait for it
-        // First will be admin friendlyName
-        ResourceDataNotification localNotif = queue.poll(1, TimeUnit.SECONDS);
-        // second will be will be admin modelURI
-        localNotif = queue.poll(1, TimeUnit.SECONDS);
-        // now ours should arrive
-        localNotif = queue.poll(1, TimeUnit.SECONDS);
-        utils.assertNotification(dto, localNotif);
+        Instant firstTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
         // Check response
-        ResultTypedResponseDTO<?> result = utils.queryJson(
+        TypedResponse<?> result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "GET"),
-                ResultTypedResponseDTO.class);
-        GetResponse<?> response = utils.convert(result, GetResponse.class);
+                TypedResponse.class);
+        ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(VALUE, response.value);
-        assertFalse(firstTime.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
+        assertFalse(Instant.ofEpochMilli(response.timestamp).isBefore(firstTime), "Timestamp wasn't updated");
 
         // Update value
         dto.value = VALUE_2;
-        push.pushUpdate(dto);
-        Instant secondTime = Instant.now();
-
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        Instant secondTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        push.pushUpdate(dto).getValue();
 
         // Check for success
         result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "GET"),
-                ResultTypedResponseDTO.class);
-        response = utils.convert(result, GetResponse.class);
+                TypedResponse.class);
+        response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(VALUE_2, response.value);
-        assertFalse(secondTime.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
+        assertFalse(Instant.ofEpochMilli(response.timestamp).isBefore(secondTime), "Timestamp wasn't updated");
     }
 
     /**
@@ -158,20 +140,23 @@ public class ResourceAccessTest {
     void resourceSet() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        Instant firstUpdateTime = Instant.now();
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        Instant firstUpdateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        push.pushUpdate(dto).getValue();
 
         // Check response
-        ResultTypedResponseDTO<?> result = utils.queryJson(
+        TypedResponse<?> result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "GET"),
-                ResultTypedResponseDTO.class);
-        GetResponse<?> response = utils.convert(result, GetResponse.class);
+                TypedResponse.class);
+        ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(VALUE, response.value);
 
         Instant firstTimestamp = Instant.ofEpochMilli(response.timestamp);
-        assertFalse(firstUpdateTime.isBefore(firstTimestamp), "Timestamp wasn't updated");
+        assertFalse(firstTimestamp.isBefore(firstUpdateTime), "Timestamp wasn't updated");
+
+        queue = new ArrayBlockingQueue<>(32);
+        SensiNactSession session = sessionManager.getDefaultSession(USER);
+        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
+        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
         AccessMethodCallParameterDTO param = new AccessMethodCallParameterDTO();
         param.name = "value";
@@ -179,9 +164,9 @@ public class ResourceAccessTest {
         param.value = VALUE_2;
         result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "SET"),
-                List.of(param), ResultTypedResponseDTO.class);
-        utils.assertResultSuccess(result, "SET_RESPONSE", PROVIDER, SERVICE, RESOURCE);
-        response = utils.convert(result, GetResponse.class);
+                List.of(param), TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.SET_RESPONSE, PROVIDER, SERVICE, RESOURCE);
+        response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(RESOURCE, response.name);
         assertEquals(param.type, response.type);
         assertEquals(VALUE_2, response.value);
@@ -193,8 +178,8 @@ public class ResourceAccessTest {
         // Check access
         result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "GET"),
-                ResultTypedResponseDTO.class);
-        response = utils.convert(result, GetResponse.class);
+                TypedResponse.class);
+        response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(VALUE_2, response.value);
         assertTrue(firstTimestamp.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
     }
@@ -206,25 +191,23 @@ public class ResourceAccessTest {
     void adminDefaultValues() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto);
-        // Wait for it
-        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+        push.pushUpdate(dto).getValue();
 
         // friendlyName should be the provider name
-        ResultTypedResponseDTO<?> result = utils.queryJson(
+        TypedResponse<?> result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", "admin", "resources", "friendlyName", "GET"),
-                ResultTypedResponseDTO.class);
-        utils.assertResultSuccess(result, "GET_RESPONSE", PROVIDER, "admin", "friendlyName");
-        GetResponse<?> response = utils.convert(result, GetResponse.class);
+                TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "friendlyName");
+        ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(String.class.getName(), response.type);
         assertEquals(PROVIDER, response.value);
 
         // Location should be null, but set
         result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", "admin", "resources", "location", "GET"),
-                ResultTypedResponseDTO.class);
-        utils.assertResultSuccess(result, "GET_RESPONSE", PROVIDER, "admin", "location");
-        response = utils.convert(result, GetResponse.class);
+                TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "location");
+        response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(GeoJsonObject.class.getName(), response.type);
         assertNull(response.value);
     }
@@ -250,14 +233,13 @@ public class ResourceAccessTest {
         param.type = Long.class.getName();
         param.value = 123L;
 
-        ResultActResponse<?> response = utils.queryJson(
+        ResultActDTO response = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", "action", "ACT"),
-                List.of(param), ResultActResponse.class);
+                List.of(param), ResultActDTO.class);
 
         assertNotNull(response);
         assertEquals(200, response.statusCode);
         assertNotNull(response.response);
         assertEquals(246d, response.response);
-
     }
 }

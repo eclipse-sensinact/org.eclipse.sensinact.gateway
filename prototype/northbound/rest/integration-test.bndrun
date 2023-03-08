@@ -11,7 +11,8 @@
 	bnd.identity;id='org.gecko.rest.jersey.config',\
 	bnd.identity;id='org.gecko.rest.jersey.sse',\
 	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
-	bnd.identity;id='org.glassfish.jersey.core.jersey-client'
+	bnd.identity;id='org.glassfish.jersey.core.jersey-client',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.northbound.filters.ldap'
 -resolve.effective: active
 
 -runee: JavaSE-11
@@ -66,6 +67,9 @@
 	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.core.models;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.northbound.filters.filters.core;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.northbound.filters.ldap;version='[0.0.1,0.0.2)',\
+	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.rest;version='[0.0.1,0.0.2)',\
 	org.eclipse.sensinact.gateway.northbound.rest-tests;version='[0.0.1,0.0.2)',\
 	org.gecko.emf.osgi.api;version='[4.5.0,4.5.1)',\

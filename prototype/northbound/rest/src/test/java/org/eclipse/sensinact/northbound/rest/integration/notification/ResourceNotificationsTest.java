@@ -24,8 +24,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.util.BlockingArrayQueue;
-import org.eclipse.sensinact.northbound.rest.dto.notification.ResourceDataNotificationDTO;
-import org.eclipse.sensinact.northbound.rest.dto.notification.ResourceLifecycleNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.notification.ResourceLifecycleNotificationDTO;
 import org.eclipse.sensinact.northbound.rest.integration.TestUtils;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
