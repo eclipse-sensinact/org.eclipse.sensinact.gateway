@@ -105,7 +105,7 @@ public class EMFUtil {
     /**
      * Provides a {@link Stream} of all {@link EAttribute}s, filtering out all
      * Attributes that are part of {@link EObject} and above
-     * 
+     *
      * @param eClass the {@link EClass} to get Attributes from
      */
     public static Stream<EAttribute> streamAttributes(EClass eClass) {

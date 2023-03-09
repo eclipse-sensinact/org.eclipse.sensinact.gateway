@@ -34,7 +34,7 @@ import com.google.common.base.Function;
 
 /**
  * Helper to Compare EObjects using EMFCompare
- * 
+ *
  * @author Juergen Albert
  * @since 22 Feb 2023
  */
@@ -77,7 +77,7 @@ public class EMFCompareUtil {
     public static class EClassFunction implements Function<EObject, String> {
         /**
          * Return an ID for an EObject, null if not found.
-         * 
+         *
          * @param eObject The EObject for which we need an identifier.
          * @return The identifier for that EObject if we could determine one.
          *         <code>null</code> if no condition (see description above) is
