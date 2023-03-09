@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.prototype.model.nexus.emf.change;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -47,8 +49,9 @@ public class ServiceChangeAdapter extends AdapterImpl {
     public void notifyChanged(Notification msg) {
         if (msg.getFeature() instanceof EAttribute) {
             notifyAttributeChange(msg, accumulatorSupplier.get());
-        } else if (msg.getFeature() == SensiNactPackage.Literals.SERVICE__METADATA) {
-
+        } else if (msg.getFeature() == SensiNactPackage.Literals.SERVICE__METADATA
+                && msg.getEventType() == Notification.ADD) {
+            ((EObject) msg.getNewValue()).eAdapters().add(new MetadataChangeAdapter(accumulatorSupplier));
         }
     }
 
@@ -71,12 +74,42 @@ public class ServiceChangeAdapter extends AdapterImpl {
             Metadata metadata = service.getMetadata().get(resource);
 
             Instant timestamp = metadata == null ? Instant.now() : metadata.getTimestamp();
+
+            Map<String, Object> oldMetaData = null;
+            Instant previousTimestamp = getPreviousTimestamp(metadata);
+            if (previousTimestamp != null) {
+                oldMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true,
+                        List.of(SensiNactPackage.Literals.METADATA__ORIGINAL_NAME,
+                                SensiNactPackage.Literals.METADATA__LOCKED),
+                        SensiNactPackage.Literals.FEATURE_CUSTOM_METADATA__TIMESTAMP, previousTimestamp);
+                oldMetaData.put("value", oldValue);
+            }
+
             accumulator.resourceValueUpdate(modelName, providerName, serviceName, resource.getName(),
                     resource.getEAttributeType().getInstanceClass(), oldValue, msg.getNewValue(),
                     timestamp == null ? Instant.now() : timestamp);
+
+            Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true, List
+                    .of(SensiNactPackage.Literals.METADATA__ORIGINAL_NAME, SensiNactPackage.Literals.METADATA__LOCKED),
+                    null, null);
+            newMetaData.put("value", msg.getNewValue());
+
+            accumulator.metadataValueUpdate(modelName, providerName, serviceName, resource.getName(), oldMetaData,
+                    newMetaData, timestamp);
+
             if (msg.getEventType() == Notification.UNSET) {
                 accumulator.removeResource(modelName, providerName, serviceName, resource.getName());
             }
         }
+    }
+
+    private Instant getPreviousTimestamp(Metadata metadata) {
+        if (metadata == null) {
+            return null;
+        }
+
+        return metadata.eAdapters().stream().filter(MetadataChangeAdapter.class::isInstance)
+                .map(MetadataChangeAdapter.class::cast).findFirst().map(MetadataChangeAdapter::getPreviousTimestamp)
+                .orElseGet(() -> null);
     }
 }

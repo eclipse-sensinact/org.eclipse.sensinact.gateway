@@ -318,19 +318,9 @@ public class ModelNexus {
         if (service == null) {
             service = (Service) EcoreUtil.create((EClass) serviceFeature.getEType());
             provider.eSet(serviceFeature, service);
-//            accumulator.addService(modelName, providerName, serviceFeature.getName());
         }
-
-        // Handle Metadata
 
         ResourceMetadata metadata = service.getMetadata().get(resourceFeature);
-
-        Map<String, Object> oldMetaData = null;
-        Object oldValue = service.eGet(resourceFeature);
-        if (metadata != null) {
-            oldMetaData = EMFUtil.toEObjectAttributesToMap(metadata);
-            oldMetaData.put("value", oldValue);
-        }
 
         // Allow an update if the resource didn't exist or if the update timestamp is
         // equal to or after the one of the current value
@@ -339,27 +329,19 @@ public class ModelNexus {
 
             if (metadata == null) {
                 metadata = sensinactPackage.getSensiNactFactory().createResourceMetadata();
-                metadata.setTimestamp(metaTimestamp);
                 service.getMetadata().put(resourceFeature, metadata);
             }
-            metadata.setTimestamp(timestamp);
+            metadata.setTimestamp(metaTimestamp);
 
             if (data == null || resourceType.isInstance(data)) {
                 service.eSet(resourceFeature, data);
             } else {
                 service.eSet(resourceFeature, EMFUtil.convertToTargetType(resourceType, data));
             }
-//            accumulator.resourceValueUpdate(modelName, providerName, serviceFeature.getName(),
-//                    resourceFeature.getName(), resourceType.getInstanceClass(), oldValue, data, timestamp);
         } else {
             return;
         }
 
-        Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true);
-        newMetaData.put("value", data);
-
-        accumulator.metadataValueUpdate(modelName, providerName, serviceFeature.getName(), resourceFeature.getName(),
-                oldMetaData, newMetaData, timestamp);
     }
 
     /**
@@ -394,6 +376,7 @@ public class ModelNexus {
             ResourceMetadata metadata = sensinactPackage.getSensiNactFactory().createResourceMetadata();
             metadata.setTimestamp(Instant.EPOCH);
             metadata.setOriginalName(resourceFeature.getName());
+            // the put will add cause the MetadataChangeAdapter to be added
             adminSvc.getMetadata().put(resourceFeature, metadata);
         }
 
@@ -603,6 +586,7 @@ public class ModelNexus {
             throw new IllegalStateException("No existing metadata for resource");
         }
 
+        metadata.setTimestamp(timestamp);
         metadata.getExtra().stream().filter(fcm -> fcm.getName().equals(metadataKey)).findFirst().ifPresentOrElse(
                 fcm -> handleFeatureCustomMetadata(fcm, metadataKey, timestamp, value),
                 () -> metadata.getExtra()
@@ -610,7 +594,6 @@ public class ModelNexus {
                                 sensinactPackage.getSensiNactFactory().createFeatureCustomMetadata(), metadataKey,
                                 timestamp, value)));
 
-        metadata.setTimestamp(timestamp);
     }
 
     private FeatureCustomMetadata handleFeatureCustomMetadata(FeatureCustomMetadata customMetadata, String metadataKey,
