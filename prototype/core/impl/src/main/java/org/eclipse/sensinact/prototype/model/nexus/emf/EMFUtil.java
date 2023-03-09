@@ -281,7 +281,7 @@ public class EMFUtil {
     /**
      * Checks if an Attribute is Marked to have a special Provider name. If not it
      * uses the ID Attribute
-     * 
+     *
      * @param eObject the {@link EObject} to check
      * @return the providerName or null
      */

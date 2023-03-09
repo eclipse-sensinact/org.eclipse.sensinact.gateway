@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="testmodel" nsURI="https://eclipse.org/sensinact/test/1.0" nsPrefix="testmodel">
+  <eAnnotations source="http://www.eclipse.org/OCL/Import">
+    <details key="ecore" value="http://www.eclipse.org/emf/2002/Ecore"/>
+    <details key="sensinactCore" value="../../../main/resources/model/sensinact.ecore#/"/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="TemperatureSensor" eSuperTypes="../../../main/resources/model/sensinact.ecore#//Provider">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="testService1" lowerBound="1"
+        eType="#//TestService1" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="testService2" lowerBound="1"
+        eType="#//TestService2" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="testAttribute" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TestService1" eSuperTypes="../../../main/resources/model/sensinact.ecore#//Service"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TestService2" eSuperTypes="../../../main/resources/model/sensinact.ecore#//Service"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TestAdmin" eSuperTypes="../../../main/resources/model/sensinact.ecore#//Admin">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="testAdmin" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBigInteger"/>
+  </eClassifiers>
+</ecore:EPackage>
