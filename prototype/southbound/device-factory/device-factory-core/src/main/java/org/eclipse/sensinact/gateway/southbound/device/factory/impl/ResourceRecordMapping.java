@@ -10,9 +10,14 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.gateway.southbound.device.factory;
+package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
 import java.util.Map;
+
+import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
+import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
+import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
+import org.eclipse.sensinact.gateway.southbound.device.factory.VariableNotFoundException;
 
 /**
  * Parses a resource path and associates it to a record path

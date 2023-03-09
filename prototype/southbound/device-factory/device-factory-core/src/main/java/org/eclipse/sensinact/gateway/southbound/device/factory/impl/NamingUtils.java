@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.gateway.southbound.device.factory;
+package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
 /**
  *

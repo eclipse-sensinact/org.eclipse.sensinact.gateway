@@ -12,7 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.mqtt.factory;
 
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.DeviceFactoryException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingHandler;
@@ -128,10 +130,37 @@ public class MqttDeviceFactoryHandler implements IMqttMessageListener {
             return;
         }
 
+        Map<String, String> context = new HashMap<>();
+        context.put("handlerId", handlerId);
+        fillTopicSegments(topic, context);
+
         try {
-            mappingHandler.handle(mappingConfiguration, message.getPayload());
+            mappingHandler.handle(mappingConfiguration, context, message.getPayload());
         } catch (DeviceFactoryException e) {
             logger.error("Error handling MQTT payload from handler={} on topic={}: {}", e.getMessage(), e);
         }
+    }
+
+    private void fillTopicSegments(String topic, Map<String, String> context) {
+        context.put("topic", topic);
+
+        int i = 0;
+        String segment;
+        int idx = 0;
+
+        do {
+            int slash = topic.indexOf('/', idx);
+            if (slash > 0) {
+                segment = topic.substring(idx, slash);
+                idx = slash + 1;
+            } else {
+                segment = topic.substring(idx);
+                idx = -1;
+            }
+            context.put("topic-".concat(Integer.toString(i)), segment);
+            i++;
+        } while (idx >= 0);
+
+        context.put("topic-last", segment);
     }
 }

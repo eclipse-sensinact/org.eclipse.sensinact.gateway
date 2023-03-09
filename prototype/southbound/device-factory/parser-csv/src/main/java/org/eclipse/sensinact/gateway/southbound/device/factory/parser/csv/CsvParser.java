@@ -12,8 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory.parser.csv;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -49,14 +51,12 @@ public class CsvParser implements IDeviceMappingParser {
             charset = StandardCharsets.UTF_8;
         }
 
-        final byte[] input;
+        final InputStream input;
         if (StandardCharsets.UTF_8.equals(charset) && rawInput.length > 3) {
             input = EncodingUtils.removeBOM(rawInput);
         } else {
-            input = rawInput;
+            input = new ByteArrayInputStream(rawInput);
         }
-
-        final String csvContent = new String(input, charset);
 
         // Prepare parser
         CSVFormat.Builder format = CSVFormat.DEFAULT.builder();
@@ -71,7 +71,7 @@ public class CsvParser implements IDeviceMappingParser {
         }
 
         final List<CsvRecord> records = new ArrayList<>();
-        try (CSVParser parser = format.build().parse(new StringReader(csvContent))) {
+        try (CSVParser parser = format.build().parse(new InputStreamReader(input, charset))) {
             for (CSVRecord record : parser) {
                 records.add(new CsvRecord(record));
             }

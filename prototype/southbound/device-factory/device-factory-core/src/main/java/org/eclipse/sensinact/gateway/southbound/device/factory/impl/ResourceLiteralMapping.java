@@ -10,10 +10,14 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.gateway.southbound.device.factory;
+package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
+import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
+import org.eclipse.sensinact.gateway.southbound.device.factory.ValueType;
+import org.eclipse.sensinact.gateway.southbound.device.factory.VariableNotFoundException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 
 /**
