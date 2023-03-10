@@ -300,8 +300,6 @@ public class RestNorthbound implements IRestNorthbound {
                 session.removeListener(listenerId.get());
                 return;
             }
-            System.err.println("Seding Lifecycle Notification " + e.model + " - " + e.provider + " - " + e.service
-                    + " - " + e.resource + " - " + e.status + " from " + e);
             eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
                     .data(new ResourceLifecycleNotificationDTO(e)).build());
         };
