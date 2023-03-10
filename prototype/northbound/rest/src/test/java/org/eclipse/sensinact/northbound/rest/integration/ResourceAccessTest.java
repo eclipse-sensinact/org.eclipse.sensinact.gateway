@@ -108,8 +108,8 @@ public class ResourceAccessTest {
     void resourceUpdate() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
-        push.pushUpdate(dto).getValue();
         Instant firstTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        push.pushUpdate(dto).getValue();
 
         // Check response
         TypedResponse<?> result = utils.queryJson(
