@@ -43,9 +43,11 @@ public interface Provider extends EObject {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Id</em>' attribute.
+	 * @see #isSetId()
+	 * @see #unsetId()
 	 * @see #setId(String)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getProvider_Id()
-	 * @model id="true" required="true"
+	 * @model unsettable="true" id="true" required="true"
 	 * @generated
 	 */
 	String getId();
@@ -55,19 +57,46 @@ public interface Provider extends EObject {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Id</em>' attribute.
+	 * @see #isSetId()
+	 * @see #unsetId()
 	 * @see #getId()
 	 * @generated
 	 */
 	void setId(String value);
 
 	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Provider#getId <em>Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetId()
+	 * @see #getId()
+	 * @see #setId(String)
+	 * @generated
+	 */
+	void unsetId();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Provider#getId <em>Id</em>}' attribute is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Id</em>' attribute is set.
+	 * @see #unsetId()
+	 * @see #getId()
+	 * @see #setId(String)
+	 * @generated
+	 */
+	boolean isSetId();
+
+	/**
 	 * Returns the value of the '<em><b>Admin</b></em>' containment reference.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Admin</em>' containment reference.
+	 * @see #isSetAdmin()
+	 * @see #unsetAdmin()
 	 * @see #setAdmin(Admin)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getProvider_Admin()
-	 * @model containment="true"
+	 * @model containment="true" unsettable="true"
 	 * @generated
 	 */
 	Admin getAdmin();
@@ -77,10 +106,35 @@ public interface Provider extends EObject {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Admin</em>' containment reference.
+	 * @see #isSetAdmin()
+	 * @see #unsetAdmin()
 	 * @see #getAdmin()
 	 * @generated
 	 */
 	void setAdmin(Admin value);
+
+	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Provider#getAdmin <em>Admin</em>}' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetAdmin()
+	 * @see #getAdmin()
+	 * @see #setAdmin(Admin)
+	 * @generated
+	 */
+	void unsetAdmin();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Provider#getAdmin <em>Admin</em>}' containment reference is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Admin</em>' containment reference is set.
+	 * @see #unsetAdmin()
+	 * @see #getAdmin()
+	 * @see #setAdmin(Admin)
+	 * @generated
+	 */
+	boolean isSetAdmin();
 
 	/**
 	 * Returns the value of the '<em><b>Linked Providers</b></em>' reference list.
@@ -88,10 +142,33 @@ public interface Provider extends EObject {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Linked Providers</em>' reference list.
+	 * @see #isSetLinkedProviders()
+	 * @see #unsetLinkedProviders()
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getProvider_LinkedProviders()
-	 * @model
+	 * @model unsettable="true"
 	 * @generated
 	 */
 	EList<Provider> getLinkedProviders();
+
+	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Provider#getLinkedProviders <em>Linked Providers</em>}' reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetLinkedProviders()
+	 * @see #getLinkedProviders()
+	 * @generated
+	 */
+	void unsetLinkedProviders();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Provider#getLinkedProviders <em>Linked Providers</em>}' reference list is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Linked Providers</em>' reference list is set.
+	 * @see #unsetLinkedProviders()
+	 * @see #getLinkedProviders()
+	 * @generated
+	 */
+	boolean isSetLinkedProviders();
 
 } // Provider

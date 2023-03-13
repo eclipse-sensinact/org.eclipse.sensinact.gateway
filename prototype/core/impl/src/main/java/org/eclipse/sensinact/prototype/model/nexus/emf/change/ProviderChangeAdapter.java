@@ -13,12 +13,14 @@
 package org.eclipse.sensinact.prototype.model.nexus.emf.change;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.model.core.Metadata;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
@@ -51,12 +53,11 @@ public class ProviderChangeAdapter extends AdapterImpl {
 
     private void notifyReferenceChange(Notification msg, NotificationAccumulator accumulator) {
         EReference reference = (EReference) msg.getFeature();
-        Service service = (Service) msg.getNewValue();
         Provider provider = (Provider) msg.getNotifier();
         if (msg.getEventType() == Notification.SET) {
-            notifyServiceAdd(provider, service, reference, accumulator);
+            notifyServiceAdd(provider, (Service) msg.getNewValue(), reference, accumulator);
         } else if (msg.getEventType() == Notification.UNSET) {
-            notifyServiceRemove(provider, service, reference, accumulator);
+            notifyServiceRemove(provider, (Service) msg.getOldValue(), reference, accumulator);
         }
     }
 
@@ -65,15 +66,23 @@ public class ProviderChangeAdapter extends AdapterImpl {
         String model = EMFUtil.getModelName(container.eClass());
         String providerName = container.getId();
         String serviceName = reference.getName();
-
-        value.eAdapters().add(new ServiceChangeAdapter(accumulatorSupplier));
+        ServiceChangeAdapter serviceChangeAdapter = new ServiceChangeAdapter(accumulatorSupplier);
+        value.eAdapters().add(serviceChangeAdapter);
 
         accumulator.addService(model, providerName, serviceName);
 
         EMFUtil.streamAttributes(value.eClass()).filter(ea -> value.eIsSet(ea)).forEach(ea -> {
+            serviceChangeAdapter.checkMetadata(ea);
+            Metadata metadata = value.getMetadata().get(ea);
             accumulator.addResource(model, providerName, serviceName, ea.getName());
             accumulator.resourceValueUpdate(model, providerName, serviceName, ea.getName(),
-                    ea.getEAttributeType().getInstanceClass(), null, value.eGet(ea), Instant.now());
+                    ea.getEAttributeType().getInstanceClass(), null, value.eGet(ea), metadata.getTimestamp());
+            Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true,
+                    EMFUtil.METADATA_PRIVATE_LIST, null, null);
+            newMetaData.put("value", value.eGet(ea));
+
+            accumulator.metadataValueUpdate(model, providerName, serviceName, ea.getName(), null, newMetaData,
+                    metadata.getTimestamp());
         });
     }
 

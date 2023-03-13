@@ -6,17 +6,20 @@
   </eAnnotations>
   <eClassifiers xsi:type="ecore:EClass" name="Provider">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        iD="true"/>
+        unsettable="true" iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="admin" eType="#//Admin"
-        containment="true"/>
+        unsettable="true" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="linkedProviders" upperBound="-1"
-        eType="#//Provider"/>
+        eType="#//Provider" unsettable="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EDataType" name="EGeoJsonObject" instanceClassName="org.eclipse.sensinact.gateway.geojson.GeoJsonObject"/>
   <eClassifiers xsi:type="ecore:EClass" name="Admin" eSuperTypes="#//Service">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="friendlyName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="#//EGeoJsonObject"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modelUri" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="friendlyName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="#//EGeoJsonObject"
+        unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modelUri" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        unsettable="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Service">
     <eStructuralFeatures xsi:type="ecore:EReference" name="metadata" upperBound="-1"
@@ -26,9 +29,9 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="extra" upperBound="-1"
         eType="#//FeatureCustomMetadata" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="locked" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
-        defaultValueLiteral="false"/>
+        defaultValueLiteral="false" unsettable="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="originalName" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" unsettable="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FeatureMetadata" instanceClassName="java.util.Map$Entry">
     <eStructuralFeatures xsi:type="ecore:EReference" name="key" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//ETypedElement"/>

@@ -56,6 +56,15 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	protected String friendlyName = FRIENDLY_NAME_EDEFAULT;
 
 	/**
+	 * This is true if the Friendly Name attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean friendlyNameESet;
+
+	/**
 	 * The default value of the '{@link #getLocation() <em>Location</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -76,6 +85,15 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	protected GeoJsonObject location = LOCATION_EDEFAULT;
 
 	/**
+	 * This is true if the Location attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean locationESet;
+
+	/**
 	 * The default value of the '{@link #getModelUri() <em>Model Uri</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -94,6 +112,15 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	 * @ordered
 	 */
 	protected String modelUri = MODEL_URI_EDEFAULT;
+
+	/**
+	 * This is true if the Model Uri attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean modelUriESet;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -133,8 +160,35 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	public void setFriendlyName(String newFriendlyName) {
 		String oldFriendlyName = friendlyName;
 		friendlyName = newFriendlyName;
+		boolean oldFriendlyNameESet = friendlyNameESet;
+		friendlyNameESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__FRIENDLY_NAME, oldFriendlyName, friendlyName));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__FRIENDLY_NAME, oldFriendlyName, friendlyName, !oldFriendlyNameESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetFriendlyName() {
+		String oldFriendlyName = friendlyName;
+		boolean oldFriendlyNameESet = friendlyNameESet;
+		friendlyName = FRIENDLY_NAME_EDEFAULT;
+		friendlyNameESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.ADMIN__FRIENDLY_NAME, oldFriendlyName, FRIENDLY_NAME_EDEFAULT, oldFriendlyNameESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetFriendlyName() {
+		return friendlyNameESet;
 	}
 
 	/**
@@ -156,8 +210,35 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	public void setLocation(GeoJsonObject newLocation) {
 		GeoJsonObject oldLocation = location;
 		location = newLocation;
+		boolean oldLocationESet = locationESet;
+		locationESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__LOCATION, oldLocation, location));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__LOCATION, oldLocation, location, !oldLocationESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetLocation() {
+		GeoJsonObject oldLocation = location;
+		boolean oldLocationESet = locationESet;
+		location = LOCATION_EDEFAULT;
+		locationESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.ADMIN__LOCATION, oldLocation, LOCATION_EDEFAULT, oldLocationESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetLocation() {
+		return locationESet;
 	}
 
 	/**
@@ -179,8 +260,35 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	public void setModelUri(String newModelUri) {
 		String oldModelUri = modelUri;
 		modelUri = newModelUri;
+		boolean oldModelUriESet = modelUriESet;
+		modelUriESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__MODEL_URI, oldModelUri, modelUri));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.ADMIN__MODEL_URI, oldModelUri, modelUri, !oldModelUriESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetModelUri() {
+		String oldModelUri = modelUri;
+		boolean oldModelUriESet = modelUriESet;
+		modelUri = MODEL_URI_EDEFAULT;
+		modelUriESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.ADMIN__MODEL_URI, oldModelUri, MODEL_URI_EDEFAULT, oldModelUriESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetModelUri() {
+		return modelUriESet;
 	}
 
 	/**
@@ -231,13 +339,13 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	public void eUnset(int featureID) {
 		switch (featureID) {
 			case SensiNactPackage.ADMIN__FRIENDLY_NAME:
-				setFriendlyName(FRIENDLY_NAME_EDEFAULT);
+				unsetFriendlyName();
 				return;
 			case SensiNactPackage.ADMIN__LOCATION:
-				setLocation(LOCATION_EDEFAULT);
+				unsetLocation();
 				return;
 			case SensiNactPackage.ADMIN__MODEL_URI:
-				setModelUri(MODEL_URI_EDEFAULT);
+				unsetModelUri();
 				return;
 		}
 		super.eUnset(featureID);
@@ -252,11 +360,11 @@ public class AdminImpl extends ServiceImpl implements Admin {
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
 			case SensiNactPackage.ADMIN__FRIENDLY_NAME:
-				return FRIENDLY_NAME_EDEFAULT == null ? friendlyName != null : !FRIENDLY_NAME_EDEFAULT.equals(friendlyName);
+				return isSetFriendlyName();
 			case SensiNactPackage.ADMIN__LOCATION:
-				return LOCATION_EDEFAULT == null ? location != null : !LOCATION_EDEFAULT.equals(location);
+				return isSetLocation();
 			case SensiNactPackage.ADMIN__MODEL_URI:
-				return MODEL_URI_EDEFAULT == null ? modelUri != null : !MODEL_URI_EDEFAULT.equals(modelUri);
+				return isSetModelUri();
 		}
 		return super.eIsSet(featureID);
 	}
@@ -272,11 +380,11 @@ public class AdminImpl extends ServiceImpl implements Admin {
 
 		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (friendlyName: ");
-		result.append(friendlyName);
+		if (friendlyNameESet) result.append(friendlyName); else result.append("<unset>");
 		result.append(", location: ");
-		result.append(location);
+		if (locationESet) result.append(location); else result.append("<unset>");
 		result.append(", modelUri: ");
-		result.append(modelUri);
+		if (modelUriESet) result.append(modelUri); else result.append("<unset>");
 		result.append(')');
 		return result.toString();
 	}

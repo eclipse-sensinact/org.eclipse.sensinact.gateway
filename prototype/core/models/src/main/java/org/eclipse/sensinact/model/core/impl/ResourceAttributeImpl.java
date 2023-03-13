@@ -105,6 +105,15 @@ public class ResourceAttributeImpl extends EAttributeImpl implements ResourceAtt
 	protected boolean locked = LOCKED_EDEFAULT;
 
 	/**
+	 * This is true if the Locked attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean lockedESet;
+
+	/**
 	 * The default value of the '{@link #getOriginalName() <em>Original Name</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -123,6 +132,15 @@ public class ResourceAttributeImpl extends EAttributeImpl implements ResourceAtt
 	 * @ordered
 	 */
 	protected String originalName = ORIGINAL_NAME_EDEFAULT;
+
+	/**
+	 * This is true if the Original Name attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean originalNameESet;
 
 	/**
 	 * The default value of the '{@link #getResourceType() <em>Resource Type</em>}' attribute.
@@ -298,8 +316,35 @@ public class ResourceAttributeImpl extends EAttributeImpl implements ResourceAtt
 	public void setLocked(boolean newLocked) {
 		boolean oldLocked = locked;
 		locked = newLocked;
+		boolean oldLockedESet = lockedESet;
+		lockedESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.RESOURCE_ATTRIBUTE__LOCKED, oldLocked, locked));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.RESOURCE_ATTRIBUTE__LOCKED, oldLocked, locked, !oldLockedESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetLocked() {
+		boolean oldLocked = locked;
+		boolean oldLockedESet = lockedESet;
+		locked = LOCKED_EDEFAULT;
+		lockedESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.RESOURCE_ATTRIBUTE__LOCKED, oldLocked, LOCKED_EDEFAULT, oldLockedESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetLocked() {
+		return lockedESet;
 	}
 
 	/**
@@ -321,8 +366,35 @@ public class ResourceAttributeImpl extends EAttributeImpl implements ResourceAtt
 	public void setOriginalName(String newOriginalName) {
 		String oldOriginalName = originalName;
 		originalName = newOriginalName;
+		boolean oldOriginalNameESet = originalNameESet;
+		originalNameESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.RESOURCE_ATTRIBUTE__ORIGINAL_NAME, oldOriginalName, originalName));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.RESOURCE_ATTRIBUTE__ORIGINAL_NAME, oldOriginalName, originalName, !oldOriginalNameESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetOriginalName() {
+		String oldOriginalName = originalName;
+		boolean oldOriginalNameESet = originalNameESet;
+		originalName = ORIGINAL_NAME_EDEFAULT;
+		originalNameESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.RESOURCE_ATTRIBUTE__ORIGINAL_NAME, oldOriginalName, ORIGINAL_NAME_EDEFAULT, oldOriginalNameESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetOriginalName() {
+		return originalNameESet;
 	}
 
 	/**
@@ -540,10 +612,10 @@ public class ResourceAttributeImpl extends EAttributeImpl implements ResourceAtt
 				getExtra().clear();
 				return;
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__LOCKED:
-				setLocked(LOCKED_EDEFAULT);
+				unsetLocked();
 				return;
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__ORIGINAL_NAME:
-				setOriginalName(ORIGINAL_NAME_EDEFAULT);
+				unsetOriginalName();
 				return;
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__RESOURCE_TYPE:
 				setResourceType(RESOURCE_TYPE_EDEFAULT);
@@ -577,9 +649,9 @@ public class ResourceAttributeImpl extends EAttributeImpl implements ResourceAtt
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__EXTRA:
 				return extra != null && !extra.isEmpty();
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__LOCKED:
-				return locked != LOCKED_EDEFAULT;
+				return isSetLocked();
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__ORIGINAL_NAME:
-				return ORIGINAL_NAME_EDEFAULT == null ? originalName != null : !ORIGINAL_NAME_EDEFAULT.equals(originalName);
+				return isSetOriginalName();
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__RESOURCE_TYPE:
 				return resourceType != RESOURCE_TYPE_EDEFAULT;
 			case SensiNactPackage.RESOURCE_ATTRIBUTE__VALUE_TYPE:
@@ -655,9 +727,9 @@ public class ResourceAttributeImpl extends EAttributeImpl implements ResourceAtt
 		result.append(" (timestamp: ");
 		result.append(timestamp);
 		result.append(", locked: ");
-		result.append(locked);
+		if (lockedESet) result.append(locked); else result.append("<unset>");
 		result.append(", originalName: ");
-		result.append(originalName);
+		if (originalNameESet) result.append(originalName); else result.append("<unset>");
 		result.append(", resourceType: ");
 		result.append(resourceType);
 		result.append(", valueType: ");

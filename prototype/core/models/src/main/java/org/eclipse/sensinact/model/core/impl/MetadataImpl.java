@@ -96,6 +96,15 @@ public abstract class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.
 	protected boolean locked = LOCKED_EDEFAULT;
 
 	/**
+	 * This is true if the Locked attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean lockedESet;
+
+	/**
 	 * The default value of the '{@link #getOriginalName() <em>Original Name</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -114,6 +123,15 @@ public abstract class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.
 	 * @ordered
 	 */
 	protected String originalName = ORIGINAL_NAME_EDEFAULT;
+
+	/**
+	 * This is true if the Original Name attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean originalNameESet;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -189,8 +207,35 @@ public abstract class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.
 	public void setLocked(boolean newLocked) {
 		boolean oldLocked = locked;
 		locked = newLocked;
+		boolean oldLockedESet = lockedESet;
+		lockedESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.METADATA__LOCKED, oldLocked, locked));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.METADATA__LOCKED, oldLocked, locked, !oldLockedESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetLocked() {
+		boolean oldLocked = locked;
+		boolean oldLockedESet = lockedESet;
+		locked = LOCKED_EDEFAULT;
+		lockedESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.METADATA__LOCKED, oldLocked, LOCKED_EDEFAULT, oldLockedESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetLocked() {
+		return lockedESet;
 	}
 
 	/**
@@ -212,8 +257,35 @@ public abstract class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.
 	public void setOriginalName(String newOriginalName) {
 		String oldOriginalName = originalName;
 		originalName = newOriginalName;
+		boolean oldOriginalNameESet = originalNameESet;
+		originalNameESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.METADATA__ORIGINAL_NAME, oldOriginalName, originalName));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.METADATA__ORIGINAL_NAME, oldOriginalName, originalName, !oldOriginalNameESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetOriginalName() {
+		String oldOriginalName = originalName;
+		boolean oldOriginalNameESet = originalNameESet;
+		originalName = ORIGINAL_NAME_EDEFAULT;
+		originalNameESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.METADATA__ORIGINAL_NAME, oldOriginalName, ORIGINAL_NAME_EDEFAULT, oldOriginalNameESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetOriginalName() {
+		return originalNameESet;
 	}
 
 	/**
@@ -291,10 +363,10 @@ public abstract class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.
 				getExtra().clear();
 				return;
 			case SensiNactPackage.METADATA__LOCKED:
-				setLocked(LOCKED_EDEFAULT);
+				unsetLocked();
 				return;
 			case SensiNactPackage.METADATA__ORIGINAL_NAME:
-				setOriginalName(ORIGINAL_NAME_EDEFAULT);
+				unsetOriginalName();
 				return;
 		}
 		super.eUnset(featureID);
@@ -313,9 +385,9 @@ public abstract class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.
 			case SensiNactPackage.METADATA__EXTRA:
 				return extra != null && !extra.isEmpty();
 			case SensiNactPackage.METADATA__LOCKED:
-				return locked != LOCKED_EDEFAULT;
+				return isSetLocked();
 			case SensiNactPackage.METADATA__ORIGINAL_NAME:
-				return ORIGINAL_NAME_EDEFAULT == null ? originalName != null : !ORIGINAL_NAME_EDEFAULT.equals(originalName);
+				return isSetOriginalName();
 		}
 		return super.eIsSet(featureID);
 	}
@@ -333,9 +405,9 @@ public abstract class MetadataImpl extends MinimalEObjectImpl.Container.Dynamic.
 		result.append(" (timestamp: ");
 		result.append(timestamp);
 		result.append(", locked: ");
-		result.append(locked);
+		if (lockedESet) result.append(locked); else result.append("<unset>");
 		result.append(", originalName: ");
-		result.append(originalName);
+		if (originalNameESet) result.append(originalName); else result.append("<unset>");
 		result.append(')');
 		return result.toString();
 	}

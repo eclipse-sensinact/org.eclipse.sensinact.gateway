@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -28,13 +30,19 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Map;
 
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.URIConverter;
+import org.eclipse.emf.ecore.resource.URIHandler;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.model.core.Service;
@@ -111,6 +119,93 @@ public class NexusTest {
 
         @Test
         void basicTest() {
+
+            resourceSet.setURIConverter(new URIConverter() {
+
+                @Override
+                public void setAttributes(URI uri, Map<String, ?> attributes, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+
+                }
+
+                @Override
+                public URI normalize(URI uri) {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public Map<URI, URI> getURIMap() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public EList<URIHandler> getURIHandlers() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public URIHandler getURIHandler(URI uri) {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public EList<ContentHandler> getContentHandlers() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public Map<String, ?> getAttributes(URI uri, Map<?, ?> options) {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public boolean exists(URI uri, Map<?, ?> options) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public void delete(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+
+                }
+
+                @Override
+                public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public OutputStream createOutputStream(URI uri) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public InputStream createInputStream(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public InputStream createInputStream(URI uri) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public Map<String, ?> contentDescription(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+            });
 
             ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
 

@@ -13,19 +13,38 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.emf.common.util.EMap;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.sensinact.model.core.Admin;
 import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.ResourceMetadata;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -34,6 +53,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.google.common.base.Objects;
 
 /**
  *
@@ -168,7 +189,6 @@ public class SubscriptionTest {
                     Map.of("value", EcoreUtil.getURI(model).toString(), "timestamp", before), before);
 
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
-            // TODO - these are missing
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE,
@@ -234,7 +254,6 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2);
-            // TODO - these are missing
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2, TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE,
@@ -250,4 +269,376 @@ public class SubscriptionTest {
             Mockito.verifyNoMoreInteractions(accumulator);
         }
     }
+
+    @Nested
+    public class EObjectPushTests {
+
+        private ModelNexus nexus;
+        private EPackage ePackage;
+
+        @BeforeEach
+        public void setup() throws IOException {
+            URI sensinactPackageURI = URI.createURI(SensiNactPackage.eNS_URI);
+
+            URIMappingRegistryImpl.INSTANCE.put(
+                    URI.createURI("https://eclipse.org/../../../models/src/main/resources/model/sensinact.ecore"),
+                    sensinactPackageURI);
+
+            XMLResource.URIHandler handler = new XMLResource.URIHandler() {
+
+                @Override
+                public URI deresolve(URI arg0) {
+                    System.out.println("deresolve " + arg0);
+                    return arg0;
+                }
+
+                @Override
+                public URI resolve(URI arg0) {
+                    System.out.println("resolve " + arg0);
+                    if (arg0.lastSegment().equals("sensinact.ecore")) {
+                        return sensinactPackageURI.appendFragment(arg0.fragment());
+                    }
+                    return arg0;
+                }
+
+                @Override
+                public void setBaseURI(URI arg0) {
+                    // TODO Auto-generated method stub
+
+                }
+
+            };
+
+            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+
+            Resource extendedPackageResource = resourceSet
+                    .createResource(URI.createURI("https://eclipse.org/sensinact/test/1.0"));
+            InputStream ín = getClass().getResourceAsStream("/model/extended.ecore");
+
+            assertNotNull(ín);
+
+            extendedPackageResource.load(ín, Collections.singletonMap(XMLResource.OPTION_URI_HANDLER, handler));
+
+            ePackage = (EPackage) extendedPackageResource.getContents().get(0);
+
+            assertNotNull(ePackage);
+
+        }
+
+        @Test
+        void pushEObjectTestSimple() throws IOException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            verifyNewProviderNotification(accumulator, saved);
+        }
+
+        @Test
+        void pushEObjectTestAttributeUpdates() throws IOException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            verifyNewProviderNotification(accumulator, saved);
+
+            stripMetadata(saved);
+
+            ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1")))
+                    .eSet(testService1.eClass().getEStructuralFeature("foo"), "foo2");
+
+            Provider modified = nexus.save(saved);
+
+            verifyProviderUpdateNotification(accumulator, saved, modified);
+
+        }
+
+        @Test
+        void pushEObjectTestAttributeUpdatesMultiple() throws IOException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            verifyNewProviderNotification(accumulator, saved);
+
+            stripMetadata(saved);
+
+            ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1")))
+                    .eSet(testService1.eClass().getEStructuralFeature("foo"), "foo2");
+            ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2")))
+                    .eSet(testService2.eClass().getEStructuralFeature("bar"), "bar2");
+
+            Provider modified = nexus.save(saved);
+
+            verifyProviderUpdateNotification(accumulator, saved, modified);
+        }
+
+        @Test
+        void pushEObjectTestAttributeRemove() throws IOException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            verifyNewProviderNotification(accumulator, saved);
+
+            stripMetadata(saved);
+
+            ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1")))
+                    .eUnset(testService1.eClass().getEStructuralFeature("foo"));
+
+            Provider modified = nexus.save(saved);
+
+            verifyProviderUpdateNotification(accumulator, saved, modified);
+        }
+
+        @Test
+        void pushEObjectTestAttributeWithMetadata() throws IOException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            verifyNewProviderNotification(accumulator, saved);
+            ResourceMetadata resourceMetadata = saved.getAdmin().getMetadata()
+                    .get(SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME);
+            stripMetadata(saved);
+
+            saved.getAdmin().getMetadata().put(SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME, resourceMetadata);
+
+            resourceMetadata.setTimestamp(Instant.now());
+            saved.getAdmin().setFriendlyName("Something new");
+
+            Provider modified = nexus.save(saved);
+
+            verifyProviderUpdateNotification(accumulator, saved, modified);
+
+        }
+
+        /**
+         * @param modified
+         */
+        private void stripMetadata(Provider provider) {
+            provider.eClass().getEAllReferences().stream()
+                    .filter(ref -> SensiNactPackage.Literals.SERVICE.isSuperTypeOf(ref.getEReferenceType()))
+                    .map(provider::eGet).map(Service.class::cast).map(Service::getMetadata).forEach(EMap::clear);
+        }
+
+        /**
+         * @param accumulator
+         * @param provider
+         * @param saved
+         */
+        private void verifyProviderUpdateNotification(NotificationAccumulator accumulator, Provider oldProvider,
+                Provider newProvider) {
+            EClass eClass = null;
+            if (oldProvider == null && newProvider != null) {
+                eClass = newProvider.eClass();
+                Mockito.verify(accumulator).addProvider(newProvider.eClass().getName(), newProvider.getId());
+            } else {
+                eClass = oldProvider.eClass();
+            }
+            eClass.getEAllReferences().stream()
+                    .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
+                    .filter(ref -> SensiNactPackage.Literals.SERVICE.isSuperTypeOf(ref.getEReferenceType()))
+                    .forEach(ref -> verifyNotificationsForService(accumulator, oldProvider, newProvider, ref));
+            if (oldProvider != null && newProvider == null) {
+                Mockito.verify(accumulator).removeProvider(eClass.getName(), oldProvider.getId());
+            }
+        }
+
+        /**
+         * @param accumulator
+         * @param oldProvider
+         * @param newProvider
+         * @param ref
+         * @return
+         */
+        private void verifyNotificationsForService(NotificationAccumulator accumulator, Provider oldProvider,
+                Provider newProvider, EReference ref) {
+            Service oldService = oldProvider == null ? null : (Service) oldProvider.eGet(ref);
+            Service newService = newProvider == null ? null : (Service) newProvider.eGet(ref);
+            if (oldService == null && newService != null) {
+                verifyNewServiceNottification(accumulator, newProvider, newService);
+            } else if (newService == null && oldService != null) {
+                verifyServiceRemoveNottification(accumulator, newProvider, oldService);
+            } else {
+                verifyServiceChangeNottification(accumulator, newProvider, oldService, newService);
+            }
+        }
+
+    }
+
+    /**
+     * @param accumulator
+     * @param newProvider
+     * @param newService
+     */
+    private static void verifyServiceChangeNottification(NotificationAccumulator accumulator, Provider provider,
+            Service oldService, Service newService) {
+        EMFUtil.streamAttributes(oldService.eClass()).filter(oldService::eIsSet).forEach(
+                ea -> verifyServiceAttributeChangeNotification(accumulator, provider, oldService, newService, ea));
+    }
+
+    /**
+     * @param accumulator
+     * @param newProvider
+     * @param newService
+     */
+    private static void verifyServiceRemoveNottification(NotificationAccumulator accumulator, Provider provider,
+            Service oldService) {
+        EMFUtil.streamAttributes(oldService.eClass()).filter(oldService::eIsSet)
+                .forEach(ea -> verifyServiceAttributeRemoveNotification(accumulator, provider, oldService, ea));
+        Mockito.verify(accumulator).removeService(EMFUtil.getModelName(provider.eClass()), provider.getId(),
+                oldService.eContainingFeature().getName());
+    }
+
+    private static void verifyNewProviderNotification(NotificationAccumulator accumulator, Provider provider) {
+        Mockito.verify(accumulator).addProvider(EMFUtil.getModelName(provider.eClass()), provider.getId());
+        provider.eClass().getEAllReferences().stream()
+                .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE).filter(provider::eIsSet)
+                .map(provider::eGet).filter(Service.class::isInstance).map(Service.class::cast)
+                .forEach(s -> verifyNewServiceNottification(accumulator, provider, s));
+    }
+
+    private static void verifyNewServiceNottification(NotificationAccumulator accumulator, Provider provider,
+            Service service) {
+        Mockito.verify(accumulator).addService(EMFUtil.getModelName(provider.eClass()), provider.getId(),
+                service.eContainingFeature().getName());
+        EMFUtil.streamAttributes(service.eClass()).filter(service::eIsSet)
+                .forEach(ea -> verifyNewServiceAttributeNotification(accumulator, provider, service, ea));
+    }
+
+    private static void verifyNewServiceAttributeNotification(NotificationAccumulator accumulator, Provider provider,
+            Service service, EAttribute attribute) {
+        String modelName = EMFUtil.getModelName(provider.eClass());
+        Mockito.verify(accumulator).addResource(modelName, provider.getId(), service.eContainingFeature().getName(),
+                attribute.getName());
+        Mockito.verify(accumulator).resourceValueUpdate(modelName, provider.getId(),
+                service.eContainingFeature().getName(), attribute.getName(), attribute.getEType().getInstanceClass(),
+                null, service.eGet(attribute), getTimestampForService(service, attribute));
+        Mockito.verify(accumulator).metadataValueUpdate(modelName, provider.getId(),
+                service.eContainingFeature().getName(), attribute.getName(), null,
+                Map.of("value", service.eGet(attribute), "timestamp", getTimestampForService(service, attribute)),
+                getTimestampForService(service, attribute));
+    }
+
+    private static void verifyServiceAttributeRemoveNotification(NotificationAccumulator accumulator, Provider provider,
+            Service oldService, EAttribute attribute) {
+        String modelName = EMFUtil.getModelName(provider.eClass());
+        Mockito.verify(accumulator).resourceValueUpdate(modelName, provider.getId(),
+                oldService.eContainingFeature().getName(), attribute.getName(), attribute.getEType().getInstanceClass(),
+                oldService.eGet(attribute), null, Mockito.any());
+        Mockito.verify(accumulator).metadataValueUpdate(modelName, provider.getId(),
+                oldService.eContainingFeature().getName(), attribute.getName(),
+                Map.of("value", oldService.eGet(attribute), "timestamp", getTimestampForService(oldService, attribute)),
+                null, Mockito.any());
+        Mockito.verify(accumulator).removeResource(modelName, provider.getId(),
+                oldService.eContainingFeature().getName(), attribute.getName());
+    }
+
+    private static void verifyServiceAttributeChangeNotification(NotificationAccumulator accumulator, Provider provider,
+            Service oldService, Service newService, EAttribute attribute) {
+        if (Objects.equal(oldService.eGet(attribute), newService.eGet(attribute))) {
+            return;
+        }
+        String modelName = EMFUtil.getModelName(provider.eClass());
+        Mockito.verify(accumulator).resourceValueUpdate(eq(modelName), eq(provider.getId()),
+                eq(oldService.eContainingFeature().getName()), eq(attribute.getName()),
+                eq(attribute.getEType().getInstanceClass()), eq(oldService.eGet(attribute)),
+                eq(newService.eGet(attribute)), Mockito.any());
+        Mockito.verify(accumulator).metadataValueUpdate(modelName, provider.getId(),
+                oldService.eContainingFeature().getName(), attribute.getName(),
+                Map.of("value", oldService.eGet(attribute), "timestamp", getTimestampForService(oldService, attribute)),
+                Map.of("value", newService.eGet(attribute), "timestamp", getTimestampForService(newService, attribute)),
+                getTimestampForService(newService, attribute));
+    }
+
+    private static Instant getTimestampForService(Service service, EStructuralFeature feature) {
+        return service.getMetadata().get(feature).getTimestamp();
+    }
+
 }

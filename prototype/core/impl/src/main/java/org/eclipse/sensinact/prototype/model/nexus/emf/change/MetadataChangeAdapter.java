@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.prototype.model.nexus.emf.change;
 
 import java.time.Instant;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -22,6 +23,8 @@ import org.eclipse.sensinact.model.core.SensiNactPackage;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
 public class MetadataChangeAdapter extends AdapterImpl {
+
+    private static UUID mostRecentTransaction;
 
     private Supplier<NotificationAccumulator> accumulatorSupplier;
 
@@ -44,11 +47,17 @@ public class MetadataChangeAdapter extends AdapterImpl {
         if (msg.getFeature() == SensiNactPackage.Literals.METADATA__ORIGINAL_NAME) {
             return;
         } else if (msg.getFeature() == SensiNactPackage.Literals.TIMESTAMPED__TIMESTAMP) {
+            mostRecentTransaction = Transaction.getCurrentTransaction();
             previousTimestamp = (Instant) msg.getOldValue();
         } else {
             notifyUpdate(msg, accumulatorSupplier.get());
         }
 
+    }
+
+    public boolean alreadyUpdated() {
+        return Transaction.getCurrentTransaction() == null
+                || Transaction.getCurrentTransaction().equals(mostRecentTransaction);
     }
 
     public Instant getPreviousTimestamp() {

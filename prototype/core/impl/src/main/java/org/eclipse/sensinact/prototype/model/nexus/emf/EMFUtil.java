@@ -74,6 +74,9 @@ public class EMFUtil {
         SensiNactPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
     }
 
+    public static List<EStructuralFeature> METADATA_PRIVATE_LIST = List
+            .of(SensiNactPackage.Literals.METADATA__ORIGINAL_NAME, SensiNactPackage.Literals.METADATA__LOCKED);
+
     private static Object fallbackConversion(Object o, Type t) {
         try {
             return converter.convert(o.toString()).to(t);

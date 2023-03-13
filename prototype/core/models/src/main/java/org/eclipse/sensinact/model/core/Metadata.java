@@ -54,9 +54,11 @@ public interface Metadata extends Timestamped {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Locked</em>' attribute.
+	 * @see #isSetLocked()
+	 * @see #unsetLocked()
 	 * @see #setLocked(boolean)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_Locked()
-	 * @model default="false"
+	 * @model default="false" unsettable="true"
 	 * @generated
 	 */
 	boolean isLocked();
@@ -66,19 +68,46 @@ public interface Metadata extends Timestamped {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Locked</em>' attribute.
+	 * @see #isSetLocked()
+	 * @see #unsetLocked()
 	 * @see #isLocked()
 	 * @generated
 	 */
 	void setLocked(boolean value);
 
 	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Metadata#isLocked <em>Locked</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetLocked()
+	 * @see #isLocked()
+	 * @see #setLocked(boolean)
+	 * @generated
+	 */
+	void unsetLocked();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Metadata#isLocked <em>Locked</em>}' attribute is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Locked</em>' attribute is set.
+	 * @see #unsetLocked()
+	 * @see #isLocked()
+	 * @see #setLocked(boolean)
+	 * @generated
+	 */
+	boolean isSetLocked();
+
+	/**
 	 * Returns the value of the '<em><b>Original Name</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Original Name</em>' attribute.
+	 * @see #isSetOriginalName()
+	 * @see #unsetOriginalName()
 	 * @see #setOriginalName(String)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getMetadata_OriginalName()
-	 * @model required="true"
+	 * @model unsettable="true" required="true"
 	 * @generated
 	 */
 	String getOriginalName();
@@ -88,9 +117,34 @@ public interface Metadata extends Timestamped {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Original Name</em>' attribute.
+	 * @see #isSetOriginalName()
+	 * @see #unsetOriginalName()
 	 * @see #getOriginalName()
 	 * @generated
 	 */
 	void setOriginalName(String value);
+
+	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Metadata#getOriginalName <em>Original Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetOriginalName()
+	 * @see #getOriginalName()
+	 * @see #setOriginalName(String)
+	 * @generated
+	 */
+	void unsetOriginalName();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Metadata#getOriginalName <em>Original Name</em>}' attribute is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Original Name</em>' attribute is set.
+	 * @see #unsetOriginalName()
+	 * @see #getOriginalName()
+	 * @see #setOriginalName(String)
+	 * @generated
+	 */
+	boolean isSetOriginalName();
 
 } // Metadata

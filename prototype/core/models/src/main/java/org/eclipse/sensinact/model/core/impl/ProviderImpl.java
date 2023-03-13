@@ -22,6 +22,7 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.util.EObjectResolvingEList;
+import org.eclipse.emf.ecore.util.InternalEList;
 import org.eclipse.sensinact.model.core.Admin;
 import org.eclipse.sensinact.model.core.Provider;
 import org.eclipse.sensinact.model.core.SensiNactPackage;
@@ -63,6 +64,15 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	protected String id = ID_EDEFAULT;
 
 	/**
+	 * This is true if the Id attribute has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean idESet;
+
+	/**
 	 * The cached value of the '{@link #getAdmin() <em>Admin</em>}' containment reference.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -71,6 +81,15 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	 * @ordered
 	 */
 	protected Admin admin;
+
+	/**
+	 * This is true if the Admin containment reference has been set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	protected boolean adminESet;
 
 	/**
 	 * The cached value of the '{@link #getLinkedProviders() <em>Linked Providers</em>}' reference list.
@@ -120,8 +139,35 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	public void setId(String newId) {
 		String oldId = id;
 		id = newId;
+		boolean oldIdESet = idESet;
+		idESet = true;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.PROVIDER__ID, oldId, id));
+			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.PROVIDER__ID, oldId, id, !oldIdESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetId() {
+		String oldId = id;
+		boolean oldIdESet = idESet;
+		id = ID_EDEFAULT;
+		idESet = false;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.PROVIDER__ID, oldId, ID_EDEFAULT, oldIdESet));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetId() {
+		return idESet;
 	}
 
 	/**
@@ -142,8 +188,10 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	public NotificationChain basicSetAdmin(Admin newAdmin, NotificationChain msgs) {
 		Admin oldAdmin = admin;
 		admin = newAdmin;
+		boolean oldAdminESet = adminESet;
+		adminESet = true;
 		if (eNotificationRequired()) {
-			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, SensiNactPackage.PROVIDER__ADMIN, oldAdmin, newAdmin);
+			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, SensiNactPackage.PROVIDER__ADMIN, oldAdmin, newAdmin, !oldAdminESet);
 			if (msgs == null) msgs = notification; else msgs.add(notification);
 		}
 		return msgs;
@@ -165,8 +213,60 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 			msgs = basicSetAdmin(newAdmin, msgs);
 			if (msgs != null) msgs.dispatch();
 		}
-		else if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.PROVIDER__ADMIN, newAdmin, newAdmin));
+		else {
+			boolean oldAdminESet = adminESet;
+			adminESet = true;
+			if (eNotificationRequired())
+				eNotify(new ENotificationImpl(this, Notification.SET, SensiNactPackage.PROVIDER__ADMIN, newAdmin, newAdmin, !oldAdminESet));
+		}
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public NotificationChain basicUnsetAdmin(NotificationChain msgs) {
+		Admin oldAdmin = admin;
+		admin = null;
+		boolean oldAdminESet = adminESet;
+		adminESet = false;
+		if (eNotificationRequired()) {
+			ENotificationImpl notification = new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.PROVIDER__ADMIN, oldAdmin, null, oldAdminESet);
+			if (msgs == null) msgs = notification; else msgs.add(notification);
+		}
+		return msgs;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetAdmin() {
+		if (admin != null) {
+			NotificationChain msgs = null;
+			msgs = ((InternalEObject)admin).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - SensiNactPackage.PROVIDER__ADMIN, null, msgs);
+			msgs = basicUnsetAdmin(msgs);
+			if (msgs != null) msgs.dispatch();
+		}
+		else {
+			boolean oldAdminESet = adminESet;
+			adminESet = false;
+			if (eNotificationRequired())
+				eNotify(new ENotificationImpl(this, Notification.UNSET, SensiNactPackage.PROVIDER__ADMIN, null, null, oldAdminESet));
+		}
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetAdmin() {
+		return adminESet;
 	}
 
 	/**
@@ -177,9 +277,29 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	@Override
 	public EList<Provider> getLinkedProviders() {
 		if (linkedProviders == null) {
-			linkedProviders = new EObjectResolvingEList<Provider>(Provider.class, this, SensiNactPackage.PROVIDER__LINKED_PROVIDERS);
+			linkedProviders = new EObjectResolvingEList.Unsettable<Provider>(Provider.class, this, SensiNactPackage.PROVIDER__LINKED_PROVIDERS);
 		}
 		return linkedProviders;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void unsetLinkedProviders() {
+		if (linkedProviders != null) ((InternalEList.Unsettable<?>)linkedProviders).unset();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean isSetLinkedProviders() {
+		return linkedProviders != null && ((InternalEList.Unsettable<?>)linkedProviders).isSet();
 	}
 
 	/**
@@ -191,7 +311,7 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
 		switch (featureID) {
 			case SensiNactPackage.PROVIDER__ADMIN:
-				return basicSetAdmin(null, msgs);
+				return basicUnsetAdmin(msgs);
 		}
 		return super.eInverseRemove(otherEnd, featureID, msgs);
 	}
@@ -246,13 +366,13 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	public void eUnset(int featureID) {
 		switch (featureID) {
 			case SensiNactPackage.PROVIDER__ID:
-				setId(ID_EDEFAULT);
+				unsetId();
 				return;
 			case SensiNactPackage.PROVIDER__ADMIN:
-				setAdmin((Admin)null);
+				unsetAdmin();
 				return;
 			case SensiNactPackage.PROVIDER__LINKED_PROVIDERS:
-				getLinkedProviders().clear();
+				unsetLinkedProviders();
 				return;
 		}
 		super.eUnset(featureID);
@@ -267,11 +387,11 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
 			case SensiNactPackage.PROVIDER__ID:
-				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
+				return isSetId();
 			case SensiNactPackage.PROVIDER__ADMIN:
-				return admin != null;
+				return isSetAdmin();
 			case SensiNactPackage.PROVIDER__LINKED_PROVIDERS:
-				return linkedProviders != null && !linkedProviders.isEmpty();
+				return isSetLinkedProviders();
 		}
 		return super.eIsSet(featureID);
 	}
@@ -287,7 +407,7 @@ public class ProviderImpl extends MinimalEObjectImpl.Container.Dynamic.Permissiv
 
 		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (id: ");
-		result.append(id);
+		if (idESet) result.append(id); else result.append("<unset>");
 		result.append(')');
 		return result.toString();
 	}

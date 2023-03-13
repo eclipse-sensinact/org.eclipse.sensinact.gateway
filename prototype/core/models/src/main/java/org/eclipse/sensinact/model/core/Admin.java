@@ -41,9 +41,11 @@ public interface Admin extends Service {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Friendly Name</em>' attribute.
+	 * @see #isSetFriendlyName()
+	 * @see #unsetFriendlyName()
 	 * @see #setFriendlyName(String)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getAdmin_FriendlyName()
-	 * @model
+	 * @model unsettable="true"
 	 * @generated
 	 */
 	String getFriendlyName();
@@ -53,19 +55,46 @@ public interface Admin extends Service {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Friendly Name</em>' attribute.
+	 * @see #isSetFriendlyName()
+	 * @see #unsetFriendlyName()
 	 * @see #getFriendlyName()
 	 * @generated
 	 */
 	void setFriendlyName(String value);
 
 	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Admin#getFriendlyName <em>Friendly Name</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetFriendlyName()
+	 * @see #getFriendlyName()
+	 * @see #setFriendlyName(String)
+	 * @generated
+	 */
+	void unsetFriendlyName();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Admin#getFriendlyName <em>Friendly Name</em>}' attribute is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Friendly Name</em>' attribute is set.
+	 * @see #unsetFriendlyName()
+	 * @see #getFriendlyName()
+	 * @see #setFriendlyName(String)
+	 * @generated
+	 */
+	boolean isSetFriendlyName();
+
+	/**
 	 * Returns the value of the '<em><b>Location</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Location</em>' attribute.
+	 * @see #isSetLocation()
+	 * @see #unsetLocation()
 	 * @see #setLocation(GeoJsonObject)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getAdmin_Location()
-	 * @model dataType="org.eclipse.sensinact.model.core.EGeoJsonObject"
+	 * @model unsettable="true" dataType="org.eclipse.sensinact.model.core.EGeoJsonObject"
 	 * @generated
 	 */
 	GeoJsonObject getLocation();
@@ -75,19 +104,46 @@ public interface Admin extends Service {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Location</em>' attribute.
+	 * @see #isSetLocation()
+	 * @see #unsetLocation()
 	 * @see #getLocation()
 	 * @generated
 	 */
 	void setLocation(GeoJsonObject value);
 
 	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Admin#getLocation <em>Location</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetLocation()
+	 * @see #getLocation()
+	 * @see #setLocation(GeoJsonObject)
+	 * @generated
+	 */
+	void unsetLocation();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Admin#getLocation <em>Location</em>}' attribute is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Location</em>' attribute is set.
+	 * @see #unsetLocation()
+	 * @see #getLocation()
+	 * @see #setLocation(GeoJsonObject)
+	 * @generated
+	 */
+	boolean isSetLocation();
+
+	/**
 	 * Returns the value of the '<em><b>Model Uri</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Model Uri</em>' attribute.
+	 * @see #isSetModelUri()
+	 * @see #unsetModelUri()
 	 * @see #setModelUri(String)
 	 * @see org.eclipse.sensinact.model.core.SensiNactPackage#getAdmin_ModelUri()
-	 * @model
+	 * @model unsettable="true"
 	 * @generated
 	 */
 	String getModelUri();
@@ -97,9 +153,34 @@ public interface Admin extends Service {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Model Uri</em>' attribute.
+	 * @see #isSetModelUri()
+	 * @see #unsetModelUri()
 	 * @see #getModelUri()
 	 * @generated
 	 */
 	void setModelUri(String value);
+
+	/**
+	 * Unsets the value of the '{@link org.eclipse.sensinact.model.core.Admin#getModelUri <em>Model Uri</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #isSetModelUri()
+	 * @see #getModelUri()
+	 * @see #setModelUri(String)
+	 * @generated
+	 */
+	void unsetModelUri();
+
+	/**
+	 * Returns whether the value of the '{@link org.eclipse.sensinact.model.core.Admin#getModelUri <em>Model Uri</em>}' attribute is set.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return whether the value of the '<em>Model Uri</em>' attribute is set.
+	 * @see #unsetModelUri()
+	 * @see #getModelUri()
+	 * @see #setModelUri(String)
+	 * @generated
+	 */
+	boolean isSetModelUri();
 
 } // Admin
