@@ -246,21 +246,15 @@ public class ModelNexus {
 
         NotificationAccumulator accumulator = notificationAccumulator.get();
 
-        EObject parent = providers.get(parentProvider);
+        Provider parent = providers.get(parentProvider);
 
-        EObject child = providers.get(childProvider);
+        Provider child = providers.get(childProvider);
 
         if (parent == null) {
             throw new IllegalArgumentException("No parent provider " + parentProvider);
-        } else if (!Provider.class.isInstance(parent)) {
-            throw new IllegalArgumentException("Parent " + parentProvider
-                    + " is no instance of Provider and only Providers can be linked right now.");
         }
         if (child == null) {
             throw new IllegalArgumentException("No child provider " + childProvider);
-        } else if (!Provider.class.isInstance(child)) {
-            throw new IllegalArgumentException("Child " + childProvider
-                    + " is no instance of Provider and only Providers can be linked right now.");
         }
         ((Provider) parent).getLinkedProviders().add((Provider) child);
 
@@ -284,21 +278,15 @@ public class ModelNexus {
 
         Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
 
-        EObject parent = providers.get(parentProvider);
+        Provider parent = providers.get(parentProvider);
 
-        EObject child = providers.get(childProvider);
+        Provider child = providers.get(childProvider);
 
         if (parent == null) {
             throw new IllegalArgumentException("No parent provider " + parentProvider);
-        } else if (!Provider.class.isInstance(parent)) {
-            throw new IllegalArgumentException("Parent " + parentProvider
-                    + " is no instance of Provider and only Providers can be linked right now.");
         }
         if (child == null) {
             throw new IllegalArgumentException("No child provider " + childProvider);
-        } else if (!Provider.class.isInstance(child)) {
-            throw new IllegalArgumentException("Child " + childProvider
-                    + " is no instance of Provider and only Providers can be linked right now.");
         }
         ((Provider) parent).getLinkedProviders().remove(child);
 
@@ -424,7 +412,7 @@ public class ModelNexus {
     }
 
     public Provider getProvider(String providerName) {
-        return transformToProvider(providers.get(providerName));
+        return providers.get(providerName);
     }
 
     public String getProviderModel(String providerName) {
@@ -432,7 +420,7 @@ public class ModelNexus {
     }
 
     public Provider getProvider(String model, String providerName) {
-        EObject p = providers.get(providerName);
+        Provider p = providers.get(providerName);
         if (p != null) {
             String m = EMFUtil.getModelName(p.eClass());
             if (!m.equals(model)) {
@@ -440,24 +428,11 @@ public class ModelNexus {
                 p = null;
             }
         }
-        return (Provider) p;
+        return p;
     }
 
-    private Provider transformToProvider(EObject eObject) {
-        if (eObject == null) {
-            return null;
-        }
-        if (eObject instanceof Provider) {
-            return (Provider) eObject;
-        }
-        throw new UnsupportedOperationException("Needs implementation");
-    }
-
-    /**
-     * Lists know providers
-     */
     public Collection<Provider> getProviders() {
-        return providers.values().stream().map(this::transformToProvider).collect(Collectors.toList());
+        return Collections.unmodifiableCollection(providers.values());
     }
 
     /**
@@ -466,7 +441,7 @@ public class ModelNexus {
     public List<Provider> getProviders(String model) {
         EClass m = getMandatoryModel(model);
         // Don't use isInstance as subtypes have a different model
-        return providers.values().stream().filter(p -> p.eClass() == m).map(this::transformToProvider)
+        return providers.values().stream().filter(p -> EMFUtil.getModelName(p.eClass()).equals(m))
                 .collect(Collectors.toList());
     }
 

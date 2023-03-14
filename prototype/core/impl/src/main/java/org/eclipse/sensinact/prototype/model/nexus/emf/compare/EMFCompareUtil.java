@@ -96,6 +96,14 @@ public class EMFCompareUtil {
             SensiNactPackage.Literals.TIMESTAMPED__TIMESTAMP);
 
     private static List<Diff> filterMetadataDiffs(List<Diff> diffs) {
+        // Filter:
+        // 1. Attribute is new; use their timestamp if present or now if not
+        // 2. Attribute changed; no timestamp change in diff; update attribute, keep
+        // timestamp
+        // 3. Attribute changed; timestamp change to null; update with Timestamp Now
+        // 4. Attribute changed; timestamp changed; update attribute and timestamp if
+        // new is after old timetamp
+        // 5. Attribute not changed, but timestamp updated: same as 4.
         List<Diff> result = new ArrayList<>(diffs);
         List<ReferenceChange> metadataChanges = diffs.stream().filter(ReferenceChange.class::isInstance)
                 .map(ReferenceChange.class::cast)

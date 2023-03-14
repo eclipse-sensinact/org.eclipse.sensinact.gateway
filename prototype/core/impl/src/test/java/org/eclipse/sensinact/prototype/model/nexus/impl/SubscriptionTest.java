@@ -288,13 +288,11 @@ public class SubscriptionTest {
 
                 @Override
                 public URI deresolve(URI arg0) {
-                    System.out.println("deresolve " + arg0);
                     return arg0;
                 }
 
                 @Override
                 public URI resolve(URI arg0) {
-                    System.out.println("resolve " + arg0);
                     if (arg0.lastSegment().equals("sensinact.ecore")) {
                         return sensinactPackageURI.appendFragment(arg0.fragment());
                     }
@@ -304,9 +302,7 @@ public class SubscriptionTest {
                 @Override
                 public void setBaseURI(URI arg0) {
                     // TODO Auto-generated method stub
-
                 }
-
             };
 
             nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
