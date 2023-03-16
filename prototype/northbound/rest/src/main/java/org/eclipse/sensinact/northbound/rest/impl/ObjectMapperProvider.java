@@ -13,6 +13,9 @@
 package org.eclipse.sensinact.northbound.rest.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
@@ -26,7 +29,8 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
     private final ObjectMapper mapper;
 
     public ObjectMapperProvider() {
-        this.mapper = new ObjectMapper();
+        this.mapper = JsonMapper.builder().addModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).build();
     }
 
     @Override
