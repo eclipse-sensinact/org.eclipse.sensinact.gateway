@@ -234,7 +234,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
                 timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
 
-                results.addAll(0, DtoMapper.toObservationList(uriInfo, historyProvider, service, resource, timed));
+                results.addAll(0, DtoMapper.toObservationList(uriInfo, provider, service, resource, timed));
 
                 if (timed.isEmpty()) {
                     break;

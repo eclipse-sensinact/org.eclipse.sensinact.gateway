@@ -47,7 +47,6 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
         super(provider.getId(), snapshotInstant);
         this.modelName = modelName;
         this.modelProvider = provider;
-        this.add(new ServiceSnapshotImpl(this, "admin", provider.getAdmin(), snapshotInstant));
     }
 
     @Override

@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.model.core.ResourceMetadata;
+import org.eclipse.sensinact.model.core.Service;
 import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
@@ -58,7 +59,8 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         this.rcFeature = rcFeature;
         this.type = rcFeature.getEType().getInstanceClass();
 
-        final ResourceMetadata rcMetadata = parent.getModelService().getMetadata().get(rcFeature);
+        Service modelService = parent.getModelService();
+        final ResourceMetadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
         if (rcMetadata == null) {
             this.metadata = Map.of();
         } else {
