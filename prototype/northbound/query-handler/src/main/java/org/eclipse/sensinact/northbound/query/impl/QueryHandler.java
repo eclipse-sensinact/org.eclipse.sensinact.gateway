@@ -743,8 +743,10 @@ public class QueryHandler implements IQueryHandler {
             final ShortResourceDescriptionDTO rcDto = new ShortResourceDescriptionDTO();
             svcDto.resources.add(rcDto);
             rcDto.name = rcName;
-            rcDto.rws = EReadWriteMode.fromValueType(rcDescription.valueType);
             rcDto.type = rcDescription.resourceType;
+            if (rcDto.type != ResourceType.ACTION) {
+                rcDto.rws = EReadWriteMode.fromValueType(rcDescription.valueType);
+            }
         }
 
         return svcDto;
