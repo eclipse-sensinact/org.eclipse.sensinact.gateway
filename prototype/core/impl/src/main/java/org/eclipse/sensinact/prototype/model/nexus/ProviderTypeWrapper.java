@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.provider.Provider;
 
 class ProviderTypeWrapper {
 

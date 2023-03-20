@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.ETypedElement;
-import org.eclipse.sensinact.model.core.ResourceAttribute;
+import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceType;

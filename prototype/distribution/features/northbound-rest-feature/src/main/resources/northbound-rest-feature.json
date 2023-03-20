@@ -1,10 +1,10 @@
 {
-  "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-rest-feature:osgifeature:0.0.1-SNAPSHOT",
+  "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-rest-feature:osgifeature:0.0.2-SNAPSHOT",
   "bundles":[
-    { "id": "org.eclipse.sensinact.gateway.northbound:rest:0.0.1-SNAPSHOT" },
-    { "id": "org.eclipse.sensinact.gateway.northbound.filters:filters.core:0.0.1-SNAPSHOT" },
-    { "id": "org.eclipse.sensinact.gateway.northbound.filters:ldap:0.0.1-SNAPSHOT" },
-    { "id": "org.eclipse.sensinact.gateway.northbound:query-handler:0.0.1-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound:rest:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.filters:filters.core:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.filters:ldap:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound:query-handler:0.0.2-SNAPSHOT" },
     { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.14.0" },
     { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.14.0" }
   ],
@@ -14,10 +14,10 @@
       "type": "artifacts",
       "artifacts": [
         {
-          "id": "org.eclipse.sensinact.gateway.distribution.features:core-feature:osgifeature:0.0.1-SNAPSHOT"
+          "id": "org.eclipse.sensinact.gateway.distribution.features:core-feature:osgifeature:0.0.2-SNAPSHOT"
         },
         {
-          "id": "org.eclipse.sensinact.gateway.distribution.features:jakarta-rest-whiteboard-feature:osgifeature:0.0.1-SNAPSHOT"
+          "id": "org.eclipse.sensinact.gateway.distribution.features:jakarta-rest-whiteboard-feature:osgifeature:0.0.2-SNAPSHOT"
         }
       ]
     }

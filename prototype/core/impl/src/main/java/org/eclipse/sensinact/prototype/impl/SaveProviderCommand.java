@@ -14,7 +14,7 @@ package org.eclipse.sensinact.prototype.impl;
 
 import java.time.Instant;
 
-import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.SensinactModelManager;

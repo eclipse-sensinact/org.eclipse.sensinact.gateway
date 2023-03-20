@@ -13,21 +13,25 @@
 package org.eclipse.sensinact.prototype.model.nexus.emf.change;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.model.core.SensiNactFactory;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
-import org.eclipse.sensinact.model.core.impl.FeatureMetadataImpl;
+import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
+import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
+import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
+import org.eclipse.sensinact.model.core.provider.impl.FeatureMetadataImpl;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
@@ -36,6 +40,14 @@ import com.google.common.base.Objects;
 public class ServiceChangeAdapter extends AdapterImpl {
 
     private Supplier<NotificationAccumulator> accumulatorSupplier;
+
+    /**
+     * Keeps a List of which Metadata has been updated with a current Timestamp. It
+     * is used to determine if a value change should be marked as now and in the end
+     * to determine if notifications have to be send for resources, where only the
+     * timestamp has changed.
+     */
+    List<ETypedElement> metadataAlreadyTouched = new ArrayList<>();
 
     public ServiceChangeAdapter(Supplier<NotificationAccumulator> accumulatorSupplier) {
         this.accumulatorSupplier = accumulatorSupplier;
@@ -57,80 +69,105 @@ public class ServiceChangeAdapter extends AdapterImpl {
                 checkMetadataRemove(msg);
             }
             notifyAttributeChange(msg, accumulatorSupplier.get());
-        } else if (msg.getFeature() == SensiNactPackage.Literals.SERVICE__METADATA
+        } else if (msg.getFeature() == ProviderPackage.Literals.SERVICE__METADATA
                 && msg.getEventType() == Notification.ADD) {
-            ((FeatureMetadataImpl) msg.getNewValue()).getValue().eAdapters()
-                    .add(new MetadataChangeAdapter(accumulatorSupplier));
+            FeatureMetadataImpl newData = ((FeatureMetadataImpl) msg.getNewValue());
+            ETypedElement element = newData.getKey();
+            Metadata meta = newData.getValue();
+            Service service = getService();
+            if (!(meta instanceof NexusMetadata)) {
+                NexusMetadata realMetadata;
+                if (element instanceof EAttribute) {
+                    realMetadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+                } else {
+                    realMetadata = MetadataFactory.eINSTANCE.createActionMetadata();
+                }
+                service.getMetadata().removeKey(element);
+                service.getMetadata().put(element, realMetadata);
+            } else if (meta.eAdapters().stream().filter(MetadataChangeAdapter.class::isInstance).findFirst()
+                    .isEmpty()) {
+                meta.eAdapters().add(new MetadataChangeAdapter(this, accumulatorSupplier));
+            }
+        } else if (msg.getFeature() == ProviderPackage.Literals.SERVICE__METADATA
+                && msg.getEventType() == Notification.REMOVE) {
+            Metadata meta = ((FeatureMetadataImpl) msg.getOldValue()).getValue();
+            meta.eAdapters().stream().filter(MetadataChangeAdapter.class::isInstance).findFirst()
+                    .ifPresent(getService().eAdapters()::remove);
         }
     }
 
-    /**
-     * @param msg
-     */
     private void checkMetadataRemove(Notification msg) {
         Service service = getService();
         EAttribute resource = (EAttribute) msg.getFeature();
         service.getMetadata().removeKey(resource);
     }
 
-    /**
-     * @param msg
-     */
-    private void checkMetadata(Notification msg) {
-        checkMetadata((EAttribute) msg.getFeature());
+    protected void checkMetadata(Notification msg) {
+        EAttribute attribute = (EAttribute) msg.getFeature();
+        checkMetadata(attribute);
     }
 
-    public void checkMetadata(EAttribute resource) {
-        Service service = getService();
-        if (!service.getMetadata().containsKey(resource)) {
-            ResourceMetadata metadata = SensiNactFactory.eINSTANCE.createResourceMetadata();
-            metadata.setTimestamp(Instant.now());
-            metadata.setOriginalName(resource.getName());
-            service.getMetadata().put(resource, metadata);
-        } else {
-            ResourceMetadata metadata = service.getMetadata().get(resource);
-            if (!alreadyUpdated(metadata)) {
-                metadata.setTimestamp(Instant.now());
-            }
+    protected void checkMetadata(EAttribute attribute) {
+        if (!getService().getMetadata().containsKey(attribute)) {
+            ResourceMetadata curMetadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+            curMetadata.setTimestamp(Instant.now());
+            curMetadata.setOriginalName(attribute.getName());
+            getService().getMetadata().put(attribute, curMetadata);
         }
     }
 
     private Service getService() {
-        return (Service) getTarget();
+        Notifier target = getTarget();
+        if (target instanceof Service) {
+            return (Service) target;
+        }
+        throw new RuntimeException(
+                "The ServiceChangeAdapter must be attached to a Service or one of its Metadata Objects");
     }
 
     private void notifyAttributeChange(Notification msg, NotificationAccumulator accumulator) {
-        Service service = getService();
         EAttribute resource = (EAttribute) msg.getFeature();
         Object oldValue = msg.getOldValue();
+        Object newValue = msg.getNewValue();
+        Service service = getService();
         EObject container = service.eContainer();
         if (container instanceof Provider) {
             String modelName = EMFUtil.getModelName(container.eClass());
             String providerName = ((Provider) container).getId();
             String serviceName = service.eContainingFeature().getName();
+            Metadata resourceMetadata = getService().getMetadata().get(resource);
+
+            if (resourceMetadata == null) {
+                throw new NullPointerException(
+                        "No Metadata Found for " + resource.getName() + " there is some serious Programming Error!");
+            }
+
+            if (!metadataAlreadyTouched.remove(resource)) {
+                // Nobody has updated the Metadata yet and set a new one. Thus we will do it
+                resourceMetadata.setTimestamp(Instant.now());
+            }
+
+            Instant timestamp = resourceMetadata.getTimestamp();
+
             if (msg.getEventType() == Notification.SET && Objects.equal(oldValue, resource.getDefaultValue())) {
                 accumulator.addResource(modelName, providerName, serviceName, resource.getName());
             }
-            Metadata metadata = service.getMetadata().get(resource);
-
-            Instant timestamp = metadata == null ? Instant.now() : metadata.getTimestamp();
 
             Map<String, Object> oldMetaData = null;
-            Instant previousTimestamp = getPreviousTimestamp(metadata);
+            Instant previousTimestamp = getPreviousTimestamp(resourceMetadata);
             if (previousTimestamp != null && !previousTimestamp.equals(Instant.EPOCH)) {
-                oldMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true, EMFUtil.METADATA_PRIVATE_LIST,
-                        SensiNactPackage.Literals.FEATURE_CUSTOM_METADATA__TIMESTAMP, previousTimestamp);
+                oldMetaData = EMFUtil.toEObjectAttributesToMap(resourceMetadata, true, EMFUtil.METADATA_PRIVATE_LIST,
+                        ProviderPackage.Literals.FEATURE_CUSTOM_METADATA__TIMESTAMP, previousTimestamp);
                 oldMetaData.put("value", oldValue);
             }
 
             accumulator.resourceValueUpdate(modelName, providerName, serviceName, resource.getName(),
-                    resource.getEAttributeType().getInstanceClass(), oldValue, msg.getNewValue(),
+                    resource.getEAttributeType().getInstanceClass(), oldValue, newValue,
                     timestamp == null ? Instant.now() : timestamp);
 
-            Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true, List
-                    .of(SensiNactPackage.Literals.METADATA__ORIGINAL_NAME, SensiNactPackage.Literals.METADATA__LOCKED),
-                    null, null);
-            newMetaData.put("value", msg.getNewValue());
+            Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(resourceMetadata, true,
+                    EMFUtil.METADATA_PRIVATE_LIST, null, null);
+            newMetaData.put("value", newValue);
 
             accumulator.metadataValueUpdate(modelName, providerName, serviceName, resource.getName(), oldMetaData,
                     newMetaData, timestamp);
@@ -142,22 +179,14 @@ public class ServiceChangeAdapter extends AdapterImpl {
     }
 
     private Instant getPreviousTimestamp(Metadata metadata) {
-        if (metadata == null) {
+        if (metadata == null || !(metadata instanceof NexusMetadata)) {
             return null;
         }
-
-        return metadata.eAdapters().stream().filter(MetadataChangeAdapter.class::isInstance)
-                .map(MetadataChangeAdapter.class::cast).findFirst().map(MetadataChangeAdapter::getPreviousTimestamp)
-                .orElseGet(() -> null);
+        return ((NexusMetadata) metadata).getPreviousTimestamp();
     }
 
-    private boolean alreadyUpdated(Metadata metadata) {
-        if (metadata == null) {
-            return Boolean.FALSE;
-        }
-
-        return metadata.eAdapters().stream().filter(MetadataChangeAdapter.class::isInstance)
-                .map(MetadataChangeAdapter.class::cast).findFirst().map(MetadataChangeAdapter::alreadyUpdated)
-                .orElseGet(() -> Boolean.FALSE);
+    protected void metadataAlreadyTouched(ETypedElement key) {
+        metadataAlreadyTouched.add(key);
     }
+
 }

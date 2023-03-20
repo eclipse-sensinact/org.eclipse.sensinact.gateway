@@ -42,14 +42,15 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.sensinact.model.core.Action;
-import org.eclipse.sensinact.model.core.ActionParameter;
-import org.eclipse.sensinact.model.core.FeatureCustomMetadata;
-import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.ResourceAttribute;
-import org.eclipse.sensinact.model.core.SensiNactFactory;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.ServiceReference;
+import org.eclipse.sensinact.model.core.metadata.Action;
+import org.eclipse.sensinact.model.core.metadata.ActionParameter;
+import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
+import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
+import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
+import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
+import org.eclipse.sensinact.model.core.metadata.ServiceReference;
+import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.ConverterFunction;
 import org.osgi.util.converter.Converters;
@@ -71,11 +72,11 @@ public class EMFUtil {
     static {
         converter = Converters.newConverterBuilder().errorHandler(EMFUtil::fallbackConversion).build();
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
-        SensiNactPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
+        ProviderPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
     }
 
-    public static List<EStructuralFeature> METADATA_PRIVATE_LIST = List
-            .of(SensiNactPackage.Literals.METADATA__ORIGINAL_NAME, SensiNactPackage.Literals.METADATA__LOCKED);
+    public static List<EStructuralFeature> METADATA_PRIVATE_LIST = List.of(
+            MetadataPackage.Literals.NEXUS_METADATA__ORIGINAL_NAME, MetadataPackage.Literals.NEXUS_METADATA__LOCKED);
 
     private static Object fallbackConversion(Object o, Type t) {
         try {
@@ -118,7 +119,7 @@ public class EMFUtil {
     }
 
     public static ActionParameter createActionParameter(Entry<String, Class<?>> entry) {
-        ActionParameter parameter = SensiNactFactory.eINSTANCE.createActionParameter();
+        ActionParameter parameter = MetadataFactory.eINSTANCE.createActionParameter();
         parameter.setName(entry.getKey());
         parameter.setTimestamp(Instant.now());
         parameter.setEType(convertClass(entry.getValue()));
@@ -206,7 +207,7 @@ public class EMFUtil {
 
     public static ServiceReference createServiceReference(EClass parent, String refName, EClass type,
             boolean containment) {
-        ServiceReference feature = SensiNactFactory.eINSTANCE.createServiceReference();
+        ServiceReference feature = MetadataFactory.eINSTANCE.createServiceReference();
         feature.setName(refName);
         feature.setEType(type);
         feature.setContainment(containment);
@@ -232,7 +233,7 @@ public class EMFUtil {
 
     public static ResourceAttribute createResourceAttribute(EClass service, String resource, Class<?> type,
             Object defaultValue) {
-        ResourceAttribute attribute = SensiNactFactory.eINSTANCE.createResourceAttribute();
+        ResourceAttribute attribute = MetadataFactory.eINSTANCE.createResourceAttribute();
         attribute.setName(resource);
         attribute.setEType(convertClass(type));
         if (defaultValue != null) {
@@ -263,7 +264,7 @@ public class EMFUtil {
         return converted;
     }
 
-    public static void fillMetadata(Metadata meta, Instant timestamp, boolean locked, String name,
+    public static void fillMetadata(NexusMetadata meta, Instant timestamp, boolean locked, String name,
             Collection<? extends FeatureCustomMetadata> extra) {
         meta.setTimestamp(timestamp);
         meta.setLocked(locked);
@@ -273,7 +274,7 @@ public class EMFUtil {
     }
 
     public static Action createAction(EClass serviceEClass, String name, Class<?> type, List<ActionParameter> params) {
-        Action operation = SensiNactFactory.eINSTANCE.createAction();
+        Action operation = MetadataFactory.eINSTANCE.createAction();
         operation.setName(name);
         operation.setEType(convertClass(type));
         operation.getEParameters().addAll(params);

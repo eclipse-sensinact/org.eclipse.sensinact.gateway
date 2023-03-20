@@ -19,14 +19,53 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
+import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
+/**
+ * This Adapter Records Changes to a Provider in general and provides
+ * notifications via the current {@link NotificationAccumulator}. Changes will
+ * be recoreded first and send out after fireNotifications is called.
+ *
+ * When the Adapter is added the following will happen:
+ * <li>1. All defined {@link EReference}s of the return type {@link Service}
+ * will be iterated and all {@link EAttribute}s that have a default value will
+ * be announced with the given last update timestamp. For all {@link Service}s
+ * containing such Resources an instance will be created and for the Resources a
+ * Metadata will be created with the given timestamp.</li>
+ * <li>New Resources will be announced as resources will be set.</li>
+ * <li>Removel will be announced, only if they are marked as unsetable and when
+ * their value will become null. If the value is set back to its default, it
+ * will not be seen as unset, contrary to how EMF sees this here.</li>
+ *
+ * Notifications for Resource updates will be created under the following
+ * conditions:
+ * <li>First and formost, only after fireNotifications is called!</li>
+ * <li>When an update to an actual value happens.</li>
+ * <li>When a timestamp for a resource changes.</li>
+ *
+ * {@link Service} and the {@link Resource} itself have a timestamp. When either
+ * one changes all contained and set Resources will send out and update.
+ *
+ * Notification collection:
+ *
+ * Until fireNotications is called, changes can happen in a random order.
+ * Besides the above mentioned criteria it is importent, that the timestamp of
+ * the last and current change and the old and new values (if present) are
+ * reflected.
+ *
+ * TODO: Metadata Updates???
+ *
+ * @author Juergen Albert
+ * @since 23 Mar 2023
+ */
 public class ProviderChangeAdapter extends AdapterImpl {
 
     private Supplier<NotificationAccumulator> accumulatorSupplier;
@@ -46,7 +85,7 @@ public class ProviderChangeAdapter extends AdapterImpl {
     public void notifyChanged(Notification msg) {
         Object feature = msg.getFeature();
         if (feature instanceof EReference
-                && SensiNactPackage.Literals.SERVICE.isSuperTypeOf(((EReference) feature).getEReferenceType())) {
+                && ProviderPackage.Literals.SERVICE.isSuperTypeOf(((EReference) feature).getEReferenceType())) {
             notifyReferenceChange(msg, accumulatorSupplier.get());
         }
     }

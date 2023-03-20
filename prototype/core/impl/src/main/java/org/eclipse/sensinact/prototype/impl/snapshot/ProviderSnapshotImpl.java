@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 
 public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSnapshot {

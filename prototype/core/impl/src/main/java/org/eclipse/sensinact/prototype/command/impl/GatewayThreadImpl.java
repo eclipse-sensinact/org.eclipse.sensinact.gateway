@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
@@ -71,10 +71,10 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     @Activate
     public GatewayThreadImpl(@Reference TypedEventBus typedEventBus, @Reference ResourceSet resourceSet,
-            @Reference SensiNactPackage sensinactPackage) {
+            @Reference ProviderPackage ProviderPackage) {
         this.typedEventBus = typedEventBus;
         this.whiteboard = new SensinactWhiteboard(this);
-        nexusImpl = new ModelNexus(resourceSet, sensinactPackage, this::getCurrentAccumulator, this::performAction);
+        nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, this::performAction);
         start();
     }
 

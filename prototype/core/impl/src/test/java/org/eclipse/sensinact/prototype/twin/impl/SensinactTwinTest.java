@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.command.impl.ActionHandler;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.model.ResourceType;
@@ -76,7 +76,7 @@ public class SensinactTwinTest {
     @BeforeEach
     void start() {
         resourceSet = EMFTestUtil.createResourceSet();
-        nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, actionHandler);
+        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, actionHandler);
         manager = new SensinactModelManagerImpl(nexus);
         twinImpl = new SensinactDigitalTwinImpl(nexus, promiseFactory);
 

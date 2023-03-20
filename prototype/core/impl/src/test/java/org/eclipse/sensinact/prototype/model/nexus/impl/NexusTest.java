@@ -43,9 +43,9 @@ import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.URIHandler;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
@@ -207,7 +207,7 @@ public class NexusTest {
                 }
             });
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
             EClass model = nexus.createModel("TestModel", now);
@@ -246,7 +246,7 @@ public class NexusTest {
         @Test
         void sensiNactProvider() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Collection<Provider> providers = nexus.getProviders();
 
@@ -276,7 +276,7 @@ public class NexusTest {
             EStructuralFeature startedFeature = eClass.getEStructuralFeature("started");
 
             assertNotNull(startedFeature);
-            assertEquals(startedFeature.getEType(), SensiNactPackage.eINSTANCE.getEInstant());
+            assertEquals(startedFeature.getEType(), ProviderPackage.eINSTANCE.getEInstant());
 
             Instant started = (Instant) service.eGet(startedFeature);
             assertNotNull(started);
@@ -286,7 +286,7 @@ public class NexusTest {
         @Test
         void basicServiceExtensionTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
             EClass model = nexus.createModel("TestModel", now);
@@ -335,7 +335,7 @@ public class NexusTest {
         @Test
         void basicSecondServiceTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
             EClass model = nexus.createModel("TestModel", now);
@@ -388,7 +388,7 @@ public class NexusTest {
 
         @Test
         void basicFullProviderTest() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
                 EClass model = nexus.createModel("model_" + modelIdx, Instant.now());
                 for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
@@ -428,7 +428,7 @@ public class NexusTest {
         @Test
         void basicPersistanceTest() throws IOException {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now);
@@ -445,7 +445,7 @@ public class NexusTest {
 
             nexus.shutDown();
 
-            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Provider provider = nexus.getProvider("TestModel", "testprovider");
             assertNotNull(provider);
             EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice2");
@@ -464,7 +464,7 @@ public class NexusTest {
         @Test
         void basicPersistanceTestMultiple() throws IOException {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now);
@@ -489,7 +489,7 @@ public class NexusTest {
 
             nexus.shutDown();
 
-            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             assertObject(nexus, "TestModel", "testprovider", "testservice", "testValue", "test");
             assertObject(nexus, "TestModelNew", "testproviderNew", "testservice2", "testValue", "test2");
@@ -515,7 +515,7 @@ public class NexusTest {
 
         @Test
         void testFindProviderWithoutModel() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now);
@@ -537,7 +537,7 @@ public class NexusTest {
 
         @Test
         void testUnableToCreateProviderNoModel() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 
@@ -547,7 +547,7 @@ public class NexusTest {
 
         @Test
         void testUnableToCreateProviderDifferentModelAndClashingId() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 
@@ -566,7 +566,7 @@ public class NexusTest {
         @Test
         void addLink() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now);
@@ -602,7 +602,7 @@ public class NexusTest {
         @Test
         void removeLink() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 

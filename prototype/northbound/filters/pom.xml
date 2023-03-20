@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
     <artifactId>northbound</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
   <artifactId>filters</artifactId>
@@ -26,7 +26,7 @@
     <module>ldap</module>
   </modules>
   <properties>
-    <sensinact.core.version>0.0.1-SNAPSHOT</sensinact.core.version>
+    <sensinact.core.version>0.0.2-SNAPSHOT</sensinact.core.version>
   </properties>
   <dependencyManagement>
     <dependencies>

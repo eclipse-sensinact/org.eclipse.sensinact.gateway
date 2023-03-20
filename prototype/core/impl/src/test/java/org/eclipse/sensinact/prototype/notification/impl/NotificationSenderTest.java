@@ -30,8 +30,8 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status;
+import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceMetaDataNotification;

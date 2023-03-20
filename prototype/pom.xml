@@ -14,7 +14,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse.sensinact.gateway</groupId>
   <artifactId>sensinact-parent</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <url>https://projects.eclipse.org/projects/technology.sensinact</url>
 
@@ -91,7 +91,15 @@
     <name>Eclipse Foundation</name>
     <url>https://www.eclipse.org/org/foundation/</url>
   </organization>
-
+<distributionManagement>
+        <repository>
+          <id>dim_nexus</id>
+          <uniqueVersion>false</uniqueVersion>
+          <name>Dim Nexus</name>
+          <url>https://devel.data-in-motion.biz/nexus/repository/sensinact/</url>
+          <layout>default</layout>
+        </repository>
+      </distributionManagement>
 
   <modules>
     <module>core</module>
@@ -119,12 +127,12 @@
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
     <osgi.feature.version>1.0.0</osgi.feature.version>
     <osgi.converter.version>1.0.9</osgi.converter.version>
-    <gecko.emf.version>4.5.0</gecko.emf.version>
+    <gecko.emf.version>5.0.0-SNAPSHOT</gecko.emf.version>
     <emf.compare.version>3.5.3.201909101346</emf.compare.version>
     <emf.compare.change.version>2.14.0.v20190528-0725</emf.compare.change.version>
     <emf.common.version>2.28.0</emf.common.version>
     <emf.ecore.version>2.33.0</emf.ecore.version>
-    <emf.ecore.xmi.version>2.17.0</emf.ecore.xmi.version>
+    <emf.ecore.xmi.version>2.18.0</emf.ecore.xmi.version>
     <slf4j.version>1.7.36</slf4j.version>
     <jackson.version>2.14.0</jackson.version>
     <google.guava.version>15.0</google.guava.version>
@@ -686,7 +694,7 @@
           <plugin>
             <groupId>org.eclipse.dash</groupId>
             <artifactId>license-tool-plugin</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.2-SNAPSHOT</version>
             <executions>
               <execution>
                 <id>license-check</id>
