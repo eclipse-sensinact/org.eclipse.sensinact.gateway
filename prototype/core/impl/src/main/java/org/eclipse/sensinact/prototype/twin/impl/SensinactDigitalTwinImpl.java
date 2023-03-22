@@ -283,10 +283,11 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Filter providers according to their services
         providersStream = providersStream.map(p -> {
             final Provider modelProvider = p.getModelProvider();
-            modelProvider.eClass().getEStructuralFeatures().stream().forEach((feature) -> {
-                p.add(new ServiceSnapshotImpl(p, feature.getName(), (Service) modelProvider.eGet(feature),
-                        snapshotTime));
-            });
+            modelProvider.eClass().getEStructuralFeatures().stream().filter(modelProvider::eIsSet)
+                    .forEach((feature) -> {
+                        p.add(new ServiceSnapshotImpl(p, feature.getName(), (Service) modelProvider.eGet(feature),
+                                snapshotTime));
+                    });
             return p;
         });
         if (svcFilter != null) {

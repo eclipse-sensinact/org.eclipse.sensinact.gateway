@@ -386,8 +386,12 @@ public class DtoMapper {
 
         Observation observation = new Observation();
 
-        observation.id = String.format("%s~%s~%s~%s", resource.provider, resource.service, resource.resource,
-                Long.toString(resource.timestamp.toEpochMilli(), 16));
+        if (resource.timestamp != null) {
+            observation.id = String.format("%s~%s~%s~%s", resource.provider, resource.service, resource.resource,
+                    Long.toString(resource.timestamp.toEpochMilli(), 16));
+        } else {
+            observation.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
+        }
 
         observation.resultTime = resource.timestamp;
         observation.result = resource.value;
@@ -431,8 +435,8 @@ public class DtoMapper {
 
         observation.selfLink = uriInfo.getBaseUriBuilder().path("v1.1").path("Observations({id})")
                 .resolveTemplate("id", observation.id).build().toString();
-        observation.datastreamLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink).path("Datastream")
-                .build().toString();
+        observation.datastreamLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink).path("Datastream").build()
+                .toString();
         observation.featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink)
                 .path("FeatureOfInterest").build().toString();
         return observation;
