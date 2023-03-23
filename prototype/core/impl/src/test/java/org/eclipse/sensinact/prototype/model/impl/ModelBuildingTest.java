@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.Resource;
@@ -57,7 +57,7 @@ public class ModelBuildingTest {
     @BeforeEach
     void start() {
         resourceSet = EMFTestUtil.createResourceSet();
-        nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
         manager = new SensinactModelManagerImpl(nexus);
     }
 

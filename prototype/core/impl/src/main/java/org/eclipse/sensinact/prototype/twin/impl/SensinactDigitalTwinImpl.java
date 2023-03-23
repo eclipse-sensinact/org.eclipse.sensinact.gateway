@@ -26,10 +26,10 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ProviderSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ResourceSnapshotImpl;
@@ -72,8 +72,8 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
      */
     @Override
     public SensinactProviderImpl getProvider(EClass model, String id) {
-        if (model != SensiNactPackage.Literals.PROVIDER
-                || !model.getEAllSuperTypes().contains(SensiNactPackage.Literals.PROVIDER)) {
+        if (model != ProviderPackage.Literals.PROVIDER
+                || !model.getEAllSuperTypes().contains(ProviderPackage.Literals.PROVIDER)) {
             throw new IllegalArgumentException("The requested eClass must have Provider as a super class");
         }
         final Provider provider = nexusImpl.getProvider(model, id);
@@ -225,7 +225,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
 
         // Get the resource metadata
-        final ResourceMetadata metadata = svc.getMetadata().get(rcFeature);
+        final Metadata metadata = svc.getMetadata().get(rcFeature);
         final Instant timestamp;
         if (metadata != null) {
             timestamp = metadata.getTimestamp();
@@ -315,7 +315,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                     final Service svc = rc.getService().getModelService();
                     final ETypedElement rcFeature = rc.getFeature();
 
-                    final ResourceMetadata metadata = svc.getMetadata().get(rcFeature);
+                    final Metadata metadata = svc.getMetadata().get(rcFeature);
                     final Instant timestamp;
                     if (metadata != null) {
                         timestamp = metadata.getTimestamp();

@@ -37,11 +37,11 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
-import org.eclipse.sensinact.model.core.Admin;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.provider.Admin;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
@@ -89,7 +89,7 @@ public class SubscriptionTest {
         @Test
         void basicTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -104,27 +104,27 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName());
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER, now);
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER, now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
                     Map.of("value", TEST_PROVIDER, "timestamp", now), now);
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName());
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
                     EcoreUtil.getURI(model).toString(), now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), null,
                     Map.of("value", EcoreUtil.getURI(model).toString(), "timestamp", now), now);
 
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
@@ -144,7 +144,7 @@ public class SubscriptionTest {
         @Test
         void basicServiceExtensionTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -164,28 +164,27 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName());
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
-                    before);
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER, before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
                     Map.of("value", TEST_PROVIDER, "timestamp", before), before);
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName());
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
                     EcoreUtil.getURI(model).toString(), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), null,
                     Map.of("value", EcoreUtil.getURI(model).toString(), "timestamp", before), before);
 
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
@@ -207,7 +206,7 @@ public class SubscriptionTest {
         @Test
         void basicSecondServiceTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -228,28 +227,27 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName());
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName());
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
-                    before);
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER, before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
                     Map.of("value", TEST_PROVIDER, "timestamp", before), before);
             Mockito.verify(accumulator).addResource(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName());
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName());
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), String.class, null,
                     EcoreUtil.getURI(model).toString(), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL, TEST_PROVIDER,
-                    SensiNactPackage.Literals.PROVIDER__ADMIN.getName(),
-                    SensiNactPackage.Literals.ADMIN__MODEL_URI.getName(), null,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), null,
                     Map.of("value", EcoreUtil.getURI(model).toString(), "timestamp", before), before);
 
             Mockito.verify(accumulator).addService(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
@@ -278,11 +276,11 @@ public class SubscriptionTest {
 
         @BeforeEach
         public void setup() throws IOException {
-            URI sensinactPackageURI = URI.createURI(SensiNactPackage.eNS_URI);
+            URI ProviderPackageURI = URI.createURI(ProviderPackage.eNS_URI);
 
             URIMappingRegistryImpl.INSTANCE.put(
                     URI.createURI("https://eclipse.org/../../../models/src/main/resources/model/sensinact.ecore"),
-                    sensinactPackageURI);
+                    ProviderPackageURI);
 
             XMLResource.URIHandler handler = new XMLResource.URIHandler() {
 
@@ -294,7 +292,7 @@ public class SubscriptionTest {
                 @Override
                 public URI resolve(URI arg0) {
                     if (arg0.lastSegment().equals("sensinact.ecore")) {
-                        return sensinactPackageURI.appendFragment(arg0.fragment());
+                        return ProviderPackageURI.appendFragment(arg0.fragment());
                     }
                     return arg0;
                 }
@@ -305,7 +303,7 @@ public class SubscriptionTest {
                 }
             };
 
-            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Resource extendedPackageResource = resourceSet
                     .createResource(URI.createURI("https://eclipse.org/sensinact/test/1.0"));
@@ -479,11 +477,11 @@ public class SubscriptionTest {
             Provider saved = nexus.save(provider);
 
             verifyNewProviderNotification(accumulator, saved);
-            ResourceMetadata resourceMetadata = saved.getAdmin().getMetadata()
-                    .get(SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME);
+            Metadata resourceMetadata = saved.getAdmin().getMetadata()
+                    .get(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME);
             stripMetadata(saved);
 
-            saved.getAdmin().getMetadata().put(SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME, resourceMetadata);
+            saved.getAdmin().getMetadata().put(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME, resourceMetadata);
 
             resourceMetadata.setTimestamp(Instant.now());
             saved.getAdmin().setFriendlyName("Something new");
@@ -499,7 +497,7 @@ public class SubscriptionTest {
          */
         private void stripMetadata(Provider provider) {
             provider.eClass().getEAllReferences().stream()
-                    .filter(ref -> SensiNactPackage.Literals.SERVICE.isSuperTypeOf(ref.getEReferenceType()))
+                    .filter(ref -> ProviderPackage.Literals.SERVICE.isSuperTypeOf(ref.getEReferenceType()))
                     .map(provider::eGet).map(Service.class::cast).map(Service::getMetadata).forEach(EMap::clear);
         }
 
@@ -519,7 +517,7 @@ public class SubscriptionTest {
             }
             eClass.getEAllReferences().stream()
                     .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
-                    .filter(ref -> SensiNactPackage.Literals.SERVICE.isSuperTypeOf(ref.getEReferenceType()))
+                    .filter(ref -> ProviderPackage.Literals.SERVICE.isSuperTypeOf(ref.getEReferenceType()))
                     .forEach(ref -> verifyNotificationsForService(accumulator, oldProvider, newProvider, ref));
             if (oldProvider != null && newProvider == null) {
                 Mockito.verify(accumulator).removeProvider(eClass.getName(), oldProvider.getId());

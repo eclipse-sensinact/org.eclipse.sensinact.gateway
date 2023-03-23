@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="metadata" nsURI="https://eclipse.org/sensinact/core/metadata/1.0"
+    nsPrefix="sensinactMetadata">
+  <eAnnotations source="http://www.eclipse.org/OCL/Import">
+    <details key="ecore" value="http://www.eclipse.org/emf/2002/Ecore"/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="NexusMetadata" abstract="true" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Metadata">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="locked" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false" unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="originalName" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="previousTimestamp" eType="ecore:EDataType ../../../../../provider/src/main/resources/model/sensinact.ecore#//EInstant"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AnnotationMetadata" eSuperTypes="#//NexusMetadata"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ResourceAttribute" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EAttribute #//NexusMetadata">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="resourceType" eType="ecore:EEnum ../../../../../provider/src/main/resources/model/sensinact.ecore#//ResourceType"
+        defaultValueLiteral="SENSOR"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueType" eType="ecore:EEnum ../../../../../provider/src/main/resources/model/sensinact.ecore#//ValueType"
+        defaultValueLiteral="MODIFIABLE"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalSet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="documentation" value="Indicator when an external get needs to be triggered and the internal data chache becomes stale. Negative values are never stale, 0 is always stale and postive values indicate the number milliseconds till the last get."/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ServiceReference" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EReference #//NexusMetadata"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Action" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EOperation #//NexusMetadata"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ActionParameter" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EParameter">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="timestamp" eType="ecore:EDataType ../../../../../provider/src/main/resources/model/sensinact.ecore#//EInstant"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ResourceMetadata" eSuperTypes="#//NexusMetadata"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ActionMetadata" eSuperTypes="#//NexusMetadata"/>
+</ecore:EPackage>

@@ -43,9 +43,10 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.impl.FeatureMetadataImpl;
+import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
+import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.impl.FeatureMetadataImpl;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 
 import com.google.common.base.Function;
@@ -91,9 +92,9 @@ public class EMFCompareUtil {
         merger.copyAllLeftToRight(filterMetadataDiffs(comparison.getDifferences()), null);
     }
 
-    private static List<EAttribute> unnullable = List.of(SensiNactPackage.Literals.ADMIN__FRIENDLY_NAME,
-            SensiNactPackage.Literals.ADMIN__MODEL_URI, SensiNactPackage.Literals.METADATA__ORIGINAL_NAME,
-            SensiNactPackage.Literals.TIMESTAMPED__TIMESTAMP);
+    private static List<EAttribute> unnullable = List.of(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME,
+            ProviderPackage.Literals.ADMIN__MODEL_URI, MetadataPackage.Literals.NEXUS_METADATA__ORIGINAL_NAME,
+            ProviderPackage.Literals.METADATA__TIMESTAMP);
 
     private static List<Diff> filterMetadataDiffs(List<Diff> diffs) {
         // Filter:
@@ -107,7 +108,7 @@ public class EMFCompareUtil {
         List<Diff> result = new ArrayList<>(diffs);
         List<ReferenceChange> metadataChanges = diffs.stream().filter(ReferenceChange.class::isInstance)
                 .map(ReferenceChange.class::cast)
-                .filter(rc -> rc.getReference() == SensiNactPackage.Literals.SERVICE__METADATA)
+                .filter(rc -> rc.getReference() == ProviderPackage.Literals.SERVICE__METADATA)
                 .collect(Collectors.toList());
         List<AttributeChange> attributeChanges = diffs.stream().filter(AttributeChange.class::isInstance)
                 .map(AttributeChange.class::cast)

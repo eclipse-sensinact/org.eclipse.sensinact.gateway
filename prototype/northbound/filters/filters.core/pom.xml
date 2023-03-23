@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
     <artifactId>filters</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>filters.core</artifactId>
   <name>SensiNact Northbound Filters :: Core</name>

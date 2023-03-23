@@ -15,14 +15,14 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
     <artifactId>features</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>core-feature</artifactId>
   <name>Eclipse sensiNact core Feature</name>
   <description>This project contains a feature representing the core of sensiNact</description>
   <packaging>pom</packaging>
   <properties>
-    <gateway.version>0.0.1-SNAPSHOT</gateway.version>
+    <gateway.version>0.0.2-SNAPSHOT</gateway.version>
   </properties>
   <dependencies>
     <dependency>
@@ -41,8 +41,8 @@
       <version>${gateway.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sensinact.gateway.core</groupId>
-      <artifactId>models</artifactId>
+      <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
+      <artifactId>provider</artifactId>
       <version>${gateway.version}</version>
     </dependency>
     <dependency>
@@ -138,7 +138,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>gogo-shell-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>gogo-shell-feature.json</destFileName>
@@ -154,7 +154,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>gogo-shell-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>

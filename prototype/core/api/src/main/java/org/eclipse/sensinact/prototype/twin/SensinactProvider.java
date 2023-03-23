@@ -15,7 +15,7 @@ package org.eclipse.sensinact.prototype.twin;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.model.core.Provider;
+import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.command.CommandScoped;
 import org.osgi.util.promise.Promise;
 

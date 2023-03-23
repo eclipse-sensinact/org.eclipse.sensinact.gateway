@@ -13,24 +13,25 @@
 package org.eclipse.sensinact.prototype.model.nexus.emf.change;
 
 import java.time.Instant;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
-import org.eclipse.sensinact.model.core.Metadata;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.impl.FeatureMetadataImpl;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
 public class MetadataChangeAdapter extends AdapterImpl {
-
-    private static UUID mostRecentTransaction;
 
     private Supplier<NotificationAccumulator> accumulatorSupplier;
 
     private Instant previousTimestamp = null;
 
-    public MetadataChangeAdapter(Supplier<NotificationAccumulator> accumulatorSupplier) {
+    private ServiceChangeAdapter parent;
+
+    public MetadataChangeAdapter(ServiceChangeAdapter parent, Supplier<NotificationAccumulator> accumulatorSupplier) {
+        this.parent = parent;
         this.accumulatorSupplier = accumulatorSupplier;
     }
 
@@ -44,20 +45,13 @@ public class MetadataChangeAdapter extends AdapterImpl {
     @Override
     public void notifyChanged(Notification msg) {
 
-        if (msg.getFeature() == SensiNactPackage.Literals.METADATA__ORIGINAL_NAME) {
-            return;
-        } else if (msg.getFeature() == SensiNactPackage.Literals.TIMESTAMPED__TIMESTAMP) {
-            mostRecentTransaction = Transaction.getCurrentTransaction();
+        if (msg.getFeature() == ProviderPackage.Literals.METADATA__TIMESTAMP) {
             previousTimestamp = (Instant) msg.getOldValue();
+            parent.metadataAlreadyTouched(((FeatureMetadataImpl) getMetaData().eContainer()).getKey());
         } else {
             notifyUpdate(msg, accumulatorSupplier.get());
         }
 
-    }
-
-    public boolean alreadyUpdated() {
-        return Transaction.getCurrentTransaction() == null
-                || Transaction.getCurrentTransaction().equals(mostRecentTransaction);
     }
 
     public Instant getPreviousTimestamp() {

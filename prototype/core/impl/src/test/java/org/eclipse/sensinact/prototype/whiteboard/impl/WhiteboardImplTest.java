@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.annotation.verb.ACT;
 import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.eclipse.sensinact.prototype.annotation.verb.UriParam;
@@ -78,7 +78,7 @@ public class WhiteboardImplTest {
     void start() throws NoSuchMethodException, SecurityException {
         resourceSet = EMFTestUtil.createResourceSet();
         whiteboard = new SensinactWhiteboard(thread);
-        nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, whiteboard::act);
+        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, whiteboard::act);
         manager = new SensinactModelManagerImpl(nexus);
         twinImpl = new SensinactDigitalTwinImpl(nexus, promiseFactory);
 

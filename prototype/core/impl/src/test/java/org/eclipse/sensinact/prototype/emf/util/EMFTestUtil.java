@@ -15,7 +15,7 @@ package org.eclipse.sensinact.prototype.emf.util;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 
 /**
  * Some helpful methods to be reused by all the tests
@@ -32,7 +32,7 @@ public class EMFTestUtil {
         ResourceSet resourceSet = new ResourceSetImpl();
 
         // Register the package to ensure it is available during loading.
-        resourceSet.getPackageRegistry().put(SensiNactPackage.eNS_URI, SensiNactPackage.eINSTANCE);
+        resourceSet.getPackageRegistry().put(ProviderPackage.eNS_URI, ProviderPackage.eINSTANCE);
 
         resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
         resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new XMIResourceFactoryImpl());
