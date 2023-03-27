@@ -15,6 +15,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TestService1" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="foo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="foo2" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TestService2" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="bar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

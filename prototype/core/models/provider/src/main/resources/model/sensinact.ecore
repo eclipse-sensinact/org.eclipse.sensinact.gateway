@@ -12,7 +12,6 @@
         unsettable="true" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="linkedProviders" upperBound="-1"
         eType="#//Provider" unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastUpdate" eType="#//EInstant"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EDataType" name="EGeoJsonObject" instanceClassName="org.eclipse.sensinact.gateway.geojson.GeoJsonObject"/>
   <eClassifiers xsi:type="ecore:EClass" name="Admin" eSuperTypes="#//Service">
@@ -26,9 +25,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="Service">
     <eStructuralFeatures xsi:type="ecore:EReference" name="metadata" upperBound="-1"
         eType="#//FeatureMetadata" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastUpdate" eType="#//EInstant"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Metadata" abstract="true">
+  <eClassifiers xsi:type="ecore:EClass" name="Metadata">
     <eStructuralFeatures xsi:type="ecore:EReference" name="extra" upperBound="-1"
         eType="#//FeatureCustomMetadata" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="timestamp" eType="#//EInstant"/>

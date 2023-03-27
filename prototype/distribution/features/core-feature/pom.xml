@@ -46,6 +46,11 @@
       <version>${gateway.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
+      <artifactId>metadata</artifactId>
+      <version>${gateway.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>geo-json</artifactId>
       <version>${gateway.version}</version>
@@ -90,18 +95,6 @@
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.compare</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.ecore.change</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

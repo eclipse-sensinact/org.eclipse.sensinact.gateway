@@ -27,7 +27,6 @@
 	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.14.0,2.14.1)',\
-	com.google.guava;version='[15.0.0,15.0.1)',\
 	com.sun.jna;version='[5.8.0,5.8.1)',\
 	jakarta.activation-api;version='[2.1.0,2.1.1)',\
 	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
@@ -42,7 +41,6 @@
 	junit-platform-commons;version='[1.9.0,1.9.1)',\
 	junit-platform-engine;version='[1.9.0,1.9.1)',\
 	junit-platform-launcher;version='[1.9.0,1.9.1)',\
-	log4j.over.slf4j;version='[1.7.36,1.7.37)',\
 	net.bytebuddy.byte-buddy;version='[1.12.13,1.12.14)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.12.13,1.12.14)',\
 	org.antlr.antlr4-runtime-osgi;version='[4.5.0,4.5.1)',\
@@ -57,7 +55,6 @@
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
 	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
 	org.eclipse.emf.common;version='[2.28.0,2.28.1)',\
-	org.eclipse.emf.compare;version='[3.5.3,3.5.4)',\
 	org.eclipse.emf.ecore;version='[2.33.0,2.33.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.18.0,2.18.1)',\
 	org.eclipse.jetty.http;version='[11.0.12,11.0.13)',\

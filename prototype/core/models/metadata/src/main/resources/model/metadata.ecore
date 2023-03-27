@@ -10,7 +10,6 @@
         defaultValueLiteral="false" unsettable="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="originalName" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="previousTimestamp" eType="ecore:EDataType ../../../../../provider/src/main/resources/model/sensinact.ecore#//EInstant"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AnnotationMetadata" eSuperTypes="#//NexusMetadata"/>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceAttribute" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EAttribute #//NexusMetadata">

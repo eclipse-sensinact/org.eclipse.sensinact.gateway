@@ -32,8 +32,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.compare.Comparison;
-import org.eclipse.emf.compare.utils.EMFComparePrettyPrinter;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -67,7 +65,6 @@ import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.command.impl.ActionHandler;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.prototype.model.nexus.emf.change.ProviderChangeAdapter;
 import org.eclipse.sensinact.prototype.model.nexus.emf.compare.EMFCompareUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.osgi.util.promise.Promise;
@@ -178,7 +175,6 @@ public class ModelNexus {
                 resource.load(null);
                 if (!resource.getContents().isEmpty()) {
                     Provider provider = (Provider) resource.getContents().get(0);
-                    provider.eAdapters().add(new ProviderChangeAdapter(notificationAccumulator));
                     EClass eClass = provider.eClass();
                     models.putIfAbsent(EMFUtil.getModelName(eClass), eClass);
                     providers.put(provider.getId(), provider);
@@ -299,18 +295,30 @@ public class ModelNexus {
             EStructuralFeature resourceFeature, Object data, Instant timestamp) {
 
         Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
+        String providerName = provider.getId();
+        NotificationAccumulator accumulator = notificationAccumulator.get();
 
         Service service = (Service) provider.eGet(serviceFeature);
         if (service == null) {
             service = (Service) EcoreUtil.create((EClass) serviceFeature.getEType());
             provider.eSet(serviceFeature, service);
+            accumulator.addService(modelName, providerName, serviceFeature.getName());
         }
 
         ResourceMetadata metadata = (ResourceMetadata) service.getMetadata().get(resourceFeature);
 
+        Map<String, Object> oldMetaData = null;
+        Object oldValue = service.eGet(resourceFeature);
+        if (metadata != null) {
+            oldMetaData = EMFCompareUtil.extractMetadataMap(oldValue, metadata);
+        }
+        if (oldValue == null) {
+            accumulator.addResource(modelName, providerName, serviceFeature.getName(), resourceFeature.getName());
+        }
+
         // Allow an update if the resource didn't exist or if the update timestamp is
         // equal to or after the one of the current value
-        if (metadata == null || !metadata.getTimestamp().isAfter(timestamp)) {
+        if (metadata == null || !metadata.getTimestamp().isAfter(timestamp.plusMillis(1))) {
             EClassifier resourceType = resourceFeature.getEType();
 
             if (metadata == null) {
@@ -324,9 +332,22 @@ public class ModelNexus {
             } else {
                 service.eSet(resourceFeature, EMFUtil.convertToTargetType(resourceType, data));
             }
+            accumulator.resourceValueUpdate(modelName, providerName, serviceFeature.getName(),
+                    resourceFeature.getName(), resourceType.getInstanceClass(), oldValue, data, timestamp);
         } else {
             return;
         }
+
+        if (metadata == null) {
+            metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+            service.getMetadata().put(resourceFeature, metadata);
+        }
+        metadata.setTimestamp(timestamp);
+
+        Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata);
+
+        accumulator.metadataValueUpdate(modelName, providerName, serviceFeature.getName(), resourceFeature.getName(),
+                oldMetaData, newMetaData, timestamp);
     }
 
     /**
@@ -348,7 +369,6 @@ public class ModelNexus {
         Provider provider = (Provider) EcoreUtil.create(model);
         provider.setId(providerName);
 
-        provider.eAdapters().add(new ProviderChangeAdapter(notificationAccumulator));
         notificationAccumulator.get().addProvider(modelName, providerName);
         if (createAdmin) {
             createAdminServiceForProvider(provider, timestamp);
@@ -359,7 +379,10 @@ public class ModelNexus {
         return provider;
     }
 
-    private void createAdminServiceForProvider(Provider provider, Instant timestamp) {
+    private void createAdminServiceForProvider(Provider original, Instant timestamp) {
+
+        Provider provider = EcoreUtil.copy(original);
+
         final Admin adminSvc = ProviderFactory.eINSTANCE.createAdmin();
         provider.setAdmin(adminSvc);
 
@@ -368,10 +391,9 @@ public class ModelNexus {
             ResourceMetadata metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
             metadata.setOriginalName(resourceFeature.getName());
             if (!(resourceFeature == ProviderPackage.Literals.ADMIN__FRIENDLY_NAME
-                    || resourceFeature == ProviderPackage.Literals.ADMIN__FRIENDLY_NAME)) {
+                    || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL_URI)) {
                 metadata.setTimestamp(Instant.EPOCH);
             }
-
             // the put will cause the MetadataChangeAdapter to be added
             adminSvc.getMetadata().put(resourceFeature, metadata);
         }
@@ -381,6 +403,9 @@ public class ModelNexus {
         adminSvc.getMetadata().get(ProviderPackage.Literals.ADMIN__MODEL_URI).setTimestamp(timestamp);
         adminSvc.setFriendlyName(provider.getId());
         adminSvc.setModelUri(EcoreUtil.getURI(provider.eClass()).toString());
+
+        EMFCompareUtil.compareAndSet(provider, original, notificationAccumulator.get());
+
     }
 
     public Provider createProviderInstance(String modelName, String providerName) {
@@ -683,15 +708,7 @@ public class ModelNexus {
             original = doCreateProvider(EMFUtil.getModelName(eObject.eClass()), eObject.eClass(), id, Instant.now(),
                     eObject.getAdmin() == null);
         }
-
-        Comparison comparison = EMFCompareUtil.compareRaw(eObject, original);
-
-        if (LOG.isDebugEnabled()) {
-            EMFComparePrettyPrinter.printComparison(comparison, System.out);
-        }
-
-        EMFCompareUtil.merge(comparison);
-
+        EMFCompareUtil.compareAndSet(eObject, original, notificationAccumulator.get());
         return EcoreUtil.copy(original);
     }
 

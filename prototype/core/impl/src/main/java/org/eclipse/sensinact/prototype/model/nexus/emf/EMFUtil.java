@@ -45,7 +45,6 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
-import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
 import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
 import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
 import org.eclipse.sensinact.model.core.metadata.ServiceReference;
@@ -74,9 +73,6 @@ public class EMFUtil {
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
         ProviderPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
     }
-
-    public static List<EStructuralFeature> METADATA_PRIVATE_LIST = List.of(
-            MetadataPackage.Literals.NEXUS_METADATA__ORIGINAL_NAME, MetadataPackage.Literals.NEXUS_METADATA__LOCKED);
 
     private static Object fallbackConversion(Object o, Type t) {
         try {

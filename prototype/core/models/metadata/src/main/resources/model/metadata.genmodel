@@ -12,7 +12,6 @@
     <genClasses image="false" ecoreClass="metadata.ecore#//NexusMetadata">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//NexusMetadata/locked"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//NexusMetadata/originalName"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//NexusMetadata/previousTimestamp"/>
     </genClasses>
     <genClasses ecoreClass="metadata.ecore#//AnnotationMetadata"/>
     <genClasses ecoreClass="metadata.ecore#//ResourceAttribute">
