@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 import static java.time.Duration.ofDays;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
@@ -25,6 +26,7 @@ import java.time.Instant;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.junit.jupiter.api.AfterEach;
@@ -176,6 +178,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         }
     }
 
+    @Test
     void getHistoricObservationTest() throws Exception {
         for (int i = 0; i < 10; i++) {
             createResource("fizz", "buzz", "fizzbuzz", String.valueOf(i), TS_2012.plus(ofDays(i)));
@@ -190,5 +193,31 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         assertEquals(id, o.id);
         assertEquals(TS_2012.plus(ofDays(3)), o.resultTime);
         assertEquals("3", o.result);
+    }
+
+    @Test
+    void navigateToObservationTest() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
+        }
+        waitForRowCount("sensinact.text_data", 10);
+
+        ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
+        });
+
+        assertFalse(streams.value.isEmpty());
+        Datastream datastream = streams.value.stream().filter(d -> "ding~dong~bell".equals(d.id)).findFirst().get();
+
+        ResultList<Observation> observations = utils.queryJson(datastream.observationsLink,
+                new TypeReference<ResultList<Observation>>() {
+                });
+
+        assertEquals(10, observations.value.size());
+        Observation observation = observations.value.get(1);
+        String id = String.format("%s~%s~%s~%s", "ding", "dong", "bell",
+                Long.toString(TS_2012.plus(ofDays(1)).toEpochMilli(), 16));
+        assertEquals(id, observation.id);
+        assertEquals(TS_2012.plus(ofDays(1)), observation.resultTime);
+        assertEquals("1", observation.result);
     }
 }

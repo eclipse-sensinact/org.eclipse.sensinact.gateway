@@ -10,7 +10,10 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.gateway.southbound.device.factory;
+package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
+
+import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
+import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
 
 /**
  *

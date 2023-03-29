@@ -225,7 +225,7 @@ public class SensinactWhiteboard {
                 if (builder != null) {
                     builder.withType(am.getReturnType()).withAction(am.getNamedParameterTypes()).buildAll();
                 }
-                return null;
+                return promiseFactory.resolved(null);
             }
         });
     }

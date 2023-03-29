@@ -233,7 +233,7 @@ public class TimescaleHistoricalStore {
                     if (twin.getProvider(config.provider()) == null) {
                         twin.createProvider("sensiNactHistory", config.provider());
                     }
-                    return null;
+                    return pf.resolved(null);
                 }
             });
 

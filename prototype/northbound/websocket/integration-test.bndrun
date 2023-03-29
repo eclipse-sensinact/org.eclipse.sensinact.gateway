@@ -20,6 +20,7 @@
 	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.14.0,2.14.1)',\
 	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
 	jakarta.el-api;version='[4.0.0,4.0.1)',\
 	jakarta.enterprise.cdi-api;version='[3.0.0,3.0.1)',\

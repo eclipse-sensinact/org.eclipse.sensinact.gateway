@@ -36,15 +36,31 @@ public class ServerProcessHandler {
      */
     private InputStreamConsumer consumer;
 
+    private String configFolder;
+
     public void startSensinact() throws IOException {
         String javaCmd = ProcessHandle.current().info().command().orElse("java");
-        process = new ProcessBuilder(javaCmd, "-Dsensinact.config.dir=src/it/resources/config", "-jar",
+        process = new ProcessBuilder(javaCmd, "-Dsensinact.config.dir=" + getConfigFolder(), "-jar",
                 "target/it/launcher.jar").redirectInput(PIPE).redirectOutput(PIPE).redirectErrorStream(true).start();
 
         // Show live data and keep track of the output
         consumer = new InputStreamConsumer(process.getInputStream(), true, true);
         outputThread = new Thread(consumer);
         outputThread.start();
+    }
+
+    /**
+     * Set the config folder to be used by this server. <code>null</code> means
+     * <code>src/it/resources/config</code>
+     *
+     * @param folder
+     */
+    public void setConfigFolder(String folder) {
+        configFolder = folder;
+    }
+
+    private String getConfigFolder() {
+        return configFolder == null ? "src/it/resources/config" : configFolder;
     }
 
     /**
