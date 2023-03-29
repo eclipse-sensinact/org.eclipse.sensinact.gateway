@@ -568,10 +568,7 @@ public class ModelNexus {
             return Map.of();
         } else {
             final Map<String, Object> rcMeta = new HashMap<>();
-            for (FeatureCustomMetadata entry : metadata.getExtra()) {
-                rcMeta.put(entry.getName(), entry.getValue());
-            }
-            rcMeta.putAll(EMFUtil.toEObjectAttributesToMap(metadata));
+            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata));
             return rcMeta;
         }
     }
@@ -708,9 +705,25 @@ public class ModelNexus {
             original = doCreateProvider(EMFUtil.getModelName(eObject.eClass()), eObject.eClass(), id, Instant.now(),
                     eObject.getAdmin() == null);
         }
+
         EMFCompareUtil.compareAndSet(eObject, original, notificationAccumulator.get());
+
         return EcoreUtil.copy(original);
     }
+
+//    private void printProvider(Provider provider) {
+//
+//        Resource resource = resourceSet.createResource(URI.createURI("file://temp.xmi"));
+//        resource.getContents().add(EcoreUtil.copy(provider));
+//        try {
+//            resource.save(System.out, null);
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        } finally {
+//            resourceSet.getResources().remove(resource);
+//        }
+//    }
 
     public Provider getProvider(EClass model, String id) {
         Provider provider = providers.get(id);

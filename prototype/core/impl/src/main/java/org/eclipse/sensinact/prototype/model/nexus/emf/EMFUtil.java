@@ -49,6 +49,7 @@ import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
 import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
 import org.eclipse.sensinact.model.core.metadata.ServiceReference;
 import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.ConverterFunction;
@@ -80,6 +81,14 @@ public class EMFUtil {
         } catch (Exception e) {
             return ConverterFunction.CANNOT_HANDLE;
         }
+    }
+
+    public static Map<String, Object> toMetadataAttributesToMap(Metadata metadata) {
+        Map<String, Object> attributes = new HashMap<>(toEObjectAttributesToMap(metadata, false));
+        for (FeatureCustomMetadata entry : metadata.getExtra()) {
+            attributes.put(entry.getName(), entry.getValue());
+        }
+        return attributes;
     }
 
     public static Map<String, Object> toEObjectAttributesToMap(EObject eObject) {
