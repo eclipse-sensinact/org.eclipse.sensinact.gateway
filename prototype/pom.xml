@@ -91,15 +91,6 @@
     <name>Eclipse Foundation</name>
     <url>https://www.eclipse.org/org/foundation/</url>
   </organization>
-<distributionManagement>
-        <repository>
-          <id>dim_nexus</id>
-          <uniqueVersion>false</uniqueVersion>
-          <name>Dim Nexus</name>
-          <url>https://devel.data-in-motion.biz/nexus/repository/sensinact/</url>
-          <layout>default</layout>
-        </repository>
-      </distributionManagement>
 
   <modules>
     <module>core</module>
@@ -688,6 +679,18 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>dim-nexus</id>
+      <distributionManagement>
+        <repository>
+          <id>dim_nexus</id>
+          <uniqueVersion>false</uniqueVersion>
+          <name>Dim Nexus</name>
+          <url>https://devel.data-in-motion.biz/nexus/repository/sensinact/</url>
+          <layout>default</layout>
+        </repository>
+      </distributionManagement>
     </profile>
   </profiles>
 </project>
