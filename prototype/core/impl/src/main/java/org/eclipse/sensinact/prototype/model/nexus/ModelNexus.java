@@ -310,7 +310,7 @@ public class ModelNexus {
         Map<String, Object> oldMetaData = null;
         Object oldValue = service.eGet(resourceFeature);
         if (metadata != null) {
-            oldMetaData = EMFCompareUtil.extractMetadataMap(oldValue, metadata);
+            oldMetaData = EMFCompareUtil.extractMetadataMap(oldValue, metadata, resourceFeature);
         }
         if (oldValue == null) {
             accumulator.addResource(modelName, providerName, serviceFeature.getName(), resourceFeature.getName());
@@ -344,7 +344,7 @@ public class ModelNexus {
         }
         metadata.setTimestamp(timestamp);
 
-        Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata);
+        Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata, resourceFeature);
 
         accumulator.metadataValueUpdate(modelName, providerName, serviceFeature.getName(), resourceFeature.getName(),
                 oldMetaData, newMetaData, timestamp);
@@ -388,14 +388,13 @@ public class ModelNexus {
 
         // Set a timestamp to admin resources to indicate them as valued
         for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
-            ResourceMetadata metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-            metadata.setOriginalName(resourceFeature.getName());
-            if (!(resourceFeature == ProviderPackage.Literals.ADMIN__FRIENDLY_NAME
-                    || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL_URI)) {
-                metadata.setTimestamp(Instant.EPOCH);
+            if (resourceFeature == ProviderPackage.Literals.ADMIN__FRIENDLY_NAME
+                    || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL_URI) {
+                ResourceMetadata metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+                metadata.setOriginalName(resourceFeature.getName());
+                adminSvc.getMetadata().put(resourceFeature, metadata);
             }
             // the put will cause the MetadataChangeAdapter to be added
-            adminSvc.getMetadata().put(resourceFeature, metadata);
         }
 
         // Set the friendlyName value
@@ -568,7 +567,7 @@ public class ModelNexus {
             return Map.of();
         } else {
             final Map<String, Object> rcMeta = new HashMap<>();
-            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata));
+            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata, rcFeature));
             return rcMeta;
         }
     }

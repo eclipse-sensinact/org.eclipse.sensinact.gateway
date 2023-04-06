@@ -266,9 +266,9 @@ public class DtoMapper {
         datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
 
         UnitOfMeasurement unit = new UnitOfMeasurement();
-        unit.symbol = String.valueOf(resource.metadata.get("unit"));
-        unit.name = String.valueOf(resource.metadata.get("sensorthings.unit.name"));
-        unit.definition = String.valueOf(resource.metadata.get("sensorthings.unit.definition"));
+        unit.symbol = Objects.toString(resource.metadata.get("unit"), null);
+        unit.name = Objects.toString(resource.metadata.get("sensorthings.unit.name"), null);
+        unit.definition = Objects.toString(resource.metadata.get("sensorthings.unit.definition"), null);
         datastream.unitOfMeasurement = unit;
 
         datastream.observedArea = getObservedArea(
@@ -307,9 +307,9 @@ public class DtoMapper {
         datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
 
         UnitOfMeasurement unit = new UnitOfMeasurement();
-        unit.symbol = String.valueOf(metadata.get("unit"));
-        unit.name = String.valueOf(metadata.get("sensorthings.unit.name"));
-        unit.definition = String.valueOf(metadata.get("sensorthings.unit.definition"));
+        unit.symbol = Objects.toString(metadata.get("unit"), null);
+        unit.name = Objects.toString(metadata.get("sensorthings.unit.name"), null);
+        unit.definition = Objects.toString(metadata.get("sensorthings.unit.definition"), null);
         datastream.unitOfMeasurement = unit;
 
         datastream.observedArea = getObservedArea(getLocation(provider, mapper, false).getValue());

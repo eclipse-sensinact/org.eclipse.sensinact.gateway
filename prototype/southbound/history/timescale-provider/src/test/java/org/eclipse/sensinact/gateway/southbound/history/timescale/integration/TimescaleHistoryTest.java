@@ -195,7 +195,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 5);
+            waitForRowCount("sensinact.text_data", 7);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement()
@@ -300,7 +300,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 5);
+            waitForRowCount("sensinact.text_data", 7);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "single") {
 
@@ -421,7 +421,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 5);
+            waitForRowCount("sensinact.text_data", 7);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
 
@@ -545,7 +545,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1002);
+            waitForRowCount("sensinact.text_data", 1004);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
 
@@ -617,7 +617,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1002);
+            waitForRowCount("sensinact.text_data", 1004);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
 

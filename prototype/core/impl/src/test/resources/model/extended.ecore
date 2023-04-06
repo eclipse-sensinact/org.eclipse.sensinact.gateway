@@ -19,6 +19,12 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TestService2" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="bar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="annotated" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="Metadata">
+        <details key="test" value="testMetadata"/>
+        <details key="test2" value="testMetadata2"/>
+      </eAnnotations>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TestAdmin" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Admin">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="testAdmin" lowerBound="1"

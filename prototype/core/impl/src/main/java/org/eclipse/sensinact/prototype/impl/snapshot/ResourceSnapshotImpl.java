@@ -65,7 +65,7 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
             this.metadata = Map.of();
         } else {
             final Map<String, Object> rcMeta = new HashMap<>();
-            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(rcMetadata));
+            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(rcMetadata, rcFeature));
             this.metadata = rcMeta;
         }
     }

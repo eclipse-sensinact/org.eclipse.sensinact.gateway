@@ -13,7 +13,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.nexus.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -620,6 +623,226 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).metadataValueUpdate(modelName, provider.getId(), "testService1", "foo",
                     Map.of("value", "foo", "timestamp", oldMetadataTimestampToCompare), Map.of("test.meta.1",
                             "some Test", "test.meta.2", 2, "value", "foo2", "timestamp", curMetadata.getTimestamp()),
+                    curMetadata.getTimestamp());
+            Mockito.verifyNoMoreInteractions(accumulator);
+        }
+
+        /**
+         * A Simple change of one attribute without a specific timestamp set
+         */
+        @Test
+        void pushEObjectTestSimpleAttributeChangeWithModelAnnotationMetadata()
+                throws IOException, InterruptedException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            Mockito.clearInvocations(accumulator);
+            Mockito.verifyNoMoreInteractions(accumulator);
+
+            ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2")))
+                    .eSet(testService2.eClass().getEStructuralFeature("annotated"), "avalue");
+
+            Instant mark = Instant.now();
+            Thread.sleep(100);
+
+            Provider toTest = nexus.save(saved);
+
+            Metadata curMetadata = ((Service) toTest.eGet(provider.eClass().getEStructuralFeature("testService2")))
+                    .getMetadata().get(testService2.eClass().getEStructuralFeature("annotated"));
+
+            System.err.println(mark);
+            System.err.println(curMetadata.getTimestamp());
+
+            assertNotNull(curMetadata);
+            assertTrue(curMetadata.getTimestamp().isAfter(mark));
+            assertEquals(0, curMetadata.getExtra().size());
+
+            String modelName = EMFUtil.getModelName(provider.eClass());
+
+            Mockito.verify(accumulator).addResource(modelName, provider.getId(), "testService2", "annotated");
+            Mockito.verify(accumulator).resourceValueUpdate(modelName, provider.getId(), "testService2", "annotated",
+                    String.class, null, "avalue", curMetadata.getTimestamp());
+            Mockito.verify(accumulator).metadataValueUpdate(
+                    modelName, provider.getId(), "testService2", "annotated", null, Map.of("test", "testMetadata",
+                            "test2", "testMetadata2", "value", "avalue", "timestamp", curMetadata.getTimestamp()),
+                    curMetadata.getTimestamp());
+            Mockito.verifyNoMoreInteractions(accumulator);
+        }
+
+        /**
+         * A Simple change of one attribute without a specific timestamp set
+         */
+        @Test
+        void pushEObjectTestSimpleAttributeChangeWithModelAnnotationMetadataWithOverwrite()
+                throws IOException, InterruptedException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            Mockito.clearInvocations(accumulator);
+            Mockito.verifyNoMoreInteractions(accumulator);
+
+            ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2")))
+                    .eSet(testService2.eClass().getEStructuralFeature("annotated"), "avalue");
+
+            Metadata overwrite = ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2")))
+                    .getMetadata().get(testService2.eClass().getEStructuralFeature("annotated"));
+
+            assertNull(overwrite);
+
+            overwrite = ProviderFactory.eINSTANCE.createMetadata();
+            FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
+            fcm.setName("test");
+            fcm.setValue("Something different");
+            fcm.setTimestamp(Instant.now());
+            overwrite.getExtra().add(fcm);
+
+            ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2"))).getMetadata()
+                    .put(testService2.eClass().getEStructuralFeature("annotated"), overwrite);
+
+            Instant mark = Instant.now();
+            Thread.sleep(100);
+
+            Provider toTest = nexus.save(saved);
+
+            Metadata curMetadata = ((Service) toTest.eGet(provider.eClass().getEStructuralFeature("testService2")))
+                    .getMetadata().get(testService2.eClass().getEStructuralFeature("annotated"));
+
+            System.err.println(mark);
+            System.err.println(curMetadata.getTimestamp());
+
+            assertNotNull(curMetadata);
+            assertTrue(curMetadata.getTimestamp().isAfter(mark));
+            assertNotEquals(overwrite, curMetadata);
+            assertEquals(1, curMetadata.getExtra().size());
+            assertEquals("test", curMetadata.getExtra().get(0).getName());
+            assertEquals(fcm.getValue(), curMetadata.getExtra().get(0).getValue());
+
+            String modelName = EMFUtil.getModelName(provider.eClass());
+
+            Mockito.verify(accumulator).addResource(modelName, provider.getId(), "testService2", "annotated");
+            Mockito.verify(accumulator).resourceValueUpdate(modelName, provider.getId(), "testService2", "annotated",
+                    String.class, null, "avalue", curMetadata.getTimestamp());
+            Mockito.verify(accumulator).metadataValueUpdate(
+                    modelName, provider.getId(), "testService2", "annotated", null, Map.of("test", fcm.getValue(),
+                            "test2", "testMetadata2", "value", "avalue", "timestamp", curMetadata.getTimestamp()),
+                    curMetadata.getTimestamp());
+            Mockito.verifyNoMoreInteractions(accumulator);
+        }
+
+        /**
+         * remove of additional metadata
+         */
+        @Test
+        void pushEObjectTestSimpleAttributeChangeWithRemoveOfExtraMetadata() throws IOException, InterruptedException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Metadata metadata = ProviderFactory.eINSTANCE.createMetadata();
+            testService1.getMetadata().put(testService1.eClass().getEStructuralFeature("foo"), metadata);
+            FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
+            fcm.setName("test.meta.1");
+            fcm.setValue("some Test");
+            fcm.setTimestamp(Instant.now());
+
+            metadata.getExtra().add(fcm);
+
+            fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
+            fcm.setName("test.meta.2");
+            fcm.setValue(2);
+            fcm.setTimestamp(Instant.now());
+
+            metadata.getExtra().add(fcm);
+
+            Provider saved = nexus.save(provider);
+
+            Mockito.clearInvocations(accumulator);
+            Mockito.verifyNoMoreInteractions(accumulator);
+
+            Metadata oldMetadata = ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1")))
+                    .getMetadata().get(testService1.eClass().getEStructuralFeature("foo"));
+
+            oldMetadata.getExtra().remove(1);
+
+            Instant mark = Instant.now();
+            Thread.sleep(100);
+
+            Instant oldMetadataTimestampToCompare = oldMetadata.getTimestamp();
+
+            oldMetadata.setTimestamp(Instant.now());
+
+            Thread.sleep(100);
+
+            Provider toTest = nexus.save(saved);
+
+            Metadata curMetadata = ((Service) toTest.eGet(provider.eClass().getEStructuralFeature("testService1")))
+                    .getMetadata().get(testService1.eClass().getEStructuralFeature("foo"));
+
+            System.err.println(mark);
+            System.err.println(curMetadata.getTimestamp());
+
+            assertNotNull(curMetadata);
+            assertTrue(curMetadata.getTimestamp().isAfter(mark));
+
+            String modelName = EMFUtil.getModelName(provider.eClass());
+
+            Mockito.verify(accumulator).resourceValueUpdate(modelName, provider.getId(), "testService1", "foo",
+                    String.class, "foo", "foo", curMetadata.getTimestamp());
+            Mockito.verify(accumulator).metadataValueUpdate(modelName, provider.getId(), "testService1", "foo",
+                    Map.of("test.meta.1", "some Test", "test.meta.2", 2, "value", "foo", "timestamp",
+                            oldMetadataTimestampToCompare),
+                    Map.of("test.meta.1", "some Test", "value", "foo", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }

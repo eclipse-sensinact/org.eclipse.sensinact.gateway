@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
@@ -39,6 +40,7 @@ import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
+import org.eclipse.sensinact.model.core.provider.impl.FeatureCustomMetadataImpl;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
@@ -195,18 +197,17 @@ public class EMFCompareUtil {
             Map<String, Object> oldMetaData = null;
 
             if (previousTimestamp != null && !previousTimestamp.equals(Instant.EPOCH)) {
-                oldMetaData = extractMetadataMap(oldValue, originalMetadata);
+                oldMetaData = extractMetadataMap(oldValue, originalMetadata, resource);
             }
 
-            Metadata updatedMetadata = updateMetadata(resource, originalMetadata, newService, originalService,
-                    newTimestamp);
+            Metadata updatedMetadata = updateMetadata(resource, newService, originalService, newTimestamp);
 
             originalService.eSet(resource, newValue);
 
             accumulator.resourceValueUpdate(modelName, providerName, serviceName, resource.getName(),
                     resource.getEAttributeType().getInstanceClass(), oldValue, newValue, newTimestamp);
 
-            Map<String, Object> newMetaData = extractMetadataMap(newValue, updatedMetadata);
+            Map<String, Object> newMetaData = extractMetadataMap(newValue, updatedMetadata, resource);
 
             accumulator.metadataValueUpdate(modelName, providerName, serviceName, resource.getName(), oldMetaData,
                     newMetaData, newTimestamp);
@@ -218,22 +219,16 @@ public class EMFCompareUtil {
 
     }
 
-    public static Map<String, Object> extractMetadataMap(Object value, Metadata updatedMetadata) {
-        Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(updatedMetadata, true,
-                MetadataPackage.Literals.NEXUS_METADATA.getEStructuralFeatures(), null, null);
-        updatedMetadata.getExtra().stream().forEach(cm -> newMetaData.put(cm.getName(), cm.getValue()));
+    public static Map<String, Object> extractMetadataMap(Object value, Metadata updatedMetadata,
+            ETypedElement feature) {
+        Map<String, Object> newMetaData = EMFUtil.toMetadataAttributesToMap(updatedMetadata, feature);
         newMetaData.put("value", value);
         return newMetaData;
     }
 
-    private static ResourceMetadata updateMetadata(EAttribute resource, Metadata originalMetadata, Service newService,
-            Service originalService, Instant newTimestamp) {
-        ResourceMetadata resourceMetadata = (ResourceMetadata) originalMetadata;
-        if (resourceMetadata == null) {
-            resourceMetadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-            originalService.getMetadata().put(resource, resourceMetadata);
-            resourceMetadata.setOriginalName(resource.getName());
-        }
+    private static ResourceMetadata updateMetadata(EAttribute resource, Service newService, Service originalService,
+            Instant newTimestamp) {
+        ResourceMetadata resourceMetadata = checkMetadata(originalService, resource);
         resourceMetadata.setTimestamp(newTimestamp);
         Metadata update = newService.getMetadata().get(resource);
         if (update != null && update.eIsSet(ProviderPackage.Literals.METADATA__EXTRA)) {
@@ -332,27 +327,34 @@ public class EMFCompareUtil {
         service.getMetadata().removeKey(resource);
     }
 
-    protected static void checkMetadata(Service service, EAttribute attribute) {
+    protected static ResourceMetadata checkMetadata(Service service, EAttribute attribute) {
+        ResourceMetadata result = null;
         if (!service.getMetadata().containsKey(attribute)) {
-            ResourceMetadata curMetadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-            curMetadata.setTimestamp(Instant.now());
-            curMetadata.setOriginalName(attribute.getName());
-            service.getMetadata().put(attribute, curMetadata);
+            result = MetadataFactory.eINSTANCE.createResourceMetadata();
+            result.setTimestamp(Instant.now());
+            result.setOriginalName(attribute.getName());
+            service.getMetadata().put(attribute, result);
         } else {
             Metadata metadata = service.getMetadata().get(attribute);
             if (metadata.eClass() == ProviderPackage.Literals.METADATA) {
-                ResourceMetadata curMetadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-                curMetadata.setTimestamp(metadata.getTimestamp() == null ? Instant.now() : metadata.getTimestamp());
-                curMetadata.setOriginalName(attribute.getName());
-                metadata.getExtra().stream().map(EcoreUtil::copy).map(fcm -> {
-                    if (fcm.getTimestamp() == null) {
-                        fcm.setTimestamp(Instant.now());
-                    }
-                    return fcm;
-                }).forEach(curMetadata.getExtra()::add);
-                service.getMetadata().put(attribute, curMetadata);
+                result = MetadataFactory.eINSTANCE.createResourceMetadata();
+                result.setTimestamp(metadata.getTimestamp() == null ? Instant.now() : metadata.getTimestamp());
+                result.setOriginalName(attribute.getName());
+                final ResourceMetadata curMetadata = result;
+                metadata.getExtra().stream().map(FeatureCustomMetadataImpl.class::cast).map(EcoreUtil::copy)
+                        .map(fcm -> {
+                            if (fcm.getTimestamp() == null) {
+                                fcm.setTimestamp(Instant.now());
+                            }
+                            removeByName(fcm.getName(), curMetadata.getExtra());
+                            return fcm;
+                        }).forEach(result.getExtra()::add);
+                service.getMetadata().put(attribute, result);
+            } else {
+                result = (ResourceMetadata) metadata;
             }
         }
+        return result;
     }
 
 }

@@ -15,12 +15,12 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EDataType" name="EGeoJsonObject" instanceClassName="org.eclipse.sensinact.gateway.geojson.GeoJsonObject"/>
   <eClassifiers xsi:type="ecore:EClass" name="Admin" eSuperTypes="#//Service">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="friendlyName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="friendlyName" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" unsettable="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="#//EGeoJsonObject"
         unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modelUri" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modelUri" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" unsettable="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Service">
     <eStructuralFeatures xsi:type="ecore:EReference" name="metadata" upperBound="-1"

@@ -219,9 +219,9 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         final Service svc = (Service) provider.eGet(svcFeature);
 
         final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resource);
+
         if (rcFeature == null) {
-            // No value
-            return new TimedValueImpl<T>(null, null);
+            return null;
         }
 
         // Get the resource metadata

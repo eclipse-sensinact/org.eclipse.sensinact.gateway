@@ -36,6 +36,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -45,6 +46,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
+import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
 import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
 import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
 import org.eclipse.sensinact.model.core.metadata.ServiceReference;
@@ -83,10 +85,19 @@ public class EMFUtil {
         }
     }
 
-    public static Map<String, Object> toMetadataAttributesToMap(Metadata metadata) {
-        Map<String, Object> attributes = new HashMap<>(toEObjectAttributesToMap(metadata, false));
+    public static Map<String, Object> toMetadataAttributesToMap(Metadata metadata, ETypedElement attribute) {
+        Map<String, Object> attributes = new HashMap<>(toEObjectAttributesToMap(metadata, false,
+                MetadataPackage.Literals.NEXUS_METADATA.getEStructuralFeatures(), null, null));
         for (FeatureCustomMetadata entry : metadata.getExtra()) {
             attributes.put(entry.getName(), entry.getValue());
+        }
+        EAnnotation metadataAnnotation = attribute.getEAnnotation("Metadata");
+        if (metadataAnnotation == null) {
+            metadataAnnotation = attribute.getEAnnotation("metadata");
+        }
+        if (metadataAnnotation != null) {
+            metadataAnnotation.getDetails().stream().filter(fcm -> !attributes.containsKey(fcm.getKey()))
+                    .forEach(fcm -> attributes.put(fcm.getKey(), fcm.getValue()));
         }
         return attributes;
     }

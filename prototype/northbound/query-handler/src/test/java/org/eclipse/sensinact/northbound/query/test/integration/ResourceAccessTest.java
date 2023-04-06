@@ -214,7 +214,7 @@ public class ResourceAccessTest {
         // Location should be null, but set
         query.uri = new SensinactPath(PROVIDER, "admin", "location");
         result = (TypedResponse<?>) handler.handleQuery(session, query);
-        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "location");
+        utils.assertResultNoContent(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "location");
         response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(GeoJsonObject.class.getName(), response.type);
         assertNull(response.value);
