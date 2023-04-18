@@ -394,7 +394,6 @@ public class ModelNexus {
                 metadata.setOriginalName(resourceFeature.getName());
                 adminSvc.getMetadata().put(resourceFeature, metadata);
             }
-            // the put will cause the MetadataChangeAdapter to be added
         }
 
         // Set the friendlyName value

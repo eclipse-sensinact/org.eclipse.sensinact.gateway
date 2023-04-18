@@ -20,6 +20,8 @@ import java.util.Map;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Service;
+import org.eclipse.sensinact.prototype.model.ResourceType;
+import org.eclipse.sensinact.prototype.model.impl.ResourceImpl;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
@@ -52,12 +54,15 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
      */
     private final Class<?> type;
 
+    private final ResourceType resourceType;
+
     public ResourceSnapshotImpl(final ServiceSnapshotImpl parent, final ETypedElement rcFeature,
             final Instant snapshotInstant) {
         super(rcFeature.getName(), snapshotInstant);
         this.service = parent;
         this.rcFeature = rcFeature;
         this.type = rcFeature.getEType().getInstanceClass();
+        this.resourceType = ResourceImpl.findResourceType(rcFeature);
 
         Service modelService = parent.getModelService();
         final Metadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
@@ -100,5 +105,10 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
 
     public ETypedElement getFeature() {
         return rcFeature;
+    }
+
+    @Override
+    public ResourceType getResourceType() {
+        return resourceType;
     }
 }

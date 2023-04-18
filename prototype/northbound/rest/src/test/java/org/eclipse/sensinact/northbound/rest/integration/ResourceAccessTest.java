@@ -206,7 +206,7 @@ public class ResourceAccessTest {
         result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", "admin", "resources", "location", "GET"),
                 TypedResponse.class);
-        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "location");
+        utils.assertResultNoContent(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "location");
         response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(GeoJsonObject.class.getName(), response.type);
         assertNull(response.value);

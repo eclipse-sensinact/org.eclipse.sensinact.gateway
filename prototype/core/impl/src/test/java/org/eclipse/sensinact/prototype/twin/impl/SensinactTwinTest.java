@@ -15,12 +15,14 @@ package org.eclipse.sensinact.prototype.twin.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -31,6 +33,8 @@ import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.junit.jupiter.api.BeforeEach;
@@ -147,6 +151,43 @@ public class SensinactTwinTest {
             assertFalse(act.isDone());
             assertEquals(4.2D, act.getValue());
         }
+    }
 
+    @Nested
+    public class FilterTests {
+
+        @Test
+        void simpleEmptyFilter() {
+            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, null, null, null);
+            assertEquals(1, list.size());
+
+            twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+            list = twinImpl.filteredSnapshot(null, null, null, null);
+            assertEquals(2, list.size());
+        }
+
+        @Test
+        void simpleProviderNameFilter() {
+            twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+
+            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, p -> "foo".equals(p.getName()), null, null);
+            assertTrue(list.isEmpty());
+
+            list = twinImpl.filteredSnapshot(null, p -> TEST_PROVIDER.equals(p.getName()), null, null);
+            assertEquals(1, list.size());
+        }
+
+        @Test
+        void simpleResourceValueFilter() throws Exception {
+            twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+            twinImpl.getResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE).setValue(5).getValue();
+
+            Predicate<ResourceSnapshot> p = r -> TEST_RESOURCE.equals(r.getName());
+
+            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, null, null, p);
+            assertEquals(1, list.size());
+            assertEquals(2, list.get(0).getServices().size());
+            assertEquals(5, list.get(0).getServices().get(1).getResources().get(0).getValue().getValue());
+        }
     }
 }

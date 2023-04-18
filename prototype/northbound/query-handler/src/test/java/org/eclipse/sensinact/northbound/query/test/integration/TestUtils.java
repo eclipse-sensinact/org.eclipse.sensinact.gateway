@@ -80,12 +80,12 @@ public class TestUtils {
     }
 
     /**
-     * Checks if the parsed result is successful
+     * Checks if the parsed result yields a no content
      */
     public void assertResultNoContent(final AbstractResultDTO result, final EResultType expectedType,
             final String... uriParts) {
         assertEquals(204, result.statusCode, "Invalid status code");
-        assertNull(result.error, "Got an error");
+        assertEquals("No value set", result.error);
         assertEquals(expectedType, result.type, "Invalid result type");
         assertEquals("/" + String.join("/", uriParts), result.uri, "Invalid URI");
     }
