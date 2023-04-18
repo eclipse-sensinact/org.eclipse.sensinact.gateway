@@ -33,6 +33,7 @@ import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ProviderSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ResourceSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ServiceSnapshotImpl;
+import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
@@ -293,10 +294,13 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         providersStream = providersStream.map(p -> {
             p.getServices().stream().forEach(s -> {
                 s.getResources().stream().forEach(rc -> {
+                    if (rc.getResourceType() == ResourceType.ACTION) {
+                        // Skip values for actions
+                        return;
+                    }
                     // Get the resource metadata
                     final Service svc = rc.getService().getModelService();
                     final ETypedElement rcFeature = rc.getFeature();
-
                     final ResourceMetadata metadata = svc == null ? null : svc.getMetadata().get(rcFeature);
                     final Instant timestamp;
                     if (metadata != null) {
