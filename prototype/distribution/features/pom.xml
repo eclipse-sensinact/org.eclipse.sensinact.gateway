@@ -33,6 +33,7 @@
     <module>northbound-ogc-sensorthings-feature</module>
     <module>virtual-temperature-sensor-feature</module>
     <module>timescale-history-provider-feature</module>
+    <module>northbound-oidc-authenticator-feature</module>
   </modules>
 
   <properties>

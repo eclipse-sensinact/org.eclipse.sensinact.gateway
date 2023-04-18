@@ -37,6 +37,7 @@
     <module>rest</module>
     <module>websocket</module>
     <module>sensorthings</module>
+    <module>security</module>
   </modules>
 
   <dependencyManagement>

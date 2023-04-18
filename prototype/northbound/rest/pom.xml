@@ -38,6 +38,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}.security</groupId>
+      <artifactId>authentication-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
       <artifactId>ldap</artifactId>
       <version>${project.version}</version>
@@ -86,6 +91,11 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.test.junit5.cm</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -44,6 +44,7 @@ import org.eclipse.sensinact.prototype.annotation.verb.ACT;
 import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ import org.osgi.test.junit5.service.ServiceExtension;
 @ExtendWith(ServiceExtension.class)
 public class ResourceAccessTest {
 
-    private static final String USER = "user";
+    private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     private static final String PROVIDER = "QueryHandlerAccessProvider";
     private static final String PROVIDER_TOPIC = PROVIDER + "/*";

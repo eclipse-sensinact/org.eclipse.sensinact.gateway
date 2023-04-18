@@ -22,8 +22,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
+import java.util.Map;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
@@ -64,7 +66,7 @@ public class TestUtils {
     /**
      * Executes a GET request and returns its parsed content
      */
-    public <T> T queryJson(final String path, final Class<T> resultType) throws IOException, InterruptedException {
+    public HttpResponse<?> queryStatus(final String path) throws IOException, InterruptedException {
         // Normalize URI
         final URI targetUri;
         if (path.startsWith("/")) {
@@ -74,6 +76,30 @@ public class TestUtils {
         }
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
+        return client.send(req, (x) -> BodySubscribers.discarding());
+    }
+
+    /**
+     * Executes a GET request and returns its parsed content
+     */
+    public <T> T queryJson(final String path, final Class<T> resultType) throws IOException, InterruptedException {
+        return queryJson(path, resultType, Map.of());
+    }
+
+    public <T> T queryJson(final String path, final Class<T> resultType, Map<String, String> headers)
+            throws IOException, InterruptedException {
+        // Normalize URI
+        final URI targetUri;
+        if (path.startsWith("/")) {
+            targetUri = URI.create("http://localhost:8185/sensinact" + path);
+        } else {
+            targetUri = URI.create("http://localhost:8185/sensinact/" + path);
+        }
+
+        Builder builder = HttpRequest.newBuilder(targetUri);
+        headers.forEach((a, b) -> builder.header(a, b));
+
+        final HttpRequest req = builder.build();
         final HttpResponse<InputStream> response = client.send(req, (x) -> BodySubscribers.ofInputStream());
         return mapper.createParser(response.body()).readValueAs(resultType);
     }

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.integration.notification;
 
@@ -26,6 +26,7 @@ import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +36,7 @@ import org.osgi.test.junit5.service.ServiceExtension;
 @ExtendWith(ServiceExtension.class)
 public class SubscribeTest {
 
-    private static final String USER = "user";
+    private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     private static final String MODEL = "model";
     private static final String PROVIDER = "provider";
@@ -59,7 +60,7 @@ public class SubscribeTest {
 
     /**
      * Show that data updates result in events received by subscribers
-     * 
+     *
      * @throws Exception
      */
     @Test

@@ -18,5 +18,8 @@
   "JakartarsServletWhiteboardRuntimeComponent": {
     "osgi.jakartars.name": "sensiNact.rest",
     "osgi.http.whiteboard.target": "(osgi.http.endpoint=*)"
+  },
+  "sensinact.northbound.rest": {
+    "allow.anonymous": true
   }
 }
