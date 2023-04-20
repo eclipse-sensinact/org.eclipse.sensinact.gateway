@@ -152,6 +152,11 @@ public class RcUtils {
             public ResourceType getResourceType() {
                 return ResourceType.PROPERTY;
             }
+
+            @Override
+            public boolean isSet() {
+                return true;
+            }
         };
 
         svc.getResources().add(rc);

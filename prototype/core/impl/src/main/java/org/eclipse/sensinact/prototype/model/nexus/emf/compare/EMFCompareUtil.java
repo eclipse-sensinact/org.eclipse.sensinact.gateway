@@ -45,7 +45,7 @@ import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
 /**
- * Helper to Compare EObjects using EMFCompare
+ * Helper to Compare EObjects
  *
  * @author Juergen Albert
  * @since 22 Feb 2023
@@ -190,7 +190,7 @@ public class EMFCompareUtil {
             if (newTimestamp == null) {
                 newTimestamp = Instant.now();
             }
-            if (isNew || (resource.getDefaultValue() != null && Objects.equals(oldValue, resource.getDefaultValue()))) {
+            if (isNew) {
                 accumulator.addResource(modelName, providerName, serviceName, resource.getName());
             }
 
@@ -291,20 +291,19 @@ public class EMFCompareUtil {
 
         accumulator.addService(model, providerName, serviceName);
 
-        EMFUtil.streamAttributes(service.eClass())
-                .filter(ea -> service.eIsSet(ea) || service.getMetadata().containsKey(ea)).forEach(ea -> {
-                    checkMetadata(service, ea);
-                    Metadata metadata = service.getMetadata().get(ea);
-                    accumulator.addResource(model, providerName, serviceName, ea.getName());
-                    accumulator.resourceValueUpdate(model, providerName, serviceName, ea.getName(),
-                            ea.getEAttributeType().getInstanceClass(), null, service.eGet(ea), metadata.getTimestamp());
-                    Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true,
-                            MetadataPackage.Literals.NEXUS_METADATA.getEStructuralFeatures(), null, null);
-                    newMetaData.put("value", service.eGet(ea));
+        EMFUtil.streamAttributes(service.eClass()).filter(ea -> service.eIsSet(ea)).forEach(ea -> {
+            checkMetadata(service, ea);
+            Metadata metadata = service.getMetadata().get(ea);
+            accumulator.addResource(model, providerName, serviceName, ea.getName());
+            accumulator.resourceValueUpdate(model, providerName, serviceName, ea.getName(),
+                    ea.getEAttributeType().getInstanceClass(), null, service.eGet(ea), metadata.getTimestamp());
+            Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true,
+                    MetadataPackage.Literals.NEXUS_METADATA.getEStructuralFeatures(), null, null);
+            newMetaData.put("value", service.eGet(ea));
 
-                    accumulator.metadataValueUpdate(model, providerName, serviceName, ea.getName(), null, newMetaData,
-                            metadata.getTimestamp());
-                });
+            accumulator.metadataValueUpdate(model, providerName, serviceName, ea.getName(), null, newMetaData,
+                    metadata.getTimestamp());
+        });
     }
 
     private static void notifyServiceRemove(Provider container, Service value, EReference reference,

@@ -4,7 +4,8 @@
     modelDirectory="/org.eclipse.sensinact.core.model/src" modelPluginID="org.eclipse.sensinact.core.model"
     modelName="sensinact" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container$Dynamic$Permissive"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="11.0" suppressGenModelAnnotations="false"
-    copyrightFields="false" operationReflection="true" importOrganizing="true" oSGiCompatible="true">
+    copyrightFields="false" usedGenPackages="../../../../../org.eclipse.emf.ecore/model/Ecore.genmodel#//ecore"
+    operationReflection="true" importOrganizing="true" oSGiCompatible="true">
   <foreignModel>sensinact.ecore</foreignModel>
   <genPackages prefix="Provider" basePackage="org.eclipse.sensinact.model.core" resource="XMI"
       disposableProviderFactory="true" ecorePackage="sensinact.ecore#/">
@@ -35,6 +36,10 @@
     </genClasses>
     <genClasses image="false" ecoreClass="sensinact.ecore#//Service">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Service/metadata"/>
+      <genOperations documentation="The eIsSet works a bit differently than the EMF Default. An EAttribute is seen as set, if it is the default value or if the Metadata with a timestamp are available."
+          ecoreOperation="sensinact.ecore#//Service/eIsSet" body="boolean result = super.eIsSet(feature);&#xA;// we only change the behaviour for EAttributes&#xA;if (!result &amp;&amp; feature instanceof org.eclipse.emf.ecore.EAttribute){&#xA;    if (getMetadata().containsKey(feature) &amp;&amp; getMetadata().get(feature).getTimestamp() != null) {&#xA;        result = true;&#xA;    } else {&#xA;         // if there is a default, we can see this as set&#xA;        result = feature.getDefaultValueLiteral() != null;&#xA;     }&#xA;}&#xA;return result;">
+        <genParameters ecoreParameter="sensinact.ecore#//Service/eIsSet/feature"/>
+      </genOperations>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//Metadata">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//Metadata/extra"/>

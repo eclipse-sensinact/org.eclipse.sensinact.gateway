@@ -99,6 +99,11 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         this.rcValue = value;
     }
 
+    @Override
+    public boolean isSet() {
+        return getValue() != null && getValue().getTimestamp() != null;
+    }
+
     public Class<?> getType() {
         return type;
     }

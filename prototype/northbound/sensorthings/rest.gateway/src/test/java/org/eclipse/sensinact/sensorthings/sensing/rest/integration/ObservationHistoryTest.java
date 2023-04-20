@@ -183,7 +183,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("fizz", "buzz", "fizzbuzz", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 10);
+        waitForRowCount("sensinact.text_data", 12);
 
         String id = String.format("%s~%s~%s~%s", "fizz", "buzz", "fizzbuzz",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -200,7 +200,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 10);
+        waitForRowCount("sensinact.text_data", 14);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });

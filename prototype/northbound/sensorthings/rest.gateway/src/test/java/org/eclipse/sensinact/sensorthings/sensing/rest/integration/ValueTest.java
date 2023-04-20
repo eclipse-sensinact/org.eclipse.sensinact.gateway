@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -107,9 +108,9 @@ public class ValueTest extends AbstractIntegrationTest {
         Datastream ds = utils.queryJson(
                 String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", PROVIDER, svcName, rcName)),
                 Datastream.class);
-        assertEquals("null", ds.unitOfMeasurement.name);
-        assertEquals("null", ds.unitOfMeasurement.symbol);
-        assertEquals("null", ds.unitOfMeasurement.definition);
+        assertNull(ds.unitOfMeasurement.name);
+        assertNull(ds.unitOfMeasurement.symbol);
+        assertNull(ds.unitOfMeasurement.definition);
 
         // Set its unit
         final String unitName = "degree Celsius";

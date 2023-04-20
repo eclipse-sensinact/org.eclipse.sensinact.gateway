@@ -68,6 +68,16 @@ public class LdapParserTest {
                 return this;
             }
 
+            /*
+             * (non-Javadoc)
+             * 
+             * @see org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot#isSet()
+             */
+            @Override
+            public boolean isSet() {
+                return true;
+            }
+
             @Override
             public ServiceSnapshot getService() {
                 return new ServiceSnapshot() {

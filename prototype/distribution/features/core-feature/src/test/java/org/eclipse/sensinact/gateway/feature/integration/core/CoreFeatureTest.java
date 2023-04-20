@@ -68,7 +68,7 @@ public class CoreFeatureTest {
 
         // There should be 40 lines (36 bundles, 2 header lines and 2 trailing lines)
         try (BufferedReader br = new BufferedReader(new StringReader(bundles))) {
-            assertEquals(44, br.lines().count());
+            assertEquals(42, br.lines().count());
         }
     }
 }

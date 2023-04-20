@@ -105,6 +105,10 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         }
     }
 
+    private List<ResourceSnapshot> listSetResources(EFilterContext context) {
+        return listResources(context).stream().filter(ResourceSnapshot::isSet).collect(Collectors.toList());
+    }
+
     private List<ResourceSnapshot> listResources(EFilterContext context) {
 
         final SensiNactSession userSession = getSession();
@@ -154,7 +158,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Datastream> getDatastreams() {
         ResultList<Datastream> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.DATASTREAMS);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.DATASTREAMS);
         list.value = resources.stream().map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r)).collect(toList());
 
         return list;
@@ -164,7 +168,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Sensor> getSensors() {
         ResultList<Sensor> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.SENSORS);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.SENSORS);
         list.value = resources.stream().map(r -> DtoMapper.toSensor(uriInfo, r)).collect(toList());
 
         return list;
@@ -175,7 +179,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Observation> getObservations() {
         ResultList<Observation> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.OBSERVATIONS);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVATIONS);
         list.value = resources.stream().map(r -> DtoMapper.toObservation(uriInfo, r)).collect(toList());
 
         return list;
@@ -185,7 +189,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<ObservedProperty> getObservedProperties() {
         ResultList<ObservedProperty> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.OBSERVED_PROPERTIES);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVED_PROPERTIES);
         list.value = resources.stream().map(r -> DtoMapper.toObservedProperty(uriInfo, r)).collect(toList());
 
         return list;

@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -392,13 +393,10 @@ public class ModelNexus {
                     || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL_URI) {
                 ResourceMetadata metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
                 metadata.setOriginalName(resourceFeature.getName());
+                metadata.setTimestamp(timestamp);
                 adminSvc.getMetadata().put(resourceFeature, metadata);
             }
         }
-
-        // Set the friendlyName value
-        adminSvc.getMetadata().get(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME).setTimestamp(timestamp);
-        adminSvc.getMetadata().get(ProviderPackage.Literals.ADMIN__MODEL_URI).setTimestamp(timestamp);
         adminSvc.setFriendlyName(provider.getId());
         adminSvc.setModelUri(EcoreUtil.getURI(provider.eClass()).toString());
 
@@ -658,7 +656,8 @@ public class ModelNexus {
                 svcClass.getEAllAttributes().stream()
                         .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE),
                 svcClass.getEAllOperations().stream()
-                        .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE));
+                        .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
+                        .filter(Predicate.not(ProviderPackage.Literals.SERVICE___EIS_SET__ESTRUCTURALFEATURE::equals)));
     }
 
     public EOperation createActionResource(EClass serviceEClass, String name, Class<?> type,
