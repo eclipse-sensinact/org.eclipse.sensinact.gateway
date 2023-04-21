@@ -45,6 +45,7 @@ import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -106,7 +107,7 @@ public class HttpDeviceFactoryAuthTest {
 
     @BeforeEach
     void start() throws InterruptedException {
-        session = sessionManager.getDefaultSession("user");
+        session = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
         queue = new ArrayBlockingQueue<>(32);
     }
 

@@ -24,6 +24,7 @@ import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ExtendWith(ServiceExtension.class)
 public class AdminServiceTest {
 
-    private static final String USER = "user";
+    private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     private static final String PROVIDER = "AdminServiceTestProvider";
     private static final String SERVICE = "service";

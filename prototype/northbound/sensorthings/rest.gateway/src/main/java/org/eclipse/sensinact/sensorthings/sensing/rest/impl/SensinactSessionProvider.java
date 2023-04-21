@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
@@ -31,7 +32,7 @@ public class SensinactSessionProvider implements ContextResolver<SensiNactSessio
     public SensiNactSession getContext(Class<?> type) {
         // TODO proper user and session mapping
         SensiNactSessionManager manager = (SensiNactSessionManager) application.getProperties().get("session.manager");
-        return manager.getDefaultSession(null);
+        return manager.getDefaultSession(UserInfo.ANONYMOUS);
     }
 
 }

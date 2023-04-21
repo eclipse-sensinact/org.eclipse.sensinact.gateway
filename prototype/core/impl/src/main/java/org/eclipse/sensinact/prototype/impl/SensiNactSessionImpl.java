@@ -48,6 +48,7 @@ import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 import org.eclipse.sensinact.prototype.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
@@ -514,5 +515,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
         public void notify(String topic, AbstractResourceNotification notification) {
             listener.notify(topic, (ResourceActionNotification) notification);
         }
+    }
+
+    @Override
+    public UserInfo getUserInfo() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

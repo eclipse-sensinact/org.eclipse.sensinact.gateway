@@ -20,6 +20,9 @@
     "osgi.jakartars.name": "sensiNact.rest",
     "osgi.http.whiteboard.target": "(osgi.http.endpoint=*)"
   },
+  "sensinact.northbound.rest": {
+    "allow.anonymous": "true"
+  },
   "sensinact.virtual.temperature": {
     "name": "temp1",
     "latitude": 1.0,

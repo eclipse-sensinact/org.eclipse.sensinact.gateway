@@ -21,6 +21,7 @@ import org.eclipse.sensinact.prototype.notification.ClientActionListener;
 import org.eclipse.sensinact.prototype.notification.ClientDataListener;
 import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.prototype.notification.ClientMetadataListener;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 
@@ -248,4 +249,11 @@ public interface SensiNactSession {
      * @return A snapshot of the model
      */
     List<ProviderSnapshot> filteredSnapshot(ICriterion filter);
+
+    /**
+     * Return the user that owns this session
+     *
+     * @return
+     */
+    UserInfo getUserInfo();
 }
