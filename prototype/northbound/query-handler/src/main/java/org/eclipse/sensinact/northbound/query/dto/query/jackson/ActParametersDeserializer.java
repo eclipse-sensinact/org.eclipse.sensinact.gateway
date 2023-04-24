@@ -10,12 +10,14 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.query.dto.query;
+package org.eclipse.sensinact.northbound.query.dto.query.jackson;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;

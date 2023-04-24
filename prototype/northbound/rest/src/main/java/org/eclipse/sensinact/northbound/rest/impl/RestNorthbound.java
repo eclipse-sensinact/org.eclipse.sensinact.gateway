@@ -30,6 +30,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.notification.ClientDataListener;
@@ -222,11 +223,11 @@ public class RestNorthbound implements IRestNorthbound {
 
     @Override
     public AbstractResultDTO resourceSet(final String providerId, final String serviceName, final String rcName,
-            final List<AccessMethodCallParameterDTO> parameters) {
+            final WrappedAccessMethodCallParametersDTO parameters) {
 
         final QuerySetDTO query = new QuerySetDTO();
         query.uri = new SensinactPath(providerId, serviceName, rcName);
-        query.value = extractSetValue(parameters);
+        query.value = extractSetValue(parameters.parameters);
         return handleQuery(query);
     }
 
@@ -267,14 +268,14 @@ public class RestNorthbound implements IRestNorthbound {
 
     @Override
     public AbstractResultDTO resourceAct(final String providerId, final String serviceName, final String rcName,
-            final List<AccessMethodCallParameterDTO> parameters) {
+            final WrappedAccessMethodCallParametersDTO parameters) {
 
         final List<Entry<String, Class<?>>> actMethodArgumentsTypes = getSession().describeResourceShort(providerId,
                 serviceName, rcName).actMethodArgumentsTypes;
 
         final QueryActDTO query = new QueryActDTO();
         query.uri = new SensinactPath(providerId, serviceName, rcName);
-        query.parameters = extractActParams(actMethodArgumentsTypes, parameters);
+        query.parameters = extractActParams(actMethodArgumentsTypes, parameters.parameters);
         return handleQuery(query);
     }
 
