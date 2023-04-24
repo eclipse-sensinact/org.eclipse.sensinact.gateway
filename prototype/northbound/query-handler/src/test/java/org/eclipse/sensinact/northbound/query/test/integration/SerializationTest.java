@@ -32,6 +32,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodParameterDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
@@ -47,6 +48,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -439,5 +441,34 @@ public class SerializationTest {
         assertEquals(setRc.response.timestamp, parsedResult.response.timestamp);
         assertEquals(setRc.response.type, parsedResult.response.type);
         assertEquals(setRc.response.value, parsedResult.response.value);
+    }
+
+    @Test
+    void testWrappedAccessMethodCallParametesrDTO() throws JsonProcessingException {
+
+        final AccessMethodCallParameterDTO arg1 = new AccessMethodCallParameterDTO();
+        arg1.name = "arg1";
+        arg1.type = Integer.class.getName();
+        arg1.value = 42;
+        final AccessMethodCallParameterDTO arg2 = new AccessMethodCallParameterDTO();
+        arg2.name = "arg2";
+        arg2.type = String.class.getName();
+        arg2.value = "abc";
+
+        List<AccessMethodCallParameterDTO> parameters = List.of(arg1, arg2);
+
+        final WrappedAccessMethodCallParametersDTO dto = new WrappedAccessMethodCallParametersDTO();
+        dto.parameters = parameters;
+
+        String s = mapper.writeValueAsString(dto);
+
+        WrappedAccessMethodCallParametersDTO read = mapper.readValue(s, WrappedAccessMethodCallParametersDTO.class);
+
+        assertEquals(dto.parameters.get(0).name, read.parameters.get(0).name);
+
+        s = mapper.writeValueAsString(parameters);
+        WrappedAccessMethodCallParametersDTO read2 = mapper.readValue(s, WrappedAccessMethodCallParametersDTO.class);
+        assertEquals(dto.parameters.get(0).name, read2.parameters.get(0).name);
+
     }
 }

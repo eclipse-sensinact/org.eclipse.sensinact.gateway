@@ -18,7 +18,6 @@ import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

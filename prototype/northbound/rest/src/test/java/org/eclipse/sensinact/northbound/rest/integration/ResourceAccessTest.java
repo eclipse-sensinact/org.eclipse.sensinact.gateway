@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
@@ -45,6 +46,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
@@ -174,8 +177,9 @@ public class ResourceAccessTest {
     /**
      * Update the resource value from the REST endpoint
      */
-    @Test
-    void resourceSet() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void resourceSet(boolean wrapParams) throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
         Instant firstUpdateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
@@ -202,7 +206,7 @@ public class ResourceAccessTest {
         param.value = VALUE_2;
         result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "SET"),
-                List.of(param), TypedResponse.class);
+                wrapParams(wrapParams, List.of(param)), TypedResponse.class);
         utils.assertResultSuccess(result, EResultType.SET_RESPONSE, PROVIDER, SERVICE, RESOURCE);
         response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(RESOURCE, response.name);
@@ -220,6 +224,15 @@ public class ResourceAccessTest {
         response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(VALUE_2, response.value);
         assertTrue(firstTimestamp.isBefore(Instant.ofEpochMilli(response.timestamp)), "Timestamp wasn't updated");
+    }
+
+    private Object wrapParams(boolean wrap, List<AccessMethodCallParameterDTO> params) {
+        if (wrap) {
+            WrappedAccessMethodCallParametersDTO dto = new WrappedAccessMethodCallParametersDTO();
+            dto.parameters = params;
+            return dto;
+        }
+        return params;
     }
 
     /**
@@ -257,8 +270,9 @@ public class ResourceAccessTest {
         }
     }
 
-    @Test
-    void resourceAct(@InjectBundleContext BundleContext context) throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void resourceAct(boolean wrapParams, @InjectBundleContext BundleContext context) throws Exception {
 
         context.registerService(TestAction.class, new TestAction(),
                 new Hashtable<>(Map.of("sensiNact.whiteboard.resource", true)));
@@ -273,7 +287,7 @@ public class ResourceAccessTest {
 
         ResultActDTO response = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", "action", "ACT"),
-                List.of(param), ResultActDTO.class);
+                wrapParams(wrapParams, List.of(param)), ResultActDTO.class);
 
         assertNotNull(response);
         assertEquals(200, response.statusCode);

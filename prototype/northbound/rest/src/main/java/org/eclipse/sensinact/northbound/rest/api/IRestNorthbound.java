@@ -14,10 +14,8 @@ package org.eclipse.sensinact.northbound.rest.api;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import java.util.List;
-
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
-import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -72,13 +70,13 @@ public interface IRestNorthbound {
     @POST
     AbstractResultDTO resourceSet(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName,
-            List<AccessMethodCallParameterDTO> parameters);
+            WrappedAccessMethodCallParametersDTO parameters);
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/ACT")
     @POST
     AbstractResultDTO resourceAct(@PathParam("providerId") String providerId,
             @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName,
-            List<AccessMethodCallParameterDTO> parameters);
+            WrappedAccessMethodCallParametersDTO parameters);
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/SUBSCRIBE")
     @GET

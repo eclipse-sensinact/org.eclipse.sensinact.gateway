@@ -12,26 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.query;
 
-import java.util.Map;
+import java.util.List;
 
-import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
-import org.eclipse.sensinact.northbound.query.api.EQueryType;
-import org.eclipse.sensinact.northbound.query.dto.query.jackson.ActParametersDeserializer;
+import org.eclipse.sensinact.northbound.query.dto.query.jackson.WrappedAccessMethodCallParametersDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-/**
- *
- */
-public class QueryActDTO extends AbstractQueryDTO {
+@JsonDeserialize(using = WrappedAccessMethodCallParametersDeserializer.class)
+public class WrappedAccessMethodCallParametersDTO {
 
-    /**
-     * Named parameters
-     */
-    @JsonDeserialize(using=ActParametersDeserializer.class)
-    public Map<String, Object> parameters;
-
-    public QueryActDTO() {
-        super(EQueryType.ACT);
-    }
+    public List<AccessMethodCallParameterDTO> parameters;
 }
