@@ -101,7 +101,7 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
 
     @Override
     public boolean isSet() {
-        return getValue() != null && getValue().getTimestamp() != null;
+        return getValue() != null || getValue().getTimestamp() != null;
     }
 
     public Class<?> getType() {
