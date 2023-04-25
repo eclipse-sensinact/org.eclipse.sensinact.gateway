@@ -35,8 +35,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
@@ -69,6 +69,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         int nbProviders = 4;
         for (int i = 0; i < nbProviders; i++) {
             createResource("countTester_" + (i + 1), "sensor", "rc", random.nextInt());
+            createResource("countTester_" + (i + 1), "admin", "location", new Point());
         }
 
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
@@ -85,7 +86,8 @@ public class FiltersTest extends AbstractIntegrationTest {
 
             // Explicit count
             resultList = utils.queryJson(url.url + "?$count=true", RESULT_ANY);
-            assertTrue(resultList.value.size() >= nbProviders);
+            assertTrue(resultList.value.size() >= nbProviders,
+                    "Expected " + resultList.value.size() + " >= " + nbProviders + " at " + url.url);
             assertEquals(resultList.value.size(), resultList.count);
 
             // Invalid value
@@ -111,8 +113,8 @@ public class FiltersTest extends AbstractIntegrationTest {
     @Test
     void testOrderBy() throws IOException, InterruptedException {
         final String prefix = "orderTester_";
-        final List<String> sortedProviderIds = Stream
-                .concat(IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id), Stream.of("sensiNact"))
+        final List<String> sortedProviderIds =
+                IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id)
                 .sorted(Comparator.naturalOrder()).collect(Collectors.toList());
         final int nbProviders = sortedProviderIds.size();
 
@@ -124,6 +126,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             createResource(id, "svcB", "rcA", id + 256);
             createResource(id, "svcA", "rcB", id);
             createResource(id, "svcB", "rcB", id + 256);
+            createResource(id, "admin", "location", new Point());
         });
 
         final Predicate<String> filter = sortedProviderIds::contains;
@@ -322,6 +325,9 @@ public class FiltersTest extends AbstractIntegrationTest {
                 below40.add(String.join("~", provider1, svc, rcName));
                 above40.add(String.join("~", provider2, svc, rcName));
             }
+
+            createResource(provider1, "admin", "location", new Point());
+            createResource(provider2, "admin", "location", new Point());
         }
 
         @AfterEach
