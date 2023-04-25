@@ -127,7 +127,11 @@ public class TestUtils {
      * Converts the content of the parsed response
      */
     public <T> T convert(final TypedResponse<?> dto, Class<T> type) {
-        return mapper.convertValue(dto.response, type);
+        return convert(dto.response, type);
+    }
+
+    public <T> T convert(final Object o, Class<T> type) {
+        return mapper.convertValue(o, type);
     }
 
     /**

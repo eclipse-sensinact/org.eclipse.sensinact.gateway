@@ -14,6 +14,7 @@ package org.eclipse.sensinact.northbound.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +28,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
@@ -59,6 +62,8 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.ws.rs.core.Application;
 
@@ -235,6 +240,66 @@ public class ResourceAccessTest {
         return params;
     }
 
+    private static final String ADMIN = "admin";
+    private static final String LOCATION = "location";
+
+    /**
+     * Update the resource value from the REST endpoint
+     */
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void locationSet(boolean wrapParams) throws Exception {
+        String provider = PROVIDER + "_" + Boolean.toString(wrapParams);
+        // Register the resource
+        GenericDto dto = utils.makeDto(provider, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
+
+        // Check response
+        TypedResponse<?> result = utils.queryJson(
+                String.join("/", "providers", provider, "services", ADMIN, "resources", LOCATION, "GET"),
+                TypedResponse.class);
+        ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
+        assertEquals(0, response.timestamp);
+
+        queue = new ArrayBlockingQueue<>(32);
+        SensiNactSession session = sessionManager.getDefaultSession(USER);
+        session.addListener(List.of(provider + "/*"), (t, e) -> queue.offer(e), null, null, null);
+        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
+
+        Point p = new Point();
+        p.coordinates = new Coordinates();
+        p.coordinates.latitude = 48.5d;
+        p.coordinates.longitude = 4.5d;
+
+        AccessMethodCallParameterDTO param = new AccessMethodCallParameterDTO();
+        param.name = "value";
+        param.type = response.type;
+        param.value = p;
+        result = utils.queryJson(
+                String.join("/", "providers", provider, "services", ADMIN, "resources", LOCATION, "SET"),
+                wrapParams(wrapParams, List.of(param)), TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.SET_RESPONSE, provider, ADMIN, LOCATION);
+        response = utils.convert(result, ResponseGetDTO.class);
+        assertEquals(LOCATION, response.name);
+        assertEquals(param.type, response.type);
+
+        // Wait for internal notification
+        dto.service = ADMIN;
+        dto.resource = LOCATION;
+        dto.type = Point.class;
+        dto.value = utils.convert(p, Map.class);
+        utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
+
+        // Check access
+        result = utils.queryJson(
+                String.join("/", "providers", provider, "services", ADMIN, "resources", LOCATION, "GET"),
+                TypedResponse.class);
+        response = utils.convert(result, ResponseGetDTO.class);
+        assertEquals(utils.convert(p, JsonNode.class).toString(),
+                utils.convert(response.value, JsonNode.class).toString());
+        assertNotEquals(0, response.timestamp, "Timestamp wasn't updated");
+    }
+
     /**
      * Get a resource value from the admin service
      */
@@ -246,18 +311,18 @@ public class ResourceAccessTest {
 
         // friendlyName should be the provider name
         TypedResponse<?> result = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", "admin", "resources", "friendlyName", "GET"),
+                String.join("/", "providers", PROVIDER, "services", ADMIN, "resources", "friendlyName", "GET"),
                 TypedResponse.class);
-        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "friendlyName");
+        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, ADMIN, "friendlyName");
         ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(String.class.getName(), response.type);
         assertEquals(PROVIDER, response.value);
 
         // Location should be null, but set
         result = utils.queryJson(
-                String.join("/", "providers", PROVIDER, "services", "admin", "resources", "location", "GET"),
+                String.join("/", "providers", PROVIDER, "services", ADMIN, "resources", LOCATION, "GET"),
                 TypedResponse.class);
-        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, "admin", "location");
+        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, ADMIN, LOCATION);
         response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(GeoJsonObject.class.getName(), response.type);
         assertNull(response.value);
