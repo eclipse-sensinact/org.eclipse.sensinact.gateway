@@ -163,12 +163,9 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
         String provider = extractFirstIdSegment(id);
 
         ResultList<Datastream> list = new ResultList<>();
-
-        list.value = userSession.describeProvider(provider).services.stream()
-                .map(s -> userSession.describeService(provider, s))
-                .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
-
+        list.value = userSession.filteredSnapshot(new SnapshotFilter(provider)).stream()
+                .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+                .map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r)).collect(toList());
         return list;
     }
 
