@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.Key;
@@ -44,16 +45,12 @@ import org.eclipse.sensinact.northbound.security.api.Authenticator;
 import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.common.annotation.config.InjectConfiguration;
-import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
-import org.osgi.test.common.service.ServiceAware;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -67,7 +64,6 @@ import io.jsonwebtoken.jackson.io.JacksonSerializer;
 /**
  * Tests variable handling
  */
-@ExtendWith(ConfigurationExtension.class)
 public class ValidatorTest {
 
     private static final Map<String, String> EC_CURVE_NAME_MAPPING = Map.of("ES256", "secp256r1", "ES384", "secp384r1",
@@ -78,9 +74,10 @@ public class ValidatorTest {
     private HttpServer httpServer;
     private String DISCOVERY;
 
-    @BeforeEach
-    public void startCertificateEndpoint() throws Exception {
+    private Configuration config;
 
+    @BeforeEach
+    public void startCertificateEndpoint(@InjectService ConfigurationAdmin cm) throws Exception {
         for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
             if (sa == SignatureAlgorithm.NONE)
                 continue;
@@ -168,10 +165,14 @@ public class ValidatorTest {
             mapper.writeValue(ex.getResponseBody(), certificates);
         });
 
+        config = cm.getFactoryConfiguration("sensinact.northbound.auth.oidc", "test", "?");
+        config.update(new Hashtable<>(Map.of("realm", "test", "discoveryURL", DISCOVERY)));
+
     }
 
     @AfterEach
-    public void clear() {
+    public void clear() throws IOException {
+        config.delete();
         httpServer.stop(0);
         httpServer = null;
         asymmetricKeys.clear();
@@ -180,12 +181,8 @@ public class ValidatorTest {
 
     @EnumSource(value = SignatureAlgorithm.class, mode = Mode.EXCLUDE, names = "NONE")
     @ParameterizedTest
-    void testValidSignatures(SignatureAlgorithm alg,
-            @InjectService(cardinality = 0) ServiceAware<Authenticator> service,
-            @InjectConfiguration(withFactoryConfig = @WithFactoryConfiguration(name = "test", factoryPid = "sensinact.northbound.auth.oidc", location = "?")) Configuration config)
+    void testValidSignatures(SignatureAlgorithm alg, @InjectService(timeout = 5000) Authenticator service)
             throws Exception {
-
-        config.update(new Hashtable<>(Map.of("realm", "test", "discoveryURL", DISCOVERY)));
 
         Date start = new Date(Instant.now().minus(Duration.ofHours(1)).toEpochMilli());
         Date end = new Date(Instant.now().plus(Duration.ofHours(1)).toEpochMilli());
@@ -196,7 +193,7 @@ public class ValidatorTest {
                 .setHeaderParam(JwsHeader.KEY_ID, alg.getDescription())
                 .serializeToJsonWith(new JacksonSerializer<>(mapper)).signWith(key, alg).compact();
 
-        UserInfo info = service.waitForService(5000).authenticate(null, token);
+        UserInfo info = service.authenticate(null, token);
 
         assertEquals("test", info.getUserId());
         assertTrue(info.isAuthenticated());
