@@ -1,0 +1,2 @@
+#!/bin/bash
+npx @openapitools/openapi-generator-cli generate -i openapi/openapi.yml --type-mappings AnyType=any,UNKNOWN_BASE_TYPE=object  -g typescript-axios -o openapi/client --additional-properties=withInterfaces=true
