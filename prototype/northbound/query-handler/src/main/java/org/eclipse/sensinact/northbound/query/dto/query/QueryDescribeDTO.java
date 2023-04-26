@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.query;
 
+import java.util.List;
+
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.EQueryType;
 
@@ -27,6 +29,8 @@ public class QueryDescribeDTO extends AbstractQueryDTO {
      */
     public String filter;
 
+    public List<String> attrs;
+
     /**
      * Language of the filter to use
      */
@@ -35,5 +39,6 @@ public class QueryDescribeDTO extends AbstractQueryDTO {
 
     public QueryDescribeDTO() {
         super(EQueryType.DESCRIBE);
+        attrs = List.of();
     }
 }

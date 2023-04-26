@@ -669,14 +669,26 @@ public class QueryHandler implements IQueryHandler {
             final CompleteProviderDescriptionDTO providerDto = new CompleteProviderDescriptionDTO();
             providerDto.name = provider.getName();
 
-            TimedValue<?> value = getResourceValue(provider, "admin", "icon");
-            if (value != null) {
-                providerDto.icon = (String) value.getValue();
+            TimedValue<?> value = null;
+            if (query.attrs.contains("icon")) {
+                value = getResourceValue(provider, "admin", "icon");
+                if (value != null) {
+                    providerDto.icon = (String) value.getValue();
+                }
             }
 
-            value = getResourceValue(provider, "admin", "location");
-            if (value != null) {
-                providerDto.location = (GeoJsonObject) value.getValue();
+            if (query.attrs.isEmpty() || query.attrs.contains("location")) {
+                value = getResourceValue(provider, "admin", "location");
+                if (value != null) {
+                    providerDto.location = (GeoJsonObject) value.getValue();
+                }
+            }
+
+            if (query.attrs.contains("friendlyName")) {
+                value = getResourceValue(provider, "admin", "friendlyName");
+                if (value != null) {
+                    providerDto.friendlyName = (String) value.getValue();
+                }
             }
 
             providerDto.services = new ArrayList<>(provider.getServices().size());

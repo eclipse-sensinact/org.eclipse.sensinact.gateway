@@ -40,6 +40,12 @@ public class CompleteProviderDescriptionDTO {
     public String icon;
 
     /**
+     * Provider friendly name, if available
+     */
+    @JsonInclude(NON_NULL)
+    public String friendlyName;
+
+    /**
      * List of services
      */
     public List<ResponseDescribeServiceDTO> services;
