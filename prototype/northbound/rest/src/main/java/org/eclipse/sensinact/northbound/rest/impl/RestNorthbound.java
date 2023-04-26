@@ -121,6 +121,7 @@ public class RestNorthbound implements IRestNorthbound {
     @Override
     public AbstractResultDTO describeProviders() {
         final QueryDescribeDTO query = new QueryDescribeDTO();
+        query.attrs = uriInfo.getQueryParameters().getOrDefault("attrs", List.of());
         query.uri = new SensinactPath();
         injectFilter(query);
         return handleQuery(query);
