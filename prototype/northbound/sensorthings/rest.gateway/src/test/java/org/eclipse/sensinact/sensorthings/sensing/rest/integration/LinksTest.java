@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -149,7 +150,8 @@ public class LinksTest extends AbstractIntegrationTest {
             TypeReference<ResultList<T>> resultListType, Class<T> resultType) throws IOException, InterruptedException {
         ResultList<T> results = utils.queryJson(listUrl, resultListType);
         assertNotNull(results);
-        assertFalse(results.value.isEmpty(), "No " + resultType.getSimpleName() + " found");
+        assertFalse(results.value.isEmpty(),
+                "No " + resultType.getSimpleName() + " found for " + srcObject.id + " on " + listUrl);
 
         @SuppressWarnings("unchecked")
         Class<S> srcType = (Class<S>) srcObject.getClass();
@@ -182,9 +184,10 @@ public class LinksTest extends AbstractIntegrationTest {
                     // Returns a result list
                     Set<Object> linkedItemsIds = listIdsFromURL(
                             String.format("%s/%s", directAccessItemUrl, kindOfLink));
+
                     Set<Object> allItemsIds = listIdsFromURL(kindOfLink);
                     assertTrue(allItemsIds.containsAll(linkedItemsIds),
-                            linkedItemsIds + " not a subset of " + allItemsIds);
+                            linkedItemsIds + " not a subset of " + allItemsIds + " (src=" + srcObject.id + ", listUrl=" + listUrl + ", kindOfLink=" + kindOfLink + ")");
                 } else {
                     // Returns a single item
                     Class<? extends Id> linkType = getDTOType(kindOfLink);
@@ -227,6 +230,7 @@ public class LinksTest extends AbstractIntegrationTest {
     void testLinksFromThings() throws IOException, InterruptedException {
         // Add a resource
         createResource(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "admin", "location", new Point());
 
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
@@ -303,6 +307,7 @@ public class LinksTest extends AbstractIntegrationTest {
     void testLinksFromLocations() throws IOException, InterruptedException {
         // Add a resource
         createResource(PROVIDER, "sensor", "data", 42);
+        createResource(PROVIDER, "admin", "location", new Point());
 
         // Get the new locations
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);

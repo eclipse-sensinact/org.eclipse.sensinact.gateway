@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
 import org.eclipse.sensinact.prototype.SensiNactSession;
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -76,11 +77,10 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
 
         SensiNactSession userSession = getSession();
         ResultList<Observation> list = new ResultList<>();
-        list.value = userSession.describeProvider(provider).services.stream()
-                .map(s -> userSession.describeService(provider, s))
-                .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
+        list.value = userSession.filteredSnapshot(new SnapshotFilter(provider)).stream()
+                .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+                .filter(ResourceSnapshot::isSet)
                 .map(r -> DtoMapper.toObservation(uriInfo, r)).collect(toList());
-
         return list;
     }
 
