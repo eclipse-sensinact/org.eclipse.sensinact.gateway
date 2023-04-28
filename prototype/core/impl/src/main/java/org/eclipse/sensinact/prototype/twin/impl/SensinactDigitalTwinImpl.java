@@ -320,6 +320,11 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                     // Get the resource metadata
                     final Service svc = rc.getService().getModelService();
                     final ETypedElement rcFeature = rc.getFeature();
+
+                    if (!svc.eIsSet((EStructuralFeature) rcFeature)) {
+                        return;
+                    }
+
                     final Metadata metadata = svc == null ? null : svc.getMetadata().get(rcFeature);
                     final Instant timestamp;
                     if (metadata != null) {
