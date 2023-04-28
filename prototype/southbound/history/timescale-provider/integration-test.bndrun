@@ -44,8 +44,8 @@
 	org.eclipse.sensinact.gateway.southbound.history.history-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider-tests;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.api;version='[5.0.0,5.0.1)',\
-	org.gecko.emf.osgi.component;version='[5.0.0,5.0.1)',\
+	org.gecko.emf.osgi.api;version='[4.6.0,4.6.1)',\
+	org.gecko.emf.osgi.component;version='[4.6.0,4.6.1)',\
 	org.mockito.junit-jupiter;version='[4.7.0,4.7.1)',\
 	org.mockito.mockito-core;version='[4.7.0,4.7.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
