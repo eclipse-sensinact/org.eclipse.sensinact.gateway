@@ -14,13 +14,22 @@ package org.eclipse.sensinact.northbound.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProviderDTO;
@@ -33,13 +42,55 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.opentest4j.AssertionFailedError;
+import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.InjectConfiguration;
+import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith(ServiceExtension.class)
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.ws.rs.core.Application;
+
+@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class DescriptionsTest {
+
+    @BeforeEach
+    public void await(
+            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
+                    @Property(key = "allow.anonymous", value = "true"),
+                    @Property(key = "foo", value = "bar") })) Configuration cm,
+            @InjectService(filter = "(foo=bar)", cardinality = 0) ServiceAware<Application> a)
+            throws InterruptedException {
+        a.waitForService(5000);
+        for (int i = 0; i < 10; i++) {
+            try {
+                if (utils.queryStatus("/").statusCode() == 200)
+                    return;
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            Thread.sleep(200);
+        }
+        throw new AssertionFailedError("REST API did not appear");
+    }
+
+    @AfterEach
+    public void clear(@InjectConfiguration("sensinact.northbound.rest") Configuration cm) throws Exception {
+        cm.delete();
+        Thread.sleep(500);
+    }
 
     private static final String PROVIDER = "RestDescriptionProvider";
     private static final String PROVIDER_2 = PROVIDER + "_2";
@@ -98,6 +149,103 @@ public class DescriptionsTest {
         }
         assertTrue(gotAdmin, "Admin service not found");
         assertTrue(gotService, "Test service not found");
+    }
+
+    /**
+     * Check the attrs query for the <code>/sensinact/</code> endpoint: full
+     * description of providers, services and resources
+     */
+    @Test
+    void completeListWithQuery() throws Exception {
+        // Register the resource
+        GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
+        dto = utils.makeDto(PROVIDER, "admin", "friendlyName", "Bob", String.class);
+        push.pushUpdate(dto).getValue();
+        // TODO enable this when we can add to the admin service
+//        dto = utils.makeDto(PROVIDER, "admin", "icon", "rolling-eyes", String.class);
+//        push.pushUpdate(dto).getValue();
+
+        Map<String, Object> location = Map.of("type", "Point", "coordinates", new double[] { 12.3d, 45.6d });
+        dto = utils.makeDto(PROVIDER, "admin", "location", utils.convert(location, GeoJsonObject.class),
+                GeoJsonObject.class);
+        push.pushUpdate(dto).getValue();
+
+        // Check for success
+        JsonNode providerDto = checkAndFindProvider(utils.queryJson("/", JsonNode.class));
+
+        assertFalse(providerDto.has("icon"));
+        assertFalse(providerDto.has("friendlyName"));
+        assertTrue(providerDto.has("location"));
+        assertEquals(normalizedJson(location), normalizedJson(providerDto.get("location")));
+
+        providerDto = checkAndFindProvider(utils.queryJson("/?attrs=icon&attrs=friendlyName", JsonNode.class));
+
+        // TODO enable this when we can add to the admin service
+//        assertTrue(providerDto.has("icon"));
+//        assertEquals("rolling-eyes", providerDto.get("icon").asText());
+        assertTrue(providerDto.has("friendlyName"));
+        assertEquals("Bob", providerDto.get("friendlyName").asText());
+        assertFalse(providerDto.has("location"));
+
+        providerDto = checkAndFindProvider(
+                utils.queryJson("/?attrs=icon&attrs=friendlyName&attrs=location", JsonNode.class));
+
+        // TODO enable this when we can add to the admin service
+//        assertTrue(providerDto.has("icon"));
+//        assertEquals("rolling-eyes", providerDto.get("icon").asText());
+        assertTrue(providerDto.has("friendlyName"));
+        assertEquals("Bob", providerDto.get("friendlyName").asText());
+        assertTrue(providerDto.has("location"));
+        assertEquals(normalizedJson(location), normalizedJson(providerDto.get("location")));
+    }
+
+    private JsonNode checkAndFindProvider(final JsonNode result) {
+        JsonNode providers = result.get("providers");
+        assertNotNull(providers);
+        assertTrue(providers.isArray());
+
+        // Check content
+        final JsonNode providerDto = StreamSupport.stream(providers.spliterator(), false)
+                .filter(p -> PROVIDER.equals(p.get("name").asText())).findFirst().get();
+        return providerDto;
+    }
+
+    private String normalizedJson(Object o) throws Exception {
+        StringWriter sw = new StringWriter();
+        JsonGenerator gen = JsonFactory.builder().build().createGenerator(sw);
+        JsonNode node;
+        if (o instanceof JsonNode) {
+            node = (JsonNode) o;
+        } else {
+            node = utils.convert(o, JsonNode.class);
+        }
+
+        if (node.isArray()) {
+            gen.writeStartArray();
+            for (JsonNode n : node) {
+                gen.writeRawValue(normalizedJson(n));
+            }
+            gen.writeEndArray();
+        } else if (node.isObject()) {
+            SortedMap<String, JsonNode> map = new TreeMap<>();
+            Iterator<Entry<String, JsonNode>> fields = node.fields();
+            while (fields.hasNext()) {
+                Entry<String, JsonNode> e = fields.next();
+                map.put(e.getKey(), e.getValue());
+            }
+
+            gen.writeStartObject();
+            for (Entry<String, JsonNode> e : map.entrySet()) {
+                gen.writeFieldName(e.getKey());
+                gen.writeRawValue(normalizedJson(e.getValue()));
+            }
+            gen.writeEndObject();
+        } else {
+            return node.toString();
+        }
+
+        return sw.toString();
     }
 
     /**

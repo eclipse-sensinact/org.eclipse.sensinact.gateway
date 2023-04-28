@@ -30,13 +30,51 @@ import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.opentest4j.AssertionFailedError;
+import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.InjectConfiguration;
+import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith(ServiceExtension.class)
+import jakarta.ws.rs.core.Application;
+
+@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class MissingEntityTest {
+
+    @BeforeEach
+    public void await(
+            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
+                    @Property(key = "allow.anonymous", value = "true"),
+                    @Property(key = "bar", value = "foobar") })) Configuration cm,
+            @InjectService(filter = "(bar=foobar)", cardinality = 0) ServiceAware<Application> a)
+            throws InterruptedException {
+        a.waitForService(5000);
+        for (int i = 0; i < 10; i++) {
+            try {
+                if (utils.queryStatus("/").statusCode() == 200)
+                    return;
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            Thread.sleep(200);
+        }
+        throw new AssertionFailedError("REST API did not appear");
+    }
+
+    @AfterEach
+    public void clear(@InjectConfiguration("sensinact.northbound.rest") Configuration cm) throws Exception {
+        cm.delete();
+        Thread.sleep(500);
+    }
 
     private static final String PROVIDER = "RestMissingSvcProvider";
     private static final String SERVICE = "service";
@@ -65,8 +103,7 @@ public class MissingEntityTest {
 
         // Resources list
         ErrorResultDTO rcListResult = utils.queryJson(
-                String.join("/", "providers", missingProvider, "services", SERVICE, "resources"),
-                ErrorResultDTO.class);
+                String.join("/", "providers", missingProvider, "services", SERVICE, "resources"), ErrorResultDTO.class);
         assertEquals(404, rcListResult.statusCode);
         assertNotNull(rcListResult.error);
         assertFalse(rcListResult.error.isEmpty());
@@ -94,8 +131,8 @@ public class MissingEntityTest {
         assertFalse(typedResult.error.isEmpty());
 
         // Services list
-        ErrorResultDTO svcListResult = utils
-                .queryJson(String.join("/", "providers", missingProvider, "services"), ErrorResultDTO.class);
+        ErrorResultDTO svcListResult = utils.queryJson(String.join("/", "providers", missingProvider, "services"),
+                ErrorResultDTO.class);
         assertEquals(404, svcListResult.statusCode);
         assertNotNull(svcListResult.error);
         assertFalse(svcListResult.error.isEmpty());
@@ -152,7 +189,8 @@ public class MissingEntityTest {
         assertFalse(errorResult.error.isEmpty());
 
         // Provider description
-        TypedResponse<?> typedResult = utils.queryJson(String.join("/", "providers", provider_service), TypedResponse.class);
+        TypedResponse<?> typedResult = utils.queryJson(String.join("/", "providers", provider_service),
+                TypedResponse.class);
         assertEquals(200, typedResult.statusCode);
         ResponseDescribeProviderDTO provider = utils.convert(typedResult, ResponseDescribeProviderDTO.class);
         assertEquals(provider_service, provider.name);

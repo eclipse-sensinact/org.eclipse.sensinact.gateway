@@ -21,6 +21,7 @@ import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.eclipse.sensinact.prototype.model.SensinactModelManager;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
@@ -50,7 +51,7 @@ public class AbstractIntegrationTest {
     protected static final TypeReference<ResultList<Self>> RESULT_SELF = new TypeReference<>() {
     };
 
-    private static final String USER = "user";
+    private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     @InjectService
     protected PrototypePush push;

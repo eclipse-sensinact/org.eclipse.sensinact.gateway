@@ -42,6 +42,7 @@ import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.notification.ClientDataListener;
 import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +143,7 @@ public class WebSocketEndpoint {
         wsSession = session;
 
         // FIXME get a real session
-        userSession = sessionManager.getDefaultSession("USER");
+        userSession = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
     }
 
     @OnWebSocketClose

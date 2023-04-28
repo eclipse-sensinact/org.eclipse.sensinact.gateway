@@ -37,6 +37,11 @@
       <version>${rest.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
+      <artifactId>authentication-api</artifactId>
+      <version>${rest.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>

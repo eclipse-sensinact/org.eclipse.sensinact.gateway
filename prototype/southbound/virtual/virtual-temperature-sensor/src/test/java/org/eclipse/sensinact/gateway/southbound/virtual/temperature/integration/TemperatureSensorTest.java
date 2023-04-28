@@ -29,6 +29,7 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +43,7 @@ import org.osgi.test.junit5.service.ServiceExtension;
 @ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class TemperatureSensorTest {
 
-    private static final String USER = "user";
+    private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     @InjectService
     SensiNactSessionManager sessionManager;

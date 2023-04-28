@@ -1,0 +1,37 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+
+
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_size = 2
+indent_style = space
+trim_trailing_whitespace = true
+
+[*.{xml,json,jj}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 1
+
+[dist/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+[openapi/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+

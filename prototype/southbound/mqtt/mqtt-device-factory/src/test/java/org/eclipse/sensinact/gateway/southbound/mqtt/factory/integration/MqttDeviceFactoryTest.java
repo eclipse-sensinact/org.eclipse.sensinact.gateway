@@ -35,6 +35,7 @@ import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -75,7 +76,7 @@ import io.moquette.broker.config.MemoryConfig;
                 + "  \"mapping.options\": { \"format.date\": \"d.M.y\", \"format.time\": \"H:m\" }\n" + "}"), })
 public class MqttDeviceFactoryTest {
 
-    private static final String USER = "user";
+    private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     private static Server server;
 

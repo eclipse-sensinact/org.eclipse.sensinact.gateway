@@ -1,5 +1,5 @@
 {
-  "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-rest-feature:osgifeature:0.0.2-SNAPSHOT",
+  "id":"org.eclipse.sensinact.gateway.distribution.features:virtual-temperature-sensor-feature:osgifeature:0.0.2-SNAPSHOT",
   "bundles":[
     { "id": "org.eclipse.sensinact.gateway.southbound.virtual:virtual-temperature-sensor:0.0.2-SNAPSHOT" }
   ],

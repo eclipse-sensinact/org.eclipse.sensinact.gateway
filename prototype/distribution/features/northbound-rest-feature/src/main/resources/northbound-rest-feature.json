@@ -5,6 +5,7 @@
     { "id": "org.eclipse.sensinact.gateway.northbound.filters:filters.core:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.filters:ldap:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound:query-handler:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.security:authentication-api:0.0.2-SNAPSHOT" },
     { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0" },
     { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.14.0" },
     { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:2.14.0" }
