@@ -29,6 +29,7 @@
 	org.apache.felix.http.jetty;version='[5.0.0,5.0.1)',\
 	org.apache.felix.http.servlet-api;version='[2.1.0,2.1.1)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
+	org.eclipse.jetty.servlet-api;version='[5.0.2,5.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-callback-whiteboard;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-callback-whiteboard-tests;version='[0.0.2,0.0.3)',\
 	org.mockito.junit-jupiter;version='[4.7.0,4.7.1)',\
