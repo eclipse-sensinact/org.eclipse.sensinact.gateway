@@ -47,8 +47,14 @@
 	org.eclipse.emf.ecore.xmi;version='[2.18.0,2.18.1)',\
 	org.eclipse.jetty.alpn.client;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.client;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.jndi;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.plus;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.webapp;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.api;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.client;version='[11.0.13,11.0.14)',\
@@ -71,7 +77,6 @@
 	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.websocket;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.websocket-tests;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.api;version='[5.0.0,5.0.1)',\
 	org.gecko.emf.osgi.component;version='[5.0.0,5.0.1)',\
 	org.objectweb.asm;version='[9.4.0,9.4.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
