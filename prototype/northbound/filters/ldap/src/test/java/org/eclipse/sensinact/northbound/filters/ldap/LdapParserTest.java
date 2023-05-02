@@ -68,11 +68,6 @@ public class LdapParserTest {
                 return this;
             }
 
-            /*
-             * (non-Javadoc)
-             * 
-             * @see org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot#isSet()
-             */
             @Override
             public boolean isSet() {
                 return true;
@@ -139,6 +134,7 @@ public class LdapParserTest {
     @Test
     void testPresence() throws Exception {
         for (Object value : List.of("test", 42, 51L, 43.5)) {
+
             ResourceSnapshot rc = makeResource("test", "hello", value);
             ICriterion filter = LdapParser.parse("(test.hello=*)");
 

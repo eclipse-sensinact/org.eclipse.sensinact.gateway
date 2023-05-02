@@ -32,7 +32,7 @@
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>

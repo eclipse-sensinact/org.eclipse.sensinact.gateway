@@ -41,7 +41,7 @@
       <artifactId>org.osgi.service.typedevent</artifactId>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
