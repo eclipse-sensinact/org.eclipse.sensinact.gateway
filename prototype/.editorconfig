@@ -14,6 +14,8 @@ trim_trailing_whitespace = true
 
 [*.{xml,json,jj}]
 indent_size = 2
+trim_trailing_whitespace = unset
+insert_final_newline = unset
 
 [*.{md,g4}]
 trim_trailing_whitespace = false
@@ -22,6 +24,7 @@ indent_size = 1
 [*.bndrun]
 indent_style = tab
 insert_final_newline = false
+trim_trailing_whitespace = false
 
 # Custom rules for unit tests with oddly named resource files
 [distribution/launcher/src/test/resources/**.feature]
