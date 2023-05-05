@@ -16,8 +16,8 @@
     { "id": "org.eclipse.emf:org.eclipse.emf.ecore:2.33.0" },
     { "id": "org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.18.0" },
     { "id": "org.slf4j:log4j-over-slf4j:1.7.36" },
-    { "id": "org.geckoprojects.emf:org.gecko.emf.osgi.api:4.6.0-SNAPSHOT" },
-    { "id": "org.geckoprojects.emf:org.gecko.emf.osgi.component:4.6.0-SNAPSHOT" },
+    { "id": "org.geckoprojects.emf:org.gecko.emf.osgi.api:4.6.2" },
+    { "id": "org.geckoprojects.emf:org.gecko.emf.osgi.component:4.6.2" },
     { "id": "org.apache.aries.component-dsl:org.apache.aries.component-dsl.component-dsl:1.2.2" },
     { "id": "org.apache.aries.typedevent:org.apache.aries.typedevent.bus:0.0.2-SNAPSHOT" }
   ]
