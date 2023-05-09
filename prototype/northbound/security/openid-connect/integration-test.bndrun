@@ -43,8 +43,8 @@
 	org.eclipse.sensinact.gateway.northbound.security.authentication-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.openid-connect;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.openid-connect-tests;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.api;version='[4.6.0,4.6.1)',\
-	org.gecko.emf.osgi.component;version='[4.6.0,4.6.1)',\
+	org.gecko.emf.osgi.api;version='[4.6.2,4.6.3)',\
+	org.gecko.emf.osgi.component;version='[4.6.2,4.6.3)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
