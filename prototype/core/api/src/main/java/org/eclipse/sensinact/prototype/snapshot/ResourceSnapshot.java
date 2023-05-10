@@ -22,6 +22,8 @@ public interface ResourceSnapshot extends Snapshot {
 
     ServiceSnapshot getService();
 
+    boolean isSet();
+
     TimedValue<?> getValue();
 
     Map<String, Object> getMetadata();

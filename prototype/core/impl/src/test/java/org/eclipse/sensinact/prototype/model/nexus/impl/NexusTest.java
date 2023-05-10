@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -28,17 +30,25 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Map;
 
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.emf.ecore.resource.URIConverter;
+import org.eclipse.emf.ecore.resource.URIHandler;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,14 +120,101 @@ public class NexusTest {
         @Test
         void basicTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            resourceSet.setURIConverter(new URIConverter() {
+
+                @Override
+                public void setAttributes(URI uri, Map<String, ?> attributes, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+
+                }
+
+                @Override
+                public URI normalize(URI uri) {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public Map<URI, URI> getURIMap() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public EList<URIHandler> getURIHandlers() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public URIHandler getURIHandler(URI uri) {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public EList<ContentHandler> getContentHandlers() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public Map<String, ?> getAttributes(URI uri, Map<?, ?> options) {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public boolean exists(URI uri, Map<?, ?> options) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public void delete(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+
+                }
+
+                @Override
+                public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public OutputStream createOutputStream(URI uri) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public InputStream createInputStream(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public InputStream createInputStream(URI uri) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public Map<String, ?> contentDescription(URI uri, Map<?, ?> options) throws IOException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+            });
+
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EReference service = nexus.createService(model, "testservice", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
 
@@ -149,7 +246,7 @@ public class NexusTest {
         @Test
         void sensiNactProvider() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Collection<Provider> providers = nexus.getProviders();
 
@@ -179,7 +276,7 @@ public class NexusTest {
             EStructuralFeature startedFeature = eClass.getEStructuralFeature("started");
 
             assertNotNull(startedFeature);
-            assertEquals(startedFeature.getEType(), SensiNactPackage.eINSTANCE.getEInstant());
+            assertEquals(startedFeature.getEType(), ProviderPackage.eINSTANCE.getEInstant());
 
             Instant started = (Instant) service.eGet(startedFeature);
             assertNotNull(started);
@@ -189,14 +286,14 @@ public class NexusTest {
         @Test
         void basicServiceExtensionTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EReference service = nexus.createService(model, "testservice", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
 
@@ -214,7 +311,7 @@ public class NexusTest {
             assertEquals("test", value);
 
             EAttribute resource2 = nexus.createResource(service.getEReferenceType(), "testValue2", String.class, now,
-                    null, accumulator);
+                    null);
             nexus.handleDataUpdate("TestModel", p, service, resource2, "test", Instant.now());
 
             Provider updatedProvider = nexus.getProvider("TestModel", "testprovider");
@@ -238,14 +335,14 @@ public class NexusTest {
         @Test
         void basicSecondServiceTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EReference service = nexus.createService(model, "testservice", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
 
@@ -263,9 +360,9 @@ public class NexusTest {
             Object value = svc.eGet(valueFeature);
             assertEquals("test", value);
 
-            EReference service2 = nexus.createService(model, "testservice2", now, accumulator);
+            EReference service2 = nexus.createService(model, "testservice2", now);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
+                    null);
             nexus.handleDataUpdate("TestModel", p, service2, resource2, "test2", Instant.now());
 
             svc = (Service) p.eGet(serviceFeature);
@@ -291,17 +388,17 @@ public class NexusTest {
 
         @Test
         void basicFullProviderTest() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
-                EClass model = nexus.createModel("model_" + modelIdx, Instant.now(), accumulator);
+                EClass model = nexus.createModel("model_" + modelIdx, Instant.now());
                 for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
-                    EReference service = nexus.createService(model, "service_" + svcIdx, Instant.now(), accumulator);
+                    EReference service = nexus.createService(model, "service_" + svcIdx, Instant.now());
                     EAttribute resource = nexus.createResource(service.getEReferenceType(), "resource", Integer.class,
-                            Instant.now(), null, accumulator);
+                            Instant.now(), null);
                     Provider p;
                     if (svcIdx == 0) {
-                        p = nexus.createProviderInstance(nexus.getModelName(model), "provider_" + modelIdx,
-                                Instant.now(), accumulator);
+                        p = nexus.createProviderInstance(EMFUtil.getModelName(model), "provider_" + modelIdx,
+                                Instant.now());
                     } else {
                         p = nexus.getProvider("provider_" + modelIdx);
                     }
@@ -331,24 +428,24 @@ public class NexusTest {
         @Test
         void basicPersistanceTest() throws IOException {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
-            EReference service2 = nexus.createService(model, "testservice2", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EReference service = nexus.createService(model, "testservice", now);
+            EReference service2 = nexus.createService(model, "testservice2", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
+                    null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
             nexus.handleDataUpdate("TestModel", p, service2, resource2, "test2", now);
 
             nexus.shutDown();
 
-            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Provider provider = nexus.getProvider("TestModel", "testprovider");
             assertNotNull(provider);
             EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice2");
@@ -367,24 +464,24 @@ public class NexusTest {
         @Test
         void basicPersistanceTestMultiple() throws IOException {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EClass model2 = nexus.createModel("TestModelNew", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
-            EReference service2 = nexus.createService(model2, "testservice2", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EClass model2 = nexus.createModel("TestModelNew", now);
+            EReference service = nexus.createService(model, "testservice", now);
+            EReference service2 = nexus.createService(model2, "testservice2", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
+                    null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            EClass model3 = nexus.createModel("something_else", now, accumulator);
-            EReference service3 = nexus.createService(model3, "whatever", now, accumulator);
+                    null);
+            EClass model3 = nexus.createModel("something_else", now);
+            EReference service3 = nexus.createService(model3, "whatever", now);
             EAttribute resource3 = nexus.createResource(service3.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
-            Provider p2 = nexus.createProviderInstance("TestModelNew", "testproviderNew", now, accumulator);
-            Provider p3 = nexus.createProviderInstance("something_else", "something_else", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
+            Provider p2 = nexus.createProviderInstance("TestModelNew", "testproviderNew", now);
+            Provider p3 = nexus.createProviderInstance("something_else", "something_else", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
             nexus.handleDataUpdate("TestModelNew", p2, service2, resource2, "test2", now);
@@ -392,7 +489,7 @@ public class NexusTest {
 
             nexus.shutDown();
 
-            nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             assertObject(nexus, "TestModel", "testprovider", "testservice", "testValue", "test");
             assertObject(nexus, "TestModelNew", "testproviderNew", "testservice2", "testValue", "test2");
@@ -418,14 +515,14 @@ public class NexusTest {
 
         @Test
         void testFindProviderWithoutModel() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EReference service = nexus.createService(model, "testservice", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
 
@@ -440,26 +537,26 @@ public class NexusTest {
 
         @Test
         void testUnableToCreateProviderNoModel() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 
             assertThrows(IllegalArgumentException.class,
-                    () -> nexus.createProviderInstance("TestModel", "testprovider", now, accumulator));
+                    () -> nexus.createProviderInstance("TestModel", "testprovider", now));
         }
 
         @Test
         void testUnableToCreateProviderDifferentModelAndClashingId() {
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 
-            nexus.createModel("TestModel", now, accumulator);
-            nexus.createModel("TestModel2", now, accumulator);
-            nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
+            nexus.createModel("TestModel", now);
+            nexus.createModel("TestModel2", now);
+            nexus.createProviderInstance("TestModel", "testprovider", now);
 
             assertThrows(IllegalArgumentException.class,
-                    () -> nexus.createProviderInstance("TestModel2", "testprovider", now, accumulator));
+                    () -> nexus.createProviderInstance("TestModel2", "testprovider", now));
         }
     }
 
@@ -469,23 +566,23 @@ public class NexusTest {
         @Test
         void addLink() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
             Instant now = Instant.now();
 
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
-            EReference service2 = nexus.createService(model, "testservice2", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EReference service = nexus.createService(model, "testservice", now);
+            EReference service2 = nexus.createService(model, "testservice2", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
+                    null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            EClass model2 = nexus.createModel("something_else", now, accumulator);
-            EReference service3 = nexus.createService(model2, "whatever", now, accumulator);
+                    null);
+            EClass model2 = nexus.createModel("something_else", now);
+            EReference service3 = nexus.createService(model2, "whatever", now);
             EAttribute resource3 = nexus.createResource(service3.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
-            Provider p2 = nexus.createProviderInstance("TestModel", "testproviderNew", now, accumulator);
-            Provider p3 = nexus.createProviderInstance("something_else", "something_else", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
+            Provider p2 = nexus.createProviderInstance("TestModel", "testproviderNew", now);
+            Provider p3 = nexus.createProviderInstance("something_else", "something_else", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
             nexus.handleDataUpdate("TestModel", p2, service2, resource2, "test2", now);
@@ -505,24 +602,24 @@ public class NexusTest {
         @Test
         void removeLink() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
 
             Instant now = Instant.now();
 
-            EClass model = nexus.createModel("TestModel", now, accumulator);
-            EReference service = nexus.createService(model, "testservice", now, accumulator);
-            EReference service2 = nexus.createService(model, "testservice2", now, accumulator);
+            EClass model = nexus.createModel("TestModel", now);
+            EReference service = nexus.createService(model, "testservice", now);
+            EReference service2 = nexus.createService(model, "testservice2", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
+                    null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            EClass model2 = nexus.createModel("something_else", now, accumulator);
-            EReference service3 = nexus.createService(model2, "whatever", now, accumulator);
+                    null);
+            EClass model2 = nexus.createModel("something_else", now);
+            EReference service3 = nexus.createService(model2, "whatever", now);
             EAttribute resource3 = nexus.createResource(service3.getEReferenceType(), "testValue", String.class, now,
-                    null, accumulator);
-            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now, accumulator);
-            Provider p2 = nexus.createProviderInstance("TestModel", "testproviderNew", now, accumulator);
-            Provider p3 = nexus.createProviderInstance("something_else", "something_else", now, accumulator);
+                    null);
+            Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
+            Provider p2 = nexus.createProviderInstance("TestModel", "testproviderNew", now);
+            Provider p3 = nexus.createProviderInstance("something_else", "something_else", now);
 
             nexus.handleDataUpdate("TestModel", p, service, resource, "test", now);
             nexus.handleDataUpdate("TestModel", p2, service2, resource2, "test2", now);

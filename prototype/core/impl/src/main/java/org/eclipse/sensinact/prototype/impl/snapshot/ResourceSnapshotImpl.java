@@ -18,11 +18,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.ETypedElement;
-import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.impl.ResourceImpl;
-import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -65,12 +65,12 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         this.resourceType = ResourceImpl.findResourceType(rcFeature);
 
         Service modelService = parent.getModelService();
-        final ResourceMetadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
+        final Metadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
         if (rcMetadata == null) {
             this.metadata = Map.of();
         } else {
             final Map<String, Object> rcMeta = new HashMap<>();
-            rcMeta.putAll(EMFUtil.toEObjectAttributesToMap(rcMetadata));
+            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(rcMetadata, rcFeature));
             this.metadata = rcMeta;
         }
     }
@@ -97,6 +97,11 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
 
     public void setValue(final TimedValue<?> value) {
         this.rcValue = value;
+    }
+
+    @Override
+    public boolean isSet() {
+        return getValue() != null && getValue().getTimestamp() != null;
     }
 
     public Class<?> getType() {

@@ -17,14 +17,21 @@ import java.time.Instant;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.SensiNactSessionManager;
+import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
+import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.security.UserInfo;
+import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -50,6 +57,9 @@ public class AbstractIntegrationTest {
     protected PrototypePush push;
 
     @InjectService
+    protected GatewayThread thread;
+
+    @InjectService
     protected SensiNactSessionManager sessionManager;
     protected SensiNactSession session;
 
@@ -64,6 +74,15 @@ public class AbstractIntegrationTest {
     void stop() {
         session.expire();
         session = null;
+
+        thread.execute(new AbstractSensinactCommand<Void>() {
+            @Override
+            protected Promise<Void> call(final SensinactDigitalTwin twin, final SensinactModelManager modelMgr,
+                    final PromiseFactory promiseFactory) {
+                twin.getProviders().forEach(SensinactProvider::delete);
+                return null;
+            }
+        });
     }
 
     protected void createResource(String provider, String service, String resource, Object value) {

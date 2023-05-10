@@ -42,7 +42,7 @@ import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.model.Service;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.osgi.framework.Constants;
 import org.osgi.util.promise.Deferred;

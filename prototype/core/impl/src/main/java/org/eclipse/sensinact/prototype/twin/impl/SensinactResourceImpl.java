@@ -22,14 +22,15 @@ import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.ValueType;
 import org.eclipse.sensinact.prototype.model.impl.ResourceImpl;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
@@ -99,7 +100,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
         }
 
-        modelNexus.handleDataUpdate(modelNexus.getModelName(provider.eClass()), provider, service,
+        modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
                 (EStructuralFeature) resource, value, timestamp);
         return promiseFactory.resolved(null);
     }
@@ -118,7 +119,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         if (svc != null) {
             value = svc.eGet((EAttribute) resource);
             // Get the resource metadata
-            final ResourceMetadata metadata = svc.getMetadata().get(resource);
+            final Metadata metadata = svc.getMetadata().get(resource);
             if (metadata != null) {
                 timestamp = metadata.getTimestamp();
             } else {

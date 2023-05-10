@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
     <artifactId>features</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
   <packaging>pom</packaging>
@@ -15,12 +15,11 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.jetty</artifactId>
-      <version>5.0.0-RC1</version>
+      <version>5.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.http.servlet-api</artifactId>
-      <version>2.1.0</version>
     </dependency>
   </dependencies>
 

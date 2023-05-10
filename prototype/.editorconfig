@@ -22,6 +22,7 @@ indent_size = 1
 [*.bndrun]
 indent_style = tab
 insert_final_newline = false
+trim_trailing_whitespace = false
 
 # Custom rules for unit tests with oddly named resource files
 [distribution/launcher/src/test/resources/**.feature]
@@ -31,6 +32,14 @@ indent_size = 2
 insert_final_newline = false
 
 [core/models/src/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+[**/*.{ecore,genmodel}]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset

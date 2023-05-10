@@ -26,16 +26,16 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.model.core.Provider;
-import org.eclipse.sensinact.model.core.ResourceMetadata;
-import org.eclipse.sensinact.model.core.Service;
+import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ProviderSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ResourceSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ServiceSnapshotImpl;
 import org.eclipse.sensinact.prototype.model.ResourceType;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
@@ -47,13 +47,11 @@ import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactDigitalTwinImpl extends CommandScopedImpl implements SensinactDigitalTwin {
 
-    private final NotificationAccumulator accumulator;
     private final ModelNexus nexusImpl;
     private final PromiseFactory pf;
 
-    public SensinactDigitalTwinImpl(NotificationAccumulator accumulator, ModelNexus nexusImpl, PromiseFactory pf) {
+    public SensinactDigitalTwinImpl(ModelNexus nexusImpl, PromiseFactory pf) {
         super(new AtomicBoolean(true));
-        this.accumulator = accumulator;
         this.nexusImpl = nexusImpl;
         this.pf = pf;
     }
@@ -64,6 +62,27 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     public List<SensinactProviderImpl> getProviders() {
         checkValid();
         return nexusImpl.getProviders().stream().map(this::toProvider).collect(Collectors.toList());
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin#getProvider(org.
+     * eclipse.emf.ecore.EClass, java.lang.String)
+     */
+    @Override
+    public SensinactProviderImpl getProvider(EClass model, String id) {
+        if (model != ProviderPackage.Literals.PROVIDER
+                || !model.getEAllSuperTypes().contains(ProviderPackage.Literals.PROVIDER)) {
+            throw new IllegalArgumentException("The requested eClass must have Provider as a super class");
+        }
+        final Provider provider = nexusImpl.getProvider(model, id);
+        if (provider == null) {
+            return null;
+        }
+
+        return toProvider(provider);
     }
 
     /**
@@ -98,13 +117,13 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
     @Override
     public SensinactProvider createProvider(String model, String providerName) {
-        return toProvider(nexusImpl.createProviderInstance(model, providerName, accumulator));
+        return toProvider(nexusImpl.createProviderInstance(model, providerName));
     }
 
     @Override
     public SensinactProvider createProvider(String model, String providerName, Instant instant) {
         return instant == null ? createProvider(model, providerName)
-                : toProvider(nexusImpl.createProviderInstance(model, providerName, instant, accumulator));
+                : toProvider(nexusImpl.createProviderInstance(model, providerName, instant));
     }
 
     @Override
@@ -201,13 +220,13 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         final Service svc = (Service) provider.eGet(svcFeature);
 
         final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resource);
+
         if (rcFeature == null) {
-            // No value
-            return new TimedValueImpl<T>(null, null);
+            return null;
         }
 
         // Get the resource metadata
-        final ResourceMetadata metadata = svc.getMetadata().get(rcFeature);
+        final Metadata metadata = svc.getMetadata().get(rcFeature);
         final Instant timestamp;
         if (metadata != null) {
             timestamp = metadata.getTimestamp();
@@ -265,7 +284,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Filter providers according to their services
         providersStream = providersStream.map(p -> {
             final Provider modelProvider = p.getModelProvider();
-            nexusImpl.getServicesForModel(modelProvider.eClass()).forEach((feature) -> {
+            nexusImpl.getServicesForModel(modelProvider.eClass()).filter(modelProvider::eIsSet).forEach((feature) -> {
                 p.add(new ServiceSnapshotImpl(p, feature.getName(), (Service) modelProvider.eGet(feature),
                         snapshotTime));
             });
@@ -301,7 +320,12 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                     // Get the resource metadata
                     final Service svc = rc.getService().getModelService();
                     final ETypedElement rcFeature = rc.getFeature();
-                    final ResourceMetadata metadata = svc == null ? null : svc.getMetadata().get(rcFeature);
+
+                    if (!svc.eIsSet((EStructuralFeature) rcFeature)) {
+                        return;
+                    }
+
+                    final Metadata metadata = svc == null ? null : svc.getMetadata().get(rcFeature);
                     final Instant timestamp;
                     if (metadata != null) {
                         timestamp = metadata.getTimestamp();

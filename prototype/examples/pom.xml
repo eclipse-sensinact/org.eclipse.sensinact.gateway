@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway</groupId>
     <artifactId>sensinact-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.sensinact.gateway.examples</groupId>
   <artifactId>examples</artifactId>
@@ -39,5 +39,4 @@
     <module>generic</module>
     <module>notification</module>
   </modules>
-
 </project>

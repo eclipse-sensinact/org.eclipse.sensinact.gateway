@@ -162,7 +162,15 @@ public class ResourceNotificationsTest {
             push.pushUpdate(dto);
 
             // Wait for it locally
-            ResourceDataNotification localNotif = queue.poll(1, TimeUnit.SECONDS);
+            // First will be admin friendlyName
+            ResourceDataNotification friendlyName = queue.poll(1, TimeUnit.SECONDS);
+            assertNotNull(friendlyName);
+            assertEquals("friendlyName", friendlyName.resource,
+                    "First event was not FriendlyName, so the Provider already exists. It is likely that the data folder wasn't cleared and this is a remnant of a previous testrun.");
+            // second will be will be admin modelURI
+            assertNotNull(queue.poll(1, TimeUnit.SECONDS));
+            // now ours should arrive
+            ResourceDataNotification localNotif = queue.poll(2, TimeUnit.SECONDS);
             utils.assertNotification(dto, localNotif);
 
             // Wait for its SSE equivalent

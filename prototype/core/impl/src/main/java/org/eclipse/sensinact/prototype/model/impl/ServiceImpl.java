@@ -23,23 +23,19 @@ import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.Resource;
 import org.eclipse.sensinact.prototype.model.ResourceBuilder;
 import org.eclipse.sensinact.prototype.model.Service;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 
 public class ServiceImpl extends CommandScopedImpl implements Service {
 
     private final Model model;
     private final EReference service;
     private final ModelNexus nexusImpl;
-    private NotificationAccumulator accumulator;
 
-    public ServiceImpl(AtomicBoolean active, Model model, EReference service, ModelNexus nexusImpl,
-            NotificationAccumulator accumulator) {
+    public ServiceImpl(AtomicBoolean active, Model model, EReference service, ModelNexus nexusImpl) {
         super(active);
         this.model = model;
         this.service = service;
         this.nexusImpl = nexusImpl;
-        this.accumulator = accumulator;
     }
 
     @Override
@@ -63,7 +59,7 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
     @Override
     public ResourceBuilder<Resource, Object> createResource(String resource) {
         checkValid();
-        return new ResourceBuilderImpl<Resource, Object>(active, null, this, resource, nexusImpl, accumulator);
+        return new ResourceBuilderImpl<Resource, Object>(active, null, this, resource, nexusImpl);
     }
 
     @Override

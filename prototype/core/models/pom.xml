@@ -15,93 +15,16 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.core</groupId>
     <artifactId>core</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
+  <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
   <artifactId>models</artifactId>
-  <name>SensiNact core models</name>
-  <description>Models for sensinact gateway core.</description>
-  <!-- No integration tests -->
-  <properties>
-    <bnd-tests.skip>true</bnd-tests.skip>
-  </properties>
+  <packaging>pom</packaging>
+  <name>Eclipse sensiNact model components</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.component.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>annotation</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>geo-json</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.geckoprojects.emf</groupId>
-      <artifactId>org.gecko.emf.osgi.api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.geckoprojects.emf</groupId>
-      <artifactId>org.gecko.emf.osgi.component</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.ecore</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.emf</groupId>
-      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>provider</module>
+    <module>metadata</module>
+  </modules>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-maven-plugin</artifactId>
-      </plugin>
-<!--
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-generate-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
-        <configuration>
-          <externalPlugins>
-            <dependency>
-              <groupId>org.geckoprojects.emf</groupId>
-              <artifactId>org.gecko.emf.osgi.codegen</artifactId>
-            </dependency>
-          </externalPlugins>
-          <steps>
-            <step>
-              <trigger>src/main/resources/model/sensinact.genmodel</trigger>
-              <generateCommand>geckoEMF</generateCommand>
-              <output>src/main/java</output>
-              <clear>false</clear>
-              <properties>
-                <genmodel>src/main/resources/model/sensinact.genmodel</genmodel>
-              </properties>
-            </step>
-          </steps>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      -->
-    </plugins>
-  </build>
 </project>

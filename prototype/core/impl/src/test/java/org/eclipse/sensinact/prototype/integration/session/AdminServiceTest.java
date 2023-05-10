@@ -88,7 +88,7 @@ public class AdminServiceTest {
         // location is not set, so it's timestamp is EPOCH
         descr = session.describeResource(PROVIDER, "admin", "location");
         assertNull(descr.value);
-        assertEquals(Instant.EPOCH, descr.timestamp);
+        assertNull(descr.timestamp);
 
         // Ensure we reject setting a value with an earlier timestamp
         session.setResourceValue(PROVIDER, "admin", "friendlyName", "foo", timestamp.minusSeconds(1));

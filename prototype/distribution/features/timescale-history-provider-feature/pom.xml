@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
     <artifactId>features</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>timescale-history-provider-feature</artifactId>
   <packaging>pom</packaging>
@@ -15,12 +15,12 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
       <artifactId>history-api</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
       <artifactId>timescale-provider</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -103,7 +103,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>core-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>core-feature.json</destFileName>
@@ -111,7 +111,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>jakarta-servlet-whiteboard-feature.json</destFileName>
@@ -119,7 +119,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>jakarta-rest-whiteboard-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>jakarta-rest-whiteboard-feature.json</destFileName>
@@ -127,7 +127,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>northbound-rest-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>northbound-rest-feature.json</destFileName>
@@ -135,7 +135,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>virtual-temperature-sensor-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>virtual-temperature-sensor-feature.json</destFileName>
@@ -151,35 +151,35 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>core-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>jakarta-rest-whiteboard-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>northbound-rest-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>virtual-temperature-sensor-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>

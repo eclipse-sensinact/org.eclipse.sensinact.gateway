@@ -17,26 +17,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.ModelBuilder;
 import org.eclipse.sensinact.prototype.model.ServiceBuilder;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 
 public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements ModelBuilder {
 
-    private final NotificationAccumulator accumulator;
     private final ModelNexus nexusImpl;
     private final String name;
     private final List<NestableBuilderImpl<?, ModelImpl, ?>> nested = new ArrayList<>();
     private Instant creationTime;
+    private final EClass modelEClass;
 
-    public ModelBuilderImpl(AtomicBoolean active, NotificationAccumulator accumulator, ModelNexus nexusImpl,
-            String name) {
+    public ModelBuilderImpl(AtomicBoolean active, ModelNexus nexusImpl, String name) {
         super(active);
-        this.accumulator = accumulator;
         this.nexusImpl = nexusImpl;
         this.name = name;
+        this.modelEClass = null;
+    }
+
+    public ModelBuilderImpl(AtomicBoolean active, ModelNexus nexusImpl, EClass model) {
+        super(active);
+        this.nexusImpl = nexusImpl;
+        this.modelEClass = model;
+        this.name = EMFUtil.getModelName(model);
     }
 
     @Override
@@ -61,8 +68,10 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
     @Override
     public ServiceBuilder<ModelBuilder> withService(String name) {
         checkValid();
-        ServiceBuilderImpl<ModelBuilder> sb = new ServiceBuilderImpl<>(active, this, null, name, nexusImpl,
-                accumulator);
+        if (modelEClass != null) {
+            throw new RuntimeException("Extendable Ecore Models arent supported yet.");
+        }
+        ServiceBuilderImpl<ModelBuilder> sb = new ServiceBuilderImpl<>(active, this, null, name, nexusImpl);
         nested.add(sb);
         return sb;
     }
@@ -70,9 +79,13 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
     @Override
     protected Model doBuild() {
         checkValid();
+        if (modelEClass != null) {
+            return new ModelImpl(active, name,
+                    nexusImpl.registerModel(modelEClass, creationTime == null ? Instant.now() : creationTime),
+                    nexusImpl);
+        }
         ModelImpl modelImpl = new ModelImpl(active, name,
-                nexusImpl.createModel(name, creationTime == null ? Instant.now() : creationTime, accumulator),
-                nexusImpl, accumulator);
+                nexusImpl.createModel(name, creationTime == null ? Instant.now() : creationTime), nexusImpl);
         nested.forEach(n -> n.doBuild(modelImpl));
         return modelImpl;
     }

@@ -5,7 +5,8 @@
 
 -runrequires: \
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
-	bnd.identity;id='slf4j.simple'
+	bnd.identity;id='slf4j.simple',\
+	bnd.identity;id='org.eclipse.jetty.servlet-api'
 -resolve.effective: active
 
 -runee: JavaSE-11
@@ -28,14 +29,14 @@
 	org.apache.felix.http.jetty;version='[5.0.0,5.0.1)',\
 	org.apache.felix.http.servlet-api;version='[2.1.0,2.1.1)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
-	org.eclipse.sensinact.gateway.southbound.http.http-callback-whiteboard;version='[0.0.1,0.0.2)',\
-	org.eclipse.sensinact.gateway.southbound.http.http-callback-whiteboard-tests;version='[0.0.1,0.0.2)',\
+	org.eclipse.jetty.servlet-api;version='[5.0.2,5.0.3)',\
+	org.eclipse.sensinact.gateway.southbound.http.http-callback-whiteboard;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.southbound.http.http-callback-whiteboard-tests;version='[0.0.2,0.0.3)',\
 	org.mockito.junit-jupiter;version='[4.7.0,4.7.1)',\
 	org.mockito.mockito-core;version='[4.7.0,4.7.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
-	org.osgi.service.servlet;version='[2.0.0,2.0.1)',\
 	org.osgi.test.common;version='[1.2.1,1.2.2)',\
 	org.osgi.test.junit5;version='[1.2.1,1.2.2)',\
 	org.osgi.test.junit5.cm;version='[1.2.1,1.2.2)',\

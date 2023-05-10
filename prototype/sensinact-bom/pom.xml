@@ -15,17 +15,17 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway</groupId>
     <artifactId>sensinact-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>sensinact-bom</artifactId>
   <packaging>pom</packaging>
   <name>Eclipse sensiNact Bill of Materials</name>
   <description>Eclipse sensiNact Bill of Materials contains all modules of the core, north- and south-bound. Examples are not part ot the BOM.</description>
-  
+
   <properties>
-    <sensinact.version>0.0.1-SNAPSHOT</sensinact.version>
+    <sensinact.version>0.0.2-SNAPSHOT</sensinact.version>
   </properties>
-  
+
   <dependencyManagement>
     <dependencies>
       <dependency>

@@ -69,6 +69,11 @@ public class LdapParserTest {
             }
 
             @Override
+            public boolean isSet() {
+                return true;
+            }
+
+            @Override
             public ServiceSnapshot getService() {
                 return new ServiceSnapshot() {
 
@@ -129,6 +134,7 @@ public class LdapParserTest {
     @Test
     void testPresence() throws Exception {
         for (Object value : List.of("test", 42, 51L, 43.5)) {
+
             ResourceSnapshot rc = makeResource("test", "hello", value);
             ICriterion filter = LdapParser.parse("(test.hello=*)");
 

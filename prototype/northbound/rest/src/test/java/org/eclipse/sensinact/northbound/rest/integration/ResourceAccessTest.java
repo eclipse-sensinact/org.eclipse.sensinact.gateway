@@ -258,8 +258,8 @@ public class ResourceAccessTest {
         TypedResponse<?> result = utils.queryJson(
                 String.join("/", "providers", provider, "services", ADMIN, "resources", LOCATION, "GET"),
                 TypedResponse.class);
+        assertEquals(204, result.statusCode);
         ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
-        assertEquals(0, response.timestamp);
 
         queue = new ArrayBlockingQueue<>(32);
         SensiNactSession session = sessionManager.getDefaultSession(USER);
@@ -322,7 +322,7 @@ public class ResourceAccessTest {
         result = utils.queryJson(
                 String.join("/", "providers", PROVIDER, "services", ADMIN, "resources", LOCATION, "GET"),
                 TypedResponse.class);
-        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, ADMIN, LOCATION);
+        utils.assertResultNoContent(result, EResultType.GET_RESPONSE, PROVIDER, ADMIN, LOCATION);
         response = utils.convert(result, ResponseGetDTO.class);
         assertEquals(GeoJsonObject.class.getName(), response.type);
         assertNull(response.value);

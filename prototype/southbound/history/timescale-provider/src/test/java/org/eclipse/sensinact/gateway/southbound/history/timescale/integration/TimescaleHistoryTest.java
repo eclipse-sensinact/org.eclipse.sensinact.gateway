@@ -195,12 +195,16 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 3);
+            waitForRowCount("sensinact.text_data", 7);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement()
                             .executeQuery("SELECT * FROM sensinact.text_data WHERE provider = 'bar' ORDER BY time;")) {
 
+                assertTrue(result.next());
+                checkResult(result, "admin", "friendlyName", "bar", TS_2012);
+                // Just skip the modelURI
+                assertTrue(result.next());
                 assertTrue(result.next());
                 checkResult(result, "fizz", TS_2012);
                 assertTrue(result.next());
@@ -212,10 +216,15 @@ public class TimescaleHistoryTest {
         }
 
         private void checkResult(ResultSet result, String data, Instant timestamp) throws SQLException {
+            checkResult(result, "foobar", "foofoobarbar", data, timestamp);
+        }
+
+        private void checkResult(ResultSet result, String service, String resource, String data, Instant timestamp)
+                throws SQLException {
             assertEquals("foo", result.getString("model"));
             assertEquals("bar", result.getString("provider"));
-            assertEquals("foobar", result.getString("service"));
-            assertEquals("foofoobarbar", result.getString("resource"));
+            assertEquals(service, result.getString("service"));
+            assertEquals(resource, result.getString("resource"));
             assertEquals(data, result.getString("data"));
             assertEquals(Timestamp.from(timestamp), result.getTimestamp("time"));
         }
@@ -291,7 +300,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 3);
+            waitForRowCount("sensinact.text_data", 7);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "single") {
 
@@ -412,7 +421,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 3);
+            waitForRowCount("sensinact.text_data", 7);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
 
@@ -536,7 +545,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1000);
+            waitForRowCount("sensinact.text_data", 1004);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
 
@@ -608,7 +617,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1000);
+            waitForRowCount("sensinact.text_data", 1004);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
 
@@ -649,7 +658,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1000);
+            waitForRowCount("sensinact.text_data", 1002);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
 
@@ -721,7 +730,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1000);
+            waitForRowCount("sensinact.text_data", 1002);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
 
@@ -762,7 +771,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(1.0001d * i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1000);
+            waitForRowCount("sensinact.text_data", 1002);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
 
@@ -833,7 +842,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(1.0001d * i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1000);
+            waitForRowCount("sensinact.text_data", 1002);
 
             thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
 

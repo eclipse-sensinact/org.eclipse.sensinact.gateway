@@ -22,8 +22,12 @@ import static org.junit.jupiter.api.Assumptions.abort;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -117,6 +121,25 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                     if (current == count) {
                         return;
                     } else if (current > count) {
+                        try (ResultSet rs2 = conn.createStatement().executeQuery("SELECT * FROM " + table)) {
+                            int j = 0;
+                            ResultSetMetaData metaData = rs2.getMetaData();
+                            final int nbCols = metaData.getColumnCount();
+                            final Map<Integer, String> names = new HashMap<>();
+                            for (int col = 1; col <= nbCols; col++) {
+                                names.put(col, metaData.getColumnName(col));
+                            }
+                            final List<String> row = new ArrayList<>(nbCols);
+                            while (rs2.next()) {
+                                for (int col = 1; col <= nbCols; col++) {
+                                    row.add(names.get(col) + "=" + rs2.getObject(col));
+                                }
+                                System.out.println("* " + j++ + " / " + current + " => " + String.join(", ", row));
+                                row.clear();
+                            }
+
+                            System.out.flush();
+                        }
                         throw new AssertionFailedError("The count for table " + table + " was " + current
                                 + " which is larger than the expected " + count);
                     }
@@ -137,7 +160,8 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 4000; i++) {
             createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 1000);
+        // 1004: 1000 updates + history provider name & modelUri + foo provider name & modelUri
+        waitForRowCount("sensinact.text_data", 1004);
         waitForRowCount("sensinact.numeric_data", 4000);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",
@@ -183,7 +207,8 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("fizz", "buzz", "fizzbuzz", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 10);
+        // 14: 10 updates + history provider name & modelUri + fizz provider name & modelUri
+        waitForRowCount("sensinact.text_data", 14);
 
         String id = String.format("%s~%s~%s~%s", "fizz", "buzz", "fizzbuzz",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -200,7 +225,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 10);
+        waitForRowCount("sensinact.text_data", 14);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });

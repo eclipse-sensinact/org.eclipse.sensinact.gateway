@@ -77,12 +77,26 @@ public class TemperatureSensorTest {
         assertNotNull(notification);
         assertEquals("temp1", notification.provider);
         assertEquals("admin", notification.service);
+        assertEquals("friendlyName", notification.resource);
+
+        notification = queue.poll(5, TimeUnit.SECONDS);
+
+        assertNotNull(notification);
+        assertEquals("temp1", notification.provider);
+        assertEquals("admin", notification.service);
         assertEquals("location", notification.resource);
         assertNull(notification.oldValue);
         assertInstanceOf(Point.class, notification.newValue);
         Point p = (Point) notification.newValue;
         assertEquals(1.0d, p.coordinates.latitude);
         assertEquals(2.0d, p.coordinates.longitude);
+
+        notification = queue.poll(5, TimeUnit.SECONDS);
+
+        assertNotNull(notification);
+        assertEquals("temp1", notification.provider);
+        assertEquals("admin", notification.service);
+        assertEquals("modelUri", notification.resource);
 
         notification = queue.poll(100, TimeUnit.MILLISECONDS);
         assertNotNull(notification);

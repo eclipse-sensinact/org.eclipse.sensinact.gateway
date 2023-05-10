@@ -23,8 +23,7 @@ import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.Service;
 import org.eclipse.sensinact.prototype.model.ServiceBuilder;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 
 public class ModelImpl extends CommandScopedImpl implements Model {
 
@@ -34,15 +33,11 @@ public class ModelImpl extends CommandScopedImpl implements Model {
 
     private ModelNexus nexusImpl;
 
-    private final NotificationAccumulator accumulator;
-
-    public ModelImpl(AtomicBoolean active, String name, EClass eClass, ModelNexus nexusImpl,
-            NotificationAccumulator accumulator) {
+    public ModelImpl(AtomicBoolean active, String name, EClass eClass, ModelNexus nexusImpl) {
         super(active);
         this.name = name;
         this.eClass = eClass;
         this.nexusImpl = nexusImpl;
-        this.accumulator = accumulator;
     }
 
     @Override
@@ -66,7 +61,7 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     @Override
     public ServiceBuilder<Service> createService(String service) {
         checkValid();
-        return new ServiceBuilderImpl<>(active, null, this, service, nexusImpl, accumulator);
+        return new ServiceBuilderImpl<>(active, null, this, service, nexusImpl);
     }
 
     @Override
@@ -74,7 +69,7 @@ public class ModelImpl extends CommandScopedImpl implements Model {
         checkValid();
         // Use nexusImpl to get services reliably
         return nexusImpl.getServicesForModel(eClass)
-                .collect(toMap(EReference::getName, r -> new ServiceImpl(active, this, r, nexusImpl, accumulator)));
+                .collect(toMap(EReference::getName, r -> new ServiceImpl(active, this, r, nexusImpl)));
     }
 
     EClass getModelEClass() {

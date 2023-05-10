@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.annotation.verb.ACT;
 import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.eclipse.sensinact.prototype.annotation.verb.UriParam;
@@ -32,7 +32,7 @@ import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
@@ -78,9 +78,9 @@ public class WhiteboardImplTest {
     void start() throws NoSuchMethodException, SecurityException {
         resourceSet = EMFTestUtil.createResourceSet();
         whiteboard = new SensinactWhiteboard(thread);
-        nexus = new ModelNexus(resourceSet, SensiNactPackage.eINSTANCE, () -> accumulator, whiteboard::act);
-        manager = new SensinactModelManagerImpl(accumulator, nexus);
-        twinImpl = new SensinactDigitalTwinImpl(accumulator, nexus, promiseFactory);
+        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, whiteboard::act);
+        manager = new SensinactModelManagerImpl(nexus);
+        twinImpl = new SensinactDigitalTwinImpl(nexus, promiseFactory);
 
         Mockito.when(thread.getPromiseFactory()).thenReturn(promiseFactory);
 

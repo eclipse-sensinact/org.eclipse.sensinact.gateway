@@ -8,7 +8,8 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
+*   Data In Motion - Addeds Provider Push
 **********************************************************************/
 package org.eclipse.sensinact.prototype.impl;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
@@ -48,6 +50,10 @@ public class PrototypePushImpl implements PrototypePush {
 
     @Override
     public Promise<?> pushUpdate(Object o) {
+
+        if (o instanceof Provider) {
+            return thread.execute(new SaveProviderCommand((Provider) o));
+        }
 
         DataExtractor extractor;
 

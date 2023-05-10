@@ -19,35 +19,33 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.ModelBuilder;
 import org.eclipse.sensinact.prototype.model.SensinactModelManager;
-import org.eclipse.sensinact.prototype.model.nexus.impl.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
+import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 
 public class SensinactModelManagerImpl extends CommandScopedImpl implements SensinactModelManager {
 
-    private final NotificationAccumulator accumulator;
     private final ModelNexus nexusImpl;
 
-    public SensinactModelManagerImpl(NotificationAccumulator accumulator, ModelNexus nexusImpl) {
+    public SensinactModelManagerImpl(ModelNexus nexusImpl) {
         super(new AtomicBoolean(true));
-        this.accumulator = accumulator;
         this.nexusImpl = nexusImpl;
     }
 
     @Override
     public ModelBuilder createModel(String model) {
         checkValid();
-        return new ModelBuilderImpl(active, accumulator, nexusImpl, model);
+        return new ModelBuilderImpl(active, nexusImpl, model);
     }
 
     @Override
     public Model getModel(String model) {
         checkValid();
-        return nexusImpl.getModel(model).map(eClass -> new ModelImpl(active, model, eClass, nexusImpl, accumulator))
-                .orElse(null);
+        return nexusImpl.getModel(model).map(eClass -> new ModelImpl(active, model, eClass, nexusImpl)).orElse(null);
     }
 
     @Override
@@ -72,6 +70,33 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
     public Map<String, Model> getModels() {
         checkValid();
         return nexusImpl.getModelNames().stream().collect(toMap(identity(), this::getModel));
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.prototype.model.SensinactModelManager#getModel(org.
+     * eclipse.emf.ecore.EClass)
+     */
+    @Override
+    public Model getModel(EClass model) {
+        if (nexusImpl.registered(model)) {
+            return new ModelImpl(active, EMFUtil.getModelName(model), model, nexusImpl);
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.prototype.model.SensinactModelManager#createModel(org.
+     * eclipse.emf.ecore.EClass)
+     */
+    @Override
+    public ModelBuilder createModel(EClass model) {
+        return new ModelBuilderImpl(active, nexusImpl, model);
     }
 
 }

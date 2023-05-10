@@ -24,7 +24,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
@@ -55,7 +55,8 @@ public class GatewayThreadImplTest {
     TypedEventBus typedEventBus;
 
     @Spy
-    SensiNactPackage sensinactPackage = SensiNactPackage.eINSTANCE;
+    ProviderPackage providerPackage = ProviderPackage.eINSTANCE;
+
     @Spy
     ResourceSet resourceSet = EMFTestUtil.createResourceSet();;
 
@@ -75,7 +76,7 @@ public class GatewayThreadImplTest {
         }
         resourceSet = EMFTestUtil.createResourceSet();
 
-        thread = new GatewayThreadImpl(typedEventBus, resourceSet, sensinactPackage);
+        thread = new GatewayThreadImpl(typedEventBus, resourceSet, providerPackage);
     }
 
     @AfterEach

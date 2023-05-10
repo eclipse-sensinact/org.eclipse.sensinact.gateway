@@ -20,8 +20,8 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.model.core.SensiNactPackage;
-import org.eclipse.sensinact.prototype.model.nexus.impl.emf.EMFUtil;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.junit.jupiter.api.Test;
 
 public class EMFUtilTest {
@@ -36,7 +36,7 @@ public class EMFUtilTest {
         assertEquals(12.3d, o.coordinates.longitude);
         assertEquals(45.6d, o.coordinates.latitude);
 
-        o = (Point) EMFUtil.convertToTargetType(SensiNactPackage.eINSTANCE.getEGeoJsonObject(), point);
+        o = (Point) EMFUtil.convertToTargetType(ProviderPackage.eINSTANCE.getEGeoJsonObject(), point);
 
         assertEquals(GeoJsonType.Point, o.type);
         assertEquals(12.3d, o.coordinates.longitude);
@@ -53,7 +53,7 @@ public class EMFUtilTest {
         assertEquals(12.3d, o.coordinates.longitude);
         assertEquals(45.6d, o.coordinates.latitude);
 
-        o = (Point) EMFUtil.convertToTargetType(SensiNactPackage.eINSTANCE.getEGeoJsonObject(), point);
+        o = (Point) EMFUtil.convertToTargetType(ProviderPackage.eINSTANCE.getEGeoJsonObject(), point);
 
         assertEquals(GeoJsonType.Point, o.type);
         assertEquals(12.3d, o.coordinates.longitude);

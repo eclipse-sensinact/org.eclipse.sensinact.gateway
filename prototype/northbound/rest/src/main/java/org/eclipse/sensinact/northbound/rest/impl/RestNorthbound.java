@@ -302,7 +302,6 @@ public class RestNorthbound implements IRestNorthbound {
                 session.removeListener(listenerId.get());
                 return;
             }
-
             eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
                     .data(new ResourceLifecycleNotificationDTO(e)).build());
         };

@@ -18,12 +18,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
-import org.eclipse.sensinact.prototype.ResourceDescription;
 import org.eclipse.sensinact.prototype.SensiNactSession;
 import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
@@ -105,6 +105,10 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         }
     }
 
+    private List<ResourceSnapshot> listSetResources(EFilterContext context) {
+        return listResources(context).stream().filter(ResourceSnapshot::isSet).collect(Collectors.toList());
+    }
+
     private List<ResourceSnapshot> listResources(EFilterContext context) {
 
         final SensiNactSession userSession = getSession();
@@ -118,6 +122,25 @@ public class RootResourceAccessImpl implements RootResourceAccess {
             return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
                     .collect(Collectors.toList());
         }
+    }
+
+    private static Optional<ResourceSnapshot> getResource(final ProviderSnapshot provider, final String svcName,
+            final String rcName) {
+        return provider.getServices().stream().filter(s -> s.getName().equals(svcName))
+                .flatMap(s -> s.getResources().stream()).filter(r -> r.getName().equals(rcName)).findFirst();
+    }
+
+    private boolean hasResourceSet(final ProviderSnapshot provider, final String svcName, final String rcName) {
+        if (provider == null) {
+            return false;
+        }
+
+        Optional<ResourceSnapshot> resource = getResource(provider, svcName, rcName);
+        if (resource.isEmpty()) {
+            return false;
+        }
+
+        return resource.get().isSet();
     }
 
     @Override
@@ -135,7 +158,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Location> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
-        list.value = providers.stream().map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p)).collect(toList());
+        list.value = providers.stream()
+                .filter(p -> hasResourceSet(p, "admin", "location"))
+                .map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p)).collect(toList());
 
         return list;
     }
@@ -145,7 +170,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<HistoricalLocation> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
-        list.value = providers.stream().map(p -> DtoMapper.toHistoricalLocation(getMapper(), uriInfo, p))
+        list.value = providers.stream()
+                .filter(p -> hasResourceSet(p, "admin", "location"))
+                .map(p -> DtoMapper.toHistoricalLocation(getMapper(), uriInfo, p))
                 .collect(toList());
         return list;
     }
@@ -154,7 +181,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Datastream> getDatastreams() {
         ResultList<Datastream> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.DATASTREAMS);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.DATASTREAMS);
         list.value = resources.stream().map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r)).collect(toList());
 
         return list;
@@ -164,7 +191,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Sensor> getSensors() {
         ResultList<Sensor> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.SENSORS);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.SENSORS);
         list.value = resources.stream().map(r -> DtoMapper.toSensor(uriInfo, r)).collect(toList());
 
         return list;
@@ -175,7 +202,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<Observation> getObservations() {
         ResultList<Observation> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.OBSERVATIONS);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVATIONS);
         list.value = resources.stream().map(r -> DtoMapper.toObservation(uriInfo, r)).collect(toList());
 
         return list;
@@ -185,7 +212,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     public ResultList<ObservedProperty> getObservedProperties() {
         ResultList<ObservedProperty> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listResources(EFilterContext.OBSERVED_PROPERTIES);
+        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVED_PROPERTIES);
         list.value = resources.stream().map(r -> DtoMapper.toObservedProperty(uriInfo, r)).collect(toList());
 
         return list;
@@ -206,9 +233,13 @@ public class RootResourceAccessImpl implements RootResourceAccess {
     static ResultList<Observation> getObservationList(SensiNactSession userSession, UriInfo uriInfo,
             Application application, String provider, String service, String resource) {
 
-        ResourceDescription rd;
+        ResourceSnapshot rd;
         try {
-            rd = userSession.describeResource(provider, service, resource);
+            List<ProviderSnapshot> list = userSession.filteredSnapshot(new SnapshotFilter(provider, service, resource));
+            if (list.isEmpty()) {
+                throw new NotFoundException(String.join("~", provider, service, resource));
+            }
+            rd = getResource(list.get(0), service, resource).orElseThrow(() -> new NotFoundException(String.join("~", provider, service, resource)));
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException(iae);
         }
@@ -245,7 +276,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
             } while (results.size() < count && results.size() < maxResults);
         }
 
-        if (results.isEmpty()) {
+        if (results.isEmpty() && rd.isSet()) {
             results.add(DtoMapper.toObservation(uriInfo, rd));
         }
 
