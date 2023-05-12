@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.ldap.impl;
+package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 
 /**
  * LDAP operators (AND, OR)

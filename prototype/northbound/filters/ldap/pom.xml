@@ -20,6 +20,9 @@
   <artifactId>ldap</artifactId>
   <name>SensiNact Northbound Filters :: LDAP</name>
   <description>Converts LDAP filters to SensiNact filters</description>
+  <properties>
+    <antlr.version>4.12.0</antlr.version>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -53,6 +56,12 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jakartars</artifactId>
     </dependency>
+    <!-- ANTLR -->
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>${antlr.version}</version>
+    </dependency>
     <!-- Test -->
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -74,8 +83,20 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>javacc-maven-plugin</artifactId>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>${antlr.version}</version>
+        <executions>
+          <execution>
+            <id>antlr</id>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+            <configuration>
+              <visitor>true</visitor>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>biz.aQute.bnd</groupId>

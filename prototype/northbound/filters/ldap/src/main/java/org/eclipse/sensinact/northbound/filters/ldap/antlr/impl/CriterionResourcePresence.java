@@ -10,8 +10,13 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.ldap.impl;
+package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.function.Predicate;
+
+import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 
 /**
@@ -19,8 +24,14 @@ import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
  */
 public class CriterionResourcePresence extends AbstractCriterion {
 
+    /**
+     * Resource path
+     */
     private final SensiNactPath rcPath;
 
+    /**
+     * @param rcPath Resource path
+     */
     public CriterionResourcePresence(final SensiNactPath rcPath) {
         this.rcPath = rcPath;
     }
@@ -36,12 +47,31 @@ public class CriterionResourcePresence extends AbstractCriterion {
 
     @Override
     public ResourceValueFilter getResourceValueFilter() {
+
+        Predicate<ResourceSnapshot> isSet = r -> {
+            if (r.getValue() == null || r.getValue().getTimestamp() == null) {
+                return false;
+            }
+
+            final Object value = r.getValue().getValue();
+            if (value == null) {
+                return false;
+            }
+
+            if (value.getClass().isArray()) {
+                return Array.getLength(value) != 0;
+            }
+
+            if (value instanceof Collection) {
+                return !((Collection<?>) value).isEmpty();
+            }
+            return true;
+        };
+
         if (isNegative()) {
-            return (p, rs) -> rs.stream()
-                    .anyMatch(r -> rcPath.accept(r) && (r.getValue() == null || r.getValue().getTimestamp() == null));
+            return (p, rs) -> rs.stream().anyMatch(r -> rcPath.accept(r) && !isSet.test(r));
         } else {
-            return (p, rs) -> rs.stream()
-                    .anyMatch(r -> rcPath.accept(r) && (r.getValue() != null && r.getValue().getTimestamp() != null));
+            return (p, rs) -> rs.stream().anyMatch(r -> rcPath.accept(r) && isSet.test(r));
         }
     }
 }

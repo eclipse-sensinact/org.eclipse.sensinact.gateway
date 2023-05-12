@@ -10,12 +10,26 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.ldap.impl;
+package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 
 /**
  * List of LDAP comparators
  */
 public enum LdapComparator {
 
-    EQUAL, APPROX, GREATER_EQ, LESS_EQ, PRESENT,
+    EQUAL("="),
+    APPROX("~="),
+    GREATER_EQ(">="),
+    LESS_EQ("<=");
+
+    private final String strComparator;
+
+    private LdapComparator(final String strComparator) {
+        this.strComparator = strComparator;
+    }
+
+    @Override
+    public String toString() {
+        return strComparator;
+    }
 }
