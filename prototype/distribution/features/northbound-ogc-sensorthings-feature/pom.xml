@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
 
   <properties>
-    <antlr.version>4.5</antlr.version>
     <spatial4j.version>0.8</spatial4j.version>
     <filters.version>0.0.2-SNAPSHOT</filters.version>
     <sensorthings.version>0.0.2-SNAPSHOT</sensorthings.version>
