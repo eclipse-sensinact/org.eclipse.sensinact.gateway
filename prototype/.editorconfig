@@ -12,10 +12,10 @@ indent_size = 4
 indent_style = space
 trim_trailing_whitespace = true
 
-[*.{xml,json,jj}]
+[*.{xml,json,g4}]
 indent_size = 2
 
-[*.{md,g4}]
+[*.{md}]
 trim_trailing_whitespace = false
 indent_size = 1
 

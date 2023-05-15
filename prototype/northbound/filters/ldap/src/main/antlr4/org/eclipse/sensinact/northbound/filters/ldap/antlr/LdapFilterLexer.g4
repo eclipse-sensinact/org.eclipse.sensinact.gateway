@@ -13,15 +13,15 @@
 lexer grammar LdapFilterLexer;
 
 options {
-	language = Java;
+  language = Java;
 }
 
 SKIPPED: [\r\n\b\f] -> skip;
 WS: [ \t];
 
-TRUE options { caseInsensitive=true; } : 'true';
-FALSE options { caseInsensitive=true; } : 'false';
-NULL options { caseInsensitive=true; } : 'null';
+TRUE options { caseInsensitive = true; }: 'true';
+FALSE options { caseInsensitive = true; }: 'false';
+NULL options { caseInsensitive = true; }: 'null';
 
 LPAR: '(';
 RPAR: ')';
