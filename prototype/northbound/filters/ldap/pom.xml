@@ -20,9 +20,6 @@
   <artifactId>ldap</artifactId>
   <name>SensiNact Northbound Filters :: LDAP</name>
   <description>Converts LDAP filters to SensiNact filters</description>
-  <properties>
-    <antlr.version>4.12.0</antlr.version>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -60,7 +57,6 @@
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
-      <version>${antlr.version}</version>
     </dependency>
     <!-- Test -->
     <dependency>
@@ -85,18 +81,6 @@
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
-        <version>${antlr.version}</version>
-        <executions>
-          <execution>
-            <id>antlr</id>
-            <goals>
-              <goal>antlr4</goal>
-            </goals>
-            <configuration>
-              <visitor>true</visitor>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>biz.aQute.bnd</groupId>

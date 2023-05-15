@@ -29,6 +29,7 @@
     <hk2.version>3.0.3</hk2.version>
     <jersey.version>3.0.8</jersey.version>
     <jetty.version>11.0.13</jetty.version>
+    <antlr.version>4.12.0</antlr.version>
   </properties>
 
   <modules>
@@ -116,7 +117,36 @@
         <artifactId>org.gecko.rest.jersey.jetty</artifactId>
         <version>${gecko.jersey.version}</version>
       </dependency>
+
+      <!-- ANTLR -->
+      <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>${antlr.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.antlr</groupId>
+          <artifactId>antlr4-maven-plugin</artifactId>
+          <version>${antlr.version}</version>
+          <executions>
+            <execution>
+              <id>antlr</id>
+              <goals>
+                <goal>antlr4</goal>
+              </goals>
+              <configuration>
+                <visitor>true</visitor>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
