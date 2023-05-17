@@ -24,6 +24,7 @@
 	junit-platform-commons;version='[1.9.0,1.9.1)',\
 	junit-platform-engine;version='[1.9.0,1.9.1)',\
 	junit-platform-launcher;version='[1.9.0,1.9.1)',\
+	org.antlr.antlr4-runtime;version='[4.12.0,4.12.1)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
 	org.apache.aries.typedevent.bus;version='[0.0.2,0.0.3)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
@@ -43,7 +44,6 @@
 	org.gecko.emf.osgi.api;version='[4.6.2,4.6.3)',\
 	org.gecko.emf.osgi.component;version='[4.6.2,4.6.3)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
-	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\
 	org.osgi.test.common;version='[1.2.1,1.2.2)',\

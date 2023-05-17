@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.northbound.filters.ldap.impl.LdapParser;
+import org.eclipse.sensinact.northbound.filters.ldap.LdapParserTest;
 import org.eclipse.sensinact.prototype.PrototypePush;
 import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
 import org.eclipse.sensinact.prototype.command.GatewayThread;
@@ -81,7 +81,7 @@ public class LdapFilterTest {
     }
 
     private List<ProviderSnapshot> applyFilter(final String query) throws Exception {
-        ICriterion parsedFilter = LdapParser.parse(query);
+        ICriterion parsedFilter = LdapParserTest.parse(query);
         Collection<ProviderSnapshot> providers = thread
                 .execute(new AbstractTwinCommand<Collection<ProviderSnapshot>>() {
                     protected Promise<Collection<ProviderSnapshot>> call(SensinactDigitalTwin model,

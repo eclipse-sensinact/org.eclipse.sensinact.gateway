@@ -18,6 +18,9 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.AbstractCriterion;
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.ILdapCriterion;
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.LdapOperator;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
 
@@ -26,10 +29,20 @@ import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
  */
 public class LdapFilter extends AbstractCriterion {
 
+    /**
+     * List of sub-filters
+     */
     private final List<ILdapCriterion> subCriteria = new ArrayList<>();
 
+    /**
+     * Combinator operator (AND or OR)
+     */
     private LdapOperator operator;
 
+    /**
+     * @param operator Combinator operator (AND or OR)
+     * @param criteria List of sub-filters
+     */
     public LdapFilter(final LdapOperator operator, final List<ILdapCriterion> criteria) {
         this.operator = operator;
         this.subCriteria.addAll(criteria);
@@ -74,6 +87,12 @@ public class LdapFilter extends AbstractCriterion {
                 this.subCriteria.stream().map(Objects::toString).reduce("", (a, b) -> a + b));
     }
 
+    /**
+     * Generates the provider filter
+     *
+     * @param criteria
+     * @return
+     */
     private Predicate<ProviderSnapshot> makeProviderFilter(final List<Predicate<ProviderSnapshot>> criteria) {
         if (criteria.isEmpty()) {
             return null;

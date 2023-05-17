@@ -48,27 +48,4 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>javacc-maven-plugin</artifactId>
-          <version>3.0.1</version>
-          <executions>
-            <execution>
-              <id>javacc</id>
-              <goals>
-                <goal>javacc</goal>
-              </goals>
-              <configuration>
-                <isStatic>false</isStatic>
-                <lookAhead>3</lookAhead>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>

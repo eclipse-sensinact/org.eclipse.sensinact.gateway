@@ -22,7 +22,6 @@
   <description>Converts OGC SensorThings filters to SensiNact filters</description>
   <properties>
     <sensinact.core.version>0.0.2-SNAPSHOT</sensinact.core.version>
-    <antlr.version>4.5</antlr.version>
   </properties>
   <dependencies>
     <dependency>
@@ -37,7 +36,6 @@
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
-      <version>${antlr.version}</version>
     </dependency>
     <!-- Spatial4J -->
     <dependency>
@@ -92,18 +90,6 @@
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
-        <version>${antlr.version}</version>
-        <executions>
-          <execution>
-            <id>antlr</id>
-            <goals>
-              <goal>antlr4</goal>
-            </goals>
-            <configuration>
-              <visitor>true</visitor>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>biz.aQute.bnd</groupId>

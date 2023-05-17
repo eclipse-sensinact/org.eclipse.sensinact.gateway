@@ -27,6 +27,11 @@
       <version>${rest.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>${antlr.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
       <artifactId>ldap</artifactId>
       <version>${rest.version}</version>

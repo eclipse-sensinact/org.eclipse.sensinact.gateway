@@ -53,6 +53,11 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jakartars</artifactId>
     </dependency>
+    <!-- ANTLR -->
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+    </dependency>
     <!-- Test -->
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -74,8 +79,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>javacc-maven-plugin</artifactId>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
