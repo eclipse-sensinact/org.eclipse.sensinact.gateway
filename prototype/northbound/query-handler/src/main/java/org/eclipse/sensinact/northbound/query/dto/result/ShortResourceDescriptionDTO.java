@@ -12,8 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.result;
 
+import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.northbound.query.api.EReadWriteMode;
-import org.eclipse.sensinact.prototype.model.ResourceType;
 
 public class ShortResourceDescriptionDTO {
 

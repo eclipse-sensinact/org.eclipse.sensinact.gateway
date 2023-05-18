@@ -13,9 +13,9 @@
 package org.eclipse.sensinact.core.emf.model;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.sensinact.prototype.model.Model;
-import org.eclipse.sensinact.prototype.model.ModelBuilder;
-import org.eclipse.sensinact.prototype.model.SensinactModelManager;
+import org.eclipse.sensinact.core.model.Model;
+import org.eclipse.sensinact.core.model.ModelBuilder;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 
 /**
  * The sensiNact interface used to create and discover the models using EMF

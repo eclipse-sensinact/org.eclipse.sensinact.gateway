@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.AbstractCriterion;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.ILdapCriterion;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.LdapOperator;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 
 /**
  * Combination filter (AND or OR)

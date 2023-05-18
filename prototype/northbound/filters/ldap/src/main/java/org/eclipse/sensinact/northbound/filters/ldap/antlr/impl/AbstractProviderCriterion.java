@@ -14,7 +14,7 @@ package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 
 import java.util.function.Predicate;
 
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 
 /**
  * Common code for Provider field comparison

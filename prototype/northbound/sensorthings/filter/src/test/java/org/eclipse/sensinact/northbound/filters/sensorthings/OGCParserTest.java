@@ -25,6 +25,9 @@ import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -34,9 +37,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolcommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolCommonExprVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 import org.junit.jupiter.api.Test;
 
 public class OGCParserTest {

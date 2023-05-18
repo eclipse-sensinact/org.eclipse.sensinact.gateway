@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.api;
 
-import org.eclipse.sensinact.prototype.model.ValueType;
+import org.eclipse.sensinact.core.model.ValueType;
 
 /**
  * External read/write mode

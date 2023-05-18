@@ -24,11 +24,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;
-import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

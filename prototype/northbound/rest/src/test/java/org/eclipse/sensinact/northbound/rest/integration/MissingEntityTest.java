@@ -21,15 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.List;
 
+import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProviderDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

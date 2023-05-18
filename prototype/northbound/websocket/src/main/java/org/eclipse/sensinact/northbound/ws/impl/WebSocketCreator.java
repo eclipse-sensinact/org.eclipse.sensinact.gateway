@@ -19,8 +19,8 @@ import java.util.List;
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse;
 import org.eclipse.jetty.websocket.server.JettyWebSocketCreator;
+import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

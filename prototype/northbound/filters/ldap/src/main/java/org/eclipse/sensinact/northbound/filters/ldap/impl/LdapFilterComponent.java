@@ -17,6 +17,7 @@ import java.util.Map;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.api.IFilterParser;
 import org.eclipse.sensinact.northbound.filters.ldap.ILdapFilterConstants;
@@ -24,7 +25,6 @@ import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterLexer;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser.FilterContext;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.FilterVisitor;
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.osgi.service.component.annotations.Component;
 
 /**

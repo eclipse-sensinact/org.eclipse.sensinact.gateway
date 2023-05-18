@@ -8,15 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.notification.impl;
 
-import org.eclipse.sensinact.prototype.notification.AbstractResourceNotification;
-import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
-import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
-import org.eclipse.sensinact.prototype.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.ResourceActionNotification;
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 
 class NotificationKey implements Comparable<NotificationKey> {
 

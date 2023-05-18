@@ -15,7 +15,7 @@ package org.eclipse.sensinact.prototype.impl.snapshot;
 
 import java.time.Instant;
 
-import org.eclipse.sensinact.prototype.snapshot.Snapshot;
+import org.eclipse.sensinact.core.snapshot.Snapshot;
 
 /**
  * Parent class of sensiNact snapshot elements

@@ -14,8 +14,8 @@ package org.eclipse.sensinact.prototype.resource;
 
 import java.security.SecureRandom;
 
-import org.eclipse.sensinact.prototype.model.SensinactModelManager;
-import org.eclipse.sensinact.prototype.model.ModelProvider;
+import org.eclipse.sensinact.core.model.ModelProvider;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.osgi.service.component.annotations.Component;
 
 @Component

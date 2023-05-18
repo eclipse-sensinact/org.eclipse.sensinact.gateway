@@ -18,8 +18,8 @@ import org.eclipse.sensinact.core.emf.command.AbstractSensinactEMFCommand;
 import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
+import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.model.core.provider.Provider;
-import org.eclipse.sensinact.prototype.model.Model;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 

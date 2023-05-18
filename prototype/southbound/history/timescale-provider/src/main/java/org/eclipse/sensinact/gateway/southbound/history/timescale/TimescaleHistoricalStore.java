@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
-import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;

@@ -15,8 +15,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;

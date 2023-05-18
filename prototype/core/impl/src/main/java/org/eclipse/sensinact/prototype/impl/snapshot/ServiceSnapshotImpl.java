@@ -17,9 +17,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 
 public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnapshot {
 

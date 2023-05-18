@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.security.api;
 
-import org.eclipse.sensinact.prototype.security.UserInfo;
+import org.eclipse.sensinact.core.security.UserInfo;
 
 public interface Authenticator {
 

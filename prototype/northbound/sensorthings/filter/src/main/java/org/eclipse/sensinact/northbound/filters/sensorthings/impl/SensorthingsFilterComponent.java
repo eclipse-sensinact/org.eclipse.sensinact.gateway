@@ -17,6 +17,7 @@ import java.util.function.Predicate;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.api.IFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
@@ -27,7 +28,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolcommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolCommonExprVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 import org.osgi.service.component.annotations.Component;
 
 @Component(immediate = true, service = { IFilterParser.class, ISensorthingsFilterParser.class }, property = {

@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
-import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 

@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 
 /**
  * Parsed sensiNact path

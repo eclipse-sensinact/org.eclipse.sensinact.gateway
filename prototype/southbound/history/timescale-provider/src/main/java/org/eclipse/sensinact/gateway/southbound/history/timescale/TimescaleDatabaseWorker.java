@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.southbound.history.api.HistoricalQueries;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
-import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.slf4j.Logger;

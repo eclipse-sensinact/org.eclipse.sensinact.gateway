@@ -17,7 +17,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.ext
 
 import java.util.List;
 
-import org.eclipse.sensinact.prototype.SensiNactSession;
+import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;

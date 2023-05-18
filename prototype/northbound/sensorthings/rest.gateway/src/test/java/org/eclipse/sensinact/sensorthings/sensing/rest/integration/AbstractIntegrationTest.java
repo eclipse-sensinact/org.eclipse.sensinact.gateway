@@ -14,16 +14,16 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
 import java.time.Instant;
 
-import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
-import org.eclipse.sensinact.prototype.model.SensinactModelManager;
-import org.eclipse.sensinact.prototype.security.UserInfo;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.session.SensiNactSessionManager;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;

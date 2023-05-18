@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

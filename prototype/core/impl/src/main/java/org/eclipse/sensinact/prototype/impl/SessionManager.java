@@ -25,11 +25,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
-import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.notification.AbstractResourceNotification;
-import org.eclipse.sensinact.prototype.security.UserInfo;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.typedevent.TypedEventHandler;

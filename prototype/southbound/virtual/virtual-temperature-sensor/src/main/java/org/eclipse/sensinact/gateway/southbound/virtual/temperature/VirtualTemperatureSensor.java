@@ -15,9 +15,9 @@ package org.eclipse.sensinact.gateway.southbound.virtual.temperature;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.promise.Promise;
 

@@ -12,8 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
 
 public interface ISensorthingsFilterParser {
 

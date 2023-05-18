@@ -29,6 +29,8 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
@@ -40,8 +42,6 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

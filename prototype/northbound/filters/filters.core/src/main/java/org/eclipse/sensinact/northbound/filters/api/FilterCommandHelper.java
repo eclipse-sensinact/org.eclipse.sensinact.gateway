@@ -17,12 +17,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.prototype.command.AbstractTwinCommand;
-import org.eclipse.sensinact.prototype.command.GatewayThread;
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 

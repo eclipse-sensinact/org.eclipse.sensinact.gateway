@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.sensinact.prototype.model.ResourceBuilder;
-import org.eclipse.sensinact.prototype.model.Service;
-import org.eclipse.sensinact.prototype.model.ServiceBuilder;
+import org.eclipse.sensinact.core.model.ResourceBuilder;
+import org.eclipse.sensinact.core.model.Service;
+import org.eclipse.sensinact.core.model.ServiceBuilder;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 
 public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, Service> implements ServiceBuilder<P> {

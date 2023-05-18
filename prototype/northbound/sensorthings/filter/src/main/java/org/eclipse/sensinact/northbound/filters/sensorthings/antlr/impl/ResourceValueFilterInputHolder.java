@@ -15,9 +15,9 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 
 /**
  * Object given as input of filter predicates

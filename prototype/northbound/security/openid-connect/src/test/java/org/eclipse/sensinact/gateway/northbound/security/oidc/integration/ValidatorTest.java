@@ -39,10 +39,10 @@ import java.util.stream.Stream;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.gateway.northbound.security.oidc.Certificates;
 import org.eclipse.sensinact.gateway.northbound.security.oidc.Certificates.KeyInfo;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
-import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;

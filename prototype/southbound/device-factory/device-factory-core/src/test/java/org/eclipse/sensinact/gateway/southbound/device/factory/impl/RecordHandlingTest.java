@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingParser;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
-import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

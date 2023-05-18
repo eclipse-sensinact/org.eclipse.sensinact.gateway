@@ -31,6 +31,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
 import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
 import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
@@ -42,7 +43,6 @@ import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.model.core.provider.impl.FeatureCustomMetadataImpl;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 
 /**
  * Helper to Compare EObjects

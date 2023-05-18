@@ -14,7 +14,7 @@ package org.eclipse.sensinact.northbound.query.dto.result;
 
 import java.util.List;
 
-import org.eclipse.sensinact.prototype.model.ResourceType;
+import org.eclipse.sensinact.core.model.ResourceType;
 
 /**
  * Description of a resource

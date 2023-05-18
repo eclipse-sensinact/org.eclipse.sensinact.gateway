@@ -15,7 +15,7 @@ package org.eclipse.sensinact.prototype.command.impl;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import static java.util.concurrent.Executors.newScheduledThreadPool;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.sensinact.prototype.command.GatewayThread.getGatewayThread;
+import static org.eclipse.sensinact.core.command.GatewayThread.getGatewayThread;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
@@ -28,12 +28,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.prototype.command.GatewayThread;
 import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.ImmediateNotificationAccumulator;
 import org.eclipse.sensinact.prototype.notification.impl.NotificationAccumulatorImpl;
 import org.eclipse.sensinact.prototype.twin.impl.SensinactDigitalTwinImpl;

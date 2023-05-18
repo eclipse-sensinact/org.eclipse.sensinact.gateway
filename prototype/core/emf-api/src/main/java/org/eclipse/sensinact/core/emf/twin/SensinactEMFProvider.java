@@ -14,8 +14,8 @@ package org.eclipse.sensinact.core.emf.twin;
 
 import java.util.List;
 
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.osgi.util.promise.Promise;
 
 /**

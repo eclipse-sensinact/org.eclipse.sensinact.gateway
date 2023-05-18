@@ -16,9 +16,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 
 public class SensorPathHandler {
 
