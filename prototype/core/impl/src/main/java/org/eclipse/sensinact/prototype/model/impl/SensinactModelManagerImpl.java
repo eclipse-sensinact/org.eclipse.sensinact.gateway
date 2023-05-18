@@ -20,14 +20,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.Model;
 import org.eclipse.sensinact.prototype.model.ModelBuilder;
-import org.eclipse.sensinact.prototype.model.SensinactModelManager;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 
-public class SensinactModelManagerImpl extends CommandScopedImpl implements SensinactModelManager {
+public class SensinactModelManagerImpl extends CommandScopedImpl implements SensinactEMFModelManager {
 
     private final ModelNexus nexusImpl;
 

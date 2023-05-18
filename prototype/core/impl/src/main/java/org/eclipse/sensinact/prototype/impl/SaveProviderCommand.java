@@ -14,16 +14,16 @@ package org.eclipse.sensinact.prototype.impl;
 
 import java.time.Instant;
 
+import org.eclipse.sensinact.core.emf.command.AbstractSensinactEMFCommand;
+import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.prototype.model.Model;
-import org.eclipse.sensinact.prototype.model.SensinactModelManager;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SaveProviderCommand extends AbstractSensinactCommand<Void> {
+public class SaveProviderCommand extends AbstractSensinactEMFCommand<Void> {
 
     private Provider provider;
 
@@ -32,14 +32,14 @@ public class SaveProviderCommand extends AbstractSensinactCommand<Void> {
     }
 
     @Override
-    protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+    protected Promise<Void> call(SensinactEMFDigitalTwin twin, SensinactEMFModelManager modelMgr,
             PromiseFactory promiseFactory) {
 
         Model model = modelMgr.getModel(provider.eClass());
         if (model == null) {
             model = modelMgr.createModel(provider.eClass()).withCreationTime(Instant.now()).build();
         }
-        SensinactProvider sp = twin.getProvider(model.getName(), provider.getId());
+        SensinactEMFProvider sp = twin.getProvider(model.getName(), provider.getId());
         if (sp == null) {
             sp = twin.createProvider(model.getName(), provider.getId(), Instant.now());
         }

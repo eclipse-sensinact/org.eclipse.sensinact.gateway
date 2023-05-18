@@ -28,6 +28,7 @@
     <module>models</module>
     <module>impl</module>
     <module>geo-json</module>
+    <module>emf-api</module>
   </modules>
 
 </project>

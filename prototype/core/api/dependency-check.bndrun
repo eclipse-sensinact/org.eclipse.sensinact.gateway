@@ -1,0 +1,17 @@
+-runrequires: bnd.identity;id='${project.groupId}.${project.artifactId}'
+-runfw: org.apache.felix.framework
+-runee: JavaSE-11
+
+# This is the test validation assertion. 
+# We want to keep the API as clean of external dependencies as possible
+# Jackson is needed to serialize and deserialize GeoJSON types and promises are in the API
+# No other bundles should be present. 
+-runbundles: \
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
+	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.2,0.0.3)',\
+	org.osgi.util.function;version='[1.1.0,1.1.1)',\
+	org.osgi.util.promise;version='[1.3.0,1.3.1)'

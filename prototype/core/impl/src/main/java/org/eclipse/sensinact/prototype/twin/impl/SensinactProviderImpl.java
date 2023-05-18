@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
@@ -28,7 +29,7 @@ import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SensinactProviderImpl extends CommandScopedImpl implements SensinactProvider {
+public class SensinactProviderImpl extends CommandScopedImpl implements SensinactEMFProvider {
 
     private final Provider provider;
 
@@ -71,7 +72,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
-    public List<SensinactProvider> getLinkedProviders() {
+    public List<SensinactEMFProvider> getLinkedProviders() {
         checkValid();
         return provider.getLinkedProviders().stream()
                 .map(p -> new SensinactProviderImpl(active, provider, nexus, promiseFactory))

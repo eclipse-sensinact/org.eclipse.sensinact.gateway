@@ -50,6 +50,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.annotations.RequireConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,6 +65,7 @@ import io.jsonwebtoken.jackson.io.JacksonSerializer;
 /**
  * Tests variable handling
  */
+@RequireConfigurationAdmin
 public class ValidatorTest {
 
     private static final Map<String, String> EC_CURVE_NAME_MAPPING = Map.of("ES256", "secp256r1", "ES384", "secp384r1",

@@ -15,7 +15,6 @@ package org.eclipse.sensinact.prototype.twin;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.command.CommandScoped;
 import org.osgi.util.promise.Promise;
 
@@ -50,7 +49,7 @@ public interface SensinactProvider extends CommandScoped {
      *
      * @return an immutable list of linked providers
      */
-    List<SensinactProvider> getLinkedProviders();
+    List<? extends SensinactProvider> getLinkedProviders();
 
     /**
      * Add a linked provider instance
@@ -70,11 +69,4 @@ public interface SensinactProvider extends CommandScoped {
      * Delete this provider from the Digital Twin
      */
     void delete();
-
-    /**
-     * Updates a complete Provider
-     *
-     * @return
-     */
-    Promise<Void> update(Provider newVersion);
 }

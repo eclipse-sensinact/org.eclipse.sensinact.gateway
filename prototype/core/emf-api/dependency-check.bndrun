@@ -1,0 +1,32 @@
+-runrequires: bnd.identity;id='${project.groupId}.${project.artifactId}'
+-runfw: org.apache.felix.framework
+-runee: JavaSE-11
+
+# This blacklist ensures consistent resolution locally and in CI
+-runblacklist: bnd.identity;id='org.osgi.service.cm'
+
+# This is the test validation assertion. 
+# We want to keep the API as clean of external dependencies as possible
+# There has been significant dependency leakage here, with the model 
+# pulling in large amounts of implementation dependency. This should be
+# investigated.
+-runbundles: \
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
+	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
+	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
+	org.eclipse.emf.common;version='[2.28.0,2.28.1)',\
+	org.eclipse.emf.ecore;version='[2.33.0,2.33.1)',\
+	org.eclipse.emf.ecore.xmi;version='[2.18.0,2.18.1)',\
+	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.emf-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
+	org.gecko.emf.osgi.api;version='[4.6.2,4.6.3)',\
+	org.gecko.emf.osgi.component;version='[4.6.2,4.6.3)',\
+	org.osgi.service.component;version='[1.5.0,1.5.1)',\
+	org.osgi.util.converter;version='[1.0.9,1.0.10)',\
+	org.osgi.util.function;version='[1.1.0,1.1.1)',\
+	org.osgi.util.promise;version='[1.3.0,1.3.1)'
