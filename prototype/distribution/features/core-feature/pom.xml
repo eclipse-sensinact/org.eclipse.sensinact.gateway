@@ -37,6 +37,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>emf-api</artifactId>
+      <version>${gateway.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>impl</artifactId>
       <version>${gateway.version}</version>
     </dependency>

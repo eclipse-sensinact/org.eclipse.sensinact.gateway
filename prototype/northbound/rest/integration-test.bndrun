@@ -62,6 +62,7 @@
 	org.eclipse.parsson.jakarta.json;version='[1.1.1,1.1.2)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.emf-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\
@@ -93,7 +94,6 @@
 	org.glassfish.jersey.media.jersey-media-sse;version='[3.0.8,3.0.9)',\
 	org.objectweb.asm;version='[9.3.0,9.3.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
-	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.jakartars;version='[2.0.0,2.0.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\

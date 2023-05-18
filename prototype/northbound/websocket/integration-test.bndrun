@@ -46,6 +46,7 @@
 	org.eclipse.emf.ecore;version='[2.33.0,2.33.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.18.0,2.18.1)',\
 	org.eclipse.jetty.alpn.client;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.annotations;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.client;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.jndi;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.plus;version='[11.0.13,11.0.14)',\
@@ -62,6 +63,7 @@
 	org.eclipse.parsson.jakarta.json;version='[1.1.1,1.1.2)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.core.emf-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\

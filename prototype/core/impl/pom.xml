@@ -24,7 +24,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>api</artifactId>
+      <artifactId>emf-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

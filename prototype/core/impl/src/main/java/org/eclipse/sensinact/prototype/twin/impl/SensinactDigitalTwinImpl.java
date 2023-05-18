@@ -25,6 +25,8 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
@@ -39,13 +41,12 @@ import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.prototype.twin.SensinactProvider;
 import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SensinactDigitalTwinImpl extends CommandScopedImpl implements SensinactDigitalTwin {
+public class SensinactDigitalTwinImpl extends CommandScopedImpl implements SensinactEMFDigitalTwin {
 
     private final ModelNexus nexusImpl;
     private final PromiseFactory pf;
@@ -116,12 +117,12 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     }
 
     @Override
-    public SensinactProvider createProvider(String model, String providerName) {
+    public SensinactEMFProvider createProvider(String model, String providerName) {
         return toProvider(nexusImpl.createProviderInstance(model, providerName));
     }
 
     @Override
-    public SensinactProvider createProvider(String model, String providerName, Instant instant) {
+    public SensinactEMFProvider createProvider(String model, String providerName, Instant instant) {
         return instant == null ? createProvider(model, providerName)
                 : toProvider(nexusImpl.createProviderInstance(model, providerName, instant));
     }

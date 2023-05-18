@@ -35,6 +35,10 @@ public abstract class DependentCommand<P, T> extends AbstractSensinactCommand<T>
 
     private AbstractSensinactCommand<P> parent;
 
+    protected DependentCommand(AbstractSensinactCommand<P> parent) {
+        this.parent = parent;
+    }
+
     @Override
     protected Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
             PromiseFactory promiseFactory) {

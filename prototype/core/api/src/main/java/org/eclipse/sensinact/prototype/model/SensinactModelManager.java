@@ -15,7 +15,6 @@ package org.eclipse.sensinact.prototype.model;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.prototype.command.CommandScoped;
 
 /**
@@ -34,9 +33,5 @@ public interface SensinactModelManager extends CommandScoped {
     void registerModel(InputStream model);
 
     Map<String, Model> getModels();
-
-    Model getModel(EClass eClass);
-
-    ModelBuilder createModel(EClass eClass);
 
 }
