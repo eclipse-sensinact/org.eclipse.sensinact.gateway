@@ -14,10 +14,10 @@ package org.eclipse.sensinact.northbound.rest.impl;
 
 import java.security.Principal;
 
+import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.rest.impl.AuthenticationFilter.UserInfoPrincipal;
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
-import org.eclipse.sensinact.prototype.security.UserInfo;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;

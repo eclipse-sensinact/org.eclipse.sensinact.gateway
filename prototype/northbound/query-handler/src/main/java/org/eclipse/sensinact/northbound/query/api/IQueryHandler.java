@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.api;
 
-import org.eclipse.sensinact.prototype.SensiNactSession;
+import org.eclipse.sensinact.core.session.SensiNactSession;
 
 /**
  * Handles a standard sensiNact query

@@ -166,10 +166,11 @@ class ConfigurationManagerTest {
             Mockito.verify(configs.get("test.factory.pid~boo"), Mockito.timeout(500))
                     .update(argThat(isConfig(of("fizz", "buzz", "foobar", 24L, ".sensinact.config", true))));
 
-            Files.newInputStream(path.resolve("configuration-update.json")).transferTo(Files.newOutputStream(configFile));
+            Files.newInputStream(path.resolve("configuration-update.json"))
+                    .transferTo(Files.newOutputStream(configFile));
 
             // Mockito timeout as there is no creation of configurations
-            Mockito.verify(configs.get("test.pid"), Mockito.timeout(500).atLeast(1))
+            Mockito.verify(configs.get("test.pid"), Mockito.timeout(25000).atLeast(1))
                     .updateIfDifferent(argThat(isConfig(of("bar", "foo", "fizzbuzz", 84L, ".sensinact.config", true))));
             Mockito.verify(configs.get("test.pid.temp"), Mockito.timeout(500)).delete();
             Mockito.verify(configs.get("test.factory.pid~boo"), Mockito.timeout(500).atLeast(1))

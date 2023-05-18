@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
-import org.eclipse.sensinact.prototype.twin.SensinactResource;
-import org.eclipse.sensinact.prototype.twin.SensinactService;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactServiceImpl extends CommandScopedImpl implements SensinactService {

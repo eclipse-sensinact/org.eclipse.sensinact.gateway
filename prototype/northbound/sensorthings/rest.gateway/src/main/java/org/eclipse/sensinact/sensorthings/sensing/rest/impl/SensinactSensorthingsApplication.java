@@ -15,8 +15,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;

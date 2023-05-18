@@ -14,7 +14,7 @@ package org.eclipse.sensinact.prototype.twin.impl;
 
 import java.time.Instant;
 
-import org.eclipse.sensinact.prototype.twin.TimedValue;
+import org.eclipse.sensinact.core.twin.TimedValue;
 
 public class TimedValueImpl<T> implements TimedValue<T> {
 

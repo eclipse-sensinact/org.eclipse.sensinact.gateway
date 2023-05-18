@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.sensinact.core.notification.ClientDataListener;
+import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
+import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
@@ -32,9 +35,6 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.notification.ClientDataListener;
-import org.eclipse.sensinact.prototype.notification.ClientLifecycleListener;
 
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;

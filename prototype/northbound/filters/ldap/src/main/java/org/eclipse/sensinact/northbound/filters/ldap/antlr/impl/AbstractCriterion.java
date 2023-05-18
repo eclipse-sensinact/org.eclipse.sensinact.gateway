@@ -14,11 +14,11 @@ package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 
 import java.util.function.Predicate;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 
 /**
  * Common code from LDAP criteria

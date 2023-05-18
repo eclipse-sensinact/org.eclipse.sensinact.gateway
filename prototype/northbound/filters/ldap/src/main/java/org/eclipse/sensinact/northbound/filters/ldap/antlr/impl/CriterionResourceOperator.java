@@ -15,7 +15,7 @@ package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
-import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 
 /**
  * Comparison filter

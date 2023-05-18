@@ -20,10 +20,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
-import org.eclipse.sensinact.prototype.ResourceDescription;
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.twin.TimedValue;
+import org.eclipse.sensinact.core.session.ResourceDescription;
+import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;

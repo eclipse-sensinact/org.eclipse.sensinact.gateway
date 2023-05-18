@@ -14,8 +14,8 @@ package org.eclipse.sensinact.northbound.query.dto.notification;
 
 import java.time.Instant;
 
-import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
-import org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status;
+import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 
 /**
  * Resource life-cycle notification

@@ -31,8 +31,8 @@ import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

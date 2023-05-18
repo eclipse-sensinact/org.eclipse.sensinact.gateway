@@ -19,12 +19,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.prototype.PrototypePush;
-import org.eclipse.sensinact.prototype.ResourceDescription;
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
-import org.eclipse.sensinact.prototype.security.UserInfo;
+import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.core.session.ResourceDescription;
+import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

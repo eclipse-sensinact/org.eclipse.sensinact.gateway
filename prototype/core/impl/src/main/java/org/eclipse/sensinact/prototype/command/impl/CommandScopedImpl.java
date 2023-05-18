@@ -8,13 +8,13 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.sensinact.prototype.command.CommandScoped;
+import org.eclipse.sensinact.core.command.CommandScoped;
 
 public abstract class CommandScopedImpl implements CommandScoped {
 

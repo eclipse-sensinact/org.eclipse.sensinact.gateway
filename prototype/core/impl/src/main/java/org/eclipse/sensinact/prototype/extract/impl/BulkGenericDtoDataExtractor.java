@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.extract.impl;
 
@@ -16,9 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
-import org.eclipse.sensinact.prototype.generic.dto.BulkGenericDto;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 
 public class BulkGenericDtoDataExtractor implements DataExtractor {
 

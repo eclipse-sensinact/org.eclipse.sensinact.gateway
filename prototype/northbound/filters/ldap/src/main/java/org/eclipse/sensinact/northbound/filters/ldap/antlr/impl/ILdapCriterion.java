@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 
 public interface ILdapCriterion extends ICriterion {
     /**

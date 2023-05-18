@@ -12,12 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.emf.command;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.prototype.command.DependentCommand;
-import org.eclipse.sensinact.prototype.model.SensinactModelManager;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 

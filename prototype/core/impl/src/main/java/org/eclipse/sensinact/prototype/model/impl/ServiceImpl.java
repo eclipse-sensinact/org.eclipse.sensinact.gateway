@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.model.Model;
+import org.eclipse.sensinact.core.model.Resource;
+import org.eclipse.sensinact.core.model.ResourceBuilder;
+import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.prototype.model.Model;
-import org.eclipse.sensinact.prototype.model.Resource;
-import org.eclipse.sensinact.prototype.model.ResourceBuilder;
-import org.eclipse.sensinact.prototype.model.Service;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 
 public class ServiceImpl extends CommandScopedImpl implements Service {

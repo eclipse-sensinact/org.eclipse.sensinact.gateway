@@ -8,12 +8,12 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.push;
 
-import org.eclipse.sensinact.prototype.EventTopicNames;
-import org.eclipse.sensinact.prototype.PrototypePush;
+import org.eclipse.sensinact.core.push.EventTopicNames;
+import org.eclipse.sensinact.core.push.PrototypePush;
 import org.eclipse.sensinact.prototype.push.dto._01_SimpleDTO;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

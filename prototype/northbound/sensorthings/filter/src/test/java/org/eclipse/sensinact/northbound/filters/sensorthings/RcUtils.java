@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.prototype.model.ResourceType;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.prototype.twin.TimedValue;
+import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.TimedValue;
 
 /**
  * Utility methods for tests

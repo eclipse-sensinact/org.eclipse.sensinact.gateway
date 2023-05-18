@@ -8,11 +8,11 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package notification;
 
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.osgi.service.typedevent.propertytypes.EventTopics;

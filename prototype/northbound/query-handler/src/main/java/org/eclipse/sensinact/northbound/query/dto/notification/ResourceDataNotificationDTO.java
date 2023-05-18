@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.notification;
 
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 
 /**
  * Notification of the new value of a resource

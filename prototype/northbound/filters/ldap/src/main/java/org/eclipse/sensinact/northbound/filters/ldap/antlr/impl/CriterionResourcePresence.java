@@ -16,8 +16,8 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 
 /**
  * Resource presence filter

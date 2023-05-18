@@ -16,10 +16,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;
-import org.eclipse.sensinact.prototype.generic.dto.GenericDto;
 
 public class GenericDtoDataExtractor implements DataExtractor {
 

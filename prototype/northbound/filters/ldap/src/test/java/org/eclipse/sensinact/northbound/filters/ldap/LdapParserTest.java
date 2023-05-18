@@ -29,13 +29,13 @@ import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser.FilterContext;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.FilterVisitor;
 import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.ILdapCriterion;
-import org.eclipse.sensinact.prototype.model.ResourceType;
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.prototype.twin.TimedValue;
+import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.junit.jupiter.api.Test;
 
 public class LdapParserTest {

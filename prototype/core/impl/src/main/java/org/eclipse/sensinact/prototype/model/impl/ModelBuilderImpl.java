@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.sensinact.prototype.model.Model;
-import org.eclipse.sensinact.prototype.model.ModelBuilder;
-import org.eclipse.sensinact.prototype.model.ServiceBuilder;
+import org.eclipse.sensinact.core.model.Model;
+import org.eclipse.sensinact.core.model.ModelBuilder;
+import org.eclipse.sensinact.core.model.ServiceBuilder;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 

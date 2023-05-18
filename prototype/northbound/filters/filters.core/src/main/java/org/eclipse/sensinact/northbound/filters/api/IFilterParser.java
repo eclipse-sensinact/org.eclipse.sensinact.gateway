@@ -14,7 +14,7 @@ package org.eclipse.sensinact.northbound.filters.api;
 
 import java.util.Map;
 
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 
 /**
  * Specification of a filter parser

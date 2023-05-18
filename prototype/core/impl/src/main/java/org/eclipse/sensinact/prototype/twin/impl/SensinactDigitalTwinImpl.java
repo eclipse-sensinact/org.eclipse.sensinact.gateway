@@ -27,6 +27,13 @@ import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
+import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactService;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
@@ -36,14 +43,7 @@ import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ProviderSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ResourceSnapshotImpl;
 import org.eclipse.sensinact.prototype.impl.snapshot.ServiceSnapshotImpl;
-import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
-import org.eclipse.sensinact.prototype.twin.SensinactService;
-import org.eclipse.sensinact.prototype.twin.TimedValue;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactDigitalTwinImpl extends CommandScopedImpl implements SensinactEMFDigitalTwin {

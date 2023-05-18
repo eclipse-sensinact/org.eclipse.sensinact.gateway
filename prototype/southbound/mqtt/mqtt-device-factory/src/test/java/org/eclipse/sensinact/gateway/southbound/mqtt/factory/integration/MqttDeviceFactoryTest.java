@@ -30,12 +30,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.core.session.ResourceDescription;
+import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.prototype.ResourceDescription;
-import org.eclipse.sensinact.prototype.SensiNactSession;
-import org.eclipse.sensinact.prototype.SensiNactSessionManager;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
-import org.eclipse.sensinact.prototype.security.UserInfo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;

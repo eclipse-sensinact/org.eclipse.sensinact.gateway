@@ -15,14 +15,14 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.impl;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
-import org.eclipse.sensinact.prototype.snapshot.ICriterion;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.prototype.snapshot.ServiceSnapshot;
 
 public class SensorthingsCriterion implements ICriterion {
 

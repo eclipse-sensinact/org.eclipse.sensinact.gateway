@@ -12,17 +12,17 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.impl;
 
-import org.eclipse.sensinact.prototype.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.model.Model;
+import org.eclipse.sensinact.core.model.Resource;
+import org.eclipse.sensinact.core.model.ResourceBuilder;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.model.Service;
+import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
-import org.eclipse.sensinact.prototype.model.Model;
-import org.eclipse.sensinact.prototype.model.Resource;
-import org.eclipse.sensinact.prototype.model.ResourceBuilder;
-import org.eclipse.sensinact.prototype.model.SensinactModelManager;
-import org.eclipse.sensinact.prototype.model.Service;
-import org.eclipse.sensinact.prototype.model.ValueType;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.prototype.twin.SensinactProvider;
-import org.eclipse.sensinact.prototype.twin.SensinactResource;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 

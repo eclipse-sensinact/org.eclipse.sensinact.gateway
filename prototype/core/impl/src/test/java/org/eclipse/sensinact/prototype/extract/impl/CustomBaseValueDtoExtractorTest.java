@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.extract.impl;
 
@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.sensinact.core.push.dto.BaseValueDto;
 import org.eclipse.sensinact.prototype.annotation.dto.Data;
 import org.eclipse.sensinact.prototype.annotation.dto.NullAction;
 import org.eclipse.sensinact.prototype.annotation.dto.Provider;
@@ -33,7 +34,6 @@ import org.eclipse.sensinact.prototype.annotation.dto.Timestamp;
 import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;
-import org.eclipse.sensinact.prototype.generic.dto.BaseValueDto;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

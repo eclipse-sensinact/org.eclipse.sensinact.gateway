@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -45,7 +46,6 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ShortResourceDescriptionDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

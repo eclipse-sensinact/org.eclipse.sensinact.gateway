@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.core.model.Resource;
+import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.Service;
+import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.prototype.model.Resource;
-import org.eclipse.sensinact.prototype.model.ResourceType;
-import org.eclipse.sensinact.prototype.model.Service;
-import org.eclipse.sensinact.prototype.model.ValueType;
 
 public class ResourceImpl extends CommandScopedImpl implements Resource {
 

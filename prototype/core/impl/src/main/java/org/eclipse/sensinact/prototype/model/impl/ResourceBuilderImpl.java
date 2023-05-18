@@ -20,10 +20,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.eclipse.emf.ecore.ETypedElement;
-import org.eclipse.sensinact.prototype.model.Resource;
-import org.eclipse.sensinact.prototype.model.ResourceBuilder;
-import org.eclipse.sensinact.prototype.model.ResourceType;
-import org.eclipse.sensinact.prototype.model.ValueType;
+import org.eclipse.sensinact.core.model.Resource;
+import org.eclipse.sensinact.core.model.ResourceBuilder;
+import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 
 public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImpl, Resource>

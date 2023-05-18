@@ -13,12 +13,12 @@
 package org.eclipse.sensinact.prototype.notification.impl;
 
 import static java.util.Collections.emptyMap;
-import static org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status.PROVIDER_CREATED;
-import static org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status.PROVIDER_DELETED;
-import static org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status.RESOURCE_CREATED;
-import static org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status.RESOURCE_DELETED;
-import static org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status.SERVICE_CREATED;
-import static org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status.SERVICE_DELETED;
+import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.PROVIDER_CREATED;
+import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.PROVIDER_DELETED;
+import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.RESOURCE_CREATED;
+import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.RESOURCE_DELETED;
+import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_CREATED;
+import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_DELETED;
 
 import java.time.Instant;
 import java.util.List;
@@ -29,13 +29,13 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.sensinact.prototype.notification.AbstractResourceNotification;
-import org.eclipse.sensinact.prototype.notification.LifecycleNotification;
-import org.eclipse.sensinact.prototype.notification.NotificationAccumulator;
-import org.eclipse.sensinact.prototype.notification.LifecycleNotification.Status;
-import org.eclipse.sensinact.prototype.notification.ResourceActionNotification;
-import org.eclipse.sensinact.prototype.notification.ResourceDataNotification;
-import org.eclipse.sensinact.prototype.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.ResourceActionNotification;
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.osgi.service.typedevent.TypedEventBus;
 
 /**

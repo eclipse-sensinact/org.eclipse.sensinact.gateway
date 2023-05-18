@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.sensinact.prototype.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 
 /**
  * The {@link SensinactEMFDigitalTwin} provides access to the in-memory digital

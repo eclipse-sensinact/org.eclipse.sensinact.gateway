@@ -18,14 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.prototype.model.ResourceType;
 import org.eclipse.sensinact.prototype.model.impl.ResourceImpl;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.prototype.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.prototype.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.prototype.twin.TimedValue;
 
 public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSnapshot {
 
