@@ -8,11 +8,11 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.extract.impl;
 
-import static org.eclipse.sensinact.prototype.annotation.dto.AnnotationConstants.NOT_SET;
+import static org.eclipse.sensinact.core.annotation.dto.AnnotationConstants.NOT_SET;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -29,15 +29,15 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.prototype.annotation.dto.Data;
-import org.eclipse.sensinact.prototype.annotation.dto.MapAction;
-import org.eclipse.sensinact.prototype.annotation.dto.Metadata;
-import org.eclipse.sensinact.prototype.annotation.dto.Model;
-import org.eclipse.sensinact.prototype.annotation.dto.NullAction;
-import org.eclipse.sensinact.prototype.annotation.dto.Provider;
-import org.eclipse.sensinact.prototype.annotation.dto.Resource;
-import org.eclipse.sensinact.prototype.annotation.dto.Service;
-import org.eclipse.sensinact.prototype.annotation.dto.Timestamp;
+import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.MapAction;
+import org.eclipse.sensinact.core.annotation.dto.Metadata;
+import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
+import org.eclipse.sensinact.core.annotation.dto.Provider;
+import org.eclipse.sensinact.core.annotation.dto.Resource;
+import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;
@@ -225,7 +225,7 @@ public class AnnotationMapping {
 
     /**
      * Separated to avoid capturing the Class
-     * 
+     *
      * @param fieldName
      * @param update
      * @return
@@ -251,7 +251,7 @@ public class AnnotationMapping {
      * This method must be careful not to capture the class or field in the returned
      * function as it will cause memory leaks if they are referenced in the value of
      * the weak cache
-     * 
+     *
      * @param clazz
      * @param f
      * @param annotationType
@@ -328,7 +328,7 @@ public class AnnotationMapping {
     /**
      * This method must be careful not to capture any types that hold the
      * classloader
-     * 
+     *
      * @param <T>
      * @param fieldName
      * @param update

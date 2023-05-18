@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.extract.impl;
 
@@ -23,14 +23,14 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.eclipse.sensinact.prototype.annotation.dto.Data;
-import org.eclipse.sensinact.prototype.annotation.dto.Metadata;
-import org.eclipse.sensinact.prototype.annotation.dto.Model;
-import org.eclipse.sensinact.prototype.annotation.dto.NullAction;
-import org.eclipse.sensinact.prototype.annotation.dto.Provider;
-import org.eclipse.sensinact.prototype.annotation.dto.Resource;
-import org.eclipse.sensinact.prototype.annotation.dto.Service;
-import org.eclipse.sensinact.prototype.annotation.dto.Timestamp;
+import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.Metadata;
+import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
+import org.eclipse.sensinact.core.annotation.dto.Provider;
+import org.eclipse.sensinact.core.annotation.dto.Resource;
+import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;

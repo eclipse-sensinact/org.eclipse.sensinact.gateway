@@ -27,6 +27,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.sensinact.core.annotation.verb.ACT;
+import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.PrototypePush;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
@@ -43,8 +45,6 @@ import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.eclipse.sensinact.prototype.annotation.verb.ACT;
-import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

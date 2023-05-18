@@ -12,10 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.virtual.temperature;
 
-import org.eclipse.sensinact.prototype.annotation.dto.Data;
-import org.eclipse.sensinact.prototype.annotation.dto.Model;
-import org.eclipse.sensinact.prototype.annotation.dto.Provider;
-import org.eclipse.sensinact.prototype.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.Provider;
+import org.eclipse.sensinact.core.annotation.dto.Service;
 
 @Model(VirtualTemperatureDto.VIRTUAL_TEMPERATURE_MODEL)
 public class VirtualTemperatureDto {

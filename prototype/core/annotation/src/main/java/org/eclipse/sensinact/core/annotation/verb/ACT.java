@@ -10,27 +10,49 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.verb;
+package org.eclipse.sensinact.core.annotation.verb;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A parameter annotation used to define the name of an action parameter.
+ * Used to define a ACT resource
  *
- * If not used then the name will default to the parameter name from the Java
- * source.
+ * Can be repeated if a single method can perform more than one action
+ * service/resource.
  */
+
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface ActParam {
+@Target(ElementType.METHOD)
+@Repeatable(ACT.ACTs.class)
+public @interface ACT {
 
     /**
-     * The name of the action parameter
+     * The model that this ACT method applies to
+     */
+    String model();
+
+    /**
+     * The service that this ACT method applies to
      *
      * @return
      */
-    String name();
+    String service();
+
+    /**
+     * The resource that this ACT method applies to
+     *
+     * @return
+     */
+    String resource();
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface ACTs {
+        ACT[] value();
+    }
+
 }

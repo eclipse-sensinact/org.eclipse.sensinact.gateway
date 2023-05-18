@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.verb;
+package org.eclipse.sensinact.core.annotation.verb;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;

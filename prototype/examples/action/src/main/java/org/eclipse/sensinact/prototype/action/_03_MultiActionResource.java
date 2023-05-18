@@ -12,11 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.action;
 
-import org.eclipse.sensinact.prototype.annotation.propertytype.ProviderName;
-import org.eclipse.sensinact.prototype.annotation.propertytype.WhiteboardResource;
-import org.eclipse.sensinact.prototype.annotation.verb.ACT;
-import org.eclipse.sensinact.prototype.annotation.verb.UriParam;
-import org.eclipse.sensinact.prototype.annotation.verb.UriParam.UriSegment;
+import org.eclipse.sensinact.core.annotation.propertytype.ProviderName;
+import org.eclipse.sensinact.core.annotation.propertytype.WhiteboardResource;
+import org.eclipse.sensinact.core.annotation.verb.ACT;
+import org.eclipse.sensinact.core.annotation.verb.UriParam;
+import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
 import org.osgi.service.component.annotations.Component;
 
 /**

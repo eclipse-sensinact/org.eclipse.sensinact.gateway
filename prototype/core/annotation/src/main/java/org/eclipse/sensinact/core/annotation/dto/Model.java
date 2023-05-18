@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.dto;
+package org.eclipse.sensinact.core.annotation.dto;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,35 +18,39 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Defines the name of the resource for a given data value
- * 
+ * Defines the identity of the model for a given data value
+ *
  * Either used:
- * 
- * On a String field with no value to supply the resource name.
- * 
+ *
+ * On a String field with no value to supply the model name.
+ *
  * <pre>
- * &#64;Resource
- * public String resource;
+ * &#64;Model
+ * public String model;
  * </pre>
- * 
+ *
  * or
- * 
- * On the type, or a {@link Data} field with a value containing the resource
- * name
- * 
+ *
+ * On the type
+ *
  * <pre>
+ * &#64;Model(&quot;exampleModel&quot;)
  * &#64;Provider(&quot;exampleProvider&quot;)
- * &#64;Service(&quot;exampleService&quot;)
  * public class MyDto {
- *     &#64;Resource(&quot;exampleResource&quot;)
+ *     &#64;Service(&quot;exampleService&quot;)
  *     &#64;Data
  *     public String value;
  * }
  * </pre>
- * 
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.FIELD })
-public @interface Resource {
+public @interface Model {
+    /**
+     * The name of the provider
+     *
+     * @return
+     */
     String value() default AnnotationConstants.NOT_SET;
 }
