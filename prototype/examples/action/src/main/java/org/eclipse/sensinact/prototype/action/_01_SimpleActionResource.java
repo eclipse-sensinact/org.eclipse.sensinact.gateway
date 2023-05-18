@@ -14,9 +14,9 @@ package org.eclipse.sensinact.prototype.action;
 
 import java.util.List;
 
-import org.eclipse.sensinact.prototype.annotation.propertytype.ProviderName;
-import org.eclipse.sensinact.prototype.annotation.propertytype.WhiteboardResource;
-import org.eclipse.sensinact.prototype.annotation.verb.ACT;
+import org.eclipse.sensinact.core.annotation.propertytype.ProviderName;
+import org.eclipse.sensinact.core.annotation.propertytype.WhiteboardResource;
+import org.eclipse.sensinact.core.annotation.verb.ACT;
 import org.osgi.service.component.annotations.Component;
 
 /**

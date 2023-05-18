@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.verb;
+package org.eclipse.sensinact.core.annotation.verb;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -18,7 +18,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.eclipse.sensinact.prototype.annotation.dto.NullAction;
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 
 /**
  * Used to define a GET method for "pull based" querying of values

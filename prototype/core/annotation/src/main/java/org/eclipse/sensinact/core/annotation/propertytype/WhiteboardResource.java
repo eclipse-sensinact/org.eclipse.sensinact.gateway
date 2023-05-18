@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.propertytype;
+package org.eclipse.sensinact.core.annotation.propertytype;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.dto;
+package org.eclipse.sensinact.core.annotation.dto;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,22 +18,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Defines the name of the provider for a given data value
- * 
+ * Defines the name of the service for a given data value
+ *
  * Either used:
- * 
- * On a String field with no value to supply the provider name.
- * 
+ *
+ * On a String field with no value to supply the service name.
+ *
  * <pre>
- * &#64;Provider
- * public String provider;
+ * &#64;Service
+ * public String service;
  * </pre>
- * 
+ *
  * or
- * 
- * On the type, or a {@link Data} field with a value containing the provider
- * name
- * 
+ *
+ * On the type, or a {@link Data} field with a value containing the service name
+ *
  * <pre>
  * &#64;Provider(&quot;exampleProvider&quot;)
  * public class MyDto {
@@ -42,14 +41,14 @@ import java.lang.annotation.Target;
  *     public String value;
  * }
  * </pre>
- * 
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.FIELD })
-public @interface Provider {
+public @interface Service {
     /**
-     * The name of the provider
-     * 
+     * The name of the service
+     *
      * @return
      */
     String value() default AnnotationConstants.NOT_SET;

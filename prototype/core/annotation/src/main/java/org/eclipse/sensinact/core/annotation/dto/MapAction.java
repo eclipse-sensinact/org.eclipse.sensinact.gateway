@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.dto;
+package org.eclipse.sensinact.core.annotation.dto;
 
 /**
  * This enum defines the rules for handling values provided in a map

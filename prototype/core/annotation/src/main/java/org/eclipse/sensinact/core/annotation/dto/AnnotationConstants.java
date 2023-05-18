@@ -8,20 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.dto;
+package org.eclipse.sensinact.core.annotation.dto;
 
-/**
- * Defines the action to take if a value is null
- */
-public enum NullAction {
-    /**
-     * If the data field is null then ignore it and do not update the value
-     */
-    IGNORE,
-    /**
-     * If the data field is null then set null as the value
-     */
-    UPDATE
+public final class AnnotationConstants {
+
+    private AnnotationConstants() {
+    };
+
+    public static final String NOT_SET = "<<NOT_SET>>";
+
 }

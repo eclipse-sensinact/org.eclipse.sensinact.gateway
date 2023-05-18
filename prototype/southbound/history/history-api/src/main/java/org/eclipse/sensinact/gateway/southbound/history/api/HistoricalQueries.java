@@ -15,9 +15,9 @@ package org.eclipse.sensinact.gateway.southbound.history.api;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.eclipse.sensinact.core.annotation.verb.ACT;
+import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.prototype.annotation.verb.ACT;
-import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
 
 public interface HistoricalQueries {
 

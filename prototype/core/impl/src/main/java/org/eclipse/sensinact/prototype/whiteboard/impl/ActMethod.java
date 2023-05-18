@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.sensinact.prototype.annotation.verb.ActParam;
-import org.eclipse.sensinact.prototype.annotation.verb.UriParam;
+import org.eclipse.sensinact.core.annotation.verb.ActParam;
+import org.eclipse.sensinact.core.annotation.verb.UriParam;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 
 class ActMethod {

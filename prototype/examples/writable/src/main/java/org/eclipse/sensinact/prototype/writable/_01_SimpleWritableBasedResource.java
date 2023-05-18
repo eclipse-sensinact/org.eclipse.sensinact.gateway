@@ -12,9 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.writable;
 
-import org.eclipse.sensinact.prototype.annotation.propertytype.ProviderName;
-import org.eclipse.sensinact.prototype.annotation.propertytype.WhiteboardResource;
-import org.eclipse.sensinact.prototype.annotation.verb.SET;
+import org.eclipse.sensinact.core.annotation.propertytype.ProviderName;
+import org.eclipse.sensinact.core.annotation.propertytype.WhiteboardResource;
+import org.eclipse.sensinact.core.annotation.verb.SET;
 import org.osgi.service.component.annotations.Component;
 
 /**

@@ -32,6 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.sensinact.core.annotation.verb.ACT;
+import org.eclipse.sensinact.core.annotation.verb.ACT.ACTs;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.Model;
@@ -41,8 +43,6 @@ import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.prototype.annotation.verb.ACT;
-import org.eclipse.sensinact.prototype.annotation.verb.ACT.ACTs;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
 import org.osgi.framework.Constants;
 import org.osgi.util.promise.Deferred;

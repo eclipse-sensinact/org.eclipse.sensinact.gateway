@@ -14,12 +14,12 @@ package org.eclipse.sensinact.core.push.dto;
 
 import java.util.Map;
 
-import org.eclipse.sensinact.prototype.annotation.dto.MapAction;
-import org.eclipse.sensinact.prototype.annotation.dto.Metadata;
-import org.eclipse.sensinact.prototype.annotation.dto.Model;
-import org.eclipse.sensinact.prototype.annotation.dto.Provider;
-import org.eclipse.sensinact.prototype.annotation.dto.Resource;
-import org.eclipse.sensinact.prototype.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.MapAction;
+import org.eclipse.sensinact.core.annotation.dto.Metadata;
+import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.Provider;
+import org.eclipse.sensinact.core.annotation.dto.Resource;
+import org.eclipse.sensinact.core.annotation.dto.Service;
 
 /**
  * A base dto for performing updates, suitable for subclassing by device modules

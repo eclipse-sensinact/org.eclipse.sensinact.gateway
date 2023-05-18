@@ -8,16 +8,16 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.prototype.pull;
 
-import org.eclipse.sensinact.prototype.annotation.dto.Data;
-import org.eclipse.sensinact.prototype.annotation.dto.Provider;
-import org.eclipse.sensinact.prototype.annotation.dto.Service;
-import org.eclipse.sensinact.prototype.annotation.propertytype.WhiteboardResource;
-import org.eclipse.sensinact.prototype.annotation.verb.GET;
-import org.eclipse.sensinact.prototype.annotation.verb.GET.ReturnType;
+import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.Provider;
+import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.propertytype.WhiteboardResource;
+import org.eclipse.sensinact.core.annotation.verb.GET;
+import org.eclipse.sensinact.core.annotation.verb.GET.ReturnType;
 import org.osgi.service.component.annotations.Component;
 
 /**

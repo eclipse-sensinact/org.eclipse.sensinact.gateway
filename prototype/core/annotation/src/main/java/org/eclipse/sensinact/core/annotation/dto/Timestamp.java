@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation 
+*   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.annotation.dto;
+package org.eclipse.sensinact.core.annotation.dto;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,7 +21,7 @@ import java.time.temporal.ChronoUnit;
 /**
  * Marks a field as containing a timestamp. The field must be convertible to a
  * long, and will be interpreted based on the epoch.
- * 
+ *
  * If the annotated field is <code>null</code> then the current system time will
  * be used when setting the data
  *
@@ -32,7 +32,7 @@ public @interface Timestamp {
     /**
      * The unit of time this represents since the epoch, either
      * {@link ChronoUnit#MILLIS} or {@link ChronoUnit#SECONDS}
-     * 
+     *
      * @return
      */
     ChronoUnit value() default ChronoUnit.MILLIS;
