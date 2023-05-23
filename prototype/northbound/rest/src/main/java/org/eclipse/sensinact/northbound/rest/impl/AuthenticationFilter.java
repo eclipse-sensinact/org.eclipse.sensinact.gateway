@@ -18,10 +18,14 @@ import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static jakarta.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
 import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static java.lang.Boolean.FALSE;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme.TOKEN;
+import static org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme.USER_PASSWORD;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -29,6 +33,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
+import org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
@@ -64,15 +69,32 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 requestContext.abortWith(Response.status(BAD_REQUEST).build());
             }
 
+            Scheme authScheme;
+            String userid;
+            String credential;
             if ("Bearer".equals(headerChunks[0])) {
-                Optional<UserInfo> user = getAuthenticators().stream().filter(a -> a.getScheme() == TOKEN)
-                        .map(a -> tryAuth(a, headerChunks[1])).filter(u -> u != null).findFirst();
+                authScheme = TOKEN;
+                userid = null;
+                credential = headerChunks[1];
+            } else if ("Basic".equals(headerChunks[0])) {
+                authScheme = USER_PASSWORD;
+                String cred = new String(Base64.getMimeDecoder().decode(headerChunks[1]), UTF_8);
+                String[] credChunks = cred.split(":", 2);
+                userid = credChunks[0];
+                credential = credChunks[1];
+            } else {
+                authScheme = null;
+                userid = null;
+                credential = null;
+            }
 
-                if (user.isEmpty()) {
-                    requestContext.abortWith(unauthorizedResponse());
-                } else {
-                    requestContext.setSecurityContext(new UserInfoSecurityContext(TOKEN.getHttpScheme(), user.get()));
-                }
+            Optional<UserInfo> user = getAuthenticators().stream().filter(a -> a.getScheme() == authScheme)
+                    .map(a -> tryAuth(a, userid, credential)).filter(u -> u != null).findFirst();
+
+            if (user.isEmpty()) {
+                requestContext.abortWith(unauthorizedResponse());
+            } else {
+                requestContext.setSecurityContext(new UserInfoSecurityContext(TOKEN.getHttpScheme(), user.get()));
             }
         }
     }
@@ -98,10 +120,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 Set.of());
     }
 
-    private UserInfo tryAuth(Authenticator a, String token) {
+    private UserInfo tryAuth(Authenticator a, String user, String credential) {
         UserInfo ui = null;
         try {
-            ui = a.authenticate(null, token);
+            ui = a.authenticate(user, credential);
         } catch (Exception e) {
         }
         return ui;
