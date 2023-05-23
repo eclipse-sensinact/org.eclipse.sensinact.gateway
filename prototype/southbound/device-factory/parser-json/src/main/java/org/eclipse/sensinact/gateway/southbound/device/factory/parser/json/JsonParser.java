@@ -44,8 +44,8 @@ public class JsonParser implements IDeviceMappingParser {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public List<? extends IDeviceMappingRecord> parseRecords(byte[] rawInput, Map<String, Object> parserConfiguration)
-            throws ParserException {
+    public List<? extends IDeviceMappingRecord> parseRecords(byte[] rawInput, Map<String, Object> parserConfiguration,
+            final Map<String, String> context) throws ParserException {
 
         // Configured base entry
         String base = (String) parserConfiguration.get("base");

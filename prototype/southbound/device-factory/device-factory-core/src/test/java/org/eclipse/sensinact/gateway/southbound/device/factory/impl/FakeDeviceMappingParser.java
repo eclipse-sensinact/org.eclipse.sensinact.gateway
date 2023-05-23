@@ -51,7 +51,7 @@ public class FakeDeviceMappingParser implements IDeviceMappingParser {
 
     @Override
     public List<? extends IDeviceMappingRecord> parseRecords(final byte[] rawInput,
-            final Map<String, Object> parserConfiguration) throws ParserException {
+            final Map<String, Object> parserConfiguration, final Map<String, String> context) throws ParserException {
         return records;
     }
 }

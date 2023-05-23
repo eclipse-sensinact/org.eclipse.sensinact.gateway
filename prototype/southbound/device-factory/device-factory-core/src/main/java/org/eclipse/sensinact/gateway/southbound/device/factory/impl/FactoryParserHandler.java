@@ -44,6 +44,7 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.gateway.southbound.device.factory.Constants;
 import org.eclipse.sensinact.gateway.southbound.device.factory.DeviceFactoryException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingHandler;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingParser;
@@ -186,13 +187,17 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         final IDeviceMappingParser parser = cso.getService();
         try {
             // Use it
-            for (final IDeviceMappingRecord record : parser.parseRecords(payload, configuration.parserOptions)) {
-                try {
-                    handleRecord(configuration, globalState, record)
-                            .onFailure((t) -> logger.error("Error updating resource: {}", t.getMessage(), t));
-                } catch (JsonProcessingException | InvalidResourcePathException | ParserException
-                        | VariableNotFoundException e) {
-                    logger.error("Error parsing record: {}", e.getMessage(), e);
+            final List<? extends IDeviceMappingRecord> records = parser.parseRecords(payload,
+                    configuration.parserOptions, context);
+            if (records != null) {
+                for (final IDeviceMappingRecord record : records) {
+                    try {
+                        handleRecord(configuration, globalState, record)
+                                .onFailure((t) -> logger.error("Error updating resource: {}", t.getMessage(), t));
+                    } catch (JsonProcessingException | InvalidResourcePathException | ParserException
+                            | VariableNotFoundException e) {
+                        logger.error("Error parsing record: {}", e.getMessage(), e);
+                    }
                 }
             }
         } finally {
@@ -308,10 +313,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final String rcName = rcMapping.getResource();
             try {
                 final Object value = record.getField(rcMapping.getRecordPath(), options);
-                if (rcMapping.isMetadata()) {
-                    logger.warn("Metadata update not supported.");
-                } else {
-                    bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
+                if (value != Constants.IGNORE) {
+                    if (rcMapping.isMetadata()) {
+                        logger.warn("Metadata update not supported.");
+                    } else {
+                        bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
+                    }
                 }
             } catch (Exception e) {
                 logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
@@ -324,10 +331,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final String rcName = rcLiteral.getResource();
             try {
                 final Object value = rcLiteral.getTypedValue(options);
-                if (rcLiteral.isMetadata()) {
-                    logger.warn("Metadata update not supported.");
-                } else {
-                    bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
+                if (value != Constants.IGNORE) {
+                    if (rcLiteral.isMetadata()) {
+                        logger.warn("Metadata update not supported.");
+                    } else {
+                        bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
+                    }
                 }
             } catch (Exception e) {
                 logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());

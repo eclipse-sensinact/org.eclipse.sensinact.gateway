@@ -39,8 +39,8 @@ import org.osgi.service.component.annotations.Component;
 public class CsvParser implements IDeviceMappingParser {
 
     @Override
-    public List<? extends IDeviceMappingRecord> parseRecords(byte[] rawInput, Map<String, Object> parserConfiguration)
-            throws ParserException {
+    public List<? extends IDeviceMappingRecord> parseRecords(byte[] rawInput, Map<String, Object> parserConfiguration,
+            Map<String, String> context) throws ParserException {
 
         // Read CSV file
         final Charset charset;
