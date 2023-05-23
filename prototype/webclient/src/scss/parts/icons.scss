@@ -11,17 +11,26 @@
  *   Markus Hochstein
  **********************************************************************/
 
-import VueI18n from "vue-i18n";
-import TranslationDE from "@/locales/de/translation.json";
+.svg_icon{
+    background-color: #a5a5a5;
 
-import Vue from "vue";
 
-Vue.use(VueI18n);
-const i18n:VueI18n = new VueI18n({
-    locale: 'de', // set locale
-    messages:{
-        de:TranslationDE,
-    },
+    &.CO{
+      mask-image:url('@/assets/icons/sensors/co.svg')
+    }
+    &.NO{
+      mask-image:url('@/assets/icons/sensors/no.svg')
+    }
 
-});
-export default i18n;
+    &.O3{
+      mask-image:url('@/assets/icons/sensors/o3.svg')
+    }
+
+    &.NO2{
+      mask-image:url('@/assets/icons/sensors/no2.svg')
+    }
+
+}
+.svg_icon2{
+  padding: 5px;
+}

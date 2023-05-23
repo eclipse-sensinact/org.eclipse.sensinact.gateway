@@ -1,5 +1,5 @@
 <!--
-  Copyright (c) YYYY Contributors to the  Eclipse Foundation.
+  Copyright (c) 2023 Contributors to the  Eclipse Foundation.
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@
 
 import {Component, Vue, Watch} from "vue-property-decorator";
 import {
+  Configuration,
   Datastream,
   Datastreams,
   DatastreamsApi,
@@ -38,6 +39,7 @@ import {
 import ThingsC from "@/components/Thing.vue";
 //@ts-ignore
 import VTreeview from "v-treeview"
+import {getBaseUrl} from "@/config/base";
 @Component({components:{
     ThingsC,
     VTreeview
@@ -118,8 +120,9 @@ export default class TreeC extends Vue{
     try{
       this.treeData = [];
       this.loading = true;
-      this.location = (await new LocationsApi().v11LocationsEntityIdGet(parseInt(this.$route.params.id))).data;
-
+      //@ts-ignore
+      this.location = (await new LocationsApi(new Configuration({basePath:getBaseUrl()})).v11LocationsEntityIdGet(this.$route.params.id)).data;
+      console.log(this.location)
       this.treeData.push({
         id: Math.random()*100000, text: "Location "+this.location.name, type: "FMM_LOC", count: 0,
         children: [
@@ -179,7 +182,8 @@ export default class TreeC extends Vue{
   }
   async getThingsTree(): Promise<unknown[]>{
     this.loading = true;
-    const things = (await new LocationsApi().v11LocationsEntityIdThingsGet(parseInt(this.$route.params.id))).data as Things
+    //@ts-ignore
+    const things = (await new LocationsApi(new Configuration({basePath:getBaseUrl()})).v11LocationsEntityIdThingsGet(this.$route.params.id)).data as Things
     this.loading = false;
     let ret:unknown[] = [];
     things.value?.forEach((thing:Thing)=>{
@@ -191,7 +195,8 @@ export default class TreeC extends Vue{
 
   async getDatascreamsTree(id:string): Promise<unknown[]>{
     this.loading = true;
-    const datastreams = (await new ThingsApi().v11ThingsEntityIdDatastreamsGet(parseInt(id))).data as Datastreams
+    //@ts-ignore
+    const datastreams = (await new ThingsApi(new Configuration({basePath:getBaseUrl()})).v11ThingsEntityIdDatastreamsGet(id)).data as Datastreams
     this.loading = false;
     let ret:unknown[] = [];
     datastreams.value?.forEach((datastream:Datastream)=>{
@@ -202,7 +207,8 @@ export default class TreeC extends Vue{
   }
   async getObservationTree(id:string): Promise<unknown[]>{
     this.loading = true;
-    const observations = (await new DatastreamsApi().v11DatastreamsEntityIdObservationsGet(parseInt(id))).data as Observations
+    //@ts-ignore
+    const observations = (await new DatastreamsApi(new Configuration({basePath:getBaseUrl()})).v11DatastreamsEntityIdObservationsGet(id)).data as Observations
     this.loading = false;
     let ret:unknown[] = [];
     observations.value?.forEach((observation:Observation)=>{

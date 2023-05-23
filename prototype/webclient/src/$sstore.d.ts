@@ -11,17 +11,12 @@
  *   Markus Hochstein
  **********************************************************************/
 
-import VueI18n from "vue-i18n";
-import TranslationDE from "@/locales/de/translation.json";
-
 import Vue from "vue";
+import {simpleStoreIF} from "@/simpleStore/SimpleStore";
 
-Vue.use(VueI18n);
-const i18n:VueI18n = new VueI18n({
-    locale: 'de', // set locale
-    messages:{
-        de:TranslationDE,
-    },
+declare module 'vue/types/vue' {
 
-});
-export default i18n;
+    interface Vue {
+        $sstore: simpleStoreIF;
+    }
+}

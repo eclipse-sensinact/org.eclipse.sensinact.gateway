@@ -11,17 +11,17 @@
  *   Markus Hochstein
  **********************************************************************/
 
-import VueI18n from "vue-i18n";
-import TranslationDE from "@/locales/de/translation.json";
+$base_path_branding:'../assets/branding';
+$base_path_icon:'../assets/icons';
+$base_path_fonts:'../assets/fonts';
 
-import Vue from "vue";
+@function getAssetBranding($path){
+  @return $base_path_branding+'/'+$path;
+}
+@function getAssetIcon($path){
+  @return $base_path_icon+'/'+$path;
+}
+@function getAssetFonts($path){
+  @return $base_path_fonts+'/'+$path;
+}
 
-Vue.use(VueI18n);
-const i18n:VueI18n = new VueI18n({
-    locale: 'de', // set locale
-    messages:{
-        de:TranslationDE,
-    },
-
-});
-export default i18n;

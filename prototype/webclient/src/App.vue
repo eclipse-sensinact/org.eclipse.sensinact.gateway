@@ -1,5 +1,5 @@
 <!--
-  Copyright (c) YYYY Contributors to the  Eclipse Foundation.
+  Copyright (c) 2023 Contributors to the  Eclipse Foundation.
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -12,17 +12,15 @@
 
 <template>
   <div id="app">
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav>
     <router-view/>
+    <InfoBox v-if="showInfoBox" :infoUri="infoUri||''"></InfoBox>
   </div>
+
 </template>
 
 <style lang="scss">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  /*font-family: Avenir, Helvetica, Arial, sans-serif;*/
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -42,3 +40,35 @@ nav {
   }
 }
 </style>
+
+<script lang="ts">
+
+import {Vue} from "vue-property-decorator";
+import axios from "axios";
+import Component from "vue-class-component";
+import InfoBox from "@/components/Modal/InfoBox.vue";
+
+@Component({
+  components:{
+    InfoBox
+  }
+})
+export default class App extends Vue {
+
+  private showInfoBox = false;
+  private infoUri = null;
+
+  async mounted() {
+    try {
+      const base = window.location.protocol + '//' + window.location.host;
+      const config = (await axios.get(`config/config.json`)).data;
+      if (config && config.INFO_CHECK_URI && config.INFO_CHECK_URI) {
+        this.infoUri = config.INFO_BASE_URI;
+        this.showInfoBox = (await axios.get(config.INFO_CHECK_URI)).status == 200
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
+</script>

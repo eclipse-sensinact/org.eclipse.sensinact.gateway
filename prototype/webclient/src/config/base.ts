@@ -11,17 +11,16 @@
  *   Markus Hochstein
  **********************************************************************/
 
-import VueI18n from "vue-i18n";
-import TranslationDE from "@/locales/de/translation.json";
 
-import Vue from "vue";
 
-Vue.use(VueI18n);
-const i18n:VueI18n = new VueI18n({
-    locale: 'de', // set locale
-    messages:{
-        de:TranslationDE,
-    },
+let config= {
+  baseUrl:window.location.origin+'/sensinact/rest',
+  //baseUrl: 'https://udp-5g-broker.nomad-dmz.jena.de/sensinact/rest'
+};
 
-});
-export default i18n;
+export function setBaseUrl(url:string){
+  config.baseUrl = url;
+}
+export function getBaseUrl(){
+  return config.baseUrl;
+}

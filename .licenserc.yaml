@@ -61,5 +61,7 @@ header:
     - 'prototype/webclient/scripts'
     - 'prototype/webclient/babel.config.js'
     - 'prototype/webclient/vue.config.js'
+    - 'prototype/webclient/Docker/**'
+    - 'prototype/webclient/**/*.svg'
 
   comment: always

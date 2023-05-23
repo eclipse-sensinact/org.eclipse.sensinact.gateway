@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) YYYY Contributors to the Eclipse Foundation.
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,12 +33,13 @@
 
 // Import Bulma's core
 @import "~bulma/sass/utilities/_all";
+@import "./parts/colors.scss";
 
 // Set your colors
-$primary: #4099FF;
-$primary-light: findLightColor($primary);
-$primary-dark: findDarkColor($primary);
-$primary-invert: findColorInvert($primary);
+$primary: $bs-blue;
+$primary-light: findLightColor($bs-blue);
+$primary-dark: findDarkColor($bs-blue);
+$primary-invert: findColorInvert($bs-blue);
 $twitter: #4099FF;
 $twitter-invert: findColorInvert($twitter);
 $text: #fefefe;
@@ -107,9 +108,9 @@ $colors: mergeColorMaps(
 
 $dark: #fefefe;
 // Links
-$link: $primary;
+$link: $bs-blue;
 $link-invert: $primary-invert;
-$link-focus-border: $primary;
+$link-focus-border: $bs-blue;
 
 // Import Bulma and Buefy styles
 @import "~bulma";
@@ -123,3 +124,53 @@ html{
 .ps {
   height: 100%;
 }
+
+
+
+// color palette - these colors will be the color swatches of the Colors section
+
+@import "parts/general.scss";
+@import "parts/colors.scss";
+
+// additional colors
+
+/* --------------------------------
+
+Texts
+
+-------------------------------- */
+@import "parts/fonts.scss";
+@import "parts/text.scss";
+
+/* --------------------------------
+
+Background
+
+-------------------------------- */
+
+@import "parts/backgrounds.scss";
+
+
+/* --------------------------------
+
+Layouts
+
+-------------------------------- */
+@import "parts/layout.scss";
+
+/* --------------------------------
+
+Logos
+
+-------------------------------- */
+@import "parts/logo.scss";
+
+/* --------------------------------
+
+Icons
+
+-------------------------------- */
+@import "parts/icons.scss";
+
+
+

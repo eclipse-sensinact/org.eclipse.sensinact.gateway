@@ -1,0 +1,87 @@
+/*********************************************************************
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Markus Hochstein
+ **********************************************************************/
+
+@import "colors";
+@import "fonts";
+
+.text{
+  &.dark{
+    color:$bs-text-dark;
+
+  }
+  &.light{
+    color:$bs-text-light;
+    &a:hover{
+      color:$bs-text-light;
+    }
+  }
+  &.bold{
+    font-weight: 700;
+  }
+  &.grey{
+    color: $bs-text-grey;
+  }
+}
+a{
+  text-decoration: none;
+}
+a:hover{
+  text-decoration: underline;
+}
+body{
+  font-family: "open sans", Arial, SansSerif, serif;
+  font-size:1rem;
+  font-weight:400;
+  line-height:1.5;
+  color: $bs-text-dark;
+  background-color:#fff;
+  -webkit-text-size-adjust:100%;
+  -webkit-tap-highlight-color:transparent
+}
+.h1,.h2,.h3,.h4,.h5,.h6,h1,h2,h3,h4,h5,h6{
+  margin-top:0;
+  margin-bottom:.5rem;
+  font-weight:600;
+  line-height:1.2
+}
+.h1,h1{
+  font-size:4.5rem;
+  font-family: open sans;
+  font-weight: 700;
+}
+
+.h2,h2{
+  font-size: 4rem;
+}
+
+.h3,h3{
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.h4,h4 {
+  font-size: 1.9rem;
+  font-family: open sans light;
+}
+
+.h5,h5{
+  font-size:1.25rem;
+  font-family: open sans light;
+}
+.h6,h6{
+  font-size:1rem;
+  font-family: open sans light;
+}
+
+

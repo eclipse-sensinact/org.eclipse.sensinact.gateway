@@ -1,5 +1,5 @@
 <!--
-  Copyright (c) YYYY Contributors to the  Eclipse Foundation.
+  Copyright (c) 2023 Contributors to the  Eclipse Foundation.
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@
     <b-loading :active="loading" :can-cancel="false" :is-full-page="false"></b-loading>
     <div v-if="data">
 
-      <b-tabs v-model="activeTab" class="nopad">
+      <b-tabs v-model="activeTab" class="nopad" id="light">
         <b-tab-item label="Datastream">
           <div class="dtable" v-if="data">
             <perfect-scrollbar>
@@ -95,6 +95,30 @@ export default class DatastreamsC extends Vue{
 .cap{
   font-style: italic;
   font-weight: bold;
+
+}
+
+
+</style>
+<style lang="scss">
+#light{
+    .tabs ul{
+      border-bottom-color: hsl(0deg 0% 35.43%);
+    }
+    nav a {
+      font-weight: 200;
+      color: #8b8b8b;
+      border-bottom-color: hsl(0deg 0% 35.43%);
+    }
+    nav .is-active a{
+      border-bottom-color: hsl(0, 1%, 70%);
+      span{
+        color: #fcfcfc!important;
+      }
+    }
+
+
+
 
 }
 

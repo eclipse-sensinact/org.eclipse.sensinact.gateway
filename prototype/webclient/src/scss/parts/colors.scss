@@ -1,0 +1,37 @@
+/*********************************************************************
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Markus Hochstein
+ **********************************************************************/
+
+$bs-blue:#133370;
+$bs-gradient-green:#009ba5;
+$bs-gradient-green2:#41b6c5;
+$bs-gradient-blue:#2d99b6;
+$bs-gradient-violet:#90358B;
+$bs-gradient-violet2:#7a5ca1;
+$bs-gradient-orange:#e9550c;
+
+$bs-grey:#dfdfdf;
+$bs-white: #fff;
+
+$bs-text-light: #fff;
+$bs-text-dark: #343a40;
+$bs-text-grey: #868585;
+
+:root{
+  --bs-blue: #{$bs-blue};
+  --bs-gradient-green: #{$bs-gradient-green};
+  --bs-text-light: #{$bs-text-light};
+  --bs-text-dark: #{$bs-text-dark};
+  --bs-text-grey: #{$bs-text-grey};
+  --bs--grey: #{$bs-grey};
+
+}

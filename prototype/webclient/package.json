@@ -11,7 +11,9 @@
     "lint:editorconfig": "editorconfig-checker"
   },
   "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/font": "^7.1.96",
+    "@mdi/js": "^7.2.96",
     "axios": "^1.2.1",
     "buefy": "^0.9.22",
     "chart.js": "^4.1.1",
@@ -24,10 +26,12 @@
     "vue-chartjs": "^5.1.0",
     "vue-class-component": "^7.2.3",
     "vue-i18n": "^8.17.4",
+    "vue-leaflet-custom-marker": "^1.0.0",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.5.1",
     "vue-tree-list": "^1.5.0",
     "vue2-leaflet": "^2.7.1",
+    "vue2-leaflet-markercluster": "^3.1.0",
     "vue2-perfect-scrollbar": "^1.5.56"
   },
   "devDependencies": {

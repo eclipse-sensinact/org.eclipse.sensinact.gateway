@@ -1,5 +1,5 @@
 <!--
-  Copyright (c) YYYY Contributors to the  Eclipse Foundation.
+  Copyright (c) 2023 Contributors to the  Eclipse Foundation.
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -15,20 +15,20 @@
   <div class="t1">
     <b-loading :active="loading" :can-cancel="false" :is-full-page="false"></b-loading>
     <div class="chart">
-      {{comp_title}}
-      <Bar  :data="chartdata"  :options="chartOptions" style="{width: 100%;height: 250px}" css-classes="chart"/>
+      <Bar  :data="chartdata"  :options="chartOptions" style="{width: 100%;height: 250px}" css-classes="chart" responsive/>
     </div>
   </div>
 </template>
-
+responsive
 <script lang="ts">
 import 'chartjs-adapter-moment';
 import {Component, Prop, Vue, Watch} from "vue-property-decorator";
-import {DatastreamsApi, Observations} from "../../openapi/client";
+import {Configuration, DatastreamsApi, Observations} from "../../openapi/client";
 
 import { Bar } from 'vue-chartjs'
 import {Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, TimeScale} from 'chart.js'
 import moment from "moment";
+import {getBaseUrl} from "@/config/base";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,TimeScale)
 
@@ -85,7 +85,8 @@ export default class ObservationsC extends Vue{
   async loadData(){
     this.loading = true;
     try{
-      this.observations = (await new DatastreamsApi().v11DatastreamsEntityIdObservationsGet(parseInt(this.id!))).data;
+      //@ts-ignore
+      this.observations = (await new DatastreamsApi(new Configuration({basePath:getBaseUrl()})).v11DatastreamsEntityIdObservationsGet(this.id!)).data;
       console.log(this.observations)
     }catch (e){
       console.log(e);
