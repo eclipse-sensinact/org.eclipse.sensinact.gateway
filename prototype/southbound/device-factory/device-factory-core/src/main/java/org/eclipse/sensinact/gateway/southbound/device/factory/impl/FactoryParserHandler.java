@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.chrono.ChronoZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
@@ -637,6 +638,36 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     }
 
     /**
+     * Tries to obtain an {@link Instant} from the given value
+     *
+     * @param value A record value
+     * @return An instant or null
+     */
+    private Instant toInstant(final Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Instant) {
+            return (Instant) value;
+        }
+
+        if (value instanceof Number) {
+            return convertTimestamp(((Number) value).longValue());
+        }
+
+        if (value instanceof ChronoZonedDateTime) {
+            return ((ChronoZonedDateTime<?>) value).toInstant();
+        }
+
+        final Long timestamp = toLong(value);
+        if (timestamp != null) {
+            return convertTimestamp(timestamp);
+        }
+        return null;
+    }
+
+    /**
      * Prepares a GeoJSON object for the point at the given location
      */
     private Point makeLocation(final Object latitude, final Object longitude, final Object altitude) {
@@ -693,12 +724,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
 
         final IResourceMapping timestampPath = placeholders.get(KEY_TIMESTAMP);
         if (timestampPath != null) {
-            final Long timestamp = toLong(getFieldValue(record, timestampPath, options));
+            final Instant timestamp = toInstant(getFieldValue(record, timestampPath, options));
             if (timestamp != null) {
-                final Instant parsed = convertTimestamp(timestamp);
-                if (parsed != null) {
-                    return parsed;
-                }
+                return timestamp;
             }
         }
 
