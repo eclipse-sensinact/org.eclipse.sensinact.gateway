@@ -22,6 +22,7 @@ import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.sensinact.core.push.PrototypePush;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
@@ -33,8 +34,9 @@ import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
@@ -85,7 +87,14 @@ public class SecureAccessTest {
     private static final String RESOURCE = "resource";
     private static final Integer VALUE = 42;
 
-    private static final String token = "Open Sesame";
+    private static final String TOKEN = "Open Sesame";
+
+    private static final String TOKEN_HEADER = "Bearer " + TOKEN;
+
+    private static final String USER = "Alice";
+    private static final String CREDENTIAL = "Secret";
+
+    private static final String BASIC_HEADER = "Basic QWxpY2U6U2VjcmV0";
 
     @InjectService
     SensiNactSessionManager sessionManager;
@@ -93,13 +102,17 @@ public class SecureAccessTest {
     @InjectService
     PrototypePush push;
 
+    @InjectBundleContext
+    BundleContext ctx;
+
     final TestUtils utils = new TestUtils();
 
     /**
      * Get the resource value
      */
-    @Test
-    void resourceGet(@InjectBundleContext BundleContext ctx) throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { TOKEN_HEADER, BASIC_HEADER })
+    void resourceGet(String header) throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
         Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
@@ -111,13 +124,14 @@ public class SecureAccessTest {
         HttpResponse<?> response = utils.queryStatus(path);
         assertEquals(Status.SERVICE_UNAVAILABLE.getStatusCode(), response.statusCode());
 
-        ctx.registerService(Authenticator.class, new TokenValidator(token), null);
+        ctx.registerService(Authenticator.class, new TokenValidator(TOKEN), null);
+        ctx.registerService(Authenticator.class, new BasicValidator(USER, CREDENTIAL), null);
 
         response = utils.queryStatus(path);
         assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());
-        assertEquals("Bearer realm=test", response.headers().firstValue(WWW_AUTHENTICATE).get());
+        assertEquals("Bearer realm=test, Basic realm=test2", response.headers().firstValue(WWW_AUTHENTICATE).get());
 
-        TypedResponse<?> result = utils.queryJson(path, TypedResponse.class, Map.of(AUTHORIZATION, "Bearer " + token));
+        TypedResponse<?> result = utils.queryJson(path, TypedResponse.class, Map.of(AUTHORIZATION, header));
         utils.assertResultSuccess(result, EResultType.GET_RESPONSE, PROVIDER, SERVICE, RESOURCE);
         ResponseGetDTO r = utils.convert(result, ResponseGetDTO.class);
         assertEquals(RESOURCE, r.name);
@@ -147,6 +161,32 @@ public class SecureAccessTest {
         @Override
         public Scheme getScheme() {
             return Scheme.TOKEN;
+        }
+    }
+
+    private static class BasicValidator implements Authenticator {
+
+        private final String user;
+        private final String credential;
+
+        public BasicValidator(String user, String credential) {
+            this.user = user;
+            this.credential = credential;
+        }
+
+        @Override
+        public UserInfo authenticate(String user, String credential) {
+            return this.user.equals(user) && this.credential.equals(credential) ? new TestUserInfo() : null;
+        }
+
+        @Override
+        public String getRealm() {
+            return "test2";
+        }
+
+        @Override
+        public Scheme getScheme() {
+            return Scheme.USER_PASSWORD;
         }
     }
 
