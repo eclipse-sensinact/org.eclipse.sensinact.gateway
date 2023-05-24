@@ -23,7 +23,6 @@ import static org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme
 import static org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme.USER_PASSWORD;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Base64;
 import java.util.Collection;
@@ -34,6 +33,8 @@ import java.util.stream.Collectors;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
 import org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
@@ -49,6 +50,8 @@ import jakarta.ws.rs.core.SecurityContext;
  */
 @Priority(Priorities.AUTHENTICATION)
 public class AuthenticationFilter implements ContainerRequestFilter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     @Context
     Application application;
@@ -125,6 +128,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         try {
             ui = a.authenticate(user, credential);
         } catch (Exception e) {
+            LOG.warn("Failed to authenticate user {}", user, e);
         }
         return ui;
     }

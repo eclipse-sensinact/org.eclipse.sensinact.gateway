@@ -43,6 +43,9 @@ public class Certificates {
         @JsonProperty("kty")
         String type;
 
+        @JsonProperty(value = "use", required = false)
+        String use;
+
         @JsonProperty("alg")
         String algorithm;
 
@@ -78,6 +81,14 @@ public class Certificates {
 
         public void setType(String type) {
             this.type = type;
+        }
+
+        public String getUse() {
+            return use;
+        }
+
+        public void setUse(String use) {
+            this.use = use;
         }
 
         public String getAlgorithm() {

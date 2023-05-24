@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.feature.integration.northbound.security.oidc;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -32,22 +30,16 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Base64.Encoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import javax.crypto.spec.SecretKeySpec;
 
 import org.eclipse.sensinact.gateway.feature.utilities.test.ServerProcessHandler;
 import org.eclipse.sensinact.gateway.northbound.security.oidc.Certificates;
@@ -87,7 +79,7 @@ class OIDCAuthenticatorIntegrationTest {
         info.setType("RSA");
         info.setAlgorithm("RS512");
         info.setKeyId(KEY_ID);
-        Encoder encoder = Base64.getEncoder();
+        Encoder encoder = Base64.getUrlEncoder();
         KeyFactory kf = KeyFactory.getInstance("RSA");
         RSAPublicKeySpec spec = kf.getKeySpec(keyPair.getPublic(), RSAPublicKeySpec.class);
         info.setRsaModulus(encoder.encodeToString(spec.getModulus().toByteArray()));
@@ -127,16 +119,15 @@ class OIDCAuthenticatorIntegrationTest {
         Key key = keyPair.getPrivate();
 
         String token = Jwts.builder().setSubject("testUser").setIssuedAt(start).setExpiration(end)
-                .setHeaderParam(JwsHeader.KEY_ID, KEY_ID)
-                .serializeToJsonWith(new JacksonSerializer<>(mapper)).signWith(key, SignatureAlgorithm.RS512).compact();
+                .setHeaderParam(JwsHeader.KEY_ID, KEY_ID).serializeToJsonWith(new JacksonSerializer<>(mapper))
+                .signWith(key, SignatureAlgorithm.RS512).compact();
 
         awaitServer(client);
 
         HttpRequest request = HttpRequest
                 .newBuilder(URI.create(
                         "http://localhost:8083/sensinact/providers/temp1/services/sensor/resources/temperature/GET"))
-                .header("Authorization", "Bearer " + token)
-                .GET().build();
+                .header("Authorization", "Bearer " + token).GET().build();
 
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 

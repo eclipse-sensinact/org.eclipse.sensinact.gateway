@@ -109,7 +109,7 @@ public class ValidatorTest {
                 KeyInfo info = new KeyInfo();
                 info.setAlgorithm(sa.getValue());
                 info.setKeyId(sa.getDescription());
-                Encoder encoder = Base64.getEncoder();
+                Encoder encoder = Base64.getUrlEncoder();
                 if (sa.isRsa()) {
                     KeyFactory kf = KeyFactory.getInstance("RSA");
                     info.setType("RSA");
@@ -136,7 +136,7 @@ public class ValidatorTest {
                 KeyInfo info = new KeyInfo();
                 info.setAlgorithm(sa.getValue());
                 info.setKeyId(sa.getDescription());
-                Encoder encoder = Base64.getEncoder();
+                Encoder encoder = Base64.getUrlEncoder();
                 if (sa.isHmac()) {
                     info.setType("HMAC");
                     info.setSymmetricKey(encoder.encodeToString(e.getValue().getEncoded()));
