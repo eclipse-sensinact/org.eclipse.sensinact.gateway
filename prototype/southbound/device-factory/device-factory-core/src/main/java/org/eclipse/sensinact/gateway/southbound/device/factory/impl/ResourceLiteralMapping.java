@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.southbound.device.factory.Constants;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
 import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.ValueType;
@@ -74,7 +75,11 @@ public class ResourceLiteralMapping extends AbstractResourceMapping {
      * @return Converted literal value
      */
     public Object getTypedValue(final DeviceMappingOptionsDTO options) {
-        return valueType.convert(value, options);
+        if (value != Constants.IGNORE) {
+            return valueType.convert(value, options);
+        } else {
+            return value;
+        }
     }
 
     /**

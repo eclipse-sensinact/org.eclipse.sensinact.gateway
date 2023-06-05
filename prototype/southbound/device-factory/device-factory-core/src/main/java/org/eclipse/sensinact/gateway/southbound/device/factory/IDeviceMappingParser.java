@@ -30,6 +30,15 @@ public interface IDeviceMappingParser {
      */
     String PARSER_SUPPORTED_TYPES = "sensinact.southbound.mapping.types";
 
-    List<? extends IDeviceMappingRecord> parseRecords(byte[] rawInput, Map<String, Object> parserConfiguration)
-            throws ParserException;
+    /**
+     * Parse the records found in the given payload
+     *
+     * @param rawInput            RAW payload
+     * @param parserConfiguration Parser configuration
+     * @param context             Payload context (MQTT topic, ...)
+     * @return The list of parsed records (can be null)
+     * @throws ParserException Error parsing payload
+     */
+    List<? extends IDeviceMappingRecord> parseRecords(byte[] rawInput, Map<String, Object> parserConfiguration,
+            Map<String, String> context) throws ParserException;
 }
