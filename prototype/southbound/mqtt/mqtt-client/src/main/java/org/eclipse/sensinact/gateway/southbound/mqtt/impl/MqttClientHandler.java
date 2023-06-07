@@ -220,7 +220,12 @@ public class MqttClientHandler implements MqttCallback {
 
         for (Entry<IMqttMessageListener, Predicate<String>> entry : workListeners.entrySet()) {
             if (entry.getValue().test(topic)) {
-                entry.getKey().onMqttMessage(handlerId, topic, snMessage);
+                try {
+                    entry.getKey().onMqttMessage(handlerId, topic, snMessage);
+                } catch (Throwable t) {
+                    logger.error("Error handling MQTT message. Client={}, topic={}, error={}", handlerId, topic,
+                            t.getMessage(), t);
+                }
             }
         }
     }
