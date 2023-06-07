@@ -1,0 +1,12 @@
+-conditionalpackage: \
+    io.moquette, \
+    io.moquette.*
+
+Import-Package: \
+    !com.bugsnag, \
+    !com.codahale.metrics, \
+    !com.librato.metrics.*, \
+    !com.zaxxer.hikari.*, \
+    !org.apache.commons.codec.*, \
+    !org.h2.*, \
+    *

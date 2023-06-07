@@ -27,6 +27,7 @@
     <module>filter</module>
     <module>rest.api</module>
     <module>rest.gateway</module>
+    <module>mqtt</module>
   </modules>
 
   <properties>
