@@ -46,7 +46,6 @@
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>dto</artifactId>
       <version>${sensorthings.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -76,11 +75,6 @@
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
-      <artifactId>netty-common</artifactId>
-      <version>${netty.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
       <version>${netty.version}</version>
     </dependency>
@@ -104,17 +98,16 @@
       <artifactId>netty-transport-native-unix-common</artifactId>
       <version>${netty.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.eclipse.paho</groupId>
       <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
       <version>1.2.5</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.14.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -148,30 +141,6 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
-                  <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
-                  <version>${sensinact.version}</version>
-                  <type>json</type>
-                  <classifier>osgifeature</classifier>
-                  <destFileName>jakarta-servlet-whiteboard-feature.json</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
-                  <artifactId>jakarta-rest-whiteboard-feature</artifactId>
-                  <version>${sensinact.version}</version>
-                  <type>json</type>
-                  <classifier>osgifeature</classifier>
-                  <destFileName>jakarta-rest-whiteboard-feature.json</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
-                  <artifactId>northbound-ogc-sensorthings-feature</artifactId>
-                  <version>${sensorthings.version}</version>
-                  <type>json</type>
-                  <classifier>osgifeature</classifier>
-                  <destFileName>northbound-ogc-sensorthings-feature.json</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>virtual-temperature-sensor-feature</artifactId>
                   <version>${sensinact.version}</version>
                   <type>json</type>
@@ -190,27 +159,6 @@
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>core-feature</artifactId>
                   <version>${sensinact.version}</version>
-                  <type>zip</type>
-                  <classifier>osgifeaturerepo</classifier>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
-                  <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
-                  <version>${sensinact.version}</version>
-                  <type>zip</type>
-                  <classifier>osgifeaturerepo</classifier>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
-                  <artifactId>jakarta-rest-whiteboard-feature</artifactId>
-                  <version>${sensinact.version}</version>
-                  <type>zip</type>
-                  <classifier>osgifeaturerepo</classifier>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
-                  <artifactId>northbound-ogc-sensorthings-feature</artifactId>
-                  <version>${sensorthings.version}</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>

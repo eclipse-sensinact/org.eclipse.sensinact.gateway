@@ -5,21 +5,11 @@
   "sensinact.launcher": {
     "features": [
       "core-feature",
-      "jakarta-servlet-whiteboard-feature",
-      "jakarta-rest-whiteboard-feature",
-      "northbound-ogc-sensorthings-feature",
       "northbound-ogc-sensorthings-mqtt-feature",
       "virtual-temperature-sensor-feature"
     ],
     "repository": "target/it/repository",
     "featureDir": "target/it/features"
-  },
-  "org.apache.felix.http": {
-    "org.osgi.service.http.port": 8081
-  },
-  "JakartarsServletWhiteboardRuntimeComponent": {
-    "osgi.jakartars.name": "sensiNact.rest",
-    "osgi.http.whiteboard.target": "(osgi.http.endpoint=*)"
   },
   "sensiNact.northbound.sensorthings.mqtt": {
     "host": "127.0.0.1",
