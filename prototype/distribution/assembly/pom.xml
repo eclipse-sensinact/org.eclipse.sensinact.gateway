@@ -108,7 +108,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>northbound-oidc-authenticator-feature</artifactId>
-                  <version>0.0.1-SNAPSHOT</version>
+                  <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>
