@@ -107,6 +107,13 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>northbound-ogc-sensorthings-mqtt-feature</artifactId>
+                  <version>0.0.2-SNAPSHOT</version>
+                  <type>zip</type>
+                  <classifier>osgifeaturerepo</classifier>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>northbound-oidc-authenticator-feature</artifactId>
                   <version>0.0.2-SNAPSHOT</version>
                   <type>zip</type>
@@ -186,6 +193,14 @@
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>northbound-ogc-sensorthings-feature.json</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>northbound-ogc-sensorthings-mqtt-feature</artifactId>
+                  <version>0.0.2-SNAPSHOT</version>
+                  <type>json</type>
+                  <classifier>osgifeature</classifier>
+                  <destFileName>northbound-ogc-sensorthings-mqtt-feature.json</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>

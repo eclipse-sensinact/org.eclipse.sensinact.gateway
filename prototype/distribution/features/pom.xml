@@ -32,6 +32,7 @@
     <module>northbound-rest-feature</module>
     <module>northbound-websocket-feature</module>
     <module>northbound-ogc-sensorthings-feature</module>
+    <module>northbound-ogc-sensorthings-mqtt-feature</module>
     <module>virtual-temperature-sensor-feature</module>
     <module>timescale-history-provider-feature</module>
     <module>northbound-oidc-authenticator-feature</module>
