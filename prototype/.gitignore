@@ -5,3 +5,6 @@ target
 
 # ANTLR
 .antlr/
+
+# MQTT tests
+.moquette_uuid
