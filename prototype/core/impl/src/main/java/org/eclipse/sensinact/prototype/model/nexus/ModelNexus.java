@@ -563,10 +563,14 @@ public class ModelNexus {
         if (metadata == null) {
             return Map.of();
         } else {
-            final Map<String, Object> rcMeta = new HashMap<>();
-            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata, rcFeature));
-            return rcMeta;
+            return toMetadataMap(rcFeature, metadata);
         }
+    }
+
+    private Map<String, Object> toMetadataMap(final ETypedElement rcFeature, final ResourceMetadata metadata) {
+        final Map<String, Object> rcMeta = new HashMap<>();
+        rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata, rcFeature));
+        return rcMeta;
     }
 
     public void setResourceMetadata(Provider provider, EStructuralFeature svcFeature, ETypedElement resource,
@@ -586,6 +590,8 @@ public class ModelNexus {
             throw new IllegalStateException("No existing metadata for resource");
         }
 
+        Map<String, Object> oldMetadata = toMetadataMap(resource, metadata);
+
         metadata.setTimestamp(timestamp);
         metadata.getExtra().stream().filter(fcm -> fcm.getName().equals(metadataKey)).findFirst()
                 .ifPresentOrElse(fcm -> handleFeatureCustomMetadata(fcm, metadataKey, timestamp, value),
@@ -593,6 +599,11 @@ public class ModelNexus {
                                 .add(handleFeatureCustomMetadata(
                                         ProviderFactory.eINSTANCE.createFeatureCustomMetadata(), metadataKey, timestamp,
                                         value)));
+
+        Map<String, Object> newMetadata = toMetadataMap(resource, metadata);
+
+        notificationAccumulator.get().metadataValueUpdate(EMFUtil.getModelName(provider.eClass()), provider.getId(),
+                svcFeature.getName(), resource.getName(), oldMetadata, newMetadata, timestamp);
 
     }
 

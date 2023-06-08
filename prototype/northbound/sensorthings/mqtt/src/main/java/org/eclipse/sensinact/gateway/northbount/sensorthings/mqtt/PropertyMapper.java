@@ -12,9 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt;
 
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -25,22 +23,36 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class SelectMapper extends SensorthingsMapper<JsonNode> {
+public class PropertyMapper extends SensorthingsMapper<JsonNode> {
 
     private final SensorthingsMapper<?> mapper;
-    private final Set<String> selected;
+    private final Set<String> property;
+    private final String provider;
+    private final String service;
+    private final String resource;
 
-    public SelectMapper(String topicFilter, String selectFilter, SensorthingsMapper<?> mapper, ObjectMapper jsonMapper,
-            GatewayThread thread) {
+    public PropertyMapper(String topicFilter, String property, String provider, String service, String resource,
+            SensorthingsMapper<?> mapper, ObjectMapper jsonMapper, GatewayThread thread) {
         super(topicFilter, jsonMapper, thread);
+        this.provider = provider;
+        this.service = service;
+        this.resource = resource;
         this.mapper = mapper;
-        selected = Arrays.stream(selectFilter.split(",")).collect(Collectors.toSet());
+        this.property = Set.of(property);
     }
 
     @Override
     public Promise<Stream<JsonNode>> toPayload(AbstractResourceNotification notification) {
-        return mapper.toPayload(notification)
-                .map(s -> s.map(o -> jsonMapper.convertValue(o, ObjectNode.class).retain(selected)));
+        if (match(provider, notification.provider) && match(service, notification.service)
+                && match(resource, notification.resource)) {
+            return mapper.toPayload(notification)
+                    .map(s -> s.map(o -> jsonMapper.convertValue(o, ObjectNode.class).retain(property)));
+        }
+        return emptyStream();
+    }
+
+    private boolean match(String require, String value) {
+        return require == null || require.equals(value);
     }
 
     @Override

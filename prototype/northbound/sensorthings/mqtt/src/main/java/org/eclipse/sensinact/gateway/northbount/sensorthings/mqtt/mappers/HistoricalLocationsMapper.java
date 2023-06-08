@@ -36,4 +36,8 @@ public class HistoricalLocationsMapper extends SensorthingsMapper<HistoricalLoca
         return emptyStream();
     }
 
+    @Override
+    protected Class<HistoricalLocation> getPayloadType() {
+        return HistoricalLocation.class;
+    }
 }

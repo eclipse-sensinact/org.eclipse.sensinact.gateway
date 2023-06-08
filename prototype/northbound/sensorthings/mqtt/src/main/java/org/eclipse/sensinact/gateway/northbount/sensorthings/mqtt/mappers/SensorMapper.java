@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
-import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.osgi.util.promise.Promise;
 
@@ -48,11 +47,6 @@ public class SensorMapper extends SensorsMapper {
             return super.toPayload(notification);
         }
         return emptyStream();
-    }
-
-    public Promise<Stream<Sensor>> toPayload(ResourceDataNotification notification) {
-        // Avoid the custom logic which does unnecessary work
-        return getSensor(getResource(notification.provider, notification.service, notification.resource));
     }
 
 }
