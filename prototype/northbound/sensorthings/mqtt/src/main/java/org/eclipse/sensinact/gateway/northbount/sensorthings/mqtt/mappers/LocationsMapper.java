@@ -35,4 +35,9 @@ public class LocationsMapper extends SensorthingsMapper<Location> {
         }
         return emptyStream();
     }
+
+    @Override
+    protected Class<Location> getPayloadType() {
+        return Location.class;
+    }
 }

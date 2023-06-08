@@ -36,4 +36,8 @@ public class FeaturesOfInterestMapper extends SensorthingsMapper<FeatureOfIntere
         return emptyStream();
     }
 
+    @Override
+    protected Class<FeatureOfInterest> getPayloadType() {
+        return FeatureOfInterest.class;
+    }
 }

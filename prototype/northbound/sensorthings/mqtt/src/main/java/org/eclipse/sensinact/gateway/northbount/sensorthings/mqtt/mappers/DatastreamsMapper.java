@@ -15,6 +15,7 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
@@ -45,17 +46,25 @@ public class DatastreamsMapper extends SensorthingsMapper<Datastream> {
         return getDatastream(getResource(notification.provider, notification.service, notification.resource));
     }
 
+    @Override
     public Promise<Stream<Datastream>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service)) {
-            if ("friendlyName".equals(notification.resource) || "description".equals(notification.resource)) {
-                // These values are used in all Datastreams for this provider
-                return mapProvider(getProvider(notification.provider), this::getDatastream);
-            }
+        if (isRelevantAdminResource(notification)) {
+            // These are used in all Datastreams for this provider so all have been updated
+            return mapProvider(getProvider(notification.provider), this::getDatastream);
         }
-        return getDatastream(getResource(notification.provider, notification.service, notification.resource));
+        return emptyStream();
     }
 
     protected Promise<Stream<Datastream>> getDatastream(Promise<ResourceSnapshot> resourceSnapshot) {
         return decorate(resourceSnapshot.map(r -> DtoMapper.toDatastream(jsonMapper, r)));
+    }
+
+    @Override
+    protected Class<Datastream> getPayloadType() {
+        return Datastream.class;
+    }
+
+    protected boolean isRelevantAdminResource(AbstractResourceNotification notification) {
+        return "admin".equals(notification.service) && "location".equals(notification.resource);
     }
 }

@@ -12,16 +12,20 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.impl;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.prototype.dto.impl.MetadataUpdateDto;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
 
-    @SuppressWarnings("unused")
     private final MetadataUpdateDto metadataUpdateDto;
 
     public SetMetadataCommand(MetadataUpdateDto metadataUpdateDto) {
@@ -32,9 +36,20 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
     protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
             PromiseFactory promiseFactory) {
 
-        // TODO set the metadata in the model
+        SensinactResource resource = metadataUpdateDto.model != null
+                ? twin.getResource(metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
+                        metadataUpdateDto.resource)
+                : twin.getResource(metadataUpdateDto.provider, metadataUpdateDto.service, metadataUpdateDto.resource);
 
-        return promiseFactory.resolved(null);
+        if (metadataUpdateDto.removeMissingValues) {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+
+        List<Promise<Void>> updates = metadataUpdateDto.metadata.entrySet().stream()
+                .map(e -> resource.setMetadataValue(e.getKey(), e.getValue(), metadataUpdateDto.timestamp))
+                .collect(toList());
+
+        return promiseFactory.all(updates).map(x -> null);
     }
 
 }

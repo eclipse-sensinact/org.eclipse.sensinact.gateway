@@ -46,4 +46,9 @@ public class ObservationsMapper extends SensorthingsMapper<Observation> {
         };
         return wrap(DtoMapper.toObservation(notification.provider, notification.service, notification.resource, tv));
     }
+
+    @Override
+    protected Class<Observation> getPayloadType() {
+        return Observation.class;
+    }
 }

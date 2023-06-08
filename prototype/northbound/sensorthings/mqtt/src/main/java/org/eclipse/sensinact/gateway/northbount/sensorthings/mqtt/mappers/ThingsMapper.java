@@ -51,4 +51,9 @@ public class ThingsMapper extends SensorthingsMapper<Thing> {
     private Promise<Stream<Thing>> getThing(String id) {
         return decorate(getProvider(id).map(DtoMapper::toThing));
     }
+
+    @Override
+    protected Class<Thing> getPayloadType() {
+        return Thing.class;
+    }
 }

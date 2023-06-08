@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
-import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
@@ -45,16 +44,12 @@ public class SensorsMapper extends SensorthingsMapper<Sensor> {
         return getSensor(getResource(notification.provider, notification.service, notification.resource));
     }
 
-    public Promise<Stream<Sensor>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service)) {
-            if ("friendlyName".equals(notification.resource) || "description".equals(notification.resource)) {
-                return mapProvider(getProvider(notification.provider), this::getSensor);
-            }
-        }
-        return getSensor(getResource(notification.provider, notification.service, notification.resource));
-    }
-
     protected Promise<Stream<Sensor>> getSensor(Promise<ResourceSnapshot> resourceSnapshot) {
         return decorate(resourceSnapshot.map(DtoMapper::toSensor));
+    }
+
+    @Override
+    protected Class<Sensor> getPayloadType() {
+        return Sensor.class;
     }
 }
