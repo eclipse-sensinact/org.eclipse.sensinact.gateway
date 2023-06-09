@@ -52,6 +52,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
 import org.eclipse.sensinact.model.core.metadata.AnnotationMetadata;
@@ -66,9 +67,12 @@ import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.command.impl.ActionHandler;
+import org.eclipse.sensinact.prototype.command.impl.ResourcePullHandler;
+import org.eclipse.sensinact.prototype.command.impl.ResourcePushHandler;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.model.nexus.emf.compare.EMFCompareUtil;
 import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,12 +106,28 @@ public class ModelNexus {
 
     private final ActionHandler actionHandler;
 
+    private final ResourcePullHandler resourceValuePullHandler;
+    private final ResourcePushHandler resourceValuePushHandler;
+
+    public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
+            Supplier<NotificationAccumulator> accumulator) {
+        this(resourceSet, ProviderPackage, accumulator, null, null, null);
+    }
+
     public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
             Supplier<NotificationAccumulator> accumulator, ActionHandler actionHandler) {
+        this(resourceSet, ProviderPackage, accumulator, actionHandler, null, null);
+    }
+
+    public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
+            Supplier<NotificationAccumulator> accumulator, ActionHandler actionHandler,
+            ResourcePullHandler resourceValuePullHandler, ResourcePushHandler resourceValuePushHandler) {
         this.resourceSet = resourceSet;
         this.providerPackage = ProviderPackage;
         this.notificationAccumulator = accumulator;
         this.actionHandler = actionHandler;
+        this.resourceValuePullHandler = resourceValuePullHandler;
+        this.resourceValuePushHandler = resourceValuePushHandler;
         // TODO we need a general Working Directory for such data
         Optional<EPackage> packageOptional = loadDefaultPackage(Paths.get(BASIC_BASE_ECORE));
 
@@ -463,18 +483,31 @@ public class ModelNexus {
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue) {
+        return createResource(service, resource, type, timestamp, defaultValue, false, 0, false);
+    }
+
+    public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
+            Object defaultValue, boolean hasGetter, long getterCacheMs, boolean hasSetter) {
+        // FIXME: WIP
         FeatureCustomMetadata resourceType = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
         resourceType.setName("resourceType");
         resourceType.setValue(ResourceType.SENSOR);
         resourceType.setTimestamp(Instant.EPOCH);
 
-        return doCreateResource(service, resource, type, timestamp, defaultValue, List.of(resourceType));
+        return doCreateResource(service, resource, type, timestamp, defaultValue, List.of(resourceType), hasGetter,
+                getterCacheMs, hasSetter);
     }
 
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
-            Object defaultValue, List<FeatureCustomMetadata> metadata) {
+            Object defaultValue, List<FeatureCustomMetadata> metadata, boolean hasGetter, long getterCacheMs,
+            boolean hasSetter) {
         assertResourceNotExist(service, resource);
         ResourceAttribute feature = EMFUtil.createResourceAttribute(service, resource, type, defaultValue);
+        feature.setExternalGet(hasGetter);
+        feature.setExternalSet(hasSetter);
+        if (getterCacheMs > 0) {
+            feature.setExternalGetCacheMs(getterCacheMs);
+        }
         EMFUtil.fillMetadata(feature, timestamp, false, resource, List.of());
         return feature;
     }
@@ -686,8 +719,44 @@ public class ModelNexus {
 
     public Promise<Object> act(Provider provider, EStructuralFeature service, ETypedElement resource,
             Map<String, Object> parameters) {
-        return actionHandler.act(EMFUtil.getModelName(provider.eClass()), provider.getId(), service.getName(),
-                resource.getName(), parameters);
+        if (actionHandler == null) {
+            return Promises.failed(new IllegalAccessError("Trying to act on a value without an action handler"));
+        }
+
+        try {
+            return actionHandler.act(EMFUtil.getModelName(provider.eClass()), provider.getId(), service.getName(),
+                    resource.getName(), parameters);
+        } catch (Throwable t) {
+            return Promises.failed(t);
+        }
+    }
+
+    public <T> Promise<TimedValue<T>> pullValue(Provider provider, EStructuralFeature service, ETypedElement resource,
+            Class<T> valueType, TimedValue<T> cachedValue) {
+        if (resourceValuePullHandler == null) {
+            return Promises.failed(new IllegalAccessError("Trying to pull a value without a pull handler"));
+        }
+
+        try {
+            return resourceValuePullHandler.pullValue(EMFUtil.getModelName(provider.eClass()), provider.getId(),
+                    service.getName(), resource.getName(), valueType, cachedValue);
+        } catch (Throwable t) {
+            return Promises.failed(t);
+        }
+    }
+
+    public <T> Promise<TimedValue<T>> pushValue(Provider provider, EStructuralFeature service, ETypedElement resource,
+            Class<T> valueType, TimedValue<T> cachedValue, TimedValue<T> newValue) {
+        if (resourceValuePushHandler == null) {
+            return Promises.failed(new IllegalAccessError("Trying to push a value without a push handler"));
+        }
+
+        try {
+            return resourceValuePushHandler.pushValue(EMFUtil.getModelName(provider.eClass()), provider.getId(),
+                    service.getName(), resource.getName(), valueType, cachedValue, newValue);
+        } catch (Throwable t) {
+            return Promises.failed(t);
+        }
     }
 
     public void deleteProvider(String model, String name) {

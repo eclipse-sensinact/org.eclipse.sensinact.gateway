@@ -12,7 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.twin.impl;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,12 +24,14 @@ import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
+import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.prototype.command.impl.CommandScopedImpl;
@@ -92,45 +96,139 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         return resource.getName();
     }
 
-    @Override
-    public Promise<Void> setValue(Object value, Instant timestamp) {
-        checkValid();
-
-        if (getResourceType() == ResourceType.ACTION) {
-            return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
+    /**
+     * Returns the current value from the twin (cached state)
+     *
+     * @param <T>  Value type generic
+     * @param type Value type class
+     * @return The timed value from the service (both value and timestamp can be
+     *         null)
+     */
+    private <T> TimedValue<T> getValueFromTwin(final Class<T> type) {
+        final Instant currentTimestamp;
+        final T currentValue;
+        final Service svc = (Service) provider.eGet(service);
+        if (svc != null) {
+            // Service is there
+            final Object rawValue = svc.eGet((EAttribute) resource);
+            if (rawValue != null && type.isAssignableFrom(rawValue.getClass())) {
+                currentValue = type.cast(rawValue);
+            } else {
+                currentValue = null;
+            }
+            // Get the resource metadata
+            final ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(resource);
+            if (metadata != null) {
+                currentTimestamp = metadata.getTimestamp();
+            } else {
+                currentTimestamp = null;
+            }
+        } else {
+            // Service (and resource) is not ready yet
+            currentValue = null;
+            currentTimestamp = null;
         }
 
-        modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
-                (EStructuralFeature) resource, value, timestamp);
-        return promiseFactory.resolved(null);
+        return new TimedValueImpl<T>(currentValue, currentTimestamp);
     }
 
     @Override
-    public Promise<TimedValue<?>> getValue() {
+    public <T> Promise<Void> setValue(T value, Instant timestamp) {
         checkValid();
 
         if (getResourceType() == ResourceType.ACTION) {
             return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
         }
 
-        final Service svc = (Service) provider.eGet(service);
-        final Instant timestamp;
-        final Object value;
-        if (svc != null) {
-            value = svc.eGet((EAttribute) resource);
-            // Get the resource metadata
-            final Metadata metadata = svc.getMetadata().get(resource);
-            if (metadata != null) {
-                timestamp = metadata.getTimestamp();
+        try {
+            final boolean hasExternalSetter;
+            if (resource instanceof ResourceAttribute) {
+                // Resource created by ResourceBuilder
+                final ResourceAttribute rc = (ResourceAttribute) resource;
+                hasExternalSetter = rc.isExternalSet();
             } else {
-                timestamp = null;
+                // Predefined resource (admin service)
+                hasExternalSetter = false;
             }
-        } else {
-            value = null;
-            timestamp = null;
+
+            if (hasExternalSetter) {
+                // TODO Check types
+                final TimedValue<T> cachedValue = (TimedValue<T>) getValueFromTwin(Object.class);
+                final TimedValue<T> newValue = new TimedValueImpl<T>(value, timestamp);
+                final Promise<TimedValue<T>> pushValue = modelNexus.pushValue(provider, service, resource,
+                        (Class<T>) type, cachedValue, newValue);
+                if (pushValue == null) {
+                    // No value returned: return the cached value
+                    return promiseFactory.resolved(null);
+                } else {
+                    // ... then update the twin value
+                    return pushValue.thenAccept((val) -> {
+                        if (val != null) {
+                            modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
+                                    (EStructuralFeature) resource, val.getValue(), val.getTimestamp());
+                        }
+                    }).then(null);
+                }
+            } else {
+                modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
+                        (EStructuralFeature) resource, value, timestamp);
+                return promiseFactory.resolved(null);
+            }
+        } catch (Exception e) {
+            return promiseFactory.failed(e);
+        }
+    }
+
+    @Override
+    public <T> Promise<TimedValue<T>> getValue(final Class<T> type, final GetLevel getLevel) {
+        checkValid();
+
+        if (getResourceType() == ResourceType.ACTION) {
+            return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
         }
 
-        return promiseFactory.resolved(new TimedValueImpl<Object>(value, timestamp));
+        // Check if the resource is pull based
+        final boolean hasExternalGetter;
+        final Duration cacheThreshold;
+        if (resource instanceof ResourceAttribute) {
+            // Resource created by ResourceBuilder
+            final ResourceAttribute rc = (ResourceAttribute) resource;
+            hasExternalGetter = rc.isExternalGet();
+            cacheThreshold = Duration.of(rc.getExternalGetCacheMs(), ChronoUnit.MILLIS);
+        } else {
+            // Predefined resource (admin service)
+            hasExternalGetter = false;
+            cacheThreshold = null;
+        }
+
+        // Get the currently cached value
+        final TimedValue<T> cachedValue = getValueFromTwin(type);
+        if (!hasExternalGetter || getLevel == GetLevel.WEAK) {
+            // Push-based or weak get: return the cached value
+            return promiseFactory.resolved(cachedValue);
+        } else if (getLevel == GetLevel.HARD || cachedValue.getTimestamp() == null || cacheThreshold == null
+                || Instant.now().minus(cacheThreshold).isAfter(cachedValue.getTimestamp())) {
+            // Hard get or no value or no cache policy or threshold exceed: pull the
+            // value...
+            final Promise<TimedValue<T>> pullValue = modelNexus.pullValue(provider, service, resource, type,
+                    cachedValue);
+            if (pullValue == null) {
+                // No value returned: return the cached value
+                return promiseFactory.resolved(cachedValue);
+            } else {
+                // ... then update the twin value
+                pullValue.thenAccept((val) -> {
+                    if (val != null) {
+                        modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
+                                (EStructuralFeature) resource, val.getValue(), val.getTimestamp());
+                    }
+                });
+            }
+            return pullValue;
+        } else {
+            // Return the cached value
+            return promiseFactory.resolved(cachedValue);
+        }
     }
 
     @Override

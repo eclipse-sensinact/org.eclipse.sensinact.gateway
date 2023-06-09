@@ -31,6 +31,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
@@ -76,7 +77,8 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             @Reference ProviderPackage ProviderPackage) {
         this.typedEventBus = typedEventBus;
         this.whiteboard = new SensinactWhiteboard(this);
-        nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, this::performAction);
+        nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, this::performAction,
+                this::pullResourceValue, this::pushResourceValue);
         start();
     }
 
@@ -152,6 +154,41 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             d.fail(e);
         }
 
+        return d.getPromise();
+    }
+
+    private <T> Promise<TimedValue<T>> pullResourceValue(String model, String provider, String service,
+            String resource, Class<T> clazz, TimedValue<T> cachedValue) {
+        Deferred<TimedValue<T>> d = getPromiseFactory().deferred();
+        try {
+            this.promiseFactory.executor().execute(() -> {
+                try {
+                    d.resolveWith(this.whiteboard.pullValue(model, provider, service, resource, clazz, cachedValue));
+                } catch (Exception e) {
+                    d.fail(e);
+                }
+            });
+        } catch (Exception e) {
+            d.fail(e);
+        }
+        return d.getPromise();
+    }
+
+    private <T> Promise<TimedValue<T>> pushResourceValue(String model, String provider, String service,
+            String resource, Class<T> clazz, TimedValue<T> cachedValue, TimedValue<T> newValue) {
+        Deferred<TimedValue<T>> d = getPromiseFactory().deferred();
+        try {
+            this.promiseFactory.executor().execute(() -> {
+                try {
+                    d.resolveWith(this.whiteboard.pushValue(model, provider, service, resource, clazz, cachedValue,
+                            newValue));
+                } catch (Exception e) {
+                    d.fail(e);
+                }
+            });
+        } catch (Exception e) {
+            d.fail(e);
+        }
         return d.getPromise();
     }
 

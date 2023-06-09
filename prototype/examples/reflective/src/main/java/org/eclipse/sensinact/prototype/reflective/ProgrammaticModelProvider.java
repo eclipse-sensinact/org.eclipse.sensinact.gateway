@@ -27,7 +27,7 @@ public class ProgrammaticModelProvider implements ModelProvider {
     @Override
     public void init(SensinactModelManager manager) {
         manager.createModel("reflective").withAutoDeletion(true).build().createService("testService").build()
-                .createResource("testResource").withType(Integer.class).withGetter(() -> random.nextInt(16))
+                .createResource("testResource").withType(Integer.class).withGetter()
                 .withValueType(ValueType.UPDATABLE);
     }
 

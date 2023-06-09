@@ -18,6 +18,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueType" eType="ecore:EEnum ../../../../../provider/src/main/resources/model/sensinact.ecore#//ValueType"
         defaultValueLiteral="MODIFIABLE"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGetCacheMs" eType="ecore:EDataType ../../../../../org.eclipse.emf.ecore/model/Ecore.ecore#//ELong"
+        defaultValueLiteral="0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalSet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="stale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
       <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">

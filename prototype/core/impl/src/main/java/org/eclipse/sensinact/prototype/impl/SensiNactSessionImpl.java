@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -56,7 +57,6 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
-import org.osgi.util.promise.Promises;
 
 public class SensiNactSessionImpl implements SensiNactSession {
 
@@ -216,8 +216,31 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
-        return safeGetValue(executeGetCommand(m -> m.getResource(provider, service, resource),
-                r -> r.getValue().map(t -> clazz.cast(t.getValue())), Promises.resolved(null)));
+        final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz);
+        if (tv != null) {
+            return tv.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz) {
+        return safeExecute(new AbstractTwinCommand<TimedValue<T>>() {
+            @Override
+            protected Promise<TimedValue<T>> call(SensinactDigitalTwin model, PromiseFactory pf) {
+                final SensinactResource sensinactResource = model.getResource(provider, service, resource);
+                if (sensinactResource != null) {
+                    if (sensinactResource.getResourceType() == ResourceType.ACTION) {
+                        return pf.resolved(null);
+                    }
+                    // TODO: get the GetLevel from argument
+                    return sensinactResource.getValue(clazz, GetLevel.CACHED);
+                } else {
+                    return pf.resolved(null);
+                }
+            }
+        });
     }
 
     @Override
@@ -300,8 +323,17 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 final SensinactResource sensinactResource = model.getResource(provider, service, resource);
                 if (sensinactResource != null) {
                     ResourceType resourceType = sensinactResource.getResourceType();
-                    final Promise<TimedValue<?>> val = resourceType == ResourceType.ACTION ? pf.resolved(null)
-                            : sensinactResource.getValue();
+                    final Promise<TimedValue<Object>> val;
+                    switch (resourceType) {
+                    case ACTION:
+                        val = pf.resolved(null);
+                        break;
+
+                    default:
+                        val = sensinactResource.getValue(Object.class, GetLevel.CACHED);
+                        break;
+                    }
+
                     final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
 
                     return val.then(x -> metadata).then(x -> {
@@ -309,12 +341,25 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         result.provider = provider;
                         result.service = service;
                         result.resource = resource;
-                        if (resourceType != ResourceType.ACTION) {
+                        result.contentType = sensinactResource.getType();
+                        result.resourceType = resourceType;
+                        result.metadata = metadata.getValue();
+
+                        switch(resourceType) {
+                        case ACTION:
+                            result.actMethodArgumentsTypes = sensinactResource.getArguments();
+                            break;
+
+                        default:
+                            // TODO: get it from the description
+                            result.valueType = ValueType.UPDATABLE;
+
+                            // Add the current value
                             result.value = val.getValue().getValue();
                             result.timestamp = val.getValue().getTimestamp();
+                            break;
                         }
-                        // TODO - how do we say that this is an action and list the parameters?
-                        result.metadata = metadata.getValue();
+
                         return pf.resolved(result);
                     });
                 } else {

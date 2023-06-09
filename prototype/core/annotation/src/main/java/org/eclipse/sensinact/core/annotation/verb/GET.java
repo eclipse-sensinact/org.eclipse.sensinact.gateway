@@ -17,6 +17,8 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 
@@ -72,6 +74,19 @@ public @interface GET {
      * @return
      */
     Class<?> type() default Object.class;
+
+    /**
+     * Duration of the value cache. If the value is requested using a CACHED get and
+     * the cache duration is exceeded, the annotated method will be called.
+     *
+     * The default duration is in {@link TimeUnit#MILLISECONDS}.
+     */
+    long cacheDuration() default 500;
+
+    /**
+     * Unit of the value cache duration. Defaults to {@link ChronoUnit#MILLIS}.
+     */
+    ChronoUnit cacheDurationUnit() default ChronoUnit.MILLIS;
 
     NullAction onNull() default NullAction.IGNORE;
 

@@ -12,12 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.model;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * A builder for programmatically registering models
@@ -85,20 +85,21 @@ public interface ResourceBuilder<B, T> {
     ResourceBuilder<B, T> withAction(List<Entry<String, Class<?>>> namedParameterTypes);
 
     /**
-     * Set a getter function to be called
-     *
-     * @param getter
-     * @return
+     * This resource has a dynamic get behavior. Can't work on resource with an action.
      */
-    ResourceBuilder<B, T> withGetter(Supplier<T> getter);
+    ResourceBuilder<B, T> withGetter();
 
     /**
-     * Set a setter function to be called
+     * Sets the cache duration for dynamic get calls
      *
-     * @param setter
-     * @return
+     * @param cacheDuration Duration of the cache
      */
-    ResourceBuilder<B, T> withSetter(Consumer<T> setter);
+    ResourceBuilder<B, T> withGetterCache(Duration cacheDuration);
+
+    /**
+     * This resource has a dynamic set behavior. Can't work on resource with an action.
+     */
+    ResourceBuilder<B, T> withSetter();
 
     /**
      * Build the resource

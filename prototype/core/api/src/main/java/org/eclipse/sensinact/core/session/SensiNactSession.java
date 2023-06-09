@@ -24,6 +24,7 @@ import org.eclipse.sensinact.core.notification.ClientMetadataListener;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.twin.TimedValue;
 
 public interface SensiNactSession {
 
@@ -99,6 +100,22 @@ public interface SensiNactSession {
      *                                  location
      */
     <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz);
+
+    /**
+     * Get the value of a resource
+     *
+     * @param <T>
+     * @param provider
+     * @param service
+     * @param resource
+     * @param clazz
+     * @return
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz);
 
     /**
      * Set the value of a resource with the current time

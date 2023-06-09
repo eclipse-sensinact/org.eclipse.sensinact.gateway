@@ -4,7 +4,7 @@
     modelDirectory="/org.eclipse.sensinact.core.model/src/main/java" modelPluginID="org.eclipse.sensinact.core.model"
     modelName="sensinact" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container$Dynamic$Permissive"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="11.0" suppressGenModelAnnotations="false"
-    copyrightFields="false" usedGenPackages="../../../../../provider/src/main/resources/model/sensinact.genmodel#//provider"
+    copyrightFields="false" usedGenPackages="../../../../../provider/src/main/resources/model/sensinact.genmodel#//provider ../../../../../org.eclipse.emf.ecore/model/Ecore.genmodel#//ecore"
     operationReflection="true" importOrganizing="true" oSGiCompatible="true">
   <foreignModel>metadata.ecore</foreignModel>
   <genPackages prefix="Metadata" basePackage="org.eclipse.sensinact.model.core" disposableProviderFactory="true"
@@ -18,6 +18,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//ResourceAttribute/resourceType"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//ResourceAttribute/valueType"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//ResourceAttribute/externalGet"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//ResourceAttribute/externalGetCacheMs"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//ResourceAttribute/externalSet"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute metadata.ecore#//ResourceAttribute/stale"/>
     </genClasses>

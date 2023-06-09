@@ -12,12 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.model.impl;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.model.Resource;
@@ -36,6 +35,9 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     private Instant timestamp;
     private ResourceType resourceType = null;
     private List<Entry<String, Class<?>>> namedParameterTypes;
+    private boolean hasGetter;
+    private long getterCacheMs;
+    private boolean hasSetter;
 
     public ResourceBuilderImpl(AtomicBoolean active, R parent, ServiceImpl builtParent, String name,
             ModelNexus nexusImpl) {
@@ -104,15 +106,28 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     }
 
     @Override
-    public ResourceBuilder<R, T> withGetter(Supplier<T> getter) {
+    public ResourceBuilder<R, T> withGetter() {
         checkValid();
-        throw new RuntimeException("Not implemented");
+        this.hasGetter = true;
+        return this;
     }
 
     @Override
-    public ResourceBuilder<R, T> withSetter(Consumer<T> setter) {
+    public ResourceBuilder<R, T> withGetterCache(Duration cacheDuration) {
         checkValid();
-        throw new RuntimeException("Not implemented");
+        if (cacheDuration == null || cacheDuration.isNegative()) {
+            this.getterCacheMs = 0;
+        } else {
+            this.getterCacheMs = cacheDuration.toMillis();
+        }
+        return this;
+    }
+
+    @Override
+    public ResourceBuilder<R, T> withSetter() {
+        checkValid();
+        this.hasSetter = true;
+        return this;
     }
 
     @Override
@@ -142,6 +157,9 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
             if (namedParameterTypes == null) {
                 throw new IllegalArgumentException("The action resource " + name + " must define parameters");
             }
+            if (hasGetter || hasSetter) {
+                throw new IllegalArgumentException("Can't define an external get or set on an ACTION resource");
+            }
         } else {
             throw new RuntimeException("No implemented support for type " + resourceType);
         }
@@ -157,7 +175,7 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
             break;
         case SENSOR:
             createResource = nexusImpl.createResource(builtParent.getServiceEClass(), name, type, timestamp,
-                    initialValue);
+                    initialValue, hasGetter, getterCacheMs, hasSetter);
             break;
         case PROPERTY:
         case STATE_VARIABLE:
