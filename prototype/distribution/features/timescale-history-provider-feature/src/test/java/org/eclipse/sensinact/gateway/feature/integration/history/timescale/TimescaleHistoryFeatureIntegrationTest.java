@@ -112,7 +112,9 @@ class TimescaleHistoryFeatureIntegrationTest {
     @AfterAll
     static void stop() throws Exception {
         server.stopSensinact();
-        container.stop();
+        if (container != null) {
+            container.stop();
+        }
     }
 
     @Test
