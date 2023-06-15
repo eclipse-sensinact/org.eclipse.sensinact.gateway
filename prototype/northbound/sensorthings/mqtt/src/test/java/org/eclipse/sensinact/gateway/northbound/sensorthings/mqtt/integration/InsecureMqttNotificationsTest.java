@@ -208,19 +208,15 @@ public class InsecureMqttNotificationsTest {
 
             List<Datastream> streams = readMessages(6, Datastream.class);
 
-            streams.sort((a, b) -> a.name.compareTo(b.name));
+            // Creation in sorted event order (p/s/r uri)
+            assertEquals("friendlyName", streams.get(0).name);
+            assertEquals("modelUri", streams.get(1).name);
+            assertEquals("foobar", streams.get(2).name);
 
-            // Creation, metadata updates x 1
-            assertEquals("foobar", streams.get(0).name);
-            assertEquals("foobar", streams.get(1).name);
-
-            // Creation, metadata update
-            assertEquals("friendlyName", streams.get(2).name);
+            // metadata update in sorted event order (p/s/r uri)
             assertEquals("friendlyName", streams.get(3).name);
-
-            // Creation, metadata update
             assertEquals("modelUri", streams.get(4).name);
-            assertEquals("modelUri", streams.get(5).name);
+            assertEquals("foobar", streams.get(5).name);
 
             Point p = new Point();
             p.coordinates = new Coordinates();
@@ -231,21 +227,17 @@ public class InsecureMqttNotificationsTest {
 
             streams = readMessages(6, Datastream.class);
 
-            streams.sort((a, b) -> a.name.compareTo(b.name));
+            // location creation
+            assertEquals("location", streams.get(0).name);
 
-            // location update
-            assertEquals("foobar", streams.get(0).name);
+            // location metadata update
+            assertEquals("location", streams.get(1).name);
 
-            // location update
-            assertEquals("friendlyName", streams.get(1).name);
-
-            // Creation, metadata update, location update
-            assertEquals("location", streams.get(2).name);
+            // location value update
+            assertEquals("friendlyName", streams.get(2).name);
             assertEquals("location", streams.get(3).name);
-            assertEquals("location", streams.get(4).name);
-
-            // location update
-            assertEquals("modelUri", streams.get(5).name);
+            assertEquals("modelUri", streams.get(4).name);
+            assertEquals("foobar", streams.get(5).name);
         }
 
         @Test
@@ -598,8 +590,6 @@ public class InsecureMqttNotificationsTest {
 
             List<Observation> obs = readMessages(3, Observation.class);
 
-            obs.sort((a, b) -> String.valueOf(a.id).compareTo(String.valueOf(b.id)));
-
             assertEquals("foo", obs.get(0).result);
             assertEquals(testTime, obs.get(0).resultTime);
             assertEquals("foo~admin~friendlyName", String.valueOf(obs.get(0).id).substring(0, 22));
@@ -689,22 +679,16 @@ public class InsecureMqttNotificationsTest {
 
             List<ObservedProperty> obs = readMessages(6, ObservedProperty.class);
 
-            obs.sort((a, b) -> a.name.compareTo(b.name));
+            // Creation
+            assertEquals("friendlyName", obs.get(0).name);
+            assertEquals("modelUri", obs.get(1).name);
+            assertEquals("foobar", obs.get(2).name);
 
-            // Creation, metadata update
-            assertEquals("foobar", obs.get(0).name);
-            assertEquals("foobar", obs.get(1).name);
-
-            // Creation, metadata update
-            assertEquals("friendlyName", obs.get(2).name);
+            // metadata update
             assertEquals("friendlyName", obs.get(3).name);
-
-            // TODO is this correct?
-//            // Creation
-//            assertEquals("location", obs.get(4).name);
-
-            // Creation, metadata update
             assertEquals("modelUri", obs.get(4).name);
+            assertEquals("foobar", obs.get(5).name);
+
         }
 
         @Test
@@ -782,22 +766,16 @@ public class InsecureMqttNotificationsTest {
 
             List<Sensor> sens = readMessages(6, Sensor.class);
 
-            sens.sort((a, b) -> a.name.compareTo(b.name));
+            // Creation
+            assertEquals("friendlyName", sens.get(0).name);
+            assertEquals("modelUri", sens.get(1).name);
+            assertEquals("foobar", sens.get(2).name);
 
-            // Creation, metadata update
-            assertEquals("foobar", sens.get(0).name);
-            assertEquals("foobar", sens.get(1).name);
-
-            // Creation, metadata update
-            assertEquals("friendlyName", sens.get(2).name);
+            // metadata update
             assertEquals("friendlyName", sens.get(3).name);
-
-            // TODO is this correct?
-//            // Creation
-//            assertEquals("location", obs.get(4).name);
-
-            // Creation, metadata update
             assertEquals("modelUri", sens.get(4).name);
+            assertEquals("foobar", sens.get(5).name);
+
         }
 
         @Test
@@ -872,8 +850,6 @@ public class InsecureMqttNotificationsTest {
             createResource("foo", "bar", "foobar", 42, testTime);
 
             List<Thing> obs = readMessages(2, Thing.class);
-
-            obs.sort((a, b) -> a.name.compareTo(b.name));
 
             // Creation, value setting, metadata updates x 2
             assertEquals("foo", obs.get(0).name);

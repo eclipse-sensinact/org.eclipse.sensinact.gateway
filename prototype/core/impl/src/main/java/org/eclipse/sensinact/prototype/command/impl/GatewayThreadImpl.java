@@ -12,8 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
-import static java.util.concurrent.Executors.newCachedThreadPool;
-import static java.util.concurrent.Executors.newScheduledThreadPool;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.sensinact.core.command.GatewayThread.getGatewayThread;
 import static org.osgi.service.component.annotations.ReferenceCardinality.MULTIPLE;
@@ -63,9 +63,11 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     private final AtomicBoolean run = new AtomicBoolean(true);
 
+    // We single thread promises from this promise factory to avoid excessive
+    // out-of-order rearrangement from chaining.
     private final PromiseFactory promiseFactory = new PromiseFactory(
-            newCachedThreadPool(r -> new Thread(r, "Eclipse sensiNact Gateway Worker")),
-            newScheduledThreadPool(3, r -> new Thread(r, "Eclipse sensiNact Scheduler")));
+            newSingleThreadExecutor(r -> new Thread(r, "Eclipse sensiNact Gateway Worker")),
+            newSingleThreadScheduledExecutor(r -> new Thread(r, "Eclipse sensiNact Scheduler")));
 
     private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
 
