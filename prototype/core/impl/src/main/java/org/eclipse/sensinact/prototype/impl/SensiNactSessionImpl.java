@@ -235,7 +235,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         return pf.resolved(null);
                     }
                     // TODO: get the GetLevel from argument
-                    return sensinactResource.getValue(clazz, GetLevel.CACHED);
+                    return sensinactResource.getValue(clazz, GetLevel.NORMAL);
                 } else {
                     return pf.resolved(null);
                 }
@@ -330,7 +330,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         break;
 
                     default:
-                        val = sensinactResource.getValue(Object.class, GetLevel.CACHED);
+                        val = sensinactResource.getValue(Object.class, GetLevel.NORMAL);
                         break;
                     }
 

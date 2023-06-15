@@ -85,7 +85,7 @@ public interface SensinactResource extends CommandScoped {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     default Promise<TimedValue<?>> getValue() {
-        return getValue((Class) Object.class, GetLevel.CACHED);
+        return getValue((Class) Object.class, GetLevel.NORMAL);
     }
 
     /**
@@ -96,7 +96,7 @@ public interface SensinactResource extends CommandScoped {
      * @return The timed and typed value of the resource
      */
     default <T> Promise<TimedValue<T>> getValue(Class<T> type) {
-        return getValue(type, GetLevel.CACHED);
+        return getValue(type, GetLevel.NORMAL);
     }
 
     /**

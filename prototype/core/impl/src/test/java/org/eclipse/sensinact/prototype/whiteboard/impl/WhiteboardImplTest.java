@@ -284,7 +284,7 @@ public class WhiteboardImplTest {
                 assertThrows(IllegalArgumentException.class, () -> r.getArguments());
 
                 // No value at first
-                TimedValue<String> result = r.getValue(String.class, GetLevel.HARD).getValue();
+                TimedValue<String> result = r.getValue(String.class, GetLevel.STRONG).getValue();
                 assertEquals(rc, result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 final Instant initialTimestamp = result.getTimestamp();
@@ -292,7 +292,7 @@ public class WhiteboardImplTest {
                 // Wait a bit
                 Thread.sleep(200);
 
-                result = r.getValue(String.class, GetLevel.HARD).getValue();
+                result = r.getValue(String.class, GetLevel.STRONG).getValue();
                 assertEquals("resource:" + rc, result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 final Instant secondTimestamp = result.getTimestamp();
@@ -317,19 +317,19 @@ public class WhiteboardImplTest {
             assertThrows(IllegalArgumentException.class, () -> r.getArguments());
 
             // No value at first: should get a 1
-            TimedValue<Integer> result = r.getValue(Integer.class, GetLevel.CACHED).getValue();
+            TimedValue<Integer> result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
             assertEquals(1, result.getValue());
             assertNotNull(result.getTimestamp(), "No timestamp returned");
             final Instant initialTimestamp = result.getTimestamp();
 
             // Second cache call should have the same value and timestamp
             Thread.sleep(200);
-            result = r.getValue(Integer.class, GetLevel.CACHED).getValue();
+            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
             assertEquals(1, result.getValue());
             assertEquals(initialTimestamp, result.getTimestamp());
 
             // Hard call
-            result = r.getValue(Integer.class, GetLevel.HARD).getValue();
+            result = r.getValue(Integer.class, GetLevel.STRONG).getValue();
             assertEquals(2, result.getValue());
             final Instant secondTimestamp = result.getTimestamp();
             assertTrue(initialTimestamp.isBefore(secondTimestamp), "Timestamp wasn't updated");
@@ -340,7 +340,7 @@ public class WhiteboardImplTest {
             assertEquals(secondTimestamp, result.getTimestamp());
 
             // Cached call
-            result = r.getValue(Integer.class, GetLevel.CACHED).getValue();
+            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
             assertEquals(2, result.getValue());
             assertEquals(secondTimestamp, result.getTimestamp());
 
@@ -353,7 +353,7 @@ public class WhiteboardImplTest {
             assertEquals(secondTimestamp, result.getTimestamp());
 
             // Cached call must recall the value
-            result = r.getValue(Integer.class, GetLevel.CACHED).getValue();
+            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
             assertEquals(4, result.getValue());
             assertTrue(secondTimestamp.isBefore(result.getTimestamp()), "Timestamp wasn't updated");
         }
@@ -382,7 +382,7 @@ public class WhiteboardImplTest {
             assertEquals(initialTimesamp, result.getTimestamp());
 
             // Check the CACHED call behavior
-            result = r.getValue(Integer.class, GetLevel.CACHED).getValue();
+            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
             assertEquals(42, result.getValue());
             assertNotNull(result.getTimestamp(), "No timestamp returned");
             assertEquals(initialTimesamp, result.getTimestamp());
@@ -390,7 +390,7 @@ public class WhiteboardImplTest {
             Thread.sleep(110);
 
             // Check the HARD call
-            result = r.getValue(Integer.class, GetLevel.HARD).getValue();
+            result = r.getValue(Integer.class, GetLevel.STRONG).getValue();
             assertEquals(84, result.getValue());
             assertNotNull(result.getTimestamp(), "No timestamp returned");
             assertTrue(initialTimesamp.isBefore(result.getTimestamp()), "Timestamp not updated");
@@ -453,7 +453,7 @@ public class WhiteboardImplTest {
                 r.setValue("toto", setTimestamp).getValue();
 
                 // Get the value
-                result = r.getValue(String.class, GetLevel.HARD).getValue();
+                result = r.getValue(String.class, GetLevel.STRONG).getValue();
                 assertEquals("toto", result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 assertEquals(setTimestamp, result.getTimestamp());
@@ -463,7 +463,7 @@ public class WhiteboardImplTest {
                 r.setValue("titi", setTimestamp2).getValue();
 
                 // Get the value
-                result = r.getValue(String.class, GetLevel.HARD).getValue();
+                result = r.getValue(String.class, GetLevel.STRONG).getValue();
                 assertEquals("resource:toto", result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 assertEquals(setTimestamp2, result.getTimestamp());
@@ -543,7 +543,7 @@ public class WhiteboardImplTest {
                 r.setValue("toto", setTimestamp).getValue();
 
                 // Get the value
-                result = r.getValue(Content.class, GetLevel.HARD).getValue();
+                result = r.getValue(Content.class, GetLevel.STRONG).getValue();
                 assertNotNull(result.getValue(), "No value");
                 assertEquals(setTimestamp, result.getTimestamp());
                 assertEquals("toto", result.getValue().oldValue);
@@ -554,7 +554,7 @@ public class WhiteboardImplTest {
                 r.setValue("titi", setTimestamp2).getValue();
 
                 // Get the value
-                result = r.getValue(Content.class, GetLevel.HARD).getValue();
+                result = r.getValue(Content.class, GetLevel.STRONG).getValue();
                 assertEquals(setTimestamp2, result.getTimestamp());
                 assertEquals("titi", result.getValue().oldValue);
                 assertEquals("+titi", result.getValue().newValue);

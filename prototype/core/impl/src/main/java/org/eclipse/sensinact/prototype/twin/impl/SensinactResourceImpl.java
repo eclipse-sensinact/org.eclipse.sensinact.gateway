@@ -206,7 +206,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         if (!hasExternalGetter || getLevel == GetLevel.WEAK) {
             // Push-based or weak get: return the cached value
             return promiseFactory.resolved(cachedValue);
-        } else if (getLevel == GetLevel.HARD || cachedValue.getTimestamp() == null || cacheThreshold == null
+        } else if (getLevel == GetLevel.STRONG || cachedValue.getTimestamp() == null || cacheThreshold == null
                 || Instant.now().minus(cacheThreshold).isAfter(cachedValue.getTimestamp())) {
             // Hard get or no value or no cache policy or threshold exceed: pull the
             // value...

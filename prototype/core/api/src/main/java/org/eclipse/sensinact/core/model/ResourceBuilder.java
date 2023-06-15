@@ -85,9 +85,20 @@ public interface ResourceBuilder<B, T> {
     ResourceBuilder<B, T> withAction(List<Entry<String, Class<?>>> namedParameterTypes);
 
     /**
-     * This resource has a dynamic get behavior. Can't work on resource with an action.
+     * This resource has a dynamic get behavior. This can't be applied on an action
+     * resource.
      */
-    ResourceBuilder<B, T> withGetter();
+    default ResourceBuilder<B, T> withGetter() {
+        return withGetter(true);
+    }
+
+    /**
+     * Indicates if the resource has a dynamic get behavior. Action resources can't
+     * have such a behavior.
+     *
+     * @param hasGetter Flag to indicate if the resource has a dynamic get or not
+     */
+    ResourceBuilder<B, T> withGetter(boolean hasGetter);
 
     /**
      * Sets the cache duration for dynamic get calls
@@ -97,9 +108,20 @@ public interface ResourceBuilder<B, T> {
     ResourceBuilder<B, T> withGetterCache(Duration cacheDuration);
 
     /**
-     * This resource has a dynamic set behavior. Can't work on resource with an action.
+     * This resource has a dynamic set behavior. This can't be applied on an action
+     * resource.
      */
-    ResourceBuilder<B, T> withSetter();
+    default ResourceBuilder<B, T> withSetter() {
+        return withSetter(true);
+    }
+
+    /**
+     * Indicates if the resource has a dynamic set behavior. Action resources can't
+     * have such a behavior.
+     *
+     * @param hasSetter Flag to indicate if the resource has a dynamic set or not
+     */
+    ResourceBuilder<B, T> withSetter(boolean hasSetter);
 
     /**
      * Build the resource

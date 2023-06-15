@@ -16,12 +16,12 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 import org.osgi.util.promise.Promise;
 
 /**
- *
+ * Definition of the external get caller
  */
 public interface ResourcePullHandler {
 
     /**
-     * Pulls the value
+     * Pulls the value from the external getter.
      *
      * @param <T>         Expected resource value type
      * @param model       Model name
@@ -29,8 +29,9 @@ public interface ResourcePullHandler {
      * @param service     Service name
      * @param resource    Resource name
      * @param clazz       Expected resource value type
-     * @param cachedValue Current cached value (value and timestamp can be null)
-     * @return The promise of a new value (can't be null)
+     * @param cachedValue Current cached value (value and time stamp can be null)
+     * @return The promise of the value to be returned by the external getter (can't
+     *         be null). This value will be stored in the twin.
      */
     <T> Promise<TimedValue<T>> pullValue(String model, String provider, String service, String resource, Class<T> clazz,
             TimedValue<T> cachedValue);

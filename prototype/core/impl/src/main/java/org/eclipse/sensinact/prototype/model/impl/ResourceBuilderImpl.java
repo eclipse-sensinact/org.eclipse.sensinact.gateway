@@ -106,9 +106,9 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     }
 
     @Override
-    public ResourceBuilder<R, T> withGetter() {
+    public ResourceBuilder<R, T> withGetter(boolean hasGet) {
         checkValid();
-        this.hasGetter = true;
+        this.hasGetter = hasGet;
         return this;
     }
 
@@ -124,9 +124,9 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     }
 
     @Override
-    public ResourceBuilder<R, T> withSetter() {
+    public ResourceBuilder<R, T> withSetter(boolean hasSet) {
         checkValid();
-        this.hasSetter = true;
+        this.hasSetter = hasSet;
         return this;
     }
 

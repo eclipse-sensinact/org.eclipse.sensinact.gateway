@@ -13,26 +13,34 @@
 package org.eclipse.sensinact.core.command;
 
 /**
- * Variants of the GET command
+ * Levels of execution of the GET command.
+ * <p>
+ * These levels only have effect on resources with an external getter. GET
+ * commands execution upon other resources will always return the cached value.
  */
 public enum GetLevel {
 
     /**
-     * Default level. For pull-based values, if the cached value is older than the
-     * threshold, pull the real value, else return the cached one. For push-based
-     * values, returns the last cached value.
+     * Default level for the GET command
+     * <p>
+     * For resources with an external getter, the cached value will be returned if
+     * its time stamp is in the cache period. If the value wasn't set or if the
+     * cache expired, the external getter will be called.
      */
-    CACHED,
+    NORMAL,
 
     /**
-     * Weak Get: always return the last value in cache. Don't try to pull a real
-     * value
+     * Weak Get
+     * <p>
+     * Always returns the cached value, never calls the external getter (if defined)
+     * even if the resource has not yet been set.
      */
     WEAK,
 
     /**
-     * Hard Get: always ask for the real value and put it in cache. Acts like
-     * {@link #CACHED} for pushed values.
+     * Strong Get
+     * <p>
+     * Always calls the external getter of the resource, if defined.
      */
-    HARD,
+    STRONG,
 }
