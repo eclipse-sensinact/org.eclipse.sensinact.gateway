@@ -16,7 +16,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -24,6 +27,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.security.UserInfo;
@@ -207,67 +211,65 @@ public class WebSocketEndpoint {
      */
     private AbstractResultDTO handleSubscribe(final QuerySubscribeDTO query) {
         final SensinactPath path = query.uri;
+        CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<String> listenerId = new AtomicReference<>();
 
         final ResultSubscribeDTO result = new ResultSubscribeDTO();
+        List<String> topics;
+        if (path.targetsSpecificResource()) {
+            result.uri = path.toUri();
+            topics = List.of(result.uri.substring(1));
+        } else {
+            result.uri = "/";
+            topics = List.of("*");
+        }
 
+        Predicate<AbstractResourceNotification> p;
         if (query.filter != null && !query.filter.isBlank()) {
             // TODO: parse filter
             // TODO: use filter criterion in event
-
-            final ClientDataListener cld = (topic, evt) -> {
-                if (!wsSession.isOpen()) {
-                    logger.warn("Detected closed WebSocket. Stop listening");
-                    userSession.removeListener(listenerId.get());
-                } else {
-                    sendNotification(listenerId.get(), new ResourceDataNotificationDTO(evt));
-                }
-            };
-
-            final ClientLifecycleListener cll = (topic, evt) -> {
-                if (!wsSession.isOpen()) {
-                    logger.warn("Detected closed WebSocket. Stop listening");
-                    userSession.removeListener(listenerId.get());
-                } else {
-                    sendNotification(listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
-                }
-            };
-
-            userSession.addListener(null, cld, null, cll, null);
-            result.uri = "/";
-        } else if (path.targetsSpecificResource()) {
-            // No filter: subscribe to a specific resource
-            final ClientDataListener cdl = (topic, evt) -> {
-                if (!wsSession.isOpen()) {
-                    logger.warn("Detected closed WebSocket. Stop listening");
-                    userSession.removeListener(listenerId.get());
-                } else {
-                    sendNotification(listenerId.get(), new ResourceDataNotificationDTO(evt));
-                }
-            };
-
-            final ClientLifecycleListener cll = (topic, evt) -> {
-                if (!wsSession.isOpen()) {
-                    logger.warn("Detected closed WebSocket. Stop listening");
-                    userSession.removeListener(listenerId.get());
-                } else {
-                    sendNotification(listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
-                }
-            };
-
-            final String topic = String.join("/", path.provider, path.service, path.resource);
-            listenerId.set(userSession.addListener(List.of(topic), cdl, null, cll, null));
-            result.uri = path.toUri();
+            p = a -> true;
         } else {
-            return new ErrorResultDTO(405, "Can only subscribe to resources");
+            p = a -> true;
         }
 
+        final ClientDataListener cld = (topic, evt) -> {
+            if (!wsSession.isOpen()) {
+                logger.warn("Detected closed WebSocket. Stop listening");
+                userSession.removeListener(listenerId.get());
+            } else if (p.test(evt) && checkLatch(latch)) {
+                sendNotification(listenerId.get(), new ResourceDataNotificationDTO(evt));
+            }
+        };
+
+        final ClientLifecycleListener cll = (topic, evt) -> {
+            if (!wsSession.isOpen()) {
+                logger.warn("Detected closed WebSocket. Stop listening");
+                userSession.removeListener(listenerId.get());
+            } else if (p.test(evt) && checkLatch(latch)) {
+                sendNotification(listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
+            }
+        };
+
+        String id = userSession.addListener(topics, cld, null, cll, null);
+        listenerId.set(id);
+
         // Store listener details
-        subscriptions.add(listenerId.get());
+        subscriptions.add(id);
+        // Release the listeners
+        latch.countDown();
 
         result.statusCode = 200;
         result.subscriptionId = listenerId.get();
         return result;
+    }
+
+    private boolean checkLatch(CountDownLatch latch) {
+        try {
+            return latch.await(500, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
