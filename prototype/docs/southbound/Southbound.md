@@ -4,4 +4,15 @@ The *southbound* API of Eclipse sensiNact gateway refers to the parts of the gat
 
 The gateway currently includes the following southbound providers:
 
-* Nothing yet
+* [Device factory](./device-factory/core.md)
+* HTTP
+  * [HTTP device factory](./http/http-device-factory.md)
+  * [HTTP callback](./http/http-callback.md)
+* MQTT
+  * [MQTT client](./mqtt/mqtt-client.md)
+  * [MQTT device factory](./mqtt/mqtt-device-factory.md)
+
+The history of resource values is considered to be southbound provider linked to a time-series database:
+
+* sensiNact History
+  * Timescale provider
