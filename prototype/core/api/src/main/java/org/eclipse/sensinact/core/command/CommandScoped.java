@@ -12,6 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.command;
 
+/**
+ * A Command Scoped object is only valid for use during the scope of a command
+ * execution, and from the thread executing the command.
+ *
+ * This forces single threaded access to avoid potential thread safety problems
+ * related to concurrent access.
+ */
 public interface CommandScoped {
 
     public boolean isValid();

@@ -12,8 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -185,10 +183,10 @@ public abstract class SensorthingsMapper<T> {
             Function<Promise<ResourceSnapshot>, Promise<Stream<R>>> conversion) {
         PromiseFactory pf = thread.getPromiseFactory();
 
-        Promise<List<Promise<Stream<R>>>> sensors = p
-                .map(ps -> getResourceSnapshots(ps).map(r -> conversion.apply(pf.resolved(r))).collect(toList()));
+        Promise<List<Stream<R>>> sensors = p.flatMap(
+                ps -> getResourceSnapshots(ps).map(r -> conversion.apply(pf.resolved(r))).collect(pf.toPromise()));
 
-        return sensors.flatMap(s -> pf.all(s).map(l -> l.stream().flatMap(Function.identity())));
+        return sensors.map(l -> l.stream().flatMap(Function.identity()));
 
     }
 
