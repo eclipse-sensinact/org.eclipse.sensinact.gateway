@@ -92,12 +92,9 @@ public class WhiteboardImplTest {
     void start() throws NoSuchMethodException, SecurityException {
         resourceSet = EMFTestUtil.createResourceSet();
         whiteboard = new SensinactWhiteboard(thread);
-        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, whiteboard::act,
-                whiteboard::pullValue, whiteboard::pushValue);
+        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, whiteboard);
         manager = new SensinactModelManagerImpl(nexus);
         twinImpl = new SensinactDigitalTwinImpl(nexus, promiseFactory);
-
-        Mockito.when(thread.getPromiseFactory()).thenReturn(promiseFactory);
 
         Method m = AbstractSensinactCommand.class.getDeclaredMethod("call", SensinactDigitalTwin.class,
                 SensinactModelManager.class, PromiseFactory.class);
@@ -235,7 +232,8 @@ public class WhiteboardImplTest {
         @GET(model = "bar", service = "pull", resource = "a")
         @GET(model = "bar", service = "pull", resource = "b")
         public String doMultiResource(@UriParam(UriSegment.RESOURCE) String resource,
-                @GetParam(GetSegment.RESULT_TYPE) Class<?> type, @GetParam(GetSegment.CACHED_VALUE) TimedValue<?> cached) {
+                @GetParam(GetSegment.RESULT_TYPE) Class<?> type,
+                @GetParam(GetSegment.CACHED_VALUE) TimedValue<?> cached) {
             switch (resource) {
             case "a":
             case "b":

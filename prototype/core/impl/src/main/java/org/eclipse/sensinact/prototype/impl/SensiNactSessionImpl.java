@@ -186,14 +186,18 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return safeExecute(new AbstractTwinCommand<T>() {
             @Override
             protected Promise<T> call(SensinactDigitalTwin model, PromiseFactory pf) {
-                I modelValue = caller.apply(model);
-                T value;
-                if (modelValue != null) {
-                    value = converter.apply(modelValue);
-                } else {
-                    value = defaultValue;
+                try {
+                    I modelValue = caller.apply(model);
+                    T value;
+                    if (modelValue != null) {
+                        value = converter.apply(modelValue);
+                    } else {
+                        value = defaultValue;
+                    }
+                    return pf.resolved(value);
+                } catch (Exception e) {
+                    return pf.failed(e);
                 }
-                return pf.resolved(value);
             }
         });
     }

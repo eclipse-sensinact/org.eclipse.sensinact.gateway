@@ -18,6 +18,7 @@ import static java.util.stream.Stream.of;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -68,20 +70,68 @@ public class SensinactWhiteboard {
 
     private static final Logger LOG = LoggerFactory.getLogger(ModelNexus.class);
 
+    /**
+     * Gateway thread, to execute model updates
+     */
     private final GatewayThread gatewayThread;
 
+    /**
+     * Links a service ID to its dynamic ACT resources
+     */
     private final Map<Long, List<RegistryKey>> serviceIdToActMethods = new ConcurrentHashMap<>();
+
+    /**
+     * Links a service ID to its dynamic GET resources
+     */
     private final Map<Long, List<RegistryKey>> serviceIdToGetMethods = new ConcurrentHashMap<>();
+
+    /**
+     * Links a service ID to its dynamic SET resources
+     */
     private final Map<Long, List<RegistryKey>> serviceIdToSetMethods = new ConcurrentHashMap<>();
 
+    /**
+     * Links a resource key to its ACT methods
+     */
     private final Map<RegistryKey, List<ActMethod>> actMethodRegistry = new ConcurrentHashMap<>();
+
+    /**
+     * Links a resource key to its GET methods
+     */
     private final Map<RegistryKey, List<GetMethod>> getMethodRegistry = new ConcurrentHashMap<>();
+
+    /**
+     * Links a resource key to its SET methods
+     */
     private final Map<RegistryKey, List<SetMethod>> setMethodRegistry = new ConcurrentHashMap<>();
+
+    /**
+     * The white board has its own promise factory with a thread pool. The dynamic
+     * calls are executed there while the twin updates are done in the gateway
+     * thread.
+     */
+    private final PromiseFactory promiseFactory = new PromiseFactory(
+            Executors.newCachedThreadPool(r -> new Thread(r, "Eclipse sensiNact Whiteboard Worker")),
+            Executors.newScheduledThreadPool(5, r -> new Thread(r, "Eclipse sensiNact Whiteboard Scheduler")));
+
+    /**
+     * Stores the promise that will be returned by a dynamic get. Allows to share
+     * the same promise when multiple dynamic GET occur.
+     *
+     * TODO
+     */
+    private final Map<RegistryKey, Promise<TimedValue<?>>> concurrentGetHolder = new ConcurrentHashMap<>();
 
     public SensinactWhiteboard(GatewayThread gatewayThread) {
         this.gatewayThread = gatewayThread;
     }
 
+    /**
+     * A new white board service has been found
+     *
+     * @param service Service instance
+     * @param props   Service properties
+     */
     public void addWhiteboardService(Object service, Map<String, Object> props) {
         Long serviceId = (Long) props.get(Constants.SERVICE_ID);
 
@@ -97,6 +147,14 @@ public class SensinactWhiteboard {
         handlePullMethods(serviceId, service, providers, getMethods, setMethods);
     }
 
+    /**
+     * Looks for the methods of the given class that has at least one of the given
+     * annotations
+     *
+     * @param clz         Class to analyze
+     * @param annotations Annotations looked for
+     * @return Methods from the class that are annotated
+     */
     private List<Method> findMethods(Class<?> clz, Collection<Class<? extends Annotation>> annotations) {
         return Stream
                 .concat(Arrays.stream(clz.getMethods()),
@@ -105,6 +163,18 @@ public class SensinactWhiteboard {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates the references to the given service
+     *
+     * @param <T>               Kind of call handler
+     * @param kind              Name of the kind of call handler (for logging)
+     * @param serviceId         Updated service ID
+     * @param providers         Set of providers handled by the service
+     * @param serviceKeysHolder Registry associating the service ID to the list of
+     *                          handled resources
+     * @param methodRegistry    Registry associating handled resources to the
+     *                          handling method
+     */
     private <T extends AbstractResourceMethod> void updateServiceReferences(final String kind, final Long serviceId,
             final Set<String> providers, final Map<Long, List<RegistryKey>> serviceKeysHolder,
             final Map<RegistryKey, List<T>> methodRegistry) {
@@ -137,6 +207,12 @@ public class SensinactWhiteboard {
         }
     }
 
+    /**
+     * A known white board service has been updated
+     *
+     * @param service Service instance
+     * @param props   New service properties
+     */
     public void updatedWhiteboardService(Object service, Map<String, Object> props) {
         Long serviceId = (Long) props.get(Constants.SERVICE_ID);
         Set<String> providers = toSet(props.get("sensiNact.provider.name"));
@@ -146,6 +222,16 @@ public class SensinactWhiteboard {
         updateServiceReferences("set", serviceId, providers, serviceIdToSetMethods, setMethodRegistry);
     }
 
+    /**
+     * Cleans up references to the given service
+     *
+     * @param <T>               Kind of call handler
+     * @param serviceId         ID of the removed service
+     * @param serviceKeysHolder Registry associating the service ID to the list of
+     *                          handled resources
+     * @param methodRegistry    Registry associating handled resources to the
+     *                          handling method
+     */
     private <T extends AbstractResourceMethod> void clearServiceReferences(final Long serviceId,
             final Map<Long, List<RegistryKey>> serviceKeysHolder, final Map<RegistryKey, List<T>> methodRegistry) {
         final List<RegistryKey> keys = serviceKeysHolder.remove(serviceId);
@@ -162,6 +248,12 @@ public class SensinactWhiteboard {
         }
     }
 
+    /**
+     * A known white board service has been removed
+     *
+     * @param service Service instance
+     * @param props   Last service properties
+     */
     public void removeWhiteboardService(Object service, Map<String, Object> props) {
         final Long serviceId = (Long) props.get(Constants.SERVICE_ID);
         clearServiceReferences(serviceId, serviceIdToActMethods, actMethodRegistry);
@@ -327,6 +419,7 @@ public class SensinactWhiteboard {
             }
             return stream.collect(toList());
         });
+
         gatewayThread.execute(new AbstractSensinactCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
@@ -410,7 +503,6 @@ public class SensinactWhiteboard {
         Optional<ActMethod> opt = actMethodRegistry.getOrDefault(key, List.of()).stream()
                 .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
 
-        PromiseFactory promiseFactory = gatewayThread.getPromiseFactory();
         if (opt.isEmpty()) {
             return promiseFactory.failed(new NoSuchElementException(
                     String.format("No suitable provider for model %s, provider %s, service %s, resource %s", model,
@@ -435,69 +527,79 @@ public class SensinactWhiteboard {
 
     @SuppressWarnings("unchecked")
     public <T> Promise<TimedValue<T>> pullValue(String model, String provider, String service, String resource,
-            Class<T> type, TimedValue<T> cachedValue) {
+            Class<T> type, TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate) {
+        // Find the handler method
         RegistryKey key = new RegistryKey(model, service, resource);
 
         Optional<GetMethod> opt = getMethodRegistry.getOrDefault(key, List.of()).stream()
                 .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
 
-        PromiseFactory promiseFactory = gatewayThread.getPromiseFactory();
         if (opt.isEmpty()) {
+            // No method
             return promiseFactory.failed(new NoSuchElementException(
                     String.format("No suitable provider for model %s, provider %s, service %s, resource %s", model,
                             provider, service, resource)));
         } else {
-            Deferred<TimedValue<T>> d = promiseFactory.deferred();
-            final GetMethod getMethod = opt.get();
-            promiseFactory.executor().execute(() -> {
-                try {
-                    Object o = getMethod.invoke(model, provider, service, resource, type, cachedValue);
-                    if (o instanceof Promise) {
-                        d.resolveWith((Promise<TimedValue<T>>) o);
-                    } else if (o instanceof TimedValue) {
-                        d.resolve((TimedValue<T>) o);
-                    } else if (o == null) {
-                        switch (getMethod.actionOnNull()) {
-                        case IGNORE:
-                            d.resolve(null);
-                            break;
-
-                        case UPDATE:
-                            d.resolve(new TimedValueImpl<T>(null));
-                            break;
-                        }
-                    } else if (type.isAssignableFrom(o.getClass())) {
-                        d.resolve(new TimedValueImpl<T>(type.cast(o)));
-                    } else {
-                        d.fail(new Exception("Invalid result type: " + o.getClass()));
-                    }
-                } catch (Exception e) {
-                    d.fail(e);
+            // Get/Set the current execution for that GET
+            synchronized (concurrentGetHolder) {
+                final Promise<TimedValue<?>> currentPromise = concurrentGetHolder.get(key);
+                if (currentPromise != null) {
+                    // Call is already running: return its promise
+                    return currentPromise.map(tv -> (TimedValue<T>) tv);
                 }
-            });
-            return d.getPromise();
+
+                final Deferred<TimedValue<T>> d = promiseFactory.deferred();
+                final GetMethod getMethod = opt.get();
+                promiseFactory.executor().execute(() -> {
+                    try {
+                        final Object result = getMethod.invoke(model, provider, service, resource, type, cachedValue);
+                        if (result instanceof Promise) {
+                            d.resolveWith((Promise<TimedValue<T>>) result);
+                        } else if (result instanceof TimedValue) {
+                            d.resolve((TimedValue<T>) result);
+                        } else if (result == null) {
+                            switch (getMethod.actionOnNull()) {
+                            case IGNORE:
+                                d.resolve(null);
+                                break;
+
+                            case UPDATE:
+                                d.resolve(new TimedValueImpl<T>(null));
+                                break;
+                            }
+                        } else if (type.isAssignableFrom(result.getClass())) {
+                            d.resolve(new TimedValueImpl<T>(type.cast(result)));
+                        } else {
+                            d.fail(new Exception("Invalid result type: " + result.getClass()));
+                        }
+                    } catch (Exception e) {
+                        d.fail(e);
+                    }
+                });
+
+                return syncWithGatewayUpdate(d.getPromise(), gatewayUpdate, () -> concurrentGetHolder.remove(key));
+            }
         }
     }
 
     @SuppressWarnings("unchecked")
     public <T> Promise<TimedValue<T>> pushValue(String model, String provider, String service, String resource,
-            Class<T> type, TimedValue<T> cachedValue, TimedValue<T> newValue) {
+            Class<T> type, TimedValue<T> cachedValue, TimedValue<T> newValue, Consumer<TimedValue<T>> gatewayUpdate) {
         RegistryKey key = new RegistryKey(model, service, resource);
 
         Optional<SetMethod> opt = setMethodRegistry.getOrDefault(key, List.of()).stream()
                 .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
 
-        PromiseFactory promiseFactory = gatewayThread.getPromiseFactory();
         if (opt.isEmpty()) {
             return promiseFactory.failed(new NoSuchElementException(
                     String.format("No suitable provider for model %s, provider %s, service %s, resource %s", model,
                             provider, service, resource)));
         } else {
-            Deferred<TimedValue<T>> d = promiseFactory.deferred();
+            final Deferred<TimedValue<T>> d = promiseFactory.deferred();
             final SetMethod setMethod = opt.get();
             promiseFactory.executor().execute(() -> {
                 try {
-                    Object o = setMethod.invoke(model, provider, service, resource, type, cachedValue, newValue);
+                    final Object o = setMethod.invoke(model, provider, service, resource, type, cachedValue, newValue);
                     if (o instanceof Promise) {
                         d.resolveWith((Promise<TimedValue<T>>) o);
                     } else if (o instanceof TimedValue) {
@@ -513,7 +615,95 @@ public class SensinactWhiteboard {
                     d.fail(e);
                 }
             });
-            return d.getPromise();
+
+            return syncWithGatewayUpdate(d.getPromise(), gatewayUpdate);
         }
+    }
+
+    /**
+     * Runs the given consumer in the gateway thread.
+     *
+     * If <code>gatewayUpdate</code> is null, the returned promise is returned by
+     * the promise factory of this white board.
+     *
+     * @param <T>           Resource value type
+     * @param promisedValue Resource value promise (should already be resolved)
+     * @param gatewayUpdate Method to call in the gateway thread.
+     * @return
+     */
+    private <T> Promise<Void> runOnGateway(final Promise<TimedValue<T>> promisedValue,
+            final Consumer<TimedValue<T>> gatewayUpdate) {
+        if (gatewayUpdate == null) {
+            // Nothing to to
+            return promiseFactory.resolved(null);
+        }
+
+        try {
+            // We are supposed to be called when the promise is resolved, by get the value
+            // outside the gateway thread anyway
+            final TimedValue<T> value = promisedValue.getValue();
+            return gatewayThread.execute(new AbstractSensinactCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    try {
+                        gatewayUpdate.accept(value);
+                        return promiseFactory.resolved(null);
+                    } catch (Exception e) {
+                        return promiseFactory.failed(e);
+                    }
+                }
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            return promiseFactory.failed(e);
+        }
+    }
+
+    /**
+     * Returns a promise that will be resolved with the gateway update
+     *
+     * @param <T>           Resource value type
+     * @param callPromise   Promise on resource value
+     * @param gatewayUpdate Update to be executed in the gateway thread
+     * @return Promise that will be resolved after the update in the gateway thread
+     */
+    private <T> Promise<TimedValue<T>> syncWithGatewayUpdate(final Promise<TimedValue<T>> callPromise,
+            final Consumer<TimedValue<T>> gatewayUpdate) {
+        return syncWithGatewayUpdate(callPromise, gatewayUpdate, null);
+    }
+
+    /**
+     * Returns a promise that will be resolved with the gateway update
+     *
+     * @param <T>            Resource value type
+     * @param callPromise    Promise on resource value
+     * @param gatewayUpdate  Update to be executed in the gateway thread
+     * @param finalOperation Optional clean up operation after the update and before
+     *                       the returned promise resolves
+     * @return Promise that will be resolved after the update in the gateway thread
+     */
+    private <T> Promise<TimedValue<T>> syncWithGatewayUpdate(final Promise<TimedValue<T>> callPromise,
+            final Consumer<TimedValue<T>> gatewayUpdate, final Runnable finalOperation) {
+        final Deferred<TimedValue<T>> waiter = promiseFactory.deferred();
+        callPromise.onResolve(() -> {
+            try {
+                runOnGateway(callPromise, gatewayUpdate).onResolve(() -> {
+                    if (finalOperation != null) {
+                        try {
+                            finalOperation.run();
+                        } catch (Throwable t) {
+                            waiter.fail(t);
+                        }
+                    }
+                }).onSuccess((v) -> {
+                    waiter.resolveWith(callPromise);
+                }).onFailure((t) -> {
+                    waiter.fail(t);
+                });
+            } catch (Throwable t) {
+                waiter.fail(t);
+            }
+        });
+        return waiter.getPromise();
     }
 }

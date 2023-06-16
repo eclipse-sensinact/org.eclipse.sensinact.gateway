@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -71,6 +72,7 @@ import org.eclipse.sensinact.prototype.command.impl.ResourcePullHandler;
 import org.eclipse.sensinact.prototype.command.impl.ResourcePushHandler;
 import org.eclipse.sensinact.prototype.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.prototype.model.nexus.emf.compare.EMFCompareUtil;
+import org.eclipse.sensinact.prototype.whiteboard.impl.SensinactWhiteboard;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
@@ -104,14 +106,11 @@ public class ModelNexus {
 
     private final Map<String, EClass> models = new HashMap<>();
 
-    private final ActionHandler actionHandler;
-
-    private final ResourcePullHandler resourceValuePullHandler;
-    private final ResourcePushHandler resourceValuePushHandler;
+    private final SensinactWhiteboard whiteboard;
 
     public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
             Supplier<NotificationAccumulator> accumulator) {
-        this(resourceSet, ProviderPackage, accumulator, null, null, null);
+        this(resourceSet, ProviderPackage, accumulator, (SensinactWhiteboard) null);
     }
 
     public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
@@ -122,12 +121,44 @@ public class ModelNexus {
     public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
             Supplier<NotificationAccumulator> accumulator, ActionHandler actionHandler,
             ResourcePullHandler resourceValuePullHandler, ResourcePushHandler resourceValuePushHandler) {
+        this(resourceSet, ProviderPackage, accumulator, new SensinactWhiteboard(null) {
+            @Override
+            public Promise<Object> act(String model, String provider, String service, String resource,
+                    Map<String, Object> arguments) {
+                if (actionHandler != null) {
+                    return actionHandler.act(model, provider, service, resource, arguments);
+                }
+                throw new RuntimeException("No action handler set");
+            }
+
+            @Override
+            public <T> Promise<TimedValue<T>> pullValue(String model, String provider, String service, String resource,
+                    Class<T> type, TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate) {
+                if (resourceValuePullHandler != null) {
+                    return resourceValuePullHandler.pullValue(model, provider, service, resource, type, cachedValue, gatewayUpdate);
+                }
+                throw new RuntimeException("No pullValue handler set");
+            }
+
+            @Override
+            public <T> Promise<TimedValue<T>> pushValue(String model, String provider, String service, String resource,
+                    Class<T> type, TimedValue<T> cachedValue, TimedValue<T> newValue,
+                    Consumer<TimedValue<T>> gatewayUpdate) {
+                if (resourceValuePushHandler != null) {
+                    return resourceValuePushHandler.pushValue(model, provider, service, resource, type, cachedValue,
+                            newValue, gatewayUpdate);
+                }
+                throw new RuntimeException("No pushValue handler set");
+            }
+        });
+    }
+
+    public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
+            Supplier<NotificationAccumulator> accumulator, SensinactWhiteboard whiteboard) {
         this.resourceSet = resourceSet;
         this.providerPackage = ProviderPackage;
         this.notificationAccumulator = accumulator;
-        this.actionHandler = actionHandler;
-        this.resourceValuePullHandler = resourceValuePullHandler;
-        this.resourceValuePushHandler = resourceValuePushHandler;
+        this.whiteboard = whiteboard;
         // TODO we need a general Working Directory for such data
         Optional<EPackage> packageOptional = loadDefaultPackage(Paths.get(BASIC_BASE_ECORE));
 
@@ -717,43 +748,90 @@ public class ModelNexus {
         return action;
     }
 
+    /**
+     * Uses the white board to call an action handler
+     *
+     * @param provider   Provider instance
+     * @param service    Service instance
+     * @param resource   Resource instance
+     * @param parameters Call parameters
+     * @return The promise of the result of the action
+     */
     public Promise<Object> act(Provider provider, EStructuralFeature service, ETypedElement resource,
             Map<String, Object> parameters) {
-        if (actionHandler == null) {
+        if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to act on a value without an action handler"));
         }
 
         try {
-            return actionHandler.act(EMFUtil.getModelName(provider.eClass()), provider.getId(), service.getName(),
+            return whiteboard.act(EMFUtil.getModelName(provider.eClass()), provider.getId(), service.getName(),
                     resource.getName(), parameters);
         } catch (Throwable t) {
             return Promises.failed(t);
         }
     }
 
+    /**
+     * Uses the white board to pull the value from a resource external getter and
+     * updates the twin on success.
+     *
+     * @param <T>         Resource data type
+     * @param provider    Provider instance
+     * @param service     Service instance
+     * @param resource    Resource instance
+     * @param valueType   Resource data class
+     * @param cachedValue Current twin value
+     * @return The promise of the new value
+     */
     public <T> Promise<TimedValue<T>> pullValue(Provider provider, EStructuralFeature service, ETypedElement resource,
             Class<T> valueType, TimedValue<T> cachedValue) {
-        if (resourceValuePullHandler == null) {
+        if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to pull a value without a pull handler"));
         }
 
         try {
-            return resourceValuePullHandler.pullValue(EMFUtil.getModelName(provider.eClass()), provider.getId(),
-                    service.getName(), resource.getName(), valueType, cachedValue);
+            final String modelName = EMFUtil.getModelName(provider.eClass());
+            return whiteboard.pullValue(modelName, provider.getId(), service.getName(), resource.getName(), valueType,
+                    cachedValue, (tv) -> {
+                        if (tv != null) {
+                            handleDataUpdate(modelName, provider, service, (EStructuralFeature) resource, tv.getValue(),
+                                    tv.getTimestamp());
+                        }
+                    });
         } catch (Throwable t) {
             return Promises.failed(t);
         }
     }
 
+    /**
+     * Uses the white board to push the value to a resource external setter and
+     * updates the twin on success.
+     *
+     * @param <T>         Resource data type
+     * @param provider    Provider instance
+     * @param service     Service instance
+     * @param resource    Resource instance
+     * @param valueType   Resource data class
+     * @param cachedValue Current twin value
+     * @param newValue    New value to be pushed
+     * @return The promise of a new resource value (can differ from
+     *         <code>newValue</code>)
+     */
     public <T> Promise<TimedValue<T>> pushValue(Provider provider, EStructuralFeature service, ETypedElement resource,
             Class<T> valueType, TimedValue<T> cachedValue, TimedValue<T> newValue) {
-        if (resourceValuePushHandler == null) {
+        if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to push a value without a push handler"));
         }
 
         try {
-            return resourceValuePushHandler.pushValue(EMFUtil.getModelName(provider.eClass()), provider.getId(),
-                    service.getName(), resource.getName(), valueType, cachedValue, newValue);
+            final String modelName = EMFUtil.getModelName(provider.eClass());
+            return whiteboard.pushValue(modelName, provider.getId(), service.getName(), resource.getName(), valueType,
+                    cachedValue, newValue, (tv) -> {
+                        if (tv != null) {
+                            handleDataUpdate(modelName, provider, service, (EStructuralFeature) resource, tv.getValue(),
+                                    tv.getTimestamp());
+                        }
+                    });
         } catch (Throwable t) {
             return Promises.failed(t);
         }

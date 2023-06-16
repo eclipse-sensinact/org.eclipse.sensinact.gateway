@@ -132,6 +132,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         return new TimedValueImpl<T>(currentValue, currentTimestamp);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Promise<Void> setValue(T value, Instant timestamp) {
         checkValid();
@@ -152,24 +153,14 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             }
 
             if (hasExternalSetter) {
-                // TODO Check types
-                final TimedValue<T> cachedValue = (TimedValue<T>) getValueFromTwin(Object.class);
+                // Check new value type
+                final TimedValue<?> cachedValue = getValueFromTwin(type);
                 final TimedValue<T> newValue = new TimedValueImpl<T>(value, timestamp);
-                final Promise<TimedValue<T>> pushValue = modelNexus.pushValue(provider, service, resource,
-                        (Class<T>) type, cachedValue, newValue);
-                if (pushValue == null) {
-                    // No value returned: return the cached value
-                    return promiseFactory.resolved(null);
-                } else {
-                    // ... then update the twin value
-                    return pushValue.thenAccept((val) -> {
-                        if (val != null) {
-                            modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
-                                    (EStructuralFeature) resource, val.getValue(), val.getTimestamp());
-                        }
-                    }).then(null);
-                }
+                return modelNexus
+                        .pushValue(provider, service, resource, (Class<T>) type, (TimedValue<T>) cachedValue, newValue)
+                        .map(x -> null);
             } else {
+                // No external setter: update the twin
                 modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
                         (EStructuralFeature) resource, value, timestamp);
                 return promiseFactory.resolved(null);
@@ -210,21 +201,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                 || Instant.now().minus(cacheThreshold).isAfter(cachedValue.getTimestamp())) {
             // Hard get or no value or no cache policy or threshold exceed: pull the
             // value...
-            final Promise<TimedValue<T>> pullValue = modelNexus.pullValue(provider, service, resource, type,
-                    cachedValue);
-            if (pullValue == null) {
-                // No value returned: return the cached value
-                return promiseFactory.resolved(cachedValue);
-            } else {
-                // ... then update the twin value
-                pullValue.thenAccept((val) -> {
-                    if (val != null) {
-                        modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
-                                (EStructuralFeature) resource, val.getValue(), val.getTimestamp());
-                    }
-                });
-            }
-            return pullValue;
+            return modelNexus.pullValue(provider, service, resource, type, cachedValue);
         } else {
             // Return the cached value
             return promiseFactory.resolved(cachedValue);

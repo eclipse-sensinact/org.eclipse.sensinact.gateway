@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.command.impl;
 
+import java.util.function.Consumer;
+
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.osgi.util.promise.Promise;
 
@@ -23,19 +25,20 @@ public interface ResourcePushHandler {
     /**
      * Pushes a value to the external setter.
      *
-     * @param <T>         Expected resource value type
-     * @param model       Model name
-     * @param provider    Provider name
-     * @param service     Service name
-     * @param resource    Resource name
-     * @param clazz       Expected resource value type
-     * @param cachedValue Current cached value (value and time stamp can be null)
-     * @param newValue    Pushed value
+     * @param <T>           Expected resource value type
+     * @param model         Model name
+     * @param provider      Provider name
+     * @param service       Service name
+     * @param resource      Resource name
+     * @param clazz         Expected resource value type
+     * @param cachedValue   Current cached value (value and time stamp can be null)
+     * @param newValue      Pushed value
+     * @param gatewayUpdate Method to call in the gateway thread to update the twin
      * @return The promise of the value to be returned by the external setter (can't
      *         be null). This value must reflect the real state of the resource and
      *         might therefore be different from newValue. The returned value will
      *         be stored in the twin.
      */
     <T> Promise<TimedValue<T>> pushValue(String model, String provider, String service, String resource, Class<T> clazz,
-            TimedValue<T> cachedValue, TimedValue<T> newValue);
+            TimedValue<T> cachedValue, TimedValue<T> newValue, Consumer<TimedValue<T>> gatewayUpdate);
 }
