@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.whiteboard.impl;
+package org.eclipse.sensinact.prototype.command.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,13 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.core.annotation.verb.ACT;
@@ -37,11 +38,9 @@ import org.eclipse.sensinact.core.annotation.verb.SetParam;
 import org.eclipse.sensinact.core.annotation.verb.SetParam.SetSegment;
 import org.eclipse.sensinact.core.annotation.verb.UriParam;
 import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GetLevel;
-import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
@@ -49,17 +48,14 @@ import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.emf.util.EMFTestUtil;
-import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
-import org.eclipse.sensinact.prototype.model.nexus.ModelNexus;
-import org.eclipse.sensinact.prototype.twin.impl.SensinactDigitalTwinImpl;
 import org.eclipse.sensinact.prototype.twin.impl.TimedValueImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.osgi.service.typedevent.TypedEventBus;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -70,42 +66,106 @@ public class WhiteboardImplTest {
 
     private static final String PROVIDER_B = "providerB";
 
-    @Mock
-    GatewayThread thread;
+    GatewayThreadImpl thread;
 
     @Mock
-    NotificationAccumulator accumulator;
+    TypedEventBus typedEventBus;
 
-    private PromiseFactory promiseFactory = new PromiseFactory(PromiseFactory.inlineExecutor());
+    @Mock
+    ProviderPackage providerPackage;
 
     private ResourceSet resourceSet;
-
-    private ModelNexus nexus;
-
-    private SensinactModelManagerImpl manager;
-
-    private SensinactDigitalTwinImpl twinImpl;
-
-    private SensinactWhiteboard whiteboard;
 
     @BeforeEach
     void start() throws NoSuchMethodException, SecurityException {
         resourceSet = EMFTestUtil.createResourceSet();
-        whiteboard = new SensinactWhiteboard(thread);
-        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, whiteboard);
-        manager = new SensinactModelManagerImpl(nexus);
-        twinImpl = new SensinactDigitalTwinImpl(nexus, promiseFactory);
+        thread = new GatewayThreadImpl(typedEventBus, resourceSet, providerPackage);
+    }
 
-        Method m = AbstractSensinactCommand.class.getDeclaredMethod("call", SensinactDigitalTwin.class,
-                SensinactModelManager.class, PromiseFactory.class);
-        m.setAccessible(true);
-        Mockito.when(thread.execute(Mockito.any()))
-                .then(i -> m.invoke(i.getArgument(0), twinImpl, manager, promiseFactory));
+    void createProviders(final String modelName, final String serviceName) throws Throwable {
+        thread.execute(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider providerA = twin.createProvider(modelName, PROVIDER_A);
+                twin.createProvider(modelName, PROVIDER_B);
+                SensinactService service = providerA.getServices().get(serviceName);
+                assertNotNull(service);
+                return pf.resolved(null);
+            }
+        }).getValue();
+    }
 
+    void runRcCommand(String provider, String service, String resource, Function<SensinactResource, Void> call)
+            throws Throwable {
+        try {
+            thread.execute(new ResourceCommand<Void>(provider, service, resource) {
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    call.apply(resource);
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
+    <T> TimedValue<T> getValue(String provider, String service, String resource, Class<T> type) throws Throwable {
+        try {
+            return thread.execute(new ResourceCommand<TimedValue<T>>(provider, service, resource) {
+                @Override
+                protected Promise<TimedValue<T>> call(SensinactResource resource, PromiseFactory pf) {
+                    return resource.getValue(type);
+                }
+            }).getValue();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
+    <T> TimedValue<T> getValue(String provider, String service, String resource, Class<T> type, GetLevel getLevel)
+            throws Throwable {
+        try {
+            return thread.execute(new ResourceCommand<TimedValue<T>>(provider, service, resource) {
+                @Override
+                protected Promise<TimedValue<T>> call(SensinactResource resource, PromiseFactory pf) {
+                    return resource.getValue(type, getLevel);
+                }
+            }).getValue();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
+    Object setValue(String provider, String svc, String rc, Function<SensinactResource, Promise<?>> setter)
+            throws Throwable {
+        try {
+            return thread.execute(new ResourceCommand<Object>(provider, svc, rc) {
+                @Override
+                protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
+                    return pf.resolvedWith(setter.apply(resource));
+                }
+            }).getValue();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
+    Object act(String provider, String service, String resource, Map<String, Object> params) throws Throwable {
+        try {
+            return thread.execute(new ResourceCommand<Object>(provider, service, resource) {
+                @Override
+                protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
+                    return resource.act(params);
+                }
+            }).getValue();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
     }
 
     // Use argX naming to match defaults if compiled without parameter names
-    static abstract class BaseActionTest {
+    public static abstract class BaseActionTest {
         @ACT(model = "foo", service = "actions", resource = "1")
         public byte noArgs() {
             return 1;
@@ -135,7 +195,7 @@ public class WhiteboardImplTest {
         }
     }
 
-    static class ExtendedActionTest extends BaseActionTest {
+    public static class ExtendedActionTest extends BaseActionTest {
         @ACT(model = "foo", service = "multi-actions", resource = "a")
         @ACT(model = "foo", service = "multi-actions", resource = "b")
         @ACT(model = "foo", service = "multi-actions", resource = "c")
@@ -155,80 +215,99 @@ public class WhiteboardImplTest {
     class ActionTests {
 
         @Test
-        void testAddActionResource() throws Exception {
+        void testAddActionResource() throws Throwable {
             ExtendedActionTest actionProvider = new ExtendedActionTest();
-            whiteboard.addWhiteboardService(actionProvider,
+            thread.addWhiteboardService(actionProvider,
                     Map.of("service.id", 42L, "sensiNact.whiteboard.resource", true));
 
-            SensinactProvider providerA = twinImpl.createProvider("foo", PROVIDER_A);
-            twinImpl.createProvider("foo", PROVIDER_B);
+            String svc = "actions";
+            createProviders("foo", svc);
 
-            // Test the actions from the supertype
+            // RC 1
+            String rc = "1";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(List.of(), r.getArguments());
+                return null;
+            });
 
-            SensinactService service = providerA.getServices().get("actions");
-            assertNotNull(service);
+            Object result = act(PROVIDER_A, svc, rc, Map.of());
+            assertEquals(Byte.valueOf("1"), result);
 
-            SensinactResource r = service.getResources().get("1");
+            // RC 2
+            rc = "2";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(List.of(new SimpleEntry<>("arg0", String.class)), r.getArguments());
+                return null;
+            });
 
-            assertEquals(List.of(), r.getArguments());
-            Promise<Object> result = r.act(Map.of());
-            assertEquals(Byte.valueOf("1"), result.getValue());
+            result = act(PROVIDER_A, svc, rc, Map.of("arg0", 16));
+            assertEquals(Short.valueOf("32"), result);
 
-            r = service.getResources().get("2");
+            // RC 3
+            rc = "3";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(
+                        List.of(new SimpleEntry<>("arg1", Integer.class), new SimpleEntry<>("arg0", Instant.class)),
+                        r.getArguments());
+                return null;
+            });
 
-            assertEquals(List.of(new SimpleEntry<>("arg0", String.class)), r.getArguments());
-            result = r.act(Map.of("arg0", 16));
-            assertEquals(Short.valueOf("32"), result.getValue());
+            result = act(PROVIDER_A, svc, rc, Map.of("arg1", "5", "arg0", Instant.now().plusSeconds(60)));
+            assertEquals(Integer.valueOf("15"), result);
 
-            r = service.getResources().get("3");
+            result = act(PROVIDER_A, svc, rc, Map.of("arg1", "5", "arg0", Instant.now().minusSeconds(60)));
+            assertEquals(Integer.valueOf("25"), result);
 
-            assertEquals(List.of(new SimpleEntry<>("arg1", Integer.class), new SimpleEntry<>("arg0", Instant.class)),
-                    r.getArguments());
-            result = r.act(Map.of("arg1", "5", "arg0", Instant.now().plusSeconds(60)));
-            assertEquals(Integer.valueOf("15"), result.getValue());
-            result = r.act(Map.of("arg1", "5", "arg0", Instant.now().minusSeconds(60)));
-            assertEquals(Integer.valueOf("25"), result.getValue());
+            // RC 4
+            rc = "4";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(List.of(new SimpleEntry<>("arg0", Byte.class), new SimpleEntry<>("arg2", Integer.class)),
+                        r.getArguments());
+                return null;
+            });
 
-            r = service.getResources().get("4");
+            result = act(PROVIDER_A, svc, rc, Map.of("arg0", 7, "arg2", 2));
+            assertEquals(Double.valueOf("56"), result);
 
-            assertEquals(List.of(new SimpleEntry<>("arg0", Byte.class), new SimpleEntry<>("arg2", Integer.class)),
-                    r.getArguments());
-            result = r.act(Map.of("arg0", 7, "arg2", 2));
-            assertEquals(Double.valueOf("56"), result.getValue());
+            runRcCommand(PROVIDER_B, svc, rc, (r) -> {
+                assertEquals(List.of(new SimpleEntry<>("arg0", Byte.class), new SimpleEntry<>("arg2", Integer.class)),
+                        r.getArguments());
+                return null;
+            });
 
-            r = twinImpl.getResource(PROVIDER_B, "actions", "4");
-
-            assertEquals(List.of(new SimpleEntry<>("arg0", Byte.class), new SimpleEntry<>("arg2", Integer.class)),
-                    r.getArguments());
-            result = r.act(Map.of("arg0", 7, "arg2", 2));
-            assertEquals(Double.valueOf("61.6").doubleValue(), ((Double) result.getValue()).doubleValue(), 0.0000001d);
+            result = act(PROVIDER_B, svc, rc, Map.of("arg0", 7, "arg2", 2));
+            assertEquals(Double.valueOf("61.6").doubleValue(), ((Double) result).doubleValue(), 0.0000001d);
 
             // Test the actions from the repeated annotations
+            svc = "multi-actions";
+            rc = "a";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(List.of(), r.getArguments());
+                return null;
+            });
 
-            service = providerA.getServices().get("multi-actions");
+            result = act(PROVIDER_A, svc, rc, Map.of());
+            assertEquals("a", result);
 
-            r = service.getResources().get("a");
+            rc = "b";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(List.of(), r.getArguments());
+                return null;
+            });
+            result = act(PROVIDER_A, svc, rc, Map.of());
+            assertEquals("b", result);
 
-            assertEquals(List.of(), r.getArguments());
-            result = r.act(Map.of());
-            assertEquals("a", result.getValue());
-
-            r = service.getResources().get("b");
-
-            assertEquals(List.of(), r.getArguments());
-            result = r.act(Map.of());
-            assertEquals("b", result.getValue());
-
-            r = service.getResources().get("c");
-
-            assertEquals(List.of(), r.getArguments());
-            result = r.act(Map.of());
-            assertEquals("c", result.getValue());
-
+            rc = "c";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(List.of(), r.getArguments());
+                return null;
+            });
+            result = act(PROVIDER_A, svc, rc, Map.of());
+            assertEquals("c", result);
         }
     }
 
-    static class BasePullResourceTest {
+    public static class BasePullResourceTest {
         @GET(model = "bar", service = "pull", resource = "a")
         @GET(model = "bar", service = "pull", resource = "b")
         public String doMultiResource(@UriParam(UriSegment.RESOURCE) String resource,
@@ -248,7 +327,7 @@ public class WhiteboardImplTest {
         }
     }
 
-    static class CachedPullResourceTest {
+    public static class CachedPullResourceTest {
         @GET(model = "bar", service = "pull", resource = "cache", cacheDuration = 1, cacheDurationUnit = ChronoUnit.SECONDS)
         @GET(model = "bar", service = "pull", resource = "forced-cache", cacheDuration = 1, cacheDurationUnit = ChronoUnit.SECONDS)
         public Integer doCachedResource(@UriParam(UriSegment.RESOURCE) String resource,
@@ -266,23 +345,22 @@ public class WhiteboardImplTest {
     class PullBasedResourceTest {
 
         @Test
-        void testBasicPullResource() throws Exception {
+        void testBasicPullResource() throws Throwable {
             BasePullResourceTest resourceProvider = new BasePullResourceTest();
-            whiteboard.addWhiteboardService(resourceProvider,
+            thread.addWhiteboardService(resourceProvider,
                     Map.of("service.id", 256L, "sensiNact.whiteboard.resource", true));
 
-            SensinactProvider providerA = twinImpl.createProvider("bar", PROVIDER_A);
-            twinImpl.createProvider("bar", PROVIDER_B);
-
-            SensinactService service = providerA.getServices().get("pull");
-            assertNotNull(service);
+            final String svc = "pull";
+            createProviders("bar", svc);
 
             for (String rc : List.of("a", "b")) {
-                SensinactResource r = service.getResources().get(rc);
-                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                    assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                    return null;
+                });
 
                 // No value at first
-                TimedValue<String> result = r.getValue(String.class, GetLevel.STRONG).getValue();
+                TimedValue<String> result = getValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
                 assertEquals(rc, result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 final Instant initialTimestamp = result.getTimestamp();
@@ -290,7 +368,7 @@ public class WhiteboardImplTest {
                 // Wait a bit
                 Thread.sleep(200);
 
-                result = r.getValue(String.class, GetLevel.STRONG).getValue();
+                result = getValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
                 assertEquals("resource:" + rc, result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 final Instant secondTimestamp = result.getTimestamp();
@@ -300,45 +378,45 @@ public class WhiteboardImplTest {
         }
 
         @Test
-        void testCachedPullResource() throws Exception {
+        void testCachedPullResource() throws Throwable {
             CachedPullResourceTest resourceProvider = new CachedPullResourceTest();
-            whiteboard.addWhiteboardService(resourceProvider,
+            thread.addWhiteboardService(resourceProvider,
                     Map.of("service.id", 256L, "sensiNact.whiteboard.resource", true));
 
-            SensinactProvider providerA = twinImpl.createProvider("bar", PROVIDER_A);
-            twinImpl.createProvider("bar", PROVIDER_B);
+            final String svc = "pull";
+            createProviders("bar", svc);
 
-            SensinactService service = providerA.getServices().get("pull");
-            assertNotNull(service);
-
-            SensinactResource r = service.getResources().get("cache");
-            assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+            final String rc = "cache";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                return null;
+            });
 
             // No value at first: should get a 1
-            TimedValue<Integer> result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
+            TimedValue<Integer> result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.NORMAL);
             assertEquals(1, result.getValue());
             assertNotNull(result.getTimestamp(), "No timestamp returned");
             final Instant initialTimestamp = result.getTimestamp();
 
             // Second cache call should have the same value and timestamp
             Thread.sleep(200);
-            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.NORMAL);
             assertEquals(1, result.getValue());
             assertEquals(initialTimestamp, result.getTimestamp());
 
-            // Hard call
-            result = r.getValue(Integer.class, GetLevel.STRONG).getValue();
+            // Strong call
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.STRONG);
             assertEquals(2, result.getValue());
             final Instant secondTimestamp = result.getTimestamp();
             assertTrue(initialTimestamp.isBefore(secondTimestamp), "Timestamp wasn't updated");
 
             // Weak call
-            result = r.getValue(Integer.class, GetLevel.WEAK).getValue();
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.WEAK);
             assertEquals(2, result.getValue());
             assertEquals(secondTimestamp, result.getTimestamp());
 
             // Cached call
-            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.NORMAL);
             assertEquals(2, result.getValue());
             assertEquals(secondTimestamp, result.getTimestamp());
 
@@ -346,56 +424,58 @@ public class WhiteboardImplTest {
             Thread.sleep(1200);
 
             // Weak call must return the same value
-            result = r.getValue(Integer.class, GetLevel.WEAK).getValue();
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.WEAK);
             assertEquals(2, result.getValue());
             assertEquals(secondTimestamp, result.getTimestamp());
 
             // Cached call must recall the value
-            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.NORMAL);
             assertEquals(4, result.getValue());
             assertTrue(secondTimestamp.isBefore(result.getTimestamp()), "Timestamp wasn't updated");
         }
 
         @Test
-        void testForcedInitialValue() throws Exception {
+        void testForcedInitialValue() throws Throwable {
             CachedPullResourceTest resourceProvider = new CachedPullResourceTest();
-            whiteboard.addWhiteboardService(resourceProvider,
+            thread.addWhiteboardService(resourceProvider,
                     Map.of("service.id", 256L, "sensiNact.whiteboard.resource", true));
 
-            SensinactProvider providerA = twinImpl.createProvider("bar", PROVIDER_A);
-            SensinactService service = providerA.getServices().get("pull");
-            assertNotNull(service);
+            final String svc = "pull";
+            createProviders("bar", svc);
 
-            SensinactResource r = service.getResources().get("forced-cache");
-            assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+            final String rc = "forced-cache";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                return null;
+            });
 
             // Force the value
             final Instant initialTimesamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-            r.setValue(42, initialTimesamp);
+            setValue(PROVIDER_A, svc, rc, (r) -> r.setValue(42, initialTimesamp));
 
             // Check the WEAK call behavior
-            TimedValue<Integer> result = r.getValue(Integer.class, GetLevel.WEAK).getValue();
+            TimedValue<Integer> result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.WEAK);
             assertEquals(42, result.getValue());
             assertNotNull(result.getTimestamp(), "No timestamp returned");
             assertEquals(initialTimesamp, result.getTimestamp());
 
-            // Check the CACHED call behavior
-            result = r.getValue(Integer.class, GetLevel.NORMAL).getValue();
+            // Check the NORMAL call behavior
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.NORMAL);
             assertEquals(42, result.getValue());
             assertNotNull(result.getTimestamp(), "No timestamp returned");
             assertEquals(initialTimesamp, result.getTimestamp());
 
             Thread.sleep(110);
 
-            // Check the HARD call
-            result = r.getValue(Integer.class, GetLevel.STRONG).getValue();
+            // Check the STRONG call
+            result = getValue(PROVIDER_A, svc, rc, Integer.class, GetLevel.STRONG);
             assertEquals(84, result.getValue());
             assertNotNull(result.getTimestamp(), "No timestamp returned");
             assertTrue(initialTimesamp.isBefore(result.getTimestamp()), "Timestamp not updated");
         }
     }
 
-    static class BasePushResourceTest {
+    public static class BasePushResourceTest {
         @SET(model = "bar", service = "push", resource = "a", type = String.class)
         @SET(model = "bar", service = "push", resource = "b", type = String.class)
         public TimedValue<String> doMultiResource(@UriParam(UriSegment.RESOURCE) String resource,
@@ -426,42 +506,41 @@ public class WhiteboardImplTest {
     class PushBasedResourceTest {
 
         @Test
-        void testPush() throws Exception {
+        void testPush() throws Throwable {
             BasePushResourceTest resourceProvider = new BasePushResourceTest();
-            whiteboard.addWhiteboardService(resourceProvider,
+            thread.addWhiteboardService(resourceProvider,
                     Map.of("service.id", 257L, "sensiNact.whiteboard.resource", true));
 
-            SensinactProvider providerA = twinImpl.createProvider("bar", PROVIDER_A);
-            twinImpl.createProvider("bar", PROVIDER_B);
-
-            SensinactService service = providerA.getServices().get("push");
-            assertNotNull(service);
+            final String svc = "push";
+            createProviders("bar", svc);
 
             for (String rc : List.of("a", "b")) {
-                SensinactResource r = service.getResources().get(rc);
-                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                    assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                    return null;
+                });
 
                 // No value at first
-                TimedValue<String> result = r.getValue(String.class).getValue();
+                TimedValue<String> result = getValue(PROVIDER_A, svc, rc, String.class);
                 assertNull(result.getValue());
                 assertNull(result.getTimestamp());
 
                 // Set the value
                 final Instant setTimestamp = Instant.now().minus(Duration.ofMinutes(5));
-                r.setValue("toto", setTimestamp).getValue();
+                setValue(PROVIDER_A, svc, rc, (r) -> r.setValue("toto", setTimestamp));
 
                 // Get the value
-                result = r.getValue(String.class, GetLevel.STRONG).getValue();
+                result = getValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
                 assertEquals("toto", result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 assertEquals(setTimestamp, result.getTimestamp());
 
                 // Second set: the computed value is the one that must be returned
                 final Instant setTimestamp2 = Instant.now().minus(Duration.ofMinutes(1));
-                r.setValue("titi", setTimestamp2).getValue();
+                setValue(PROVIDER_A, svc, rc, (r) -> r.setValue("titi", setTimestamp2));
 
                 // Get the value
-                result = r.getValue(String.class, GetLevel.STRONG).getValue();
+                result = getValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
                 assertEquals("resource:toto", result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 assertEquals(setTimestamp2, result.getTimestamp());
@@ -479,7 +558,7 @@ public class WhiteboardImplTest {
         }
     }
 
-    static class PullPushResourceTest {
+    public static class PullPushResourceTest {
 
         @GET(model = "foobar", service = "svc", resource = "a", type = Content.class)
         @GET(model = "foobar", service = "svc", resource = "b", type = Content.class)
@@ -514,23 +593,22 @@ public class WhiteboardImplTest {
     class PushPullBasedResourceTest {
 
         @Test
-        void testPushPull() throws Exception {
+        void testPushPull() throws Throwable {
             PullPushResourceTest resourceProvider = new PullPushResourceTest();
-            whiteboard.addWhiteboardService(resourceProvider,
+            thread.addWhiteboardService(resourceProvider,
                     Map.of("service.id", 258L, "sensiNact.whiteboard.resource", true));
 
-            SensinactProvider providerA = twinImpl.createProvider("foobar", PROVIDER_A);
-            twinImpl.createProvider("foobar", PROVIDER_B);
-
-            SensinactService service = providerA.getServices().get("svc");
-            assertNotNull(service);
+            final String svc = "svc";
+            createProviders("foobar", svc);
 
             for (String rc : List.of("a", "b")) {
-                SensinactResource r = service.getResources().get(rc);
-                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                    assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                    return null;
+                });
 
                 // Initial value from the getter
-                TimedValue<Content> result = r.getValue(Content.class).getValue();
+                TimedValue<Content> result = getValue(PROVIDER_A, svc, rc, Content.class);
                 assertNotNull(result.getValue(), "No value");
                 assertNotNull(result.getTimestamp(), "No timestamp");
                 assertNull(result.getValue().oldValue);
@@ -538,10 +616,10 @@ public class WhiteboardImplTest {
 
                 // Set the value
                 final Instant setTimestamp = Instant.now().plus(Duration.ofMinutes(5));
-                r.setValue("toto", setTimestamp).getValue();
+                setValue(PROVIDER_A, svc, rc, (r) -> r.setValue("toto", setTimestamp));
 
                 // Get the value
-                result = r.getValue(Content.class, GetLevel.STRONG).getValue();
+                result = getValue(PROVIDER_A, svc, rc, Content.class, GetLevel.STRONG);
                 assertNotNull(result.getValue(), "No value");
                 assertEquals(setTimestamp, result.getTimestamp());
                 assertEquals("toto", result.getValue().oldValue);
@@ -549,10 +627,10 @@ public class WhiteboardImplTest {
 
                 // Second set: the computed value is the one that must be returned
                 final Instant setTimestamp2 = Instant.now().plus(Duration.ofMinutes(10));
-                r.setValue("titi", setTimestamp2).getValue();
+                setValue(PROVIDER_A, svc, rc, (r) -> r.setValue("titi", setTimestamp2));
 
                 // Get the value
-                result = r.getValue(Content.class, GetLevel.STRONG).getValue();
+                result = getValue(PROVIDER_A, svc, rc, Content.class, GetLevel.STRONG);
                 assertEquals(setTimestamp2, result.getTimestamp());
                 assertEquals("titi", result.getValue().oldValue);
                 assertEquals("+titi", result.getValue().newValue);

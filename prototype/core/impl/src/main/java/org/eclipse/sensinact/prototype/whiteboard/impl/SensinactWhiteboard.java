@@ -117,8 +117,6 @@ public class SensinactWhiteboard {
     /**
      * Stores the promise that will be returned by a dynamic get. Allows to share
      * the same promise when multiple dynamic GET occur.
-     *
-     * TODO
      */
     private final Map<RegistryKey, Promise<TimedValue<?>>> concurrentGetHolder = new ConcurrentHashMap<>();
 
@@ -577,7 +575,17 @@ public class SensinactWhiteboard {
                     }
                 });
 
-                return syncWithGatewayUpdate(d.getPromise(), gatewayUpdate, () -> concurrentGetHolder.remove(key));
+                Consumer<TimedValue<T>> coCall = (v) -> {
+                    try {
+                        if (gatewayUpdate != null) {
+                            gatewayUpdate.accept(v);
+                        }
+                    } finally {
+                        concurrentGetHolder.remove(key);
+                    }
+                };
+
+                return runOnGateway(d.getPromise(), coCall);
             }
         }
     }
@@ -616,7 +624,7 @@ public class SensinactWhiteboard {
                 }
             });
 
-            return syncWithGatewayUpdate(d.getPromise(), gatewayUpdate);
+            return runOnGateway(d.getPromise(), gatewayUpdate);
         }
     }
 
@@ -631,79 +639,43 @@ public class SensinactWhiteboard {
      * @param gatewayUpdate Method to call in the gateway thread.
      * @return
      */
-    private <T> Promise<Void> runOnGateway(final Promise<TimedValue<T>> promisedValue,
+    private <T> Promise<TimedValue<T>> runOnGateway(final Promise<TimedValue<T>> promisedValue,
             final Consumer<TimedValue<T>> gatewayUpdate) {
+        final PromiseFactory gatewayPromiseFactory = gatewayThread.getPromiseFactory();
+        final Deferred<TimedValue<T>> deferred = gatewayPromiseFactory.deferred();
         if (gatewayUpdate == null) {
-            // Nothing to to
-            return promiseFactory.resolved(null);
-        }
-
-        try {
+            // Return the promised value from the gateway thread
+            deferred.resolveWith(promisedValue);
+        } else {
             // We are supposed to be called when the promise is resolved, by get the value
             // outside the gateway thread anyway
-            final TimedValue<T> value = promisedValue.getValue();
-            return gatewayThread.execute(new AbstractSensinactCommand<Void>() {
-                @Override
-                protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                        PromiseFactory promiseFactory) {
-                    try {
-                        gatewayUpdate.accept(value);
-                        return promiseFactory.resolved(null);
-                    } catch (Exception e) {
-                        return promiseFactory.failed(e);
+            promisedValue.onResolve(() -> {
+                try {
+                    final Throwable t = promisedValue.getFailure();
+                    if (t == null) {
+                        final TimedValue<T> value = promisedValue.getValue();
+                        deferred.resolveWith(gatewayThread.execute(new AbstractSensinactCommand<TimedValue<T>>() {
+                            @Override
+                            protected Promise<TimedValue<T>> call(SensinactDigitalTwin twin,
+                                    SensinactModelManager modelMgr, PromiseFactory pf) {
+                                try {
+                                    gatewayUpdate.accept(value);
+                                    return pf.resolved(value);
+                                } catch (Exception e) {
+                                    return pf.failed(e);
+                                }
+                            }
+                        }));
+                    } else {
+                        deferred.fail(t);
                     }
+                } catch (InterruptedException e) {
+                    deferred.fail(e);
+                } catch (InvocationTargetException e) {
+                    deferred.fail(e.getCause());
                 }
             });
-        } catch (InterruptedException | InvocationTargetException e) {
-            return promiseFactory.failed(e);
         }
-    }
-
-    /**
-     * Returns a promise that will be resolved with the gateway update
-     *
-     * @param <T>           Resource value type
-     * @param callPromise   Promise on resource value
-     * @param gatewayUpdate Update to be executed in the gateway thread
-     * @return Promise that will be resolved after the update in the gateway thread
-     */
-    private <T> Promise<TimedValue<T>> syncWithGatewayUpdate(final Promise<TimedValue<T>> callPromise,
-            final Consumer<TimedValue<T>> gatewayUpdate) {
-        return syncWithGatewayUpdate(callPromise, gatewayUpdate, null);
-    }
-
-    /**
-     * Returns a promise that will be resolved with the gateway update
-     *
-     * @param <T>            Resource value type
-     * @param callPromise    Promise on resource value
-     * @param gatewayUpdate  Update to be executed in the gateway thread
-     * @param finalOperation Optional clean up operation after the update and before
-     *                       the returned promise resolves
-     * @return Promise that will be resolved after the update in the gateway thread
-     */
-    private <T> Promise<TimedValue<T>> syncWithGatewayUpdate(final Promise<TimedValue<T>> callPromise,
-            final Consumer<TimedValue<T>> gatewayUpdate, final Runnable finalOperation) {
-        final Deferred<TimedValue<T>> waiter = promiseFactory.deferred();
-        callPromise.onResolve(() -> {
-            try {
-                runOnGateway(callPromise, gatewayUpdate).onResolve(() -> {
-                    if (finalOperation != null) {
-                        try {
-                            finalOperation.run();
-                        } catch (Throwable t) {
-                            waiter.fail(t);
-                        }
-                    }
-                }).onSuccess((v) -> {
-                    waiter.resolveWith(callPromise);
-                }).onFailure((t) -> {
-                    waiter.fail(t);
-                });
-            } catch (Throwable t) {
-                waiter.fail(t);
-            }
-        });
-        return waiter.getPromise();
+        return deferred.getPromise();
     }
 }
