@@ -26,14 +26,19 @@ Each listener detected by the HTTP callback will be assocaited to a unique ID (U
 
 The URI associated to the listener will be be given to with its `activate(String uri)` method.
 
-When a POST HTTP request is received on the URI of a listener, the latter will be notified using its `call(Sitring uri, Map<String, String> headers, BufferedReader bodyReader)` method.
+When a POST HTTP request is received on the URI of a listener, the latter will be notified using its `call(String uri, Map<String, String> headers, BufferedReader bodyReader)` method; note that the callback cannot reply to the client.
+An HTTP 204 (No content) status code will be returned to the client when the callback method returns.
+If the callback method throws a `RuntimeException`, an HTTP 500 status code will be returned to the client without error message nor stack trace.
 
 When the HTTP callback service is disabled, all the listeners are disabled and notified with their `deactivate(uri)` method.
 
 ## Example
 
 ```java
+import org.eclipse.sensinact.gateway.southbound.http.callback.api.RequireHttpCallback;
+
 @Component()
+@RequireHttpCallback
 class HttpHandler implements HttpCallback {
     @Override
     void activate(String uri) {
