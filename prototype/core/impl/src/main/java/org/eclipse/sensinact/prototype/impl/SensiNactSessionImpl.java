@@ -229,19 +229,38 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     @Override
+    public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel) {
+        final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz, getLevel);
+        if (tv != null) {
+            return tv.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz) {
+        return getResourceTimedValue(provider, service, resource, clazz, GetLevel.NORMAL);
+    }
+
+    @Override
+    public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
+            GetLevel getLevel) {
         return safeExecute(new AbstractTwinCommand<TimedValue<T>>() {
             @Override
             protected Promise<TimedValue<T>> call(SensinactDigitalTwin model, PromiseFactory pf) {
-                final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                if (sensinactResource != null) {
-                    if (sensinactResource.getResourceType() == ResourceType.ACTION) {
+                try {
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
+                    if (sensinactResource != null) {
+                        if (sensinactResource.getResourceType() == ResourceType.ACTION) {
+                            return pf.resolved(null);
+                        }
+                        return sensinactResource.getValue(clazz, getLevel);
+                    } else {
                         return pf.resolved(null);
                     }
-                    // TODO: get the GetLevel from argument
-                    return sensinactResource.getValue(clazz, GetLevel.NORMAL);
-                } else {
-                    return pf.resolved(null);
+                } catch (Throwable t) {
+                    return pf.failed(t);
                 }
             }
         });
@@ -313,7 +332,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return safeExecute(new ResourceCommand<Object>(provider, service, resource) {
             @Override
             protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
-                return resource.act(parameters);
+                try {
+                    return resource.act(parameters);
+                } catch (Throwable t) {
+                    return pf.failed(t);
+                }
             }
         });
     }
@@ -324,50 +347,54 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return safeExecute(new AbstractTwinCommand<ResourceDescription>() {
             @Override
             protected Promise<ResourceDescription> call(SensinactDigitalTwin model, PromiseFactory pf) {
-                final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                if (sensinactResource != null) {
-                    ResourceType resourceType = sensinactResource.getResourceType();
-                    final Promise<TimedValue<Object>> val;
-                    switch (resourceType) {
-                    case ACTION:
-                        val = pf.resolved(null);
-                        break;
-
-                    default:
-                        val = sensinactResource.getValue(Object.class, GetLevel.NORMAL);
-                        break;
-                    }
-
-                    final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
-
-                    return val.then(x -> metadata).then(x -> {
-                        ResourceDescription result = new ResourceDescription();
-                        result.provider = provider;
-                        result.service = service;
-                        result.resource = resource;
-                        result.contentType = sensinactResource.getType();
-                        result.resourceType = resourceType;
-                        result.metadata = metadata.getValue();
-
-                        switch(resourceType) {
+                try {
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
+                    if (sensinactResource != null) {
+                        ResourceType resourceType = sensinactResource.getResourceType();
+                        final Promise<TimedValue<Object>> val;
+                        switch (resourceType) {
                         case ACTION:
-                            result.actMethodArgumentsTypes = sensinactResource.getArguments();
+                            val = pf.resolved(null);
                             break;
 
                         default:
-                            // TODO: get it from the description
-                            result.valueType = ValueType.UPDATABLE;
-
-                            // Add the current value
-                            result.value = val.getValue().getValue();
-                            result.timestamp = val.getValue().getTimestamp();
+                            val = sensinactResource.getValue(Object.class, GetLevel.NORMAL);
                             break;
                         }
 
-                        return pf.resolved(result);
-                    });
-                } else {
-                    return pf.resolved(null);
+                        final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
+
+                        return val.then(x -> metadata).then(x -> {
+                            ResourceDescription result = new ResourceDescription();
+                            result.provider = provider;
+                            result.service = service;
+                            result.resource = resource;
+                            result.contentType = sensinactResource.getType();
+                            result.resourceType = resourceType;
+                            result.metadata = metadata.getValue();
+
+                            switch (resourceType) {
+                            case ACTION:
+                                result.actMethodArgumentsTypes = sensinactResource.getArguments();
+                                break;
+
+                            default:
+                                // TODO: get it from the description
+                                result.valueType = ValueType.UPDATABLE;
+
+                                // Add the current value
+                                result.value = val.getValue().getValue();
+                                result.timestamp = val.getValue().getTimestamp();
+                                break;
+                            }
+
+                            return pf.resolved(result);
+                        });
+                    } else {
+                        return pf.resolved(null);
+                    }
+                } catch (Throwable t) {
+                    return pf.failed(t);
                 }
             }
         });
