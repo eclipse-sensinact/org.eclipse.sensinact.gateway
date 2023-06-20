@@ -14,5 +14,5 @@ The gateway currently includes the following southbound providers:
 
 The history of resource values is considered to be southbound provider linked to a time-series database:
 
-* sensiNact History
-  * Timescale provider
+* [sensiNact History](./history/history.md)
+  * [Timescale history provider](./history/timescale.md)
