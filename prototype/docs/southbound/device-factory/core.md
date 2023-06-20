@@ -18,7 +18,7 @@ Eclipse sensiNact includes the following parsers:
 * [CSV](./csv.md)
 * [JSON](./json.md)
 
-A parser can be created following the [Device Factory Parser Tutorial](./tuto_parser.md).
+A parser can be created following the [Device Factory Parser Tutorial](./tuto-parser.md).
 
 ## Device Factory Configuration
 
