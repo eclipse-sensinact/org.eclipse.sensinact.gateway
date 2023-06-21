@@ -76,7 +76,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             @Reference ProviderPackage ProviderPackage) {
         this.typedEventBus = typedEventBus;
         this.whiteboard = new SensinactWhiteboard(this);
-        nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, this::performAction);
+        nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, whiteboard);
         start();
     }
 
@@ -130,29 +130,6 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
         WorkItem<?> workItem = currentItem.get();
         return workItem == null ? new ImmediateNotificationAccumulator(typedEventBus)
                 : workItem.command.getAccumulator();
-    }
-
-    private Promise<Object> performAction(String model, String provider, String service, String resource,
-            Map<String, Object> args) {
-        Deferred<Object> d = getPromiseFactory().deferred();
-        try {
-            this.promiseFactory.executor().execute(() -> {
-                try {
-                    Object result = this.whiteboard.act(model, provider, service, resource, args);
-                    if (result instanceof Promise) {
-                        d.resolveWith((Promise<?>) result);
-                    } else {
-                        d.resolve(result);
-                    }
-                } catch (Exception e) {
-                    d.fail(e);
-                }
-            });
-        } catch (Exception e) {
-            d.fail(e);
-        }
-
-        return d.getPromise();
     }
 
     @Override

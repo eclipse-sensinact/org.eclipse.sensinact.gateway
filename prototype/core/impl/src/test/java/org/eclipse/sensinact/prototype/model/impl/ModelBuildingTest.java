@@ -57,7 +57,7 @@ public class ModelBuildingTest {
     @BeforeEach
     void start() {
         resourceSet = EMFTestUtil.createResourceSet();
-        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
+        nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
         manager = new SensinactModelManagerImpl(nexus);
     }
 

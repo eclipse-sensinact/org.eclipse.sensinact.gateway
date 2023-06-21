@@ -12,12 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.model;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * A builder for programmatically registering models
@@ -85,20 +85,43 @@ public interface ResourceBuilder<B, T> {
     ResourceBuilder<B, T> withAction(List<Entry<String, Class<?>>> namedParameterTypes);
 
     /**
-     * Set a getter function to be called
-     *
-     * @param getter
-     * @return
+     * This resource has a dynamic get behavior. This can't be applied on an action
+     * resource.
      */
-    ResourceBuilder<B, T> withGetter(Supplier<T> getter);
+    default ResourceBuilder<B, T> withGetter() {
+        return withGetter(true);
+    }
 
     /**
-     * Set a setter function to be called
+     * Indicates if the resource has a dynamic get behavior. Action resources can't
+     * have such a behavior.
      *
-     * @param setter
-     * @return
+     * @param hasGetter Flag to indicate if the resource has a dynamic get or not
      */
-    ResourceBuilder<B, T> withSetter(Consumer<T> setter);
+    ResourceBuilder<B, T> withGetter(boolean hasGetter);
+
+    /**
+     * Sets the cache duration for dynamic get calls
+     *
+     * @param cacheDuration Duration of the cache
+     */
+    ResourceBuilder<B, T> withGetterCache(Duration cacheDuration);
+
+    /**
+     * This resource has a dynamic set behavior. This can't be applied on an action
+     * resource.
+     */
+    default ResourceBuilder<B, T> withSetter() {
+        return withSetter(true);
+    }
+
+    /**
+     * Indicates if the resource has a dynamic set behavior. Action resources can't
+     * have such a behavior.
+     *
+     * @param hasSetter Flag to indicate if the resource has a dynamic set or not
+     */
+    ResourceBuilder<B, T> withSetter(boolean hasSetter);
 
     /**
      * Build the resource

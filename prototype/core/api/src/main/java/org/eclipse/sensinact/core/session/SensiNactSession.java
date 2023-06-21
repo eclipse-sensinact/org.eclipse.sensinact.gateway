@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
@@ -24,6 +25,7 @@ import org.eclipse.sensinact.core.notification.ClientMetadataListener;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.twin.TimedValue;
 
 public interface SensiNactSession {
 
@@ -85,20 +87,72 @@ public interface SensiNactSession {
     void removeListener(String id);
 
     /**
-     * Get the value of a resource
+     * Get the value of a resource with with a {@link GetLevel#NORMAL} operation.
      *
-     * @param <T>
-     * @param provider
-     * @param service
-     * @param resource
-     * @param clazz
-     * @return
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @return The resource value, can be null
      * @throws ClassCastException       if the value cannot be cast to the relevant
      *                                  type
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
     <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz);
+
+    /**
+     * Get the value of a resource
+     *
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @param getLevel The level of get operation. Only concerns resources with an external getter.
+     * @return The resource value, can be null
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel);
+
+    /**
+     * Get the timed value of a resource with a {@link GetLevel#NORMAL} operation.
+     *
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @return The timed value of the resource. Can return null.
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz);
+
+    /**
+     * Get the timed value of a resource with a {@link GetLevel#NORMAL} operation.
+     *
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @param getLevel The level of get operation. Only concerns resources with an
+     *                 external getter.
+     * @return The timed value of the resource. Can return null.
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
+            GetLevel getLevel);
 
     /**
      * Set the value of a resource with the current time

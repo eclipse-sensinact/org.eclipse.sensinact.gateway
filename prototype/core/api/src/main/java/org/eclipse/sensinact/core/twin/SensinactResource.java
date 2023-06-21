@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.command.CommandScoped;
+import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.osgi.util.promise.Promise;
@@ -77,14 +78,36 @@ public interface SensinactResource extends CommandScoped {
      * @param timestamp
      * @return
      */
-    Promise<Void> setValue(Object value, Instant timestamp);
+    <T> Promise<Void> setValue(T value, Instant timestamp);
 
     /**
      * Get the value of the resource
-     *
-     * @return
      */
-    Promise<TimedValue<?>> getValue();
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    default Promise<TimedValue<?>> getValue() {
+        return getValue((Class) Object.class, GetLevel.NORMAL);
+    }
+
+    /**
+     * Get the typed value of the resource. If the value doesn't match the expected
+     * type, null is returned.
+     *
+     * @param type Expected resource type
+     * @return The timed and typed value of the resource
+     */
+    default <T> Promise<TimedValue<T>> getValue(Class<T> type) {
+        return getValue(type, GetLevel.NORMAL);
+    }
+
+    /**
+     * Get the typed value of the resource.
+     * If the value doesn't match the expected type, null is returned.
+     *
+     * @param type Expected resource type
+     * @param getLevel Get command level for pull-based resources
+     * @return The timed and typed value of the resource
+     */
+    <T> Promise<TimedValue<T>> getValue(Class<T> type, GetLevel getLevel);
 
     /**
      * Set a metadata value for the resource

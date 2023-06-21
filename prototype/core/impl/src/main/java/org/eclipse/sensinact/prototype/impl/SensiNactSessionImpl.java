@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -56,7 +57,6 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
-import org.osgi.util.promise.Promises;
 
 public class SensiNactSessionImpl implements SensiNactSession {
 
@@ -186,14 +186,18 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return safeExecute(new AbstractTwinCommand<T>() {
             @Override
             protected Promise<T> call(SensinactDigitalTwin model, PromiseFactory pf) {
-                I modelValue = caller.apply(model);
-                T value;
-                if (modelValue != null) {
-                    value = converter.apply(modelValue);
-                } else {
-                    value = defaultValue;
+                try {
+                    I modelValue = caller.apply(model);
+                    T value;
+                    if (modelValue != null) {
+                        value = converter.apply(modelValue);
+                    } else {
+                        value = defaultValue;
+                    }
+                    return pf.resolved(value);
+                } catch (Exception e) {
+                    return pf.failed(e);
                 }
-                return pf.resolved(value);
             }
         });
     }
@@ -216,8 +220,50 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
-        return safeGetValue(executeGetCommand(m -> m.getResource(provider, service, resource),
-                r -> r.getValue().map(t -> clazz.cast(t.getValue())), Promises.resolved(null)));
+        final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz);
+        if (tv != null) {
+            return tv.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel) {
+        final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz, getLevel);
+        if (tv != null) {
+            return tv.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz) {
+        return getResourceTimedValue(provider, service, resource, clazz, GetLevel.NORMAL);
+    }
+
+    @Override
+    public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
+            GetLevel getLevel) {
+        return safeExecute(new AbstractTwinCommand<TimedValue<T>>() {
+            @Override
+            protected Promise<TimedValue<T>> call(SensinactDigitalTwin model, PromiseFactory pf) {
+                try {
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
+                    if (sensinactResource != null) {
+                        if (sensinactResource.getResourceType() == ResourceType.ACTION) {
+                            return pf.resolved(null);
+                        }
+                        return sensinactResource.getValue(clazz, getLevel);
+                    } else {
+                        return pf.resolved(null);
+                    }
+                } catch (Throwable t) {
+                    return pf.failed(t);
+                }
+            }
+        });
     }
 
     @Override
@@ -286,7 +332,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return safeExecute(new ResourceCommand<Object>(provider, service, resource) {
             @Override
             protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
-                return resource.act(parameters);
+                try {
+                    return resource.act(parameters);
+                } catch (Throwable t) {
+                    return pf.failed(t);
+                }
             }
         });
     }
@@ -297,28 +347,54 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return safeExecute(new AbstractTwinCommand<ResourceDescription>() {
             @Override
             protected Promise<ResourceDescription> call(SensinactDigitalTwin model, PromiseFactory pf) {
-                final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                if (sensinactResource != null) {
-                    ResourceType resourceType = sensinactResource.getResourceType();
-                    final Promise<TimedValue<?>> val = resourceType == ResourceType.ACTION ? pf.resolved(null)
-                            : sensinactResource.getValue();
-                    final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
+                try {
+                    final SensinactResource sensinactResource = model.getResource(provider, service, resource);
+                    if (sensinactResource != null) {
+                        ResourceType resourceType = sensinactResource.getResourceType();
+                        final Promise<TimedValue<Object>> val;
+                        switch (resourceType) {
+                        case ACTION:
+                            val = pf.resolved(null);
+                            break;
 
-                    return val.then(x -> metadata).then(x -> {
-                        ResourceDescription result = new ResourceDescription();
-                        result.provider = provider;
-                        result.service = service;
-                        result.resource = resource;
-                        if (resourceType != ResourceType.ACTION) {
-                            result.value = val.getValue().getValue();
-                            result.timestamp = val.getValue().getTimestamp();
+                        default:
+                            val = sensinactResource.getValue(Object.class, GetLevel.NORMAL);
+                            break;
                         }
-                        // TODO - how do we say that this is an action and list the parameters?
-                        result.metadata = metadata.getValue();
-                        return pf.resolved(result);
-                    });
-                } else {
-                    return pf.resolved(null);
+
+                        final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
+
+                        return val.then(x -> metadata).then(x -> {
+                            ResourceDescription result = new ResourceDescription();
+                            result.provider = provider;
+                            result.service = service;
+                            result.resource = resource;
+                            result.contentType = sensinactResource.getType();
+                            result.resourceType = resourceType;
+                            result.metadata = metadata.getValue();
+
+                            switch (resourceType) {
+                            case ACTION:
+                                result.actMethodArgumentsTypes = sensinactResource.getArguments();
+                                break;
+
+                            default:
+                                // TODO: get it from the description
+                                result.valueType = ValueType.UPDATABLE;
+
+                                // Add the current value
+                                result.value = val.getValue().getValue();
+                                result.timestamp = val.getValue().getTimestamp();
+                                break;
+                            }
+
+                            return pf.resolved(result);
+                        });
+                    } else {
+                        return pf.resolved(null);
+                    }
+                } catch (Throwable t) {
+                    return pf.failed(t);
                 }
             }
         });

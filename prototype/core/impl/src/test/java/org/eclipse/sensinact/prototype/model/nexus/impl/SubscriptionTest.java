@@ -96,7 +96,7 @@ public class SubscriptionTest {
         @Test
         void basicTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -151,7 +151,7 @@ public class SubscriptionTest {
         @Test
         void basicServiceExtensionTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -213,7 +213,7 @@ public class SubscriptionTest {
         @Test
         void basicSecondServiceTest() {
 
-            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
             // Ignore the setup of the sensiNact provider
             Mockito.clearInvocations(accumulator);
 
@@ -310,7 +310,7 @@ public class SubscriptionTest {
                 }
             };
 
-            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, null);
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
 
             Resource extendedPackageResource = resourceSet
                     .createResource(URI.createURI("https://eclipse.org/sensinact/test/1.0"));
