@@ -95,25 +95,65 @@ A mapping defined by a record path will get the value from the parser "as is".
 This means the resource value will contain it in its parsed type.
 For example, all the values from the CSV parser are strings, whereas the JSON parser will detect strings, numbers, booleans, arrays, ...
 
-Here is an example of mapping the value of the resource `serial` in the service `sensor` from the record path `serial`:
+Here is an example of mapping the provider name to the record path `sensor` and the value of the resource `serial` in the service `sensor` from the record path `serial`:
 ```json
 {
+    "@provider": "sensor",
     "sensor/serial": "serial"
 }
 ```
 
-Record paths can also be constructed from variables.
-For example:
+With the example payload, the mapping above defines two providers, `A1` and `B1`, each with a service `sensor` providing a resource `serial` with values being respectively `ABC12` and `ABC13`.
+
+Both mapping keys and record paths can be constructed from variables.
+For example, considering the following payload:
+```csv
+sensor,type,temperature,humidity
+A,temperature,21,-1
+B,humidity,-1,64
+```
+
+And the following mapping:
 ```json
 {
+    "$id": "sensor",
     "$kind": "type",
+    "@provider": "${id}",
     "sensor/${kind}": "value"
 }
 ```
 
+We would obtain two providers:
+* Provider `A` with a resource `temperature` in service `sensor`, with the value 21
+* Provider `B` with a resource `humidity` in service `sensor`, with the value 64
+
 Finally, note that the record path depends on the parser.
 In the case of CSV payloads without headers, it is a column index number given as an integer (or the string representation of an integer). For example `"sensor/serial": 2`. Note that the first column index number is 0.
 In the case of the JSON parser, it can be a path through objects or indices through arrays: `"sensor/serial": "sensor/array/0/serial`
+
+For example, the path `sensor/array/0/serial` would allow to access the value `ABC123` in the following JSON payload:
+```json
+{
+    "sensor": {
+        "properties": {
+            "kind": "multi-sensor"
+        },
+        "array": [
+            {
+                "serial": "ABC123",
+                "type": "temperature",
+                "year": 2021
+            },
+            {
+                "serial": "ABC124",
+                "type": "humidity",
+                "year": 2022
+            }
+        ]
+    }
+}
+```
+
 
 #### Configured record path
 
@@ -122,16 +162,32 @@ In the case of the JSON parser, it can be a path through objects or indices thro
 Some parsers, like the CSV one, can't determine the type of the value they are parsing.
 The mapping configuration allows to indicate the type the parsed value must be converted to.
 
-Here is an example of mapping the value of the resource `count` of the service `vehicles` from the record path `nbVehicles`, converted to integer:
+For example, if we consider the payload:
+```csv
+sensor,serial,nbVehicles,nbPersons
+ABC,12345,6,2
+```
 
+And the following mapping:
 ```json
 {
-    "vehicles/count": {
+    "@provider": "sensor",
+    "sensor/serial": "serial",
+    "sensor/vehicles": {
         "path": "nbVehicles",
         "type": "int"
+    },
+    "sensor/pedestrians": {
+        "path": "nbPersons",
+        "type": "float"
     }
 }
 ```
+
+We would a provider `ABC` with the following mapped resources in the `sensor` service:
+* `serial`: `"12345"` as a string, as the CSV parser returns values as string by default
+* `vehicles`: `6` as an integer
+* `pedestrians`: 2.0 as float
 
 The available types are:
 * `any`: use the value as it was parsed (default)
