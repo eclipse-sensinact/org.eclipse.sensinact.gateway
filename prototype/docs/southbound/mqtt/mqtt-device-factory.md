@@ -22,7 +22,7 @@ The MQTT device factory waits for configurations with PID `sensinact.mqtt.device
 The MQTT device factory configuration defines rules to accepts payloads from specific MQTT clients and/or MQTT topics:
 * `mapping`: the device factory mapping configuration  (**mandatory**)
 * `mqtt.handler.id`: ID of the only accepted source MQTT client. Set to null to accept payloads from any client.
-* `mqtt.topics`: List of accepted explicit MQTT topics. MQTT jokers are not supported. Set to null to accept any topic.
+* `mqtt.topics`: List of accepted explicit MQTT topics. MQTT wildcards are not supported. Set to null to accept any topic.
 
 The configuration must define at least one of `mqtt.handler.id` or `mqtt.topics` or it will be rejected.
 

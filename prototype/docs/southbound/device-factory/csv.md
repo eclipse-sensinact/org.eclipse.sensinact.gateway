@@ -15,7 +15,7 @@ It requires the following bundles to be resolved:
 
 The CSV data can be mapped using the integer column index as the path, with the first column having index 0.
 
-If the payload has a header, the column name can also be used as path. If multiple columns have the same name, the leftmost one will be used.
+If the CSV data has a header row then the column name can also be used as the path. If multiple columns have the same name, the first one encountered will be used.
 
 **Note:** the CSV parser consider that everything it reads is a string. If necessary, the value type must be given explicitly in the mapping configuration.
 

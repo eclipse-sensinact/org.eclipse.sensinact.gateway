@@ -22,7 +22,7 @@ This `IDeviceMappingParser` interface defines only one method:
   ```
 
   It accepts the following arguments:
-  * `rawInput`: the raw payload as given to the device factory core. Note that the transport that received it might have done some pre-treatment.
+  * `rawInput`: the raw payload as given to the device factory core. Note that the transport that received it might have done some pre-treatment, for example unzipping data that was compressed for transmission.
   * `parserConfiguration`: configuration for our parser as given in the device factory configuration.
   * `context`: context properties as defined by the transport implementation.
 

@@ -16,7 +16,7 @@ It requires the following bundles to be resolved:
 
 ## Parser paths
 
-The JSON parser accepts key names for objects and integers for arrays.
+The JSON data can be mapped using key names for fields in objects and integer indexes for arrays.
 They can be combined as a path string.
 
 The parsed value keep their JSON type: strings numbers and booleans can be stored as is in the resource.
@@ -55,7 +55,7 @@ It accepts the following options:
 
 A JSON payload can be complex and can describe multiple providers at once or can have the provider description deep inside its hierarchy.
 
-Defining a payload base allows to handle those cases.
+Defining a payload base allows to handle those cases by selecting a sub-path in the JSON payload to use as the JSON to be parsed. Other parts of the JSON payload outside the base will be ignored.
 The base is defined with a parser path that can walk through object entries or specific array indices. The JSON parser doesn't support walking through all entries of an array.
 
 If the base targets an array, the mapping will be applied for each item individually.
@@ -94,7 +94,7 @@ In the first example, we'll consider the following payload, containing an array 
 ]
 ```
 
-Here we define the `base` to be `0`, *i.e.* to work as if the payload was the first array of the 2 arrays contained in the root array:
+Here we define the `base` to be `0`. This navigates to the first entry in the array at the root of the payload, and ignores all other entries in the array, *i.e.* it works as if the payload was the first array of the 2 arrays contained in the root array:
 ```json
 {
   "parser": "json",
