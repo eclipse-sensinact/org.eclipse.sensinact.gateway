@@ -62,7 +62,11 @@ public class CsvParser implements IDeviceMappingParser {
         CSVFormat.Builder format = CSVFormat.DEFAULT.builder();
         final String delimiter = (String) parserConfiguration.get("delimiter");
         if (delimiter != null) {
-            format = format.setDelimiter(delimiter);
+            if ("\\t".equals(delimiter)) {
+                format = format.setDelimiter("\t");
+            } else {
+                format = format.setDelimiter(delimiter);
+            }
         }
 
         final Boolean withHeader = (Boolean) parserConfiguration.get("header");

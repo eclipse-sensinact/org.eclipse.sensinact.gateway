@@ -15,9 +15,8 @@ trim_trailing_whitespace = true
 [*.{xml,json,g4}]
 indent_size = 2
 
-[*.{md}]
-trim_trailing_whitespace = false
-indent_size = 1
+[*.md]
+indent_size = unset
 
 [*.bndrun]
 indent_style = tab
