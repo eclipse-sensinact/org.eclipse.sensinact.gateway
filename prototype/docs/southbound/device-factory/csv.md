@@ -13,7 +13,7 @@ It requires the following bundles to be resolved:
 
 ## Parser paths
 
-If the CSV payload accepts integer column index as path, with the first column having index 0.
+The CSV data can be mapped using the integer column index as the path, with the first column having index 0.
 
 If the payload has a header, the column name can also be used as path. If multiple columns have the same name, the leftmost one will be used.
 
