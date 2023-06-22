@@ -37,7 +37,7 @@ The MQTT interface will run without any configuration, however the `jakarta-rest
  * `host` - the host interface to listen on - defaults to `"0.0.0.0"`;
  * `port` - the insecure port - defaults to `1883`, set to `-1` to disable
  * `secure.port` - the secure port - defaults to `8883`, only used if `keystore.file` is set
- * `websocked.enable` - if true then websocket access is enabled - defaults to `true`
+ * `websocket.enable` - if true then websocket access is enabled - defaults to `true`
  * `websocket.port` - the insecure websocket port - defaults to `8884`, set to `-1` to disable
  * `websocket.secure.port` - the secure websocket port - defaults to `8885`, only used if `keystore.file` is set
  * `keystore.file` - the keystore to use for securing connections
