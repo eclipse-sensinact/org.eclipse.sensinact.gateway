@@ -19,7 +19,7 @@ The MQTT interface will run without any configuration, however the `jakarta-rest
 ```json
 {
   ":configurator:resource-version": 1,
-  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.northbound.rest.example",
+  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.northbound.mqtt.example",
   ":configurator:version": "0.0.1",
   "sensinact.launcher": {
     "features": [
