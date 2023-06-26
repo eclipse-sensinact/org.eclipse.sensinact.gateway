@@ -153,7 +153,7 @@ public class SessionManager implements SensiNactSessionManager, TypedEventHandle
     @Override
     public SensiNactSession createNewSession(UserInfo user) {
         Objects.requireNonNull(user);
-        SensiNactSessionImpl session = new SensiNactSessionImpl(thread);
+        SensiNactSessionImpl session = new SensiNactSessionImpl(user, thread);
         String sessionId = session.getSessionId();
 
         synchronized (lock) {

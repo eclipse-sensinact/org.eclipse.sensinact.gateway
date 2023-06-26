@@ -75,7 +75,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final GatewayThread thread;
 
-    public SensiNactSessionImpl(final GatewayThread thread) {
+    private final UserInfo user;
+
+    public SensiNactSessionImpl(UserInfo user, final GatewayThread thread) {
+        this.user = user;
         expiry = Instant.now().plusSeconds(600);
         this.thread = thread;
     }
@@ -595,7 +598,6 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public UserInfo getUserInfo() {
-        // TODO Auto-generated method stub
-        return null;
+        return user;
     }
 }
