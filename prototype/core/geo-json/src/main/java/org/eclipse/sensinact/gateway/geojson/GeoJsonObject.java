@@ -12,9 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -61,4 +63,44 @@ public abstract class GeoJsonObject {
     public Map<String, Object> foreignMembers = new HashMap<>();
 
     public List<Double> bbox;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, bbox);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof GeoJsonObject) {
+            final GeoJsonObject other = (GeoJsonObject) obj;
+            return type == other.type && Objects.equals(bbox, other.bbox)
+                    && Objects.equals(foreignMembers, other.foreignMembers);
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the object description
+     */
+    protected abstract String getObjectDescription();
+
+    @Override
+    public String toString() {
+        final List<String> parts = new ArrayList<>();
+        final String description = getObjectDescription();
+        if (description != null && !description.isEmpty()) {
+            parts.add(description);
+        }
+
+        if (bbox != null && !bbox.isEmpty()) {
+            parts.add("bbox=[" + bbox + "]");
+        }
+
+        if (foreignMembers != null && !foreignMembers.isEmpty()) {
+            parts.add("hasForeignMembers=true");
+        }
+
+        return type + "(" + String.join(", ", parts) + ")";
+    }
 }

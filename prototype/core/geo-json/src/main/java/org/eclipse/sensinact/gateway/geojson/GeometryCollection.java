@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A GeoJSON geometry collection object as defined in
@@ -27,4 +28,21 @@ public class GeometryCollection extends Geometry {
 
     public List<Geometry> geometries;
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), geometries);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof GeometryCollection) {
+            return Objects.equals(geometries, ((GeometryCollection) obj).geometries);
+        }
+        return false;
+    }
+
+    @Override
+    protected String getObjectDescription() {
+        return "geometries=" + geometries;
+    }
 }

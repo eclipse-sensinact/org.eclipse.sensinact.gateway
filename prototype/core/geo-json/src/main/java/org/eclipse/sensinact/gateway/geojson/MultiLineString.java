@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A GeoJSON multi line string object as defined in
@@ -27,4 +28,21 @@ public class MultiLineString extends Geometry {
 
     public List<List<Coordinates>> coordinates;
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), coordinates);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (super.equals(obj)) {
+            return Objects.equals(coordinates, ((MultiLineString) obj).coordinates);
+        }
+        return false;
+    }
+
+    @Override
+    protected String getObjectDescription() {
+        return "coords=" + coordinates;
+    }
 }

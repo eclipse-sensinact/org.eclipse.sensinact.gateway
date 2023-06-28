@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
+import java.util.Objects;
+
 /**
  * A GeoJSON point object as defined in
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1">the GeoJSON
@@ -25,4 +27,21 @@ public class Point extends Geometry {
 
     public Coordinates coordinates;
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), coordinates);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (super.equals(obj)) {
+            return Objects.equals(coordinates, ((Point) obj).coordinates);
+        }
+        return false;
+    }
+
+    @Override
+    protected String getObjectDescription() {
+        return "coords=" + coordinates;
+    }
 }

@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FeatureCollection extends GeoJsonObject {
 
@@ -21,5 +22,23 @@ public class FeatureCollection extends GeoJsonObject {
 
     public FeatureCollection() {
         super(GeoJsonType.FeatureCollection);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), features);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (super.equals(obj)) {
+            return Objects.equals(features, ((FeatureCollection) obj).features);
+        }
+        return false;
+    }
+
+    @Override
+    protected String getObjectDescription() {
+        return "features=" + features;
     }
 }
