@@ -12,6 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.time.Instant;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
@@ -66,8 +70,26 @@ public class AbstractIntegrationTest {
     protected final TestUtils utils = new TestUtils();
 
     @BeforeEach
-    void start() throws InterruptedException {
+    void start() throws IOException, InterruptedException {
         session = sessionManager.getDefaultSession(USER);
+
+        // Wait for the servlet to be ready
+        boolean ready = false;
+        for (int i = 0; i < 10; i++) {
+            HttpResponse<String> result = utils.query("/Datastreams");
+            if (result.statusCode() < 400) {
+                ready = true;
+                break;
+            }
+
+            // Not ready yet
+            System.out.println("Waiting for the SensorThings servlet to come up...");
+            Thread.sleep(1000);
+        }
+
+        if (!ready) {
+            fail("SensorThings servlet didn't come up");
+        }
     }
 
     @AfterEach

@@ -65,10 +65,9 @@ public class TestUtils {
     }
 
     /**
-     * Executes a GET request and returns its parsed content
+     * Executes a GET request and returns its response body as a string
      */
-    public <T> T queryJson(final String path, final TypeReference<T> resultType)
-            throws IOException, InterruptedException {
+    public HttpResponse<String> query(final String path) throws IOException, InterruptedException {
         // Normalize URI
         final URI targetUri;
         if (path.contains("://")) {
@@ -80,10 +79,21 @@ public class TestUtils {
         }
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
-        final HttpResponse<String> response = client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+        return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Executes a GET request and returns its parsed content
+     */
+    public <T> T queryJson(final String path, final TypeReference<T> resultType)
+            throws IOException, InterruptedException {
+        final HttpResponse<String> response = query(path);
         return mapper.createParser(response.body()).readValueAs(resultType);
     }
 
+    /**
+     * Executes a GET request and returns its parsed content
+     */
     public <T> T queryJson(final String path, final Class<T> resultType) throws IOException, InterruptedException {
         return queryJson(path, new TypeReference<T>() {
             @Override
