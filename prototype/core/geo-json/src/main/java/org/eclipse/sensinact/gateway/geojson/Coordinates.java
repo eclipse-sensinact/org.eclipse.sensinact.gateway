@@ -46,7 +46,7 @@ public class Coordinates {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Coordinates) {
+        if (obj != null && obj.getClass() == Coordinates.class) {
             // Chosen according to https://xkcd.com/2170/
             final double epsilon = 0.0000001d;
             final Coordinates other = (Coordinates) obj;

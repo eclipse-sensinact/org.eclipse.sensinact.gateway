@@ -37,7 +37,7 @@ public class Feature extends GeoJsonObject {
     public boolean equals(Object obj) {
         if (super.equals(obj)) {
             final Feature other = (Feature) obj;
-            return Objects.equals(id, other.id) && Objects.equals(geometry, ((Feature) obj).geometry)
+            return Objects.equals(id, other.id) && Objects.equals(geometry, other.geometry)
                     && Objects.equals(properties, other.properties);
         }
         return false;
