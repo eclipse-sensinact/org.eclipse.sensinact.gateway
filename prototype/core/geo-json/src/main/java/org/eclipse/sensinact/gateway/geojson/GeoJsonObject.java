@@ -15,6 +15,7 @@ package org.eclipse.sensinact.gateway.geojson;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -61,4 +62,58 @@ public abstract class GeoJsonObject {
     public Map<String, Object> foreignMembers = new HashMap<>();
 
     public List<Double> bbox;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, bbox);
+    }
+
+    /**
+     * Checks if the object is a GeoJSON object and shares common members
+     *
+     * @param obj Object to compare to
+     * @return True if the given object matches the GeoJSON type and common members
+     */
+    protected boolean checkParentEquals(Object obj) {
+        if (obj instanceof GeoJsonObject) {
+            final GeoJsonObject other = (GeoJsonObject) obj;
+            return type == other.type && Objects.equals(bbox, other.bbox)
+                    && Objects.equals(foreignMembers, other.foreignMembers);
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the object description
+     *
+     * @param builder String builder to add description to
+     * @return A content flag: if true, content was added to the builder
+     */
+    protected abstract boolean getObjectDescription(StringBuilder builder);
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(type.toString()).append("(");
+
+        boolean first = !getObjectDescription(builder);
+
+        if (bbox != null && !bbox.isEmpty()) {
+            if (first) {
+                builder.append(", ");
+                first = false;
+            }
+            builder.append("bbox=[").append(bbox).append("]");
+        }
+
+        if (foreignMembers != null && !foreignMembers.isEmpty()) {
+            if (first) {
+                builder.append(", ");
+                first = false;
+            }
+            builder.append("hasForeignMembers=true");
+        }
+
+        return builder.append(")").toString();
+    }
 }

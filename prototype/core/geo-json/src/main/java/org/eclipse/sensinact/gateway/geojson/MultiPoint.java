@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A GeoJSON multi point object as defined in
@@ -27,4 +28,22 @@ public class MultiPoint extends Geometry {
 
     public List<Coordinates> coordinates;
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), coordinates);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (checkParentEquals(obj)) {
+            return Objects.equals(coordinates, ((MultiPoint) obj).coordinates);
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean getObjectDescription(StringBuilder builder) {
+        builder.append("coords=").append(coordinates);
+        return true;
+    }
 }

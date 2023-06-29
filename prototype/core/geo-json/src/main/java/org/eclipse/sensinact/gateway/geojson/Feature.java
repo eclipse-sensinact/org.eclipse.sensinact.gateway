@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Feature extends GeoJsonObject {
 
@@ -27,4 +28,25 @@ public class Feature extends GeoJsonObject {
         super(GeoJsonType.Feature);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), id, geometry, properties);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (checkParentEquals(obj)) {
+            final Feature other = (Feature) obj;
+            return Objects.equals(id, other.id) && Objects.equals(geometry, other.geometry)
+                    && Objects.equals(properties, other.properties);
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean getObjectDescription(StringBuilder builder) {
+        builder.append("id=").append(id).append(", geometry=").append(geometry).append("properties=")
+                .append(properties);
+        return true;
+    }
 }
