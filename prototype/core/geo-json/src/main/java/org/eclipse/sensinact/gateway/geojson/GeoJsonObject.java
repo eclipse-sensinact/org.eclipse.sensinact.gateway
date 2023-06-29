@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,8 +68,13 @@ public abstract class GeoJsonObject {
         return Objects.hash(type, bbox);
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    /**
+     * Checks if the object is a GeoJSON object and shares common members
+     *
+     * @param obj Object to compare to
+     * @return True if the given object matches the GeoJSON type and common members
+     */
+    protected boolean checkParentEquals(Object obj) {
         if (obj instanceof GeoJsonObject) {
             final GeoJsonObject other = (GeoJsonObject) obj;
             return type == other.type && Objects.equals(bbox, other.bbox)
@@ -82,25 +86,34 @@ public abstract class GeoJsonObject {
 
     /**
      * Returns the object description
+     *
+     * @param builder String builder to add description to
+     * @return A content flag: if true, content was added to the builder
      */
-    protected abstract String getObjectDescription();
+    protected abstract boolean getObjectDescription(StringBuilder builder);
 
     @Override
     public String toString() {
-        final List<String> parts = new ArrayList<>();
-        final String description = getObjectDescription();
-        if (description != null && !description.isEmpty()) {
-            parts.add(description);
-        }
+        final StringBuilder builder = new StringBuilder(type.toString()).append("(");
+
+        boolean first = !getObjectDescription(builder);
 
         if (bbox != null && !bbox.isEmpty()) {
-            parts.add("bbox=[" + bbox + "]");
+            if (first) {
+                builder.append(", ");
+                first = false;
+            }
+            builder.append("bbox=[").append(bbox).append("]");
         }
 
         if (foreignMembers != null && !foreignMembers.isEmpty()) {
-            parts.add("hasForeignMembers=true");
+            if (first) {
+                builder.append(", ");
+                first = false;
+            }
+            builder.append("hasForeignMembers=true");
         }
 
-        return type + "(" + String.join(", ", parts) + ")";
+        return builder.append(")").toString();
     }
 }

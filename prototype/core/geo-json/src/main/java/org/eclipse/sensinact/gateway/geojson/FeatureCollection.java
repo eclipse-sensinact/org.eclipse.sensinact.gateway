@@ -31,14 +31,15 @@ public class FeatureCollection extends GeoJsonObject {
 
     @Override
     public boolean equals(Object obj) {
-        if (super.equals(obj)) {
+        if (checkParentEquals(obj)) {
             return Objects.equals(features, ((FeatureCollection) obj).features);
         }
         return false;
     }
 
     @Override
-    protected String getObjectDescription() {
-        return "features=" + features;
+    protected boolean getObjectDescription(StringBuilder builder) {
+        builder.append("features=").append(features);
+        return true;
     }
 }

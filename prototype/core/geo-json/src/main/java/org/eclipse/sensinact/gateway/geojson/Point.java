@@ -34,14 +34,15 @@ public class Point extends Geometry {
 
     @Override
     public boolean equals(Object obj) {
-        if (super.equals(obj)) {
+        if (checkParentEquals(obj)) {
             return Objects.equals(coordinates, ((Point) obj).coordinates);
         }
         return false;
     }
 
     @Override
-    protected String getObjectDescription() {
-        return "coords=" + coordinates;
+    protected boolean getObjectDescription(StringBuilder builder) {
+        builder.append("coords=").append(coordinates);
+        return true;
     }
 }

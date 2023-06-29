@@ -72,11 +72,12 @@ public class Coordinates {
 
     @Override
     public String toString() {
-        String repr = "(lon=" + longitude + ",lat=" + latitude;
+        final StringBuilder builder = new StringBuilder();
+        builder.append("(lon=").append(longitude).append(",lat=").append(latitude);
         if (Double.isFinite(elevation)) {
             // Add elevation
-            repr += ",alt=" + elevation;
+            builder.append(",alt=").append(elevation);
         }
-        return repr + ")";
+        return builder.append(")").toString();
     }
 }

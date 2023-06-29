@@ -35,7 +35,7 @@ public class Feature extends GeoJsonObject {
 
     @Override
     public boolean equals(Object obj) {
-        if (super.equals(obj)) {
+        if (checkParentEquals(obj)) {
             final Feature other = (Feature) obj;
             return Objects.equals(id, other.id) && Objects.equals(geometry, other.geometry)
                     && Objects.equals(properties, other.properties);
@@ -44,7 +44,9 @@ public class Feature extends GeoJsonObject {
     }
 
     @Override
-    protected String getObjectDescription() {
-        return String.format("id=%s, geometry=%s, properties=%s", id, geometry, properties);
+    protected boolean getObjectDescription(StringBuilder builder) {
+        builder.append("id=").append(id).append(", geometry=").append(geometry).append("properties=")
+                .append(properties);
+        return true;
     }
 }

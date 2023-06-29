@@ -35,14 +35,15 @@ public class GeometryCollection extends Geometry {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof GeometryCollection) {
+        if (checkParentEquals(obj)) {
             return Objects.equals(geometries, ((GeometryCollection) obj).geometries);
         }
         return false;
     }
 
     @Override
-    protected String getObjectDescription() {
-        return "geometries=" + geometries;
+    protected boolean getObjectDescription(StringBuilder builder) {
+        builder.append("geometries=").append(geometries);
+        return true;
     }
 }

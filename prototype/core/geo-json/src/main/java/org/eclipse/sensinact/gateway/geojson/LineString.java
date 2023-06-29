@@ -35,14 +35,15 @@ public class LineString extends Geometry {
 
     @Override
     public boolean equals(Object obj) {
-        if (super.equals(obj)) {
+        if (checkParentEquals(obj)) {
             return Objects.equals(coordinates, ((LineString) obj).coordinates);
         }
         return false;
     }
 
     @Override
-    protected String getObjectDescription() {
-        return "coords=" + coordinates;
+    protected boolean getObjectDescription(StringBuilder builder) {
+        builder.append("coords=").append(coordinates);
+        return true;
     }
 }
