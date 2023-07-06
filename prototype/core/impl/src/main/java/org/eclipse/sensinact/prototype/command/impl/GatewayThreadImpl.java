@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.metrics.IMetricTimer;
+import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.prototype.model.impl.SensinactModelManagerImpl;
@@ -71,9 +73,14 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
 
+    private IMetricsManager metrics;
+
     @Activate
-    public GatewayThreadImpl(@Reference TypedEventBus typedEventBus, @Reference ResourceSet resourceSet,
+    public GatewayThreadImpl(
+            @Reference IMetricsManager metrics,
+            @Reference TypedEventBus typedEventBus, @Reference ResourceSet resourceSet,
             @Reference ProviderPackage ProviderPackage) {
+        this.metrics = metrics;
         this.typedEventBus = typedEventBus;
         this.whiteboard = new SensinactWhiteboard(this);
         nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, whiteboard);
@@ -115,6 +122,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     @Reference(service = AnyService.class, target = "(sensiNact.whiteboard.resource=true)", cardinality = MULTIPLE, policy = DYNAMIC)
     void addWhiteboardService(Object service, Map<String, Object> props) {
+        metrics.getCounter("sensinact.whiteboard.services").inc();
         whiteboard.addWhiteboardService(service, props);
     }
 
@@ -123,6 +131,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     }
 
     void removeWhiteboardService(Object service, Map<String, Object> props) {
+        metrics.getCounter("sensinact.whiteboard.services").dec();
         whiteboard.removeWhiteboardService(service, props);
     }
 
@@ -146,6 +155,10 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     public <T> Promise<T> execute(AbstractSensinactCommand<T> command) {
         Deferred<T> d = getPromiseFactory().deferred();
         work.add(new WorkItem<>(d, command, nexusImpl));
+        if(metrics != null) {
+            metrics.getCounter("sensinact.tasks.pending").inc();
+            metrics.getHistogram("sensinact.tasks.pending.hist").update(work.size());
+        }
         return d.getPromise();
     }
 
@@ -155,7 +168,15 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             try {
                 WorkItem<?> item = work.take();
                 currentItem.set(item);
-                item.doWork();
+
+                metrics.getCounter("sensinact.tasks.pending").dec();
+                metrics.getHistogram("sensinact.tasks.pending.hist").update(work.size());
+                try (IMetricTimer timer = metrics.withTimer("sensinact.task.time")) {
+                    item.doWork();
+                } catch (Exception e) {
+                    // Ignore: the timer shouldn't fail on close
+                    e.printStackTrace();
+                }
             } catch (InterruptedException e) {
                 continue;
             } finally {
