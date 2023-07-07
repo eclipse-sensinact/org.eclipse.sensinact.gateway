@@ -30,6 +30,7 @@ public class DummyTimer implements IMetricTimer {
 
     @Override
     public void close() throws Exception {
+        // Do nothing
     }
 
     @Override

@@ -13,8 +13,15 @@
 package org.eclipse.sensinact.core.metrics;
 
 /**
- *
+ * Represents a metrics histogram: values history is kept to compute statistics
+ * on the metrics
  */
 public interface IMetricsHistogram extends INamedMetric {
+
+    /**
+     * Updates the value of the metric
+     *
+     * @param value New value of the metric
+     */
     void update(long value);
 }

@@ -47,14 +47,12 @@ public class MetricsCounter implements IMetricCounter {
     }
 
     @Override
-    public long inc() {
+    public void inc() {
         counter.inc();
-        return counter.getCount();
     }
 
     @Override
-    public long dec() {
+    public void dec() {
         counter.dec();
-        return counter.getCount();
     }
 }

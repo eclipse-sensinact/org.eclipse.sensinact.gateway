@@ -13,21 +13,17 @@
 package org.eclipse.sensinact.core.metrics;
 
 /**
- * A simple counter
+ * A simple counter that be incremented or decremented
  */
 public interface IMetricCounter extends INamedMetric {
 
     /**
-     * Increments the counter by 1 then returns its value
-     *
-     * @return The new value of the counter
+     * Increments the counter by 1
      */
-    long inc();
+    void inc();
 
     /**
-     * Decrements the counter by 1 then returns its value
-     *
-     * @return The new value of the counter
+     * Decrements the counter by 1
      */
-    long dec();
+    void dec();
 }

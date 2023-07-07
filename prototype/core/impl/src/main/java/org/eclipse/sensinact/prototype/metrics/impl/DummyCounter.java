@@ -12,8 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.metrics.impl;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.eclipse.sensinact.core.metrics.IMetricCounter;
 
 /**
@@ -22,7 +20,6 @@ import org.eclipse.sensinact.core.metrics.IMetricCounter;
 public class DummyCounter implements IMetricCounter {
 
     private final String name;
-    private final AtomicLong value = new AtomicLong();
 
     /**
      * @param name Name of the counter
@@ -37,12 +34,12 @@ public class DummyCounter implements IMetricCounter {
     }
 
     @Override
-    public long inc() {
-        return value.incrementAndGet();
+    public void inc() {
+        // Do nothing
     }
 
     @Override
-    public long dec() {
-        return value.decrementAndGet();
+    public void dec() {
+        // Do nothing
     }
 }

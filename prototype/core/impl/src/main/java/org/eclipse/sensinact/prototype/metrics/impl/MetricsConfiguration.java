@@ -17,6 +17,9 @@ package org.eclipse.sensinact.prototype.metrics.impl;
  */
 public @interface MetricsConfiguration {
 
+    /**
+     * Default reporters update rate is {@value #DEFAULT_RATE} seconds
+     */
     public static final int DEFAULT_RATE = 10;
 
     /**
@@ -45,7 +48,7 @@ public @interface MetricsConfiguration {
     boolean console_enabled() default false;
 
     /**
-     * Metrics update rate in seconds
+     * Metrics update rate in seconds ({@value #DEFAULT_RATE} seconds by default)
      */
     int metrics_rate() default DEFAULT_RATE;
 

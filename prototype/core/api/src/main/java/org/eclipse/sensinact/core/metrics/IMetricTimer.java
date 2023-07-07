@@ -13,7 +13,13 @@
 package org.eclipse.sensinact.core.metrics;
 
 /**
- * A simple timer
+ * A simple timer that holds the time taken by a task.
+ *
+ * Timers are started immediately when {@link IMetricsManager#withTimer(String)}
+ * returns and run until their {@link #close()} method is called.
+ *
+ * Timers are {@link AutoCloseable} and can be used in a try-with-resources
+ * pattern.
  */
 public interface IMetricTimer extends INamedMetric, AutoCloseable {
 }
