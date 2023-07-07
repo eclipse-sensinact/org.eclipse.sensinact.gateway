@@ -83,6 +83,11 @@ public class MetricsManager implements IMetricsManager {
     private CallbackReporter callbackReporter;
 
     /**
+     * Console reporter activation flag
+     */
+    private boolean allowConsoleReporter;
+
+    /**
      * Console reporter
      */
     private ConsoleReporter consoleReporter;
@@ -104,7 +109,6 @@ public class MetricsManager implements IMetricsManager {
         registry = new MetricRegistry();
 
         update(config);
-        enableMetrics();
     }
 
     @Modified
@@ -112,12 +116,16 @@ public class MetricsManager implements IMetricsManager {
         isActive = config.enabled();
         metricsProvider = config.provider_name();
         updateRate = config.metrics_rate() > 0 ? config.metrics_rate() : MetricsConfiguration.DEFAULT_RATE;
+
+        activeMetrics.clear();
         activeMetrics.addAll(Arrays.asList(config.metrics_enabled()));
 
-        if (config.console_enabled()) {
-            consoleReporter = ConsoleReporter.forRegistry(registry).convertDurationsTo(TimeUnit.MILLISECONDS)
-                    .convertRatesTo(TimeUnit.SECONDS).build();
-            consoleReporter.start(updateRate, TimeUnit.SECONDS);
+        allowConsoleReporter = config.console_enabled();
+
+        if (isActive) {
+            enableMetrics();
+        } else {
+            disableMetrics();
         }
     }
 
@@ -191,6 +199,27 @@ public class MetricsManager implements IMetricsManager {
     public void enableMetrics() {
         isActive = true;
 
+        // Restart the console reporter if allowed
+        if (allowConsoleReporter) {
+            if (consoleReporter != null) {
+                consoleReporter.close();
+                consoleReporter = null;
+            }
+
+            consoleReporter = ConsoleReporter.forRegistry(registry).convertDurationsTo(TimeUnit.MILLISECONDS)
+                    .convertRatesTo(TimeUnit.SECONDS).build();
+            consoleReporter.start(updateRate, TimeUnit.SECONDS);
+        } else if (consoleReporter != null) {
+            consoleReporter.close();
+            consoleReporter = null;
+        }
+
+        // Restart the callback reporter
+        if (callbackReporter != null) {
+            callbackReporter.close();
+            callbackReporter = null;
+        }
+
         if (callbackReporter == null) {
             callbackReporter = new CallbackReporter(this::reporterCallback, registry, metricsProvider);
             callbackReporter.start(updateRate, TimeUnit.SECONDS);
@@ -201,10 +230,26 @@ public class MetricsManager implements IMetricsManager {
     public void disableMetrics() {
         isActive = false;
 
+        if (consoleReporter != null) {
+            consoleReporter.close();
+            consoleReporter = null;
+        }
+
         if (callbackReporter != null) {
             callbackReporter.close();
             callbackReporter = null;
         }
+
+        // Clear metrics
+        clear();
+    }
+
+    @Override
+    public void clear() {
+        // Remove all metrics but the gauges
+        final Set<String> toRemove = new HashSet<>(registry.getNames());
+        toRemove.removeAll(registry.getGauges().keySet());
+        registry.removeMatching((name, metric) -> toRemove.contains(name));
     }
 
     @Override

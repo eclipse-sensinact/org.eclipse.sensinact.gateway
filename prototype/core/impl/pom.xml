@@ -88,6 +88,16 @@
         <artifactId>metadata</artifactId>
         <version>0.0.2-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.configadmin</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.test.junit5.cm</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 

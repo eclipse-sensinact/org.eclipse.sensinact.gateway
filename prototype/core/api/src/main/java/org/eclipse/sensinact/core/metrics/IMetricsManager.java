@@ -57,6 +57,12 @@ public interface IMetricsManager {
     void disableMetrics(String... names);
 
     /**
+     * Resets the state of all counters, histograms and timers. Gauges are kepts as
+     * is.
+     */
+    void clear();
+
+    /**
      * Returns a timer that can be used in a try-with-resources pattern.
      *
      * The timer is started before being returned by this method and will stop when
