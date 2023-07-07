@@ -49,6 +49,8 @@ import org.eclipse.sensinact.core.annotation.verb.SET;
 import org.eclipse.sensinact.core.annotation.verb.SET.SETs;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.metrics.IMetricTimer;
+import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceBuilder;
@@ -74,6 +76,11 @@ public class SensinactWhiteboard {
      * Gateway thread, to execute model updates
      */
     private final GatewayThread gatewayThread;
+
+    /**
+     * Metrics manager
+     */
+    private final IMetricsManager metrics;
 
     /**
      * Links a service ID to its dynamic ACT resources
@@ -120,8 +127,9 @@ public class SensinactWhiteboard {
      */
     private final Map<RegistryKey, Promise<TimedValue<?>>> concurrentGetHolder = new ConcurrentHashMap<>();
 
-    public SensinactWhiteboard(GatewayThread gatewayThread) {
+    public SensinactWhiteboard(GatewayThread gatewayThread, IMetricsManager metrics) {
         this.gatewayThread = gatewayThread;
+        this.metrics = metrics;
     }
 
     /**
@@ -508,7 +516,7 @@ public class SensinactWhiteboard {
         } else {
             Deferred<Object> d = promiseFactory.deferred();
             promiseFactory.executor().execute(() -> {
-                try {
+                try (IMetricTimer timer = metrics.withTimer("sensinact.whiteboard.act")) {
                     Object o = opt.get().invoke(model, provider, service, resource, arguments);
                     if (o instanceof Promise) {
                         d.resolveWith((Promise<?>) o);
@@ -549,7 +557,7 @@ public class SensinactWhiteboard {
                 final Deferred<TimedValue<T>> d = promiseFactory.deferred();
                 final GetMethod getMethod = opt.get();
                 promiseFactory.executor().execute(() -> {
-                    try {
+                    try (IMetricTimer timer = metrics.withTimer("sensinact.whiteboard.pull")) {
                         final Object result = getMethod.invoke(model, provider, service, resource, type, cachedValue);
                         if (result instanceof Promise) {
                             d.resolveWith((Promise<TimedValue<T>>) result);
@@ -606,7 +614,7 @@ public class SensinactWhiteboard {
             final Deferred<TimedValue<T>> d = promiseFactory.deferred();
             final SetMethod setMethod = opt.get();
             promiseFactory.executor().execute(() -> {
-                try {
+                try (IMetricTimer timer = metrics.withTimer("sensinact.whiteboard.push")) {
                     final Object o = setMethod.invoke(model, provider, service, resource, type, cachedValue, newValue);
                     if (o instanceof Promise) {
                         d.resolveWith((Promise<TimedValue<T>>) o);

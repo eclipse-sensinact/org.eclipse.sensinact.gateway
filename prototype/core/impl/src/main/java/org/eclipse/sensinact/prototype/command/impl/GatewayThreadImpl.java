@@ -82,7 +82,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             @Reference ProviderPackage ProviderPackage) {
         this.metrics = metrics;
         this.typedEventBus = typedEventBus;
-        this.whiteboard = new SensinactWhiteboard(this);
+        this.whiteboard = new SensinactWhiteboard(this, metrics);
         nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, whiteboard);
         start();
     }
@@ -122,7 +122,6 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     @Reference(service = AnyService.class, target = "(sensiNact.whiteboard.resource=true)", cardinality = MULTIPLE, policy = DYNAMIC)
     void addWhiteboardService(Object service, Map<String, Object> props) {
-        metrics.getCounter("sensinact.whiteboard.services").inc();
         whiteboard.addWhiteboardService(service, props);
     }
 
@@ -131,7 +130,6 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     }
 
     void removeWhiteboardService(Object service, Map<String, Object> props) {
-        metrics.getCounter("sensinact.whiteboard.services").dec();
         whiteboard.removeWhiteboardService(service, props);
     }
 

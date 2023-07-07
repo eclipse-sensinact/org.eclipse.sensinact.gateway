@@ -121,7 +121,7 @@ public class ModelNexus {
     public ModelNexus(ResourceSet resourceSet, ProviderPackage ProviderPackage,
             Supplier<NotificationAccumulator> accumulator, ActionHandler actionHandler,
             ResourcePullHandler resourceValuePullHandler, ResourcePushHandler resourceValuePushHandler) {
-        this(resourceSet, ProviderPackage, accumulator, new SensinactWhiteboard(null) {
+        this(resourceSet, ProviderPackage, accumulator, new SensinactWhiteboard(null, null) {
             @Override
             public Promise<Object> act(String model, String provider, String service, String resource,
                     Map<String, Object> arguments) {
