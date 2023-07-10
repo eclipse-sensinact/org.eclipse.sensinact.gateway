@@ -37,6 +37,12 @@
       <groupId>io.moquette</groupId>
       <artifactId>moquette-broker</artifactId>
       <version>0.16</version>
+      <exclusions>
+        <exclusion>
+          <groupId>io.dropwizard.metrics</groupId>
+          <artifactId>metrics-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.paho</groupId>
