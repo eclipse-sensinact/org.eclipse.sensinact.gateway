@@ -153,10 +153,8 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     public <T> Promise<T> execute(AbstractSensinactCommand<T> command) {
         Deferred<T> d = getPromiseFactory().deferred();
         work.add(new WorkItem<>(d, command, nexusImpl));
-        if(metrics != null) {
-            metrics.getCounter("sensinact.tasks.pending").inc();
-            metrics.getHistogram("sensinact.tasks.pending.hist").update(work.size());
-        }
+        metrics.getCounter("sensinact.tasks.pending").inc();
+        metrics.getHistogram("sensinact.tasks.pending.hist").update(work.size());
         return d.getPromise();
     }
 
