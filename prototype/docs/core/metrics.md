@@ -97,10 +97,8 @@ As a result, if many metrics have to be stored, the operation might impact the m
 
 ## Listen to metrics reports
 
-You can listen to metrics reports by calling the `registerListener` method of the `org.eclipse.sensinact.core.metrics.IMetricsManager` service.
-The method expects a consumer of `BulkGenericDto` a object that will be called after each report generation.
-The registered listener has an ID that must be given to the `unregisterListener` method.
-Each listener must be unregistered explicitly.
+You can listen to metrics reports by registering an `IMetricsListener` service.
+The service must implement the `onMetricsReport(BulkGenericDto)` method that will be called after each report generation.
 
 The `BulkGenericDto` provides a list of `GenericDto` objects that represents the resources as defined the [Core metrics section](#sensinact-metrics) and in the [metrics provider description](#note-on-the-metrics-provider).
 
@@ -180,20 +178,18 @@ Here is an example POM file:
 
 Here is an example component that will register two gauges: one computing the system CPU load and one getting the available memory.
 
-This is an OSGi component that requires the `IMetricsManager` sensiNact service and will call `registerGauge` when activated.
-It uses the utility method `unregisterGaugesByPrefix` that will unregister all gauges which metrics name matches the given prefix.
-Note that this might unregister gauges registered by other components.
+This is an OSGi component that provides a `IMetricsMultiGauge` service that the `IMetricsManager` sensiNact service will detect.
+To be valid, the service must be associated to an array of gauge names using the property defined in `IMetricsMultiGauge.NAMES` (`sensinact.metrics.multigauge.names`).
 
 ```java
 package org.eclipse.sensinact.tutorials.metrics.oshi;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.sensinact.core.metrics.IMetricsManager;
+import org.eclipse.sensinact.core.metrics.IMetricsMultiGauge;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -202,14 +198,33 @@ import oshi.hardware.HardwareAbstractionLayer;
 /**
  * Oshi-based system metrics
  */
-@Component
-public class OshiMetrics {
+@Component(immediate = true, property = {
+  IMetricsMultiGauge.NAMES + "=" + OshiMetrics.CPU + "," + OshiMetrics.MEM_AVAIL })
+public class OshiMetrics implements IMetricsMultiGauge {
+    /**
+     * CPU load gauge name
+     */
+    static final String CPU = "oshi.cpu";
 
     /**
-     * This component requires the core metrics service
+     * Available memory
      */
-    @Reference
-    private IMetricsManager metrics;
+    static final String MEM_AVAIL = "oshi.memory.available";
+
+    /**
+     * Previous CPU ticks
+     */
+    private final AtomicReference<long[]> previousTicks = new AtomicReference<long[]>();
+
+    /**
+     * Oshi access to hardware
+     */
+    private HardwareAbstractionLayer hal;
+
+    /**
+     * Oshi access to CPU
+     */
+    private CentralProcessor cpu;
 
     /**
      * Component is activated, the metrics service is available
@@ -218,35 +233,38 @@ public class OshiMetrics {
     void activate() {
         // Get access to system information via Oshi
         final SystemInfo si = new SystemInfo();
-        final HardwareAbstractionLayer hal = si.getHardware();
-        final CentralProcessor cpu = hal.getProcessor();
+        hal = si.getHardware();
+        cpu = hal.getProcessor();
 
         // Get the initial CPU load ticks
-        final AtomicReference<long[]> previousTicks = new AtomicReference<long[]>(cpu.getSystemCpuLoadTicks());
-
-        // Register a callback method as a gauge. It will be called during each report generation
-        metrics.registerGauge("oshi.cpu", () -> {
-            // Get the previous ticks and store the new ones
-            final long[] oldTicks = previousTicks.getAndSet(cpu.getSystemCpuLoadTicks());
-
-            // Compute the system CPU load compared the previous ticks
-            return cpu.getSystemCpuLoadBetweenTicks(oldTicks);
-        });
-
-        // Register another callback method as a gauge. It will be called during each report generation
-        metrics.registerGauge("oshi.memory.available", () -> {
-            // Return the current available memory size
-            return hal.getMemory().getAvailable();
-        });
+        previousTicks.set(cpu.getSystemCpuLoadTicks());
     }
 
     /**
-     * The component is deactivated, the metrics service is still available
+     * The component is deactivated
      */
     @Deactivate
     void deactivate() {
-        // Unregister all gauges whose name starts with "oshi."
-        metrics.unregisterGaugesByPrefix("oshi.");
+      cpu = null;
+      hal = null;
+    }
+
+    @Override
+    public Object gauge(String name) {
+        switch (name) {
+        case CPU: {
+            // Get the previous ticks and store the new ones
+            final long[] oldTicks = previousTicks.getAndSet(cpu.getSystemCpuLoadTicks());
+            // Compute the system CPU load compared the previous ticks
+            return cpu.getSystemCpuLoadBetweenTicks(oldTicks);
+        }
+
+        case MEM_AVAIL:
+            return hal.getMemory().getAvailable();
+
+        default:
+            throw new RuntimeException("Unknown gauge name: " + name);
+        }
     }
 }
 ```
