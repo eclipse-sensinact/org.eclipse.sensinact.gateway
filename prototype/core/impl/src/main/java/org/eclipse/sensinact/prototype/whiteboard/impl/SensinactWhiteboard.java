@@ -165,8 +165,7 @@ public class SensinactWhiteboard {
         return Stream
                 .concat(Arrays.stream(clz.getMethods()),
                         Arrays.stream(clz.getInterfaces()).flatMap(c -> Arrays.stream(c.getMethods())))
-                .filter(m -> annotations.stream().anyMatch(a -> m.isAnnotationPresent(a)))
-                .collect(Collectors.toList());
+                .filter(m -> annotations.stream().anyMatch(a -> m.isAnnotationPresent(a))).collect(Collectors.toList());
     }
 
     /**
@@ -191,9 +190,8 @@ public class SensinactWhiteboard {
                     if (actMethod.serviceId.equals(serviceId)) {
                         if (providers.equals(actMethod.providers)
                                 || (!providers.isEmpty() && !actMethod.providers.isEmpty())) {
-                            LOG.debug(
-                                    "The update to the whiteboard {} service {} did not change the resource {}",
-                                    kind, serviceId, key);
+                            LOG.debug("The update to the whiteboard {} service {} did not change the resource {}", kind,
+                                    serviceId, key);
                             return v;
                         } else {
                             LOG.debug(
@@ -401,9 +399,8 @@ public class SensinactWhiteboard {
 
     private <T extends AbstractResourceMethod> void processAnnotatedMethod(final RegistryKey key,
             final Predicate<ResourceType> validateResourceType,
-            final Consumer<ResourceBuilder<?, Object>> builderCaller,
-            T method, Map<RegistryKey, List<T>> methodsRegistry,
-            Map<Long, List<RegistryKey>> serviceIdRegistry) {
+            final Consumer<ResourceBuilder<?, Object>> builderCaller, T method,
+            Map<RegistryKey, List<T>> methodsRegistry, Map<Long, List<RegistryKey>> serviceIdRegistry) {
 
         serviceIdRegistry.merge(method.serviceId, List.of(key),
                 (k, v) -> concat(v.stream(), of(key)).collect(toList()));
@@ -515,8 +512,13 @@ public class SensinactWhiteboard {
                             provider, service, resource)));
         } else {
             Deferred<Object> d = promiseFactory.deferred();
+            final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.act.request",
+                    "sensinact.whiteboard.act.request." + String.join(".", model, service, resource),
+                    "sensinact.whiteboard.act.request." + String.join(".", provider, service, resource));
             promiseFactory.executor().execute(() -> {
-                try (IMetricTimer timer = metrics.withTimer("sensinact.whiteboard.act")) {
+                try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.act.task",
+                        "sensinact.whiteboard.act.task." + String.join(".", model, service, resource),
+                        "sensinact.whiteboard.act.task." + String.join(".", provider, service, resource))) {
                     Object o = opt.get().invoke(model, provider, service, resource, arguments);
                     if (o instanceof Promise) {
                         d.resolveWith((Promise<?>) o);
@@ -527,7 +529,7 @@ public class SensinactWhiteboard {
                     d.fail(e);
                 }
             });
-            return d.getPromise();
+            return d.getPromise().onResolve(() -> overallTimer.close());
         }
     }
 
@@ -556,8 +558,14 @@ public class SensinactWhiteboard {
 
                 final Deferred<TimedValue<T>> d = promiseFactory.deferred();
                 final GetMethod getMethod = opt.get();
+
+                final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.pull.request",
+                        "sensinact.whiteboard.pull.request." + String.join(".", model, service, resource),
+                        "sensinact.whiteboard.pull.request." + String.join(".", provider, service, resource));
                 promiseFactory.executor().execute(() -> {
-                    try (IMetricTimer timer = metrics.withTimer("sensinact.whiteboard.pull")) {
+                    try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.pull.task",
+                            "sensinact.whiteboard.pull.task." + String.join(".", model, service, resource),
+                            "sensinact.whiteboard.pull.task." + String.join(".", provider, service, resource))) {
                         final Object result = getMethod.invoke(model, provider, service, resource, type, cachedValue);
                         if (result instanceof Promise) {
                             d.resolveWith((Promise<TimedValue<T>>) result);
@@ -593,7 +601,8 @@ public class SensinactWhiteboard {
                     }
                 };
 
-                return runOnGateway(d.getPromise(), coCall);
+                final Promise<TimedValue<T>> promise = d.getPromise().onResolve(() -> overallTimer.close());
+                return runOnGateway(promise, coCall);
             }
         }
     }
@@ -613,8 +622,14 @@ public class SensinactWhiteboard {
         } else {
             final Deferred<TimedValue<T>> d = promiseFactory.deferred();
             final SetMethod setMethod = opt.get();
+
+            final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.pull.request",
+                    "sensinact.whiteboard.pull.request." + String.join(".", model, service, resource),
+                    "sensinact.whiteboard.pull.request." + String.join(".", provider, service, resource));
             promiseFactory.executor().execute(() -> {
-                try (IMetricTimer timer = metrics.withTimer("sensinact.whiteboard.push")) {
+                try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.push.task",
+                        "sensinact.whiteboard.push.task." + String.join(".", model, service, resource),
+                        "sensinact.whiteboard.push.task." + String.join(".", provider, service, resource))) {
                     final Object o = setMethod.invoke(model, provider, service, resource, type, cachedValue, newValue);
                     if (o instanceof Promise) {
                         d.resolveWith((Promise<TimedValue<T>>) o);
@@ -632,7 +647,8 @@ public class SensinactWhiteboard {
                 }
             });
 
-            return runOnGateway(d.getPromise(), gatewayUpdate);
+            final Promise<TimedValue<T>> promise = d.getPromise().onResolve(() -> overallTimer.close());
+            return runOnGateway(promise, gatewayUpdate);
         }
     }
 

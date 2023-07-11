@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.metrics.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -374,22 +375,36 @@ public class MetricsManager implements IMetricsManager {
     }
 
     @Override
-    public IMetricCounter getCounter(String name) {
-        if (!isEnabled(name)) {
-            // Return a dummy counter
-            return new DummyCounter(name);
+    public IMetricTimer withTimers(String... names) {
+        final List<IMetricTimer> timers = new ArrayList<>();
+        for (String name : names) {
+            if (isEnabled(name)) {
+                timers.add(new MetricsTimer(registry, name));
+            }
         }
 
-        return new MetricsCounter(registry, name);
+        return new IMetricTimer() {
+            @Override
+            public String getName() {
+                return "[" + String.join(", ", names) + "]";
+            }
+
+            @Override
+            public void close() {
+                for (IMetricTimer timer : timers) {
+                    timer.close();
+                }
+            }
+        };
+    }
+
+    @Override
+    public IMetricCounter getCounter(String name) {
+        return new Counter(name, registry, this::isEnabled);
     }
 
     @Override
     public IMetricsHistogram getHistogram(String name) {
-        if (!isEnabled(name)) {
-            // Return a dummy counter
-            return new DummyHistogram(name);
-        }
-
-        return new MetricsHistogram(registry, name);
+        return new Histogram(name, registry, this::isEnabled);
     }
 }

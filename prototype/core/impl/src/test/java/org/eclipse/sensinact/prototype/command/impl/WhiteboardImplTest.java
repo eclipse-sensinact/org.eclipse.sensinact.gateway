@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -94,6 +95,7 @@ public class WhiteboardImplTest {
         lenient().when(metrics.getCounter(anyString())).thenReturn(counter);
         lenient().when(metrics.getHistogram(anyString())).thenReturn(histogram);
         lenient().when(metrics.withTimer(anyString())).thenReturn(timer);
+        lenient().when(metrics.withTimers(any())).thenReturn(timer);
 
         thread = new GatewayThreadImpl(metrics, typedEventBus, resourceSet, providerPackage);
     }

@@ -69,6 +69,14 @@ public interface IMetricsManager {
     IMetricTimer withTimer(String name);
 
     /**
+     * Defines multiple timer metrics for the same measurement
+     *
+     * @param names Names of the timers
+     * @return Multiple timers handled as a single one
+     */
+    IMetricTimer withTimers(String... names);
+
+    /**
      * Returns a simple counter. Counters only keep their current value.
      *
      * @param name Metric name

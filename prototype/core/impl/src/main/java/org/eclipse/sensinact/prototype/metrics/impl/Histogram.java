@@ -10,35 +10,44 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
+
 package org.eclipse.sensinact.prototype.metrics.impl;
 
-import org.eclipse.sensinact.core.metrics.IMetricCounter;
+import java.util.function.Function;
 
-import com.codahale.metrics.Counter;
+import org.eclipse.sensinact.core.metrics.IMetricsHistogram;
+
 import com.codahale.metrics.MetricRegistry;
 
 /**
- * Metrics-based counter
+ * A proxy implementation to set a histogram
  */
-public class MetricsCounter implements IMetricCounter {
+public class Histogram implements IMetricsHistogram {
 
     /**
-     * Counter name
+     * Metric name
      */
     private final String name;
 
     /**
-     * Metrics counter
+     * Method indicating if the metrics service is active
      */
-    private final Counter counter;
+    private final Function<String, Boolean> isActive;
 
     /**
-     * @param registry Metrics registry
-     * @param name     Name of the counter
+     * Metrics registry
      */
-    public MetricsCounter(final MetricRegistry registry, final String name) {
+    private final MetricRegistry registry;
+
+    /**
+     * @param name     Counter name
+     * @param registry Metrics registry
+     * @param isActive Metrics activation flag
+     */
+    public Histogram(final String name, final MetricRegistry registry, final Function<String, Boolean> isActive) {
+        this.isActive = isActive;
         this.name = name;
-        this.counter = registry.counter(name);
+        this.registry = registry;
     }
 
     @Override
@@ -47,12 +56,9 @@ public class MetricsCounter implements IMetricCounter {
     }
 
     @Override
-    public void inc() {
-        counter.inc();
-    }
-
-    @Override
-    public void dec() {
-        counter.dec();
+    public void update(long value) {
+        if (isActive.apply(name)) {
+            registry.histogram(name).update(value);
+        }
     }
 }
