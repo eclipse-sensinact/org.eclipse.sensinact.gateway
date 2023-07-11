@@ -105,7 +105,8 @@ The `BulkGenericDto` provides a list of `GenericDto` objects that represents the
 ## Store metrics
 
 It is possible to store your own metrics in sensiNact by calling the `IMetricsManager` service.
-Make sure that the gauges you register are quick enough to note slow the metrics report generation.
+Make sure that the callback functions for any gauges you register execute quickly.
+If they block, or require significant computation, then they will significantly slow the metrics report generation *and* impact the measured metrics.
 
 Here is an example to add some system metrics using the [Oshi](https://www.oshi.ooo/) library.
 
@@ -281,7 +282,7 @@ try (IMetricTimer timer = metrics.withTimer("tutorial.metric.name")) {
 }
 ```
 
-Unlike other statistics, you cannot reuse a timer instance.
+Unlike other statistics, you *must not* reuse a timer instance.
 
 ### Use other metrics
 
