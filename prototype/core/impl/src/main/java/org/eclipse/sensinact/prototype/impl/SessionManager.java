@@ -26,27 +26,23 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.metrics.IMetricsManager;
+import org.eclipse.sensinact.core.metrics.IMetricsGauge;
 import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.osgi.service.typedevent.propertytypes.EventTopics;
 
-@Component
+@Component(property = IMetricsGauge.NAME + "=sensinact.sessions")
 @EventTopics({ "LIFECYCLE/*", "METADATA/*", "DATA/*", "ACTION/*" })
-public class SessionManager implements SensiNactSessionManager, TypedEventHandler<AbstractResourceNotification> {
+public class SessionManager
+        implements SensiNactSessionManager, TypedEventHandler<AbstractResourceNotification>, IMetricsGauge {
 
     @Reference
     GatewayThread thread;
-
-    @Reference
-    IMetricsManager metrics;
 
     private final Object lock = new Object();
 
@@ -56,14 +52,9 @@ public class SessionManager implements SensiNactSessionManager, TypedEventHandle
 
     private final Map<String, String> userDefaultSessionIds = new HashMap<>();
 
-    @Activate
-    void activate() {
-        metrics.registerGauge("sensinact.sessions", () -> sessions.size());
-    }
-
-    @Deactivate
-    void deactivate() {
-        metrics.unregisterGauge("sensinact.sessions");
+    @Override
+    public Object gauge() {
+        return sessions.size();
     }
 
     @Override

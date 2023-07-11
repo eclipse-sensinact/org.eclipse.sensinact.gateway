@@ -12,11 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.metrics;
 
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-
-import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
-
 /**
  * Manages metrics.
  */
@@ -74,31 +69,6 @@ public interface IMetricsManager {
     IMetricTimer withTimer(String name);
 
     /**
-     * Registers a gauge: the callback method will be called each time a reporter
-     * will update its content.
-     *
-     * @param <T>           Gauge value type
-     * @param name          Metric name
-     * @param gaugeCallback Method that will be called by the reporter to get gauge
-     *                      value
-     */
-    <T> void registerGauge(String name, Callable<T> gaugeCallback);
-
-    /**
-     * Unregisters a gauge by its exact name
-     *
-     * @param name Gauge name
-     */
-    void unregisterGauge(String name);
-
-    /**
-     * Unregisters gauges which name starts with the given prefix
-     *
-     * @param prefix Gauge name prefix
-     */
-    void unregisterGaugesByPrefix(String prefix);
-
-    /**
      * Returns a simple counter. Counters only keep their current value.
      *
      * @param name Metric name
@@ -114,21 +84,4 @@ public interface IMetricsManager {
      * @return A histogram
      */
     IMetricsHistogram getHistogram(String name);
-
-    /**
-     * Registers a listener callback after the reporter generated its
-     * {@link BulkGenericDto} representing all the activated metrics.
-     *
-     * @param listener Listener to register
-     * @return The listener ID, to use in {@link #unregisterListener(int)}
-     */
-    int registerListener(Consumer<BulkGenericDto> listener);
-
-    /**
-     * Unregisters a listener callback using the listener ID returned by
-     * {@link #registerListener(Consumer)}
-     *
-     * @param id Listener ID
-     */
-    void unregisterListener(int id);
 }

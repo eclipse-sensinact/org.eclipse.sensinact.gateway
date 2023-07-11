@@ -10,31 +10,19 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.metrics.impl;
+package org.eclipse.sensinact.core.metrics;
 
-import org.eclipse.sensinact.core.metrics.IMetricTimer;
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 
 /**
- * Dummy timer that does nothing
+ * Specification of a service that will be notified of metrics reports
  */
-public class DummyTimer implements IMetricTimer {
-
-    private final String name;
+public interface IMetricsListener {
 
     /**
-     * @param name Timer name
+     * Notification of a new metrics report
+     *
+     * @param dto Bulk of metrics updates
      */
-    public DummyTimer(final String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void close() {
-        // Do nothing
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
+    void onMetricsReport(final BulkGenericDto dto);
 }

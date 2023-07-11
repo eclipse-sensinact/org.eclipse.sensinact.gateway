@@ -10,31 +10,20 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.prototype.metrics.impl;
-
-import org.eclipse.sensinact.core.metrics.IMetricTimer;
+package org.eclipse.sensinact.core.metrics;
 
 /**
- * Dummy timer that does nothing
+ * Service providing a gauge. Called each time a metrics report is generated.
  */
-public class DummyTimer implements IMetricTimer {
-
-    private final String name;
+public interface IMetricsGauge {
 
     /**
-     * @param name Timer name
+     * Name of the service property to hold the gauge name
      */
-    public DummyTimer(final String name) {
-        this.name = name;
-    }
+    String NAME = "sensinact.metrics.gauge.name";
 
-    @Override
-    public void close() {
-        // Do nothing
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
+    /**
+     * Returns the value of the gauge
+     */
+    Object gauge();
 }

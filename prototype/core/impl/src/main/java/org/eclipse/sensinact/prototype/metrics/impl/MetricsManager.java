@@ -13,25 +13,34 @@
 package org.eclipse.sensinact.prototype.metrics.impl;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import org.eclipse.sensinact.core.metrics.IMetricCounter;
 import org.eclipse.sensinact.core.metrics.IMetricTimer;
+import org.eclipse.sensinact.core.metrics.IMetricsGauge;
 import org.eclipse.sensinact.core.metrics.IMetricsHistogram;
+import org.eclipse.sensinact.core.metrics.IMetricsListener;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
+import org.eclipse.sensinact.core.metrics.IMetricsMultiGauge;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.FieldOption;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.converter.ConverterBuilder;
+import org.osgi.util.converter.Converters;
+import org.osgi.util.converter.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,18 +102,13 @@ public class MetricsManager implements IMetricsManager {
     private ConsoleReporter consoleReporter;
 
     /**
-     * List of update consumers
+     * List of listeners
      */
-    private final Map<Integer, Consumer<BulkGenericDto>> consumers = new HashMap<>();
-
-    /**
-     * Holder of next listener ID
-     */
-    private AtomicInteger nextListenerId;
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, fieldOption = FieldOption.UPDATE, policy = ReferencePolicy.DYNAMIC)
+    private final List<IMetricsListener> listener = new CopyOnWriteArrayList<>();
 
     @Activate
     void activate(final MetricsConfiguration config) {
-        nextListenerId = new AtomicInteger();
         activeMetrics.clear();
         registry = new MetricRegistry();
 
@@ -148,26 +152,120 @@ public class MetricsManager implements IMetricsManager {
             }
             registry = null;
         }
-
-        // Remove listeners
-        nextListenerId = null;
-        consumers.clear();
     }
 
-    @Override
-    public int registerListener(Consumer<BulkGenericDto> listener) {
-        if (listener == null || nextListenerId == null) {
-            return -1;
+    /**
+     * Found a new gauge service
+     *
+     * @param gauge      Gauge service
+     * @param properties Gauge service properties
+     */
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    void registerGauge(final IMetricsGauge gauge, final Map<?, ?> properties) {
+
+        final String name = (String) properties.get(IMetricsGauge.NAME);
+        if (name == null || name.isBlank()) {
+            logger.warn("Gauge service registered without the {} property", IMetricsGauge.NAME);
+            return;
         }
 
-        final int listenerId = nextListenerId.incrementAndGet();
-        consumers.put(listenerId, listener);
-        return listenerId;
+        registerGauge(name, () -> gauge.gauge());
     }
 
-    @Override
-    public void unregisterListener(int listenerId) {
-        consumers.remove(listenerId);
+    /**
+     * A gauge service went away
+     *
+     * @param properties Gauge service properties
+     */
+    void unregisterGauge(final Map<?, ?> properties) {
+        final String name = (String) properties.get(IMetricsGauge.NAME);
+        if (name != null && !name.isBlank()) {
+            unregisterGauge(name);
+        }
+    }
+
+    /**
+     * Extracts the names of the gauges provided by the service
+     *
+     * @param rawNames Raw service property value
+     * @return The list of names (never null, can be empty)
+     */
+    private List<String> extractMultigaugeNames(final Object rawNames) {
+        if (rawNames == null) {
+            return List.of();
+        }
+
+        final ConverterBuilder cb = Converters.newConverterBuilder();
+        cb.rule(new Rule<String, String[]>(v -> Arrays.stream(v.split(",")).toArray(String[]::new)) {
+        });
+        cb.errorHandler((o, e) -> new String[0]);
+        return Arrays.asList(cb.build().convert(rawNames).to(String[].class));
+    }
+
+    /**
+     * Found a new gauge service
+     *
+     * @param gauges     Multigauge service
+     * @param properties Multigauge service properties
+     */
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    void registerGauges(final IMetricsMultiGauge gauges, final Map<String, Object> properties) {
+
+        final List<String> names = extractMultigaugeNames(properties.get(IMetricsMultiGauge.NAMES));
+        if (names.isEmpty()) {
+            logger.warn("Multigauge service registered without the {} property", IMetricsMultiGauge.NAMES);
+            return;
+        }
+
+        for (String name : names) {
+            registerGauge(name, () -> gauges.gauge(name));
+        }
+    }
+
+    /**
+     * A gauge service went away
+     *
+     * @param properties Multigauge service properties
+     */
+    void unregisterGauges(final Map<?, ?> properties) {
+        final List<String> names = extractMultigaugeNames(properties.get(IMetricsMultiGauge.NAMES));
+        for (String name : names) {
+            unregisterGauge(name);
+        }
+    }
+
+    /**
+     * Registers a gauge to Metrics
+     *
+     * @param <T>           Gauge type
+     * @param name          Gauge name
+     * @param gaugeCallback Gauge method
+     */
+    private <T> void registerGauge(final String name, final Callable<T> gaugeCallback) {
+        if (registry != null && gaugeCallback != null) {
+            registry.registerGauge(name, new Gauge<T>() {
+                @Override
+                public T getValue() {
+                    try {
+                        return gaugeCallback.call();
+                    } catch (Exception e) {
+                        logger.error("Error calling gauge {}: {}", name, e.getMessage(), e);
+                        return null;
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Unregisters a gauge from Metrics
+     *
+     * @param name Gauge name
+     */
+    private void unregisterGauge(String name) {
+        if (registry != null) {
+            registry.remove(name);
+        }
     }
 
     /**
@@ -176,9 +274,9 @@ public class MetricsManager implements IMetricsManager {
      * @param dtos Metrics DTOs
      */
     private void reporterCallback(final BulkGenericDto dtos) {
-        for (Consumer<BulkGenericDto> consumer : consumers.values()) {
+        for (IMetricsListener consumer : listener) {
             try {
-                consumer.accept(dtos);
+                consumer.onMetricsReport(dtos);
             } catch (Throwable e) {
                 logger.error("Error updating SensiNact metrics: {}", e.getMessage(), e);
             }
@@ -273,41 +371,6 @@ public class MetricsManager implements IMetricsManager {
         }
 
         return new MetricsTimer(registry, name);
-    }
-
-    @Override
-    public <T> void registerGauge(final String name, final Callable<T> gaugeCallback) {
-        if (registry != null && gaugeCallback != null) {
-            registry.registerGauge(name, new Gauge<T>() {
-                @Override
-                public T getValue() {
-                    try {
-                        return gaugeCallback.call();
-                    } catch (Exception e) {
-                        logger.error("Error calling gauge {}: {}", name, e.getMessage(), e);
-                        return null;
-                    }
-                }
-            });
-        }
-    }
-
-    @Override
-    public void unregisterGauge(String name) {
-        if (registry != null) {
-            registry.remove(name);
-        }
-    }
-
-    @Override
-    public void unregisterGaugesByPrefix(String prefix) {
-        if (registry != null && prefix != null && !prefix.isBlank()) {
-            for (String key : registry.getGauges().keySet()) {
-                if (key.startsWith(prefix)) {
-                    registry.remove(key);
-                }
-            }
-        }
     }
 
     @Override

@@ -12,36 +12,60 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.metrics.impl;
 
-import org.eclipse.sensinact.core.metrics.IMetricsManager;
-import org.osgi.service.component.annotations.Activate;
+import org.eclipse.sensinact.core.metrics.IMetricsMultiGauge;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link Runtime}-based system metrics
  */
-@Component
-public class JVMMetrics {
+@Component(immediate = true, property = { IMetricsMultiGauge.NAMES + "=" + JVMMetrics.MEM_FREE + ","
+        + JVMMetrics.MEM_MAX + "," + JVMMetrics.MEM_TOTAL + "," + JVMMetrics.MEM_USED })
+public class JVMMetrics implements IMetricsMultiGauge {
 
-    @Reference
-    private IMetricsManager metrics;
+    /**
+     * Prefix of all metrics names
+     */
+    private static final String PREFIX = "jvm.memory.heap.";
 
-    @Activate
-    void activate() {
-        // Make sure no other gauges are here
-        metrics.unregisterGaugesByPrefix("jvm.memory.heap.");
+    /**
+     * Total heap memory
+     */
+    static final String MEM_TOTAL = PREFIX + "total";
 
-        // JVM stats
+    /**
+     * Free heap memory
+     */
+    static final String MEM_FREE = PREFIX + "free";
+
+    /**
+     * Used heap memory
+     */
+    static final String MEM_USED = PREFIX + "used";
+
+    /**
+     * Maximum heap memory
+     */
+    static final String MEM_MAX = PREFIX + "max";
+
+    @Override
+    public Object gauge(String name) {
         final Runtime rt = Runtime.getRuntime();
-        metrics.registerGauge("jvm.memory.heap.total", () -> rt.totalMemory());
-        metrics.registerGauge("jvm.memory.heap.free", () -> rt.freeMemory());
-        metrics.registerGauge("jvm.memory.heap.usage", () -> rt.totalMemory() - rt.freeMemory());
-        metrics.registerGauge("jvm.memory.heap.max", () -> rt.maxMemory());
-    }
 
-    @Deactivate
-    void deactivate() {
-        metrics.unregisterGaugesByPrefix("jvm.memory.heap.");
+        switch (name) {
+        case MEM_FREE:
+            return rt.freeMemory();
+
+        case MEM_MAX:
+            return rt.maxMemory();
+
+        case MEM_TOTAL:
+            return rt.totalMemory();
+
+        case MEM_USED:
+            return rt.totalMemory() - rt.freeMemory();
+
+        default:
+            throw new RuntimeException("Unknown gauge name: " + name);
+        }
     }
 }

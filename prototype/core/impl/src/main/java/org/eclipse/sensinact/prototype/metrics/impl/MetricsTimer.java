@@ -48,7 +48,7 @@ public class MetricsTimer implements IMetricTimer {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         context.close();
     }
 }

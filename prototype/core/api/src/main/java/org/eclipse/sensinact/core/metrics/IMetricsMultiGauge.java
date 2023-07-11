@@ -13,21 +13,22 @@
 package org.eclipse.sensinact.core.metrics;
 
 /**
- * A simple timer that holds the time taken by a task.
- *
- * Timers are started immediately when {@link IMetricsManager#withTimer(String)}
- * returns and run until their {@link #close()} method is called.
- *
- * Timers are {@link AutoCloseable} and can be used in a try-with-resources
- * pattern.
+ * Service providing multiple gauges. Called each time a metrics report is
+ * generated.
  */
-public interface IMetricTimer extends INamedMetric, AutoCloseable {
+public interface IMetricsMultiGauge {
 
     /**
-     * Stops the timer.
-     *
-     * Override to remove the exception.
+     * Name of the service property to hold the names of the gauges
      */
-    @Override
-    void close();
+    String NAMES = "sensinact.metrics.multigauge.names";
+
+    /**
+     * Returns the value of the gauge with the given name
+     *
+     * @param name Name of the gauge, one of those defined in the {@link #NAMES}
+     *             property
+     * @return Value of the gauge with the given name
+     */
+    Object gauge(String name);
 }

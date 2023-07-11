@@ -169,9 +169,6 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
                 metrics.getHistogram("sensinact.tasks.pending.hist").update(work.size());
                 try (IMetricTimer timer = metrics.withTimer("sensinact.task.time")) {
                     item.doWork();
-                } catch (Exception e) {
-                    // Ignore: the timer shouldn't fail on close
-                    e.printStackTrace();
                 }
             } catch (InterruptedException e) {
                 continue;
