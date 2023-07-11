@@ -15,6 +15,7 @@ package org.eclipse.sensinact.prototype.command.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -90,6 +91,7 @@ public class GatewayThreadImplTest {
         lenient().when(metrics.getCounter(anyString())).thenReturn(counter);
         lenient().when(metrics.getHistogram(anyString())).thenReturn(histogram);
         lenient().when(metrics.withTimer(anyString())).thenReturn(timer);
+        lenient().when(metrics.withTimers(any())).thenReturn(timer);
 
         thread = new GatewayThreadImpl(metrics, typedEventBus, resourceSet, providerPackage);
     }

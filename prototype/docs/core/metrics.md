@@ -35,9 +35,12 @@ Here is the list of metrics measured in the sensiNact core bundle:
 * Session manager:
   * `sensinact.sessions`: total number of active sessions (anonymous and user sessions)  at the time of the report
 * Whiteboard
-  * `sensinact.whiteboard.act`: time taken to execute each `ACT` command implementation for action resources
-  * `sensinact.whiteboard.pull`: time taken to execute each task `GET` command implementation for pull-based resources
-  * `sensinact.whiteboard.push`: time taken to execute each task `SET` command implementation for push-based resources
+  * `sensinact.whiteboard.act.task`: time taken to execute each `ACT` command implementation for action resources
+  * `sensinact.whiteboard.act.request`: time taken to execute each `ACT` command implementation and update the twin for action resources
+  * `sensinact.whiteboard.pull.task`: time taken to execute each task `GET` command implementation for pull-based resources
+  * `sensinact.whiteboard.pull.request`: time taken to execute each `GET` command implementation and update the twin for action resources
+  * `sensinact.whiteboard.push.task`: time taken to execute each task `SET` command implementation for push-based resources
+  * `sensinact.whiteboard.push.request`: time taken to execute each `SET` command implementation and update the twin for action resources
 
 The core bundle also measures metrics about the Java Virtual Machine:
 * `jvm.memory.heap.max`: maximum allowed heap size
@@ -282,12 +285,21 @@ try (IMetricTimer timer = metrics.withTimer("tutorial.metric.name")) {
 }
 ```
 
+A meta-timer is also available, to have multiple metric names for the same measurement.
+```java
+try (IMetricTimer timer = metrics.withTimers("tutorial.metric.name", "some.other.metric", "and.another.one")) {
+    executeTask();
+}
+```
+
+Note that the meta-timer is starting and closing a timer per enabled metric (all by default), which might cause a small delay depending on system performances.
+
 Unlike other statistics, you *must not* reuse a timer instance.
 
 ### Use other metrics
 
-Counters and histograms can be used inline.
-It is not recommended to keep it as a class member as the returned instance depends on the metrics activation.
+Counters and histograms can be used inline or be kept as members.
+The metric object will only work if overall metrics and the specific metric are both enabled.
 
 Here are some example usage of counters and histograms:
 ```java
