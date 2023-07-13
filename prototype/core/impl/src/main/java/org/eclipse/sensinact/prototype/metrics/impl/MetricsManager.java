@@ -170,7 +170,7 @@ public class MetricsManager implements IMetricsManager {
             return;
         }
 
-        registerGauge(name, () -> gauge.gauge());
+        registerGauge(name, gauge::gauge);
     }
 
     /**
