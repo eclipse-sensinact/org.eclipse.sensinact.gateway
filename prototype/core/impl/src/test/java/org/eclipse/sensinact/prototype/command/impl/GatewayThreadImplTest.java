@@ -15,6 +15,10 @@ package org.eclipse.sensinact.prototype.command.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +30,10 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.metrics.IMetricCounter;
+import org.eclipse.sensinact.core.metrics.IMetricTimer;
+import org.eclipse.sensinact.core.metrics.IMetricsHistogram;
+import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
@@ -58,7 +66,7 @@ public class GatewayThreadImplTest {
     ProviderPackage providerPackage = ProviderPackage.eINSTANCE;
 
     @Spy
-    ResourceSet resourceSet = EMFTestUtil.createResourceSet();;
+    ResourceSet resourceSet = EMFTestUtil.createResourceSet();
 
     GatewayThreadImpl thread = null;
 
@@ -76,7 +84,16 @@ public class GatewayThreadImplTest {
         }
         resourceSet = EMFTestUtil.createResourceSet();
 
-        thread = new GatewayThreadImpl(typedEventBus, resourceSet, providerPackage);
+        IMetricsManager metrics = mock(IMetricsManager.class);
+        IMetricCounter counter = mock(IMetricCounter.class);
+        IMetricsHistogram histogram = mock(IMetricsHistogram.class);
+        IMetricTimer timer = mock(IMetricTimer.class);
+        lenient().when(metrics.getCounter(anyString())).thenReturn(counter);
+        lenient().when(metrics.getHistogram(anyString())).thenReturn(histogram);
+        lenient().when(metrics.withTimer(anyString())).thenReturn(timer);
+        lenient().when(metrics.withTimers(any())).thenReturn(timer);
+
+        thread = new GatewayThreadImpl(metrics, typedEventBus, resourceSet, providerPackage);
     }
 
     @AfterEach

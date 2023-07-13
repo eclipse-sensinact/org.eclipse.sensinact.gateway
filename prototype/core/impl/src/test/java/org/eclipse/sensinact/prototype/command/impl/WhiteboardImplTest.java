@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
@@ -41,6 +45,10 @@ import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.metrics.IMetricCounter;
+import org.eclipse.sensinact.core.metrics.IMetricTimer;
+import org.eclipse.sensinact.core.metrics.IMetricsHistogram;
+import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
@@ -79,7 +87,17 @@ public class WhiteboardImplTest {
     @BeforeEach
     void start() throws NoSuchMethodException, SecurityException {
         resourceSet = EMFTestUtil.createResourceSet();
-        thread = new GatewayThreadImpl(typedEventBus, resourceSet, providerPackage);
+
+        IMetricsManager metrics = mock(IMetricsManager.class);
+        IMetricCounter counter = mock(IMetricCounter.class);
+        IMetricsHistogram histogram = mock(IMetricsHistogram.class);
+        IMetricTimer timer = mock(IMetricTimer.class);
+        lenient().when(metrics.getCounter(anyString())).thenReturn(counter);
+        lenient().when(metrics.getHistogram(anyString())).thenReturn(histogram);
+        lenient().when(metrics.withTimer(anyString())).thenReturn(timer);
+        lenient().when(metrics.withTimers(any())).thenReturn(timer);
+
+        thread = new GatewayThreadImpl(metrics, typedEventBus, resourceSet, providerPackage);
     }
 
     void createProviders(final String modelName, final String serviceName) throws Throwable {

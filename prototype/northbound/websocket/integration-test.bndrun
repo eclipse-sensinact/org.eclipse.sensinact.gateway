@@ -21,6 +21,7 @@
 	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.14.0,2.14.1)',\
+	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
 	jakarta.el-api;version='[4.0.0,4.0.1)',\
 	jakarta.enterprise.cdi-api;version='[3.0.0,3.0.1)',\
@@ -49,9 +50,12 @@
 	org.eclipse.jetty.alpn.client;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.client;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.jndi;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.plus;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.webapp;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.api;version='[11.0.13,11.0.14)',\
