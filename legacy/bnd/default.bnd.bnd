@@ -1,5 +1,0 @@
-Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
-Bundle-Vendor: Eclipse
--contract: *
--includeresource.about: about.html=${sensinact.root.dir}/bnd/about.html
--verbose: true

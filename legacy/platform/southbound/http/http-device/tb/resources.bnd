@@ -1,9 +1,0 @@
-Bundle-Name: sensiNact IoT Gateway - HTTP Protocol Device Moke
-Bundle-Vendor: Eclipse
-Bundle-Version: 1.3.0.20170212
-Bundle-Description: sensiNact IoT Gateway - HTTP Protocol Device Moke
-Bundle-SymbolicName: http-device-moke
-
--privatepackage: org.eclipse.sensinact.gateway.sthbnd.http.test.bundle1
-
--includeresource: resources.xml=${.}/resources.xml

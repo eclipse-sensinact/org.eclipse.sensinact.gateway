@@ -1,4 +1,0 @@
--include: ${sensinact.root.dir}/bnd/default.bnd.bnd
-Provide-Capability: \
-	org.eclipse.sensinact.user.manager,\
-	org.eclipse.sensinact.security

@@ -1,7 +1,0 @@
-grant codeBase "http://felix.extensions:9/" {
-  permission java.security.AllPermission;
-};
-
-grant codeBase "file:target/bundle/" {
-  permission java.security.AllPermission;
-};

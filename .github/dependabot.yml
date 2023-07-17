@@ -11,6 +11,11 @@ updates:
 
   # Maintain dependencies for maven
   - package-ecosystem: "maven"
-    directory: "/prototype"
+    directory: "/"
     schedule:
       interval: "daily"
+  # Maintain dependencies for npm
+  - package-ecosystem: "npm"
+    directory: "/webclient"
+    schedule:
+      interval: "weekly"

@@ -1,9 +1,0 @@
-{
-  "modifiable": "UPDATEABLE",
-  "serviceProviderIdPattern": "test7_%s",
-  "timestampPattern": "yyy-MM-dd hh:mm",
-  "csvTitles": true,
-  "csvDelimiter": ";",
-  "csvMaxRows": 1,
-  "csvNumberLocale": "et_EE"
-}

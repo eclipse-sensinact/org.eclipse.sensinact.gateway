@@ -1,2 +1,0 @@
--include: ${sensinact.root.dir}/bnd/default.tests.bnd
--conditionalpackage: org.skyscreamer.jsonassert.*
