@@ -136,7 +136,7 @@
     <johnzon.version>1.2.19</johnzon.version>
     <aries.component-dsl.version>1.2.2</aries.component-dsl.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
-    <aries.spifly.version>1.3.5</aries.spifly.version>
+    <aries.spifly.version>1.3.6</aries.spifly.version>
     <felix.servlet.version>2.1.0</felix.servlet.version>
     <antlr.version>4.12.0</antlr.version>
     <metrics.version>4.2.19</metrics.version>

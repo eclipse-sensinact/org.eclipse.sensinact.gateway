@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.server.JettyServerUpgradeResponse;
 import org.eclipse.jetty.websocket.server.JettyWebSocketCreator;
+import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
 import org.slf4j.Logger;
@@ -80,7 +81,9 @@ public class WebSocketCreator implements JettyWebSocketCreator {
 
     @Override
     public Object createWebSocket(final JettyServerUpgradeRequest req, final JettyServerUpgradeResponse resp) {
-        final WebSocketEndpoint wsConnection = new WebSocketEndpoint(this, sessionManager, queryHandler);
+        UserInfo userInfo = (UserInfo) req.getServletAttribute(WebSocketJettyRegistrar.SENSINACT_USER_INFO);
+        final WebSocketEndpoint wsConnection = new WebSocketEndpoint(this, sessionManager.createNewSession(userInfo),
+                queryHandler);
         sessions.add(wsConnection);
         return wsConnection;
     }

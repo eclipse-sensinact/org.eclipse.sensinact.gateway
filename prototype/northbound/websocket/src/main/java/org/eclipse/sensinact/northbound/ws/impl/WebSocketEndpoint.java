@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.northbound.ws.impl;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
@@ -30,9 +33,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSession;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
@@ -73,22 +74,17 @@ public class WebSocketEndpoint {
     /**
      * Current WebSocket session
      */
-    private Session wsSession;
+    private final AtomicReference<Session> wsSession = new AtomicReference<>();
 
     /**
      * Current user session
      */
-    private SensiNactSession userSession;
+    private final SensiNactSession userSession;
 
     /**
      * Parent socket pool
      */
     private final WebSocketCreator pool;
-
-    /**
-     * Session manager
-     */
-    private final SensiNactSessionManager sessionManager;
 
     /**
      * Query handler
@@ -101,14 +97,14 @@ public class WebSocketEndpoint {
     private final Set<String> subscriptions = new HashSet<>();
 
     /**
-     * @param pool           WebSocket connections pool
-     * @param sessionManager User session manager
-     * @param queryHandler   Query handler
+     * @param pool             WebSocket connections pool
+     * @param sensiNactSession User session manager
+     * @param queryHandler     Query handler
      */
-    public WebSocketEndpoint(final WebSocketCreator pool, final SensiNactSessionManager sessionManager,
+    public WebSocketEndpoint(final WebSocketCreator pool, final SensiNactSession sensiNactSession,
             final IQueryHandler queryHandler) {
         this.pool = pool;
-        this.sessionManager = sessionManager;
+        this.userSession = sensiNactSession;
         this.queryHandler = queryHandler;
     }
 
@@ -116,7 +112,8 @@ public class WebSocketEndpoint {
      * Explicit WebSocket closure
      */
     public synchronized void close() {
-        if (wsSession == null) {
+        Session ws = wsSession.getAndSet(null);
+        if (ws == null) {
             return;
         }
 
@@ -128,26 +125,22 @@ public class WebSocketEndpoint {
         }
         subscriptions.clear();
 
-        if (wsSession.isOpen()) {
+        if (ws.isOpen()) {
             // Close websocket session
             try {
-                wsSession.close();
+                ws.close();
             } catch (Throwable t) {
                 logger.error("Error closing WebSocket: {}", t.getMessage(), t);
             }
         }
 
-        wsSession = null;
-        userSession = null;
+        userSession.expire();
     }
 
     @OnWebSocketConnect
     public void open(final Session session) {
         logger.debug("WebSocket opening - {}", session);
-        wsSession = session;
-
-        // FIXME get a real session
-        userSession = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
+        wsSession.set(session);
     }
 
     @OnWebSocketClose
@@ -155,7 +148,7 @@ public class WebSocketEndpoint {
         logger.debug("WebSocket closing - {} ({}: {})", session, statusCode, reason);
         pool.deleteSocketEndpoint(this);
 
-        userSession = null;
+        userSession.expire();
     }
 
     @OnWebSocketError
@@ -165,6 +158,12 @@ public class WebSocketEndpoint {
 
     @OnWebSocketMessage
     public void onMessage(final Session wsSession, final String strContent) {
+
+        if (userSession.isExpired()) {
+            wsSession.close(StatusCode.ABNORMAL, "User session expired due to inactivity");
+        } else {
+            userSession.extend(Duration.of(5, ChronoUnit.MINUTES));
+        }
 
         final AbstractQueryDTO query;
         try {
@@ -179,8 +178,8 @@ public class WebSocketEndpoint {
             final AbstractResultDTO result;
             switch (query.operation) {
             case SUBSCRIBE:
-                result = handleSubscribe((QuerySubscribeDTO) query);
-                break;
+                handleSubscribe(query.requestId, (QuerySubscribeDTO) query);
+                return;
 
             case UNSUBSCRIBE:
                 result = handleUnsubscribe((QueryUnsubscribeDTO) query);
@@ -191,9 +190,7 @@ public class WebSocketEndpoint {
                 break;
             }
 
-            if (query.requestId != null) {
-                result.requestId = query.requestId;
-            }
+            result.requestId = query.requestId;
 
             sendResult(wsSession, result);
         } catch (Throwable t) {
@@ -205,11 +202,13 @@ public class WebSocketEndpoint {
     /**
      * Registers a subscription of the current session
      *
+     * @param requestId
+     *
      * @param userSession Caller session
      * @param query       Subscription query
      * @return Result DTO
      */
-    private AbstractResultDTO handleSubscribe(final QuerySubscribeDTO query) {
+    private void handleSubscribe(String requestId, final QuerySubscribeDTO query) throws Exception {
         final SensinactPath path = query.uri;
         CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<String> listenerId = new AtomicReference<>();
@@ -234,20 +233,22 @@ public class WebSocketEndpoint {
         }
 
         final ClientDataListener cld = (topic, evt) -> {
-            if (!wsSession.isOpen()) {
+            Session ws = wsSession.get();
+            if (ws == null || !ws.isOpen()) {
                 logger.warn("Detected closed WebSocket. Stop listening");
                 userSession.removeListener(listenerId.get());
             } else if (p.test(evt) && checkLatch(latch)) {
-                sendNotification(listenerId.get(), new ResourceDataNotificationDTO(evt));
+                sendNotification(ws, listenerId.get(), new ResourceDataNotificationDTO(evt));
             }
         };
 
         final ClientLifecycleListener cll = (topic, evt) -> {
-            if (!wsSession.isOpen()) {
+            Session ws = wsSession.get();
+            if (ws == null || !ws.isOpen()) {
                 logger.warn("Detected closed WebSocket. Stop listening");
                 userSession.removeListener(listenerId.get());
             } else if (p.test(evt) && checkLatch(latch)) {
-                sendNotification(listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
+                sendNotification(ws, listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
             }
         };
 
@@ -256,12 +257,28 @@ public class WebSocketEndpoint {
 
         // Store listener details
         subscriptions.add(id);
+        // Send the subscription response to the client
+        result.statusCode = 200;
+        result.subscriptionId = id;
+        result.requestId = requestId;
+        try {
+            Session ws = wsSession.get();
+            if (ws == null || !ws.isOpen()) {
+                subscriptions.remove(id);
+                userSession.removeListener(id);
+            } else {
+                sendResult(ws, result);
+            }
+        } catch (Exception e) {
+            subscriptions.remove(id);
+            userSession.removeListener(id);
+
+            // Don't release the latch so any pending notifications time out
+            throw e;
+        }
+
         // Release the listeners
         latch.countDown();
-
-        result.statusCode = 200;
-        result.subscriptionId = listenerId.get();
-        return result;
     }
 
     private boolean checkLatch(CountDownLatch latch) {
@@ -275,22 +292,25 @@ public class WebSocketEndpoint {
     /**
      * Sends a notification to the client
      *
+     * @param ws
+     *
      * @param listenerId   ID of the subscription
      * @param notification Notification DTO
      */
-    private void sendNotification(final String listenerId, final AbstractResourceNotificationDTO notification) {
+    private void sendNotification(Session ws, final String listenerId,
+            final AbstractResourceNotificationDTO notification) {
         try {
             final ResultResourceNotificationDTO result = new ResultResourceNotificationDTO();
             result.statusCode = 200;
             result.uri = new SensinactPath(notification.provider, notification.service, notification.resource).toUri();
             result.subscriptionId = listenerId;
             result.notification = notification;
-            wsSession.getRemote().sendString(mapper.writeValueAsString(result));
+            ws.getRemote().sendString(mapper.writeValueAsString(result));
         } catch (IOException e) {
             logger.error("Error sending notification to client: {}", e.getMessage(), e);
             try {
                 final ErrorResultNotificationDTO errorNotification = new ErrorResultNotificationDTO(listenerId);
-                wsSession.getRemote().sendString(mapper.writeValueAsString(errorNotification));
+                ws.getRemote().sendString(mapper.writeValueAsString(errorNotification));
             } catch (IOException e2) {
                 logger.error("Error sending notification to client: {}. Closing WebSocket.", e2.getMessage(), e2);
                 userSession.removeListener(listenerId);

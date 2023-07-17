@@ -51,12 +51,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ExtendWith(ServiceExtension.class)
+@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
+@WithConfiguration(pid = "sensinact.northbound.websocket", properties = @Property(key = "allow.anonymous", value = "true"))
 public class WebSocketTest {
 
     @InjectService
