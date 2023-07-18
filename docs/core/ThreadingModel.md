@@ -10,7 +10,7 @@ When running sensiNact maintains an internal "digital twin" of the devices that 
 
 ### Bulk operations
 
-Bulk update/read operations can be performed in a single command that is submitted to the gateway thread. By executing as a single command multiple operations can be applied together, in such a way that other operations cannot see a partial update (i.e. only some of the update operations have been applied). 
+Bulk update/read operations can be performed in a single command that is submitted to the gateway thread. By executing as a single command multiple operations can be applied together, in such a way that other operations cannot see a partial update (i.e. only some of the update operations have been applied).
 
 Note that there is no intent for this to make bulk operations truly *atomic*, specifically if part of the update fails then the successful part will not be automatically rolled back. It is, however, the case that commands do not need to worry about *dirty read/write* operations, or about the impact of concurrent data access/update.
 
@@ -22,7 +22,7 @@ If multiple notifications are generated for the same resource (e.g. the value of
 
 ### Potential drawbacks
 
-As all commands are executed sequentially by a single thread there is the possibility for significant latency and/or scaling issues. All commands must execute quickly, but as data access does not require synchronization or locking this will be the default case normally. 
+As all commands are executed sequentially by a single thread there is the possibility for significant latency and/or scaling issues. All commands must execute quickly, but as data access does not require synchronization or locking this will be the default case normally.
 
 If long-running tasks must be performed then this work should be performed on a separate thread and the result applied in a separate command. A `Promise` may also be helpfully used in these situations, such as the return value from a pull-based resource.
 
@@ -41,7 +41,7 @@ Push based Southbound providers receive data pushed from a sensor or actuator. T
 
 ### Pull based providers
 
-Pull based Southbound providers retrieve data from a sensor or actuator when triggered. This may be a periodic call, or it may be as a result of a read request. 
+Pull based Southbound providers retrieve data from a sensor or actuator when triggered. This may be a periodic call, or it may be as a result of a read request.
 
 Whatever the reason for the trigger the request will not occur on the gateway thread, and therefore the calling thread may be used to contact the device. Pull based providers that use long running actions (e.g. MQTT/HTTP) to read are encouraged to use `Promise` return values to avoid exhausting the request threads.
 

@@ -12,7 +12,7 @@ The Eclipse sensiNact gateway is distributed as a single archive produced by the
 
 To launch the gateway simply follow these three steps:
 
-1. Build or download a copy of the gateway zip archive produced by the `distribution/assembly` project. 
+1. Build or download a copy of the gateway zip archive produced by the `distribution/assembly` project.
 2. Extract this archive to the location from which you wish to run the gateway.
 3. Run the start.sh script
 

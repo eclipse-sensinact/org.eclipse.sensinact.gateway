@@ -75,7 +75,7 @@ Features do not exist in isolation, and most gateways will deploy multiple featu
 The `sensinact.feature.depends` extension is of type `artifacts`, and if present it is always enforced, regardless of the kind of the extension. The artifacts listed are the ids of the features upon which the feature depends. For example:
 
 ```js
-    { 
+    {
       // Bundles skipped for brevity
       "extensions": {
         "sensinact.feature.depends": {
@@ -90,9 +90,9 @@ The `sensinact.feature.depends` extension is of type `artifacts`, and if present
       }
     }
 ```
-    
+
 When dependencies are expressed in this way then all dependencies must be installed before the dependent feature can successfully install. If any dependencies are missing then the feature will not be installed.
- 
+
 
 ### Configuration in features
 
