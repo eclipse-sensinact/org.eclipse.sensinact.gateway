@@ -2,9 +2,9 @@ name: eclipse dash ip-check
 
 on:
   push:
-    branches: [ "future/prototype" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "future/prototype" ]
+    branches: [ "master" ]
 
 jobs:
   build:

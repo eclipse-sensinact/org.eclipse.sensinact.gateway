@@ -2,7 +2,7 @@ name: 'Editor Config format check'
 
 on:
   pull_request:
-    branches: [future/prototype]
+    branches: [master]
 
 permissions:
   contents: read
