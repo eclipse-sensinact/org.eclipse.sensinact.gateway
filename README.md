@@ -1,11 +1,19 @@
-# The Eclipse sensiNact gateway upgrade
+# Updating the sensiNact Device API - Prototype
 
-This branch represents the ongoing work to rebuild the core of sensiNact in an effort to improve integration with other Eclipse projects, and to modernise the codebase as a whole.
+This repository aims to prototype how devices connectors should integrate with sensiNact in a clean way, fitting with the EMF model of the device
 
-## The legacy folder
+### Annotation
 
-This folder contains the whole of the sensiNact 2.0-SNAPSHOT build, and represents the branch point from which this prototype will continue
+The annotation module contains the sources for annotations used to define the "code first" connectors
 
-## The prototype folder
+### Models
 
-This folder contains the new core of the gateway, and will be slowly expanded to encompass the full set of existing use cases
+The models module contains the EMF models and the code generated from them
+
+### Sensinact-API
+
+The sensinact-api module contains the API for the sensinact core
+
+#### Examples
+
+The examples project contains examples demonstrating how to use the sensiNact API

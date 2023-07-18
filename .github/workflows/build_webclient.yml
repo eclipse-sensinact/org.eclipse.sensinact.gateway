@@ -4,7 +4,7 @@ on:
     branches: ["webclient"]
 defaults:
   run:
-    working-directory: prototype/webclient
+    working-directory: webclient
 jobs:
   build:
     runs-on: ubuntu-latest

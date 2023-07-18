@@ -1,7 +1,0 @@
--include: ${sensinact.root.dir}/bnd/default.tests.bnd
--make: (*).(jar); type=bnd; recipe="${.}/tb/$1.bnd"
-
--includeresource:\
-		extra.jar
-		
--privatepackage: org.eclipse.sensinact.gateway.nthbnd.filter.jsonpath.test

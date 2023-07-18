@@ -1,5 +1,0 @@
--include: ${sensinact.root.dir}/bnd/default.tests.bnd
--make: (*).(jar); type=bnd; recipe="${.}/tb/$1.bnd"
--includeresource:\
-		tb_nosign_fail.jar,\
-		tb_sign_ok.jar

@@ -1,8 +1,0 @@
--include: ${sensinact.root.dir}/bnd/default.bnd.bnd
-DynamicImport-Package: org.eclipse.sensinact.gateway.core.security.impl
-
-# resilve over api
-#Require-Capability: \
-#	org.eclipse.sensinact.security,\
-#	org.eclipse.sensinact.signature.validator
-#	org.eclipse.sensinact.data.store,\

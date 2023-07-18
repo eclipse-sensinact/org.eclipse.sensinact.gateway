@@ -1,6 +1,0 @@
-{
-  "modifiable": "UPDATABLE",
-  "serviceProviderIdPattern": "test8_%s",
-  "timestampPattern": "dd.MM.yy-hh:mm",
-  "observed": ["data/value"]
-}
