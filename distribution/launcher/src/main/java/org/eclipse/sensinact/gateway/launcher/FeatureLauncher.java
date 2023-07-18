@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -296,7 +297,13 @@ public class FeatureLauncher {
         // Start
         for (Bundle b : installed) {
             try {
-                b.start();
+                BundleRevision rev = b.adapt(BundleRevision.class);
+                if (rev == null || (rev.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
+                    // Start all but fragment bundles
+                    b.start();
+                } else {
+                    LOGGER.debug("Not starting bundle {} as it is a fragment", b.getSymbolicName());
+                }
             } catch (Exception e) {
                 LOGGER.warn("An error occurred starting a bundle in feature {}", feature, e);
             }
