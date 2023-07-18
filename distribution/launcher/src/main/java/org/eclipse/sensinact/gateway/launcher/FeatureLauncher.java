@@ -20,6 +20,7 @@ import static org.osgi.service.feature.FeatureExtension.Kind.MANDATORY;
 import static org.osgi.service.feature.FeatureExtension.Type.ARTIFACTS;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -27,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
@@ -70,9 +72,9 @@ public class FeatureLauncher {
     @interface Config {
         String[] features() default {};
 
-        String repository() default "repository";
+        String[] repository() default { "repository" };
 
-        String featureDir() default "features";
+        String[] featureDir() default { "features" };
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureLauncher.class);
@@ -111,8 +113,8 @@ public class FeatureLauncher {
      */
     private final List<String> features = new ArrayList<>();
 
-    private Path repository;
-    private Path featureDir;
+    private List<Path> repositories;
+    private List<Path> featureDirs;
 
     @Activate
     void start(BundleContext context, Config config) throws ConfigurationException {
@@ -148,15 +150,33 @@ public class FeatureLauncher {
         return Paths.get(newPath).normalize();
     }
 
+    List<Path> getPaths(String[] paths) {
+        if (paths == null || paths.length == 0) {
+            return List.of();
+        }
+
+        if (paths.length == 1) {
+            if (paths[0].contains(";")) {
+                // Windows-like ';' as path separator, use \; to escape
+                paths = paths[0].split("(?<!\\\\);");
+            } else if (paths[0].contains(":")) {
+                // Unix-like ':' as path separator, use \: to escape
+                paths = paths[0].split("(?<!\\\\):");
+            }
+        }
+
+        return Arrays.stream(paths).map(p -> getPath(p)).collect(toList());
+    }
+
     @Modified
     void update(Config config) throws ConfigurationException {
-        repository = getPath(config.repository());
-        featureDir = getPath(config.featureDir());
+        repositories = getPaths(config.repository());
+        featureDirs = getPaths(config.featureDir());
 
         List<String> newFeatures = stream(config.features()).collect(toList());
 
-        LOGGER.info("Feature installation for features {} requested using repository {} and feature directory {}",
-                newFeatures, repository, featureDir);
+        LOGGER.info("Feature installation for features {} requested using repositories {} and feature directories {}",
+                newFeatures, repositories, featureDirs);
 
         /**
          * Removed, in installation order
@@ -314,19 +334,29 @@ public class FeatureLauncher {
 
         LOGGER.debug("Loading feature model {}", feature);
 
-        Path featureFile;
+        Path featureFile = null;
         if (feature.indexOf(':') >= 0) {
-            featureFile = getFileFromRepository(featureService.getIDfromMavenCoordinates(feature), "json");
+            try {
+                featureFile = getFileFromRepository(featureService.getIDfromMavenCoordinates(feature), "json");
+            } catch (FileNotFoundException e) {
+                LOGGER.warn("Can't find feature file: {}", feature, e);
+            }
         } else {
             String simpleFileName = feature;
             if (!simpleFileName.endsWith(".json")) {
                 simpleFileName += ".json";
             }
 
-            featureFile = featureDir.resolve(simpleFileName);
+            for (Path featureDir : featureDirs) {
+                Path testedFile = featureDir.resolve(simpleFileName);
+                if (Files.exists(testedFile)) {
+                    featureFile = testedFile;
+                    break;
+                }
+            }
         }
 
-        if (Files.isRegularFile(featureFile)) {
+        if (featureFile != null && Files.isRegularFile(featureFile)) {
             try (Reader fr = Files.newBufferedReader(featureFile, UTF_8)) {
                 return featureService.readFeature(fr);
             } catch (IOException ioe) {
@@ -399,13 +429,26 @@ public class FeatureLauncher {
         return null;
     }
 
-    private Path getFileFromRepository(ID id, String defaultType) {
-        LOGGER.debug("Searching for feature {} in repository {}", id, repository);
+    private Path getFileFromRepository(ID id, String defaultType) throws FileNotFoundException {
+        LOGGER.debug("Searching for feature {} in repositories {}", id, repositories);
 
         Path file;
         String groupPath = id.getGroupId().replace('.', File.separatorChar);
 
-        Path path = repository.resolve(groupPath).resolve(id.getArtifactId()).resolve(id.getVersion());
+        Path path = null;
+        for (Path repository : repositories) {
+            Path testedPath = repository.resolve(groupPath).resolve(id.getArtifactId()).resolve(id.getVersion());
+            if (Files.isDirectory(testedPath)) {
+                path = testedPath;
+                break;
+            }
+        }
+
+        if (path == null) {
+            throw new FileNotFoundException("Can't find feature " + id);
+        }
+
+        final Path repoPath = path;
 
         String fileName;
         if (id.getClassifier().isEmpty()) {
@@ -416,7 +459,7 @@ public class FeatureLauncher {
 
         fileName = fileName.concat(String.format(".%s", id.getType().orElse(defaultType)));
 
-        file = path.resolve(fileName);
+        file = repoPath.resolve(fileName);
 
         LOGGER.debug("Expected file path for feature {} is {}", id, file);
 
@@ -437,9 +480,9 @@ public class FeatureLauncher {
 
             LOGGER.debug("File not found, looking for the latest SNAPSHOT");
             try {
-                Optional<Path> found = Files.list(path).map(p -> p.getFileName().toString())
+                Optional<Path> found = Files.list(repoPath).map(p -> p.getFileName().toString())
                         .filter(pattern.asMatchPredicate()).sorted(Comparator.reverseOrder()).findFirst()
-                        .map(s -> path.resolve(s));
+                        .map(s -> repoPath.resolve(s));
 
                 if (found.isPresent()) {
                     file = found.get();

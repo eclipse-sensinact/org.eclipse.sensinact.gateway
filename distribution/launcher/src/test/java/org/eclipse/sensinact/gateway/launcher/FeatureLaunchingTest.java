@@ -81,8 +81,8 @@ class FeatureLaunchingTest {
         ServiceLoader<FeatureService> loader = ServiceLoader.load(FeatureService.class);
         fs = loader.findFirst().get();
 
-        Mockito.lenient().when(config.featureDir()).thenReturn("src/test/resources/features");
-        Mockito.lenient().when(config.repository()).thenReturn("src/test/resources/repository");
+        Mockito.lenient().when(config.featureDir()).thenReturn(new String[] { "src/test/resources/features" });
+        Mockito.lenient().when(config.repository()).thenReturn(new String[] { "src/test/resources/repository" });
 
         Mockito.lenient().when(context.installBundle(Mockito.anyString(), Mockito.any())).thenAnswer(i -> {
             String fromIs;
