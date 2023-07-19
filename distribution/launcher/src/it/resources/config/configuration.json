@@ -1,0 +1,15 @@
+{
+  ":configurator:resource-version": 1,
+  ":configurator:symbolic-name": "org.eclipse.sensinact.config",
+  ":configurator:version": "0.0.1",
+  "sensinact.launcher": {
+    "features": [
+      "test-feature"
+    ],
+    "repository": "target/it/repository",
+    "featureDir": "src/it/resources/features"
+  },
+  "org.apache.felix.http": {
+    "org.osgi.service.http.port": 8081
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "feature-resource-version": "1.0",
+  "id": "org.eclipse.sensinact.gateway.launcher.test:need_foo:1.0.0",
+  "bundles": [
+    {
+      "id": "org.eclipse.sensinact.gateway.launcher.test:buzz:1.0.2-SNAPSHOT"
+    }
+  ],
+  "extensions": {
+    "sensinact.feature.depends": {
+      "kind": "mandatory",
+      "type": "text",
+      "text": [
+        "foo",
+        "bar",
+        "foobar"
+      ]
+    }
+  }
+}

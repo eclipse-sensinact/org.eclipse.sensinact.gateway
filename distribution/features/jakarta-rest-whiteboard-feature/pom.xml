@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2022 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+    <artifactId>features</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>jakarta-rest-whiteboard-feature</artifactId>
+  <packaging>pom</packaging>
+  <name>Eclipse sensiNact Jakarta RESTful Web Services Whiteboard Feature</name>
+  <description>This project contains a feature providing a Jakarta RESTful Web Services whiteboard</description>
+  <properties>
+    <gecko.jersey.version>6.0.0.RC1</gecko.jersey.version>
+    <hk2.version>3.0.3</hk2.version>
+    <hk2.osgi.version>1.0.3</hk2.osgi.version>
+    <jackson.version>2.13.4</jackson.version>
+    <jersey.version>3.0.8</jersey.version>
+    <asm.version>9.3</asm.version>
+    <javassist.version>3.29.2-GA</javassist.version>
+  </properties>
+
+  <dependencies>
+    <!-- Gecko -->
+    <dependency>
+      <groupId>org.geckoprojects.jakartars</groupId>
+      <artifactId>org.gecko.rest.jersey</artifactId>
+      <version>${gecko.jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.jakartars</groupId>
+      <artifactId>org.gecko.rest.jersey.servlet.whiteboard</artifactId>
+      <version>${gecko.jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.jakartars</groupId>
+      <artifactId>org.gecko.rest.jersey.sse</artifactId>
+      <version>${gecko.jersey.version}</version>
+    </dependency>
+
+    <!-- API -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.jakartars</artifactId>
+      <version>2.0.0-RC1</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.activation</groupId>
+      <artifactId>jakarta.activation-api</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>2.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
+    <!-- Jersey -->
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet-core</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-jaxb</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-sse</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+
+    <!-- HK2 -->
+    <dependency>
+      <groupId>org.glassfish.hk2</groupId>
+      <artifactId>hk2-api</artifactId>
+      <version>${hk2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.hk2.external</groupId>
+      <artifactId>aopalliance-repackaged</artifactId>
+      <version>${hk2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.hk2</groupId>
+      <artifactId>hk2-locator</artifactId>
+      <version>${hk2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.hk2</groupId>
+      <artifactId>osgi-resource-locator</artifactId>
+      <version>${hk2.osgi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.hk2</groupId>
+      <artifactId>hk2-utils</artifactId>
+      <version>${hk2.version}</version>
+    </dependency>
+
+    <!-- Other -->
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>${asm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>${javassist.version}</version>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.ops4j.pax.tinybundles</groupId>
+      <artifactId>tinybundles</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>gather-test-features</id>
+            <configuration>
+              <skip>false</skip>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
+                  <version>0.0.2-SNAPSHOT</version>
+                  <type>json</type>
+                  <classifier>osgifeature</classifier>
+                  <destFileName>jakarta-servlet-whiteboard-feature.json</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>gogo-shell-feature</artifactId>
+                  <version>0.0.2-SNAPSHOT</version>
+                  <type>json</type>
+                  <classifier>osgifeature</classifier>
+                  <destFileName>gogo-shell-feature.json</destFileName>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>create-test-repo</id>
+            <configuration>
+              <skip>false</skip>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
+                  <version>0.0.2-SNAPSHOT</version>
+                  <type>zip</type>
+                  <classifier>osgifeaturerepo</classifier>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+                  <artifactId>gogo-shell-feature</artifactId>
+                  <version>0.0.2-SNAPSHOT</version>
+                  <type>zip</type>
+                  <classifier>osgifeaturerepo</classifier>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

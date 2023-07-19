@@ -1,0 +1,64 @@
+header:
+  license:
+    spdx-id: EPL-2.0
+    copyright-owner: Contributors to the Eclipse Foundation
+    content: |
+      Copyright (c) 2022 Contributors to the Eclipse Foundation.
+
+      This program and the accompanying materials are made
+      available under the terms of the Eclipse Public License 2.0
+      which is available at https://www.eclipse.org/legal/epl-2.0/
+      SPDX-License-Identifier: EPL-2.0
+
+      Contributors:
+
+    pattern: |
+      This program and the accompanying materials are made
+      available under the terms of the Eclipse Public License 2.0
+      which is available at https://www.eclipse.org/legal/epl-2.0/
+
+  paths-ignore:
+    - 'dist'
+    - 'licenses'
+    - '**/package-info.java'
+    - '**/packageinfo'
+    - '**/module-info.java'
+    - '**/*.bnd'
+    - '**/*.bndrun'
+    - '**/*.xml'
+    - '**/*.ecore'
+    - '**/*.genmodel'
+    - '**/*.md'
+    - '**/*.MD'
+    - '**/.keep'
+    - '**/*.jetproperties'
+    - '**/*.javajet'
+    - '**/*.javajetinc'
+    - '**/*.json'
+    - '**/*.csv'
+    - '**/*.properties'
+    - '**/*.maven'
+    - '**/*.html'
+    - '**/*.aird'
+    - '**/*.basic'
+    - '**/.classpath'
+    - '**/.editorconfig'
+    - 'LICENSE'
+    - 'NOTICE'
+    - '.gitattributes'
+    - '.github/**'
+    - '.gitignore'
+    - '.licenserc.yaml'
+    - '**/.project'
+    - '**/*.prefs'
+    - 'license.templates'
+    - 'distribution/launcher/src/test/resources/repository/**'
+    - 'webclient/dist'
+    - 'webclient/node_modules'
+    - 'webclient/openapi'
+    - 'webclient/.*'
+    - 'webclient/scripts'
+    - 'webclient/babel.config.js'
+    - 'webclient/vue.config.js'
+
+  comment: always

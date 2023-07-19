@@ -1,0 +1,20 @@
+[
+  {
+    "Date": "20.10.2021",
+    "Time": "18:14",
+    "Name": "JsonLiteral1",
+    "Latitude": 1.2,
+    "Longitude": 3.4,
+    "Value": 94,
+    "Street": "Cours Berriat"
+  },
+  {
+    "Date": "20.10.2021",
+    "Time": "18:17",
+    "Name": "JsonLiteral2",
+    "Latitude": 5.6,
+    "Longitude": 7.8,
+    "Altitude": 1.5,
+    "Value": 28
+  }
+]

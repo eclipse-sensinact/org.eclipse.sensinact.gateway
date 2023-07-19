@@ -1,0 +1,14 @@
+{
+  "feature-resource-version": "1.0",
+  "id": "org.eclipse.sensinact.gateway.launcher.test:config_only2:1.0.0",
+  "configurations": {
+    "test-only2": {
+      "test": "Only2",
+      "value": 15
+    },
+    "test-fixed": {
+      "test": "Override",
+      "value": 451
+    }
+  }
+}

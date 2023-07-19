@@ -1,0 +1,30 @@
+{
+  "id": "org.eclipse.sensinact.gateway.distribution.features:northbound-ogc-sensorthings-mqtt-feature:osgifeature:0.0.2-SNAPSHOT",
+  "bundles": [
+    { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0" },
+    { "id": "io.netty:netty-common:4.1.77.Final" },
+    { "id": "io.netty:netty-buffer:4.1.77.Final" },
+    { "id": "io.netty:netty-codec:4.1.77.Final" },
+    { "id": "io.netty:netty-codec-http:4.1.77.Final" },
+    { "id": "io.netty:netty-codec-mqtt:4.1.77.Final" },
+    { "id": "io.netty:netty-common:4.1.77.Final" },
+    { "id": "io.netty:netty-handler:4.1.77.Final" },
+    { "id": "io.netty:netty-resolver:4.1.77.Final" },
+    { "id": "io.netty:netty-transport:4.1.77.Final" },
+    { "id": "io.netty:netty-transport-classes-epoll:4.1.77.Final" },
+    { "id": "io.netty:netty-transport-native-unix-common:4.1.77.Final" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:dto:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:mqtt:0.0.2-SNAPSHOT" }
+],
+  "extensions": {
+    "sensinact.feature.depends": {
+      "kind": "mandatory",
+      "type": "artifacts",
+      "artifacts": [
+        {
+          "id": "org.eclipse.sensinact.gateway.distribution.features:core-feature:osgifeature:0.0.2-SNAPSHOT"
+        }
+      ]
+    }
+  }
+}

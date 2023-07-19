@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2023 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
+    <artifactId>northbound</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+  <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+  <artifactId>filters</artifactId>
+  <packaging>pom</packaging>
+  <name>SensiNact Northbound Filters</name>
+  <modules>
+    <module>filters.core</module>
+    <module>ldap</module>
+  </modules>
+  <properties>
+    <sensinact.core.version>0.0.2-SNAPSHOT</sensinact.core.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>api</artifactId>
+        <version>${sensinact.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>geo-json</artifactId>
+        <version>${sensinact.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>impl</artifactId>
+        <version>${sensinact.core.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

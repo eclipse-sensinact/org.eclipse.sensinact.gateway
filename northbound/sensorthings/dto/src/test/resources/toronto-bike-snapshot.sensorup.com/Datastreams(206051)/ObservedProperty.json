@@ -1,0 +1,8 @@
+{
+  "@iot.id": 2,
+  "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)",
+  "description": "The total number count of available docks in a bike station",
+  "definition": "https://member.bikesharetoronto.com/stations",
+  "name": "available_docks",
+  "Datastreams@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/ObservedProperties(2)/Datastreams"
+}

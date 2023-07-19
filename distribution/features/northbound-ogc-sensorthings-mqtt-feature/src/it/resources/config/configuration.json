@@ -1,0 +1,25 @@
+{
+  ":configurator:resource-version": 1,
+  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.ogcsensorthingsmqtt.test",
+  ":configurator:version": "0.0.1",
+  "sensinact.launcher": {
+    "features": [
+      "core-feature",
+      "northbound-ogc-sensorthings-mqtt-feature",
+      "virtual-temperature-sensor-feature"
+    ],
+    "repository": "target/it/repository",
+    "featureDir": "target/it/features"
+  },
+  "sensiNact.northbound.sensorthings.mqtt": {
+    "host": "127.0.0.1",
+    "port": 18883,
+    "websocket.enable": false
+  },
+  "sensinact.virtual.temperature": {
+    "name": "temp1",
+    "latitude": 1.0,
+    "longitude": 2.0,
+    "interval": 1000
+  }
+}

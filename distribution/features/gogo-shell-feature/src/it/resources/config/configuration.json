@@ -1,0 +1,12 @@
+{
+  ":configurator:resource-version": 1,
+  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.gogo.test",
+  ":configurator:version": "0.0.1",
+  "sensinact.launcher": {
+    "features": [
+      "gogo-shell-feature"
+    ],
+    "repository": "target/it/repository",
+    "featureDir": "target/it/features"
+  }
+}

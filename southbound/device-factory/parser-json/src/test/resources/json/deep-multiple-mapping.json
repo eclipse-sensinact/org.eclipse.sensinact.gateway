@@ -1,0 +1,15 @@
+{
+  "parser": "json",
+  "parser.options": {
+    "base": "records"
+  },
+  "mapping": {
+    "@provider": "fields/id",
+    "@name": "fields/name",
+    "@datetime": "fields/date",
+    "@latitude": "fields/geo/0",
+    "@longitude": "fields/geo/1",
+    "$type": "fields/type",
+    "data/${type}_value": "fields/value"
+  }
+}

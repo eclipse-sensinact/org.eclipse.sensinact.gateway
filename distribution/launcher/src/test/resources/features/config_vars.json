@@ -1,0 +1,21 @@
+{
+    "feature-resource-version": "1.0",
+    "id": "org.eclipse.sensinact.gateway.launcher.test:config_vars:1.0.0",
+    "configurations": {
+        "test-A": {
+            "test": "A",
+            "value": 42
+        },
+        "test-vars": {
+            "test": "vars",
+            "value": "${val.int}",
+            "text": "${val.A}_${val.B}",
+            "missing": "${missing}"
+        }
+    },
+    "variables": {
+        "val.int": 42,
+        "val.A": "Hello",
+        "val.B": "World"
+    }
+}

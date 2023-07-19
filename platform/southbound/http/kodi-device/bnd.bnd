@@ -1,5 +1,0 @@
--include: ${sensinact.root.dir}/bnd/default.bnd.bnd
-Import-Package: \
-	javax.servlet.http;version="[3.0,4)",\
-    javax.servlet;version="[3.0,4)",\
-    *

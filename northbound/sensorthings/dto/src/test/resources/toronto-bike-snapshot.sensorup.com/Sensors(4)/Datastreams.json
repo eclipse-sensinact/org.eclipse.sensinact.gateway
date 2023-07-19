@@ -1,0 +1,1606 @@
+{
+  "@iot.count": 199,
+  "@iot.nextLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Sensors(4)/Datastreams?$top=100&$skip=100",
+  "value": [
+    {
+      "@iot.id": 206051,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bloor St / Brunswick Ave",
+      "name": "7061:Bloor St / Brunswick Ave:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(206051)/Thing"
+    },
+    {
+      "@iot.id": 1585,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)",
+      "description": "The datastream of available docks count for the Toronto bike share station Wellington Dog Park",
+      "name": "7216:Wellington Dog Park:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1585)/Thing"
+    },
+    {
+      "@iot.id": 1577,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1577)",
+      "description": "The datastream of available docks count for the Toronto bike share station Fort York/Garrison",
+      "name": "7211:Fort York/Garrison:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1577)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1577)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1577)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1577)/Thing"
+    },
+    {
+      "@iot.id": 1569,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1569)",
+      "description": "The datastream of available docks count for the Toronto bike share station Mary McCormick Rec Centre",
+      "name": "7210:Mary McCormick Rec Centre:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1569)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1569)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1569)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1569)/Thing"
+    },
+    {
+      "@iot.id": 1561,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1561)",
+      "description": "The datastream of available docks count for the Toronto bike share station Ossington/Harrison",
+      "name": "7209:Ossington/Harrison:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1561)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1561)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1561)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1561)/Thing"
+    },
+    {
+      "@iot.id": 1553,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1553)",
+      "description": "The datastream of available docks count for the Toronto bike share station College/Clinton",
+      "name": "7208:College/Clinton:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1553)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1553)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1553)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1553)/Thing"
+    },
+    {
+      "@iot.id": 1545,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1545)",
+      "description": "The datastream of available docks count for the Toronto bike share station Dundas/Crawford",
+      "name": "7207:Dundas/Crawford:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1545)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1545)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1545)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1545)/Thing"
+    },
+    {
+      "@iot.id": 1537,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1537)",
+      "description": "The datastream of available docks count for the Toronto bike share station Claremont/Dundas",
+      "name": "7206:Claremont/Dundas:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1537)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1537)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1537)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1537)/Thing"
+    },
+    {
+      "@iot.id": 1529,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1529)",
+      "description": "The datastream of available docks count for the Toronto bike share station Rusholme Park/College",
+      "name": "7205:Rusholme Park/College:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1529)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1529)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1529)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1529)/Thing"
+    },
+    {
+      "@iot.id": 1521,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1521)",
+      "description": "The datastream of available docks count for the Toronto bike share station College/Crawford",
+      "name": "7204:College/Crawford:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1521)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1521)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1521)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1521)/Thing"
+    },
+    {
+      "@iot.id": 1513,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1513)",
+      "description": "The datastream of available docks count for the Toronto bike share station Harrison/Dovercourt",
+      "name": "7203:Harrison/Dovercourt:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1513)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1513)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1513)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1513)/Thing"
+    },
+    {
+      "@iot.id": 1505,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1505)",
+      "description": "The datastream of available docks count for the Toronto bike share station City Hall",
+      "name": "7202:City Hall:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1505)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1505)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1505)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1505)/Thing"
+    },
+    {
+      "@iot.id": 1497,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1497)",
+      "description": "The datastream of available docks count for the Toronto bike share station College/Markham",
+      "name": "7199:College/Markham:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1497)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1497)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1497)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1497)/Thing"
+    },
+    {
+      "@iot.id": 1489,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1489)",
+      "description": "The datastream of available docks count for the Toronto bike share station Queen/Cowan",
+      "name": "7198:Queen/Cowan:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1489)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1489)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1489)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1489)/Thing"
+    },
+    {
+      "@iot.id": 1481,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1481)",
+      "description": "The datastream of available docks count for the Toronto bike share station Roxton/Harbord",
+      "name": "7196:Roxton/Harbord:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1481)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1481)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1481)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1481)/Thing"
+    },
+    {
+      "@iot.id": 1473,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1473)",
+      "description": "The datastream of available docks count for the Toronto bike share station Ulster/Bathurst",
+      "name": "7195:Ulster/Bathurst:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1473)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1473)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1473)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1473)/Thing"
+    },
+    {
+      "@iot.id": 1465,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1465)",
+      "description": "The datastream of available docks count for the Toronto bike share station Mortimer/Coxwell",
+      "name": "7194:Mortimer/Coxwell:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1465)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1465)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1465)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1465)/Thing"
+    },
+    {
+      "@iot.id": 1457,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1457)",
+      "description": "The datastream of available docks count for the Toronto bike share station Queen/Gladstone",
+      "name": "7193:Queen/Gladstone:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1457)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1457)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1457)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1457)/Thing"
+    },
+    {
+      "@iot.id": 1449,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1449)",
+      "description": "The datastream of available docks count for the Toronto bike share station Harbord/ Clinton",
+      "name": "7192:Harbord/ Clinton:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1449)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1449)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1449)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1449)/Thing"
+    },
+    {
+      "@iot.id": 1441,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1441)",
+      "description": "The datastream of available docks count for the Toronto bike share station Central Tech",
+      "name": "7191:Central Tech:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1441)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1441)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1441)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1441)/Thing"
+    },
+    {
+      "@iot.id": 1433,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1433)",
+      "description": "The datastream of available docks count for the Toronto bike share station St. George/Hoskin",
+      "name": "7190:St. George/Hoskin:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1433)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1433)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1433)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1433)/Thing"
+    },
+    {
+      "@iot.id": 1425,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1425)",
+      "description": "The datastream of available docks count for the Toronto bike share station Augusta/Denison Sq",
+      "name": "7189:Augusta/Denison Sq:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1425)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1425)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1425)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1425)/Thing"
+    },
+    {
+      "@iot.id": 1417,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1417)",
+      "description": "The datastream of available docks count for the Toronto bike share station Atlantic/Liberty",
+      "name": "7188:Atlantic/Liberty:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1417)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1417)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1417)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1417)/Thing"
+    },
+    {
+      "@iot.id": 1409,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1409)",
+      "description": "The datastream of available docks count for the Toronto bike share station Ossington Ave/College St.",
+      "name": "7184:Ossington Ave/College St.:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1409)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1409)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1409)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1409)/Thing"
+    },
+    {
+      "@iot.id": 1401,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1401)",
+      "description": "The datastream of available docks count for the Toronto bike share station Margueretta/College",
+      "name": "7183:Margueretta/College:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1401)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1401)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1401)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1401)/Thing"
+    },
+    {
+      "@iot.id": 1393,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1393)",
+      "description": "The datastream of available docks count for the Toronto bike share station Sterling/Dundas",
+      "name": "7182:Sterling/Dundas:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1393)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1393)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1393)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1393)/Thing"
+    },
+    {
+      "@iot.id": 1385,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1385)",
+      "description": "The datastream of available docks count for the Toronto bike share station Lansdowne/Whytock",
+      "name": "7181:Lansdowne/Whytock:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1385)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1385)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1385)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1385)/Thing"
+    },
+    {
+      "@iot.id": 1377,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1377)",
+      "description": "The datastream of available docks count for the Toronto bike share station Lansdowne/Wade",
+      "name": "7180:Lansdowne/Wade:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1377)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1377)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1377)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1377)/Thing"
+    },
+    {
+      "@iot.id": 1369,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1369)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bloor GO/UP Station",
+      "name": "7179:Bloor GO/UP Station:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1369)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1369)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1369)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1369)/Thing"
+    },
+    {
+      "@iot.id": 1361,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1361)",
+      "description": "The datastream of available docks count for the Toronto bike share station Dundas St W/Edna Ave",
+      "name": "7178:Dundas St W/Edna Ave:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1361)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1361)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1361)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1361)/Thing"
+    },
+    {
+      "@iot.id": 1353,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1353)",
+      "description": "The datastream of available docks count for the Toronto bike share station Liberty/Pirandello",
+      "name": "7177:Liberty/Pirandello:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1353)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1353)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1353)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1353)/Thing"
+    },
+    {
+      "@iot.id": 1345,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1345)",
+      "description": "The datastream of available docks count for the Toronto bike share station Fort York/Bathurst",
+      "name": "7176:Fort York/Bathurst:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1345)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1345)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1345)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1345)/Thing"
+    },
+    {
+      "@iot.id": 1337,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1337)",
+      "description": "The datastream of available docks count for the Toronto bike share station HTO Park",
+      "name": "7175:HTO Park:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1337)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1337)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1337)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1337)/Thing"
+    },
+    {
+      "@iot.id": 1329,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1329)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bloor/Dundas St W",
+      "name": "7174:Bloor/Dundas St W:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1329)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1329)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1329)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1329)/Thing"
+    },
+    {
+      "@iot.id": 1321,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1321)",
+      "description": "The datastream of available docks count for the Toronto bike share station Cariboo St/ Rail Path",
+      "name": "7173:Cariboo St/ Rail Path:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1321)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1321)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1321)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1321)/Thing"
+    },
+    {
+      "@iot.id": 1313,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1313)",
+      "description": "The datastream of available docks count for the Toronto bike share station Strachan and Princes' Blvd",
+      "name": "7172:Strachan and Princes' Blvd:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1313)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1313)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1313)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1313)/Thing"
+    },
+    {
+      "@iot.id": 1305,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1305)",
+      "description": "The datastream of available docks count for the Toronto bike share station Strachan/Lakeshore",
+      "name": "7171:Strachan/Lakeshore:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1305)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1305)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1305)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1305)/Thing"
+    },
+    {
+      "@iot.id": 1297,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1297)",
+      "description": "The datastream of available docks count for the Toronto bike share station Spadina / Willcocks",
+      "name": "7170:Spadina / Willcocks:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1297)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1297)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1297)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1297)/Thing"
+    },
+    {
+      "@iot.id": 1289,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1289)",
+      "description": "The datastream of available docks count for the Toronto bike share station Front/Bay",
+      "name": "7169:Front/Bay:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1289)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1289)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1289)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1289)/Thing"
+    },
+    {
+      "@iot.id": 1281,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1281)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bay/Lakeshore",
+      "name": "7168:Bay/Lakeshore:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1281)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1281)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1281)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1281)/Thing"
+    },
+    {
+      "@iot.id": 1273,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1273)",
+      "description": "The datastream of available docks count for the Toronto bike share station Moss Park",
+      "name": "7167:Moss Park:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1273)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1273)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1273)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1273)/Thing"
+    },
+    {
+      "@iot.id": 1265,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1265)",
+      "description": "The datastream of available docks count for the Toronto bike share station Victoria/Dundas",
+      "name": "7164:Victoria/Dundas:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1265)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1265)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1265)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1265)/Thing"
+    },
+    {
+      "@iot.id": 1257,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1257)",
+      "description": "The datastream of available docks count for the Toronto bike share station Yonge/Wood",
+      "name": "7163:Yonge/Wood:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1257)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1257)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1257)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1257)/Thing"
+    },
+    {
+      "@iot.id": 1249,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1249)",
+      "description": "The datastream of available docks count for the Toronto bike share station Hayter/Laplante",
+      "name": "7162:Hayter/Laplante:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1249)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1249)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1249)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1249)/Thing"
+    },
+    {
+      "@iot.id": 1241,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1241)",
+      "description": "The datastream of available docks count for the Toronto bike share station Beverly/College",
+      "name": "7161:Beverly/College:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1241)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1241)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1241)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1241)/Thing"
+    },
+    {
+      "@iot.id": 1233,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1233)",
+      "description": "The datastream of available docks count for the Toronto bike share station King/Tecumseth",
+      "name": "7160:King/Tecumseth:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1233)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1233)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1233)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1233)/Thing"
+    },
+    {
+      "@iot.id": 1225,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1225)",
+      "description": "The datastream of available docks count for the Toronto bike share station King/Strachan",
+      "name": "7158:King/Strachan:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1225)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1225)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1225)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1225)/Thing"
+    },
+    {
+      "@iot.id": 1217,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1217)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bloor/Dufferin",
+      "name": "7157:Bloor/Dufferin:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1217)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1217)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1217)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1217)/Thing"
+    },
+    {
+      "@iot.id": 1209,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1209)",
+      "description": "The datastream of available docks count for the Toronto bike share station Salem/Bloor",
+      "name": "7156:Salem/Bloor:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1209)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1209)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1209)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1209)/Thing"
+    },
+    {
+      "@iot.id": 1201,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1201)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bathurst/Lennox",
+      "name": "7155:Bathurst/Lennox:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1201)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1201)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1201)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1201)/Thing"
+    },
+    {
+      "@iot.id": 1193,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1193)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bathurst Subway Station",
+      "name": "7154:Bathurst Subway Station:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1193)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1193)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1193)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1193)/Thing"
+    },
+    {
+      "@iot.id": 1185,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1185)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bloor/Christie",
+      "name": "7153:Bloor/Christie:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1185)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1185)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1185)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1185)/Thing"
+    },
+    {
+      "@iot.id": 1177,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1177)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bloor/Ossington",
+      "name": "7152:Bloor/Ossington:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1177)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1177)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1177)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1177)/Thing"
+    },
+    {
+      "@iot.id": 1169,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1169)",
+      "description": "The datastream of available docks count for the Toronto bike share station Essex/Christie",
+      "name": "7151:Essex/Christie:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1169)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1169)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1169)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1169)/Thing"
+    },
+    {
+      "@iot.id": 1161,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1161)",
+      "description": "The datastream of available docks count for the Toronto bike share station Dufferin Grove Park",
+      "name": "7150:Dufferin Grove Park:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1161)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1161)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1161)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1161)/Thing"
+    },
+    {
+      "@iot.id": 1153,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1153)",
+      "description": "The datastream of available docks count for the Toronto bike share station Yarmouth/Christie",
+      "name": "7149:Yarmouth/Christie:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1153)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1153)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1153)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1153)/Thing"
+    },
+    {
+      "@iot.id": 1145,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1145)",
+      "description": "The datastream of available docks count for the Toronto bike share station King / Jefferson",
+      "name": "7148:King / Jefferson:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1145)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1145)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1145)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1145)/Thing"
+    },
+    {
+      "@iot.id": 1137,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1137)",
+      "description": "The datastream of available docks count for the Toronto bike share station King St / Mowat",
+      "name": "7147:King St / Mowat:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1137)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1137)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1137)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1137)/Thing"
+    },
+    {
+      "@iot.id": 1129,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1129)",
+      "description": "The datastream of available docks count for the Toronto bike share station Benson/Christie Wychwood Barns",
+      "name": "7146:Benson/Christie Wychwood Barns:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1129)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1129)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1129)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1129)/Thing"
+    },
+    {
+      "@iot.id": 1121,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1121)",
+      "description": "The datastream of available docks count for the Toronto bike share station Palmerston/Vermont",
+      "name": "7144:Palmerston/Vermont:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1121)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1121)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1121)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1121)/Thing"
+    },
+    {
+      "@iot.id": 1113,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1113)",
+      "description": "The datastream of available docks count for the Toronto bike share station Kendal/Bernard",
+      "name": "7143:Kendal/Bernard:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1113)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1113)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1113)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1113)/Thing"
+    },
+    {
+      "@iot.id": 1105,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1105)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bridgeman/Bathurst",
+      "name": "7142:Bridgeman/Bathurst:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1105)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1105)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1105)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1105)/Thing"
+    },
+    {
+      "@iot.id": 1097,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1097)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bridgeman/Kendal",
+      "name": "7141:Bridgeman/Kendal:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1097)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1097)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1097)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1097)/Thing"
+    },
+    {
+      "@iot.id": 1089,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1089)",
+      "description": "The datastream of available docks count for the Toronto bike share station Macpherson/ Spadina",
+      "name": "7140:Macpherson/ Spadina:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1089)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1089)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1089)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1089)/Thing"
+    },
+    {
+      "@iot.id": 1081,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1081)",
+      "description": "The datastream of available docks count for the Toronto bike share station Glen Edyth/Davenport",
+      "name": "7139:Glen Edyth/Davenport:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1081)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1081)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1081)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1081)/Thing"
+    },
+    {
+      "@iot.id": 1073,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1073)",
+      "description": "The datastream of available docks count for the Toronto bike share station Davenport/Christie",
+      "name": "7138:Davenport/Christie:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1073)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1073)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1073)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1073)/Thing"
+    },
+    {
+      "@iot.id": 1065,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1065)",
+      "description": "The datastream of available docks count for the Toronto bike share station Davenport/Bathurst",
+      "name": "7137:Davenport/Bathurst:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1065)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1065)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1065)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1065)/Thing"
+    },
+    {
+      "@iot.id": 1057,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1057)",
+      "description": "The datastream of available docks count for the Toronto bike share station Queen/Close",
+      "name": "7136:Queen/Close:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1057)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1057)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1057)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1057)/Thing"
+    },
+    {
+      "@iot.id": 1049,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1049)",
+      "description": "The datastream of available docks count for the Toronto bike share station Hanna/Liberty",
+      "name": "7135:Hanna/Liberty:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1049)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1049)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1049)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1049)/Thing"
+    },
+    {
+      "@iot.id": 1041,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1041)",
+      "description": "The datastream of available docks count for the Toronto bike share station Marlborough/Yonge",
+      "name": "7134:Marlborough/Yonge:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1041)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1041)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1041)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1041)/Thing"
+    },
+    {
+      "@iot.id": 1033,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1033)",
+      "description": "The datastream of available docks count for the Toronto bike share station Summerhill Station",
+      "name": "7133:Summerhill Station:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1033)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1033)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1033)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1033)/Thing"
+    },
+    {
+      "@iot.id": 1025,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1025)",
+      "description": "The datastream of available docks count for the Toronto bike share station Kendal/Spadina",
+      "name": "7132:Kendal/Spadina:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1025)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1025)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1025)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1025)/Thing"
+    },
+    {
+      "@iot.id": 1017,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1017)",
+      "description": "The datastream of available docks count for the Toronto bike share station Taddle Creek Park",
+      "name": "7131:Taddle Creek Park:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1017)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1017)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1017)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1017)/Thing"
+    },
+    {
+      "@iot.id": 1009,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1009)",
+      "description": "The datastream of available docks count for the Toronto bike share station Davenport/Bedford",
+      "name": "7130:Davenport/Bedford:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1009)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1009)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1009)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1009)/Thing"
+    },
+    {
+      "@iot.id": 1001,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1001)",
+      "description": "The datastream of available docks count for the Toronto bike share station Davenport/Avenue",
+      "name": "7129:Davenport/Avenue:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1001)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1001)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1001)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(1001)/Thing"
+    },
+    {
+      "@iot.id": 993,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(993)",
+      "description": "The datastream of available docks count for the Toronto bike share station Yonge/Aylmer",
+      "name": "7128:Yonge/Aylmer:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(993)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(993)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(993)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(993)/Thing"
+    },
+    {
+      "@iot.id": 985,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(985)",
+      "description": "The datastream of available docks count for the Toronto bike share station Bay/Davenport",
+      "name": "7127:Bay/Davenport:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(985)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(985)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(985)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(985)/Thing"
+    },
+    {
+      "@iot.id": 977,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(977)",
+      "description": "The datastream of available docks count for the Toronto bike share station Yonge/Yorkville",
+      "name": "7126:Yonge/Yorkville:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(977)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(977)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(977)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(977)/Thing"
+    },
+    {
+      "@iot.id": 969,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(969)",
+      "description": "The datastream of available docks count for the Toronto bike share station Dundas/Broadview",
+      "name": "7124:Dundas/Broadview:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(969)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(969)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(969)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(969)/Thing"
+    },
+    {
+      "@iot.id": 961,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(961)",
+      "description": "The datastream of available docks count for the Toronto bike share station Portland/Stewart",
+      "name": "7123:Portland/Stewart:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(961)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(961)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(961)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(961)/Thing"
+    },
+    {
+      "@iot.id": 953,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(953)",
+      "description": "The datastream of available docks count for the Toronto bike share station Niagara/Tecumseth",
+      "name": "7122:Niagara/Tecumseth:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(953)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(953)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(953)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(953)/Thing"
+    },
+    {
+      "@iot.id": 945,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(945)",
+      "description": "The datastream of available docks count for the Toronto bike share station Jarvis/Dundas",
+      "name": "7121:Jarvis/Dundas:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(945)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(945)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(945)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(945)/Thing"
+    },
+    {
+      "@iot.id": 937,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(937)",
+      "description": "The datastream of available docks count for the Toronto bike share station Gerrard/River",
+      "name": "7120:Gerrard/River:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(937)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(937)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(937)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(937)/Thing"
+    },
+    {
+      "@iot.id": 929,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(929)",
+      "description": "The datastream of available docks count for the Toronto bike share station Sumach/Winchester",
+      "name": "7119:Sumach/Winchester:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(929)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(929)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(929)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(929)/Thing"
+    },
+    {
+      "@iot.id": 921,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(921)",
+      "description": "The datastream of available docks count for the Toronto bike share station King/Bay",
+      "name": "7118:King/Bay:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(921)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(921)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(921)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(921)/Thing"
+    },
+    {
+      "@iot.id": 913,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(913)",
+      "description": "The datastream of available docks count for the Toronto bike share station Castle Frank/Bloor",
+      "name": "7117:Castle Frank/Bloor:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(913)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(913)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(913)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(913)/Thing"
+    },
+    {
+      "@iot.id": 905,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(905)",
+      "description": "The datastream of available docks count for the Toronto bike share station Parliament/Bloor",
+      "name": "7116:Parliament/Bloor:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(905)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(905)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(905)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(905)/Thing"
+    },
+    {
+      "@iot.id": 897,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(897)",
+      "description": "The datastream of available docks count for the Toronto bike share station Howard St./ Sherbourne St.",
+      "name": "7115:Howard St./ Sherbourne St.:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(897)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(897)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(897)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(897)/Thing"
+    },
+    {
+      "@iot.id": 889,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(889)",
+      "description": "The datastream of available docks count for the Toronto bike share station Carlton/Parliament",
+      "name": "7114:Carlton/Parliament:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(889)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(889)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(889)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(889)/Thing"
+    },
+    {
+      "@iot.id": 881,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(881)",
+      "description": "The datastream of available docks count for the Toronto bike share station Parliament/Aberdeen",
+      "name": "7113:Parliament/Aberdeen:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(881)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(881)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(881)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(881)/Thing"
+    },
+    {
+      "@iot.id": 873,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(873)",
+      "description": "The datastream of available docks count for the Toronto bike share station Liberty/Fraser",
+      "name": "7112:Liberty/Fraser:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(873)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(873)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(873)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(873)/Thing"
+    },
+    {
+      "@iot.id": 865,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(865)",
+      "description": "The datastream of available docks count for the Toronto bike share station King/Douro",
+      "name": "7111:King/Douro:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(865)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(865)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(865)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(865)/Thing"
+    },
+    {
+      "@iot.id": 857,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(857)",
+      "description": "The datastream of available docks count for the Toronto bike share station Queen/Berkely",
+      "name": "7110:Queen/Berkely:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(857)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(857)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(857)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(857)/Thing"
+    },
+    {
+      "@iot.id": 849,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(849)",
+      "description": "The datastream of available docks count for the Toronto bike share station Seaton/Dundas St E",
+      "name": "7109:Seaton/Dundas St E:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(849)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(849)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(849)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(849)/Thing"
+    },
+    {
+      "@iot.id": 841,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(841)",
+      "description": "The datastream of available docks count for the Toronto bike share station Front/Cherry",
+      "name": "7108:Front/Cherry:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(841)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(841)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(841)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(841)/Thing"
+    },
+    {
+      "@iot.id": 833,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(833)",
+      "description": "The datastream of available docks count for the Toronto bike share station Cherry/Distillery Ln",
+      "name": "7107:Cherry/Distillery Ln:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(833)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(833)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(833)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(833)/Thing"
+    },
+    {
+      "@iot.id": 825,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(825)",
+      "description": "The datastream of available docks count for the Toronto bike share station Mill/Tannery",
+      "name": "7106:Mill/Tannery:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(825)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(825)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(825)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(825)/Thing"
+    },
+    {
+      "@iot.id": 817,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(817)",
+      "description": "The datastream of available docks count for the Toronto bike share station Queen/Sackville",
+      "name": "7105:Queen/Sackville:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(817)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(817)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(817)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(817)/Thing"
+    },
+    {
+      "@iot.id": 809,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(809)",
+      "description": "The datastream of available docks count for the Toronto bike share station King/River",
+      "name": "7104:King/River:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(809)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(809)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(809)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(809)/Thing"
+    },
+    {
+      "@iot.id": 801,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(801)",
+      "description": "The datastream of available docks count for the Toronto bike share station Jimmie Simpson Park",
+      "name": "7103:Jimmie Simpson Park:available_docks",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_CountObservation",
+      "unitOfMeasurement": {
+        "symbol": "{TOT}",
+        "name": "dock count",
+        "definition": "http://unitsofmeasure.org/ucum.html#para-50"
+      },
+      "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(801)/Observations",
+      "ObservedProperty@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(801)/ObservedProperty",
+      "Sensor@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(801)/Sensor",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Datastreams(801)/Thing"
+    }
+  ]
+}

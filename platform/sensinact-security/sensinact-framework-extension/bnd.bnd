@@ -1,2 +1,0 @@
--include: ${sensinact.root.dir}/bnd/default.bnd.bnd
-Fragment-Host: system.bundle; extension:="framework"

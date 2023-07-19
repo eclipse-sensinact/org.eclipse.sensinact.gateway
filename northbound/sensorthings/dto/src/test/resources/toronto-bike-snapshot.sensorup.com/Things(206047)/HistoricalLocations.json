@@ -1,0 +1,12 @@
+{
+  "@iot.count": 1,
+  "value": [
+    {
+      "@iot.id": 206049,
+      "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)",
+      "time": "2017-02-04T15:50:10.489Z",
+      "Locations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Locations",
+      "Thing@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Thing"
+    }
+  ]
+}

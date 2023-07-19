@@ -1,0 +1,6 @@
+{
+    ":configurator:resource-version": 1,
+    "org.apache.felix.http": {
+      "org.osgi.service.http.port": 14001
+    }
+}

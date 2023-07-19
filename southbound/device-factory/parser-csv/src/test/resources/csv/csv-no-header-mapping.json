@@ -1,0 +1,18 @@
+{
+  "parser": "csv",
+  "parser.options": {
+      "header": false
+  },
+  "mapping": {
+    "@provider": 2,
+    "@latitude": 3,
+    "@longitude": 4,
+    "@date": 0,
+    "@time": 1,
+    "data/value": 5
+  },
+  "mapping.options": {
+    "format.date": "d.M.y",
+    "format.time": "H:m"
+  }
+}
