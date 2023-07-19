@@ -143,7 +143,7 @@
 
     <!-- test dependency versions -->
     <junit.version>5.9.0</junit.version>
-    <mockito.version>4.7.0</mockito.version>
+    <mockito.version>5.4.0</mockito.version>
     <osgi.test.version>1.2.1</osgi.test.version>
 
     <!-- plugin dependency versions -->
