@@ -183,7 +183,9 @@ public class FeatureLauncher {
          */
         List<String> removed = features.stream().filter(s -> !newFeatures.contains(s)).collect(toList());
 
-        LOGGER.info("The following features {} are no longer required and will be removed.", removed);
+        if (!removed.isEmpty()) {
+            LOGGER.info("The following features {} are no longer required and will be removed.", removed);
+        }
 
         // First remove all removes
         removeFeatures(removed);
