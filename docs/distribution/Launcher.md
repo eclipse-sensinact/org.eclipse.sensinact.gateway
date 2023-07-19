@@ -23,8 +23,8 @@ The feature manager is configured in the same way as any other gateway component
 The name of the configuration is `sensinact.launcher` and it defines three properties:
 
 * `features` - a list of features to install, in the order that they are to be installed
-* `repository` - a maven repository containing bundles and optionally features for installation
-* `featureDir` - a folder containing feature files that are candidates for installation
+* `repository` - a Maven repository containing bundles and optionally features for installation. This can be a single folder or a list of folders.
+* `featureDir` - a folder containing feature files that are candidates for installation. This can be a single folder or a list of folders.
 
 An example configuration might look like the following:
 
@@ -55,9 +55,9 @@ The Eclipse sensiNact gateway includes a number of features which can be deploye
 
 A feature follows approximately the following lifecycle:
 
-1. Finding - feature files are often found in the `features` directory, where they are named <artifactId>.json. They may also be found in the `repository` directory, where they are named according to the standard [Maven repository layout](https://maven.apache.org/repository/layout.html).
+1. Finding - feature files are often found in the `features` directory, where they are named `<artifactId>.json`. They may also be found in the `repository` directory, where they are named according to the standard [Maven repository layout](https://maven.apache.org/repository/layout.html). If multiple directories are listed in the `repository` configuration, the first matching feature found will be returned.
 2. Loading - features are loaded using a standards compliant Feature Service implementation. Feature extensions are not supported, except where specifically stated, by the feature manager. Therefore features with mandatory kind feature extensions will not be processed further.
-3. Installing - the bundles listed in the feature are installed in the order defined by the feature. Each bundle is located by searching the `repository` directory. If a bundle is already installed (for example by another feature) or no suitable bundle can be found in the repository then installation is skipped. Once all bundles have been installed or skipped the newly installed bundles are started.
+3. Installing - the bundles listed in the feature are installed in the order defined by the feature. Each bundle is located by searching the `repository` directories. If a bundle is already installed (for example by another feature) or no suitable bundle can be found in the repository then installation is skipped. Once all bundles have been installed or skipped the newly installed bundles are started.
 4. Uninstalling - the bundles listed in the feature are uninstalled in the reverse of the order defined by the feature. If a bundle is required by another feature then it will not be uninstalled. The bundles to be uninstalled are all stopped, then all uninstalled, in the defined order.
 
 If the list of features installed in the gateway changes at runtime then:
