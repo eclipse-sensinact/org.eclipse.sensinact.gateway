@@ -27,7 +27,7 @@
     <hk2.osgi.version>1.0.3</hk2.osgi.version>
     <jackson.version>2.13.4</jackson.version>
     <jersey.version>3.0.8</jersey.version>
-    <asm.version>9.3</asm.version>
+    <asm.version>9.5</asm.version>
     <javassist.version>3.29.2-GA</javassist.version>
   </properties>
 
