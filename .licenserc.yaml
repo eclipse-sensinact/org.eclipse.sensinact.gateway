@@ -53,6 +53,7 @@ header:
     - '**/*.prefs'
     - 'license.templates'
     - 'distribution/launcher/src/test/resources/repository/**'
+    - 'distribution/launcher/src/test/resources/repository2/**'
     - 'webclient/dist'
     - 'webclient/node_modules'
     - 'webclient/openapi'
