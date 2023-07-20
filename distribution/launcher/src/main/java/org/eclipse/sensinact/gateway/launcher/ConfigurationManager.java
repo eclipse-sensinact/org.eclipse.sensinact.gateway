@@ -71,21 +71,23 @@ public class ConfigurationManager {
 
     ExecutorService executor;
 
+    Path configFolder;
     Path configFile;
 
-    private AtomicBoolean expectedInterruption = new AtomicBoolean();
-    private AtomicReference<Thread> currentWatchThread = new AtomicReference<>();
+    private final AtomicBoolean expectedInterruption = new AtomicBoolean();
+    private final AtomicReference<Thread> currentWatchThread = new AtomicReference<>();
 
     @Activate
     void start() throws IOException {
 
         watchService = FileSystems.getDefault().newWatchService();
 
-        configFile = Paths.get(System.getProperty("sensinact.config.dir", "./config"), "configuration.json");
+        configFolder = Paths.get(System.getProperty("sensinact.config.dir", "./config"));
+        configFile = configFolder.resolve("configuration.json");
 
         LOGGER.info("Eclipse sensiNact is watching for changes in configuration file {}", configFile);
 
-        configFile.getParent().register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+        configFolder.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
 
         executor = Executors.newSingleThreadExecutor(this::createThread);
 
@@ -146,7 +148,7 @@ public class ConfigurationManager {
                     // there has been a change, so assume there has
                     executor.submit(this::reloadConfigFile);
                     break;
-                } else if (Files.isSameFile(configFile.getFileName(), (Path) watchEvent.context())) {
+                } else if (Files.isSameFile(configFile, configFolder.resolve((Path) watchEvent.context()))) {
                     // There has been a change to the config file
                     executor.submit(this::reloadConfigFile);
                     break;
