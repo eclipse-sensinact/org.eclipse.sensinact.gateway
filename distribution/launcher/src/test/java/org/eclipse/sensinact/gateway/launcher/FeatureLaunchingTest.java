@@ -51,6 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.feature.FeatureService;
 
@@ -81,6 +82,9 @@ class FeatureLaunchingTest {
         ServiceLoader<FeatureService> loader = ServiceLoader.load(FeatureService.class);
         fs = loader.findFirst().get();
 
+        final BundleRevision revMock = Mockito.mock(BundleRevision.class);
+        Mockito.lenient().when(revMock.getTypes()).thenReturn(0);
+
         Mockito.lenient().when(config.featureDir()).thenReturn(new String[] { "src/test/resources/features" });
         Mockito.lenient().when(config.repository()).thenReturn(new String[] { "src/test/resources/repository" });
 
@@ -94,9 +98,10 @@ class FeatureLaunchingTest {
             } catch (AssertionFailedError e) {
                 failures.add(e);
             }
-            Bundle mock = Mockito.mock(Bundle.class, fromIs);
-            installed.put(fromIs, mock);
-            return mock;
+            Bundle bundleMock = Mockito.mock(Bundle.class, fromIs);
+            Mockito.lenient().when(bundleMock.adapt(eq(BundleRevision.class))).thenReturn(revMock);
+            installed.put(fromIs, bundleMock);
+            return bundleMock;
         });
 
         fl.featureService = fs;

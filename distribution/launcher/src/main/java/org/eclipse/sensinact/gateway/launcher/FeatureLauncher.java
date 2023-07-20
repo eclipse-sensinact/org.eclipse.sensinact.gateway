@@ -320,7 +320,7 @@ public class FeatureLauncher {
         for (Bundle b : installed) {
             try {
                 BundleRevision rev = b.adapt(BundleRevision.class);
-                if (rev == null || (rev.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
+                if (rev != null && (rev.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
                     // Start all but fragment bundles
                     b.start();
                 } else {
@@ -351,7 +351,7 @@ public class FeatureLauncher {
 
             for (Path featureDir : featureDirs) {
                 Path testedFile = featureDir.resolve(simpleFileName);
-                if (Files.exists(testedFile)) {
+                if (Files.isRegularFile(testedFile)) {
                     featureFile = testedFile;
                     break;
                 }

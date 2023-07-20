@@ -33,6 +33,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.service.feature.FeatureService;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +63,9 @@ class FeatureLaunchingMultipleFoldersTest {
         ServiceLoader<FeatureService> loader = ServiceLoader.load(FeatureService.class);
         fs = loader.findFirst().get();
 
+        final BundleRevision revMock = Mockito.mock(BundleRevision.class);
+        Mockito.lenient().when(revMock.getTypes()).thenReturn(0);
+
         Mockito.lenient().when(config.featureDir())
                 .thenReturn(new String[] { "src/test/resources/features2", "src/test/resources/features" });
         Mockito.lenient().when(config.repository())
@@ -76,9 +80,10 @@ class FeatureLaunchingMultipleFoldersTest {
             String name = i.getArgument(0, String.class);
             contents.put(name, fromIs);
 
-            Bundle mock = Mockito.mock(Bundle.class, fromIs);
-            installed.put(name, mock);
-            return mock;
+            Bundle bundleMock = Mockito.mock(Bundle.class, fromIs);
+            Mockito.lenient().when(bundleMock.adapt(eq(BundleRevision.class))).thenReturn(revMock);
+            installed.put(name, bundleMock);
+            return bundleMock;
         });
 
         fl.featureService = fs;
