@@ -247,7 +247,10 @@ public class FeatureLauncher {
             Bundle b = bundlesByIdentifier.get(s);
             if (b != null) {
                 try {
-                    b.stop();
+                    BundleRevision rev = b.adapt(BundleRevision.class);
+                    if (rev != null && (rev.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
+                        b.stop();
+                    }
                 } catch (BundleException e) {
                     LOGGER.warn("An error occurred stopping bundle {}.", s, e);
                 }
@@ -311,8 +314,10 @@ public class FeatureLauncher {
             String bid = bundleIdentifier.toString();
             if (!bundlesByIdentifier.containsKey(bid)) {
                 Bundle bundle = installBundle(bundleIdentifier);
-                bundlesByIdentifier.put(bid, bundle);
-                installed.add(bundle);
+                if (bundle != null) {
+                    bundlesByIdentifier.put(bid, bundle);
+                    installed.add(bundle);
+                }
             }
         }
 
