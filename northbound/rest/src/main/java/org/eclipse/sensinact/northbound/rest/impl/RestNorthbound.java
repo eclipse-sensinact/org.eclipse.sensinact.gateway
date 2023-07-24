@@ -96,9 +96,14 @@ public class RestNorthbound implements IRestNorthbound {
     private void injectFilter(final QueryDescribeDTO query) {
         final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
         query.filter = queryParameters.getFirst("filter");
-        if (queryParameters.containsKey("filterLanguage")) {
-            query.filterLanguage = queryParameters.getFirst("filterLanguage");
-        } else {
+        if (query.filter != null) {
+            if (queryParameters.containsKey("filterLanguage")) {
+                query.filterLanguage = queryParameters.getFirst("filterLanguage");
+            } else {
+                query.filterLanguage = "ldap";
+            }
+        } else if ((query.filter = queryParameters.getFirst("ldap")) != null) {
+            // LDAP-only legacy attribute
             query.filterLanguage = "ldap";
         }
     }
