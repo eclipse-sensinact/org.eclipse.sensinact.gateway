@@ -261,6 +261,37 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                 rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
     }
 
+    /**
+     * Fills the fields of the given resource snapshot
+     *
+     * @param rcSnapshot Resource snapshot
+     */
+    private void fillInResource(final ResourceSnapshotImpl rcSnapshot) {
+        // Add resource value
+        if (rcSnapshot.getResourceType() == ResourceType.ACTION) {
+            // Skip values for actions
+            return;
+        }
+
+        // Get the resource metadata
+        final ETypedElement rcFeature = rcSnapshot.getFeature();
+        final Service svc = rcSnapshot.getService().getModelService();
+        if (!svc.eIsSet((EStructuralFeature) rcFeature)) {
+            return;
+        }
+
+        final Metadata metadata = svc == null ? null : svc.getMetadata().get(rcFeature);
+        final Instant timestamp;
+        if (metadata != null) {
+            timestamp = metadata.getTimestamp();
+        } else {
+            timestamp = null;
+        }
+
+        rcSnapshot.setValue(
+                new TimedValueImpl<Object>(svc == null ? null : svc.eGet((EStructuralFeature) rcFeature), timestamp));
+    }
+
     @Override
     public List<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
@@ -313,35 +344,124 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Add resource value
         providersStream = providersStream.map(p -> {
             p.getServices().stream().forEach(s -> {
-                s.getResources().stream().forEach(rc -> {
-                    if (rc.getResourceType() == ResourceType.ACTION) {
-                        // Skip values for actions
-                        return;
-                    }
-                    // Get the resource metadata
-                    final Service svc = rc.getService().getModelService();
-                    final ETypedElement rcFeature = rc.getFeature();
-
-                    if (!svc.eIsSet((EStructuralFeature) rcFeature)) {
-                        return;
-                    }
-
-                    final Metadata metadata = svc == null ? null : svc.getMetadata().get(rcFeature);
-                    final Instant timestamp;
-                    if (metadata != null) {
-                        timestamp = metadata.getTimestamp();
-                    } else {
-                        timestamp = null;
-                    }
-
-                    rc.setValue(new TimedValueImpl<Object>(
-                            svc == null ? null : svc.eGet((EStructuralFeature) rcFeature), timestamp));
-                });
+                s.getResources().stream().forEach(this::fillInResource);
             });
             p.filterEmptyServices();
             return p;
         });
 
         return providersStream.collect(Collectors.toList());
+    }
+
+    @Override
+    public ProviderSnapshot snapshotProvider(String providerName) {
+        final Instant snapshotTime = Instant.now();
+
+        final Provider nexusProvider = nexusImpl.getProvider(providerName);
+        if (nexusProvider == null) {
+            // Provider not found
+            return null;
+        }
+
+        final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
+                nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
+
+        // Add all services
+        nexusImpl.getServicesForModel(nexusProvider.eClass()).filter(nexusProvider::eIsSet).forEach((svcFeature) -> {
+            // Get the service
+            final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, svcFeature.getName(),
+                    (Service) nexusProvider.eGet(svcFeature), snapshotTime);
+
+            // Get the resources
+            final EStructuralFeature sf = nexusProvider.eClass().getEStructuralFeature(svcSnapshot.getName());
+            nexusImpl.getResourcesForService((EClass) sf.getEType()).forEach(rcFeature -> {
+                final ResourceSnapshotImpl rcSnapshot = new ResourceSnapshotImpl(svcSnapshot, rcFeature, snapshotTime);
+                fillInResource(rcSnapshot);
+                svcSnapshot.add(rcSnapshot);
+            });
+
+            providerSnapshot.add(svcSnapshot);
+        });
+        providerSnapshot.filterEmptyServices();
+        return providerSnapshot;
+    }
+
+    @Override
+    public ServiceSnapshot snapshotService(String providerName, String serviceName) {
+        final Instant snapshotTime = Instant.now();
+
+        final Provider nexusProvider = nexusImpl.getProvider(providerName);
+        if (nexusProvider == null) {
+            // Provider not found
+            return null;
+        }
+
+        final Optional<EReference> foundSvc = nexusImpl.getServicesForModel(nexusProvider.eClass())
+                .filter(nexusProvider::eIsSet).filter(f -> f.getName().equals(serviceName)).findFirst();
+        if (foundSvc.isEmpty()) {
+            // Service not found
+            return null;
+        }
+
+        // Minimal snapshot of the provider owning the service
+        final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
+                nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
+
+        // Describe the service
+        final EReference svcFeature = foundSvc.get();
+        final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, svcFeature.getName(),
+                (Service) nexusProvider.eGet(svcFeature), snapshotTime);
+        providerSnapshot.add(svcSnapshot);
+
+        // Get the resources
+        final EStructuralFeature sf = nexusProvider.eClass().getEStructuralFeature(svcSnapshot.getName());
+        nexusImpl.getResourcesForService((EClass) sf.getEType()).forEach(rcFeature -> {
+            final ResourceSnapshotImpl rcSnapshot = new ResourceSnapshotImpl(svcSnapshot, rcFeature, snapshotTime);
+            fillInResource(rcSnapshot);
+            svcSnapshot.add(rcSnapshot);
+        });
+
+        return svcSnapshot;
+    }
+
+    @Override
+    public ResourceSnapshot snapshotResource(String providerName, String serviceName, String resourceName) {
+        final Instant snapshotTime = Instant.now();
+
+        final Provider nexusProvider = nexusImpl.getProvider(providerName);
+        if (nexusProvider == null) {
+            // Provider not found
+            return null;
+        }
+
+        final Optional<EReference> foundSvc = nexusImpl.getServicesForModel(nexusProvider.eClass())
+                .filter(nexusProvider::eIsSet).filter(f -> f.getName().equals(serviceName)).findFirst();
+        if (foundSvc.isEmpty()) {
+            // Service not found
+            return null;
+        }
+
+        final EStructuralFeature sf = nexusProvider.eClass().getEStructuralFeature(serviceName);
+        final Optional<ETypedElement> foundRc = nexusImpl.getResourcesForService((EClass) sf.getEType()).filter(f -> f.getName().equals(resourceName)).findFirst();
+        if(foundRc.isEmpty()) {
+            // Resource not found
+            return null;
+        }
+
+        // Minimal description of the provider owning the service
+        final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
+                nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
+
+        // Minimal description of the service owning the resource
+        final EReference svcFeature = foundSvc.get();
+        final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, svcFeature.getName(),
+                (Service) nexusProvider.eGet(svcFeature), snapshotTime);
+        providerSnapshot.add(svcSnapshot);
+
+        // Describe the resource
+        final ResourceSnapshotImpl rcSnapshot = new ResourceSnapshotImpl(svcSnapshot, foundRc.get(), snapshotTime);
+        fillInResource(rcSnapshot);
+        svcSnapshot.add(rcSnapshot);
+        return rcSnapshot;
     }
 }

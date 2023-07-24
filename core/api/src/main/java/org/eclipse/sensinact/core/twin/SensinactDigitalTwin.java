@@ -135,4 +135,30 @@ public interface SensinactDigitalTwin extends CommandScoped {
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter);
 
+    /**
+     * Returns the snapshot of the provider with the given name.
+     *
+     * @param providerName Name of the provider
+     * @return The snapshot of the provider, null if not found
+     */
+    ProviderSnapshot snapshotProvider(String providerName);
+
+    /**
+     * Returns the snapshot of a service of a provider
+     *
+     * @param providerName Name of the provider
+     * @param serviceName  Name of the service
+     * @return The snapshot of the service, null if not found
+     */
+    ServiceSnapshot snapshotService(String providerName, String serviceName);
+
+    /**
+     * Returns the snapshot of a resource of a service of a provider
+     *
+     * @param providerName Name of the provider
+     * @param serviceName  Name of the service
+     * @param resourceName Name of the resource
+     * @return The snapshot of the resource, null if not found
+     */
+    ResourceSnapshot snapshotResource(String providerName, String serviceName, String resourceName);
 }

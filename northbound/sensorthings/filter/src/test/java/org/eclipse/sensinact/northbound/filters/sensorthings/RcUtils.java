@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -151,6 +152,11 @@ public class RcUtils {
             @Override
             public ResourceType getResourceType() {
                 return ResourceType.PROPERTY;
+            }
+
+            @Override
+            public ValueType getValueType() {
+                return ValueType.UPDATABLE;
             }
 
             @Override

@@ -24,18 +24,19 @@ import java.util.Map;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterLexer;
-import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser;
-import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser.FilterContext;
-import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.FilterVisitor;
-import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.ILdapCriterion;
 import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterLexer;
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser;
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.LdapFilterParser.FilterContext;
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.FilterVisitor;
+import org.eclipse.sensinact.northbound.filters.ldap.antlr.impl.ILdapCriterion;
 import org.junit.jupiter.api.Test;
 
 public class LdapParserTest {
@@ -157,6 +158,11 @@ public class LdapParserTest {
             @Override
             public ResourceType getResourceType() {
                 return ResourceType.PROPERTY;
+            }
+
+            @Override
+            public ValueType getValueType() {
+                return ValueType.UPDATABLE;
             }
         };
     }
