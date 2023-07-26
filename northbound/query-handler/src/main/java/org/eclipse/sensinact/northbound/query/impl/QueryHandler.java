@@ -805,8 +805,8 @@ public class QueryHandler implements IQueryHandler {
                     final TypedResponse<ResponseDescribeResourceDTO> result = new TypedResponse<>(
                             EResultType.DESCRIBE_RESOURCE);
                     result.statusCode = 200;
-                    result.response = (ResponseDescribeResourceDTO) d;
-                    return Promises.resolved(result);
-                }, t -> Promises.resolved(new ErrorResultDTO(404, "Resource not set"))).getValue();
+                    result.response = (ResponseDescribeResourceDTO) d.getValue();
+                    return Promises.resolved((AbstractResultDTO) result);
+                }).fallbackTo(Promises.resolved(new ErrorResultDTO(404, "Resource not set"))).getValue();
     }
 }
