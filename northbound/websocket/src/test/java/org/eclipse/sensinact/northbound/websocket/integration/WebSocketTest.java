@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +34,7 @@ import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
@@ -264,7 +266,7 @@ public class WebSocketTest {
             assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
             assertEquals(dto.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
             final Instant secondNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
-            assertTrue(firstNotifTime.isBefore(secondNotifTime));
+            assertFalse(firstNotifTime.isAfter(secondNotifTime));
             assertFalse(updateTime2.isAfter(secondNotifTime));
 
             // Unsubscribe
@@ -292,6 +294,146 @@ public class WebSocketTest {
             // New update
             dto.value = 512;
             push.pushUpdate(dto).getValue();
+
+            // Wait of a notification
+            assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
+        }
+    }
+
+    @Test
+    void testSubscriptionWithFilter() throws Exception {
+        // Push 2 providers
+        final GenericDto dto1 = makeDto("wsTestProviderSubFilter1", "svc", "data", 42, Integer.class);
+        final GenericDto dto2 = makeDto("wsTestProviderSubFilter2", "svc", "data", 21, Integer.class);
+        final BulkGenericDto bulk = new BulkGenericDto();
+        bulk.dtos = List.of(dto1, dto2);
+        push.pushUpdate(bulk).getValue();
+
+        final WSHandler handler = new WSHandler();
+        final CountDownLatch barrier = new CountDownLatch(1);
+
+        final AtomicReference<Session> sessionRef = new AtomicReference<>();
+        handler.onConnect = s -> {
+            sessionRef.set(s);
+            barrier.countDown();
+        };
+
+        final AtomicReference<Throwable> error = new AtomicReference<>();
+        handler.onError = (s, t) -> {
+            error.set(t);
+            barrier.countDown();
+        };
+        handler.onClose = (s, c) -> barrier.countDown();
+
+        final BlockingQueue<AbstractResultDTO> resultsHolder = new BlockingArrayQueue<>();
+        handler.onMessage = (s, m) -> {
+            try {
+                resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
+            } catch (JsonProcessingException e) {
+                error.set(new Exception("Error parsing WS response", e));
+            }
+        };
+
+        try (final WSClient client = new WSClient()) {
+            client.ws.connect(handler, wsUri).get();
+
+            // Wait for the websocket to connect connection
+            barrier.await(2, TimeUnit.SECONDS);
+            final Session session = sessionRef.get();
+
+            // Send the notification
+            final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
+            querySub.uri = new SensinactPath();
+            querySub.requestId = String.valueOf(new Random().nextInt());
+            querySub.filter = "(PROVIDER=" + dto1.provider + ")";
+            querySub.filterLanguage = "ldap";
+            sendDTO(session, querySub);
+
+            // Result must be the subscription result
+            AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+            assertNotNull(rawResult, "No result to subscribe");
+            ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
+            assertEquals(querySub.requestId, rawResult.requestId);
+            assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
+
+            // Update the value
+            Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+            Object oldValue = dto1.value;
+            dto1.value = -12;
+            push.pushUpdate(dto1).getValue();
+
+            // Second result must be the notification
+            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+            if (rawResult == null && error.get() != null) {
+                fail(error.get());
+            }
+            assertNotNull(rawResult, "No notification");
+            ResultResourceNotificationDTO notif = (ResultResourceNotificationDTO) rawResult;
+            assertEquals(querySub.requestId, subscribeResult.requestId);
+            assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
+            assertNotNull(notif.notification);
+            assertEquals(dto1.provider, notif.notification.provider);
+            assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
+            assertEquals(dto1.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
+            assertEquals(dto1.provider, notif.notification.provider);
+            assertEquals(dto1.service, notif.notification.service);
+            assertEquals(dto1.resource, notif.notification.resource);
+            final Instant firstNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
+            assertFalse(updateTime.isAfter(firstNotifTime));
+
+            // New update on second provider
+            dto2.value = 128;
+            push.pushUpdate(dto2).getValue();
+
+            // Notification shouldn't be sent
+            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+            assertNull(rawResult, "Got notified on filtered out provider");
+
+            // Second result must be the notification
+            Instant updateTime2 = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+            oldValue = dto1.value;
+            dto1.value = -128;
+            push.pushUpdate(dto1).getValue();
+
+            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+            assertNotNull(rawResult, "No notification");
+            notif = (ResultResourceNotificationDTO) rawResult;
+            assertEquals(querySub.requestId, subscribeResult.requestId);
+            assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
+            assertNotNull(notif.notification);
+            assertEquals(dto1.provider, notif.notification.provider);
+            assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
+            assertEquals(dto1.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
+            final Instant secondNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
+            assertFalse(firstNotifTime.isAfter(secondNotifTime));
+            assertFalse(updateTime2.isAfter(secondNotifTime));
+
+            // Unsubscribe
+            final QueryUnsubscribeDTO unsubQuery = new QueryUnsubscribeDTO();
+            unsubQuery.subscriptionId = subscribeResult.subscriptionId;
+            sendDTO(session, unsubQuery);
+
+            // Wait for the result
+            final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
+            boolean found = false;
+            while (Instant.now().isBefore(timeout)) {
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                if (rawResult != null && rawResult.type == EResultType.UNSUBSCRIPTION_RESPONSE) {
+                    // Got it
+                    found = true;
+                    break;
+                }
+            }
+
+            assertTrue(found, "Didn't get the unsubscription response");
+
+            ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
+            assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
+
+            // New update for both
+            dto1.value = 512;
+            dto2.value = 256;
+            push.pushUpdate(bulk).getValue();
 
             // Wait of a notification
             assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
