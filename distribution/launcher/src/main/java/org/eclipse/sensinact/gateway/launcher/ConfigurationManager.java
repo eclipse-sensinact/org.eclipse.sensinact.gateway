@@ -230,8 +230,14 @@ public class ConfigurationManager {
 
     private Hashtable<String, Object> mergeConfigs(final Map<String, Object> currentValues,
             final Map<String, Object> defaultValues) {
-        final Hashtable<String, Object> newValues = new Hashtable<>(defaultValues);
-        newValues.putAll(currentValues);
+        final Hashtable<String, Object> newValues = new Hashtable<>();
+        if (defaultValues != null) {
+            newValues.putAll(defaultValues);
+        }
+
+        if (currentValues != null) {
+            newValues.putAll(currentValues);
+        }
         return newValues;
     }
 
