@@ -50,6 +50,7 @@ import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EReadWriteMode;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
+import org.eclipse.sensinact.northbound.query.api.StatusException;
 import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
@@ -167,6 +168,23 @@ public class QueryHandler implements IQueryHandler {
         }
 
         return result;
+    }
+
+    @Override
+    public ICriterion parseFilter(final String filter, final String filterLanguage) throws StatusException {
+        synchronized (filterHandlerRef) {
+            IFilterHandler filterHandler = filterHandlerRef.get();
+            if (filterHandler == null) {
+                throw new StatusException(501, "No filter implementation available");
+            }
+
+            try {
+                return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
+                        filter);
+            } catch (Throwable t) {
+                throw new StatusException(500, "Error parsing filter: " + t.getMessage());
+            }
+        }
     }
 
     /**
@@ -327,30 +345,6 @@ public class QueryHandler implements IQueryHandler {
         result.statusCode = 200;
         result.response = userSession.actOnResource(path.provider, path.service, path.resource, dto.parameters);
         return result;
-    }
-
-    /**
-     * Parses the given filter
-     *
-     * @param filter         Filter string
-     * @param filterLanguage Filter language
-     * @return Parsed filter
-     * @throws StatusException Error parsing filter
-     */
-    private ICriterion parseFilter(final String filter, final String filterLanguage) throws StatusException {
-        synchronized (filterHandlerRef) {
-            IFilterHandler filterHandler = filterHandlerRef.get();
-            if (filterHandler == null) {
-                throw new StatusException(501, "No filter implementation available");
-            }
-
-            try {
-                return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
-                        filter);
-            } catch (Throwable t) {
-                throw new StatusException(500, "Error parsing filter: " + t.getMessage());
-            }
-        }
     }
 
     /**

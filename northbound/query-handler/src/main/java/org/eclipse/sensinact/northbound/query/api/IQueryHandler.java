@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.northbound.query.api;
 
 import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 
 /**
  * Handles a standard sensiNact query
@@ -30,4 +31,15 @@ public interface IQueryHandler {
      * @return Query results
      */
     AbstractResultDTO handleQuery(SensiNactSession userSession, AbstractQueryDTO query);
+
+    /**
+     * Parses the given filter
+     *
+     * @param filter         Filter string
+     * @param filterLanguage Filter language
+     * @return Parsed filter, null if empty filter
+     * @throws StatusException Error parsing filter: 501 for missing filter parser,
+     *                         500 for parser exception
+     */
+    ICriterion parseFilter(String filter, String filterLanguage) throws StatusException;
 }
