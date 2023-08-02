@@ -22,14 +22,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
- *
+ * Holds a response of a given type
  */
 public class TypedResponse<T extends SubResult> extends AbstractResultDTO {
 
     @JsonSubTypes({ @Type(value = ResponseDescribeProviderDTO.class, name = "DESCRIBE_PROVIDER"),
             @Type(value = ResponseDescribeServiceDTO.class, name = "DESCRIBE_SERVICE"),
             @Type(value = ResponseDescribeResourceDTO.class, name = "DESCRIBE_RESOURCE"),
-            @Type(value = ResponseGetDTO.class, names = { "GET_RESPONSE", "SET_RESPONSE" }) })
+            @Type(value = ResponseGetDTO.class, name = "GET_RESPONSE"),
+            @Type(value = ResponseSetDTO.class, names = "SET_RESPONSE") })
     @JsonTypeInfo(use = Id.NAME, include = As.EXTERNAL_PROPERTY, property = "type")
     public T response;
 

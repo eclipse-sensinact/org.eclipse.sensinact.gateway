@@ -42,6 +42,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProvide
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseSetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ShortResourceDescriptionDTO;
@@ -418,13 +419,13 @@ public class SerializationTest {
         assertEquals(query.valueType, parsedQuery.valueType);
 
         // Result
-        final TypedResponse<ResponseGetDTO> setRc = new TypedResponse<>(EResultType.SET_RESPONSE);
+        final TypedResponse<ResponseSetDTO> setRc = new TypedResponse<>(EResultType.SET_RESPONSE);
         assertEquals(EResultType.SET_RESPONSE, setRc.type);
         setRc.statusCode = 200;
         setRc.error = "abc";
         setRc.requestId = query.requestId;
         setRc.uri = query.uri.toUri();
-        setRc.response = new ResponseGetDTO();
+        setRc.response = new ResponseSetDTO();
         setRc.response.name = "rc";
         setRc.response.timestamp = Instant.now().toEpochMilli();
         setRc.response.type = Integer.class.getName();
@@ -470,5 +471,36 @@ public class SerializationTest {
         WrappedAccessMethodCallParametersDTO read2 = mapper.readValue(s, WrappedAccessMethodCallParametersDTO.class);
         assertEquals(dto.parameters.get(0).name, read2.parameters.get(0).name);
 
+    }
+
+    @Test
+    void testTypeResponseSerialization() throws JsonProcessingException {
+        // Original version
+        final TypedResponse<ResponseGetDTO> original = new TypedResponse<>(EResultType.GET_RESPONSE);
+        original.statusCode = 42;
+        original.uri = "a/b/c";
+        original.response = new ResponseGetDTO();
+        original.response.name = "c";
+        original.response.type = Integer.class.getName();
+        original.response.timestamp = Instant.now().toEpochMilli();
+        original.response.value = 42;
+
+        final String strJson = mapper.writeValueAsString(original);
+        int idx = -1;
+        int typeKeyOccurrences = -1;
+        do {
+            typeKeyOccurrences++;
+            idx = strJson.indexOf("\"type\"", idx + 1);
+        } while (idx != -1);
+
+        // We should find "type" twice: root level type and response value type
+        assertEquals(2, typeKeyOccurrences);
+
+        // Parse it back
+        final TypedResponse<?> parsed = mapper.readValue(strJson, TypedResponse.class);
+        assertEquals(original.error, parsed.error);
+        assertEquals(original.requestId, parsed.requestId);
+        assertEquals(original.statusCode, parsed.statusCode);
+        assertEquals(original.response.getClass(), parsed.response.getClass());
     }
 }
