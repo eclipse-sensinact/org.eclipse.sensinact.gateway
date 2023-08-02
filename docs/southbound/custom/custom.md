@@ -26,7 +26,7 @@ GenericDto dto = new GenericDto();
 dto.model = "myModel";
 dto.provider = "provider1";
 dto.service = "service";
-dto.service = "resource";
+dto.resource = "resource";
 dto.value = 42;
 
 push.pushUpdate(dto);
