@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -54,7 +55,15 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
      */
     private final Class<?> type;
 
+    /**
+     * Resource type (action, property, ...)
+     */
     private final ResourceType resourceType;
+
+    /**
+     * Resource value type (read-only, read-write)
+     */
+    private final ValueType valueType;
 
     public ResourceSnapshotImpl(final ServiceSnapshotImpl parent, final ETypedElement rcFeature,
             final Instant snapshotInstant) {
@@ -63,6 +72,9 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         this.rcFeature = rcFeature;
         this.type = rcFeature.getEType().getInstanceClass();
         this.resourceType = ResourceImpl.findResourceType(rcFeature);
+
+        // TODO: get it from the resource description
+        this.valueType = ValueType.UPDATABLE;
 
         Service modelService = parent.getModelService();
         final Metadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
@@ -115,5 +127,10 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
     @Override
     public ResourceType getResourceType() {
         return resourceType;
+    }
+
+    @Override
+    public ValueType getValueType() {
+        return valueType;
     }
 }

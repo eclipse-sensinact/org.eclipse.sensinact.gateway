@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
+import org.eclipse.sensinact.core.session.ResourceShortDescription;
 import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
@@ -34,6 +35,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
 
 import jakarta.ws.rs.core.Context;
@@ -96,9 +98,14 @@ public class RestNorthbound implements IRestNorthbound {
     private void injectFilter(final QueryDescribeDTO query) {
         final MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters(true);
         query.filter = queryParameters.getFirst("filter");
-        if (queryParameters.containsKey("filterLanguage")) {
-            query.filterLanguage = queryParameters.getFirst("filterLanguage");
-        } else {
+        if (query.filter != null) {
+            if (queryParameters.containsKey("filterLanguage")) {
+                query.filterLanguage = queryParameters.getFirst("filterLanguage");
+            } else {
+                query.filterLanguage = "ldap";
+            }
+        } else if ((query.filter = queryParameters.getFirst("ldap")) != null) {
+            // LDAP-only legacy attribute
             query.filterLanguage = "ldap";
         }
     }
@@ -271,8 +278,17 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO resourceAct(final String providerId, final String serviceName, final String rcName,
             final WrappedAccessMethodCallParametersDTO parameters) {
 
-        final List<Entry<String, Class<?>>> actMethodArgumentsTypes = getSession().describeResourceShort(providerId,
-                serviceName, rcName).actMethodArgumentsTypes;
+        final ResourceShortDescription rcDesc = getSession().describeResourceShort(providerId, serviceName, rcName);
+        if (rcDesc == null) {
+            // Unknown resource
+            final ErrorResultDTO error = new ErrorResultDTO();
+            error.statusCode = 404;
+            error.error = "Resource not found";
+            error.uri = String.join("/", providerId, serviceName, rcName);
+            return error;
+        }
+
+        final List<Entry<String, Class<?>>> actMethodArgumentsTypes = rcDesc.actMethodArgumentsTypes;
 
         final QueryActDTO query = new QueryActDTO();
         query.uri = new SensinactPath(providerId, serviceName, rcName);

@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.query.impl;
+package org.eclipse.sensinact.northbound.query.api;
 
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 

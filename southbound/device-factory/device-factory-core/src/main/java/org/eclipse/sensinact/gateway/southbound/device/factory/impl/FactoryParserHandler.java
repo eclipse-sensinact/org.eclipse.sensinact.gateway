@@ -63,13 +63,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -190,14 +187,20 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final List<? extends IDeviceMappingRecord> records = parser.parseRecords(payload,
                     configuration.parserOptions, context);
             if (records != null) {
+                final BulkGenericDto bulk = new BulkGenericDto();
+                bulk.dtos = new ArrayList<>();
+
                 for (final IDeviceMappingRecord record : records) {
                     try {
-                        handleRecord(configuration, globalState, record)
-                                .onFailure((t) -> logger.error("Error updating resource: {}", t.getMessage(), t));
-                    } catch (JsonProcessingException | InvalidResourcePathException | ParserException
-                            | VariableNotFoundException e) {
-                        logger.error("Error parsing record: {}", e.getMessage(), e);
+                        bulk.dtos.addAll(handleRecord(configuration, globalState, record));
+                    } catch (InvalidResourcePathException | ParserException | VariableNotFoundException e) {
+                        logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
                     }
+                }
+
+                if (!bulk.dtos.isEmpty()) {
+                    // Send all updates to the gateway thread at once
+                    prototypePush.pushUpdate(bulk);
                 }
             }
         } finally {
@@ -253,9 +256,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * @throws ParserException              Error parsing content
      * @throws VariableNotFoundException    Error resolving variables
      */
-    private Promise<?> handleRecord(final DeviceMappingConfigurationDTO configuration, final RecordState globalState,
-            final IDeviceMappingRecord record) throws InvalidResourcePathException, ParserException,
-            VariableNotFoundException, JsonMappingException, JsonProcessingException {
+    private List<GenericDto> handleRecord(final DeviceMappingConfigurationDTO configuration,
+            final RecordState globalState, final IDeviceMappingRecord record)
+            throws InvalidResourcePathException, ParserException, VariableNotFoundException {
 
         final DeviceMappingOptionsDTO options = configuration.mappingOptions;
         final RecordState recordState = computeRecordState(configuration, globalState, record);
@@ -263,7 +266,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Extract the provider
         final String rawProvider = getFieldString(record, recordState.placeholders.get(KEY_PROVIDER), options);
         if (rawProvider == null || rawProvider.isBlank()) {
-            return Promises.failed(new IllegalArgumentException("Empty provider field."));
+            throw new ParserException("Empty provider field");
         }
         final String provider = NamingUtils.sanitizeName(rawProvider, false);
 
@@ -272,7 +275,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (recordState.placeholders.containsKey(KEY_MODEL)) {
             final String rawModel = getFieldString(record, recordState.placeholders.get(KEY_MODEL), options);
             if (rawModel == null || rawModel.isBlank()) {
-                return Promises.failed(new IllegalArgumentException("Empty model field."));
+                throw new ParserException("Empty model field");
             } else {
                 model = NamingUtils.sanitizeName(rawModel, false);
             }
@@ -281,8 +284,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
 
         // Bulk update preparation
-        final BulkGenericDto bulk = new BulkGenericDto();
-        bulk.dtos = new ArrayList<>();
+        final List<GenericDto> bulk = new ArrayList<>();
 
         // Compute the timestamp
         final Instant timestamp = computeTimestamp(record, recordState.placeholders, configuration);
@@ -292,7 +294,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (nameKey != null) {
             final String name = getFieldString(record, nameKey, options);
             if (name != null) {
-                bulk.dtos.add(makeDto(model, provider, "admin", "friendlyName", name, timestamp));
+                bulk.add(makeDto(model, provider, "admin", "friendlyName", name, timestamp));
             }
         }
 
@@ -301,7 +303,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         try {
             location = computeLocation(record, recordState.placeholders, configuration.mappingOptions);
             if (location != null) {
-                bulk.dtos.add(makeDto(model, provider, "admin", "location", location, timestamp));
+                bulk.add(makeDto(model, provider, "admin", "location", location, timestamp));
             }
         } catch (JsonProcessingException e) {
             throw new ParserException("Error parsing location", e);
@@ -317,7 +319,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     if (rcMapping.isMetadata()) {
                         logger.warn("Metadata update not supported.");
                     } else {
-                        bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
+                        bulk.add(makeDto(model, provider, service, rcName, value, timestamp));
                     }
                 }
             } catch (Exception e) {
@@ -335,7 +337,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     if (rcLiteral.isMetadata()) {
                         logger.warn("Metadata update not supported.");
                     } else {
-                        bulk.dtos.add(makeDto(model, provider, service, rcName, value, timestamp));
+                        bulk.add(makeDto(model, provider, service, rcName, value, timestamp));
                     }
                 }
             } catch (Exception e) {
@@ -343,8 +345,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             }
         }
 
-        // Push update
-        return prototypePush.pushUpdate(bulk);
+        return bulk;
     }
 
     /**

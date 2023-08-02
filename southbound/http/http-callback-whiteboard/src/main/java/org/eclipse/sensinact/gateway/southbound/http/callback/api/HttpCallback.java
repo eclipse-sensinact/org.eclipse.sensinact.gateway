@@ -16,12 +16,31 @@ import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service detected by the HTTP callback white board
+ */
 public interface HttpCallback {
 
+    /**
+     * Callback enabled at the given URI.
+     *
+     * @param uri Callback URI
+     */
     void activate(String uri);
 
+    /**
+     * Callback deactivated
+     *
+     * @param uri Callback URI
+     */
     void deactivate(String uri);
 
+    /**
+     * Data received through a POST
+     *
+     * @param uri     Callback URI
+     * @param headers Query headers
+     * @param body    Request body
+     */
     void call(String uri, Map<String, List<String>> headers, Reader body);
-
 }

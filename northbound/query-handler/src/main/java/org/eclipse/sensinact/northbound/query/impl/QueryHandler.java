@@ -22,8 +22,11 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.session.ProviderDescription;
 import org.eclipse.sensinact.core.session.ResourceDescription;
@@ -35,6 +38,8 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.api.FilterCommandHelper;
@@ -45,6 +50,7 @@ import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EReadWriteMode;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
+import org.eclipse.sensinact.northbound.query.api.StatusException;
 import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
@@ -71,6 +77,9 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
+import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,6 +168,23 @@ public class QueryHandler implements IQueryHandler {
         }
 
         return result;
+    }
+
+    @Override
+    public ICriterion parseFilter(final String filter, final String filterLanguage) throws StatusException {
+        synchronized (filterHandlerRef) {
+            IFilterHandler filterHandler = filterHandlerRef.get();
+            if (filterHandler == null) {
+                throw new StatusException(501, "No filter implementation available");
+            }
+
+            try {
+                return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
+                        filter);
+            } catch (Throwable t) {
+                throw new StatusException(500, "Error parsing filter: " + t.getMessage());
+            }
+        }
     }
 
     /**
@@ -319,30 +345,6 @@ public class QueryHandler implements IQueryHandler {
         result.statusCode = 200;
         result.response = userSession.actOnResource(path.provider, path.service, path.resource, dto.parameters);
         return result;
-    }
-
-    /**
-     * Parses the given filter
-     *
-     * @param filter         Filter string
-     * @param filterLanguage Filter language
-     * @return Parsed filter
-     * @throws StatusException Error parsing filter
-     */
-    private ICriterion parseFilter(final String filter, final String filterLanguage) throws StatusException {
-        synchronized (filterHandlerRef) {
-            IFilterHandler filterHandler = filterHandlerRef.get();
-            if (filterHandler == null) {
-                throw new StatusException(501, "No filter implementation available");
-            }
-
-            try {
-                return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
-                        filter);
-            } catch (Throwable t) {
-                throw new StatusException(500, "Error parsing filter: " + t.getMessage());
-            }
-        }
     }
 
     /**
@@ -533,19 +535,17 @@ public class QueryHandler implements IQueryHandler {
     /**
      * Generates the methods to access the given resource
      *
-     * @param rcDesc      Resource description
-     * @param rcShortDesc Short resource description
+     * @param resource Resource to describe
      * @return Access methods descriptions
      */
-    private List<AccessMethodDTO> generateAccessMethodsDescriptions(final ResourceDescription rcDesc,
-            final ResourceShortDescription rcShortDesc) {
+    private List<AccessMethodDTO> generateAccessMethodsDescriptions(final SensinactResource resource) {
         final List<AccessMethodDTO> methods = new ArrayList<>();
-        if (rcShortDesc.resourceType == ResourceType.ACTION) {
+        if (resource.getResourceType() == ResourceType.ACTION) {
             // Only an action is available
             final AccessMethodDTO actMethod = new AccessMethodDTO();
             actMethod.name = "ACT";
 
-            final List<Entry<String, Class<?>>> actMethodArgumentsTypes = rcShortDesc.actMethodArgumentsTypes;
+            final List<Entry<String, Class<?>>> actMethodArgumentsTypes = resource.getArguments();
             final List<AccessMethodParameterDTO> actParams = new ArrayList<>(actMethodArgumentsTypes.size());
             for (final Entry<String, Class<?>> entry : actMethodArgumentsTypes) {
                 final AccessMethodParameterDTO param = new AccessMethodParameterDTO();
@@ -575,12 +575,13 @@ public class QueryHandler implements IQueryHandler {
             unsubscriptionMethod.parameters = List.of(makeParam("subscriptionId", "string"));
             methods.add(unsubscriptionMethod);
 
-            if (rcShortDesc.valueType == ValueType.MODIFIABLE) {
+            if (resource.getValueType() == ValueType.MODIFIABLE) {
                 // SET is also available
                 final AccessMethodDTO setMethod = new AccessMethodDTO();
+                final Class<?> contentType = resource.getType();
                 setMethod.name = "SET";
-                setMethod.parameters = List.of(makeParam("value",
-                        rcShortDesc.contentType != null ? rcShortDesc.contentType.getName() : Object.class.getName()));
+                setMethod.parameters = List
+                        .of(makeParam("value", contentType != null ? contentType.getName() : Object.class.getName()));
                 methods.add(setMethod);
             }
         }
@@ -591,11 +592,12 @@ public class QueryHandler implements IQueryHandler {
     /**
      * Generates the list of resource metadata
      *
-     * @param rcDesc Resource description
+     * @param resource Resource to describe
+     * @param metadata Raw resource metadata
      * @return Description of resource metadta
      */
-    private List<MetadataDTO> generateMetadataDescriptions(final ResourceDescription rcDesc) {
-        final Map<String, Object> metadataMap = rcDesc.metadata;
+    private List<MetadataDTO> generateMetadataDescriptions(final SensinactResource resource,
+            Map<String, Object> metadataMap) {
         final List<MetadataDTO> result;
         if (metadataMap != null) {
             result = new ArrayList<>(metadataMap.size());
@@ -613,29 +615,6 @@ public class QueryHandler implements IQueryHandler {
             result = List.of();
         }
         return result;
-    }
-
-    /**
-     * Extracts a resource value from a provider snapshot
-     *
-     * @param provider Provider snapshot
-     * @param service  Service name
-     * @param rcName   Resource name
-     * @return Resource TimedValue (can be null)
-     */
-    private TimedValue<?> getResourceValue(final ProviderSnapshot provider, final String service, final String rcName) {
-        for (final ServiceSnapshot svc : provider.getServices()) {
-            if (service.equals(svc.getName())) {
-                for (final ResourceSnapshot rc : svc.getResources()) {
-                    if (rcName.equals(rc.getName())) {
-                        return rc.getValue();
-                    }
-                }
-                // Service found, but no resource with the right name: stop here
-                break;
-            }
-        }
-        return null;
     }
 
     /**
@@ -666,40 +645,51 @@ public class QueryHandler implements IQueryHandler {
         result.providers = new ArrayList<>(providers.size());
 
         for (final ProviderSnapshot provider : providers) {
+            provider.getServices().get(0).getResources().get(0).getValue();
+
             final CompleteProviderDescriptionDTO providerDto = new CompleteProviderDescriptionDTO();
             providerDto.name = provider.getName();
 
-            TimedValue<?> value = null;
-            if (query.attrs.contains("icon")) {
-                value = getResourceValue(provider, "admin", "icon");
-                if (value != null) {
-                    providerDto.icon = (String) value.getValue();
+            // Fill in resources from the admin service
+            ServiceSnapshot adminSvc = null;
+            for (ServiceSnapshot svcSnapshot : provider.getServices()) {
+                if ("admin".equals(svcSnapshot.getName())) {
+                    adminSvc = svcSnapshot;
+                    break;
                 }
             }
 
-            if (query.attrs.isEmpty() || query.attrs.contains("location")) {
-                value = getResourceValue(provider, "admin", "location");
-                if (value != null) {
-                    providerDto.location = (GeoJsonObject) value.getValue();
+            if (adminSvc != null) {
+                TimedValue<?> value;
+                for (ResourceSnapshot rcSnapshot : adminSvc.getResources()) {
+                    switch (rcSnapshot.getName()) {
+                    case "icon":
+                        if (query.attrs.contains("icon") && (value = rcSnapshot.getValue()) != null) {
+                            providerDto.icon = (String) value.getValue();
+                        }
+                        break;
+
+                    case "friendlyName":
+                        if (query.attrs.contains("friendlyName") && (value = rcSnapshot.getValue()) != null) {
+                            providerDto.friendlyName = (String) value.getValue();
+                        }
+                        break;
+
+                    case "location":
+                        if ((query.attrs.isEmpty() || query.attrs.contains("location"))
+                                && (value = rcSnapshot.getValue()) != null) {
+                            providerDto.location = (GeoJsonObject) value.getValue();
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
                 }
             }
 
-            if (query.attrs.contains("friendlyName")) {
-                value = getResourceValue(provider, "admin", "friendlyName");
-                if (value != null) {
-                    providerDto.friendlyName = (String) value.getValue();
-                }
-            }
-
-            providerDto.services = new ArrayList<>(provider.getServices().size());
-            for (final ServiceSnapshot service : provider.getServices()) {
-                final ResponseDescribeServiceDTO svcDescription = completeServiceDescription(userSession,
-                        provider.getName(), service.getName());
-                if (svcDescription != null) {
-                    providerDto.services.add(svcDescription);
-                }
-            }
-
+            providerDto.services = provider.getServices().stream().map(this::completeServiceDescription)
+                    .collect(Collectors.toList());
             result.providers.add(providerDto);
         }
 
@@ -733,35 +723,23 @@ public class QueryHandler implements IQueryHandler {
      * Generates the complete description of a service. This description contains
      * its name and the description of its resources.
      *
-     * @param providerId Provider ID
-     * @param svcName    Service name
+     * @param svcSnapshot Snapshot of the service
      * @return Complete description of the service
      */
-    private final ResponseDescribeServiceDTO completeServiceDescription(final SensiNactSession userSession,
-            final String providerId, final String svcName) {
-        final ServiceDescription serviceDescription = userSession.describeService(providerId, svcName);
-        if (serviceDescription == null) {
-            return null;
-        }
-
-        final ResponseDescribeServiceDTO svcDto = new ResponseDescribeServiceDTO();
-        svcDto.name = serviceDescription.service;
-        svcDto.resources = new ArrayList<>(serviceDescription.resources.size());
-
-        for (final String rcName : serviceDescription.resources) {
-            final ResourceShortDescription rcDescription = userSession.describeResourceShort(providerId, svcName,
-                    rcName);
-
-            final ShortResourceDescriptionDTO rcDto = new ShortResourceDescriptionDTO();
-            svcDto.resources.add(rcDto);
-            rcDto.name = rcName;
-            rcDto.type = rcDescription.resourceType;
-            if (rcDto.type != ResourceType.ACTION) {
-                rcDto.rws = EReadWriteMode.fromValueType(rcDescription.valueType);
+    private ResponseDescribeServiceDTO completeServiceDescription(final ServiceSnapshot svcSnapshot) {
+        final ResponseDescribeServiceDTO svcDesc = new ResponseDescribeServiceDTO();
+        svcDesc.name = svcSnapshot.getName();
+        svcDesc.resources = new ArrayList<>(svcSnapshot.getResources().size());
+        for (ResourceSnapshot rcSnapshot : svcSnapshot.getResources()) {
+            final ShortResourceDescriptionDTO rcDesc = new ShortResourceDescriptionDTO();
+            rcDesc.name = rcSnapshot.getName();
+            rcDesc.type = rcSnapshot.getResourceType();
+            if (rcDesc.type != ResourceType.ACTION) {
+                rcDesc.rws = EReadWriteMode.fromValueType(rcSnapshot.getValueType());
             }
+            svcDesc.resources.add(rcDesc);
         }
-
-        return svcDto;
+        return svcDesc;
     }
 
     /**
@@ -775,12 +753,21 @@ public class QueryHandler implements IQueryHandler {
     private AbstractResultDTO describeService(final SensiNactSession userSession, final String providerId,
             final String serviceId) throws Exception {
 
-        final TypedResponse<ResponseDescribeServiceDTO> result = new TypedResponse<>(EResultType.DESCRIBE_SERVICE);
-        result.statusCode = 200;
-        result.response = completeServiceDescription(userSession, providerId, serviceId);
-        if (result.response == null) {
+        final ServiceSnapshot svcSnapshot = gatewayThread.execute(new AbstractSensinactCommand<ServiceSnapshot>() {
+            @Override
+            protected Promise<ServiceSnapshot> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                    PromiseFactory pf) {
+                return pf.resolved(twin.snapshotService(providerId, serviceId));
+            }
+        }).getValue();
+
+        if (svcSnapshot == null) {
             return new ErrorResultDTO(404, "Service not found");
         }
+
+        final TypedResponse<ResponseDescribeServiceDTO> result = new TypedResponse<>(EResultType.DESCRIBE_SERVICE);
+        result.statusCode = 200;
+        result.response = completeServiceDescription(svcSnapshot);
         return result;
     }
 
@@ -795,22 +782,25 @@ public class QueryHandler implements IQueryHandler {
      */
     private AbstractResultDTO describeResource(final SensiNactSession userSession, final String providerId,
             final String serviceId, final String resourceId) throws Exception {
-
-        final ResourceDescription rcDesc = userSession.describeResource(providerId, serviceId, resourceId);
-        if (rcDesc == null) {
-            return new ErrorResultDTO(404, "Resource not set");
-        }
-
-        final ResourceShortDescription rcShortdesc = userSession.describeResourceShort(providerId, serviceId,
-                resourceId);
-
-        final TypedResponse<ResponseDescribeResourceDTO> result = new TypedResponse<>(EResultType.DESCRIBE_RESOURCE);
-        result.statusCode = 200;
-        result.response = new ResponseDescribeResourceDTO();
-        result.response.name = rcDesc.resource;
-        result.response.type = rcShortdesc.resourceType;
-        result.response.accessMethods = generateAccessMethodsDescriptions(rcDesc, rcShortdesc);
-        result.response.attributes = generateMetadataDescriptions(rcDesc);
-        return result;
+        return gatewayThread
+                .execute(new ResourceCommand<ResponseDescribeResourceDTO>(providerId, serviceId, resourceId) {
+                    @Override
+                    protected Promise<ResponseDescribeResourceDTO> call(SensinactResource resource, PromiseFactory pf) {
+                        final ResponseDescribeResourceDTO dto = new ResponseDescribeResourceDTO();
+                        dto.name = resource.getName();
+                        dto.type = resource.getResourceType();
+                        dto.accessMethods = generateAccessMethodsDescriptions(resource);
+                        return resource.getMetadataValues().then(metadata -> {
+                            dto.attributes = generateMetadataDescriptions(resource, metadata.getValue());
+                            return pf.resolved(dto);
+                        });
+                    }
+                }).then((d) -> {
+                    final TypedResponse<ResponseDescribeResourceDTO> result = new TypedResponse<>(
+                            EResultType.DESCRIBE_RESOURCE);
+                    result.statusCode = 200;
+                    result.response = (ResponseDescribeResourceDTO) d.getValue();
+                    return Promises.resolved((AbstractResultDTO) result);
+                }).fallbackTo(Promises.resolved(new ErrorResultDTO(404, "Resource not set"))).getValue();
     }
 }

@@ -33,10 +33,19 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
+import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
+import org.eclipse.sensinact.northbound.query.api.StatusException;
 import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.notification.AbstractResourceNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.notification.ErrorResultNotificationDTO;
@@ -193,10 +202,111 @@ public class WebSocketEndpoint {
             result.requestId = query.requestId;
 
             sendResult(wsSession, result);
+        } catch (StatusException e) {
+            logger.error("Error handling query {}: {}", query, e.getMessage(), e);
+            sendError(wsSession, query.uri, e.statusCode, "Error running query: " + e.getMessage());
         } catch (Throwable t) {
             logger.error("Error handling query {}: {}", query, t.getMessage(), t);
             sendError(wsSession, query.uri, 500, "Error running query: " + t.getMessage());
         }
+    }
+
+    /**
+     * Converts the given notification to a snapshot
+     *
+     * @param notif Received notification
+     * @return
+     */
+    private NotificationSnapshot convertToSnapshot(final AbstractResourceNotification notif) {
+        if (notif.getClass() == LifecycleNotification.class) {
+            return new NotificationSnapshot((LifecycleNotification) notif);
+        } else if (notif.getClass() == ResourceDataNotification.class) {
+            return new NotificationSnapshot((ResourceDataNotification) notif);
+        } else {
+            // Not a notification we support
+            return null;
+        }
+    }
+
+    /**
+     * Prepares the predicate to filter notifications
+     *
+     * @param query Subscription query
+     * @return The filter to apply on all notifications
+     * @throws StatusException Error creating the filter
+     */
+    private Predicate<AbstractResourceNotification> prepareFilter(QuerySubscribeDTO query) throws StatusException {
+        // Parse filter
+        final ICriterion parsedFilter = queryHandler.parseFilter(query.filter, query.filterLanguage);
+        if (parsedFilter == null) {
+            return null;
+        }
+
+        Predicate<AbstractResourceNotification> predicate = null;
+
+        // Basic filters
+        final Predicate<ProviderSnapshot> providerFilter = parsedFilter.getProviderFilter();
+        final Predicate<ServiceSnapshot> serviceFilter = parsedFilter.getServiceFilter();
+        final Predicate<ResourceSnapshot> resourceFilter = parsedFilter.getResourceFilter();
+        final ResourceValueFilter resourceValueFilter = parsedFilter.getResourceValueFilter();
+
+        if (providerFilter != null || serviceFilter != null || resourceFilter != null || resourceValueFilter != null) {
+            // We have at least one basic filter
+            predicate = notif -> {
+                // Mimic a snapshot to apply the filter
+                final NotificationSnapshot snapshot = convertToSnapshot(notif);
+                if (snapshot == null) {
+                    // Couldn't create the snapshot, consider the result invalid
+                    return false;
+                }
+
+                if (providerFilter != null && !providerFilter.test(snapshot.provider)) {
+                    return false;
+                }
+
+                if (serviceFilter != null && !serviceFilter.test(snapshot.service)) {
+                    return false;
+                }
+
+                if (resourceFilter != null && !resourceFilter.test(snapshot.resource)) {
+                    return false;
+                }
+
+                if (resourceValueFilter != null
+                        && !resourceValueFilter.test(snapshot.provider, List.of(snapshot.resource))) {
+                    return false;
+                }
+
+                // Passed all tests
+                return true;
+            };
+        }
+
+        // Combine with location filter
+        final Predicate<GeoJsonObject> locationFilter = parsedFilter.getLocationFilter();
+        if (locationFilter != null) {
+            Predicate<AbstractResourceNotification> locationPredicate = notif -> {
+                if ("admin".equals(notif.service) && "location".equals(notif.resource)) {
+                    if (notif.getClass() == LifecycleNotification.class) {
+                        final LifecycleNotification lifecycleNotif = (LifecycleNotification) notif;
+                        return lifecycleNotif.initialValue != null
+                                && locationFilter.test((GeoJsonObject) lifecycleNotif.initialValue);
+                    } else if (notif.getClass() == ResourceDataNotification.class) {
+                        final ResourceDataNotification dataNotif = (ResourceDataNotification) notif;
+                        return dataNotif.newValue != null && locationFilter.test((GeoJsonObject) dataNotif.newValue);
+                    }
+                }
+                return true;
+            };
+
+            if (predicate == null) {
+                predicate = locationPredicate;
+            } else {
+                predicate = predicate.and(locationPredicate);
+            }
+        }
+
+        return predicate;
     }
 
     /**
@@ -223,32 +333,38 @@ public class WebSocketEndpoint {
             topics = List.of("*");
         }
 
-        Predicate<AbstractResourceNotification> p;
+        final Predicate<AbstractResourceNotification> p;
         if (query.filter != null && !query.filter.isBlank()) {
-            // TODO: parse filter
-            // TODO: use filter criterion in event
-            p = a -> true;
+            p = prepareFilter(query);
         } else {
-            p = a -> true;
+            p = null;
         }
 
         final ClientDataListener cld = (topic, evt) -> {
-            Session ws = wsSession.get();
-            if (ws == null || !ws.isOpen()) {
-                logger.warn("Detected closed WebSocket. Stop listening");
-                userSession.removeListener(listenerId.get());
-            } else if (p.test(evt) && checkLatch(latch)) {
-                sendNotification(ws, listenerId.get(), new ResourceDataNotificationDTO(evt));
+            try {
+                Session ws = wsSession.get();
+                if (ws == null || !ws.isOpen()) {
+                    logger.warn("Detected closed WebSocket. Stop listening");
+                    userSession.removeListener(listenerId.get());
+                } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
+                    sendNotification(ws, listenerId.get(), new ResourceDataNotificationDTO(evt));
+                }
+            } catch (Throwable e) {
+                logger.warn("Error notifying WebSocket of life cycle update", e);
             }
         };
 
         final ClientLifecycleListener cll = (topic, evt) -> {
-            Session ws = wsSession.get();
-            if (ws == null || !ws.isOpen()) {
-                logger.warn("Detected closed WebSocket. Stop listening");
-                userSession.removeListener(listenerId.get());
-            } else if (p.test(evt) && checkLatch(latch)) {
-                sendNotification(ws, listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
+            try {
+                Session ws = wsSession.get();
+                if (ws == null || !ws.isOpen()) {
+                    logger.warn("Detected closed WebSocket. Stop listening");
+                    userSession.removeListener(listenerId.get());
+                } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
+                    sendNotification(ws, listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
+                }
+            } catch (Throwable e) {
+                logger.error("Error notifying WebSocket of a data update", e);
             }
         };
 

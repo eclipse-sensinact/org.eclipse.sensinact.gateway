@@ -16,6 +16,7 @@ package org.eclipse.sensinact.core.snapshot;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.twin.TimedValue;
 
 public interface ResourceSnapshot extends Snapshot {
@@ -29,4 +30,6 @@ public interface ResourceSnapshot extends Snapshot {
     Map<String, Object> getMetadata();
 
     ResourceType getResourceType();
+
+    ValueType getValueType();
 }

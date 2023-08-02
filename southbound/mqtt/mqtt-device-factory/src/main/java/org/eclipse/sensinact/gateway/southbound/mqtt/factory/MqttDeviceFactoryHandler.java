@@ -137,7 +137,8 @@ public class MqttDeviceFactoryHandler implements IMqttMessageListener {
         try {
             mappingHandler.handle(mappingConfiguration, context, message.getPayload());
         } catch (DeviceFactoryException e) {
-            logger.error("Error handling MQTT payload from handler={} on topic={}: {}", e.getMessage(), e);
+            logger.error("Error handling MQTT payload from handler '{}' on topic '{}': {}", handlerId, topic,
+                    e.getMessage(), e);
         }
     }
 
