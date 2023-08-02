@@ -1,6 +1,6 @@
 # Eclipse sensiNact SensorThings MQTT access
 
- The OGC SensorThings 1.1 specification defines a data model and MQTT interface for accessing data from sensor devices. Eclipse sensiNact includes a northbound adapter which translates from the sensiNact [core data model](../core/DataModel.md) event notifications to the SensorThings API MQTT notifications. The implementation uses [Moquette](https://github.com/moquette-io/moquette) as an MQTT broker.
+ The OGC SensorThings 1.1 specification defines a data model and MQTT interface for accessing data from sensor devices. Eclipse sensiNact includes a northbound adapter which translates from the sensiNact [core model](../core/CoreModel.md) event notifications to the SensorThings API MQTT notifications. The implementation uses [Moquette](https://github.com/moquette-io/moquette) as an MQTT broker.
 
 ## Bundles
 

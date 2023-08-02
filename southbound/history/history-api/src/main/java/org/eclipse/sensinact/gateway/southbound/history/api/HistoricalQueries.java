@@ -35,9 +35,8 @@ public interface HistoricalQueries {
      *         exists prior to the supplied time
      */
     @ACT(model = "sensiNactHistory", service = "history", resource = "single")
-    TimedValue<?> getSingleValue(@ActParam(name = "provider") String provider,
-            @ActParam(name = "service") String service, @ActParam(name = "resource") String resource,
-            @ActParam(name = "time") ZonedDateTime time);
+    TimedValue<?> getSingleValue(@ActParam("provider") String provider, @ActParam("service") String service,
+            @ActParam("resource") String resource, @ActParam("time") ZonedDateTime time);
 
     /**
      * Return a list of values that a resource had between the given times.
@@ -69,10 +68,9 @@ public interface HistoricalQueries {
      *         and value to indicate that the data continues.
      */
     @ACT(model = "sensiNactHistory", service = "history", resource = "range")
-    List<TimedValue<?>> getValueRange(@ActParam(name = "provider") String provider,
-            @ActParam(name = "service") String service, @ActParam(name = "resource") String resource,
-            @ActParam(name = "fromTime") ZonedDateTime fromTime, @ActParam(name = "toTime") ZonedDateTime toTime,
-            @ActParam(name = "skip") Integer skip);
+    List<TimedValue<?>> getValueRange(@ActParam("provider") String provider, @ActParam("service") String service,
+            @ActParam("resource") String resource, @ActParam("fromTime") ZonedDateTime fromTime,
+            @ActParam("toTime") ZonedDateTime toTime, @ActParam("skip") Integer skip);
 
     /**
      * Get the number of stored values for a given resource
@@ -87,7 +85,7 @@ public interface HistoricalQueries {
      * @return
      */
     @ACT(model = "sensiNactHistory", service = "history", resource = "count")
-    Long getStoredValueCount(@ActParam(name = "provider") String provider, @ActParam(name = "service") String service,
-            @ActParam(name = "resource") String resource, @ActParam(name = "fromTime") ZonedDateTime fromTime,
-            @ActParam(name = "toTime") ZonedDateTime toTime);
+    Long getStoredValueCount(@ActParam("provider") String provider, @ActParam("service") String service,
+            @ActParam("resource") String resource, @ActParam("fromTime") ZonedDateTime fromTime,
+            @ActParam("toTime") ZonedDateTime toTime);
 }

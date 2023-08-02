@@ -30,7 +30,7 @@ public @interface GetParam {
     GetSegment value();
 
     /**
-     * Possible arguments for SET handlers
+     * Possible arguments for GET handlers
      */
     public enum GetSegment {
         /**

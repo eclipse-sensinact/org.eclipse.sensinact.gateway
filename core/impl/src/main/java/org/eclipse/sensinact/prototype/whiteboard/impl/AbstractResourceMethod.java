@@ -88,7 +88,7 @@ abstract class AbstractResourceMethod {
     private String getActionParameterName(Parameter p) {
         String name;
         if (p.isAnnotationPresent(ActParam.class)) {
-            name = p.getAnnotation(ActParam.class).name();
+            name = p.getAnnotation(ActParam.class).value();
         } else {
             name = p.getName();
         }

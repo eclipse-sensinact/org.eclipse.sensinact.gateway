@@ -330,7 +330,7 @@ public class ResourceAccessTest {
 
     public static class TestAction {
         @ACT(model = PROVIDER, service = SERVICE, resource = "action")
-        public Double toDoubleDouble(@ActParam(name = "input") Long longValue) {
+        public Double toDoubleDouble(@ActParam("input") Long longValue) {
             return longValue.doubleValue() * 2.0d;
         }
     }

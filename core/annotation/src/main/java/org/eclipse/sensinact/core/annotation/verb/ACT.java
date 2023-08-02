@@ -49,6 +49,14 @@ public @interface ACT {
      */
     String resource();
 
+    /**
+     * The type of the resource data. If not set then the return type of the method
+     * is used.
+     *
+     * @return
+     */
+    Class<?> type() default Object.class;
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     public @interface ACTs {
