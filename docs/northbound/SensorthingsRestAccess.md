@@ -1,6 +1,6 @@
 # Eclipse sensiNact SensorThings REST access
 
- The OGC SensorThings 1.1 specification defines a data model and REST interface for accessing data from sensor devices. Eclipse sensiNact includes a northbound adapter which translates from the sensiNact [core data model](../core/DataModel.md) to the SensorThings API. The implementation uses Jakarta RESTful Web Services via the OSGi Jakarta REST Whiteboard specification.
+ The OGC SensorThings 1.1 specification defines a data model and REST interface for accessing data from sensor devices. Eclipse sensiNact includes a northbound adapter which translates from the sensiNact [core model](../core/CoreModel.md) to the SensorThings API. The implementation uses Jakarta RESTful Web Services via the OSGi Jakarta REST Whiteboard specification.
 
 ## Bundles
 

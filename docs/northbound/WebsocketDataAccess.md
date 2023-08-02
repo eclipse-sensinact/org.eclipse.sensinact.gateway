@@ -1,6 +1,6 @@
 # Eclipse sensiNact Websocket interface
 
- The Websocket interface is a user-facing API for Eclipse sensiNact designed to fit naturally with the [core data model](../core/DataModel.md). The implementation uses Jetty Websockets via the OSGi Servlet Whiteboard specification.
+ The Websocket interface is a user-facing API for Eclipse sensiNact designed to fit naturally with the [core model](../core/CoreModel.md). The implementation uses Jetty Websockets via the OSGi Servlet Whiteboard specification.
 
 ## Bundles
 

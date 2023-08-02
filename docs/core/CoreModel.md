@@ -6,7 +6,7 @@ The sensiNact core data model is broken down into *Resources*, *Services* and *P
 
 # Verbs
 
-THe sensiNact *verbs* are conceptually similar to the verbs in HTTP. They represent a common set of instructions that can be used to query or change the state of a sensiNact gateway.
+The sensiNact *verbs* are conceptually similar to the verbs in HTTP. They represent a common set of instructions that can be used to query or change the state of a sensiNact gateway.
 
 ## Read only verbs
 
@@ -45,9 +45,9 @@ The *SET* verb is used to change the value of a *Resource* or to change the meta
 
 The *ACT* verb is used to trigger an *Action Resource*, potentially passing one or more parameters to a device, and potentially returning a value.
 
-# The data model
+# The core data model
 
-The sensiNact data model is composed of *Resources*, *Services* and *Providers*, which are arranged in a tree-structure.
+The sensiNact core data model is composed of *Resources*, *Services* and *Providers*, which are arranged in a tree-structure. The definition of the structure for a provider is referred to as the provider model.
 
 A `Resource` is the lowest level of the sensiNact data model. A resource represents a single sensor, actuator or state variable within the digital twin. There are two types of *Resources*, data resources and action resources
 
@@ -60,7 +60,7 @@ The `fields` of a resource have associated time stamps representing the times at
 
 ### Read-only fields
 
-A read-only field is one cannot be changed by sensiNact. Read-only fields may be `UPDATEABLE` and have the potential to change over time (e.g. the data reading from a sensor) or `FIXED` and unchanging (e.g. a hardware identifier reported by a device).
+A read-only field is one cannot be changed by sensiNact. Read-only fields may be `UPDATABLE` and have the potential to change over time (e.g. the data reading from a sensor) or `FIXED` and unchanging (e.g. a hardware identifier reported by a device).
 
 The value of a read-only field can be queried using the `GET` verb, or watched using the `SUBSCRIBE` verb.
 
@@ -87,7 +87,7 @@ A service is a logical grouping of one or more resources that are related, for e
 
 ## Providers
 
-A `Provider` is a logical representation of a device, group of devices, or physical object, that should be available within sensiNact. Each `Provider` will contain one or more `Service` entries
+A `Provider` is a logical representation of a device, group of devices, or physical object, that should be available within sensiNact. Each `Provider` will contain one or more `Service` entries. The description of the services and resources associated with a provider is known as the provider model.
 
 ### The `admin` Service
 
@@ -97,6 +97,6 @@ All `Provider` instances have an implicit service called `admin`. The `admin` se
  * `location` - a GeoJSON string representing the location of this device
  * `icon` - an icon to use when representing this device
 
-## The Eclipse Modelling Framework (EMF)
+## Looking for more detail?
 
-EMF is used internally to store the sensiNact data and metadata
+More detail about the data model can be defined and interacted with is available [here](data-model/DataModel.md)

@@ -1,6 +1,6 @@
 # Eclipse sensiNact REST interface
 
- The REST interface is a user-facing API for Eclipse sensiNact designed to fit naturally with the [core data model](../core/DataModel.md). The implementation uses Jakarta RESTful Web Services via the OSGi Jakarta REST Whiteboard specification, and follows RESTful principles.
+ The REST interface is a user-facing API for Eclipse sensiNact designed to fit naturally with the [core model](../core/CoreModel.md). The implementation uses Jakarta RESTful Web Services via the OSGi Jakarta REST Whiteboard specification, and follows RESTful principles.
 
 ## Bundles
 

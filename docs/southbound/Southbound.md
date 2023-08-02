@@ -16,3 +16,5 @@ The history of resource values is considered to be southbound provider linked to
 
 * [sensiNact History](./history/history.md)
   * [Timescale history provider](./history/timescale.md)
+
+Writing your own [custom southbound connector](./custom/custom.md) is very easy, and can allow you to optimise your updates.

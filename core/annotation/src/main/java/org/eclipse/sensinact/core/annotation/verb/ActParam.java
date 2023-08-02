@@ -32,5 +32,5 @@ public @interface ActParam {
      *
      * @return
      */
-    String name();
+    String value();
 }

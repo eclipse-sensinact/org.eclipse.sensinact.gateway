@@ -196,7 +196,7 @@ public class WhiteboardImplTest {
 
         // Invert numbering to show we use the parameter names from the annotations
         @ACT(model = "foo", service = "actions", resource = "3")
-        public Integer namedArgs(@ActParam(name = "arg1") Integer arg0, @ActParam(name = "arg0") Instant arg1) {
+        public Integer namedArgs(@ActParam("arg1") Integer arg0, @ActParam("arg0") Instant arg1) {
             return (arg1.isAfter(Instant.now()) ? 3 : 5) * arg0;
         }
 
