@@ -18,11 +18,11 @@ Creating a model can be achieved in several different ways
 
 The data first approach appears, at first, to avoid creating a model entirely. In the data first approach users simply push data updates into sensiNact using the `PrototypePush` service
 
-```
+```java
 GenericDto dto = new GenericDto();
 dto.provider = "provider1";
 dto.service = "service";
-dto.service = "resource";
+dto.resource = "resource";
 dto.value = 42;
 
 push.pushUpdate(dto);
@@ -47,7 +47,7 @@ The code first approach is similar to the data first approach in that no formal 
 
 For example, the following DTO:
 
-```
+```java
 @Model("WeatherStation")
 public class WeatherStation {
   @Provider
@@ -79,7 +79,7 @@ In fact the process becomes more obvious if the `model` field of the `GenericDto
 
 #### Modifying the model
 
-When using a code first approach the model can always be updated and dynamically expanded. This means that the sending a new custom dto  extend the model to include any new services or resources as needed.
+When using a code first approach the model can always be updated and dynamically expanded. This means that the sending a new custom dto will extend the model to include any new services or resources as needed.
 
 A significant advantage of the code-first model is that it is not as easy to make mistakes when pushing updates, as the schema for the resources is defined in a class. This reduces the likelihood that the model for the providers will be incorrectly extended.
 
@@ -87,7 +87,7 @@ A significant advantage of the code-first model is that it is not as easy to mak
 
 In some cases auto-generating the model gives insufficient control over the model that gets created. In this case a model can be explicitly generated in code by using the `SensinactModelManager` which gets passed to a sensiNact command when it is run. The following example code creates the same model as the code-first example above:
 
-```
+```java
 public class WeatherStationModel extends AbstractSensinactCommand<Void> {
     @Override
     protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
@@ -119,7 +119,7 @@ public class WeatherStationModel extends AbstractSensinactCommand<Void> {
 If you have created a suitable model for use in sensiNact then you can use the `SensinactModelManager` to import it directly.
 
 
-```
+```java
 public class WeatherStationModel extends AbstractSensinactCommand<Void> {
     @Override
     protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
@@ -132,7 +132,7 @@ public class WeatherStationModel extends AbstractSensinactCommand<Void> {
 
 ## Whiteboard Resources
 
-In addition to pushed updates sensiNact allows resources to be registered using the whiteboard pattern. This allows for *pull based* data resources, where the gateway will query the connector to get or set an up to date value for a resource, and for action resources where the supplied function will be made available as an action to be called.
+In addition to pushed updates sensiNact allows resources to be registered using the [whiteboard pattern](https://docs.osgi.org/whitepaper/whiteboard-pattern/). This allows for *pull based* data resources, where the gateway will query the connector to get or set an up to date value for a resource, and for action resources where the supplied function will be made available as an action to be called.
 
 ### Whiteboard Services
 

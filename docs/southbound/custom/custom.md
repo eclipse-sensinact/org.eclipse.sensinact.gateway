@@ -21,7 +21,7 @@ The `GenericDTO` allows data updates to be pushed by setting fields in the DTO. 
 
 For example:
 
-```
+```java
 GenericDto dto = new GenericDto();
 dto.model = "myModel";
 dto.provider = "provider1";
@@ -40,7 +40,7 @@ Custom DTOs allow southbound providers to simplify the way in which they push up
 
 The model annotation is used to define the name of the model to which an update is applied. The preferred usage is as a single element annotation applied to the DTO type.
 
-```
+```java
 @Model("myModel")
 public class MyUpdateDTO {
     ....
@@ -49,7 +49,7 @@ public class MyUpdateDTO {
 
 The annotation can also be used as a marker annotation on a String field to identify that the value of the field should be used as the name of the model.
 
-```
+```java
 public class MyUpdateDTO {
     @Model
     public String model
@@ -60,7 +60,7 @@ public class MyUpdateDTO {
 
 The provider annotation is used to define the id of the provider to which an update is applied. The preferred usage is as a marker annotation applied to a String field in the DTO type.
 
-```
+```java
 public class MyUpdateDTO {
     @Provider
     public String provider
@@ -69,7 +69,7 @@ public class MyUpdateDTO {
 
 The annotation can also be used as a single element annotation on a type or field to identify that the update should be applied to the identified provider. This usage hard codes the id of the provider and should only be used in cases where the DTO will have limited reuse
 
-```
+```java
 @Provider("myProvider")
 public class MyUpdateDTO {
     ...
@@ -77,7 +77,7 @@ public class MyUpdateDTO {
 ```
 or
 
-```
+```java
 public class MyUpdateDTO {
     @Provider("myProvider")
     @Service("myService")
@@ -90,7 +90,7 @@ public class MyUpdateDTO {
 
 The service annotation is used to define the name of the service to which an update is applied. The preferred usage is as a single element annotation applied to a field containing the data to update, or to the type which will use that service for all data updates.
 
-```
+```java
 public class MyUpdateDTO {
     @Service("myService")
     @Data
@@ -100,7 +100,7 @@ public class MyUpdateDTO {
 ```
 or
 
-```
+```java
 @Service("myService")
 public class MyUpdateDTO {
     ...
@@ -110,7 +110,7 @@ public class MyUpdateDTO {
 The annotation can also be used as a marker annotation applied to a String field in the DTO type. This allows the service name to be set dynamically at runtime.
 
 
-```
+```java
 public class MyUpdateDTO {
     @Service
     public String service;
@@ -121,7 +121,7 @@ public class MyUpdateDTO {
 
 The `Data` annotation is applied to a DTO field and used to define a data value which should be updated. The name of the field is used as the name of the resource to be updated.
 
-```
+```java
 public class MyUpdateDTO {
     @Data
     public Integer counter;
@@ -135,7 +135,7 @@ The type of the resource defaults to the type of the data field, but this can be
 
 The resource annotation is used to define the name of the resource to which an update is applied. The preferred usage is as a single element annotation applied to a field containing the data to update. This can be used to override the default resource name in the case where it does not match the DTO field name.
 
-```
+```java
 public class MyUpdateDTO {
     @Resource("myResource")
     @Data
@@ -146,7 +146,7 @@ public class MyUpdateDTO {
 
 The annotation can also be used as a marker annotation applied to a String field in the DTO type. This allows the resource name to be set dynamically at runtime.
 
-```
+```java
 public class MyUpdateDTO {
     @Resource
     public String resource;
@@ -157,7 +157,7 @@ public class MyUpdateDTO {
 
 The `Timestamp` annotation can be applied to a field to indicate the time at which the data in the update was generated. The type of the field may be a `long` or `Long` representing time since EPOCH, or it may be an `Instant`, `OffsetDateTime` or `ZonedDateTime`.
 
-```
+```java
 public class MyUpdateDTO {
     @Timestamp
     public long timestamp;
@@ -168,7 +168,7 @@ public class MyUpdateDTO {
 
 The `Metadata` annotation can be applied to a field to indicate that it contains metadata that should be updated.
 
-```
+```java
 public class MyUpdateDTO {
     @Metadata
     public String unit;
@@ -207,7 +207,7 @@ In the simplest case the `model`, `service` and `resource` elements of the `GET`
 * `@UriParam String s` - Allows the injection of either the full URI, or parts of the URI, representing the GET request (e.g. the provider id)
 * `@GetParam TimedValue oldValue` - Allows the injection of either the existing TimedValue from the digital twin, or the `Class` representing the type of the object being retrieved
 
-```
+```java
 @GET(model = "myModel", service = "myService", resource = "myResource", cacheDuration = 2, cacheDurationUnit = MINUTES)
 public Promise<Integer> getReading(@UriParam(PROVIDER) String provider, @GetParam TimedValue<Integer> oldValue) {
     ...
@@ -238,7 +238,7 @@ The return value from the `SET` method represents the eventual result of the `SE
 * The new value of the resource after the `SET`. This will normally be the value passed into the `SET` operation, but may be different if the resource is being updated by multiple users, or for some other reason
 * An exception, indicating that the `SET` operation failed
 
-```
+```java
 @SET(model = "myModel", service = "myService", resource = "myResource")
 public Promise<Integer> getReading(@UriParam(PROVIDER) String provider, @SetParam TimedValue<Integer> newValue) {
     ...
@@ -256,7 +256,7 @@ The `model`, `service` and `resource` elements of the `ACT` annotation are to de
 
 The return value from the `ACT` method represents the eventual result of the `ACT` operation. If a `Promise` is returned the `ACT` will be treated as an asynchronous operation which completes when the `Promise` resolves.
 
-```
+```java
 @ACT(model = "myModel", service = "myService", resource = "securityLight")
 public Promise<Void> setLight(@ActParam("brightness") Integer b, @ActParam("time") Duration d) {
   ...
