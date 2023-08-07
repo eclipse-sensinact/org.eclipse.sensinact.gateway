@@ -14,24 +14,16 @@ package org.eclipse.sensinact.northbound.query.dto.result;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
+import org.eclipse.sensinact.northbound.query.dto.result.jackson.TypedResponseDeserializer;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Holds a response of a given type
  */
+@JsonDeserialize(using = TypedResponseDeserializer.class)
 public class TypedResponse<T extends SubResult> extends AbstractResultDTO {
 
-    @JsonSubTypes({ @Type(value = ResponseDescribeProviderDTO.class, name = "DESCRIBE_PROVIDER"),
-            @Type(value = ResponseDescribeServiceDTO.class, name = "DESCRIBE_SERVICE"),
-            @Type(value = ResponseDescribeResourceDTO.class, name = "DESCRIBE_RESOURCE"),
-            @Type(value = ResponseGetDTO.class, name = "GET_RESPONSE"),
-            @Type(value = ResponseSetDTO.class, names = "SET_RESPONSE") })
-    @JsonTypeInfo(use = Id.NAME, include = As.EXTERNAL_PROPERTY, property = "type")
     public T response;
 
     public TypedResponse() {

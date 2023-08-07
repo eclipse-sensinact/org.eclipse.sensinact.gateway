@@ -28,6 +28,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeId;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
  * Represents a Northbound query response
@@ -43,6 +46,7 @@ import com.fasterxml.jackson.annotation.JsonTypeId;
         @Type(value = ResultSubscribeDTO.class, name = "SUBSCRIPTION_RESPONSE"),
         @Type(value = ResultResourceNotificationDTO.class, name = "SUBSCRIPTION_NOTIFICATION"),
         @Type(value = ResultUnsubscribeDTO.class, name = "UNSUBSCRIPTION_RESPONSE") })
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type", visible = true)
 public abstract class AbstractResultDTO {
 
     /**
