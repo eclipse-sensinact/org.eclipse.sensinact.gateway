@@ -66,6 +66,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProvide
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseSetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
@@ -297,8 +298,8 @@ public class QueryHandler implements IQueryHandler {
             return new ErrorResultDTO(405, "Can only set a resource or its metadata");
         }
 
-        final TypedResponse<ResponseGetDTO> result = new TypedResponse<>(EResultType.SET_RESPONSE);
-        final ResponseGetDTO response = new ResponseGetDTO();
+        final TypedResponse<ResponseSetDTO> result = new TypedResponse<>(EResultType.SET_RESPONSE);
+        final ResponseSetDTO response = new ResponseSetDTO();
 
         // Force the timestamp so that we are sure we are coherent with what we return
         final Instant timestamp = Instant.now();

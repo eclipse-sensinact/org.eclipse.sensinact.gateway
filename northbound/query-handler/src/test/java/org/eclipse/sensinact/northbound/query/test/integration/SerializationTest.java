@@ -24,6 +24,7 @@ import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EQueryType;
 import org.eclipse.sensinact.northbound.query.api.EReadWriteMode;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
@@ -42,8 +43,10 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProvide
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseSetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ShortResourceDescriptionDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.junit.jupiter.api.Test;
@@ -418,13 +421,13 @@ public class SerializationTest {
         assertEquals(query.valueType, parsedQuery.valueType);
 
         // Result
-        final TypedResponse<ResponseGetDTO> setRc = new TypedResponse<>(EResultType.SET_RESPONSE);
+        final TypedResponse<ResponseSetDTO> setRc = new TypedResponse<>(EResultType.SET_RESPONSE);
         assertEquals(EResultType.SET_RESPONSE, setRc.type);
         setRc.statusCode = 200;
         setRc.error = "abc";
         setRc.requestId = query.requestId;
         setRc.uri = query.uri.toUri();
-        setRc.response = new ResponseGetDTO();
+        setRc.response = new ResponseSetDTO();
         setRc.response.name = "rc";
         setRc.response.timestamp = Instant.now().toEpochMilli();
         setRc.response.type = Integer.class.getName();
@@ -470,5 +473,60 @@ public class SerializationTest {
         WrappedAccessMethodCallParametersDTO read2 = mapper.readValue(s, WrappedAccessMethodCallParametersDTO.class);
         assertEquals(dto.parameters.get(0).name, read2.parameters.get(0).name);
 
+    }
+
+    @Test
+    void testTypedResponseSerialization() throws JsonProcessingException {
+        // Original version
+        final TypedResponse<ResponseGetDTO> original = new TypedResponse<>(EResultType.GET_RESPONSE);
+        original.statusCode = 218;
+        original.uri = "a/b/c";
+        original.response = new ResponseGetDTO();
+        original.response.name = "c";
+        original.response.type = Integer.class.getName();
+        original.response.timestamp = Instant.now().toEpochMilli();
+        original.response.value = 42;
+
+        final String strJson = mapper.writeValueAsString(original);
+        int idx = -1;
+        int typeKeyOccurrences = -1;
+        do {
+            typeKeyOccurrences++;
+            idx = strJson.indexOf("\"type\"", idx + 1);
+        } while (idx != -1);
+
+        // We should find "type" twice: root level type and response value type
+        assertEquals(2, typeKeyOccurrences);
+
+        // Parse it back
+        final TypedResponse<?> parsed = mapper.readValue(strJson, TypedResponse.class);
+        assertEquals(original.error, parsed.error);
+        assertEquals(original.requestId, parsed.requestId);
+        assertEquals(original.statusCode, parsed.statusCode);
+        assertEquals(original.response.getClass(), parsed.response.getClass());
+    }
+
+    @Test
+    void testProvidersList() throws JsonProcessingException {
+        final ResultListProvidersDTO original = new ResultListProvidersDTO();
+        original.statusCode = 200;
+        original.uri = "/";
+        original.providers = List.of("toto", "titi", "tutu");
+
+        final String strJson = mapper.writeValueAsString(original);
+
+        // Test direct conversion
+        final ResultListProvidersDTO typedParsed = mapper.readValue(strJson, ResultListProvidersDTO.class);
+        assertEquals(original.type, typedParsed.type);
+        assertEquals(original.statusCode, typedParsed.statusCode);
+        assertEquals(original.uri, typedParsed.uri);
+        assertEquals(original.providers, typedParsed.providers);
+
+        // Test via abstract
+        final AbstractResultDTO abstractParsed = mapper.readValue(strJson, AbstractResultDTO.class);
+        assertEquals(original.type, abstractParsed.type);
+        assertEquals(original.statusCode, abstractParsed.statusCode);
+        assertEquals(original.uri, abstractParsed.uri);
+        assertEquals(original.providers, ((ResultListProvidersDTO) abstractParsed).providers);
     }
 }

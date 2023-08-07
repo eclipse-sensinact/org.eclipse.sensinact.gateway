@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeId;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
@@ -45,8 +46,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
         @Type(value = ResultSubscribeDTO.class, name = "SUBSCRIPTION_RESPONSE"),
         @Type(value = ResultResourceNotificationDTO.class, name = "SUBSCRIPTION_NOTIFICATION"),
         @Type(value = ResultUnsubscribeDTO.class, name = "UNSUBSCRIPTION_RESPONSE") })
-@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type", visible = true)
 public abstract class AbstractResultDTO {
+
+    /**
+     * Result content type
+     */
+    @JsonTypeId
+    public final EResultType type;
 
     /**
      * Targeted URI as used
@@ -69,11 +76,6 @@ public abstract class AbstractResultDTO {
      */
     @JsonInclude(Include.NON_NULL)
     public String error;
-
-    /**
-     * Result content type
-     */
-    public EResultType type;
 
     /**
      * Sets up the result type
