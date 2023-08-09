@@ -3,6 +3,7 @@
   "mapping": {
     "@provider": "Name",
     "data/value": "Value",
+    "data/long-value": "LongValue",
     "@latitude": "Latitude",
     "@longitude": "Longitude",
     "@altitude": "Altitude",
