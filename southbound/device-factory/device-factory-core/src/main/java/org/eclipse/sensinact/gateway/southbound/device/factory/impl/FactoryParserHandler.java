@@ -275,7 +275,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (recordState.placeholders.containsKey(KEY_MODEL)) {
             final String rawModel = getFieldString(record, recordState.placeholders.get(KEY_MODEL), options);
             if (rawModel == null || rawModel.isBlank()) {
-                throw new ParserException("Empty model field");
+                throw new ParserException("Empty model field for " + provider);
             } else {
                 model = NamingUtils.sanitizeName(rawModel, false);
             }
@@ -287,7 +287,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         final List<GenericDto> bulk = new ArrayList<>();
 
         // Compute the timestamp
-        final Instant timestamp = computeTimestamp(record, recordState.placeholders, configuration);
+        final Instant timestamp = computeTimestamp(provider, record, recordState.placeholders, configuration);
 
         // Get the friendly name
         final IResourceMapping nameKey = recordState.placeholders.get(KEY_NAME);
@@ -306,7 +306,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 bulk.add(makeDto(model, provider, "admin", "location", location, timestamp));
             }
         } catch (JsonProcessingException e) {
-            throw new ParserException("Error parsing location", e);
+            throw new ParserException("Error parsing location of " + provider, e);
         }
 
         // Loop on resources
@@ -650,10 +650,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Tries to obtain an {@link Instant} from the given value
      *
-     * @param value A record value
+     * @param provider Parsed provider
+     * @param value    A record value
      * @return An instant or null
      */
-    private Instant toInstant(final Object value) {
+    private Instant toInstant(final String provider, final Object value) {
         if (value == null) {
             return null;
         }
@@ -663,7 +664,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
 
         if (value instanceof Number) {
-            return convertTimestamp(((Number) value).longValue());
+            return convertTimestamp(provider, ((Number) value).longValue());
         }
 
         if (value instanceof ChronoZonedDateTime) {
@@ -672,7 +673,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
 
         final Long timestamp = toLong(value);
         if (timestamp != null) {
-            return convertTimestamp(timestamp);
+            return convertTimestamp(provider, timestamp);
         }
         return null;
     }
@@ -722,19 +723,20 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Looks for a time value in the given record
      *
+     * @param provider      Parsed provider
      * @param record        Record to read
      * @param placeholders  Defined mapping placeholders
      * @param configuration Mapping configuration
      * @return The parsed timestamp or the current time
      */
-    private Instant computeTimestamp(final IDeviceMappingRecord record,
+    private Instant computeTimestamp(final String provider, final IDeviceMappingRecord record,
             final Map<String, IResourceMapping> placeholders, final DeviceMappingConfigurationDTO configuration) {
 
         final DeviceMappingOptionsDTO options = configuration.mappingOptions;
 
         final IResourceMapping timestampPath = placeholders.get(KEY_TIMESTAMP);
         if (timestampPath != null) {
-            final Instant timestamp = toInstant(getFieldValue(record, timestampPath, options));
+            final Instant timestamp = toInstant(provider, getFieldValue(record, timestampPath, options));
             if (timestamp != null) {
                 return timestamp;
             }
@@ -891,10 +893,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Converts a timestamp to an Instant
      *
+     * @param provider  Parsed provider
      * @param timestamp Parsed timestamp
      * @return The instant at the timestamp
      */
-    private Instant convertTimestamp(Long timestamp) {
+    private Instant convertTimestamp(final String provider, final Long timestamp) {
 
         int currentLogMs = (int) Math.log10(System.currentTimeMillis());
         int currentLogNs = (int) Math.log10(System.nanoTime());
@@ -907,7 +910,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         } else if (timestampLog == currentLogNs) {
             return Instant.EPOCH.plusNanos(timestamp);
         } else {
-            logger.warn("Can't determine timestamp unit %d (%d digits)", timestamp, timestampLog);
+            logger.warn("Can't parse timestamp {} for provider {}", timestamp, provider);
         }
 
         return Instant.now();
