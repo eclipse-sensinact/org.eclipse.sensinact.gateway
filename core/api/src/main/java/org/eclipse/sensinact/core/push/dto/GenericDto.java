@@ -14,6 +14,8 @@ package org.eclipse.sensinact.core.push.dto;
 
 import java.time.Instant;
 
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
+
 /**
  * A special update dto type where the data is found in "value" with an optional
  * target data type
@@ -32,4 +34,8 @@ public final class GenericDto extends BaseValueDto {
      */
     public Instant timestamp;
 
+    /**
+     * Action to apply if value is null
+     */
+    public NullAction nullAction = NullAction.IGNORE;
 }
