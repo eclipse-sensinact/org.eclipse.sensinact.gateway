@@ -97,8 +97,10 @@ public class JsonRecord implements IDeviceMappingRecord {
         case NUMBER:
             if (node.isDouble()) {
                 return node.asDouble();
-            } else {
+            } else if (node.isInt()) {
                 return node.asInt();
+            } else {
+                return node.asLong();
             }
 
         case STRING:

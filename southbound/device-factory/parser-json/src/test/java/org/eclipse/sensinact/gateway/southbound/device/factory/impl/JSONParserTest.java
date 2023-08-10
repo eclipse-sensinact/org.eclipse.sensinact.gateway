@@ -286,6 +286,7 @@ public class JSONParserTest {
 
         // Ensure value and type
         assertEquals(15, getResourceValue(provider, "data", "value", Integer.class));
+        assertEquals(1691587953000L, getResourceValue(provider, "data", "long-value", Long.class));
 
         // Ensure timestamp
         Instant timestamp = Instant.from(LocalDateTime.of(2022, 12, 7, 15, 17, 0).atOffset(ZoneOffset.UTC));
