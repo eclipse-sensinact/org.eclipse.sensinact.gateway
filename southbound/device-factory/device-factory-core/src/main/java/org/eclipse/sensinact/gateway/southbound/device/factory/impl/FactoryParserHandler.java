@@ -345,6 +345,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             }
         }
 
+        // Set the null action to all DTOs
+        bulk.stream().forEach(dto -> {
+            dto.nullAction = options.nullAction;
+        });
+
         return bulk;
     }
 

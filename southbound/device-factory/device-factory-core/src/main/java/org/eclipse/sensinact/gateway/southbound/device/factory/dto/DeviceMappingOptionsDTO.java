@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory.dto;
 
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -33,4 +35,7 @@ public class DeviceMappingOptionsDTO {
 
     @JsonProperty("numbers.locale")
     public String numbersLocale;
+
+    @JsonProperty("null.action")
+    public NullAction nullAction = NullAction.UPDATE;
 }

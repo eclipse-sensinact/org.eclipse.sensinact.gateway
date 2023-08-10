@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.prototype.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.prototype.dto.impl.DataUpdateDto;
@@ -32,7 +33,8 @@ public class GenericDtoDataExtractor implements DataExtractor {
 
         Instant instant = dto.timestamp == null ? Instant.now() : dto.timestamp;
 
-        if (dto.value != null) {
+        // Accept a null value if this is not a metadata update
+        if (dto.value != null || dto.nullAction == NullAction.UPDATE) {
             DataUpdateDto dud = new DataUpdateDto();
             instant = copyCommonFields(dto, instant, dud);
             if (dto.type != null)
