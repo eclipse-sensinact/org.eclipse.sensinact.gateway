@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.push.PrototypePush;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
@@ -241,5 +243,43 @@ public class RecordHandlingTest {
         assertEquals("name", dto.value);
         assertEquals("buzz", dto.provider);
         assertEquals(model, dto.model);
+    }
+
+    @Test
+    void testNullAction() throws Exception {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+
+        final Map<String, Object> record = new HashMap<>();
+        record.put("p", "provider");
+        record.put("nullVal", null);
+        record.put("nonNullVal", 42);
+        parser.setRecords(record);
+
+        // Test default configuration (update)
+        config.mapping.put("@provider", "p");
+        config.mapping.put("data/val", "nonNullVal");
+        config.mapping.put("data/null", "nullVal");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+
+        GenericDto dto = getResourceValue("provider", "data", "null");
+        assertEquals(NullAction.UPDATE, dto.nullAction);
+        assertNull(dto.value);
+
+        dto = getResourceValue("provider", "data", "val");
+        assertEquals(NullAction.UPDATE, dto.nullAction);
+        assertEquals(42, dto.value);
+
+        // Test ignore handling
+        bulks.clear();
+        config.mappingOptions.nullAction = NullAction.IGNORE;
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+
+        dto = getResourceValue("provider", "data", "null");
+        assertEquals(NullAction.IGNORE, dto.nullAction);
+        assertNull(dto.value);
+
+        dto = getResourceValue("provider", "data", "val");
+        assertEquals(NullAction.IGNORE, dto.nullAction);
+        assertEquals(42, dto.value);
     }
 }
