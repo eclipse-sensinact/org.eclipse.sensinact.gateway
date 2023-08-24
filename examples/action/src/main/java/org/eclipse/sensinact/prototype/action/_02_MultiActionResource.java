@@ -20,22 +20,44 @@ import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Multiple providers from a single service, different methods for each resource
+ * This sample component handles the ACT verb for multiple resources of multiple
+ * providers, with one method per resource
  */
-@WhiteboardResource
-@ProviderName({ "foo", "bar", "foobar" })
-@Component(service = _02_MultiActionResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName({ "foo", "bar", "foobar" }) // Names of the providers those resources are provided by
+@Component(service = _02_MultiActionResource.class) // The component must provide a service to be detected
 public class _02_MultiActionResource {
 
+    /**
+     * An ACT handler for service "example" and resource "fizz". This action takes
+     * takes no argument from the caller, but accepts the name of the provider of
+     * the called resource as URI parameter (see {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     */
     @ACT(model = "testModel", service = "example", resource = "fizz")
-    public void setFizz(@UriParam(UriSegment.PROVIDER) String provider) {
+    public void actFizz(@UriParam(UriSegment.PROVIDER) String provider) {
     }
 
+    /**
+     * An ACT handler for service "example" and resource "buzz". This action takes
+     * takes no argument from the caller, but accepts the name of the provider of
+     * the called resource as URI parameter (see {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     */
     @ACT(model = "testModel", service = "example", resource = "buzz")
-    public void setBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
+    public void actBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
     }
 
+    /**
+     * An ACT handler for service "example" and resource "fizzbuzz". This action
+     * takes no argument from the caller, but accepts the name of the provider of
+     * the called resource as URI parameter (see {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     */
     @ACT(model = "testModel", service = "example", resource = "fizzbuzz")
-    public void setFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
+    public void actFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider) {
     }
 }

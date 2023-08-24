@@ -18,16 +18,22 @@ import org.osgi.service.typedevent.TypedEventHandler;
 import org.osgi.service.typedevent.propertytypes.EventTopics;
 
 /**
- * Notified for all data events
+ * This component is registered as typed event handler that listens to all data
+ * events. This type of listener is notified of all events from the sensiNact
+ * core and is not associated to a session.
  */
-@Component
-@EventTopics("DATA/*")
+@Component // The TypedEventHandler interface will automatically be registered as a service
+@EventTopics("DATA/*") // Filter on typed event topics
 public class _01_SimpleNotification implements TypedEventHandler<ResourceDataNotification> {
 
+    /**
+     * Method called when a typed event with a matching topic is received
+     *
+     * @param topic Event topic
+     * @param event Received data event
+     */
     @Override
     public void notify(String topic, ResourceDataNotification event) {
         // TODO Auto-generated method stub
-
     }
-
 }

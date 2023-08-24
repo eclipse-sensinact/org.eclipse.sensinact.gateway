@@ -20,21 +20,21 @@ import org.eclipse.sensinact.core.annotation.verb.ACT;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Service properties define the provider that this resource is for
+ * This sample component handles the ACT verb of the "action" resource of the
+ * "example" service of the "actionResource" provider
  */
-@WhiteboardResource
-@ProviderName("pull_based")
-@Component(service = _01_SimpleActionResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName("actionResource") // Service property to define the provider that this resource is for
+@Component(service = _01_SimpleActionResource.class) // The component must provide a service to be detected
 public class _01_SimpleActionResource {
 
     /**
-     * A GET method for a service and resource
-     *
-     * @return
+     * An ACT method for service "example" and resource "action". This action takes
+     * no argument and returns a list of long integers.
      */
-    @ACT(model = "testModel", service = "example", resource = "default")
+    @ACT(model = "testModel", service = "example", resource = "action")
     public List<Long> doAction() {
         // Run the action and return the result
-        return null;
+        return List.of(42L);
     }
 }

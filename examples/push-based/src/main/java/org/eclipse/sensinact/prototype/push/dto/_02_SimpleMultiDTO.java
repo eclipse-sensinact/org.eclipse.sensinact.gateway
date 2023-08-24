@@ -18,9 +18,9 @@ import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 
 /**
- * This example is a DTO defining two resources with the uris
- * <code>push_example/simple/count</code> and
- * <code>override_example/simple_override/average</code>
+ * This example is a DTO defining two resources with the URIs
+ * <code>push-example/simple/count</code> and
+ * <code>override-example/simple-override/average</code>
  *
  * <ul>
  * <li>The provider and service names are defined as annotations, with fields
@@ -32,17 +32,23 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
  * </ul>
  *
  */
-@Provider("push_example")
+@Provider("push-example")
 @Service("simple")
 public class _02_SimpleMultiDTO {
 
+    /**
+     * Resource value (resource name will be the field name)
+     */
     @Data
     public int count;
 
-    @Provider("override_example")
-    @Service("simple_override")
-    @Resource("average")
-    @Data(type = double.class)
+    /**
+     * Other resource value with overridden characteristics
+     */
+    @Provider("override-example") // Override provider name
+    @Service("simple-override") // Override service name
+    @Resource("average") // Explicit resource name
+    @Data(type = double.class) // Explicit resource type
     public Float remapped;
 
 }

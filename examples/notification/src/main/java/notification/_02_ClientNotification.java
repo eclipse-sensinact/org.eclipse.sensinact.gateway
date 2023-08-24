@@ -18,10 +18,12 @@ import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * Notified for all data events visible to the client
+ * This component uses the session notification process to be notified of all
+ * data events visible by the client.
  */
 @Component
 public class _02_ClientNotification {
@@ -30,15 +32,39 @@ public class _02_ClientNotification {
     @Reference
     SensiNactSession session;
 
+    /**
+     * ID of the listener we registered
+     */
+    private String listenerId;
+
+    /**
+     * Component is activated: register the listener
+     */
     @Activate
     void start() {
         // We ask for * but only events visible to the user will be seen
-        session.addListener(List.of("*"), this::notify, null, null, null);
+        // Note that we only register a handler for data notifications
+        listenerId = session.addListener(List.of("*"), this::notify, null, null, null);
     }
 
+    /**
+     * Component is deactivated: don't forget to unregister the listener
+     */
+    @Deactivate
+    void stop() {
+        if (listenerId != null) {
+            session.removeListener(listenerId);
+            listenerId = null;
+        }
+    }
+
+    /**
+     * Called when a visible data notification is received
+     *
+     * @param topic Topic of the notification typed event
+     * @param event The data event
+     */
     private void notify(String topic, ResourceDataNotification event) {
         // TODO Auto-generated method stub
-
     }
-
 }

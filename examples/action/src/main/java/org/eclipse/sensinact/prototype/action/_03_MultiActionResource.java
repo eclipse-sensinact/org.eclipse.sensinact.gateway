@@ -20,18 +20,28 @@ import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Multiple providers from a single service, a single method for all resources
+ * This sample component handles the ACT verb for multiple resources of multiple
+ * providers, sharing a single method for all resources
  */
-@WhiteboardResource
-@ProviderName({ "foo", "bar", "foobar" })
-@Component(service = _03_MultiActionResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName({ "foo", "bar", "foobar" }) // Names of the providers those resources are provided by
+@Component(service = _03_MultiActionResource.class) // The component must provide a service to be detected
 public class _03_MultiActionResource {
 
+    /**
+     * An ACT handler for multiple resources, from different services. The action
+     * handler takes no argument from the caller, but accepts different URI
+     * parameters (see {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     */
     @ACT(model = "testModel", service = "example", resource = "fizz")
     @ACT(model = "testModel", service = "example", resource = "buzz")
     @ACT(model = "testModel", service = "example2", resource = "fizzbuzz")
-    public void setValue(@UriParam(UriSegment.PROVIDER) String provider, @UriParam(UriSegment.SERVICE) String service,
-            @UriParam(UriSegment.RESOURCE) String resource) {
-        // Get the actual value from the sensor
+    public void actResource(@UriParam(UriSegment.PROVIDER) String provider,
+            @UriParam(UriSegment.SERVICE) String service, @UriParam(UriSegment.RESOURCE) String resource) {
+        // Do work based on resource information
     }
 }

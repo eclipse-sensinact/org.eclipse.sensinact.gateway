@@ -21,24 +21,35 @@ import org.eclipse.sensinact.core.annotation.verb.GET.ReturnType;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * A DTO defines the resource(s) returned by this GET method
+ * This component provides a resource handler that return a DTO to describe its
+ * value
  */
-@WhiteboardResource
-@Component(service = _02_DTOPullBasedResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@Component(service = _02_DTOPullBasedResource.class) // The component must provide a service to be detected
 public class _02_DTOPullBasedResource {
 
+    /**
+     * Definition of the GET handler, where we indicate that we return an annotated
+     * DTO instead of a value. The DTO must therefore describe the resource and its
+     * value.
+     */
     @GET(ReturnType.DTO)
     public SimpleDTO getValue() {
         // Get the value from the sensor
         return null;
     }
 
-    @Provider("pull_example")
+    /**
+     * Custom DTO for resources of the "dto" service of the "pull-examples" provider
+     */
+    @Provider("pull-example")
     @Service("dto")
     public static class SimpleDTO {
 
+        /**
+         * Resource value. The resource will be named as the field (<code>count</code>)
+         */
         @Data
         public int count;
-
     }
 }

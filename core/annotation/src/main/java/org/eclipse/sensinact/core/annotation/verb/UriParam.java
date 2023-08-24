@@ -26,12 +26,13 @@ import java.lang.annotation.Target;
 public @interface UriParam {
 
     /**
-     * What part of the URI should be passed
-     *
-     * @return
+     * What part of the URI should be passed ( {@link UriSegment#URI} by default)
      */
     UriSegment value() default UriSegment.URI;
 
+    /**
+     * URI segment that can be provided as whiteboard method argument
+     */
     public enum UriSegment {
         /** The whole URI */
         URI,

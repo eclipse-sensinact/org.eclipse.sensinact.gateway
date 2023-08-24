@@ -12,8 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.action;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 
 import org.eclipse.sensinact.core.annotation.propertytype.ProviderName;
 import org.eclipse.sensinact.core.annotation.propertytype.WhiteboardResource;
@@ -21,21 +21,25 @@ import org.eclipse.sensinact.core.annotation.verb.ACT;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Service properties define the provider that this resource is for
+ * This sample component handles the ACT verb of the "delta" resource of the
+ * "example" service of the "actionResource" provider. The sample handler
+ * accepts caller arguments.
  */
-@WhiteboardResource
-@ProviderName("pull_based")
-@Component(service = _04_ParameterActionResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName("actionResource") // Name of the provider the resource is provided by
+@Component(service = _04_ParameterActionResource.class) // The component must provide a service to be detected
 public class _04_ParameterActionResource {
 
     /**
-     * A GET method for a service and resource
+     * An ACT method for service "example" and resource "delta". This action takes
+     * two arguments from the caller and returns a value.
      *
-     * @return
+     * @param fromTime A parameter given by the caller
+     * @param toTime   A parameter given by the caller
      */
-    @ACT(model = "testModel", service = "example", resource = "default")
-    public List<Long> doAction(Instant fromTime, Instant toTime) {
+    @ACT(model = "testModel", service = "example", resource = "delta")
+    public Long doAction(Instant fromTime, Instant toTime) {
         // Run the action and return the result
-        return null;
+        return Duration.between(fromTime, toTime).getSeconds();
     }
 }

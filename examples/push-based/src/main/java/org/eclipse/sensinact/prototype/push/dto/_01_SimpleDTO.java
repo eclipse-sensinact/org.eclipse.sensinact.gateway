@@ -17,8 +17,8 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 
 /**
- * This example is a minimal DTO defining a resource with the uri
- * <code>push_example/simple/count</code>
+ * This example is a minimal DTO defining a resource with the URI
+ * <code>push-example/simple/count</code>
  *
  * <ul>
  * <li>The provider and service names are defined as annotations at class
@@ -28,10 +28,13 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
  * </ul>
  *
  */
-@Provider("push_example")
+@Provider("push-example")
 @Service("simple")
 public class _01_SimpleDTO {
 
+    /**
+     * Resource value (resource name will be the field name)
+     */
     @Data
     public int count;
 
