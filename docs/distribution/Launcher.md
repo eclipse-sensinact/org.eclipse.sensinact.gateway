@@ -153,8 +153,8 @@ An example file follows:
 ```js
     {
       ":configurator:resource-version": 1,
-      ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.jakartaservlet.test",
-      ":configurator:version": "0.0.1",
+      ":configurator:symbolic-name": "org.eclipse.sensinact.gateway",
+      ":configurator:version": "0.0.2-SNAPSHOT",
       "sensinact.launcher": {
         "features": [
           "jakarta-servlet-whiteboard-feature",

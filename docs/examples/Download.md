@@ -12,7 +12,7 @@ Eclipse sensiNact is published to the Eclipse Nexus repository instance at [http
 ## Installing sensiNact
 
 Once you have obtained the sensiNact assembly you can unzip it using your favourite zip tool
- 
+
      unzip sensinact.zip
 
 The unzipped contents will include several folders and files including:
@@ -22,7 +22,7 @@ The unzipped contents will include several folders and files including:
 * `launch` - the folder containing the sensiNact launcher responsible for bootstrapping the gateway
 * `repository` - a maven layout repository containing the bundles used by the gateway features
 * `start.sh` - a launch script for sensiNact
- 
+
 ## Starting sensiNact
 
 Starting sensiNact can be achieved simply by executing the start script
@@ -31,3 +31,5 @@ Starting sensiNact can be achieved simply by executing the start script
 
 > [!WARNING]
 > If you are unable to execute the start script try setting the executable permission bit using `chmod +x start.sh`
+
+Once you have started sensiNact you should see some logs written to the console indicating that the gateway is running. In order to interact with the gateway you will need to [configure a northbound provider](Configuring.md)

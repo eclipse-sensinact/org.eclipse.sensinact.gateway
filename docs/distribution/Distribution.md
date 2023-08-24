@@ -16,6 +16,8 @@ To launch the gateway simply follow these three steps:
 2. Extract this archive to the location from which you wish to run the gateway.
 3. Run the start.sh script
 
+A more detailed guide is available in the [worked examples](../examples/Download.md).
+
 ## The gateway architecture
 
 The gateway architecture is modular, and uses [OSGi](https://www.osgi.org)<sup>®</sup> as a platform. The gateway includes a launcher based upon the Feature service, which can deploy groups of bundles as a single unit.
