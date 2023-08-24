@@ -70,11 +70,20 @@ We consider that a `null` value indicates that the sensor couldn't send a valid 
 
 ### Setup the project
 
-The custom parser we will create in this section is a simple Maven Java project.
+The custom parser we will create in this section will be structured as a Maven parent project and 2 modules:
+  * Parent Maven project: defines commons properties and dependencies versions
+    * Implementation project: implementation of the custom device factory parser
+    * Feature project: definition of the sensiNact feature JSON file and creation of the dependencies repository
 
-We will consider that the classes written in this tutorial are all in the `org.eclipse.sensinact.doc.tutorial.parser` Java package.
+This structure is recommended to write a new module, as it eases the creation of the repository to add your feature, its modules and its dependencies to a sensiNact distribution.
 
-Here is the POM file to construct the parser bundle:
+#### Parent POM file
+
+First, we need to create the parent project folder, then named `${PROJECT_ROOT}` in this tutorial.
+We then create the the file `${PROJECT_ROOT}/pom.xml` with the following content.
+It defines the parent Maven project with the implementation submodule, the common properties and the dependencies versions.
+We will add the feature submodule later.
+
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -83,10 +92,16 @@ Here is the POM file to construct the parser bundle:
 
   <!-- Update according to your project -->
   <groupId>org.eclipse.sensinact.doc.tutorial</groupId>
-  <artifactId>tuto-device-factory-parser</artifactId>
+  <artifactId>tuto-device-factory-parser-parent</artifactId>
   <version>0.0.2</version>
-  <name>Custom Device Factory Parser</name>
-  <description>Eclipse sensiNact sample to write a parser for the Device Factory</description>
+  <packaging>pom</packaging>
+  <name>Custom Device Factory Parser - Parent</name>
+  <description>Parent project of the Eclipse sensiNact sample to write a parser for the Device Factory</description>
+
+  <!-- Definition of the submodules. We'll add the feature module afterwards -->
+  <modules>
+    <module>parser</module>
+  </modules>
 
   <properties>
     <!-- Build properties: Eclipse sensiNact runs on Java 11+ -->
@@ -103,37 +118,38 @@ Here is the POM file to construct the parser bundle:
     <bnd.version>7.0.0-SNAPSHOT</bnd.version>
   </properties>
 
-  <dependencies>
-    <!-- Eclipse sensiNact Device Factory Core: required for its API -->
-    <dependency>
-      <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
-      <artifactId>device-factory-core</artifactId>
-      <version>${sensinact.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- OSGi Declarative Services: the parser will be an OSGi component -->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.component.annotations</artifactId>
-      <version>${osgi.ds.version}</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <!-- Eclipse sensiNact Device Factory Core: required for its API -->
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
+        <artifactId>device-factory-core</artifactId>
+        <version>${sensinact.version}</version>
+      </dependency>
+      <!-- OSGi Declarative Services: the parser will be an OSGi component -->
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.component.annotations</artifactId>
+        <version>${osgi.ds.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
-    <plugins>
-      <!-- The Bnd Maven plugin generates a MANIFEST.MF file with OSGi headers -->
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>bnd-process</goal>
-            </goals>
-            <configuration>
-              <bnd>
+    <pluginManagement>
+      <plugins>
+        <!-- The Bnd Maven plugin generates a MANIFEST.MF file with OSGi headers -->
+        <plugin>
+          <groupId>biz.aQute.bnd</groupId>
+          <artifactId>bnd-maven-plugin</artifactId>
+          <version>${bnd.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>bnd-process</goal>
+              </goals>
+              <configuration>
+                <bnd>
                 <![CDATA[
                 Bundle-SymbolicName: ${project.groupId}.${project.artifactId}
                 Bundle-Description: ${project.description}
@@ -141,32 +157,95 @@ Here is the POM file to construct the parser bundle:
                 -reproducible: true
                 ]]>
                 </bnd>
-            </configuration>
-          </execution>
-        </executions>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Use the Maven JAR plugin to use the MANIFEST.MF file generated by Bnd -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.3.0</version>
+          <configuration>
+            <archive>
+              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+            </archive>
+            <skipIfEmpty>true</skipIfEmpty>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+```
+
+
+#### Implementation POM file
+
+The implementation of the custom parser will be done in the `${PROJECT_ROOT}/parser` folder.
+
+Here is the POM file to construct the parser bundle, defined in `${PROJECT_ROOT}/parser/pom.xml`:
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Update according to your project -->
+  <parent>
+    <groupId>org.eclipse.sensinact.doc.tutorial</groupId>
+    <artifactId>tuto-device-factory-parser-parent</artifactId>
+    <version>0.0.2</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>tuto-device-factory-parser</artifactId>
+  <name>Custom Device Factory Parser - Implementation</name>
+  <description>Eclipse sensiNact sample to write a parser for the Device Factory</description>
+
+  <dependencies>
+    <!-- Eclipse sensiNact Device Factory Core: required for its API -->
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
+      <artifactId>device-factory-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!-- OSGi Declarative Services: the parser will be an OSGi component -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!--
+        The Bnd Maven plugin generates a MANIFEST.MF file with OSGi headers.
+        The plugin gets its configuration from the parent POM file.
+      -->
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
       </plugin>
-      <!-- Use the Maven JAR plugin to use the MANIFEST.MF file generated by Bnd -->
+      <!--
+        Use the Maven JAR plugin to use the MANIFEST.MF file generated by Bnd.
+        The plugin gets its configuration from the parent POM file.
+      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
-        <configuration>
-          <archive>
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-          <skipIfEmpty>true</skipIfEmpty>
-        </configuration>
       </plugin>
     </plugins>
   </build>
 </project>
 ```
 
-### The record
+### The device mapping record
 
-First, we will implement the record that will hold the values associated to a single provider.
+First, we will implement the record data class that will hold the values the parser associates to a single provider.
+This class must implement the interface `org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord` as it will be used by the device factory core.
 As decided before, we will consider that `null` values will be ignored instead of given to the twin.
 
+Here is the content of the file `${PROJECT_ROOT}/parser/src/main/java/org/eclipse/sensinact/doc/tutorial/parser/CustomMappingRecord.java`:
 ```java
 package org.eclipse.sensinact.doc.tutorial.parser;
 
@@ -267,6 +346,7 @@ public class CustomMappingRecord implements IDeviceMappingRecord {
 The second step is the implementation of the parser service.
 It will be an OSGi Component (`@Component`) to simplify the tutorial, but it could also be registered as a service using a `BundleContext`.
 
+Here is the content of the file `${PROJECT_ROOT}/parser/src/main/java/org/eclipse/sensinact/doc/tutorial/parser/CustomParser.java`:
 ```java
 package org.eclipse.sensinact.doc.tutorial.parser;
 
@@ -296,12 +376,14 @@ public class CustomParser implements IDeviceMappingParser {
     public static final String PARSER_ID = "tuto-custom-parser";
 
     /**
-     * Define a class that represents the data we expect
+     * Define a class that represents the data we expect.
+     * Note that all fields found in the JSON input should be public.
+     * You can also use Jackson databind annotations to control deserialization
      */
     final static class DataRecord {
-        String[] sensors;
-        Float[] temperature;
-        Float[] humidity;
+        public String[] sensors;
+        public Float[] temperature;
+        public Float[] humidity;
     }
 
     /**
@@ -369,10 +451,149 @@ public class CustomParser implements IDeviceMappingParser {
 }
 ```
 
-### The configuration
+#### Prepare the feature and repository
 
-Finally, we can test the parser with a complement configuration.
-Here we consider that the data is sent regularly on an MQTT topic.
+To prepare a sensiNact feature, we first need to choose a unique ID. It is suppose to be in the short artifact description format: `groupId:artifactId:version`.
+In this example, we will use the feature ID: `org.eclipse.sensinact.gateway.doc.tutorials.features:custom-parser:osgifeature:0.0.2`.
+
+Then, we have to determine which bundles are required for our project to work.
+According to our Maven project dependencies, we need:
+* the OSGi Declarative Services annotations bundle
+* the device factory core bundle
+
+The Declarative Services bundles are included in the sensiNact gateway core feature.
+On the other hand, we will have to indicate in our feature that we need the device factory core bundle.
+We should also add any of its transitive dependency, but those are all included in the gateway core.
+
+In our example, we will use an MQTT client, so we also need:
+* the sensiNact MQTT client
+* the sensiNact MQTT device factory, which links the MQTT client to the device factory core
+* the Eclipse Paho client
+
+First, we will update the parent POM file (`${PROJECT_ROOT}/pom.xml`) to add the features modules:
+```xml
+  <!-- Definition of the submodules -->
+  <modules>
+    <module>parser</module>
+    <module>feature</module>
+  </modules>
+```
+
+Then we create the feature project POM file: `${PROJECT_ROOT}/feature/pom.xml`:
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Update according to your project -->
+  <parent>
+    <groupId>org.eclipse.sensinact.doc.tutorial</groupId>
+    <artifactId>tuto-device-factory-parser-parent</artifactId>
+    <version>0.0.2</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>tuto-device-factory-parser-feature</artifactId>
+  <packaging>pom</packaging>
+  <name>Custom Device Factory Parser - Feature</name>
+  <description>Feature to deploy the sample Device Factory Parser to a sensiNact instance</description>
+
+  <!-- Dependencies here are fined in the runtime scope, to be included in the repository -->
+  <dependencies>
+    <!-- Define our bundle(s) as dependencies, to be included in the repository -->
+    <dependency>
+      <groupId>org.eclipse.sensinact.doc.tutorial</groupId>
+      <artifactId>tuto-device-factory-parser</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!--
+      Eclipse sensiNact Device Factory Core:  required as it is not included in the sensiNact distribution
+    -->
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
+      <artifactId>device-factory-core</artifactId>
+      <version>${sensinact.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- MQTT device factory and its dependencies, as they are not included in the sensiNact distribution -->
+    <dependency>
+      <groupId>org.eclipse.paho</groupId>
+      <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+      <version>1.2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.mqtt</groupId>
+      <artifactId>mqtt-client</artifactId>
+      <version>${sensinact.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.mqtt</groupId>
+      <artifactId>mqtt-device-factory</artifactId>
+      <version>${sensinact.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <!-- Copy dependencies of this project in a Maven repository-structured folder -->
+            <id>create-feature-repo</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <!--
+                It is recommended to exclude transitive dependencies
+                and to explicitly declare them as feature dependencies
+              -->
+              <excludeTransitive>true</excludeTransitive>
+              <!--
+                Only dependencies declared in the runtime scope will be included.
+                This allows to have test dependencies if the feature has integration tests.
+              -->
+              <includeScope>runtime</includeScope>
+              <!-- Configuration to have a Maven repository layout in the target directory -->
+              <useRepositoryLayout>true</useRepositoryLayout>
+              <outputDirectory>${project.build.directory}/repository</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+```
+
+Next, we write our feature file as `${PROJECT_ROOT}/feature/src/main/resources/custom-parser-feature.json`.
+We declare its ID and list the bundles we need using the short artifact description format:
+```json
+{
+  "id": "org.eclipse.sensinact.gateway.doc.tutorials.features:custom-parser:osgifeature:0.0.2",
+  "bundles": [
+    { "id": "org.eclipse.sensinact.doc.tutorial:tuto-device-factory-parser:0.0.2" },
+    { "id": "org.eclipse.sensinact.gateway.southbound.device-factory:device-factory-core:0.0.2" },
+    { "id": "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5" },
+    { "id": "org.eclipse.sensinact.gateway.southbound.mqtt:mqtt-client:0.0.2" },
+    { "id": "org.eclipse.sensinact.gateway.southbound.mqtt:mqtt-device-factory:0.0.2" }
+  ]
+}
+```
+
+Finally, we construct the repository using: `mvn clean install`.
+The repository can be found in `target/repository` with a Maven layout.
+
+### Expected configuration
+
+In this example, we consider that the data will be sent regularly on an MQTT topic.
 
 First we configure the MQTT client by a configuration with PID `sensinact.southbound.mqtt`:
 ```json
@@ -383,6 +604,7 @@ First we configure the MQTT client by a configuration with PID `sensinact.southb
   "topics": [ "custom/sensors/update" ]
 }
 ```
+For this example, we will use the [HiveMQ public MQTT broker](https://www.mqtt-dashboard.com/).
 
 Then we configure the MQTT device factory and tell it to use our parser by a configuration with PID `sensinact.mqtt.device.factory`:
 ```json
@@ -395,8 +617,12 @@ Then we configure the MQTT device factory and tell it to use our parser by a con
     },
     "mapping": {
       "$name": "provider",
-      "@provider": "sensor-${name}",
-      "@name": "Sensor ${name}",
+      "@provider": {
+          "literal": "sensor-${name}"
+        },
+        "@name": {
+          "literal": "Sensor ${name}"
+        },
       "@timestamp": "time",
       "sensor/temperature": "temperature",
       "sensor/humidity": "humidity"
@@ -405,9 +631,11 @@ Then we configure the MQTT device factory and tell it to use our parser by a con
 }
 ```
 
-With those configurations, the parser will be called by the device factory core each time the MQTT device factory will receive a notification.
+The device factory configuration format is described [here](./core.md#device-factory-configuration).
 
-### Sample payloads
+With those configurations, the parser will be called by the device factory core each time the MQTT device factory will receive a notification from the MQTT client.
+
+### Description of the expected behavior
 
 1. Consider the MQTT client receive the following payload:
    ```json
@@ -471,3 +699,153 @@ With those configurations, the parser will be called by the device factory core 
      * `sensor`:
        * `temperature`: 38.0 @ 2023-06-20T13:50:00+0200
        * `humidity`: 15.0 @ 2023-06-20T13:40:00+0200 (*the value and timestamp haven't been updated*)
+
+### Deployment
+
+Now that we have the Maven project and the Java code, we can prepare the deployment of our device factory parser.
+
+#### Package the project
+
+The first step is to install the project in the local Maven repository.
+This will ensure it is visible by other Maven projects and ease the creation of the deployment repository.
+
+1. Go to the project root folder
+2. Run `mvn clean install`
+
+#### Setup a sensiNact instance
+
+1. Download or generate the Eclipse distribution file
+   * To generate it, [clone](https://github.com/eclipse/org.eclipse.sensinact.gateway) and build the project and get the `distribution/assembly/target/gateway.zip` file
+2. Decompress it somewhere, we'll call the folder containing `start.sh`: `${SENSINACT_HOME}`.
+3. Copy your JSON feature file (`custom-parser-feature.json`) in `${SENSINACT_HOME}/features`
+4. Copy the content of `feature/target/repository` in `${SENSINACT_HOME}/repository`
+5. Update the configuration of sensiNact by editing the file `${SENSINACT_HOME}/configuration/configuration.json`
+   * Add the `"custom-parser-feature"` item in the `features` array of `sensinact.launcher`.
+   * In the root object, add configurations of the MQTT client and of the custom parser:
+     ```json
+      "sensinact.southbound.mqtt~tuto-parser": {
+        "id": "mqtt-tuto-parser",
+        "host": "broker.hivemq.com",
+        "port": 1883,
+        "topics": [
+          "custom/sensors/update"
+        ]
+      },
+      "sensinact.mqtt.device.factory~tuto-parser": {
+        "mqtt.handler.id": "mqtt-tuto-parser",
+        "mapping": {
+          "parser": "tuto-custom-parser",
+          "parser.options": {
+            "charset": "latin-1"
+          },
+          "mapping": {
+            "$name": "provider",
+            "@provider": {
+              "literal": "sensor-${name}"
+            },
+            "@name": {
+              "literal": "Sensor ${name}"
+            },
+            "@timestamp": "time",
+            "sensor/temperature": "temperature",
+            "sensor/humidity": "humidity"
+          }
+        }
+      }
+     ```
+6. To be able to test the project, we will also add the HTTP REST endpoint
+   * Add the following items in the `features` array of `sensinact.launcher`:
+     * `"jakarta-servlet-whiteboard-feature"`
+     * `"jakarta-rest-whiteboard-feature"`
+     * `"northbound-rest-feature"`
+   * In the root object, add the HTTP REST configuration to ensure it loads correctly and accepts anonymous connections:
+     ```json
+      "JakartarsServletWhiteboardRuntimeComponent": {
+        "osgi.http.whiteboard.target": "(osgi.http.endpoint=*)"
+      },
+      "sensinact.northbound.rest": {
+        "allow.anonymous": true
+      }
+     ```
+
+After all those steps, the configuration file `${SENSINACT_HOME}/configuration/configuration.json` should look like this:
+```json
+{
+  ":configurator:resource-version": 1,
+  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.gogo.test",
+  ":configurator:version": "0.0.1",
+  "sensinact.launcher": {
+    "features": [
+      "core-feature",
+      "custom-parser-feature",
+      "jakarta-servlet-whiteboard-feature",
+      "jakarta-rest-whiteboard-feature",
+      "northbound-rest-feature"
+    ],
+    "repository": "repository",
+    "featureDir": "features"
+  },
+  "sensinact.southbound.mqtt~tuto-parser": {
+    "id": "mqtt-tuto-parser",
+    "host": "broker.hivemq.com",
+    "port": 1883,
+    "topics": [
+      "custom/sensors/update"
+    ]
+  },
+  "sensinact.mqtt.device.factory~tuto-parser": {
+    "mqtt.handler.id": "mqtt-tuto-parser",
+    "mapping": {
+      "parser": "tuto-custom-parser",
+      "parser.options": {
+        "charset": "latin-1"
+      },
+      "mapping": {
+        "$name": "provider",
+        "@provider": {
+          "literal": "sensor-${name}"
+        },
+        "@name": {
+          "literal": "Sensor ${name}"
+        },
+        "@timestamp": "time",
+        "sensor/temperature": "temperature",
+        "sensor/humidity": "humidity"
+      }
+    }
+  },
+  "JakartarsServletWhiteboardRuntimeComponent": {
+    "osgi.http.whiteboard.target": "(osgi.http.endpoint=*)"
+  },
+  "sensinact.northbound.rest": {
+    "allow.anonymous": true
+  }
+}
+```
+
+#### Start the sensiNact instance
+
+* In the `${SENSINACT_HOME}` folder, either run `./start.sh` or the following command:
+  `java -D"sensinact.config.dir=configuration" -jar launch/launcher.jar`
+
+* To check the value of a resource, you can use any HTTP client (`curl`, `httPIE`, a browser...).
+  With the payload we will send via MQTT, below are the URLs where we will find our resources values.
+  Note that accessing those URLs before sending any data will return 404 errors.
+  * <http://localhost:8080/sensinact/providers/sensor-a/services/sensor/resources/temperature/GET>
+  * <http://localhost:8080/sensinact/providers/sensor-a/services/sensor/resources/humidity/GET>
+  * <http://localhost:8080/sensinact/providers/sensor-b/services/sensor/resources/temperature/GET>
+  * <http://localhost:8080/sensinact/providers/sensor-b/services/sensor/resources/humidity/GET>
+
+* To send messages, we will use the [MQTT dashboard websocket client](https://www.hivemq.com/demos/websocket-client/):
+  1. Connect the broker using the default configuration
+  2. Publish the following message on topic `custom/sensors/update`:
+     ```json
+     {
+       "sensors": ["a", "c"],
+       "temperature": [40, 38],
+       "humidity": [0, 15]
+     }
+     ```
+
+* You can now access the links above to check if the resources have been created or updated.
+  You can also edit the JSON payload to try different values.
