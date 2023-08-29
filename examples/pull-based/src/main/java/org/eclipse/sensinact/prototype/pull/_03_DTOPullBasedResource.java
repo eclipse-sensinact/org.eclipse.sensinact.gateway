@@ -21,26 +21,42 @@ import org.eclipse.sensinact.core.annotation.verb.GET.ReturnType;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * A DTO defines the resource(s) returned, but the provider is determined by the
- * service properties
+ * This component provides a resource handler that return a DTO to describe its
+ * value, but the provider is determined by the service properties
  */
-@WhiteboardResource
-@ProviderName("pull_based")
-@Component(service = _03_DTOPullBasedResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName("pull-based") // Service property to define the provider that this resource is for
+@Component(service = _03_DTOPullBasedResource.class) // The component must provide a service to be detected
 public class _03_DTOPullBasedResource {
 
+    /**
+     * Definition of the GET handler, where we indicate that we return an annotated
+     * DTO instead of a value. The DTO must therefore describe the resource and its
+     * value. The DTO doesn't need to define a provider as it will be found in the
+     * service properties
+     */
     @GET(ReturnType.DTO)
     public SimpleDTO getValue() {
         // Get the value from the sensor
         return null;
     }
 
+    /**
+     * Custom DTO for multiple resources of the "example" service
+     */
     @Service("example")
     public static class SimpleDTO {
 
+        /**
+         * Resource value. The resource will be named as the field (<code>count</code>)
+         */
         @Data
         public int count;
 
+        /**
+         * Resource value. The resource will be named as the field
+         * (<code>average</code>)
+         */
         @Data
         public double average;
 

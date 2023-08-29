@@ -12,27 +12,44 @@
 **********************************************************************/
 package org.eclipse.sensinact.prototype.pull;
 
+import java.time.temporal.ChronoUnit;
+
 import org.eclipse.sensinact.core.annotation.propertytype.ProviderName;
 import org.eclipse.sensinact.core.annotation.propertytype.WhiteboardResource;
 import org.eclipse.sensinact.core.annotation.verb.GET;
+import org.eclipse.sensinact.core.command.GetLevel;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Service properties define the provider that this pull based resource is for
+ * This component provides a custom handler to get the current value of a
+ * resource.
+ *
+ * Note that such handler is called if:
+ * <ul>
+ * <li>... the resource doesn't have a value yet</li>
+ * <li>... if the value request is a strong GET (see
+ * {@link GetLevel#STRONG})</li>
+ * <li>... if the value request is a normal (default) GET (see
+ * {@link GetLevel#NORMAL}) and if the data cache period has expired</li>
+ * </ul>
+ *
+ * The handler is never called if the value request is a weak GET (see
+ * {@link GetLevel#WEAK}).
  */
-@WhiteboardResource
-@ProviderName("pull_based")
-@Component(service = _01_SimplePullBasedResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName("pull-based") // Service property to define the provider that this resource is for
+@Component(service = _01_SimplePullBasedResource.class) // The component must provide a service to be detected
 public class _01_SimplePullBasedResource {
 
     /**
-     * A GET method for a service and resource
+     * A GET method for resource "getter" of service "example".
      *
-     * @return
+     * The annotation also indicates how long the cached value is considered valid
+     * (500&nbsp;ms by default).
      */
-    @GET(service = "example", resource = "default")
+    @GET(service = "example", resource = "getter", cacheDuration = 5, cacheDurationUnit = ChronoUnit.MINUTES)
     public Double getValue() {
         // Get the value from the sensor
-        return null;
+        return 42.0;
     }
 }

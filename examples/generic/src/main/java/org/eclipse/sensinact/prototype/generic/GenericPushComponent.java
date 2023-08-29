@@ -19,12 +19,22 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.typedevent.TypedEventBus;
 
+/**
+ * This components show to push an update event to sensiNact using a
+ * {@link GenericDto} object.
+ */
 @Component
 public class GenericPushComponent {
 
+    /**
+     * Service to send the update event through the typed event bus
+     */
     @Reference
     private TypedEventBus bus;
 
+    /**
+     * Service to send the update event through the update DTO handler
+     */
     @Reference
     private PrototypePush sensiNact;
 
@@ -32,21 +42,26 @@ public class GenericPushComponent {
      * Message coming in from the sensor, just like a custom model
      */
     public void onMessage(String message) {
-        // Create the DTO
+        // Create the DTO based on sensor data
         GenericDto dto = toDTO(message);
 
-        // Send the dto data to sensiNact core somehow?
-
-        // e.g. Typed Events
+        // Send the DTO to sensiNact core, either via:
+        // ... Typed Events
         bus.deliver(EventTopicNames.GENERIC_UPDATE_EVENTS, dto);
 
-        // e.g. Direct to core
+        // ... Direct to core using the DTO handler
         sensiNact.pushUpdate(dto);
     }
 
+    /**
+     * Internal method to convert sensor data into an update DTO
+     *
+     * @param message Sensor data
+     * @return A resource value/metadata update DTO
+     */
     GenericDto toDTO(String message) {
         GenericDto dto = new GenericDto();
-        // Populate the DTO
+        // Populate the DTO: model, provider, service, resource, value and timestamp
         return dto;
     }
 

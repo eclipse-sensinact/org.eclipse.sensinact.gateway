@@ -20,18 +20,35 @@ import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Multiple providers from a single service, a single method for all resources
+ * This component provides a shared handler for multiple resources.
+ *
+ * The handler is called when a SET verb is applied to the resource. It can
+ * return a value that will be stored in sensiNact as the value to returned when
+ * calling GET.
  */
-@WhiteboardResource
-@ProviderName({ "foo", "bar", "foobar" })
-@Component(service = _03_MultiWritableBasedResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName({ "foo", "bar", "foobar" }) // Names of the providers those resources are provided by
+@Component(service = _03_MultiWritableBasedResource.class) // The component must provide a service to be detected
 public class _03_MultiWritableBasedResource {
 
+    /**
+     * A SET handler for multiple resourecs. Here, the resource type is explicitly
+     * given for each resource: the method can return void if no correction is
+     * expected, or have the return type Object and return a value with the same
+     * type as the handled resource one. The handler takes a single argument from
+     * the caller (the new value), but accepts different URI parameters (see
+     * {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param value    New value to set
+     */
     @SET(model = "model", service = "example", resource = "fizz", type = String.class)
     @SET(model = "model", service = "example", resource = "buzz", type = Long.class)
     @SET(model = "model", service = "example2", resource = "fizzbuzz", type = Double.class)
     public void setValue(@UriParam(UriSegment.PROVIDER) String provider, @UriParam(UriSegment.SERVICE) String service,
             @UriParam(UriSegment.RESOURCE) String resource, Object value) {
-        // Get the actual value from the sensor
+        // Update the sensor
     }
 }

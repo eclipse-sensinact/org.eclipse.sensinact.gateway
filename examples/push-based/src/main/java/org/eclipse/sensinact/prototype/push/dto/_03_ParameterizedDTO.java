@@ -19,7 +19,7 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 
 /**
- * This example is a DTO defining a resource with the uri
+ * This example is a DTO defining a resource with the URI
  * <code>foo/bar/foobar</code>
  *
  * <ul>
@@ -31,18 +31,33 @@ import org.eclipse.sensinact.core.annotation.dto.Timestamp;
  */
 public class _03_ParameterizedDTO {
 
+    /**
+     * Provider name, with a default value
+     */
     @Provider
     public String provider = "foo";
 
+    /**
+     * Resource name, with a default value
+     */
     @Service
     public String service = "bar";
 
+    /**
+     * Resource name, with a default value
+     */
     @Resource
     public String resource = "foobar";
 
+    /**
+     * Resource value
+     */
     @Data
     public int count;
 
+    /**
+     * Value timestamp
+     */
     @Timestamp
     public long timestamp;
 

@@ -20,22 +20,57 @@ import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Multiple providers from a single service, different methods for each resource
+ * This component provides different resource handlers for multiple resources.
+ * Each handler can propagate a value assignment and return the real one.
+ *
+ * The handler is called when a SET verb is applied to the resource. It can
+ * return a value that will be stored in sensiNact as the value to returned when
+ * calling GET.
  */
-@WhiteboardResource
-@ProviderName({ "foo", "bar", "foobar" })
-@Component(service = _02_MultiWritableBasedResource.class)
+@WhiteboardResource // Adds the property to be detected by sensiNact
+@ProviderName({ "foo", "bar", "foobar" }) // Names of the providers those resources are provided by
+@Component(service = _02_MultiWritableBasedResource.class) // The component must provide a service to be detected
 public class _02_MultiWritableBasedResource {
 
+    /**
+     * A SET method for resource "fizz" of service "example". Note that the resource
+     * type will be the return type of the method if not explicitly given. The
+     * handler takes a single argument from the caller (the new value), but accepts
+     * different URI parameters (see {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     * @param value    New value to set
+     */
     @SET(model = "model", service = "example", resource = "fizz")
-    public void setFizz(@UriParam(UriSegment.PROVIDER) String provider, String value) {
+    public String setFizz(@UriParam(UriSegment.PROVIDER) String provider, String value) {
+        return "set:" + value;
     }
 
+    /**
+     * A SET method for resource "buzz" of service "example". Note that the resource
+     * type will be the return type of the method if not explicitly given. The
+     * handler takes a single argument from the caller (the new value), but accepts
+     * different URI parameters (see {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     * @param value    New value to set
+     */
     @SET(model = "model", service = "example", resource = "buzz")
-    public void setBuzz(@UriParam(UriSegment.PROVIDER) String provider, Long value) {
+    public Long setBuzz(@UriParam(UriSegment.PROVIDER) String provider, Long value) {
+        return value * 2;
     }
 
+    /**
+     * A SET method for resource "fizzbuzz" of service "example". Note that the
+     * resource type will be the return type of the method if not explicitly given.
+     * The handler takes a single argument from the caller (the new value), but
+     * accepts different URI parameters (see {@link UriParam}) from sensiNact.
+     *
+     * @param provider Provider name
+     * @param value    New value to set
+     */
     @SET(model = "model", service = "example", resource = "fizzbuzz")
-    public void setFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider, Double value) {
+    public Double setFizzBuzz(@UriParam(UriSegment.PROVIDER) String provider, Double value) {
+        return Math.max(value, 255d);
     }
 }
