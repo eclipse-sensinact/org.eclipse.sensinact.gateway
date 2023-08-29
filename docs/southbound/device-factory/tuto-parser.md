@@ -207,7 +207,6 @@ Here is the POM file to construct the parser bundle, defined in `${PROJECT_ROOT}
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
       <artifactId>device-factory-core</artifactId>
-      <scope>provided</scope>
     </dependency>
     <!-- OSGi Declarative Services: the parser will be an OSGi component -->
     <dependency>
