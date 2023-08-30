@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.List;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
@@ -82,7 +82,7 @@ public class MissingEntityTest {
     private static final Integer VALUE = 42;
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     final TestUtils utils = new TestUtils();
 

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.osgi.service.component.annotations.Activate;
@@ -46,7 +46,7 @@ public class VirtualTemperatureSensorComponent {
     }
 
     @Reference
-    PrototypePush push;
+    DataUpdate push;
 
     private Random random = new Random();
 

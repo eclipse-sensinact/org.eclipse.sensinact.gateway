@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.sensinact.core.annotation.verb.ACT;
 import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSession;
@@ -71,7 +71,7 @@ public class ResourceAccessTest {
     SensiNactSession session;
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     @InjectService
     IQueryHandler handler;

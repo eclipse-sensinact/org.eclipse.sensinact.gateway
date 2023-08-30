@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.prototype.generic;
 
 import org.eclipse.sensinact.core.push.EventTopicNames;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -36,7 +36,7 @@ public class GenericPushComponent {
      * Service to send the update event through the update DTO handler
      */
     @Reference
-    private PrototypePush sensiNact;
+    private DataUpdate sensiNact;
 
     /**
      * Message coming in from the sensor, just like a custom model

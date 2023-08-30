@@ -22,7 +22,7 @@ import java.util.WeakHashMap;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.command.IndependentCommands;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.model.core.provider.Provider;
@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.promise.Promise;
 
 @Component
-public class PrototypePushImpl implements PrototypePush {
+public class DataUpdateImpl implements DataUpdate {
     // TODO wrap this in a more pleasant type?
     @Reference
     GatewayThread thread;

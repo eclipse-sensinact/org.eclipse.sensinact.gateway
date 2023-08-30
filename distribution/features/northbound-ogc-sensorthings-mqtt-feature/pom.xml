@@ -110,6 +110,15 @@
       <version>1.2.5</version>
       <scope>test</scope>
     </dependency>
+    <!-- This is needed indirectly in testing as part of the test gateway -->
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
+      <artifactId>virtual-temperature-sensor-feature</artifactId>
+      <version>${sensinact.version}</version>
+      <type>json</type>
+      <classifier>osgifeature</classifier>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

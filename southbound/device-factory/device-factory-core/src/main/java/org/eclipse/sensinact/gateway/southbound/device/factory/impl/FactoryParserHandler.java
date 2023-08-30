@@ -38,7 +38,7 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -119,7 +119,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * SensiNact update endpoint
      */
     @Reference
-    PrototypePush prototypePush;
+    DataUpdate prototypePush;
 
     /**
      * JSON mapper

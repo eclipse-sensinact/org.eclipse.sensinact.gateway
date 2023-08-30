@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import org.eclipse.sensinact.northbound.filters.ldap.LdapParserTest;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -43,7 +43,7 @@ import org.osgi.util.promise.PromiseFactory;
 public class LdapFilterTest {
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     @InjectService
     GatewayThread thread;

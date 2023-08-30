@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -39,7 +39,7 @@ import org.osgi.util.promise.PromiseFactory;
 public class FilterTest {
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     @InjectService
     GatewayThread thread;

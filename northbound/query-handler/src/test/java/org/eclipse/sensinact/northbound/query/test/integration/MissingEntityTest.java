@@ -23,7 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
@@ -64,7 +64,7 @@ public class MissingEntityTest {
     SensiNactSession session;
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     @InjectService
     IQueryHandler handler;

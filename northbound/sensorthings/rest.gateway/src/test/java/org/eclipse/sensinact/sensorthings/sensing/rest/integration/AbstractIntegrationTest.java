@@ -21,7 +21,7 @@ import java.time.Instant;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSession;
@@ -58,7 +58,7 @@ public class AbstractIntegrationTest {
     private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     @InjectService
-    protected PrototypePush push;
+    protected DataUpdate push;
 
     @InjectService
     protected GatewayThread thread;
