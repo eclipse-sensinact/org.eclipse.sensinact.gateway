@@ -71,4 +71,4 @@ Once the configuration is updated and saved the gateway will automatically insta
 
     curl http://localhost:8082/sensinact
 
-The full set of endpoints available is listed in the [documentation for the northbound REST interface](../northbound/RestDataAccess.md#available-endpoints)
+The full set of endpoints available is listed in the [documentation for the northbound REST interface](../northbound/RestDataAccess.md#available-endpoints). For a guide to using the REST interface you may also wish to look at the [interacting with sensiNact example](Interacting.md).
