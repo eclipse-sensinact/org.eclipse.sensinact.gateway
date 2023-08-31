@@ -234,3 +234,6 @@ A successful response will look like the following:
 
 After a `SET` subsequent `GET` requests will return the previously set value.
 
+> [!NOTE]
+> If your resource is `FIXED` or `UPDATABLE` then it cannot be set by the northbound API. Also, the behaviour of `SET` requests may be slightly different if your resource is [pull-based](../southbound/custom/custom.md#SET-Methods) and the device returns a different value.
+
