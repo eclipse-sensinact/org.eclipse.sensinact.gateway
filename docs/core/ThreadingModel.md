@@ -37,7 +37,7 @@ Southbound providers can operate in one of two ways, *push based* or *pull based
 
 ### Push based providers
 
-Push based Southbound providers receive data pushed from a sensor or actuator. This data should be converted into a suitable update DTO and passed to the `PrototypePush` service which will wrap the update data in a command and submit it to the gateway thread. Once the gateway thread has processed the update then the returned `Promise` will be resolved.
+Push based Southbound providers receive data pushed from a sensor or actuator. This data should be converted into a suitable update DTO and passed to the `DataUpdate` service which will wrap the update data in a command and submit it to the gateway thread. Once the gateway thread has processed the update then the returned `Promise` will be resolved.
 
 ### Pull based providers
 

@@ -119,7 +119,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * SensiNact update endpoint
      */
     @Reference
-    DataUpdate prototypePush;
+    DataUpdate dataUpdate;
 
     /**
      * JSON mapper
@@ -200,7 +200,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
 
                 if (!bulk.dtos.isEmpty()) {
                     // Send all updates to the gateway thread at once
-                    prototypePush.pushUpdate(bulk);
+                    dataUpdate.pushUpdate(bulk);
                 }
             }
         } finally {

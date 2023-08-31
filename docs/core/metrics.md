@@ -95,7 +95,7 @@ Statistics of complex metrics like histograms and timers are stored in two ways:
   * `-p99`: 99th percentile of values / times
   * `-p99_9`: 99.9th percentile of values / times
 
-All reported metrics are stored in the sensiNact twin model at once using the `PrototypePush` service.
+All reported metrics are stored in the sensiNact twin model at once using the `DataUpdate` service.
 As a result, if many metrics have to be stored, the operation might impact the measured metrics themselves, like the core task time.
 
 ## Listen to metrics reports

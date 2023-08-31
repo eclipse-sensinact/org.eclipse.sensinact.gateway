@@ -42,14 +42,14 @@ public class TestUtils {
     static final HttpClient client = HttpClient.newHttpClient();
 
     /**
-     * Constructs a DTO to use with PrototypePush
+     * Constructs a DTO to use with DataUpdate
      */
     public GenericDto makeDto(String provider, String service, String resource, Object value, Class<?> type) {
         return makeDto(provider, provider, service, resource, value, type);
     }
 
     /**
-     * Constructs a DTO to use with PrototypePush
+     * Constructs a DTO to use with DataUpdate
      */
     public GenericDto makeDto(String model, String provider, String service, String resource, Object value,
             Class<?> type) {

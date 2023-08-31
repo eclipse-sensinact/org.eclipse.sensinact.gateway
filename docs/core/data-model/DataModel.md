@@ -16,7 +16,7 @@ Creating a model can be achieved in several different ways
 
 ### The data first approach
 
-The data first approach appears, at first, to avoid creating a model entirely. In the data first approach users simply push data updates into sensiNact using the `PrototypePush` service
+The data first approach appears, at first, to avoid creating a model entirely. In the data first approach users simply push data updates into sensiNact using the `DataUpdate` service
 
 ```java
 GenericDto dto = new GenericDto();
@@ -25,7 +25,7 @@ dto.service = "service";
 dto.resource = "resource";
 dto.value = 42;
 
-push.pushUpdate(dto);
+dataUpdate.pushUpdate(dto);
 ```
 
 In this approach the sensiNact core will automatically create a model for `provider1` if it doesn't already exist. The model will automatically be extended with a service called `service` and a resource called `resource` if needed, and then the resource will be set with a value of 42.
@@ -43,7 +43,7 @@ This process gives maximum flexibility, but it is important to remember that any
 
 ### The code first approach
 
-The code first approach is similar to the data first approach in that no formal model is created, and that users simply push data updates into sensiNact using the `PrototypePush` service. The key difference is that unlike the data first approach users define one or more custom DTOs representing the resources that they want to update. These DTOs form the template for the model, with the field names and type information being used to generate the model as updates are received.
+The code first approach is similar to the data first approach in that no formal model is created, and that users simply push data updates into sensiNact using the `DataUpdate` service. The key difference is that unlike the data first approach users define one or more custom DTOs representing the resources that they want to update. These DTOs form the template for the model, with the field names and type information being used to generate the model as updates are received.
 
 For example, the following DTO:
 

@@ -52,9 +52,9 @@ public class RecordHandlingTest {
     @BeforeEach
     void start() throws InterruptedException {
         deviceMapper = new FactoryParserHandler();
-        deviceMapper.prototypePush = Mockito.mock(DataUpdate.class);
+        deviceMapper.dataUpdate = Mockito.mock(DataUpdate.class);
 
-        Mockito.when(deviceMapper.prototypePush.pushUpdate(Mockito.any())).thenAnswer(i -> {
+        Mockito.when(deviceMapper.dataUpdate.pushUpdate(Mockito.any())).thenAnswer(i -> {
             final BulkGenericDto dto = i.getArgument(0, BulkGenericDto.class);
             bulks.add(dto);
             return Promises.resolved(dto);

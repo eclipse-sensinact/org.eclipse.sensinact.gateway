@@ -93,7 +93,7 @@ public class SecureWebSocketTest {
     }
 
     /**
-     * Constructs a DTO to use with PrototypePush
+     * Constructs a DTO to use with DataUpdate
      */
     public GenericDto makeDto(String provider, String service, String resource, Object value, Class<?> type) {
         GenericDto dto = new GenericDto();
