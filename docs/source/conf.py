@@ -19,7 +19,7 @@ root_doc = "index"
 extensions = ["myst_parser"]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "build", "venv", "README.md", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------

@@ -1,6 +1,6 @@
 # Configuring sensiNact
 
-In order to configure sensiNact you will need to have a launchable gateway. If you haven't already got one then [this example](Downloading.md) will tell you how to obtain one.
+In order to configure sensiNact you will need to have a launchable gateway. If you haven't already got one then [this example](Download.md) will tell you how to obtain one.
 
 ## The sensiNact configuration file
 
@@ -12,7 +12,7 @@ The sensiNact configuration file format is described [in detail here](../distrib
 
 ## Adding a Northbound interface
 
-[Northbound interfaces](../northbound/Northbound.md) are externally facing components that allow users or machines to interact with the gateway. To add one we need to configure the [feature manager](../distribution/Launcher.md#configuring-the-feature-manager) to include the necessary feature(s)
+[Northbound interfaces](../northbound/_index.md) are externally facing components that allow users or machines to interact with the gateway. To add one we need to configure the [feature manager](../distribution/Launcher.md#configuring-the-feature-manager) to include the necessary feature(s)
 
 A clean gateway instance will start with a `configuration.json` containing something similar to the following:
 

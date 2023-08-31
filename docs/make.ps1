@@ -5,8 +5,8 @@ Push-Location $PSScriptRoot
 if (!$Env:SPHINXBUILD) {
 	$Env:SPHINXBUILD = "sphinx-build"
 }
-$SOURCEDIR = "$(pwd)"
-$BUILDDIR = "_build"
+$SOURCEDIR = "source"
+$BUILDDIR = "build"
 
 try {
 	& $Env:SPHINXBUILD > $null 2> $null

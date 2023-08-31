@@ -1,6 +1,6 @@
 # Documentation of Eclipse sensiNact
 
-The documentation entry point is [`Main.md`](Main.md).
+The documentation entry point is [`source/index.md`](source/index.md).
 
 ## How to compile
 
@@ -18,4 +18,4 @@ The documentation entry point is [`Main.md`](Main.md).
    * Bash: `make clean html`
    * Powershell: `.\make.ps1 clean && .\make.ps1 html`
    * CMD: `make clean & make html`
-5. The documentation HTML project is in the `_build/html` folder, starting at [index.html](./_build/html/index.html).
+5. The documentation HTML project is in the `build/html` folder, starting at [index.html](./build/html/index.html).
