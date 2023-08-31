@@ -1,0 +1,6 @@
+# Output folder
+_build/
+build/
+
+# Python virtual environment
+venv/

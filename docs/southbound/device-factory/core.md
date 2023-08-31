@@ -1,4 +1,4 @@
-# Device factory
+# Device factory core
 
 The device factory handles raw update notifications from transport handlers.
 The payload is parsed and its content is mapped to the Eclipse sensiNact model according to a configuration.

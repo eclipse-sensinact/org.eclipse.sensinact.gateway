@@ -24,7 +24,7 @@ The gateway architecture is modular, and uses [OSGi](https://www.osgi.org)<sup>Â
 
 At a high level the structure of the launcher looks like this:
 
-<img src="architecture diagram.png" alt="The sensiNact gateway launcher architecture" width="800"/>
+![The sensiNact gateway launcher architecture](../_static/distribution/architecture_diagram.png){width=800px}
 
 ### Gateway features
 
@@ -37,7 +37,7 @@ The bundles referenced in a feature descriptor will be installed into the gatewa
 
 The gateway distribution comes with a number of pre-built features, such as the `core-feature`. Users may add their own features to extend the gateway, either by putting them in the `features` folder, or by adding them to the `repository`. Any additional bundles installed by user features will also need to be available in the `repository`.
 
-For more information about features see [here](Launcher.md#the-eclipse-sensiNact-gateway-feature-manager).
+For more information about features see [here](Launcher.md#the-eclipse-sensinact-gateway-feature-manager).
 
 ### Gateway configuration
 

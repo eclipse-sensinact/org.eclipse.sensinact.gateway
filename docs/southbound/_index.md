@@ -1,4 +1,4 @@
-# The Eclipse sensiNact gateway southbound
+# Southbound providers
 
 The *southbound* API of Eclipse sensiNact gateway refers to the parts of the gateway which interface with the external device. This may be through a generic protocol (e.g. MQTT/HTTP) or through something custom (e.g. a native serial interface).
 
@@ -18,3 +18,14 @@ The history of resource values is considered to be southbound provider linked to
   * [Timescale history provider](./history/timescale.md)
 
 Writing your own [custom southbound connector](./custom/custom.md) is very easy, and can allow you to optimise your updates.
+
+```{toctree}
+:hidden:
+:glob:
+
+device-factory/_index
+http/_index
+mqtt/_index
+history/_index
+custom/*
+```

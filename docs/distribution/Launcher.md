@@ -10,7 +10,7 @@ The Eclipse sensiNact gateway uses an OSGi<sup>®</sup> runtime and related spec
 
 The overall functional layout is as follows:
 
-<img src="architecture diagram.png" alt="The sensiNact gateway launcher architecture" width="800"/>
+![The sensiNact gateway launcher architecture](../_static/distribution/architecture_diagram.png){width=800px}
 
 ## The Eclipse sensiNact gateway feature manager
 
