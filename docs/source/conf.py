@@ -25,8 +25,16 @@ exclude_patterns = ["Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "nature"
+html_theme = "piccolo_theme"
 html_static_path = ["_static"]
+
+# -- Options for Piccolo Theme -----------------------------------------------
+# https://piccolo-theme.readthedocs.io/en/latest/configuration.html
+
+html_theme_options = {
+    "source_url": 'https://github.com/eclipse/org.eclipse.sensinact.gateway',
+    "source_icon": "github"
+}
 
 # -- Options for MyST Parser ------------------------------------------------
 # https://myst-parser.readthedocs.io/en/latest/syntax/optional.html

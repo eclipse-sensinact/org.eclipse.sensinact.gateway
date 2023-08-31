@@ -29,7 +29,7 @@ The *SUBSCRIBE* verb allows the caller to watch for changes in the target part o
  * Changes in the value of a *Resource*
  * Actions ocurring on a *Resource*
 
-## UNSUBSCRIBE
+### UNSUBSCRIBE
 
 The *UNSUBSCRIBE* verb allows the caller to remove a subscription from an earlier *SUBSCRIBE* call
 

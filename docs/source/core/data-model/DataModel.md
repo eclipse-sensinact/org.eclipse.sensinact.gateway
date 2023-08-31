@@ -32,8 +32,9 @@ In this approach the sensiNact core will automatically create a model for `provi
 
 In fact the process becomes more obvious if the `model` field of the `GenericDto` is set. This indicates the model that should be used for the provider and allows different providers to share the same model.
 
-> [!IMPORTANT]
-> All automatically created resources are set to be `UPDATABLE`, meaning that they can be updated by pushing data updates, but not using a `SET` operation.
+```{important}
+All automatically created resources are set to be `UPDATABLE`, meaning that they can be updated by pushing data updates, but not using a `SET` operation.
+```
 
 #### Modifying the model
 
@@ -74,8 +75,9 @@ In this approach the sensiNact core will automatically create a model for `provi
 
 In fact the process becomes more obvious if the `model` field of the `GenericDto` is set. This indicates the model that should be used for the provider and allows different providers to share the same model.
 
-> [!IMPORTANT]
-> All automatically created resources are set to be `UPDATABLE`, meaning that they can be updated by pushing data updates, but not using a `SET` operation.
+```{important}
+All automatically created resources are set to be `UPDATABLE`, meaning that they can be updated by pushing data updates, but not using a `SET` operation.
+```
 
 #### Modifying the model
 
@@ -139,6 +141,3 @@ In addition to pushed updates sensiNact allows resources to be registered using 
 All Resource whiteboard services must be registered with the property `sensiNact.whiteboard.resource` set to `true`. This can be easily achieved using the `WhiteboardResource` component property annotation.
 
 The service instance should then have one or more methods annotated with `ACT`, `GET` or `SET`. These methods will be used to register the resource with the model, and called whenever the relevant verb is used for the resource.
-
-
-

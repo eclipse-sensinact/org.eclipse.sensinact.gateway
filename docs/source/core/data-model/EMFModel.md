@@ -26,9 +26,9 @@ Each `Service` uses `EAttribute`s for each data resource in the model. The type 
 
 Every resource in sensiNact has associated metadata. This metadata is stored in a `Metadata` object at the `Service` level. The `Service` uses an `EMap` where the key is the `ETypedElement` representing the `EAttribute` or `EOperation` for the resource, and the value is the `Metadata` object. The `Metadata` object has a `timestamp` which represents the most recent update time for the resource (i.e. the most recent update to the resource value or resource metadata). The `Metadata` also provides a list of `FeatureCustomMetadata` representing the individual metadata values for the resource. Each `FeatureCustomMetadata` has a name, value and timestamp representing the metadata value and when it was last updated.
 
-> [!IMPORTANT]
-> The `timestamp` is used to determine the last update time for the resource. If the resource has never been set then there will be no timestamp set. Also, the timestamp represents the time of the last update, which may be *later* than the timestamps for each individual metadata timestamp if, for example, the most recent change was to delete a metadata value.
-
+```{important}
+The `timestamp` is used to determine the last update time for the resource. If the resource has never been set then there will be no timestamp set. Also, the timestamp represents the time of the last update, which may be *later* than the timestamps for each individual metadata timestamp if, for example, the most recent change was to delete a metadata value.
+```
 
 ### Annotated metadata
 
@@ -51,4 +51,3 @@ Linking a provider `B` into provider `A` does not cause any of the linked provid
 ## Creating a custom model
 
 TODO: We need input from Jürgen or Mark here
-

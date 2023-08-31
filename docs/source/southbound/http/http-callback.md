@@ -19,10 +19,10 @@ The configuration is required for the HTTP callback service to be initiatied, bu
 
 The root request URI will be `<base.uri>/southbound/callback/`.
 
-# HTTP listener
+## HTTP listener
 
-The request listener will be a service registeerred for interface `org.eclipse.sensinact.gateway.southbound.http.callback.api.HttpCallback`.
-Each listener detected by the HTTP callback will be assocaited to a unique ID (UUID) and to a unique HTTP path: `<base.uri>/southbound/callback/<UUID>`.
+The request listener will be a service registered for interface `org.eclipse.sensinact.gateway.southbound.http.callback.api.HttpCallback`.
+Each listener detected by the HTTP callback will be associated to a unique ID (UUID) and to a unique HTTP path: `<base.uri>/southbound/callback/<UUID>`.
 
 The URI associated to the listener will be be given to with its `activate(String uri)` method.
 
