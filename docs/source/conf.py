@@ -27,13 +27,14 @@ exclude_patterns = ["Thumbs.db", ".DS_Store"]
 
 html_theme = "piccolo_theme"
 html_static_path = ["_static"]
+html_favicon = "_static/sensiNact_logo.png"
 
 # -- Options for Piccolo Theme -----------------------------------------------
 # https://piccolo-theme.readthedocs.io/en/latest/configuration.html
 
 html_theme_options = {
-    "source_url": 'https://github.com/eclipse/org.eclipse.sensinact.gateway',
-    "source_icon": "github"
+    "source_url": "https://github.com/eclipse/org.eclipse.sensinact.gateway",
+    "source_icon": "github",
 }
 
 # -- Options for MyST Parser ------------------------------------------------
