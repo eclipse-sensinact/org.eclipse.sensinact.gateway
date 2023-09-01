@@ -16,7 +16,7 @@ The sensiNact configuration file format is described [in detail here](../distrib
 
 A clean gateway instance will start with a `configuration.json` containing something similar to the following:
 
-```js
+```json
 "sensinact.launcher": {
   "features": [
     "core-feature"
@@ -40,7 +40,7 @@ We can also configure these features to control the port used, and to enable ano
 
 The updated configuration will look something like this:
 
-```js
+```json
 "sensinact.launcher": {
   "features": [
     "core-feature",
@@ -69,6 +69,8 @@ The updated configuration will look something like this:
 
 Once the configuration is updated and saved the gateway will automatically install and configure the defined list of features. You can verify this by querying `http://localhost:8082/sensinact` in your browser, or from the command line by using a tool such as `curl`.
 
-    curl http://localhost:8082/sensinact
+```bash
+curl http://localhost:8082/sensinact
+```
 
 The full set of endpoints available is listed in the [documentation for the northbound REST interface](../northbound/RestDataAccess.md#available-endpoints). For a guide to using the REST interface you may also wish to look at the [interacting with sensiNact example](Interacting.md).

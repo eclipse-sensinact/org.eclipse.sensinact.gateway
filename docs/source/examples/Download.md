@@ -6,14 +6,18 @@ This worked example aims to get you started with running sensiNact for the first
 
 Eclipse sensiNact is published to the Eclipse Nexus repository instance at [https://repo.eclipse.org](https://repo.eclipse.org). You can find it directly there, or use the maven-dependency plugin to find it for you.
 
-    mvn dependency:get -DremoteRepositories=https://repo.eclipse.org/content/groups/sensinact/ \
-    -Dartifact=org.eclipse.sensinact.gateway.distribution:assembly:0.0.2-SNAPSHOT:zip -Ddest=sensinact.zip
+```bash
+mvn dependency:get \
+    -DremoteRepositories=https://repo.eclipse.org/content/groups/sensinact/ \
+    -Dartifact=org.eclipse.sensinact.gateway.distribution:assembly:0.0.2-SNAPSHOT:zip \
+    -Ddest=sensinact.zip
+```
 
 ## Installing sensiNact
 
 Once you have obtained the sensiNact assembly you can unzip it using your favourite zip tool
 
-     unzip sensinact.zip
+    unzip sensinact.zip
 
 The unzipped contents will include several folders and files including:
 
@@ -29,7 +33,8 @@ Starting sensiNact can be achieved simply by executing the start script
 
     ./start.sh
 
-> [!WARNING]
-> If you are unable to execute the start script try setting the executable permission bit using `chmod +x start.sh`
+```{warning}
+If you are unable to execute the start script try setting the executable permission bit using `chmod +x start.sh`
+```
 
 Once you have started sensiNact you should see some logs written to the console indicating that the gateway is running. In order to interact with the gateway you will need to [configure a northbound provider](Configuring.md)

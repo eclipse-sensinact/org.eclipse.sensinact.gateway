@@ -8,7 +8,7 @@ To start with you will need a runnable gateway configured with REST access. If y
 
 Listing the providers present in the gateway is very simple. Assuming that you're using the configuration from [the previous example](Configuring.md) then issuing a GET request to `http://localhost:8082/sensinact/providers` will return something like:
 
-```js
+```json
 {
   "type": "PROVIDERS_LIST",
   "uri": "/",
@@ -21,7 +21,7 @@ This shows the result was successful, is of type `PROVIDERS_LIST` and the `provi
 
 The `sensiNact` provider is a built in provider which we can further introspect at `http://localhost:8082/sensinact/providers/sensiNact`
 
-```js
+```json
 {
   "type": "DESCRIBE_PROVIDER",
   "uri": "/sensiNact",
@@ -34,7 +34,7 @@ The `sensiNact` provider is a built in provider which we can further introspect 
 ```
 This shows us details about the `sensiNact` provider in the form of a `DESCRIBE_PROVIDER` response. We could get similar information by listing the services for the `sensiNact` provider at `http://localhost:8082/sensinact/providers/sensiNact/services`
 
-```js
+```json
 {
   "type": "SERVICES_LIST",
   "uri": "/sensiNact",
@@ -44,7 +44,7 @@ This shows us details about the `sensiNact` provider in the form of a `DESCRIBE_
 
 We can further query the resources available for a given service at `http://localhost:8082/sensinact/providers/sensiNact/services/system` or `http://localhost:8082/sensinact/providers/sensiNact/services/system/resources`
 
-```js
+```json
 {
   "type": "DESCRIBE_SERVICE",
   "uri": "/sensiNact/system",
@@ -58,7 +58,7 @@ We can further query the resources available for a given service at `http://loca
   }
 }
 ```
-```js
+```json
 {
   "type": "RESOURCES_LIST",
   "uri": "/sensiNact/system",
@@ -71,7 +71,7 @@ We can further query the resources available for a given service at `http://loca
 
 When you describe a resource such as `http://localhost:8082/sensinact/providers/sensiNact/services/system/resources` you get a list of all of the possible sensiNact verbs that can be used, and the parameters that they accept:
 
-```js
+```json
 {
   "type": "DESCRIBE_RESOURCE",
   "uri": "/sensiNact/system/started",
@@ -116,7 +116,7 @@ When you describe a resource such as `http://localhost:8082/sensinact/providers/
 
 We can then "GET" the value of the resource from `http://localhost:8082/sensinact/providers/sensiNact/services/system/resources/started/GET`
 
-```js
+```json
 {
   "type": "GET_RESPONSE",
   "uri": "/sensiNact/system/started",
@@ -135,31 +135,33 @@ We can then "GET" the value of the resource from `http://localhost:8082/sensinac
 
 In order to get more meaningful data from our sensiNact we can deploy a virtual sensor by updating the `configuration/configuration.json` to include the `virtual-temperature-sensor-feature`.
 
-```js
-```js
-"sensinact.launcher": {
-  "features": [
-    "core-feature",
-    "jakarta-servlet-whiteboard-feature",
-    "jakarta-rest-whiteboard-feature",
-    "northbound-rest-feature",
-    "virtual-temperature-sensor-feature"
-  ],
-  "repository": "repository",
-  "featureDir": "features"
-},
-"sensinact.virtual.temperature": {
-  "name": "temp1",
-  "interval": 5000,
-  "latitude": 1.0,
-  "longitude": 2.0
-},
-...
+```json
+{
+  // ...
+  "sensinact.launcher": {
+    "features": [
+      "core-feature",
+      "jakarta-servlet-whiteboard-feature",
+      "jakarta-rest-whiteboard-feature",
+      "northbound-rest-feature",
+      "virtual-temperature-sensor-feature"
+    ],
+    "repository": "repository",
+    "featureDir": "features"
+  },
+  "sensinact.virtual.temperature": {
+    "name": "temp1",
+    "interval": 5000,
+    "latitude": 1.0,
+    "longitude": 2.0
+  }
+  // ...
+}
 ```
 
 We can query the value of the `sensor/temperature` resource as before at `http://localhost:8082/sensinact/providers/temp1/services/sensor/resources/temperature/GET`
 
-```js
+```json
 {
   "type": "GET_RESPONSE",
   "uri": "/temp1/sensor/temperature",
@@ -211,14 +213,15 @@ In the REST interface unsubscription occurs automatically when the client closes
 
 If a resource is `MODIFIABLE` that means that it can have its value updated by an end user using the `SET` verb. Unlike the other requests so far a `SET` operation in the REST API is a `PUT`, not a `GET`. The body of the PUT request is an array of parameters with a `name`, `type` and `value`. We can test this using `curl`
 
-```
-curl -d "[{\"name\": \"value\", \"type\": \"string\", \"value\": \"Lassie\"}]" -H "Content-Type: application/json" \
-http://localhost:8082/sensinact/providers/temp1/services/admin/resources/friendlyName/SET
+```bash
+curl -d "[{\"name\": \"value\", \"type\": \"string\", \"value\": \"Lassie\"}]" \
+  -H "Content-Type: application/json" \
+  http://localhost:8082/sensinact/providers/temp1/services/admin/resources/friendlyName/SET
 ```
 
 A successful response will look like the following:
 
-```js
+```json
 {
   "type": "SET_RESPONSE",
   "uri": "/temp1/admin/friendlyName",
@@ -234,5 +237,6 @@ A successful response will look like the following:
 
 After a `SET` subsequent `GET` requests will return the previously set value.
 
-> [!NOTE]
-> If your resource is `FIXED` or `UPDATABLE` then it cannot be set by the northbound API. Also, the behaviour of `SET` requests may be slightly different if your resource is [pull-based](../southbound/custom/custom.md#set-methods) and the device returns a different value.
+```{note}
+If your resource is `FIXED` or `UPDATABLE` then it cannot be set by the northbound API. Also, the behaviour of `SET` requests may be slightly different if your resource is [pull-based](../southbound/custom/custom.md#set-methods) and the device returns a different value.
+```
