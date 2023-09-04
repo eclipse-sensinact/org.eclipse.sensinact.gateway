@@ -14,7 +14,7 @@ package org.eclipse.sensinact.core.push;
 
 import org.osgi.util.promise.Promise;
 
-public interface PrototypePush {
+public interface DataUpdate {
 
     Promise<?> pushUpdate(Object o);
 

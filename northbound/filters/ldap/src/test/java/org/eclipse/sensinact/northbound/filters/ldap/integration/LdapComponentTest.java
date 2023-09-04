@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -37,7 +37,7 @@ import org.osgi.test.junit5.service.ServiceExtension;
 public class LdapComponentTest {
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     @InjectService
     GatewayThread thread;

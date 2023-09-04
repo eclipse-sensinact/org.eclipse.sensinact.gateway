@@ -38,7 +38,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
@@ -74,7 +74,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public class InsecureMqttNotificationsTest {
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     @InjectService
     GatewayThread thread;

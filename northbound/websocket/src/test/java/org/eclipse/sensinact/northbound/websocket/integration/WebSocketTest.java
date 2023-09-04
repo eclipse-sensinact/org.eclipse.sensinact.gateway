@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
@@ -69,7 +69,7 @@ public class WebSocketTest {
     SensiNactSessionManager sessionManager;
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     final ObjectMapper mapper = new ObjectMapper();
 
@@ -99,7 +99,7 @@ public class WebSocketTest {
     }
 
     /**
-     * Constructs a DTO to use with PrototypePush
+     * Constructs a DTO to use with DataUpdate
      */
     public GenericDto makeDto(String provider, String service, String resource, Object value, Class<?> type) {
         GenericDto dto = new GenericDto();

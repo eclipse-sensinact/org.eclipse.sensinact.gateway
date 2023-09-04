@@ -19,7 +19,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.ResourceDescription;
@@ -47,7 +47,7 @@ public class AdminServiceTest {
     private static final String RESOURCE = "resource";
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
     @InjectService
     SensiNactSessionManager sessionManager;
     SensiNactSession session;

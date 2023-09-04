@@ -31,7 +31,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.exceptions.UpgradeException;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
@@ -63,7 +63,7 @@ public class SecureWebSocketTest {
     SensiNactSessionManager sessionManager;
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     final ObjectMapper mapper = new ObjectMapper();
 
@@ -93,7 +93,7 @@ public class SecureWebSocketTest {
     }
 
     /**
-     * Constructs a DTO to use with PrototypePush
+     * Constructs a DTO to use with DataUpdate
      */
     public GenericDto makeDto(String provider, String service, String resource, Object value, Class<?> type) {
         GenericDto dto = new GenericDto();

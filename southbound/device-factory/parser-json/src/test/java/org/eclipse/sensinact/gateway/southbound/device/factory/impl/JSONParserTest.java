@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -56,9 +56,9 @@ public class JSONParserTest {
     @BeforeEach
     void start() throws InterruptedException {
         deviceMapper = new FactoryParserHandler();
-        deviceMapper.prototypePush = Mockito.mock(PrototypePush.class);
+        deviceMapper.dataUpdate = Mockito.mock(DataUpdate.class);
 
-        Mockito.when(deviceMapper.prototypePush.pushUpdate(Mockito.any())).thenAnswer(i -> {
+        Mockito.when(deviceMapper.dataUpdate.pushUpdate(Mockito.any())).thenAnswer(i -> {
             final BulkGenericDto dto = i.getArgument(0, BulkGenericDto.class);
             bulks.add(dto);
             return Promises.resolved(dto);

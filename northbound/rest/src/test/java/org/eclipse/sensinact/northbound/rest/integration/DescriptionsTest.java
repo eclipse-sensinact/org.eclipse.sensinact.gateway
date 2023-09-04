@@ -29,7 +29,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
@@ -100,7 +100,7 @@ public class DescriptionsTest {
     private static final Integer VALUE = 42;
 
     @InjectService
-    PrototypePush push;
+    DataUpdate push;
 
     final TestUtils utils = new TestUtils();
 

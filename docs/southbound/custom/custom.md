@@ -4,7 +4,7 @@ Building a custom Southbound connector is a relatively simple task, however we r
 
 ## Pushing updates
 
-Pushing updates is the simplest way to set data in the sensiNact digital twin. Updates are pushed using the `PrototypePush` service which allows update objects to be sent to sensiNact.
+Pushing updates is the simplest way to set data in the sensiNact digital twin. Updates are pushed using the `DataUpdate` service which allows update objects to be sent to sensiNact.
 
 ### Using a Generic DTO
 

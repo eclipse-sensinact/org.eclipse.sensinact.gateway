@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.southbound.virtual.temperature;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.sensinact.core.push.PrototypePush;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.osgi.service.component.annotations.Deactivate;
@@ -23,7 +23,7 @@ import org.osgi.util.promise.Promise;
 
 public class VirtualTemperatureSensor {
 
-    private final PrototypePush push;
+    private final DataUpdate push;
 
     private final String name;
 
@@ -37,7 +37,7 @@ public class VirtualTemperatureSensor {
 
     private final AtomicBoolean active = new AtomicBoolean(true);
 
-    VirtualTemperatureSensor(PrototypePush push, String name, Random random, long interval, double min, double max,
+    VirtualTemperatureSensor(DataUpdate push, String name, Random random, long interval, double min, double max,
             GeoJsonObject location) throws Exception {
 
         this.push = push;
