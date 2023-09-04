@@ -5,7 +5,8 @@
 Eclipse sensiNact can work in various environment, from a Raspberry Pi 1 to a cloud instance.
 Its requirements will depend mainly on the number of updates and queries it must handle.
 
-The platform **requires** to run in a Java 17+ environment, with a minimum of 2GB of RAM and 50 MB of disk space.
+The platform **requires** to run in a Java 17+ environment, with a minimum of 256MB of Java Heap space, 50 MB of disk space and a single core processor.
+For larger deployments with more users and sensors you will want to run with at least 2GB of available heap and a multi-core processor.
 
 ## Installation
 
