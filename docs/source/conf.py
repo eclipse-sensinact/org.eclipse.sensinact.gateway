@@ -27,13 +27,20 @@ release = "0.0.2"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-root_doc = "index"
+root_doc = "root-toc"
 
 extensions = ["myst_parser"]
 
 templates_path = ["_templates"]
 exclude_patterns = ["Thumbs.db", ".DS_Store"]
 
+# -- Options for LaTex output ------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#latex-options
+
+latex_engine = "xelatex"
+latex_logo = "_static/sensiNact_logo.png"
+latex_show_pagerefs = True
+latex_show_urls = "footnote"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

@@ -40,19 +40,3 @@ You can open issues on [GitHub](https://github.com/eclipse/org.eclipse.sensinact
 Remember to follow the [code of conduct](https://github.com/eclipse/.github/blob/master/CODE_OF_CONDUCT.md).
 
 You can also ask your questions on the [sensinact-dev mailing list](https://accounts.eclipse.org/mailing-list/sensinact-dev).
-
-
-```{toctree}
-:maxdepth: 2
-:hidden:
-
-setup
-getting-started
-news
-references
-guides
-faq
-code-doc
-
-EPL-2.0
-```
