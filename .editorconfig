@@ -49,3 +49,6 @@ indent_size = unset
 [license.templates]
 indent_size = unset
 trim_trailing_whitespace = unset
+
+[Makefile]
+indent_style = tab
