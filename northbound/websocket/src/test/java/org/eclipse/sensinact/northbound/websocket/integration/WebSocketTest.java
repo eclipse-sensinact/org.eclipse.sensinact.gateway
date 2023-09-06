@@ -223,7 +223,7 @@ public class WebSocketTest {
             AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
             assertNotNull(rawResult, "No result to subscribe");
             ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
-            assertEquals(querySub.requestId, rawResult.requestId);
+            assertEquals(querySub.requestId, subscribeResult.requestId);
             assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
 
             // Update the value
@@ -240,6 +240,7 @@ public class WebSocketTest {
             assertNotNull(rawResult, "No notification");
             ResultResourceNotificationDTO notif = (ResultResourceNotificationDTO) rawResult;
             assertEquals(querySub.requestId, subscribeResult.requestId);
+            assertEquals(querySub.requestId, notif.requestId);
             assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
             assertNotNull(notif.notification);
             assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);

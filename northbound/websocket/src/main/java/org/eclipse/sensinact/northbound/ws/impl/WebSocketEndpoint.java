@@ -312,13 +312,11 @@ public class WebSocketEndpoint {
     /**
      * Registers a subscription of the current session
      *
-     * @param requestId
-     *
-     * @param userSession Caller session
-     * @param query       Subscription query
+     * @param requestId ID of the subscription request
+     * @param query     Subscription query
      * @return Result DTO
      */
-    private void handleSubscribe(String requestId, final QuerySubscribeDTO query) throws Exception {
+    private void handleSubscribe(final String requestId, final QuerySubscribeDTO query) throws Exception {
         final SensinactPath path = query.uri;
         CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<String> listenerId = new AtomicReference<>();
@@ -347,7 +345,7 @@ public class WebSocketEndpoint {
                     logger.warn("Detected closed WebSocket. Stop listening");
                     userSession.removeListener(listenerId.get());
                 } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
-                    sendNotification(ws, listenerId.get(), new ResourceDataNotificationDTO(evt));
+                    sendNotification(ws, requestId, listenerId.get(), new ResourceDataNotificationDTO(evt));
                 }
             } catch (Throwable e) {
                 logger.warn("Error notifying WebSocket of life cycle update", e);
@@ -361,7 +359,7 @@ public class WebSocketEndpoint {
                     logger.warn("Detected closed WebSocket. Stop listening");
                     userSession.removeListener(listenerId.get());
                 } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
-                    sendNotification(ws, listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
+                    sendNotification(ws, requestId, listenerId.get(), new ResourceLifecycleNotificationDTO(evt));
                 }
             } catch (Throwable e) {
                 logger.error("Error notifying WebSocket of a data update", e);
@@ -408,17 +406,18 @@ public class WebSocketEndpoint {
     /**
      * Sends a notification to the client
      *
-     * @param ws
-     *
+     * @param ws           WebSocket session
+     * @param requestId    ID of the subscription request
      * @param listenerId   ID of the subscription
      * @param notification Notification DTO
      */
-    private void sendNotification(Session ws, final String listenerId,
+    private void sendNotification(final Session ws, final String requestId, final String listenerId,
             final AbstractResourceNotificationDTO notification) {
         try {
             final ResultResourceNotificationDTO result = new ResultResourceNotificationDTO();
             result.statusCode = 200;
             result.uri = new SensinactPath(notification.provider, notification.service, notification.resource).toUri();
+            result.requestId = requestId;
             result.subscriptionId = listenerId;
             result.notification = notification;
             ws.getRemote().sendString(mapper.writeValueAsString(result));
