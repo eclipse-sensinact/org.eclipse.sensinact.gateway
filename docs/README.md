@@ -16,6 +16,6 @@ The documentation entry point is [`source/index.md`](source/index.md).
    * **Note:** the requirements contains a link to a Git repository, you might need to add `--use-pep517` argument.
 4. Compile the project with the Sphinx HTML builder:
    * Bash: `make clean html`
-   * Powershell: `.\make.ps1 clean && .\make.ps1 html`
+   * Powershell: `.\make.bat clean && .\make.bat html`
    * CMD: `make clean & make html`
 5. The documentation HTML project is in the `build/html` folder, starting at [index.html](./build/html/index.html).
