@@ -32,6 +32,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.transaction.control.ScopedWorkException;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jdbc.JDBCConnectionProvider;
 import org.osgi.service.transaction.control.jdbc.JDBCConnectionProviderFactory;
@@ -186,21 +187,26 @@ public class TimescaleHistoricalStore {
             logger.debug("Creating database tables if needed");
         }
         Connection conn = connection.get();
-        txControl.required(() -> {
-            Statement s = conn.createStatement();
-            s.execute("CREATE SCHEMA IF NOT EXISTS sensinact;");
-            s.execute(
-                    "CREATE TABLE IF NOT EXISTS sensinact.numeric_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data NUMERIC )");
-            s.execute("SELECT create_hypertable('sensinact.numeric_data', 'time');");
-            s.execute(
-                    "CREATE TABLE IF NOT EXISTS sensinact.text_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data text )");
-            s.execute("SELECT create_hypertable('sensinact.text_data', 'time');");
-            s.execute("CREATE EXTENSION Postgis;");
-            s.execute(
-                    "CREATE TABLE IF NOT EXISTS sensinact.geo_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data geography(POINT,4326) )");
-            s.execute("SELECT create_hypertable('sensinact.geo_data', 'time');");
-            return null;
-        });
+        try {
+            txControl.required(() -> {
+                Statement s = conn.createStatement();
+                s.execute("CREATE SCHEMA IF NOT EXISTS sensinact;");
+                s.execute(
+                        "CREATE TABLE IF NOT EXISTS sensinact.numeric_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data NUMERIC )");
+                s.execute("SELECT create_hypertable('sensinact.numeric_data', 'time', if_not_exists => TRUE);");
+                s.execute(
+                        "CREATE TABLE IF NOT EXISTS sensinact.text_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data text )");
+                s.execute("SELECT create_hypertable('sensinact.text_data', 'time', if_not_exists => TRUE);");
+                s.execute("CREATE EXTENSION IF NOT EXISTS Postgis;");
+                s.execute(
+                        "CREATE TABLE IF NOT EXISTS sensinact.geo_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data geography(POINT,4326) )");
+                s.execute("SELECT create_hypertable('sensinact.geo_data', 'time', if_not_exists => TRUE);");
+                return null;
+            });
+        } catch (ScopedWorkException e) {
+            logger.error("Error setting up history tables. The history provider might not work", e.getCause());
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("Database tables created");
         }

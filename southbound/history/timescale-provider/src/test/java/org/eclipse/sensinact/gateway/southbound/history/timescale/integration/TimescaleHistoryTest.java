@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -41,6 +42,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,58 +72,97 @@ public class TimescaleHistoryTest {
     private static final Instant TS_2013 = Instant.parse("2013-01-01T00:00:00.00Z");
     private static final Instant TS_2014 = Instant.parse("2014-01-01T00:00:00.00Z");
 
+    private static JdbcDatabaseContainer<?> container;
+
     @BeforeAll
-    static void check() throws Exception {
+    static void startContainer() throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(TimescaleHistoryTest.class.getClassLoader());
         try {
-            DockerClientFactory.lazyClient().versionCmd().exec();
-        } catch (Throwable t) {
-            abort("No docker executable on the path, so tests will be skipped");
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
-    }
+            try {
+                DockerClientFactory.lazyClient().versionCmd().exec();
+            } catch (Throwable t) {
+                abort("No docker executable on the path, so tests will be skipped");
+            }
 
-    @BeforeEach
-    void startContainer(
-            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.history.timescale", location = "?")) Configuration cm)
-            throws Exception {
-        container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
-                .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
-
-        container.withDatabaseName("sensinactHistory");
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
+                    .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
+            container.withDatabaseName("sensinactHistory");
             container.start();
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
         }
+    }
+
+    private Configuration historyProviderConfig;
+
+    @BeforeEach
+    void setupTest(
+            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.history.timescale", location = "?")) Configuration cm)
+            throws Exception {
+        historyProviderConfig = cm;
         cm.update(new Hashtable<>(Map.of("url", container.getJdbcUrl(), "user", container.getUsername(), ".password",
                 container.getPassword())));
-        Thread.sleep(1000);
+        waitForStart();
+    }
+
+    private void waitForStart() {
+        boolean ready = false;
+        final long timeout = System.currentTimeMillis() + 5000;
+        Exception lastError = null;
+        do {
+            try {
+                for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
+                    waitForRowCount("sensinact." + table, 0, true);
+                }
+                // Got a valid count
+                ready = true;
+                lastError = null;
+                break;
+            } catch (Exception e) {
+                // Ignore
+                lastError = e;
+            }
+        } while(!ready && System.currentTimeMillis() < timeout);
+
+        assertTrue(ready, "History provider setup timed out: " + lastError);
     }
 
     @AfterEach
-    void stopContainer() {
-        container.stop();
+    void cleanupTest() throws Exception {
+        if (historyProviderConfig != null) {
+            historyProviderConfig.delete();
+        }
+
         thread.execute(new AbstractSensinactCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
                     PromiseFactory promiseFactory) {
                 twin.getProviders().forEach(SensinactProvider::delete);
-                return null;
+                return promiseFactory.resolved(null);
             }
-        });
+        }).getValue();
+
+        try (Connection connection = getDataSource().getConnection()) {
+            final Statement stmt = connection.createStatement();
+            for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
+                stmt.execute("DROP TABLE IF EXISTS sensinact." + table);
+            }
+        }
+    }
+
+    @AfterAll
+    static void stopContainer() {
+        if (container != null) {
+            container.stop();
+            container = null;
+        }
     }
 
     @InjectService
     DataUpdate push;
     @InjectService
     GatewayThread thread;
-
-    private JdbcDatabaseContainer<?> container;
 
     private GenericDto getDto(String value, Instant timestamp) {
         GenericDto dto = new GenericDto();
@@ -168,6 +209,10 @@ public class TimescaleHistoryTest {
     }
 
     private void waitForRowCount(String table, int count) {
+        waitForRowCount(table, count, false);
+    }
+
+    private void waitForRowCount(String table, int count, boolean allowMore) {
         try (Connection conn = getDataSource().getConnection()) {
             for (int i = 0; i < 50; i++) {
                 try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + table)) {
@@ -176,8 +221,12 @@ public class TimescaleHistoryTest {
                     if (current == count) {
                         return;
                     } else if (current > count) {
-                        throw new AssertionFailedError("The count for table " + table + " was " + current
-                                + " which is larger than the expected " + count);
+                        if (allowMore) {
+                            return;
+                        } else {
+                            throw new AssertionFailedError("The count for table " + table + " was " + current
+                                    + " which is larger than the expected " + count);
+                        }
                     }
                 }
                 Thread.sleep(100);
