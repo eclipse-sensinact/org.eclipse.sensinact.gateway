@@ -67,7 +67,8 @@ public class DatastreamMapper extends DatastreamsMapper {
     @Override
     public Promise<Stream<Datastream>> toPayload(ResourceDataNotification notification) {
         // Force the required datastream if a relevant admin topic changes
-        return isRelevantAdminResource(notification) ? getDatastream(getResource(provider, service, resource))
+        return isRelevantAdminResource(notification)
+                ? getDatastream(getResource(provider, service, resource))
                 : emptyStream();
     }
 

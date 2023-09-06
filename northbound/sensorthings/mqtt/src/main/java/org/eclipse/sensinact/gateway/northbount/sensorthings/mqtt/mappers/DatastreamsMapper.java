@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -34,7 +35,7 @@ public class DatastreamsMapper extends SensorthingsMapper<Datastream> {
 
     @Override
     public Promise<Stream<Datastream>> toPayload(LifecycleNotification notification) {
-        if (notification.resource != null) {
+        if (notification.resource != null && notification.status != Status.RESOURCE_DELETED) {
             // This is a resource appearing
             return getDatastream(getResource(notification.provider, notification.service, notification.resource));
         }

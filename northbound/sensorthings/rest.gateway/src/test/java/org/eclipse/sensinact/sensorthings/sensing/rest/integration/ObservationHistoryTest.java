@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assumptions.abort;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import java.util.Map;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,47 +63,117 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
     private static final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<ResultList<Observation>>() {
     };
 
+    private static JdbcDatabaseContainer<?> container;
+
     @BeforeAll
-    static void check() throws Exception {
+    static void startContainer() throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(ObservationHistoryTest.class.getClassLoader());
         try {
-            DockerClientFactory.lazyClient().versionCmd().exec();
-        } catch (Throwable t) {
-            abort("No docker executable on the path, so tests will be skipped");
-        } finally {
-            Thread.currentThread().setContextClassLoader(cl);
-        }
-    }
+            try {
+                DockerClientFactory.lazyClient().versionCmd().exec();
+            } catch (Throwable t) {
+                abort("No docker executable on the path, so tests will be skipped");
+            }
 
-    @BeforeEach
-    void startContainer(
-            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.history.timescale", location = "?")) Configuration historyConfig,
-            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig)
-            throws Exception {
-        container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
-                .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
-
-        container.withDatabaseName("sensinactHistory");
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
+                    .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
+            container.withDatabaseName("sensinactHistory");
             container.start();
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
         }
+    }
+
+    private Configuration historyProviderConfig;
+
+    @BeforeEach
+    void setupTest(
+            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.history.timescale", location = "?")) Configuration historyConfig,
+            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig)
+            throws Exception {
+
+        assertNotNull(container);
+
+        historyProviderConfig = historyConfig;
+
         historyConfig.update(new Hashtable<>(Map.of("url", container.getJdbcUrl(), "user", container.getUsername(),
                 ".password", container.getPassword())));
         sensorthingsConfig.update(new Hashtable<>(Map.of("history.provider", "timescale-history")));
-        Thread.sleep(1000);
+
+        // Wait for the tables to be ready
+        waitForHistoryTables();
+
+        // Wait for the servlet to be valid
+        waitForSensorthingsAPI();
+    }
+
+    private void waitForHistoryTables() {
+        boolean ready = false;
+        final long timeout = System.currentTimeMillis() + 5000;
+        Exception lastError = null;
+        do {
+            try {
+                for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
+                    waitForRowCount("sensinact." + table, 0, true);
+                }
+                // Got a valid count
+                ready = true;
+                lastError = null;
+                break;
+            } catch (Exception e) {
+                // Ignore
+                lastError = e;
+            }
+        } while(!ready && System.currentTimeMillis() < timeout);
+
+        assertTrue(ready, "History provider setup timed out: " + lastError);
+    }
+
+    private void waitForSensorthingsAPI() {
+        boolean ready = false;
+        final long timeout = System.currentTimeMillis() + 5000;
+        Exception lastError = null;
+        do {
+            try {
+                // Will throw an error if not ready
+                utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
+                });
+                // Got a valid count
+                ready = true;
+                lastError = null;
+                break;
+            } catch (Exception e) {
+                // Ignore
+                lastError = e;
+            }
+        } while(!ready && System.currentTimeMillis() < timeout);
+
+        assertTrue(ready, "SensorThings API setup timed out: " + lastError);
     }
 
     @AfterEach
-    void stopContainer() {
-        container.stop();
+    void cleanupTest() throws Exception {
+        if (historyProviderConfig != null) {
+            historyProviderConfig.delete();
+            historyProviderConfig = null;
+        }
+
+        try (Connection connection = getDataSource().getConnection()) {
+            final Statement stmt = connection.createStatement();
+            for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
+                stmt.execute("DROP TABLE IF EXISTS sensinact." + table);
+            }
+        }
     }
 
-    private JdbcDatabaseContainer<?> container;
+    @AfterAll
+    static void stopContainer() {
+        if (container != null) {
+            container.stop();
+            container = null;
+        }
+    }
 
     private PGSimpleDataSource getDataSource() {
         PGSimpleDataSource ds = new PGSimpleDataSource();
@@ -112,6 +184,10 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
     }
 
     private void waitForRowCount(String table, int count) {
+        waitForRowCount(table, count, false);
+    }
+
+    private void waitForRowCount(String table, int count, boolean allowMore) {
         int current = -1;
         try (Connection conn = getDataSource().getConnection()) {
             for (int i = 0; i < 60; i++) {
@@ -121,6 +197,10 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                     if (current == count) {
                         return;
                     } else if (current > count) {
+                        if (allowMore) {
+                            return;
+                        }
+
                         try (ResultSet rs2 = conn.createStatement().executeQuery("SELECT * FROM " + table)) {
                             int j = 0;
                             ResultSetMetaData metaData = rs2.getMetaData();

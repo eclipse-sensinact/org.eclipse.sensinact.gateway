@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
@@ -31,7 +32,7 @@ public class ThingsMapper extends SensorthingsMapper<Thing> {
 
     @Override
     public Promise<Stream<Thing>> toPayload(LifecycleNotification notification) {
-        if (notification.service == null) {
+        if (notification.service == null && notification.status != Status.PROVIDER_DELETED) {
             // This is a provider appearing
             return getThing(notification.provider);
         }

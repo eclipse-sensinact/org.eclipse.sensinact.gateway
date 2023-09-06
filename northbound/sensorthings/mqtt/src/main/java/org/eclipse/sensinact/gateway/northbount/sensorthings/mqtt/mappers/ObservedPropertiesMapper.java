@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
@@ -32,7 +33,7 @@ public class ObservedPropertiesMapper extends SensorthingsMapper<ObservedPropert
 
     @Override
     public Promise<Stream<ObservedProperty>> toPayload(LifecycleNotification notification) {
-        if (notification.resource != null) {
+        if (notification.resource != null && notification.status != Status.RESOURCE_DELETED) {
             // This is a resource appearing
             return getObservedProperty(getResource(notification.provider, notification.service, notification.resource));
         }
