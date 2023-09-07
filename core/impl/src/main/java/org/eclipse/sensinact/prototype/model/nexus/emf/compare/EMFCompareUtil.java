@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -114,8 +113,32 @@ public class EMFCompareUtil {
             notifyServiceRemove(original, oldService, reference, accumulator);
             original.eUnset(reference);
         } else {
+            if (newService.eClass() != oldService.eClass()) {
+                if (oldService.eClass().isSuperTypeOf(newService.eClass())) {
+                    oldService = copyOldService(oldService, newService.eClass());
+                    original.eSet(reference, oldService);
+                } else {
+                    throw new RuntimeException("Merging Services of different Types is not possible."
+                            + newService.eClass().getName() + " must be a subtype of " + oldService.eClass().getName());
+                }
+            }
             mergeAndNotify(reference, newService, oldService, blackList, accumulator);
         }
+    }
+
+    /**
+     * Copies the given Service in a new {@link EObject} created from the given
+     * {@link EClass}
+     *
+     * @param oldService the service top copy from
+     * @param eClass     the EClass. Must be a subtype of the oldServices
+     *                   {@link EClass}
+     * @return the copied service
+     */
+    private static Service copyOldService(Service oldService, EClass eClass) {
+        Service eObject = (Service) EcoreUtil.create(eClass);
+        oldService.eClass().getEAllStructuralFeatures().forEach(e -> eObject.eSet(e, oldService.eGet(e)));
+        return eObject;
     }
 
 //    private static void mergeAndNotify(EReference reference, Service newService, Service originalService,
@@ -320,11 +343,11 @@ public class EMFCompareUtil {
         accumulator.removeService(model, providerName, serviceName);
     }
 
-    private static void checkMetadataRemove(Notification msg) {
-        Service service = (Service) msg.getNotifier();
-        EAttribute resource = (EAttribute) msg.getFeature();
-        service.getMetadata().removeKey(resource);
-    }
+//    private static void checkMetadataRemove(Notification msg) {
+//        Service service = (Service) msg.getNotifier();
+//        EAttribute resource = (EAttribute) msg.getFeature();
+//        service.getMetadata().removeKey(resource);
+//    }
 
     protected static ResourceMetadata checkMetadata(Service service, EAttribute attribute) {
         ResourceMetadata result = null;
