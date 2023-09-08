@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -30,20 +31,27 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.ContentHandler;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.URIHandler;
+import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
@@ -56,6 +64,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
@@ -637,6 +646,92 @@ public class NexusTest {
 
             nexus.unlinkProviders("testprovider", "testproviderNew", Instant.now());
             assertEquals(1, provider.getLinkedProviders().size());
+        }
+    }
+
+    @Nested
+    public class AdminTests {
+
+        private ModelNexus nexus;
+        private EPackage ePackage;
+
+        @BeforeEach
+        public void setup() throws IOException {
+            URI ProviderPackageURI = URI.createURI(ProviderPackage.eNS_URI);
+
+            URIMappingRegistryImpl.INSTANCE.put(
+                    URI.createURI("https://eclipse.org/../../../models/src/main/resources/model/sensinact.ecore"),
+                    ProviderPackageURI);
+
+            XMLResource.URIHandler handler = new XMLResource.URIHandler() {
+
+                @Override
+                public URI deresolve(URI arg0) {
+                    return arg0;
+                }
+
+                @Override
+                public URI resolve(URI arg0) {
+                    if (arg0.lastSegment().equals("sensinact.ecore")) {
+                        return ProviderPackageURI.appendFragment(arg0.fragment());
+                    }
+                    return arg0;
+                }
+
+                @Override
+                public void setBaseURI(URI arg0) {
+                    // TODO Auto-generated method stub
+                }
+            };
+
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+
+            Resource extendedPackageResource = resourceSet
+                    .createResource(URI.createURI("https://eclipse.org/sensinact/test/1.0"));
+            InputStream ín = getClass().getResourceAsStream("/model/extended.ecore");
+
+            assertNotNull(ín);
+
+            extendedPackageResource.load(ín, Collections.singletonMap(XMLResource.OPTION_URI_HANDLER, handler));
+
+            ePackage = (EPackage) extendedPackageResource.getContents().get(0);
+
+            assertNotNull(ePackage);
+        }
+
+        /**
+         * A Simple change of one attribute without a specific timestamp set
+         */
+        @Test
+        void pushEObjectTestSimpleAttributeChange() throws IOException, InterruptedException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+
+            provider.setId("sensor");
+
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            Provider saved = nexus.save(provider);
+
+            Mockito.clearInvocations(accumulator);
+            Mockito.verifyNoMoreInteractions(accumulator);
+            EClass testAdminEClass = (EClass) ePackage.getEClassifier("TestAdmin");
+            Admin testAdmin = (Admin) EcoreUtil.create(testAdminEClass);
+            saved.setAdmin(testAdmin);
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider savedAgain = nexus.save(saved);
+
+            assertNotNull(savedAgain.getAdmin());
+            assertEquals(testAdminEClass, savedAgain.getAdmin().eClass());
         }
     }
 }
