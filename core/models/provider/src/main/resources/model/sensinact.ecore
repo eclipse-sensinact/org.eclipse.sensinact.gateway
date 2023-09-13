@@ -23,8 +23,8 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" unsettable="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Service">
-    <eOperations name="eIsSet" eType="ecore:EDataType ../../../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EBoolean">
-      <eParameters name="feature" eType="ecore:EClass ../../../../../org.eclipse.emf.ecore/model/Ecore.ecore#//EStructuralFeature"/>
+    <eOperations name="eIsSet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="feature" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EStructuralFeature"/>
     </eOperations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="metadata" upperBound="-1"
         eType="#//FeatureMetadata" containment="true"/>
