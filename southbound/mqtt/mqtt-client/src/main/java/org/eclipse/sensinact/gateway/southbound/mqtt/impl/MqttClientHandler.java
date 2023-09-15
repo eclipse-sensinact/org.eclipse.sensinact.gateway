@@ -119,6 +119,18 @@ public class MqttClientHandler implements MqttCallback {
         final MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
 
+        // Setup authentication
+        final String userName = config.user();
+        if (userName != null && !userName.isBlank()) {
+            logger.debug("Connecting MQTT with authentication");
+            options.setUserName(userName);
+        }
+
+        final char[] userPass = config._password();
+        if (userPass != null) {
+            options.setPassword(userPass);
+        }
+
         // Start client (blocking)
         logger.debug("Connecting MQTT client with ID {}", clientId);
         client = new MqttClient(broker, clientId);
@@ -160,7 +172,12 @@ public class MqttClientHandler implements MqttCallback {
             throw new IllegalArgumentException("No MQTT host given");
         }
 
-        return new URI("tcp", null, mqttHost, config.port(), null, null, null).toString();
+        String protocol = config.protocol();
+        if (protocol == null || protocol.isBlank()) {
+            protocol = "tcp";
+        }
+
+        return new URI(protocol, null, mqttHost, config.port(), null, null, null).toString();
     }
 
     /**

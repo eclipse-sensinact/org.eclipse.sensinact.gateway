@@ -23,6 +23,11 @@ public @interface MqttClientConfiguration {
     String id();
 
     /**
+     * MQTT connection protocol: TCP or SSL
+     */
+    String protocol() default "tcp";
+
+    /**
      * MQTT broker host
      */
     String host();
@@ -46,4 +51,14 @@ public @interface MqttClientConfiguration {
      * Delay before trying to reconnect (in milliseconds)
      */
     int client_reconnect_delay() default 500;
+
+    /**
+     * MQTT authentication user
+     */
+    String user();
+
+    /**
+     * MQTT authentication password
+     */
+    char[] _password();
 }
