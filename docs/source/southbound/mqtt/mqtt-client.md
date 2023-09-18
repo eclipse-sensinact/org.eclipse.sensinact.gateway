@@ -18,8 +18,11 @@ The supported configuration keys are:
 * `id`: internal ID of the MQTT client. It will be given to the notified listeners as handler ID
 * `client.id`: MQTT client ID, as given to the broker during connection
 * `client.reconnect.delay`: MQTT client reconnection delay in milliseconds (500ms by default)
+* `protocol`: either `tcp` (default) or `ssl` to choose between plain and SSL connection
 * `host`: host name or IP address of the MQTT broker to connect
 * `port`: port of the MQTT broker to connect (1883 by default)
+* `user`: user name
+* `.password`: user password
 * `topics`: list of topic patterns the client must subscribe to. Joker characters `#` and `+` are supported
 
 Here is an example of configuration of an MQTT client:
