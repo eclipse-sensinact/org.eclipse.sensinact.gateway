@@ -13,11 +13,11 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - name: Checkout PR head branch
-      uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
       with:
         fetch-depth: 0
     - name: Editor Config Validation against PR base commit
-      uses: github/super-linter/slim@v5
+      uses: github/super-linter/slim@962a6409c1b303d0e53a9d34ada577a0362f4fae # v5.2.1
       env:
         VALIDATE_ALL_CODEBASE: false
         VALIDATE_EDITORCONFIG: true
