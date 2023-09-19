@@ -25,6 +25,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
@@ -314,5 +315,48 @@ public class CSVParserTest {
         assertEquals(defaultValue, getResourceValue(provider1, "sensor", "street", String.class));
         assertEquals(defaultValue, getResourceValue(provider2, "sensor", "street", String.class));
         assertEquals("Cours Bériat", getResourceValue(literalProvider, "sensor", "street", String.class));
+    }
+
+    /**
+     * Mapping a "CSV" file with only a single value and no header
+     */
+    @Test
+    void testIsolatedValue() throws Exception {
+        // Excepted provider
+        final String provider = "isolated-value-" + String.valueOf(new Random().nextInt());
+
+        // Read the configuration
+        DeviceMappingConfigurationDTO config = readConfiguration("csv/isolated-value-mapping.json");
+
+        // Read the file
+        byte[] fileContent = readFile("csv/isolated-value.csv");
+
+        // Apply mapping
+        deviceMapper.handle(config, Map.of("provider", provider), fileContent);
+
+        // CSV loads strings by default
+        assertEquals("37.5", getResourceValue(provider, "data", "value", String.class));
+    }
+
+    /**
+     * Mapping a "CSV" file with only a single value and no header, with a typed
+     * mapping
+     */
+    @Test
+    void testIsolatedValueTyped() throws Exception {
+        // Excepted provider
+        final String provider = "isolated-value-" + String.valueOf(new Random().nextInt());
+
+        // Read the configuration
+        DeviceMappingConfigurationDTO config = readConfiguration("csv/isolated-value-mapping-typed.json");
+
+        // Read the file
+        byte[] fileContent = readFile("csv/isolated-value.csv");
+
+        // Apply mapping
+        deviceMapper.handle(config, Map.of("provider", provider), fileContent);
+
+        // CSV loads strings by default
+        assertEquals(37.5f, getResourceValue(provider, "data", "value", Float.class));
     }
 }

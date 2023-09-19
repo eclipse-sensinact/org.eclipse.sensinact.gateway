@@ -1,0 +1,12 @@
+{
+  "parser": "csv",
+  "parser.options": {
+      "header": false
+  },
+  "mapping": {
+    "@provider": {
+      "literal": "${context.provider}"
+    },
+    "data/value": 0
+  }
+}
