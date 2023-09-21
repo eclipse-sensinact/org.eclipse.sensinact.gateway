@@ -14,8 +14,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
       - name: Check License Header
-        uses: apache/skywalking-eyes@main      # always prefer to use a revision instead of `main`.
+        uses: apache/skywalking-eyes@6b2529214f6b1ccee3ec92bb0adfeabf6f66f538 # v0.5.0
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # needed only when you want License-Eye to comment on the pull request.https://github.com/eclipse/org.eclipse.sensinact.gateway/tree/future/prototype/prototype
