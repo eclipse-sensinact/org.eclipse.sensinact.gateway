@@ -8,11 +8,11 @@
 
  The Websocket interface requires the sensinact `core` feature, as well as the `jakarta-servlet-whiteboard` feature. It currently has no authentication.
 
-# Making a Websocket connection
+## Making a Websocket connection
 
 The Websocket interface provides a connection URL at `ws/sensinact/` relative to the root context of the configured Jakarta Servlet whiteboard. It follows the normal upgrade handshake mechanism.
 
-## Websocket commands
+### Websocket commands
 
  The Websocket commands map closely to those of the Query Handler. Requests are sent as serialized JSON.
 
@@ -94,7 +94,7 @@ The Websocket interface provides a connection URL at `ws/sensinact/` relative to
 
   The response will be of `type` `UNSUBSCRIPTION_RESPONSE` including a `subscriptionId` property that identifies the subscription that was closed.
 
-# Basic configuration
+## Basic configuration
 
 The Websocket interface will run without any configuration. A minimal configuration would therefore be:
 
