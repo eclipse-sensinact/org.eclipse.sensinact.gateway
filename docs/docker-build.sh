@@ -26,15 +26,25 @@ else
     formats="$@"
 fi
 
-# Run the container and let it sleep
-echo "Starting container..."
-CID=$(docker run --rm -d -it -v "${PWD}:/docs" -w /docs --entrypoint sleep sphinxdoc/sphinx inf)
+CID=sensiNact-docs-build-v1
 
-# Install requirements
-echo "Install requirements..."
-docker exec "$CID" apt update
-docker exec "$CID" apt install -y git
-docker exec "$CID" python -m pip install -r requirements.txt
+echo "Checking for existing $CID container..."
+
+if docker container inspect "$CID" > /dev/null 2>&1;
+then
+    echo "Reusing $CID container..."
+    docker start "$CID"
+else
+    # Run the container and let it sleep
+    echo "Creating $CID container..."
+    docker run --name "$CID" -d -it -v "${PWD}:/docs" -w /docs --entrypoint sleep sphinxdoc/sphinx inf
+
+    # Install requirements
+    echo "Install requirements..."
+    docker exec "$CID" apt update
+    docker exec "$CID" apt install -y git
+    docker exec "$CID" python -m pip install -r requirements.txt
+fi
 
 # Clear output directory
 echo "Clean up..."
@@ -48,4 +58,5 @@ do
 done
 
 # Clean up
-docker rm -f "$CID"
+echo "Stopping $CID container..."
+docker stop --signal SIGKILL "$CID" > /dev/null 2>&1
