@@ -1,9 +1,3 @@
-<style>
-.float-right {
-    float: right;
-}
-</style>
-
 # Welcome to Eclipse sensiNact
 
 ![Eclipse sensiNact logo](_static/sensiNact_logo.png){width=120px}
@@ -26,9 +20,8 @@ Eclipse sensiNact represents its data using the following model:
 * **Service**: the name of a set of resources. All providers have the reserved `admin` service which holds sensiNact details about them, including their `location` resource.
 * **Resource**: a resource can either represent a property of the provider (like the temperature read from a sensor) or an action (for example to send a text message).
 
-The model is described more in detail in the [Data Model](./core/CoreModel.md) section.
+The model is described more in detail in the [Data Model](./core/CoreModel.md){.clear-right} section.
 
-<p style="clear: right"/>
 
 ## Getting Started
 
