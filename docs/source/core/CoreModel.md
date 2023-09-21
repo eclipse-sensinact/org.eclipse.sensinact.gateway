@@ -1,3 +1,10 @@
+<style>
+.block-center {
+    display: block;
+    margin: auto;
+}
+</style>
+
 # The sensiNact core model
 
 The sensiNact core model describes the interactions and in-memory representation of the sensiNact "digital twin", i.e. a virtual representation of the state of sensors and actuators connected to the sensiNact gateway.
@@ -48,6 +55,8 @@ The *ACT* verb is used to trigger an *Action Resource*, potentially passing one 
 # The core data model
 
 The sensiNact core data model is composed of *Resources*, *Services* and *Providers*, which are arranged in a tree-structure. The definition of the structure for a provider is referred to as the provider model.
+
+![The sensiNact Data Model](../_static/core/datamodel-white.png){.block-center w=15em}
 
 A `Resource` is the lowest level of the sensiNact data model. A resource represents a single sensor, actuator or state variable within the digital twin. There are two types of *Resources*, data resources and action resources
 

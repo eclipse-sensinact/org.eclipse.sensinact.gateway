@@ -1,3 +1,9 @@
+<style>
+.float-right {
+    float: right;
+}
+</style>
+
 # Welcome to Eclipse sensiNact
 
 ![Eclipse sensiNact logo](_static/sensiNact_logo.png){width=120px}
@@ -13,13 +19,16 @@ The project is licensed under the terms of the [Eclipse Public License - v 2.0](
 
 Eclipse sensiNact represents its data using the following model:
 
+![The sensiNact Data Model](_static/core/datamodel-white.png){.float-right w=25em}
+
 * **Model**: a static or dynamic representation of a kind of provider. This allows to describe the structure of a provider, *i.e.* its services and the type, default value, description, ... of their resources
-  * **Provider**: a provider of services. It usually represents a physical object, but the granularity depends on the use case. For example, it can be an IoT device with multiple sensors, a car, ...
-    * **Service**: the name of a set of resources. All providers have the reserved `admin` service which holds sensiNact details about them, including their `location` resource.
-      * **Resource**: a resource can either represent a property of the provider (like the temperature read from a sensor) or an action (for example to send a text message).
+* **Provider**: a provider of services. It usually represents a physical object, but the granularity depends on the use case. For example, it can be an IoT device with multiple sensors, a car, ...
+* **Service**: the name of a set of resources. All providers have the reserved `admin` service which holds sensiNact details about them, including their `location` resource.
+* **Resource**: a resource can either represent a property of the provider (like the temperature read from a sensor) or an action (for example to send a text message).
 
-The model is described more in details in the [Data Model](./core/CoreModel.md) section.
+The model is described more in detail in the [Data Model](./core/CoreModel.md) section.
 
+<p style="clear: right"/>
 
 ## Getting Started
 
