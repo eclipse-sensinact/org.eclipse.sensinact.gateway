@@ -113,7 +113,7 @@ public class MqttAuthTest {
         Mockito.when(mock.port()).thenReturn(2183);
         Mockito.when(mock.topics()).thenReturn(topics);
         Mockito.when(mock.user()).thenReturn(user);
-        Mockito.when(mock._password()).thenReturn(password != null ? password.toCharArray() : null);
+        Mockito.when(mock._password()).thenReturn(password != null ? password : null);
         handler.activate(mock);
         return handler;
     }

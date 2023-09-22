@@ -126,9 +126,9 @@ public class MqttClientHandler implements MqttCallback {
             options.setUserName(userName);
         }
 
-        final char[] userPass = config._password();
+        final String userPass = config._password();
         if (userPass != null) {
-            options.setPassword(userPass);
+            options.setPassword(userPass.toCharArray());
         }
 
         // Start client (blocking)
@@ -151,7 +151,9 @@ public class MqttClientHandler implements MqttCallback {
     @Deactivate
     public void deactivate() throws Exception {
         if (client != null) {
-            client.disconnect();
+            if (client.isConnected()) {
+                client.disconnect();
+            }
             client.close();
             logger.info("MQTT client {} stopped", client.getClientId());
             client = null;

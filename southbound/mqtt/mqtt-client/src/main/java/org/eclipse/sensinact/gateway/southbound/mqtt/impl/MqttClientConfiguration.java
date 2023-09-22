@@ -60,5 +60,5 @@ public @interface MqttClientConfiguration {
     /**
      * MQTT authentication password
      */
-    char[] _password();
+    String _password();
 }
