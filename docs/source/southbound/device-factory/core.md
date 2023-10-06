@@ -279,7 +279,7 @@ Here are some example of variable definitions:
         "literal": "rc"
         // "${rcName}" = "rc"
     },
-    "$rcValuePath" {
+    "$rcValuePath": {
         "literal": "data"
         // "${rcValuePath}" = "data"
     }
