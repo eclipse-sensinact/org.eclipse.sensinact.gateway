@@ -1,0 +1,21 @@
+{
+  "parser": "csv",
+  "parser.options": {
+    "header": false
+  },
+  "mapping": {
+    "@provider": {
+      "literal": "${context.provider}"
+    },
+    "$svcName": "${context.svc}",
+    "@datetime": 0,
+    "$rcName": 1,
+    "$rcValue": {
+      "path": 2,
+      "type": "int"
+    },
+    "${svcName}/${rcName}": {
+      "path": "${rcValue}"
+    }
+  }
+}

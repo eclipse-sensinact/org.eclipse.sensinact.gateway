@@ -359,4 +359,27 @@ public class CSVParserTest {
         // CSV loads strings by default
         assertEquals(37.5f, getResourceValue(provider, "data", "value", Float.class));
     }
+
+    /**
+     * Mapping based on variables in multiple places
+     */
+    @Test
+    void testVariables() throws Exception {
+        // Excepted resource
+        final String provider = "provider-vars-" + String.valueOf(new Random().nextInt());
+        final String service = "svc-vars-" + String.valueOf(new Random().nextInt());
+        final String resource = "rc-vars-" + String.valueOf(new Random().nextInt());
+
+        // Read the configuration
+        DeviceMappingConfigurationDTO config = readConfiguration("csv/csv-no-header-vars-mapping.json");
+
+        // Read the file
+        byte[] fileContent = readFile("csv/csv-no-header-vars.csv");
+
+        // Apply mapping
+        deviceMapper.handle(config, Map.of("provider", provider, "svc", service, "rc", resource), fileContent);
+
+        assertEquals("3.4", getResourceValue(provider, service, "a", String.class));
+        assertEquals("42", getResourceValue(provider, service, "b", String.class));
+    }
 }
