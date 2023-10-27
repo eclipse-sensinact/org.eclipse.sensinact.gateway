@@ -22,7 +22,7 @@
   <description>Northbound WebSocket access to sensiNact</description>
 
   <properties>
-    <jakarta.ws.version>2.1.0</jakarta.ws.version>
+    <jakarta.ws.version>2.1.1</jakarta.ws.version>
     <jetty.version>11.0.13</jetty.version>
     <felix.http.version>5.0.4</felix.http.version>
   </properties>
