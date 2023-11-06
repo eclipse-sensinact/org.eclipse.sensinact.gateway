@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.mqtt.impl;
 
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+
 /**
  * MQTT client configuration
  */
@@ -53,6 +55,11 @@ public @interface MqttClientConfiguration {
     int client_reconnect_delay() default 500;
 
     /**
+     * MQTT connection timeout
+     */
+    int client_connection_timeout() default MqttConnectOptions.CONNECTION_TIMEOUT_DEFAULT;
+
+    /**
      * MQTT authentication user
      */
     String user();
@@ -61,4 +68,29 @@ public @interface MqttClientConfiguration {
      * MQTT authentication password
      */
     String _password();
+
+    /**
+     * Kind of key store
+     */
+    String auth_keystore_type() default "PKCS12";
+
+    /**
+     * Key store path
+     */
+    String auth_keystore_path();
+
+    /**
+     * Key store password
+     */
+    String _auth_keystore_password();
+
+    /**
+     * Trust store path
+     */
+    String auth_truststore_path();
+
+    /**
+     * Trust store password
+     */
+    String _auth_truststore_password();
 }
