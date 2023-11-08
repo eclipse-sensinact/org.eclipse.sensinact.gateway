@@ -85,6 +85,31 @@ public @interface MqttClientConfiguration {
     String _auth_keystore_password();
 
     /**
+     * Path to the client authentication PEM certificate (public key)
+     */
+    String auth_clientcert_path();
+
+    /**
+     * Path to the client private key
+     */
+    String auth_clientcert_key();
+
+    /**
+     * Explicit algorithm of the client private key
+     */
+    String auth_clientcert_key_algorithm();
+
+    /**
+     * Password of the client private key
+     */
+    String _auth_clientcert_key_password();
+
+    /**
+     * Kind of key store for the trust store
+     */
+    String auth_truststore_type() default "PKCS12";
+
+    /**
      * Trust store path
      */
     String auth_truststore_path();
@@ -93,4 +118,9 @@ public @interface MqttClientConfiguration {
      * Trust store password
      */
     String _auth_truststore_password();
+
+    /**
+     * Path to the Certificate Authority PEM file
+     */
+    String auth_ca_path();
 }
