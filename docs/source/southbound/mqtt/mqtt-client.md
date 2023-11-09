@@ -36,6 +36,65 @@ Here is an example of configuration of an MQTT client:
 }
 ```
 
+### MQTT client TLS authentication
+
+The MQTT client supports certificate authentication, using either a keystore or a set of PEM files.
+
+```{note}
+If either a keystore or client certificate is given, the `protocol` configuration will become `ssl` if not explicitly set.
+```
+
+When relying on a PKCS#12 or a Java (JKS) key store, you can use the following configuration options:
+* `auth.keystore.type`: Type of Java keystore, either `JKS` or `PKCS12` (default)
+* `auth.keystore.path`: Path to the Java keystore, containing the client certificate
+* `.auth.keystore.password`: Password of the Java keystore
+* `auth.truststore.type`:  Type of Java trust store, either `JKS` or `PKCS12` (default)
+* `auth.truststore.path`: Path to the Java trust store, containing the certificate of the authority that signed the server certificate.
+* `.auth.truststore.password`: Password of the Java trust store
+
+Here is an example:
+```json
+{
+  "id": "mqtt-handler-client-auth",
+  "host": "some.broker.com",
+  "port": 8883,
+  "client.id": "mqtt.client.id",
+  "topics": [ "sensinact/mqtt/test/+" ],
+  "auth.keystore.type": "PKCS12",
+  "auth.keystore.path": "/secure/client.p12",
+  ".auth.keystore.password": "secret",
+  "auth.truststore.type": "JKS",
+  "auth.truststore.path": "/secure/trusted.jks",
+  ".auth.truststore.password": "secret"
+}
+```
+
+When relying on a set of PEM files, you can use the following options:
+* `auth.clientcert.path`: Path to the client certificate
+* `auth.clientcert.key`: Path to the client private key
+* `auth.clientcert.key.algorithm`: Explicit algorithm of the private key (`RSA` by default if not found in the file)
+* `.auth.clientcert.key.password`: Password of the client private key
+* `auth.ca.path`: Path to the certificate of the authority that signed the server certificate. Also added at the end of the certification chain when loading the client private key.
+
+```{note}
+If both a keystore and a PEM file client certificate are given, the keystore will be used.
+```
+
+Here is an example:
+```json
+{
+  "id": "mqtt-handler-client-auth",
+  "host": "some.broker.com",
+  "port": 8883,
+  "client.id": "mqtt.client.id",
+  "topics": [ "sensinact/mqtt/test/+" ],
+  "auth.clientcert.path": "/secure/client.crt",
+  "auth.clientcert.key": "/secure/client.key",
+  "auth.clientcert.key.password": "secret",
+  "auth.ca.path": "/secure/trusted.pem"
+}
+```
+
 ## MQTT listeners
 
 To be notified of MQTT messages, the listener must be registered as a `org.eclipse.sensinact.gateway.southbound.mqtt.api.IMqttMessageListener` service.
