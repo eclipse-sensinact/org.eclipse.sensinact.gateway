@@ -187,7 +187,7 @@ public class MqttSslAuthTest {
     @AfterAll
     static void cleanupCertificates() {
         for (String file : Arrays.asList(SERVER_CERT_P12, CLIENT_CERT_P12, CLIENT_CERT_KEY_PEM, CLIENT_CERT_PEM,
-                CLIENT_CERT_UNSIGNED_P12, CLIENT_CERT_UNSIGNED_WITH_CA_P12)) {
+                CLIENT_CERT_UNSIGNED_P12, CLIENT_CERT_UNSIGNED_WITH_CA_P12, TRUST_CERT_P12, TRUST_CERT_PEM)) {
             try {
                 Files.deleteIfExists(Paths.get(file));
             } catch (IOException e) {
@@ -408,7 +408,7 @@ public class MqttSslAuthTest {
         Mockito.when(mock.auth_clientcert_path()).thenReturn(certPath);
         Mockito.when(mock.auth_clientcert_key()).thenReturn(certKey);
         Mockito.when(mock._auth_clientcert_key_password()).thenReturn(certKeyPassword);
-        Mockito.when(mock.auth_ca_path()).thenReturn(caPath);
+        Mockito.when(mock.auth_clientcert_ca_path()).thenReturn(caPath);
         return mock;
     }
 

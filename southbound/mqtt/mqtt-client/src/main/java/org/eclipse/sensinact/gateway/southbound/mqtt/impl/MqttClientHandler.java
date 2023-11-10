@@ -169,6 +169,7 @@ public class MqttClientHandler implements MqttCallback {
 
         // Setup certificate-based authentication
         if (config.auth_keystore_path() != null || config.auth_clientcert_path() != null) {
+
             options.setSocketFactory(SSLUtils.setupSSLSocketFactory(config));
         }
 
@@ -187,9 +188,10 @@ public class MqttClientHandler implements MqttCallback {
             throw new IllegalArgumentException("No MQTT host given");
         }
 
+        final boolean clientAuth = config.auth_keystore_path() != null || config.auth_clientcert_path() != null;
         String protocol = config.protocol();
-        if (protocol == null || protocol.isBlank()) {
-            if (config.auth_keystore_path() != null || config.auth_clientcert_path() != null) {
+        if (protocol == null || protocol.isBlank() || (clientAuth && protocol.equalsIgnoreCase("tcp"))) {
+            if (clientAuth) {
                 protocol = "ssl";
             } else {
                 protocol = "tcp";

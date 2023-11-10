@@ -30,6 +30,7 @@ import java.util.Objects;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 /**
@@ -178,14 +179,30 @@ public class SSLUtils {
         }
 
         // Load the explicitly given CA certificate
-        final String caCertPath = config.auth_ca_path();
+        final String caCertPath = config.auth_clientcert_ca_path();
         if (caCertPath != null && !caCertPath.isBlank()) {
             // Load the PEM client certificate and its private key
-            final Certificate caCert;
             try (final FileInputStream inStream = new FileInputStream(caCertPath)) {
-                caCert = PEMUtils.loadCertificate(inStream);
+                final Certificate caCert = PEMUtils.loadCertificate(inStream);
                 keys.caCertificate = caCert;
                 trustStore.setCertificateEntry("ca", caCert);
+            }
+        }
+
+        // Load extra trusted certificates
+        String[] trustedCertificates = config.auth_trusted_certs();
+        if (trustedCertificates != null && trustedCertificates.length > 0) {
+            if (trustedCertificates.length == 1 && trustedCertificates[0].contains(",")) {
+                // Got a list string as single entry
+                trustedCertificates = trustedCertificates[0].split("\\s*,\\s*");
+            }
+
+            int i = 0;
+            for (final String path : trustedCertificates) {
+                try (final FileInputStream inStream = new FileInputStream(path)) {
+                    final Certificate certificate = PEMUtils.loadCertificate(inStream);
+                    trustStore.setCertificateEntry("trusted-" + ++i, certificate);
+                }
             }
         }
 
@@ -213,7 +230,7 @@ public class SSLUtils {
         try {
             loadTrustStore(config, keys);
             loadKeyStore(config, keys);
-            return setupSSLSocketFactory(keys);
+            return setupSSLSocketFactory(keys, config.auth_truststore_default_merge(), config.auth_allow_expired());
         } finally {
             clearArray(keys.keyPassword);
         }
@@ -222,7 +239,10 @@ public class SSLUtils {
     /**
      * Prepares an {@link SSLSocketFactory} from the configuration
      *
-     * @param keys Loaded key stores and associated configuration
+     * @param keys                   Loaded key stores and associated configuration
+     * @param mergeDefaultTrustStore If true, fallback to default trust store if
+     *                               necessary
+     * @param allowExpired           If true, consider expired certificates as valid
      * @return An SSLSocketFactory
      * @throws KeyStoreException         Error setting up the key store
      * @throws IOException               Error reading certificate
@@ -231,8 +251,9 @@ public class SSLUtils {
      * @throws KeyManagementException    Error setting up the SSL context
      * @throws UnrecoverableKeyException Error reading keys
      */
-    private static SSLSocketFactory setupSSLSocketFactory(final CertKeys keys) throws KeyStoreException, IOException,
-            NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException {
+    private static SSLSocketFactory setupSSLSocketFactory(final CertKeys keys, final boolean mergeDefaultTrustStore,
+            final boolean allowExpired) throws KeyStoreException, IOException, NoSuchAlgorithmException,
+            CertificateException, KeyManagementException, UnrecoverableKeyException {
 
         // Prepare the key manager
         final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -247,8 +268,24 @@ public class SSLUtils {
         final TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(keys.trustStore);
 
+        final TrustManager[] trustManagers;
+        if (mergeDefaultTrustStore) {
+            // Get the default trust manager factory
+            final TrustManagerFactory defaultTmf = TrustManagerFactory
+                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            defaultTmf.init((KeyStore) null);
+
+            trustManagers = new TrustManager[] {
+                    new ChainedTrustManagers(allowExpired, tmf.getTrustManagers(), defaultTmf.getTrustManagers()) };
+        } else if (allowExpired) {
+            trustManagers = new TrustManager[] { new ChainedTrustManagers(true, tmf.getTrustManagers()) };
+        } else {
+            // Use the trust manager of our trust store only
+            trustManagers = tmf.getTrustManagers();
+        }
+
         final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+        sslContext.init(kmf.getKeyManagers(), trustManagers, new SecureRandom());
         return sslContext.getSocketFactory();
     }
 }

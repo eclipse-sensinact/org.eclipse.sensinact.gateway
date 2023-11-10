@@ -120,7 +120,23 @@ public @interface MqttClientConfiguration {
     String _auth_truststore_password();
 
     /**
-     * Path to the Certificate Authority PEM file
+     * Path to the PEM file of the Certificate Authority that signed the client (if
+     * not included in client)
      */
-    String auth_ca_path();
+    String auth_clientcert_ca_path();
+
+    /**
+     * Flag to merge the given trust store with the default one
+     */
+    boolean auth_truststore_default_merge() default true;
+
+    /**
+     * Paths to trusted PEM certificates
+     */
+    String[] auth_trusted_certs();
+
+    /**
+     * Allow expired certificates
+     */
+    boolean auth_allow_expired() default false;
 }
