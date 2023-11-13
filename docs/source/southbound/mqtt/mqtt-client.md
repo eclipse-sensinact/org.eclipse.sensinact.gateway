@@ -96,7 +96,7 @@ Here is an example:
   "auth.clientcert.ca.path": "/secure/ca.pem",
   "auth.clientcert.path": "/secure/client.crt",
   "auth.clientcert.key": "/secure/client.key",
-  "auth.clientcert.key.password": "secret",
+  ".auth.clientcert.key.password": "secret",
   "auth.allow.expired": true
 }
 ```
