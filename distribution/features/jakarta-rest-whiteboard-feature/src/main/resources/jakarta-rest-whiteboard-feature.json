@@ -25,7 +25,7 @@
     { "id": "org.glassfish.hk2:osgi-resource-locator:1.0.3" },
     { "id": "org.glassfish.hk2:hk2-utils:3.0.3" },
     { "id": "org.javassist:javassist:3.29.2-GA" },
-    { "id": "org.ow2.asm:asm:9.3" }
+    { "id": "org.ow2.asm:asm:9.6" }
   ],
   "extensions": {
     "sensinact.feature.depends": {

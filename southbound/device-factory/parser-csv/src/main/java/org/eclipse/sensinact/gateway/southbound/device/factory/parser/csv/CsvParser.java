@@ -77,7 +77,7 @@ public class CsvParser implements IDeviceMappingParser {
         final List<CsvRecord> records = new ArrayList<>();
         try (CSVParser parser = format.build().parse(new InputStreamReader(input, charset))) {
             for (CSVRecord record : parser) {
-                records.add(new CsvRecord(record));
+                records.add(new CsvRecord(record, withHeader != null && !withHeader));
             }
         } catch (IllegalStateException | IOException e) {
             throw new ParserException("Error reading CSV content", e);

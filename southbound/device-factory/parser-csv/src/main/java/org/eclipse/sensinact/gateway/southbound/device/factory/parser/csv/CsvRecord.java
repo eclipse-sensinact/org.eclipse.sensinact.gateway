@@ -32,12 +32,19 @@ public class CsvRecord implements IDeviceMappingRecord {
     private final CSVRecord record;
 
     /**
+     * Flag to indicate the paths must all be a column index
+     */
+    private final boolean columnIndexOnly;
+
+    /**
      * Sets up the CSV record
      *
-     * @param record Current parsed CSV record
+     * @param record          Current parsed CSV record
+     * @param columnIndexOnly If true, all paths are considered column indices
      */
-    public CsvRecord(final CSVRecord record) {
+    public CsvRecord(final CSVRecord record, final boolean columnIndexOnly) {
         this.record = record;
+        this.columnIndexOnly = columnIndexOnly;
     }
 
     /**
@@ -48,7 +55,7 @@ public class CsvRecord implements IDeviceMappingRecord {
      */
     private String getValue(final RecordPath path) {
         try {
-            if (path.isInt()) {
+            if (path.isInt() || columnIndexOnly) {
                 return this.record.get(path.asInt());
             } else {
                 return this.record.get(path.asString());

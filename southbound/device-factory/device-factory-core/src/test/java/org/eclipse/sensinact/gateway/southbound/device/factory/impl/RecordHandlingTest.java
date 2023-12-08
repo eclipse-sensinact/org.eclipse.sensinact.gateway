@@ -282,4 +282,32 @@ public class RecordHandlingTest {
         assertEquals(NullAction.IGNORE, dto.nullAction);
         assertEquals(42, dto.value);
     }
+
+    @Test
+    void testVariableService() throws Exception {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+
+        // Set a record
+        final Map<String, Object> record = new HashMap<>();
+        record.put("rc_provider", "provider");
+        record.put("rc_name", "rc");
+        record.put("rc_value", 42);
+        parser.setRecords(record);
+
+        // Set a context
+        final Map<String, String> context = new HashMap<>();
+        context.put("ctx", "svc");
+
+        // Setup mapping
+        config.mapping.put("@provider", "rc_provider");
+        config.mapping.put("$service", "${context.ctx}");
+        config.mapping.put("$resource", "rc_name");
+        config.mapping.put("${service}/${resource}", "rc_value");
+
+        // Parse
+        deviceMapper.handle(config, context, new byte[0]);
+
+        // Test values
+        assertEquals(42, getResourceValue("provider", "svc", "rc").value);
+    }
 }

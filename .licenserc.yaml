@@ -49,6 +49,7 @@ header:
     - '.github/**'
     - '.gitignore'
     - '.licenserc.yaml'
+    - '.readthedocs.yaml'
     - '**/.project'
     - '**/*.prefs'
     - 'license.templates'
