@@ -62,9 +62,10 @@
 	org.eclipse.sensinact.gateway.southbound.mqtt.mqtt-client;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.mqtt.mqtt-device-factory;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.mqtt.mqtt-device-factory-tests;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.api;version='[4.6.2,4.6.3)',\
-	org.gecko.emf.osgi.component;version='[4.6.2,4.6.3)',\
+	org.gecko.emf.osgi.api;version='[5.0.0,5.0.1)',\
+	org.gecko.emf.osgi.component;version='[5.0.0,5.0.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\
 	org.osgi.test.common;version='[1.2.1,1.2.2)',\
