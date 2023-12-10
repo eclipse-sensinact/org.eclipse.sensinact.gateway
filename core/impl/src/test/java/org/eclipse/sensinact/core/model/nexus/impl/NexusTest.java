@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,11 +34,13 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -50,14 +53,14 @@ import org.eclipse.emf.ecore.resource.URIHandler;
 import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
+import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -733,5 +736,111 @@ public class NexusTest {
             assertNotNull(savedAgain.getAdmin());
             assertEquals(testAdminEClass, savedAgain.getAdmin().eClass());
         }
+    }
+
+    @Nested
+    public class EPackageTests {
+
+        private ModelNexus nexus;
+        private EPackage ePackage;
+
+        @BeforeEach
+        public void setup() throws IOException {
+            URI ProviderPackageURI = URI.createURI(ProviderPackage.eNS_URI);
+
+            URIMappingRegistryImpl.INSTANCE.put(
+                    URI.createURI("https://eclipse.org/../../../models/src/main/resources/model/sensinact.ecore"),
+                    ProviderPackageURI);
+
+            XMLResource.URIHandler handler = new XMLResource.URIHandler() {
+
+                @Override
+                public URI deresolve(URI arg0) {
+                    return arg0;
+                }
+
+                @Override
+                public URI resolve(URI arg0) {
+                    if (arg0.lastSegment().equals("sensinact.ecore")) {
+                        return ProviderPackageURI.appendFragment(arg0.fragment());
+                    }
+                    return arg0;
+                }
+
+                @Override
+                public void setBaseURI(URI arg0) {
+                    // TODO Auto-generated method stub
+                }
+            };
+
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+
+            Resource extendedPackageResource = resourceSet
+                    .createResource(URI.createURI("https://eclipse.org/sensinact/test/1.0"));
+            InputStream ín = getClass().getResourceAsStream("/model/extended.ecore");
+
+            assertNotNull(ín);
+
+            extendedPackageResource.load(ín, Collections.singletonMap(XMLResource.OPTION_URI_HANDLER, handler));
+
+            ePackage = (EPackage) extendedPackageResource.getContents().get(0);
+
+            assertNotNull(ePackage);
+        }
+
+        @Test
+        void addModelEPackage() throws IOException, InterruptedException {
+            URI uri = EcoreUtil.getURI(ePackage.getEClassifier("TemperatureSensor"));
+            Optional<EClass> model = nexus.getModel(uri.toString());
+
+            assertTrue(model.isEmpty());
+
+            nexus.addEPackage(ePackage);
+
+            model = nexus.getModel(uri.toString());
+
+            assertTrue(model.isPresent());
+        }
+
+        @Test
+        void removeModelEPackage() throws IOException, InterruptedException {
+            URI uri = EcoreUtil.getURI(ePackage.getEClassifier("TemperatureSensor"));
+            Optional<EClass> model = nexus.getModel(uri.toString());
+
+            assertTrue(model.isEmpty());
+
+            nexus.addEPackage(ePackage);
+
+            model = nexus.getModel(uri.toString());
+
+            assertTrue(model.isPresent());
+
+            nexus.removeEPackage(ePackage);
+
+            model = nexus.getModel(uri.toString());
+
+            assertTrue(model.isEmpty());
+        }
+
+        @Test
+        void checkInstance() throws IOException, InterruptedException {
+            EClassifier eClassifier = ePackage.getEClassifier("TemperatureSensor");
+            URI uri = EcoreUtil.getURI(ePackage.getEClassifier("TemperatureSensor"));
+            Optional<EClass> model = nexus.getModel(uri.toString());
+
+            assertTrue(model.isEmpty());
+
+            nexus.addEPackage(ePackage);
+
+            model = nexus.getModel(uri.toString());
+
+            assertTrue(model.isPresent());
+
+            Provider provider = nexus.createProviderInstance(uri.toString(), "test");
+
+            assertNotNull(provider);
+            assertEquals(eClassifier, provider.eClass());
+        }
+
     }
 }
