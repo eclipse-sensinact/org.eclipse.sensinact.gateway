@@ -4,8 +4,7 @@
     modelDirectory="/org.eclipse.sensinact.core.model/src" modelPluginID="org.eclipse.sensinact.core.model"
     modelName="sensinact" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container$Dynamic$Permissive"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="11.0" suppressGenModelAnnotations="false"
-    copyrightFields="false" usedGenPackages="../../../../../org.eclipse.emf.ecore/model/Ecore.genmodel#//ecore"
-    operationReflection="true" importOrganizing="true" oSGiCompatible="true">
+    copyrightFields="false" operationReflection="true" importOrganizing="true" oSGiCompatible="true">
   <foreignModel>sensinact.ecore</foreignModel>
   <genPackages prefix="Provider" basePackage="org.eclipse.sensinact.model.core" resource="XMI"
       disposableProviderFactory="true" ecorePackage="sensinact.ecore#/">
