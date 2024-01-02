@@ -40,5 +40,8 @@ public class DeviceMappingOptionsDTO {
     public NullAction nullAction = NullAction.UPDATE;
 
     @JsonProperty("names.ascii")
-    public boolean asciiNames;
+    public boolean asciiNames = false;
+
+    @JsonProperty("model.raw")
+    public boolean useRawModel = false;
 }

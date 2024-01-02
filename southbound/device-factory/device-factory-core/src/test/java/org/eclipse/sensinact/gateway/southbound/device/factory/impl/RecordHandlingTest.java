@@ -378,4 +378,29 @@ public class RecordHandlingTest {
         assertEquals(value, getResourceValue(provider, "_Greek", "________", Integer.class));
         assertEquals(value, getResourceValue(provider, "_int", "_finally", Integer.class));
     }
+
+    @Test
+    void testRawModel() throws Exception {
+        final String rawModel = "http://user:test@some.emf.model:8080/model.xml?format=emf#";
+        final String provider = "provider";
+        parser.setRecords(Map.of("m", rawModel, "p", provider));
+
+        // Test with an escaped model
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mappingOptions.useRawModel = false;
+        config.mapping.put("@model", "m");
+        config.mapping.put("@provider", "p");
+        config.mapping.put("@name", "p");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+
+        GenericDto dto = getResourceValue(provider, "admin", "friendlyName");
+        assertEquals("http___user_test_some_emf_model_8080_model_xml_format_emf_", dto.model);
+
+        // Test with a raw model
+        bulks.clear();
+        config.mappingOptions.useRawModel = true;
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        dto = getResourceValue(provider, "admin", "friendlyName");
+        assertEquals(rawModel, dto.model);
+    }
 }

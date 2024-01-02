@@ -281,6 +281,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final String rawModel = getFieldString(record, recordState.placeholders.get(KEY_MODEL), options);
             if (rawModel == null || rawModel.isBlank()) {
                 throw new ParserException("Empty model field for " + provider);
+            } else if (configuration.mappingOptions.useRawModel) {
+                model = rawModel;
             } else if (configuration.mappingOptions.asciiNames) {
                 model = NamingUtils.asciiSanitizeName(rawModel, false);
             } else {
