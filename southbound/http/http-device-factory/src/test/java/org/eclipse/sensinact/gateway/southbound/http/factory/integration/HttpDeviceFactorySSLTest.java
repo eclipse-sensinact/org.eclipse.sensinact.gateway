@@ -228,7 +228,7 @@ public class HttpDeviceFactorySSLTest {
         startServer(false);
 
         // Excepted providers
-        final String provider1 = "ssl-reject-provider1";
+        final String provider1 = "ssl_reject_provider1";
 
         // Register listener
         session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
@@ -263,7 +263,7 @@ public class HttpDeviceFactorySSLTest {
         startServer(false);
 
         // Excepted providers
-        final String provider1 = "ssl-allowed-provider1";
+        final String provider1 = "ssl_allowed_provider1";
 
         // Register listener
         session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
@@ -302,7 +302,7 @@ public class HttpDeviceFactorySSLTest {
         startServer(false);
 
         // Excepted providers
-        final String provider1 = "ssl-trusted-provider1";
+        final String provider1 = "ssl_trusted_provider1";
 
         // Register listener
         session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
@@ -344,7 +344,7 @@ public class HttpDeviceFactorySSLTest {
         startServer(true);
 
         // Excepted providers
-        final String provider1 = "ssl-client-auth-fail-provider1";
+        final String provider1 = "ssl_client_auth_fail_provider1";
 
         // Register listener
         session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
@@ -382,7 +382,7 @@ public class HttpDeviceFactorySSLTest {
         startServer(true);
 
         // Excepted providers
-        final String provider1 = "ssl-client-auth-valid-provider1";
+        final String provider1 = "ssl_client_auth_valid_provider1";
 
         // Register listener
         session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);

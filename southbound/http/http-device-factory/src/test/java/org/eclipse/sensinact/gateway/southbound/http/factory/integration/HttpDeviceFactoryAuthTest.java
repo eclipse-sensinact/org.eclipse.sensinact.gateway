@@ -130,7 +130,7 @@ public class HttpDeviceFactoryAuthTest {
     @Test
     void testCombined() throws Exception {
         // Excepted providers
-        final String providerBase = "auth-station";
+        final String providerBase = "auth_station";
         final String provider1 = providerBase + "1";
         final String provider2 = providerBase + "2";
 

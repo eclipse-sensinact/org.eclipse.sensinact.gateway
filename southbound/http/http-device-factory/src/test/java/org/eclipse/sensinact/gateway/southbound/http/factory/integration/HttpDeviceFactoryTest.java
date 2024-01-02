@@ -168,8 +168,8 @@ public class HttpDeviceFactoryTest {
     @Test
     void testSimpleTask() throws Exception {
         // Excepted providers
-        final String provider1 = "typed-provider1";
-        final String provider2 = "typed-provider2";
+        final String provider1 = "typed_provider1";
+        final String provider2 = "typed_provider2";
 
         // Register listener
         setupProvidersHandling(provider1, provider2);
@@ -225,8 +225,8 @@ public class HttpDeviceFactoryTest {
     @Test
     void testPeriodicTask() throws Exception {
         // Excepted providers
-        final String provider1 = "dynamic-provider1";
-        final String provider2 = "dynamic-provider2";
+        final String provider1 = "dynamic_provider1";
+        final String provider2 = "dynamic_provider2";
 
         // Register listener
         setupProvidersHandling(provider1, provider2);

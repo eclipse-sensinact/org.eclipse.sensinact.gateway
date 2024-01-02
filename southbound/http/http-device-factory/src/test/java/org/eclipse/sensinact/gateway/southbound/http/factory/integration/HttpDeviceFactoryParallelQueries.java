@@ -131,8 +131,8 @@ public class HttpDeviceFactoryParallelQueries {
     @Test
     void testParallelQuery() throws Exception {
         // Setup server
-        final String provider1 = "http-parallel-query1";
-        final String provider2 = "http-parallel-query2";
+        final String provider1 = "http_parallel_query1";
+        final String provider2 = "http_parallel_query2";
         final int value1 = 42;
         final int value2 = 21;
 
