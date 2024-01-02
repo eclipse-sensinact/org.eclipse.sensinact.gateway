@@ -220,7 +220,7 @@ public class JSONParserTest {
         // Excepted providers
         final String provider1 = "JsonSubArray1";
         final String provider2 = "JsonSubArray2";
-        final String ignoredProvider = "JsonSubArray-Ignore";
+        final String ignoredProvider = "JsonSubArray_Ignore";
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("json/sub-array-mapping.json");
@@ -286,7 +286,7 @@ public class JSONParserTest {
 
         // Ensure value and type
         assertEquals(15, getResourceValue(provider, "data", "value", Integer.class));
-        assertEquals(1691587953000L, getResourceValue(provider, "data", "long-value", Long.class));
+        assertEquals(1691587953000L, getResourceValue(provider, "data", "long_value", Long.class));
 
         // Ensure timestamp
         Instant timestamp = Instant.from(LocalDateTime.of(2022, 12, 7, 15, 17, 0).atOffset(ZoneOffset.UTC));
@@ -328,9 +328,9 @@ public class JSONParserTest {
     void testDeepObjects() throws Exception {
 
         // Expected providers
-        final String provider1 = "1452";
+        final String provider1 = "_1452";
         final String type1 = "GOOSE";
-        final String provider2 = "1851";
+        final String provider2 = "_1851";
         final String type2 = "DUCK";
 
         // Read the configuration
@@ -343,11 +343,11 @@ public class JSONParserTest {
         deviceMapper.handle(config, Map.of(), fileContent);
 
         // Check first provider
-        assertEquals(0, getResourceValue(provider1, "data", type1 + "-value", Integer.class));
+        assertEquals(0, getResourceValue(provider1, "data", type1 + "_value", Integer.class));
 
         // Ensure timestamp
         Instant timestamp = Instant.from(LocalDateTime.of(2021, 10, 26, 15, 28, 0).atOffset(ZoneOffset.UTC));
-        assertEquals(timestamp, getResourceValue(provider1, "data", type1 + "-value").timestamp);
+        assertEquals(timestamp, getResourceValue(provider1, "data", type1 + "_value").timestamp);
 
         // Ensure location update (and its timestamp)
         GenericDto location = getResourceValue(provider1, "admin", "location");
@@ -360,11 +360,11 @@ public class JSONParserTest {
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
 
         // Check 2nd provider
-        assertEquals(7, getResourceValue(provider2, "data", type2 + "-value", Integer.class));
+        assertEquals(7, getResourceValue(provider2, "data", type2 + "_value", Integer.class));
 
         // Ensure timestamp
         timestamp = Instant.from(LocalDateTime.of(2021, 10, 26, 15, 27, 0).atOffset(ZoneOffset.UTC));
-        assertEquals(timestamp, getResourceValue(provider2, "data", type2 + "-value").timestamp);
+        assertEquals(timestamp, getResourceValue(provider2, "data", type2 + "_value").timestamp);
 
         // Ensure location update (and its timestamp)
         location = getResourceValue(provider2, "admin", "location");

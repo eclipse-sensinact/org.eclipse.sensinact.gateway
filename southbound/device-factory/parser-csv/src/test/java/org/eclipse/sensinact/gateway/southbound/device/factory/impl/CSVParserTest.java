@@ -141,8 +141,8 @@ public class CSVParserTest {
     @Test
     void testNoHeader() throws Exception {
         // Excepted providers
-        final String provider1 = "no-header-provider1";
-        final String provider2 = "no-header-provider2";
+        final String provider1 = "no_header_provider1";
+        final String provider2 = "no_header_provider2";
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("csv/csv-no-header-mapping.json");
@@ -188,8 +188,8 @@ public class CSVParserTest {
     @Test
     void testWithHeader() throws Exception {
         // Excepted providers
-        final String provider1 = "header-provider1";
-        final String provider2 = "header-provider2";
+        final String provider1 = "header_provider1";
+        final String provider2 = "header_provider2";
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("csv/csv-header-mapping.json");
@@ -235,8 +235,8 @@ public class CSVParserTest {
     @Test
     void testTyped() throws Exception {
         // Excepted providers
-        final String provider1 = "typed-provider1";
-        final String provider2 = "typed-provider2";
+        final String provider1 = "typed_provider1";
+        final String provider2 = "typed_provider2";
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("csv/csv-header-typed-mapping.json");
@@ -282,9 +282,9 @@ public class CSVParserTest {
     @Test
     void testLiteral() throws Exception {
         // Excepted providers
-        final String provider1 = "literal-provider1";
-        final String provider2 = "literal-provider2";
-        final String literalProvider = "literal-provider";
+        final String provider1 = "literal_provider1";
+        final String provider2 = "literal_provider2";
+        final String literalProvider = "literal_provider";
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("csv/csv-literal-typed-mapping.json");
@@ -323,7 +323,7 @@ public class CSVParserTest {
     @Test
     void testIsolatedValue() throws Exception {
         // Excepted provider
-        final String provider = "isolated-value-" + String.valueOf(new Random().nextInt());
+        final String provider = "isolated_value_" + String.valueOf(new Random().nextInt(Integer.MAX_VALUE));
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("csv/isolated-value-mapping.json");
@@ -345,7 +345,7 @@ public class CSVParserTest {
     @Test
     void testIsolatedValueTyped() throws Exception {
         // Excepted provider
-        final String provider = "isolated-value-" + String.valueOf(new Random().nextInt());
+        final String provider = "isolated_value_" + String.valueOf(new Random().nextInt(Integer.MAX_VALUE));
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("csv/isolated-value-mapping-typed.json");
@@ -366,9 +366,9 @@ public class CSVParserTest {
     @Test
     void testVariables() throws Exception {
         // Excepted resource
-        final String provider = "provider-vars-" + String.valueOf(new Random().nextInt());
-        final String service = "svc-vars-" + String.valueOf(new Random().nextInt());
-        final String resource = "rc-vars-" + String.valueOf(new Random().nextInt());
+        final String provider = "provider_vars_" + String.valueOf(new Random().nextInt(Integer.MAX_VALUE));
+        final String service = "svc_vars_" + String.valueOf(new Random().nextInt(Integer.MAX_VALUE));
+        final String resource = "rc_vars_" + String.valueOf(new Random().nextInt(Integer.MAX_VALUE));
 
         // Read the configuration
         DeviceMappingConfigurationDTO config = readConfiguration("csv/csv-no-header-vars-mapping.json");
