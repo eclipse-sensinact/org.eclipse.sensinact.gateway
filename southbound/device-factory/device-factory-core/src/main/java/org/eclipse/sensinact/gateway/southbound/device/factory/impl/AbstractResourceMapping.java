@@ -100,6 +100,7 @@ public abstract class AbstractResourceMapping implements IResourceMapping {
     /**
      * Returns the name of the service
      */
+    @Override
     public String getService() {
         return service;
     }
@@ -107,6 +108,7 @@ public abstract class AbstractResourceMapping implements IResourceMapping {
     /**
      * Returns the name of the resource
      */
+    @Override
     public String getResource() {
         return resource;
     }
@@ -114,6 +116,7 @@ public abstract class AbstractResourceMapping implements IResourceMapping {
     /**
      * Returns the name of the metadata, if any
      */
+    @Override
     public String getMetadata() {
         return metadata;
     }
@@ -121,6 +124,7 @@ public abstract class AbstractResourceMapping implements IResourceMapping {
     /**
      * Checks if this mapping targets a metadata
      */
+    @Override
     public boolean isMetadata() {
         return metadata != null;
     }
@@ -128,18 +132,24 @@ public abstract class AbstractResourceMapping implements IResourceMapping {
     /**
      * Returns the resource path
      */
+    @Override
     public String getResourcePath() {
         return path;
     }
 
     @Override
-    public IResourceMapping ensureValidPath() throws InvalidResourcePathException {
-        if (service == null) {
+    public IResourceMapping ensureValidPath(final boolean asciiOnly) throws InvalidResourcePathException {
+        if (path == null) {
             // Not a path
             return this;
         }
 
-        final String cleaned = NamingUtils.sanitizeName(path, true);
+        final String cleaned;
+        if (asciiOnly) {
+            cleaned = NamingUtils.asciiSanitizeName(path, true);
+        } else {
+            cleaned = NamingUtils.sanitizeName(path, true);
+        }
         if (cleaned.equals(path)) {
             // Nothing to do
             return this;

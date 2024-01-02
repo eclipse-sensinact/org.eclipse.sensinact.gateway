@@ -268,7 +268,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (rawProvider == null || rawProvider.isBlank()) {
             throw new ParserException("Empty provider field");
         }
-        final String provider = NamingUtils.sanitizeName(rawProvider, false);
+        final String provider;
+        if (configuration.mappingOptions.asciiNames) {
+            provider = NamingUtils.asciiSanitizeName(rawProvider, false);
+        } else {
+            provider = NamingUtils.sanitizeName(rawProvider, false);
+        }
 
         // Extract the model
         final String model;
@@ -276,6 +281,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final String rawModel = getFieldString(record, recordState.placeholders.get(KEY_MODEL), options);
             if (rawModel == null || rawModel.isBlank()) {
                 throw new ParserException("Empty model field for " + provider);
+            } else if (configuration.mappingOptions.asciiNames) {
+                model = NamingUtils.asciiSanitizeName(rawModel, false);
             } else {
                 model = NamingUtils.sanitizeName(rawModel, false);
             }
@@ -437,6 +444,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final RecordState initialState, final IDeviceMappingRecord record)
             throws InvalidResourcePathException, ParserException, VariableNotFoundException {
 
+        final boolean asciiPaths = configuration.mappingOptions.asciiNames;
+
         final RecordState state = new RecordState();
 
         // Resolve variables
@@ -447,12 +456,14 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
 
         state.rcMappings = new ArrayList<>(initialState.rcMappings.size());
         for (final ResourceRecordMapping rcMapping : initialState.rcMappings) {
-            state.rcMappings.add((ResourceRecordMapping) rcMapping.fillInVariables(state.variables).ensureValidPath());
+            state.rcMappings.add(
+                    (ResourceRecordMapping) rcMapping.fillInVariables(state.variables).ensureValidPath(asciiPaths));
         }
 
         state.rcLiterals = new ArrayList<>(initialState.rcLiterals.size());
         for (final ResourceLiteralMapping rcMapping : initialState.rcLiterals) {
-            state.rcLiterals.add((ResourceLiteralMapping) rcMapping.fillInVariables(state.variables).ensureValidPath());
+            state.rcLiterals.add(
+                    (ResourceLiteralMapping) rcMapping.fillInVariables(state.variables).ensureValidPath(asciiPaths));
         }
         return state;
     }

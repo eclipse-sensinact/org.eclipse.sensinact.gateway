@@ -64,8 +64,10 @@ public interface IResourceMapping {
      * Returns a copy of this mapping with a path that meets the sensiNact naming
      * requirements
      *
+     * @param asciiOnly If true, the path must only contain letters, digits and
+     *                  underscores
      * @return This object if the key was valid or a new one with a new path
      * @throws InvalidResourcePathException Invalid new resource path
      */
-    IResourceMapping ensureValidPath() throws InvalidResourcePathException;
+    IResourceMapping ensureValidPath(final boolean asciiOnly) throws InvalidResourcePathException;
 }

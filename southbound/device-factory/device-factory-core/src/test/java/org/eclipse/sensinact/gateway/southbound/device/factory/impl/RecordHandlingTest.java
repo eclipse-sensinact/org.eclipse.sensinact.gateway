@@ -310,4 +310,72 @@ public class RecordHandlingTest {
         // Test values
         assertEquals(42, getResourceValue("provider", "svc", "rc").value);
     }
+
+    @Test
+    void testNameSanitize() throws Exception {
+        final String model = "modèle_test";
+        final String providerInput = "test-provider";
+        final String provider = "test_provider";
+        final String name = "Châlons";
+        final int value = 42;
+        parser.setRecords(Map.of("m", model, "p", providerInput, "n", name, "val", value));
+
+        // Test w/o a model
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mapping.put("@model", "m");
+        config.mapping.put("@provider", "p");
+        config.mapping.put("@name", "n");
+        config.mapping.put("état/Val-1", "val");
+        config.mapping.put("État/föhn", "val");
+        config.mapping.put("1/3.14", "val");
+        config.mapping.put("-Greek/Γαλαξιας", "val");
+        config.mapping.put("int/finally", "val");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+
+        GenericDto dto = getResourceValue(provider, "admin", "friendlyName");
+        // No change in value
+        assertEquals(model, dto.model);
+        assertEquals(provider, dto.provider);
+        assertEquals(name, dto.value);
+        assertEquals(value, getResourceValue(provider, "état", "Val_1", Integer.class));
+        assertEquals(value, getResourceValue(provider, "État", "föhn", Integer.class));
+        assertEquals(value, getResourceValue(provider, "_1", "_3_14", Integer.class));
+        assertEquals(value, getResourceValue(provider, "_Greek", "Γαλαξιας", Integer.class));
+        assertEquals(value, getResourceValue(provider, "_int", "_finally", Integer.class));
+    }
+
+    @Test
+    void testNameAsciiSanitize() throws Exception {
+        final String modelInput = "modèle_test";
+        final String model = "modele_test";
+        final String providerInput = "test-provider";
+        final String provider = "test_provider";
+        final String name = "Châlons";
+        final int value = 42;
+        parser.setRecords(Map.of("m", modelInput, "p", providerInput, "n", name, "val", value));
+
+        // Test w/o a model
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mappingOptions.asciiNames = true;
+        config.mapping.put("@model", "m");
+        config.mapping.put("@provider", "p");
+        config.mapping.put("@name", "n");
+        config.mapping.put("état/Val-1", "val");
+        config.mapping.put("État/föhn", "val");
+        config.mapping.put("1/3.14", "val");
+        config.mapping.put("-Greek/Γαλαξιας", "val");
+        config.mapping.put("int/finally", "val");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+
+        GenericDto dto = getResourceValue(provider, "admin", "friendlyName");
+        // No change in value
+        assertEquals(model, dto.model);
+        assertEquals(provider, dto.provider);
+        assertEquals(name, dto.value);
+        assertEquals(value, getResourceValue(provider, "etat", "Val_1", Integer.class));
+        assertEquals(value, getResourceValue(provider, "Etat", "fohn", Integer.class));
+        assertEquals(value, getResourceValue(provider, "_1", "_3_14", Integer.class));
+        assertEquals(value, getResourceValue(provider, "_Greek", "________", Integer.class));
+        assertEquals(value, getResourceValue(provider, "_int", "_finally", Integer.class));
+    }
 }
