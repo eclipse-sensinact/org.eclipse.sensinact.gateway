@@ -127,8 +127,8 @@ public class MqttDeviceFactoryTest {
     @Test
     void testWorking() throws Exception {
         // Excepted providers
-        final String provider1 = "typed-provider1";
-        final String provider2 = "typed-provider2";
+        final String provider1 = "typed_provider1";
+        final String provider2 = "typed_provider2";
 
         // Register listener
         session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
@@ -192,7 +192,7 @@ public class MqttDeviceFactoryTest {
     @Test
     void testHandlerFilter() throws Exception {
         // Excepted providers
-        final String provider1 = "handler-provider1";
+        final String provider1 = "handler_provider1";
 
         // Register listener
         session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
