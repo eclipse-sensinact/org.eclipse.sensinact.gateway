@@ -617,7 +617,7 @@ Then we configure the MQTT device factory and tell it to use our parser by a con
     "mapping": {
       "$name": "provider",
       "@provider": {
-          "literal": "sensor-${name}"
+          "literal": "sensor_${name}"
         },
         "@name": {
           "literal": "Sensor ${name}"
@@ -653,18 +653,18 @@ With those configurations, the parser will be called by the device factory core 
    **Note:** Each mapping configuration must at least contain the `@Provider` placeholder. Each record must therefore handle a path that returns a provider name.
 
    The result will be the update/creation of the following providers:
-   * `sensor-a`
-   * `admin`
+   * `sensor_a`
+     * `admin`
        * `location`: `null` @ 2023-06-20T13:40:00+0200
        * `friendlyName`: `"Sensor a"` @ 2023-06-20T13:40:00+0200
-   * `sensor`:
+     * `sensor`:
        * `temperature`: 40.0 @ 2023-06-20T13:40:00+0200
        * `humidity`: 0.0 @ 2023-06-20T13:40:00+0200
-   * `sensor-c`
-   * `admin`
+   * `sensor_c`
+     * `admin`
        * `location`: `null` @ 2023-06-20T13:40:00+0200
        * `friendlyName`: `"Sensor c"` @ 2023-06-20T13:40:00+0200
-   * `sensor`:
+     * `sensor`:
        * `temperature`: 38.0 @ 2023-06-20T13:40:00+0200
        * `humidity`: 15.0 @ 2023-06-20T13:40:00+0200
 7. Now consider a second payload:
@@ -677,21 +677,21 @@ With those configurations, the parser will be called by the device factory core 
    ```
 
    Following the same steps as before, the providers will be updated as:
-   * `sensor-a`
+   * `sensor_a`
      * `admin`
        * `location`: `null` @ 2023-06-20T13:40:00+0200
        * `friendlyName`: `"Sensor a"` @ 2023-06-20T13:50:00+0200
      * `sensor`:
        * `temperature`: 42.0 @ 2023-06-20T13:50:00+0200
        * `humidity`: 0.0 @ 2023-06-20T13:50:00+0200
-   * `sensor-b`
+   * `sensor_b`
      * `admin`
        * `location`: `null` @ 2023-06-20T13:50:00+0200
        * `friendlyName`: `"Sensor b"` @ 2023-06-20T13:50:00+0200
      * `sensor`:
        * `temperature`: 21.0 @ 2023-06-20T13:50:00+0200
        * `humidity`: 30.0 @ 2023-06-20T13:50:00+0200
-   * `sensor-c`
+   * `sensor_c`
      * `admin`
        * `location`: `null` 2023-06-20T13:40:00+0200
        * `friendlyName`: `"Sensor c"` @ 2023-06-20T13:50:00+0200
@@ -740,7 +740,7 @@ This will ensure it is visible by other Maven projects and ease the creation of 
           "mapping": {
             "$name": "provider",
             "@provider": {
-              "literal": "sensor-${name}"
+              "literal": "sensor_${name}"
             },
             "@name": {
               "literal": "Sensor ${name}"
@@ -802,7 +802,7 @@ After all those steps, the configuration file `${SENSINACT_HOME}/configuration/c
       "mapping": {
         "$name": "provider",
         "@provider": {
-          "literal": "sensor-${name}"
+          "literal": "sensor_${name}"
         },
         "@name": {
           "literal": "Sensor ${name}"
@@ -830,10 +830,10 @@ After all those steps, the configuration file `${SENSINACT_HOME}/configuration/c
 * To check the value of a resource, you can use any HTTP client (`curl`, `httPIE`, a browser...).
   With the payload we will send via MQTT, below are the URLs where we will find our resources values.
   Note that accessing those URLs before sending any data will return 404 errors.
-  * <http://localhost:8080/sensinact/providers/sensor-a/services/sensor/resources/temperature/GET>
-  * <http://localhost:8080/sensinact/providers/sensor-a/services/sensor/resources/humidity/GET>
-  * <http://localhost:8080/sensinact/providers/sensor-b/services/sensor/resources/temperature/GET>
-  * <http://localhost:8080/sensinact/providers/sensor-b/services/sensor/resources/humidity/GET>
+  * <http://localhost:8080/sensinact/providers/sensor_a/services/sensor/resources/temperature/GET>
+  * <http://localhost:8080/sensinact/providers/sensor_a/services/sensor/resources/humidity/GET>
+  * <http://localhost:8080/sensinact/providers/sensor_b/services/sensor/resources/temperature/GET>
+  * <http://localhost:8080/sensinact/providers/sensor_b/services/sensor/resources/humidity/GET>
 
 * To send messages, we will use the [MQTT dashboard websocket client](https://www.hivemq.com/demos/websocket-client/):
   1. Connect the broker using the default configuration

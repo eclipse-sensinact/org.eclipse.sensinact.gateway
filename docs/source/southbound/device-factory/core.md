@@ -79,6 +79,35 @@ The key of the mapping entry can be in the following formats:
 * `$xxx`: definition of a variable that can be reused in or as a mapping value. The variable can be used in other mapping key or in record paths using the `${xxx}` syntax.
 * `"svc/rc"`: the parser value will be stored in a the resource `rc` of the service `svc`
 
+#### Names handling
+
+Eclipse sensiNact is based on EMF to manage its model, which requires all the names it handles to be valid Java identifiers.
+As a result, the Device Factory Core normalizes all model, provider, service and resource names before forwarding data to sensiNact.
+
+By default, the normalization process allows all Java identifier characters, including non-Latin characters and diacritics.
+Invalid characters (space, ...) are replaced with underscores.
+
+The mapping options include a `names.ascii` flag that can be set to true to restrict names to digits, underscores and Latin letters without diacritics.
+The device factory first normalizes the input in NKFD form to remove diacritics, then replaces all rejected characters with underscores.
+If the entire name is rejected, it will be replaced by a string of underscores that has the same length as the original name.
+
+In both cases, if the normalized name doesn't begin with a valid Java identifier start character or is a reserved Java keyword, then it is prefixed with an underscore.
+
+Here are some examples of transformation:
+
+| Input             | Default Normalization | ASCII Normalization |
+|-------------------|-----------------------|---------------------|
+| `état`            | `état`                | `etat`              |
+| `État`            | `État`                | `Etat`              |
+| `int/3.14`        | `_int/_3_14`          | `_int/_3_14`        |
+| `-Greek/Γαλαξιας` | `_Greek/Γαλαξιας`     | `_Greek/________`   |
+
+
+:::{warning}
+Before [pull request #297](https://github.com/eclipse/org.eclipse.sensinact.gateway/pull/297), the normalization was performed in ASCII mode, and the replacement character was the hyphen (`-`).
+As this character is invalid in a Java identifier, it is now replaced with an underscore (`_`).
+:::
+
 ### Mapping value
 
 The value of a mapping can be defined in many different formats.
@@ -294,10 +323,10 @@ For example:
 ```json
 {
     // ...
-    "${svcName}/${rcName}-txt": "${rcValuePath}", // service/rc-txt = "data"
-    "${svcName}/${rcName}-value":{
+    "${svcName}/${rcName}_txt": "${rcValuePath}", // service/rc_txt = "data"
+    "${svcName}/${rcName}_value":{
         "path": "${rcValuePath}"
-        // service/rc-value = <value in the "data" path>
+        // service/rc_value = <value in the "data" path>
     }
 }
 ```
@@ -317,3 +346,7 @@ The following entries are supported:
   Dates without timezone are considered to be in UTC.
 * Number inputs:
   * `numbers.locale`: the name of the locale to use to parse numbers, *e.g.* `fr`, `en_us`, `zh_Hand_TW`.
+* Name handling:
+  * `names.ascii`: if set to true, all model, provider, service and resource names will be normalized to contain only ASCII letters, digits and underscores. If set to false (default), those names will be normalized to be valid Java identifiers.
+* Model name handling:
+  * `model.raw`: if set to true, the explicit model names won't be escaped. This allows to use URLs of existing EMF models.

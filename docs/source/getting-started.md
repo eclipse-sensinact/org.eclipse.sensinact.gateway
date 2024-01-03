@@ -332,8 +332,8 @@ Here is the configuration of the HTTP device factory, where we declare a periodi
     "utc_offset_seconds": 0
   }
   ```
-* maps the response JSON as follows:
-   * the result is associated to a fixed provider name: `grenoble-weather`. `@Provider` is a special placeholder to name the provider that holds the data we received, this is the only mandatory field in a mapping definition.
+* will map the response JSON as follows:
+   * the result is associated to a fixed provider name: `grenoble_weather`. `@Provider` is a special placeholder to name the provider that holds the data we received, this is the only mandatory field in a mapping definition. Note that model, provider, service and resource names are normalized before being transmitted to the Eclipse sensiNact model. See [here](./southbound/device-factory/core.md#names-handling) for more information.
    * the provider friendly (human readable) name will be: `Grenoble Weather`. It is stored using the `@Name` placeholder.
    * the exact location of the weather data point is given by its latitude, longitude and elevation.
    * the weather was measured/computed at the time given in the `time` entry of the `current_weather` object. The timestamp is given as an [ISO 8601 date time](https://en.wikipedia.org/wiki/ISO_8601) (in UTC timezone), that can be given to the device factory using `@datetime` placeholder. Other time-related placeholders are: `@Date`, `@Time` and `@Timestamp` (for Unix timestamps).
@@ -353,7 +353,7 @@ Here is the configuration of the HTTP device factory, where we declare a periodi
             "parser": "json",
             "mapping": {
               "@provider": {
-                "literal": "grenoble-weather"
+                "literal": "grenoble_weather"
               },
               "@name": {
                 "literal": "Grenoble Weather"
@@ -366,15 +366,15 @@ Here is the configuration of the HTTP device factory, where we declare a periodi
                 "path": "current_weather/temperature",
                 "type": "float"
               },
-              "weather/wind-speed": {
+              "weather/wind_speed": {
                 "path": "current_weather/windspeed",
                 "type": "float"
               },
-              "weather/wind-direction": {
+              "weather/wind_direction": {
                 "path": "current_weather/winddirection",
                 "type": "int"
               },
-              "weather/weather-code": "current_weather/weathercode"
+              "weather/weather_code": "current_weather/weathercode"
             }
           }
         }
@@ -391,7 +391,6 @@ You can (re)start the configured sensiNact instance, using `./start.sh`
 :::{note}
 On Windows, that would be:
 ```powershell
-
 & java -D"sensinact.config.dir=configuration" -jar launch\launcher.jar
 ```
 :::
@@ -399,13 +398,12 @@ On Windows, that would be:
 The current temperature at Grenoble should now be accessible using:
 
 ```bash
-curl http://localhost:8082/sensinact/providers/grenoble-weather/services/weather/resources/temperature/GET
+curl http://localhost:8082/sensinact/providers/grenoble_weather/services/weather/resources/temperature/GET
 ```
 
 And the result will have the following format:
 
 ```json
-
 {
   "response": {
     "name": "temperature",
@@ -415,6 +413,6 @@ And the result will have the following format:
   },
   "statusCode": 200,
   "type": "GET_RESPONSE",
-  "uri": "/grenoble-weather/weather/temperature"
+  "uri": "/grenoble_weather/weather/temperature"
 }
 ```

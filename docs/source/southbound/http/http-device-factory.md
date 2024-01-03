@@ -58,7 +58,7 @@ Here is an example of configuration for HTTP device factory that will get the de
         "mapping": {
           "$station_id": "station_id",
           "@provider": {
-            "literal": "cycling-${station_id}"
+            "literal": "cycling_${station_id}"
           },
           "@name": "name",
           "@latitude": "lat",
@@ -80,7 +80,7 @@ Here is an example of configuration for HTTP device factory that will get the de
         "mapping": {
           "$station_id": "station_id",
           "@provider": {
-            "literal": "cycling-${station_id}"
+            "literal": "cycling_${station_id}"
           },
           "station/active": "is_installed",
           "station/stationCode": "stationCode",
