@@ -38,8 +38,8 @@ Here are the paths that can be used:
 
 The CSV parser has the ID `csv`.
 It accepts the following options:
-* `encoding`: the payload encoding, as supported by [`java.nio.charset.Charset`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/Charset.html), *e.g.* `"UTF-8"`, `"latin-1"`.
-* `delimiter`: the CSV delimiter character, *e.g.* ",", ";", "\t".
+* `encoding`: the payload encoding, as supported by [`java.nio.charset.Charset`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/charset/Charset.html), *e.g.* `"UTF-8"` (default), `"latin-1"`.
+* `delimiter`: the CSV delimiter character, *e.g.* `,` (default), `;` or `\t`.
 * `header`: a boolean flag to indicate if the CSV payload has a header
 
 ## Example
@@ -55,6 +55,8 @@ Here is an example configuration to parse that payload:
 {
   "parser": "csv",
   "parser.options": {
+    "encoding": "UTF-8",
+    "delimiter": ",",
     "header": true
   },
   "mapping": {
