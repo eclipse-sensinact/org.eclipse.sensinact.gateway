@@ -11,13 +11,9 @@
  * The interface is configured to permit anonymous access
  * An authentication implementation is provided
 
-# Available endpoints
+## Available endpoints
 
 The REST interface provides resources relative to the root context of the configured Jakarta REST whiteboard.
-
-## REST endpoints
-
- There are several resources available in the REST interface.
 
 ### GET resources
   The following `GET` resources are available:
@@ -37,15 +33,15 @@ The REST interface provides resources relative to the root context of the config
   * `/sensinact/providers/{provider}/services/{id}/resources/{id}/SET` - Sets the value of a resource
   * `/sensinact/providers/{provider}/services/{id}/resources/{id}/ACT` - Acts on an action resource
 
-## Responses
+### Responses
 
   All of the defined REST resources return a response body. The response body is used to return information to the client.
 
-### Response URI
+#### Response URI
 
   The `uri` of the response corresponds to the URI of the incoming request, and identifies the provider, service, or resource being returned.
 
-### Response types
+#### Response types
 
   The `type` of the response is one of:
   * `ERROR` - an error response
@@ -61,21 +57,21 @@ The REST interface provides resources relative to the root context of the config
   * `ACT_RESPONSE` - the JSON serialized result of performing an action, contained in a property named `response`
   * `SUBSCRIPTION_NOTIFICATION` - For server sent event streams, events will be JSON objects in the `notification` property,
 
-### Response status codes
+#### Response status codes
 
  The REST interface resources do not use the HTTP response status code directly unless authentication is required. The HTTP response status code will therefore, in general, be 200. Instead the status of the response is indicated in the `statusCode` property of the response body.
 
-#### Providers and services
+##### Providers and services
 
    Where providers and services exist, the `statusCode` set will be 200 (OK). Missing providers and missing services will use 404 (Not found).
 
-#### Resources
+##### Resources
 
    If the provider or service for the resource do not exist then a 404 will be returned. When trying to describe or read a resource which exists but has never been given a value then the `statusCode` will be 204 (No content).
 
    When setting a value to a resource, its whole path is created: if its provider and/or service don't exist, they will be created with default values. Status code based northbound endpoints will return a 200 (OK).
 
-#### Admin resources
+##### Admin resources
 
    Pre-defined resources of the `admin` service (defined in the data model) should always be considered set, even if they have not been given a value. As a result, when a provider instance is created, its pre-defined resources will be given a default value (can be `null`) and a timestamp (creation time of instance).
 
@@ -83,12 +79,12 @@ The REST interface provides resources relative to the root context of the config
 
    Access to admin resources follows the same rules as resources from other services.
 
-### Error responses
+#### Error responses
 
   If an error occurs while running a command then the `error` property will be set with a String containing error information.
 
 
-# Basic configuration
+## Basic configuration
 
 The REST interface will run without any configuration, however the `jakarta-rest-whiteboard` must have a configuration defined in order to activate. A minimal configuration would therefore be:
 
@@ -141,7 +137,7 @@ Once an authenticator is present calls to the API will return `401` responses in
 
  As REST is a stateless model the `Authorization` header must be sent and validated with each request.
 
-## Allowing anonymous access
+### Allowing anonymous access
 
  In some cases, for example when testing, it is desirable to allow anonymous access to the REST interface. This can be enabled in configuration
 

@@ -51,9 +51,15 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.sensinact.core.command.impl.ActionHandler;
+import org.eclipse.sensinact.core.command.impl.ResourcePullHandler;
+import org.eclipse.sensinact.core.command.impl.ResourcePushHandler;
 import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
 import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
 import org.eclipse.sensinact.model.core.metadata.AnnotationMetadata;
@@ -67,12 +73,6 @@ import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.core.command.impl.ActionHandler;
-import org.eclipse.sensinact.core.command.impl.ResourcePullHandler;
-import org.eclipse.sensinact.core.command.impl.ResourcePushHandler;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
-import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
@@ -135,7 +135,8 @@ public class ModelNexus {
             public <T> Promise<TimedValue<T>> pullValue(String model, String provider, String service, String resource,
                     Class<T> type, TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate) {
                 if (resourceValuePullHandler != null) {
-                    return resourceValuePullHandler.pullValue(model, provider, service, resource, type, cachedValue, gatewayUpdate);
+                    return resourceValuePullHandler.pullValue(model, provider, service, resource, type, cachedValue,
+                            gatewayUpdate);
                 }
                 throw new RuntimeException("No pullValue handler set");
             }
@@ -897,5 +898,30 @@ public class ModelNexus {
 
         models.put(EMFUtil.getModelName(modelEClass), modelEClass);
         return null;
+    }
+
+    /**
+     * @param ePackage a registered {@link EPackage} to scan for registered
+     *                 Provideres
+     */
+    public void addEPackage(EPackage ePackage) {
+        if (ePackage != providerPackage) {
+            ePackage.getEClassifiers().stream().filter(EClass.class::isInstance).map(EClass.class::cast)
+                    .filter(ProviderPackage.Literals.PROVIDER::isSuperTypeOf)
+                    .forEach(ec -> models.put(EcoreUtil.getURI(ec).toString(), ec));
+        }
+    }
+
+    /**
+     * TODO how do we handle existing Instances of such a model?
+     *
+     * @param ePackage a registered {@link EPackage} to remove
+     */
+    public void removeEPackage(EPackage ePackage) {
+        if (ePackage != providerPackage) {
+            ePackage.getEClassifiers().stream().filter(EClass.class::isInstance).map(EClass.class::cast)
+                    .filter(ProviderPackage.Literals.PROVIDER::isSuperTypeOf)
+                    .forEach(ec -> models.remove(EcoreUtil.getURI(ec).toString()));
+        }
     }
 }

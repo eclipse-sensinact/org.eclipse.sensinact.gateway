@@ -1,6 +1,10 @@
 # Southbound providers
 
-The *southbound* API of Eclipse sensiNact gateway refers to the parts of the gateway which interface with the external device. This may be through a generic protocol (e.g. MQTT/HTTP) or through something custom (e.g. a native serial interface).
+![Devices using Southbound providers to communicate with the Eclipse sensiNact Digital Twin](../_static/southbound/southbound-provider-white.png){.float-right w=20em}
+
+The *southbound* API of Eclipse sensiNact gateway refers to the parts of the gateway which interface with the external devices. This may be through a generic protocol (e.g. MQTT/HTTP) or through something custom (e.g. a native serial interface). A single southbound provider may create and manage multiple providers in the digital twin, with those providers being of the same type, or of different types.
+
+<p class="clear-right"/>
 
 The gateway currently includes the following southbound providers:
 

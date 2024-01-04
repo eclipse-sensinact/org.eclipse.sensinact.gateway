@@ -8,11 +8,11 @@
 
  The SensorThings interface requires the sensinact `core` feature.
 
-# Available endpoints
+## Available endpoints
 
 The SensorThings MQTT interface is available to all those with subscribe access to the MQTT broker. The topics defined are described in [OGC Sensorthings 1.1](https://docs.ogc.org/is/18-088/18-088.html#receive-mqtt-subscribe).
 
-# Basic configuration
+## Basic configuration
 
 The MQTT interface will run without any configuration, however the `jakarta-rest-whiteboard` must have a configuration defined in order to activate. A minimal configuration would therefore be:
 

@@ -115,9 +115,8 @@ public class MqttClientHandler implements MqttCallback {
             handlerId = configId;
         }
 
-        // Setup options: always start with a clean session
-        final MqttConnectOptions options = new MqttConnectOptions();
-        options.setCleanSession(true);
+        // Setup options
+        final MqttConnectOptions options = setupOptions(config);
 
         // Start client (blocking)
         logger.debug("Connecting MQTT client with ID {}", clientId);
@@ -139,13 +138,42 @@ public class MqttClientHandler implements MqttCallback {
     @Deactivate
     public void deactivate() throws Exception {
         if (client != null) {
-            client.disconnect();
+            if (client.isConnected()) {
+                client.disconnect();
+            }
             client.close();
             logger.info("MQTT client {} stopped", client.getClientId());
             client = null;
         }
 
         handlerId = null;
+    }
+
+    private MqttConnectOptions setupOptions(final MqttClientConfiguration config) throws Exception {
+        // Always start with a clean session
+        final MqttConnectOptions options = new MqttConnectOptions();
+        options.setCleanSession(true);
+        options.setConnectionTimeout(config.client_connection_timeout());
+
+        // Setup password-based authentication
+        final String userName = config.user();
+        if (userName != null && !userName.isBlank()) {
+            logger.debug("Connecting MQTT with authentication");
+            options.setUserName(userName);
+        }
+
+        final String userPass = config._password();
+        if (userPass != null) {
+            options.setPassword(userPass.toCharArray());
+        }
+
+        // Setup certificate-based authentication
+        if (config.auth_keystore_path() != null || config.auth_clientcert_path() != null) {
+
+            options.setSocketFactory(SSLUtils.setupSSLSocketFactory(config));
+        }
+
+        return options;
     }
 
     /**
@@ -160,7 +188,17 @@ public class MqttClientHandler implements MqttCallback {
             throw new IllegalArgumentException("No MQTT host given");
         }
 
-        return new URI("tcp", null, mqttHost, config.port(), null, null, null).toString();
+        final boolean clientAuth = config.auth_keystore_path() != null || config.auth_clientcert_path() != null;
+        String protocol = config.protocol();
+        if (protocol == null || protocol.isBlank() || (clientAuth && protocol.equalsIgnoreCase("tcp"))) {
+            if (clientAuth) {
+                protocol = "ssl";
+            } else {
+                protocol = "tcp";
+            }
+        }
+
+        return new URI(protocol, null, mqttHost, config.port(), null, null, null).toString();
     }
 
     /**

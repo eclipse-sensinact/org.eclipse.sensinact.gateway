@@ -396,8 +396,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             if (key.startsWith("@")) {
                 // Placeholder
                 placeholders.put(key, mapping);
-            } else if (key.startsWith("$")) {
-                // Variable
+            } else if (key.startsWith("$") && !key.startsWith("${")) {
+                // Variable definition
                 if (VariableSolver.isValidKey(key)) {
                     variablesMappings.put(key, mapping);
                 } else {

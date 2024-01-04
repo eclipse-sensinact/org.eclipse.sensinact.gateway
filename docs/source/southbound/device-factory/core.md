@@ -3,6 +3,8 @@
 The device factory handles raw update notifications from transport handlers.
 The payload is parsed and its content is mapped to the Eclipse sensiNact model according to a configuration.
 
+![An example transform from JSON](../../_static/southbound/device-factory-transform-white.png){.block-center}
+
 The device factory core is not intended to be used directly, but through a transport-specific device factory.
 
 ## Bundles
@@ -255,6 +257,50 @@ And the following configuration:
 We will have the provider friendly name set to "Thomas" and the "greet" service will have two resources:
 * "hello": "Hello Thomas!"
 * "bye": "Bye Thomas!"
+
+### Variables
+
+Variables are defined using the `$` prefix and no brackets (`{`, `}`).
+They can be given a literal value or a value from the record.
+
+Here are some example of variable definitions:
+```json
+{
+    "$rc_value": "data", // ${rc_value} = <value in the "data" path>
+    "$rc_value.2": {
+        "path": "data"
+        // ${rc_value.2} = <value in the "data" path>
+    },
+    "$svcName": {
+        "literal": "service"
+        // "${svcName}" = "service"
+    },
+    "$rcName": {
+        "literal": "rc"
+        // "${rcName}" = "rc"
+    },
+    "$rcValuePath": {
+        "literal": "data"
+        // "${rcValuePath}" = "data"
+    }
+    // ...
+}
+```
+
+The variables can then be used both in the record paths or in the mapping definition.
+Note that unlike other mappings, which are considered as path by default, variables are considered as literals.
+
+For example:
+```json
+{
+    // ...
+    "${svcName}/${rcName}-txt": "${rcValuePath}", // service/rc-txt = "data"
+    "${svcName}/${rcName}-value":{
+        "path": "${rcValuePath}"
+        // service/rc-value = <value in the "data" path>
+    }
+}
+```
 
 ## Mapping options
 

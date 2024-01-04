@@ -1,0 +1,15 @@
+{
+  "parser": "csv",
+  "parser.options": {
+      "header": false
+  },
+  "mapping": {
+    "@provider": {
+      "literal": "${context.provider}"
+    },
+    "data/value": {
+      "path": 0,
+      "type": "float"
+    }
+  }
+}

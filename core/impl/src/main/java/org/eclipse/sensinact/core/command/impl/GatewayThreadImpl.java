@@ -27,19 +27,20 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.metrics.IMetricTimer;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.core.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.notification.impl.ImmediateNotificationAccumulator;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulatorImpl;
 import org.eclipse.sensinact.core.twin.impl.SensinactDigitalTwinImpl;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.service.component.AnyService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -76,14 +77,12 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     private IMetricsManager metrics;
 
     @Activate
-    public GatewayThreadImpl(
-            @Reference IMetricsManager metrics,
-            @Reference TypedEventBus typedEventBus, @Reference ResourceSet resourceSet,
-            @Reference ProviderPackage ProviderPackage) {
+    public GatewayThreadImpl(@Reference IMetricsManager metrics, @Reference TypedEventBus typedEventBus,
+            @Reference ResourceSet resourceSet, @Reference ProviderPackage providerPackage) {
         this.metrics = metrics;
         this.typedEventBus = typedEventBus;
         this.whiteboard = new SensinactWhiteboard(this, metrics);
-        nexusImpl = new ModelNexus(resourceSet, ProviderPackage, this::getCurrentAccumulator, whiteboard);
+        nexusImpl = new ModelNexus(resourceSet, providerPackage, this::getCurrentAccumulator, whiteboard);
         start();
     }
 
@@ -118,6 +117,15 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             executor.shutdownNow();
             scheduledExecutor.shutdown();
         }
+    }
+
+    @Reference(cardinality = MULTIPLE, policy = DYNAMIC)
+    void addEPackage(EPackage ePackage) {
+        nexusImpl.addEPackage(ePackage);
+    }
+
+    void removeEPackage(EPackage ePackage) {
+        nexusImpl.removeEPackage(ePackage);
     }
 
     @Reference(service = AnyService.class, target = "(sensiNact.whiteboard.resource=true)", cardinality = MULTIPLE, policy = DYNAMIC)

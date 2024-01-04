@@ -80,13 +80,16 @@ public class MqttTest {
 
     @AfterEach
     void stop() throws Exception {
-        client.disconnect();
-        client.close();
+        try {
+            client.disconnect();
+            client.close();
 
-        for (MqttClientHandler handler : handlers) {
-            handler.deactivate();
+            for (MqttClientHandler handler : handlers) {
+                handler.deactivate();
+            }
+        } finally {
+            server.stopServer();
         }
-        server.stopServer();
     }
 
     MqttClientHandler setupHandler(final String handlerId, final String... topics) throws Exception {
