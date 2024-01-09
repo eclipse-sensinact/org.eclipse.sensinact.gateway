@@ -61,7 +61,7 @@
 	org.eclipse.jetty.server;version='[11.0.12,11.0.13)',\
 	org.eclipse.jetty.servlet;version='[11.0.12,11.0.13)',\
 	org.eclipse.jetty.util;version='[11.0.12,11.0.13)',\
-	org.eclipse.parsson.jakarta.json;version='[1.1.1,1.1.2)',\
+	org.eclipse.parsson.jakarta.json;version='[1.1.5,1.1.6)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.emf-api;version='[0.0.2,0.0.3)',\
@@ -75,8 +75,8 @@
 	org.eclipse.sensinact.gateway.northbound.rest;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.rest-tests;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.authentication-api;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.api;version='[4.6.2,4.6.3)',\
-	org.gecko.emf.osgi.component;version='[4.6.2,4.6.3)',\
+	org.gecko.emf.osgi.api;version='[5.0.0,5.0.1)',\
+	org.gecko.emf.osgi.component;version='[5.0.0,5.0.1)',\
 	org.gecko.rest.jersey;version='[6.0.0,6.0.1)',\
 	org.gecko.rest.jersey.config;version='[6.0.0,6.0.1)',\
 	org.gecko.rest.jersey.jetty;version='[6.0.0,6.0.1)',\
