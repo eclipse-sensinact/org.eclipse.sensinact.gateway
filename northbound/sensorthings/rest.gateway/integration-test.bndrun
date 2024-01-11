@@ -27,7 +27,7 @@
 	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.14.0,2.14.1)',\
 	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.14.0,2.14.1)',\
-	com.sun.jna;version='[5.8.0,5.8.1)',\
+	com.sun.jna;version='[5.12.1,5.12.2)',\
 	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	jakarta.activation-api;version='[2.1.0,2.1.1)',\
 	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
@@ -48,7 +48,7 @@
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
 	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.6,1.3.7)',\
 	org.apache.aries.typedevent.bus;version='[0.0.2,0.0.3)',\
-	org.apache.commons.commons-compress;version='[1.22.0,1.22.1)',\
+	org.apache.commons.commons-compress;version='[1.24.0,1.24.1)',\
 	org.apache.felix.cm.json;version='[2.0.0,2.0.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.felix.configurator;version='[1.0.18,1.0.19)',\
@@ -64,7 +64,7 @@
 	org.eclipse.jetty.server;version='[11.0.12,11.0.13)',\
 	org.eclipse.jetty.servlet;version='[11.0.12,11.0.13)',\
 	org.eclipse.jetty.util;version='[11.0.12,11.0.13)',\
-	org.eclipse.parsson.jakarta.json;version='[1.1.1,1.1.2)',\
+	org.eclipse.parsson.jakarta.json;version='[1.1.5,1.1.6)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.emf-api;version='[0.0.2,0.0.3)',\
