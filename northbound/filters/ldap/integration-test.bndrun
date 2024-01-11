@@ -2,6 +2,7 @@
 
 -runrequires: \
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
+	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='slf4j.simple',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.core.api',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.core.impl'
@@ -9,6 +10,10 @@
 
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
+
+# These packages are also provided by the gecko.emf.osgi.component project
+# so we blacklist the API for resolve consistency
+-runblacklist: bnd.identity;id='org.gecko.emf.osgi.api'
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \
@@ -43,7 +48,6 @@
 	org.eclipse.sensinact.gateway.northbound.filters.filters.core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.filters.ldap;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.filters.ldap-tests;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.api;version='[5.0.0,5.0.1)',\
 	org.gecko.emf.osgi.component;version='[5.0.0,5.0.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.service.cm;version='[1.6.1,1.6.2)',\

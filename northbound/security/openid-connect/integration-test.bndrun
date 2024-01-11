@@ -2,6 +2,7 @@
 
 -runrequires: \
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
+	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='slf4j.simple',\
 	bnd.identity;id='io.jsonwebtoken.jjwt-impl'
 -resolve.effective: active

@@ -12,6 +12,10 @@
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
 
+# These packages are also provided by the gecko.emf.osgi.component project
+# so we blacklist the API for resolve consistency
+-runblacklist: bnd.identity;id='org.gecko.emf.osgi.api', bnd.identity;id='slf4j.log4j12', bnd.identity;id='log4j.over.slf4j'
+
 # This will help us keep -runbundles sorted
 -runstartlevel: \
 	order=sortbynameversion,\
@@ -39,7 +43,6 @@
 	junit-platform-commons;version='[1.9.0,1.9.1)',\
 	junit-platform-engine;version='[1.9.0,1.9.1)',\
 	junit-platform-launcher;version='[1.9.0,1.9.1)',\
-	log4j.over.slf4j;version='[1.7.36,1.7.37)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
 	org.apache.aries.typedevent.bus;version='[0.0.2,0.0.3)',\
 	org.apache.commons.codec;version='[1.10.0,1.10.1)',\
@@ -62,10 +65,8 @@
 	org.eclipse.sensinact.gateway.southbound.mqtt.mqtt-client;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.mqtt.mqtt-device-factory;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.mqtt.mqtt-device-factory-tests;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.api;version='[5.0.0,5.0.1)',\
 	org.gecko.emf.osgi.component;version='[5.0.0,5.0.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
-	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\
 	org.osgi.test.common;version='[1.2.1,1.2.2)',\
