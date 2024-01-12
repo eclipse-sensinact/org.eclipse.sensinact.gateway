@@ -226,6 +226,45 @@ class ConfigurationManagerTest {
         }
     }
 
+    @Nested
+    class InvalidConfig {
+
+        @Test
+        void testNullValue() throws Exception {
+            final Path path = Paths.get("target/test-classes/configs/invalid");
+            System.setProperty("sensinact.config.dir", path.toString());
+
+            Path configFile = path.resolve("configuration.json");
+
+            if (Files.exists(configFile)) {
+                Files.delete(configFile);
+            }
+
+            manager.start();
+
+            Thread.sleep(500);
+
+            Mockito.verify(configAdmin).listConfigurations(anyString());
+
+            Mockito.verifyNoMoreInteractions(configAdmin);
+
+            Files.copy(path.resolve("configuration-null.json"), configFile);
+
+            assertTrue(semaphore.tryAcquire(2, 15, SECONDS));
+
+            Mockito.verify(configAdmin).getConfiguration(eq("test.valid"), anyString());
+            Mockito.verify(configs.get("test.valid"), Mockito.timeout(500))
+                    .update(argThat(isConfig(of("valid", 1L, ".sensinact.config", true))));
+
+            // Configuration with null value must exist
+            Mockito.verify(configAdmin).getConfiguration(eq("test.null"), anyString());
+            // Null entry (foo) must be ignored
+            // Sub-object are loaded as strings
+            Mockito.verify(configs.get("test.null"), Mockito.timeout(500))
+                    .update(argThat(isConfig(of("valid", 42L, "test", "{\"titi\":null}", ".sensinact.config", true))));
+        }
+    }
+
     ArgumentMatcher<Dictionary<String, Object>> isConfig(Map<String, Object> config) {
         return new ArgumentMatcher<Dictionary<String, Object>>() {
 
