@@ -134,6 +134,29 @@ Here is an example of configuration in a feature:
   }
 ```
 
+:::{important}
+Null values are not accepted in first level configuration values.
+
+For example, in the following snippet, the configuration key `invalid` will be ignored while `valid/key` will be kept.
+A warning will be logged to indicate this key was ignored.
+
+```json
+{
+  "feature-resource-version": "1.0",
+  "id": "org.example:feature_id:1.0.0",
+  "configurations": {
+    "pid1": {
+      "text": "Some string value",
+      "value": 42,
+      "invalid": null,
+      "valid": {
+        "key": null
+      }
+    },
+}
+```
+:::
+
 ### Adding your own features
 
 Adding your own features can be achieved by writing a valid feature document and including it in the `features` directory, or installing it into the `repository`. It is also necessary to make sure that any bundles used in your feature are also installed into the `repository`.
