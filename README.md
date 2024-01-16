@@ -17,3 +17,8 @@ The sensinact-api module contains the API for the sensinact core
 #### Examples
 
 The examples project contains examples demonstrating how to use the sensiNact API
+
+# Infrastructure
+
+Current Snapshot Repository: https://repo.eclipse.org/content/groups/sensinact/
+Build: https://ci.eclipse.org/sensinact/
