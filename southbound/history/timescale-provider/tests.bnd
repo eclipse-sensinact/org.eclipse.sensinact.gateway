@@ -19,3 +19,31 @@ Import-Package: \
     !org.conscrypt, \
     !org.testcontainers.r2dbc.*, \
     *
+# Remove warnings about annotation dependencies from repackaged code
+-fixupmessages: \
+    "While traversing the type tree for com.github.dockerjava.* cannot find class javax.annotation.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for com.github.dockerjava.* cannot find class org.immutables.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.jboss.resteasy.* cannot find class jakarta.servlet.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.jboss.resteasy.* cannot find class org.jboss.logging.annotations.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.jboss.resteasy.* cannot find class org.jboss.resteasy.tracing.api.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.jboss.resteasy.* cannot find class org.apache.http.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.keycloak.representations.* cannot find class org.eclipse.microprofile.openapi.annotations.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class com.google.j2objc.annotations.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class lombok.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class javax.annotation.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class org.codehaus.mojo.animal_sniffer.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class org.jetbrains.annotations.VisibleForTesting"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for * cannot find class edu.umd.cs.findbugs.annotations.SuppressFBWarnings"; \
+    restrict:=warning; is:=ignore

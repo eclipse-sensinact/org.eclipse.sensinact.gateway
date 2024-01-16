@@ -148,6 +148,11 @@
 
     <!-- plugin dependency versions -->
     <bnd.version>7.0.0-SNAPSHOT</bnd.version>
+
+    <!-- Default properties for resolver setup in development -->
+    <save.test.bndrun.changes>true</save.test.bndrun.changes>
+    <verify.test.bndruns>false</verify.test.bndruns>
+
   </properties>
 
   <repositories>
@@ -586,8 +591,8 @@
                 <goal>resolve</goal>
               </goals>
               <configuration>
-                <writeOnChanges>true</writeOnChanges>
-                <failOnChanges>false</failOnChanges>
+                <writeOnChanges>${save.test.bndrun.changes}</writeOnChanges>
+                <failOnChanges>${verify.test.bndruns}</failOnChanges>
                 <includeDependencyManagement>true</includeDependencyManagement>
                 <scopes>
                   <scope>compile</scope>
@@ -668,6 +673,31 @@
 
 
   <profiles>
+    <!-- Used in CI to treat bndruns as immutable source -->
+    <profile>
+      <id>ci-build</id>
+      <properties>
+        <save.test.bndrun.changes>false</save.test.bndrun.changes>
+        <verify.test.bndruns>true</verify.test.bndruns>
+      </properties>
+    </profile>
+    <!-- Used by developers to quickly update bndruns for dependabot updates -->
+    <profile>
+      <id>dependabot</id>
+      <properties>
+        <save.test.bndrun.changes>true</save.test.bndrun.changes>
+        <verify.test.bndruns>false</verify.test.bndruns>
+        <skipTests>true</skipTests>
+      </properties>
+    </profile>
+    <!-- Used by developers for normal development (restating the default)  -->
+    <profile>
+      <id>dev</id>
+      <properties>
+        <save.test.bndrun.changes>true</save.test.bndrun.changes>
+        <verify.test.bndruns>false</verify.test.bndruns>
+      </properties>
+    </profile>
     <profile>
       <id>eclipse-licenses-check</id>
       <activation>
