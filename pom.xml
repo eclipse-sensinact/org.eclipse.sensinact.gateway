@@ -124,7 +124,7 @@
     <emf.ecore.version>2.33.0</emf.ecore.version>
     <emf.ecore.xmi.version>2.18.0</emf.ecore.xmi.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <jackson.version>2.14.0</jackson.version>
+    <jackson.version>2.16.1</jackson.version>
     <jjwt.version>0.11.5</jjwt.version>
 
     <!-- runtime dependencies -->
@@ -132,7 +132,7 @@
     <felix.scr.version>2.2.2</felix.scr.version>
     <felix.configadmin.version>1.9.24</felix.configadmin.version>
     <felix.cm.json.version>1.0.6</felix.cm.json.version>
-    <felix.feature.version>1.0.0</felix.feature.version>
+    <felix.feature.version>1.0.2</felix.feature.version>
     <johnzon.version>1.2.19</johnzon.version>
     <aries.component-dsl.version>1.2.2</aries.component-dsl.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
