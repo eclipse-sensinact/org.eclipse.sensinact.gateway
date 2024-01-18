@@ -55,13 +55,19 @@
       <artifactId>org.osgi.util.converter</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-json_1.1_spec</artifactId>
+      <groupId>jakarta.json</groupId>
+      <artifactId>jakarta.json-api</artifactId>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
+      <artifactId>test-utils</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
@@ -89,7 +95,7 @@
             </goals>
             <configuration>
               <resolve>true</resolve>
-              <failOnChanges>false</failOnChanges>
+              <failOnChanges>true</failOnChanges>
               <includeDependencyManagement>true</includeDependencyManagement>
             </configuration>
           </execution>

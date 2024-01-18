@@ -1,7 +1,9 @@
 -runee: JavaSE-11
 -runrequires: \
 	bnd.identity;id='org.eclipse.sensinact.gateway.distribution.launcher',\
+	bnd.identity;id='org.apache.aries.spifly.dynamic.framework.extension',\
 	bnd.identity;id='org.apache.felix.configadmin',\
+	bnd.identity;id='org.apache.johnzon.core',\
 	bnd.identity;id='slf4j.simple'
 -runfw: org.apache.felix.framework
 
@@ -11,14 +13,14 @@
 	sensinact.config.dir=config
 
 -runbundles: \
+	jakarta.json-api;version='[2.1.3,2.1.4)', \
 	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.7,1.3.8)', \
-	org.apache.felix.cm.json;version='[1.0.6,1.0.7)', \
+	org.apache.felix.cm.json;version='[2.0.4,2.0.5)', \
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)', \
 	org.apache.felix.feature;version='[1.0.2,1.0.3)', \
 	org.apache.felix.scr;version='[2.2.2,2.2.3)', \
-	org.apache.geronimo.specs.geronimo-json_1.1_spec;version='[1.5.0,1.5.1)', \
-	org.apache.johnzon.core;version='[1.2.19,1.2.20)', \
-	org.eclipse.sensinact.gateway.distribution.launcher;version='[0.0.1,0.0.2)', \
+	org.apache.johnzon.core;version='[2.0.0,2.0.1)', \
+	org.eclipse.sensinact.gateway.distribution.launcher;version='[0.0.2,0.0.3)', \
 	org.osgi.service.component;version='[1.5.0,1.5.1)', \
 	org.osgi.service.feature;version='[1.0.0,1.0.1)', \
 	org.osgi.util.converter;version='[1.0.9,1.0.10)', \
