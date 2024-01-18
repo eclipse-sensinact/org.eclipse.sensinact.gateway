@@ -147,7 +147,7 @@
     <osgi.test.version>1.2.1</osgi.test.version>
 
     <!-- plugin dependency versions -->
-    <bnd.version>7.0.0-SNAPSHOT</bnd.version>
+    <bnd.version>7.0.0</bnd.version>
 
     <!-- Default properties for resolver setup in development -->
     <save.test.bndrun.changes>true</save.test.bndrun.changes>
