@@ -15,7 +15,7 @@
 	bnd.identity;id='org.eclipse.sensinact.gateway.northbound.filters.ldap'
 -resolve.effective: active
 
--runee: JavaSE-11
+-runee: JavaSE-21
 -runfw: org.apache.felix.framework
 
 # These packages are also provided by the gecko.emf.osgi.component project
