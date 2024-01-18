@@ -20,10 +20,10 @@
 	begin=-1
 
 -runbundles: \
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.16.1,2.16.2)',\
 	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	io.netty.buffer;version='[4.1.77,4.1.78)',\
 	io.netty.codec;version='[4.1.77,4.1.78)',\

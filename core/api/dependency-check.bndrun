@@ -7,9 +7,9 @@
 # Jackson is needed to serialize and deserialize GeoJSON types and promises are in the API
 # No other bundles should be present. 
 -runbundles: \
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.16.1,2.16.2)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.2,0.0.3)',\
