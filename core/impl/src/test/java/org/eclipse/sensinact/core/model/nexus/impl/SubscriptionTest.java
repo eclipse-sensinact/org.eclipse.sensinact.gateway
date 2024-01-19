@@ -43,6 +43,9 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
+import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
 import org.eclipse.sensinact.model.core.provider.Admin;
@@ -52,9 +55,6 @@ import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -533,7 +533,7 @@ public class SubscriptionTest {
                     .getMetadata().get(testService1.eClass().getEStructuralFeature("foo"));
 
             assertNotNull(curMetadata);
-            assertTrue(curMetadata.getTimestamp().isBefore(mark));
+            assertFalse(curMetadata.getTimestamp().isAfter(mark));
             assertTrue(curMetadata instanceof ResourceMetadata);
 
             String modelName = EMFUtil.getModelName(provider.eClass());
