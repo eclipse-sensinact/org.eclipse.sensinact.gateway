@@ -3,6 +3,7 @@
 -runrequires: \
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
 	bnd.identity;id='slf4j.simple',\
+	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='org.apache.felix.configurator',\
 	bnd.identity;id='org.apache.felix.cm.json',\
 	bnd.identity;id='org.glassfish.jersey.core.jersey-common',\
@@ -25,12 +26,12 @@
 	order=sortbynameversion,\
 	begin=-1
 -runbundles: \
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.16.1,2.16.2)',\
 	com.sun.jna;version='[5.12.1,5.12.2)',\
 	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	jakarta.activation-api;version='[2.1.0,2.1.1)',\
@@ -108,6 +109,7 @@
 	org.objectweb.asm;version='[9.3.0,9.3.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.jakartars;version='[2.0.0,2.0.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\

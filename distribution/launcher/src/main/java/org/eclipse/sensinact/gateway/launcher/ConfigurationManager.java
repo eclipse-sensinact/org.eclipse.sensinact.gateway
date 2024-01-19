@@ -49,15 +49,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.stream.JsonParser;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.stream.JsonParser;
 
-import org.apache.felix.cm.json.ConfigurationReader;
-import org.apache.felix.cm.json.ConfigurationResource;
-import org.apache.felix.cm.json.Configurations;
+import org.apache.felix.cm.json.io.ConfigurationReader;
+import org.apache.felix.cm.json.io.ConfigurationResource;
+import org.apache.felix.cm.json.io.Configurations;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;

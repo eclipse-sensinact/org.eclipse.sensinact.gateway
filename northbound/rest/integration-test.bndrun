@@ -15,7 +15,7 @@
 	bnd.identity;id='org.eclipse.sensinact.gateway.northbound.filters.ldap'
 -resolve.effective: active
 
--runee: JavaSE-11
+-runee: JavaSE-21
 -runfw: org.apache.felix.framework
 
 # These packages are also provided by the gecko.emf.osgi.component project
@@ -27,12 +27,12 @@
 	order=sortbynameversion,\
 	begin=-1
 -runbundles: \
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.14.0,2.14.1)',\
-	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.14.0,2.14.1)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.16.1,2.16.2)',\
 	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	jakarta.activation-api;version='[2.1.0,2.1.1)',\
 	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
