@@ -14,15 +14,27 @@ package org.eclipse.sensinact.core.whiteboard.impl;
 
 import java.util.Objects;
 
+import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+
 class RegistryKey {
+    private final String modelPackageUri;
     private final String model;
     private final String service;
     private final String resource;
 
-    public RegistryKey(String model, String service, String resource) {
+    public RegistryKey(String modelPackageUri, String model, String service, String resource) {
+        this.modelPackageUri = (modelPackageUri == null || modelPackageUri.isBlank()
+                || AnnotationConstants.NOT_SET.equals(modelPackageUri))
+                ? EMFUtil.constructPackageUri(model)
+                : modelPackageUri;
         this.model = model;
         this.service = service;
         this.resource = resource;
+    }
+
+    public String getModelPackageUri() {
+        return modelPackageUri;
     }
 
     public String getModel() {
@@ -51,12 +63,13 @@ class RegistryKey {
         if (getClass() != obj.getClass())
             return false;
         RegistryKey other = (RegistryKey) obj;
-        return Objects.equals(model, other.model) && Objects.equals(resource, other.resource)
-                && Objects.equals(service, other.service);
+        return Objects.equals(modelPackageUri, other.modelPackageUri) && Objects.equals(model, other.model)
+                && Objects.equals(resource, other.resource) && Objects.equals(service, other.service);
     }
 
     @Override
     public String toString() {
-        return "RegistryKey [model=" + model + ", service=" + service + ", resource=" + resource + "]";
+        return "RegistryKey [modelPackageUri=" + modelPackageUri + ", model=" + model + ", service=" + service
+                + ", resource=" + resource + "]";
     }
 }

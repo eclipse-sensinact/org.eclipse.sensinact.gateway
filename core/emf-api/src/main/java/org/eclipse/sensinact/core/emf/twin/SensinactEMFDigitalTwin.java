@@ -40,6 +40,15 @@ public interface SensinactEMFDigitalTwin extends SensinactDigitalTwin {
     List<? extends SensinactEMFProvider> getProviders(String model);
 
     /**
+     * List all providers for the named model and modelpackageuri
+     *
+     * @param model
+     * @param modelPackageUri can be <code>null</code>
+     * @return
+     */
+    List<? extends SensinactEMFProvider> getProviders(String modelPackageUri, String model);
+
+    /**
      * Get a provider by name
      *
      * @param providerName
@@ -57,6 +66,16 @@ public interface SensinactEMFDigitalTwin extends SensinactDigitalTwin {
     SensinactEMFProvider getProvider(String model, String providerName);
 
     /**
+     * Get a provider by name and model
+     *
+     * @param model
+     * @param providerName
+     * @param modelPackageUri can be <code>null</code>
+     * @return
+     */
+    SensinactEMFProvider getProvider(String modelPackageUri, String model, String providerName);
+
+    /**
      * Create a provider instance for the named model
      *
      * @param model
@@ -64,6 +83,16 @@ public interface SensinactEMFDigitalTwin extends SensinactDigitalTwin {
      * @return
      */
     SensinactEMFProvider createProvider(String model, String providerName);
+
+    /**
+     * Create a provider instance for the named model
+     *
+     * @param model
+     * @param providerName
+     * @param modelPackageUri can be <code>null</code>
+     * @return
+     */
+    SensinactEMFProvider createProvider(String modelPackageUri, String model, String providerName);
 
     /**
      * Get a provider by name and its concrete model class
@@ -79,8 +108,20 @@ public interface SensinactEMFDigitalTwin extends SensinactDigitalTwin {
      *
      * @param model
      * @param providerName
+     * @param created
      * @return
      */
     SensinactEMFProvider createProvider(String model, String providerName, Instant created);
+
+    /**
+     * Create a provider instance for the named model
+     *
+     * @param model
+     * @param providerName
+     * @param created
+     * @param modelPackageUri can be null
+     * @return
+     */
+    SensinactEMFProvider createProvider(String modelPackageUri, String model, String providerName, Instant created);
 
 }

@@ -71,8 +71,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void addProvider(String model, String name) {
-        doLifecycleMerge(PROVIDER_CREATED, model, name, null, null, null, null, false);
+    public void addProvider(String modelPackageUri, String model, String name) {
+        doLifecycleMerge(PROVIDER_CREATED, modelPackageUri, model, name, null, null, null, null, false);
     }
 
     /**
@@ -88,8 +88,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void removeProvider(String model, String name) {
-        doLifecycleMerge(PROVIDER_DELETED, model, name, null, null, null, null, true);
+    public void removeProvider(String modelPackageUri, String model, String name) {
+        doLifecycleMerge(PROVIDER_DELETED, modelPackageUri, model, name, null, null, null, null, true);
     }
 
     /**
@@ -106,8 +106,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void addService(String model, String provider, String name) {
-        doLifecycleMerge(SERVICE_CREATED, model, provider, name, null, null, null, false);
+    public void addService(String modelPackageUri, String model, String provider, String name) {
+        doLifecycleMerge(SERVICE_CREATED, modelPackageUri, model, provider, name, null, null, null, false);
     }
 
     /**
@@ -124,8 +124,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void removeService(String model, String provider, String name) {
-        doLifecycleMerge(SERVICE_DELETED, model, provider, name, null, null, null, true);
+    public void removeService(String modelPackageUri, String model, String provider, String name) {
+        doLifecycleMerge(SERVICE_DELETED, modelPackageUri, model, provider, name, null, null, null, true);
     }
 
     /**
@@ -143,8 +143,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void addResource(String model, String provider, String service, String name) {
-        doLifecycleMerge(RESOURCE_CREATED, model, provider, service, name, null, null, false);
+    public void addResource(String modelPackageUri, String model, String provider, String service, String name) {
+        doLifecycleMerge(RESOURCE_CREATED, modelPackageUri, model, provider, service, name, null, null, false);
     }
 
     /**
@@ -162,15 +162,15 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void removeResource(String model, String provider, String service, String name) {
-        doLifecycleMerge(RESOURCE_DELETED, model, provider, service, name, null, null, true);
+    public void removeResource(String modelPackageUri, String model, String provider, String service, String name) {
+        doLifecycleMerge(RESOURCE_DELETED, modelPackageUri, model, provider, service, name, null, null, true);
     }
 
-    private void doLifecycleMerge(Status status, String model, String provider, String service, String resource,
+    private void doLifecycleMerge(Status status, String modelPackageUri, String model, String provider, String service, String resource,
             Object initialValue, Map<String, Object> initialMetadata, boolean isDelete) {
         check();
         notifications.compute(new NotificationKey(provider, service, resource, LifecycleNotification.class), (a, b) -> {
-            LifecycleNotification ln = createLifecycleNotification(status, model, provider, service, resource,
+            LifecycleNotification ln = createLifecycleNotification(status, modelPackageUri, model, provider, service, resource,
                     initialValue, initialMetadata);
             if (b != null) {
                 // Check the status of the last entry
@@ -208,7 +208,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                                  {@link #completeAndSend()}
      */
     @Override
-    public void metadataValueUpdate(String model, String provider, String service, String resource,
+    public void metadataValueUpdate(String modelPackageUri, String model, String provider, String service, String resource,
             Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
         check();
 
@@ -235,7 +235,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                         newValuesToUse = nonNullNewValues;
                         timestampToUse = timestamp;
                     }
-                    return List.of(createResourceMetaDataNotification(model, provider, service, resource,
+                    return List.of(createResourceMetaDataNotification(modelPackageUri, model, provider, service, resource,
                             oldValuesToUse, newValuesToUse, timestampToUse));
                 });
     }
@@ -259,7 +259,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                                  {@link #completeAndSend()}
      */
     @Override
-    public void resourceValueUpdate(String model, String provider, String service, String resource, Class<?> type,
+    public void resourceValueUpdate(String modelPackageUri, String model, String provider, String service, String resource, Class<?> type,
             Object oldValue, Object newValue, Instant timestamp) {
         check();
         Objects.requireNonNull(timestamp);
@@ -275,7 +275,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     } else {
                         oldValueToUse = oldValue;
                     }
-                    return List.of(createResourceDataNotification(model, provider, service, resource, type,
+                    return List.of(createResourceDataNotification(modelPackageUri, model, provider, service, resource, type,
                             oldValueToUse, newValue, timestamp));
                 });
     }
@@ -296,12 +296,12 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      *                               {@link #completeAndSend()}
      */
     @Override
-    public void resourceAction(String model, String provider, String service, String resource, Instant timestamp) {
+    public void resourceAction(String modelPackageUri, String model, String provider, String service, String resource, Instant timestamp) {
         check();
         Objects.requireNonNull(timestamp);
         notifications.compute(new NotificationKey(provider, service, resource, ResourceActionNotification.class),
                 (a, b) -> {
-                    ResourceActionNotification ran = createResourceActionNotification(model, provider, service,
+                    ResourceActionNotification ran = createResourceActionNotification(modelPackageUri, model, provider, service,
                             resource, timestamp);
                     if (b != null) {
                         return Stream.concat(b.stream(), Stream.of(ran)).map(ResourceActionNotification.class::cast)

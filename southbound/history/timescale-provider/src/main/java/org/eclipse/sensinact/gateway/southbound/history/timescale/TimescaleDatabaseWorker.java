@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNotification>, HistoricalQueries {
 
-    private static final String INSERT_TEMPLATE = "INSERT INTO %s ( time, model, provider, service, resource, data ) values ( ?, ?, ?, ?, ?, %s );";
+    private static final String INSERT_TEMPLATE = "INSERT INTO %s ( time, modelpackageuri, model, provider, service, resource, data ) values ( ?, ?, ?, ?, ?, ?, %s );";
 
     private static final String SINGLE_TEMPLATE = "SELECT time, num, text, geo FROM ( "
             + "( SELECT time, data AS num, NULL AS text, NULL AS geo FROM sensinact.numeric_data WHERE provider = ? AND service = ? AND resource = ? AND time <= ? ORDER BY time DESC LIMIT 1 ) "
@@ -180,11 +180,12 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
 
                 PreparedStatement ps = conn.prepareStatement(command);
                 ps.setTimestamp(1, Timestamp.from(event.timestamp));
-                ps.setString(2, event.model);
-                ps.setString(3, event.provider);
-                ps.setString(4, event.service);
-                ps.setString(5, event.resource);
-                ps.setObject(6, value);
+                ps.setString(2, event.modelPackageUri);
+                ps.setString(3, event.model);
+                ps.setString(4, event.provider);
+                ps.setString(5, event.service);
+                ps.setString(6, event.resource);
+                ps.setObject(7, value);
 
                 return ps.execute();
             });

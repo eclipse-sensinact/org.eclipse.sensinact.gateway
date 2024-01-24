@@ -192,14 +192,14 @@ public class TimescaleHistoricalStore {
                 Statement s = conn.createStatement();
                 s.execute("CREATE SCHEMA IF NOT EXISTS sensinact;");
                 s.execute(
-                        "CREATE TABLE IF NOT EXISTS sensinact.numeric_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data NUMERIC )");
+                        "CREATE TABLE IF NOT EXISTS sensinact.numeric_data ( time TIMESTAMPTZ NOT NULL, modelpackageuri VARCHAR(128) NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data NUMERIC )");
                 s.execute("SELECT create_hypertable('sensinact.numeric_data', 'time', if_not_exists => TRUE);");
                 s.execute(
-                        "CREATE TABLE IF NOT EXISTS sensinact.text_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data text )");
+                        "CREATE TABLE IF NOT EXISTS sensinact.text_data ( time TIMESTAMPTZ NOT NULL, modelpackageuri VARCHAR(128) NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data text )");
                 s.execute("SELECT create_hypertable('sensinact.text_data', 'time', if_not_exists => TRUE);");
                 s.execute("CREATE EXTENSION IF NOT EXISTS Postgis;");
                 s.execute(
-                        "CREATE TABLE IF NOT EXISTS sensinact.geo_data ( time TIMESTAMPTZ NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data geography(POINT,4326) )");
+                        "CREATE TABLE IF NOT EXISTS sensinact.geo_data ( time TIMESTAMPTZ NOT NULL, modelpackageuri VARCHAR(128) NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data geography(POINT,4326) )");
                 s.execute("SELECT create_hypertable('sensinact.geo_data', 'time', if_not_exists => TRUE);");
                 return null;
             });
@@ -237,7 +237,7 @@ public class TimescaleHistoricalStore {
                 @Override
                 protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                     if (twin.getProvider(config.provider()) == null) {
-                        twin.createProvider("sensiNactHistory", config.provider());
+                        twin.createProvider("https://eclipse.org/sensinact/sensiNactHistory", "sensiNactHistory", config.provider());
                     }
                     return pf.resolved(null);
                 }

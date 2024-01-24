@@ -6,13 +6,14 @@
 
 -resolve.effective: active
 
--runee: JavaSE-11
--runfw: org.apache.felix.framework
-
 # These packages are also provided by the gecko.emf.osgi.component project
 # so we blacklist the API for resolve consistency
 -runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
+	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='slf4j.reload4k'
+
+-runee: JavaSE-11
+-runfw: org.apache.felix.framework
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \

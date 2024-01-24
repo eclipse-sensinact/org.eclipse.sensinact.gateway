@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.sensinact.core.annotation.dto.MapAction;
 import org.eclipse.sensinact.core.annotation.dto.Metadata;
 import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
@@ -25,6 +26,13 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
  * A base dto for performing updates, suitable for subclassing by device modules
  */
 public abstract class BaseValueDto {
+
+    /**
+     * The model package URI of the model to which this value belongs. If null then a model package URI will be
+     * created if necessary
+     */
+    @ModelPackageUri
+    public String modelPackageUri;
 
     /**
      * The model to which this value belongs. If null then a model name will be

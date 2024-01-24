@@ -79,9 +79,6 @@ public class WhiteboardImplTest {
     @Mock
     TypedEventBus typedEventBus;
 
-    @Mock
-    ProviderPackage providerPackage;
-
     private ResourceSet resourceSet;
 
     @BeforeEach
@@ -97,7 +94,7 @@ public class WhiteboardImplTest {
         lenient().when(metrics.withTimer(anyString())).thenReturn(timer);
         lenient().when(metrics.withTimers(any())).thenReturn(timer);
 
-        thread = new GatewayThreadImpl(metrics, typedEventBus, resourceSet, providerPackage);
+        thread = new GatewayThreadImpl(metrics, typedEventBus, resourceSet, ProviderPackage.eINSTANCE);
     }
 
     void createProviders(final String modelName, final String serviceName) throws Throwable {

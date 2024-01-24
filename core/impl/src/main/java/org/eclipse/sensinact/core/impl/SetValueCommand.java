@@ -38,6 +38,7 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
     @Override
     protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
             PromiseFactory promiseFactory) {
+        String packageUri = dataUpdateDto.modelPackageUri;
         String mod = dataUpdateDto.model == null ? dataUpdateDto.provider : dataUpdateDto.model;
         String provider = dataUpdateDto.provider;
         String svc = dataUpdateDto.service;
@@ -48,12 +49,12 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
                     .failed(new NullPointerException("The provider, service and resource must be non null"));
         }
 
-        SensinactResource resource = twin.getResource(mod, provider, svc, res);
+        SensinactResource resource = twin.getResource(packageUri, mod, provider, svc, res);
 
         if (resource == null) {
-            Model model = modelMgr.getModel(mod);
+            Model model = modelMgr.getModel(packageUri, mod);
             if (model == null) {
-                model = modelMgr.createModel(mod).withCreationTime(dataUpdateDto.timestamp).build();
+                model = modelMgr.createModel(packageUri, mod).withCreationTime(dataUpdateDto.timestamp).build();
             }
             Service service = model.getServices().get(svc);
             if (service == null) {
@@ -66,9 +67,9 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
                         .withType((Class<Object>) dataUpdateDto.type).build();
             }
 
-            SensinactProvider sp = twin.getProvider(mod, provider);
+            SensinactProvider sp = twin.getProvider(packageUri, mod, provider);
             if (sp == null) {
-                sp = twin.createProvider(mod, provider, dataUpdateDto.timestamp);
+                sp = twin.createProvider(packageUri, mod, provider, dataUpdateDto.timestamp);
             }
             resource = sp.getServices().get(svc).getResources().get(res);
         }

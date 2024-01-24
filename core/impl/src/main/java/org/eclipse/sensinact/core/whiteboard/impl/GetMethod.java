@@ -34,12 +34,12 @@ class GetMethod extends AbstractResourceMethod {
         this.nullAction = onNull;
     }
 
-    public <T> Object invoke(String model, String provider, String service, String resource, Class<T> resultType,
+    public <T> Object invoke(String modelPackageUri, String model, String provider, String service, String resource, Class<T> resultType,
             TimedValue<T> cachedValue) throws Exception {
         final Map<Object, Object> params = new HashMap<>();
         params.put(GetSegment.RESULT_TYPE, resultType);
         params.put(GetSegment.CACHED_VALUE, cachedValue);
-        return super.invoke(model, provider, service, resource, params, GetParam.class, GetParam::value);
+        return super.invoke(modelPackageUri, model, provider, service, resource, params, GetParam.class, GetParam::value);
     }
 
     public NullAction actionOnNull() {

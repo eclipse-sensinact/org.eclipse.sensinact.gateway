@@ -9,6 +9,9 @@
 
 -resolve.effective: active
 
+# This blacklist ensures consistent resolution locally and in CI
+-runblacklist: bnd.identity;id='org.osgi.service.cm'
+
 -runproperties: \
 	sensinact.config.dir=config
 

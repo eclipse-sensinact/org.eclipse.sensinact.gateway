@@ -26,6 +26,7 @@ import java.util.List;
 import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.Metadata;
 import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 public class AnnotationBasedDtoExtractorTest {
 
+    private static final String MODEL_PACKAGE_URI = "http://test.org/foo/bar";
     private static final String MODEL = "model";
     private static final String PROVIDER = "provider";
     private static final String SERVICE = "service";
@@ -68,6 +70,7 @@ public class AnnotationBasedDtoExtractorTest {
         public Integer foo;
     }
 
+    @ModelPackageUri(MODEL_PACKAGE_URI)
     @Model(MODEL)
     @Provider(PROVIDER)
     @Service(SERVICE)
@@ -162,6 +165,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             checkCommonFields(extracted);
 
+            assertEquals(MODEL_PACKAGE_URI, extracted.modelPackageUri);
             assertEquals(MODEL, extracted.model);
             assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
 

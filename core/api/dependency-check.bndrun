@@ -2,6 +2,11 @@
 -runfw: org.apache.felix.framework
 -runee: JavaSE-11
 
+# These packages are also provided by the gecko.emf.osgi.component project
+# so we blacklist the API for resolve consistency
+-runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
+	bnd.identity;id='org.osgi.service.cm'
+
 # This is the test validation assertion. 
 # We want to keep the API as clean of external dependencies as possible
 # Jackson is needed to serialize and deserialize GeoJSON types and promises are in the API

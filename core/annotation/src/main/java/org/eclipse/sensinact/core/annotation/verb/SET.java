@@ -18,6 +18,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
+
 /**
  * Used to define a SET method for writable values
  *
@@ -29,6 +31,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Repeatable(SET.SETs.class)
 public @interface SET {
+
+    /**
+     * The package URI of the model that this SET method applies to. If omitted, a
+     * package URI is derived from its model name.
+     */
+    String modelPackageUri() default AnnotationConstants.NOT_SET;;
 
     /**
      * The model that this SET method applies to

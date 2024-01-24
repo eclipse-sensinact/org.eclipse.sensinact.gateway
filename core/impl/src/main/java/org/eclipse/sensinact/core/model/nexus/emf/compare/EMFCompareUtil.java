@@ -94,7 +94,7 @@ public class EMFCompareUtil {
         Admin newService = incomming.getAdmin();
         if (newService != null) {
             serviceUpdate(ProviderPackage.Literals.PROVIDER__ADMIN, incomming, original, accumulator,
-                    List.of(ProviderPackage.Literals.ADMIN__MODEL_URI));
+                    List.of(ProviderPackage.Literals.ADMIN__MODEL, ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI));
         }
     }
 
@@ -184,6 +184,7 @@ public class EMFCompareUtil {
             NotificationAccumulator accumulator) {
         EObject container = originalService.eContainer();
         if (container instanceof Provider) {
+            String packageUri = container.eClass().getEPackage().getNsURI();
             String modelName = EMFUtil.getModelName(container.eClass());
             String providerName = ((Provider) container).getId();
             String serviceName = originalService.eContainingFeature().getName();
@@ -214,7 +215,7 @@ public class EMFCompareUtil {
                 newTimestamp = Instant.now();
             }
             if (isNew) {
-                accumulator.addResource(modelName, providerName, serviceName, resource.getName());
+                accumulator.addResource(packageUri, modelName, providerName, serviceName, resource.getName());
             }
 
             Map<String, Object> oldMetaData = null;
@@ -227,16 +228,16 @@ public class EMFCompareUtil {
 
             originalService.eSet(resource, newValue);
 
-            accumulator.resourceValueUpdate(modelName, providerName, serviceName, resource.getName(),
+            accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
                     resource.getEAttributeType().getInstanceClass(), oldValue, newValue, newTimestamp);
 
             Map<String, Object> newMetaData = extractMetadataMap(newValue, updatedMetadata, resource);
 
-            accumulator.metadataValueUpdate(modelName, providerName, serviceName, resource.getName(), oldMetaData,
-                    newMetaData, newTimestamp);
+            accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
+                    oldMetaData, newMetaData, newTimestamp);
 
             if (newValue == null) {
-                accumulator.removeResource(modelName, providerName, serviceName, resource.getName());
+                accumulator.removeResource(packageUri, modelName, providerName, serviceName, resource.getName());
             }
         }
 
@@ -308,39 +309,41 @@ public class EMFCompareUtil {
 
     private static void notifyServiceAdd(Provider container, Service service, EReference reference,
             NotificationAccumulator accumulator) {
+        String packageUri = container.eClass().getEPackage().getNsURI();
         String model = EMFUtil.getModelName(container.eClass());
         String providerName = container.getId();
         String serviceName = reference.getName();
 
-        accumulator.addService(model, providerName, serviceName);
+        accumulator.addService(packageUri, model, providerName, serviceName);
 
         EMFUtil.streamAttributes(service.eClass()).filter(ea -> service.eIsSet(ea)).forEach(ea -> {
             checkMetadata(service, ea);
             Metadata metadata = service.getMetadata().get(ea);
-            accumulator.addResource(model, providerName, serviceName, ea.getName());
-            accumulator.resourceValueUpdate(model, providerName, serviceName, ea.getName(),
+            accumulator.addResource(packageUri, model, providerName, serviceName, ea.getName());
+            accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
                     ea.getEAttributeType().getInstanceClass(), null, service.eGet(ea), metadata.getTimestamp());
             Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true,
                     MetadataPackage.Literals.NEXUS_METADATA.getEStructuralFeatures(), null, null);
             newMetaData.put("value", service.eGet(ea));
 
-            accumulator.metadataValueUpdate(model, providerName, serviceName, ea.getName(), null, newMetaData,
-                    metadata.getTimestamp());
+            accumulator.metadataValueUpdate(packageUri, model, providerName, serviceName, ea.getName(), null,
+                    newMetaData, metadata.getTimestamp());
         });
     }
 
     private static void notifyServiceRemove(Provider container, Service value, EReference reference,
             NotificationAccumulator accumulator) {
+        String packageUri = container.eClass().getEPackage().getNsURI();
         String model = EMFUtil.getModelName(container.eClass());
         String providerName = container.getId();
         String serviceName = reference.getName();
 
         EMFUtil.streamAttributes(value.eClass()).filter(ea -> value.eIsSet(ea)).forEach(ea -> {
-            accumulator.resourceValueUpdate(model, providerName, serviceName, ea.getName(),
+            accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
                     ea.getEAttributeType().getInstanceClass(), null, null, Instant.now());
-            accumulator.removeResource(model, providerName, serviceName, ea.getName());
+            accumulator.removeResource(packageUri, model, providerName, serviceName, ea.getName());
         });
-        accumulator.removeService(model, providerName, serviceName);
+        accumulator.removeService(packageUri, model, providerName, serviceName);
     }
 
 //    private static void checkMetadataRemove(Notification msg) {

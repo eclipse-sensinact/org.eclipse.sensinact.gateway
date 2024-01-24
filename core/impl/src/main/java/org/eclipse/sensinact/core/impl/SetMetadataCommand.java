@@ -37,7 +37,7 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
             PromiseFactory promiseFactory) {
 
         SensinactResource resource = metadataUpdateDto.model != null
-                ? twin.getResource(metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
+                ? twin.getResource(metadataUpdateDto.modelPackageUri, metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
                         metadataUpdateDto.resource)
                 : twin.getResource(metadataUpdateDto.provider, metadataUpdateDto.service, metadataUpdateDto.resource);
 

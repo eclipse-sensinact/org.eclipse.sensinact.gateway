@@ -64,6 +64,15 @@ public interface SensinactDigitalTwin extends CommandScoped {
     SensinactProvider getProvider(String model, String providerName);
 
     /**
+     * Get a provider by name and model
+     *
+     * @param model
+     * @param providerName
+     * @return
+     */
+    SensinactProvider getProvider(String modelPackageUri, String model, String providerName);
+
+    /**
      * Create a provider instance for the named model
      *
      * @param model
@@ -75,11 +84,33 @@ public interface SensinactDigitalTwin extends CommandScoped {
     /**
      * Create a provider instance for the named model
      *
+     * @param modelPackageUri
      * @param model
      * @param providerName
      * @return
      */
+    SensinactProvider createProvider(String modelPackageUri, String model, String providerName);
+
+    /**
+     * Create a provider instance for the named model
+     *
+     * @param model
+     * @param providerName
+     * @param created
+     * @return
+     */
     SensinactProvider createProvider(String model, String providerName, Instant created);
+
+    /**
+     * Create a provider instance for the named model and model package uri
+     *
+     * @param modelPackageUri
+     * @param model
+     * @param providerName
+     * @param created
+     * @return
+     */
+    SensinactProvider createProvider(String modelPackageUri, String model, String providerName, Instant created);
 
     /**
      * Get a service by model, provider name and service name
@@ -90,6 +121,16 @@ public interface SensinactDigitalTwin extends CommandScoped {
      * @return
      */
     SensinactService getService(String model, String providerName, String service);
+
+    /**
+     * Get a service by model, provider name and service name
+     *
+     * @param model
+     * @param providerName
+     * @param service
+     * @return
+     */
+    SensinactService getService(String modelPackageUri, String model, String providerName, String service);
 
     /**
      * Get a service by provider name and service name
@@ -110,6 +151,17 @@ public interface SensinactDigitalTwin extends CommandScoped {
      * @return
      */
     SensinactResource getResource(String model, String providerName, String service, String resource);
+
+    /**
+     * Get a resource by model, provider name, service name and resource name
+     *
+     * @param model
+     * @param providerName
+     * @param service
+     * @param resource
+     * @return
+     */
+    SensinactResource getResource(String modelPackageUri, String model, String providerName, String service, String resource);
 
     /**
      * Get a resource by provider name, service name and resource name
