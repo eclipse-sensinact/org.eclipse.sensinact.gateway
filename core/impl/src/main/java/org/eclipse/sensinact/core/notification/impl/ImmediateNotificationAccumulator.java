@@ -53,8 +53,8 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @param name the provider name
      */
     @Override
-    public void addProvider(String model, String name) {
-        LifecycleNotification ln = createLifecycleNotification(PROVIDER_CREATED, model, name, null, null, null, null);
+    public void addProvider(String modelPackageUri, String model, String name) {
+        LifecycleNotification ln = createLifecycleNotification(PROVIDER_CREATED, modelPackageUri, model, name, null, null, null, null);
         eventBus.deliver(ln.getTopic(), ln);
     }
 
@@ -64,8 +64,8 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @param name the provider name
      */
     @Override
-    public void removeProvider(String model, String name) {
-        LifecycleNotification ln = createLifecycleNotification(PROVIDER_DELETED, model, name, null, null, null, null);
+    public void removeProvider(String modelPackageUri, String model, String name) {
+        LifecycleNotification ln = createLifecycleNotification(PROVIDER_DELETED, modelPackageUri, model, name, null, null, null, null);
         eventBus.deliver(ln.getTopic(), ln);
     }
 
@@ -76,8 +76,8 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @param name     the service name
      */
     @Override
-    public void addService(String model, String provider, String name) {
-        LifecycleNotification ln = createLifecycleNotification(SERVICE_CREATED, model, provider, name, null, null,
+    public void addService(String modelPackageUri, String model, String provider, String name) {
+        LifecycleNotification ln = createLifecycleNotification(SERVICE_CREATED, modelPackageUri, model, provider, name, null, null,
                 null);
         eventBus.deliver(ln.getTopic(), ln);
     }
@@ -89,8 +89,8 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @param name     the service name
      */
     @Override
-    public void removeService(String model, String provider, String name) {
-        LifecycleNotification ln = createLifecycleNotification(SERVICE_DELETED, model, provider, name, null, null,
+    public void removeService(String modelPackageUri, String model, String provider, String name) {
+        LifecycleNotification ln = createLifecycleNotification(SERVICE_DELETED, modelPackageUri, model, provider, name, null, null,
                 null);
         eventBus.deliver(ln.getTopic(), ln);
     }
@@ -103,8 +103,8 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @param name     the resource name
      */
     @Override
-    public void addResource(String model, String provider, String service, String name) {
-        LifecycleNotification ln = createLifecycleNotification(RESOURCE_CREATED, model, provider, service, name, null,
+    public void addResource(String modelPackageUri, String model, String provider, String service, String name) {
+        LifecycleNotification ln = createLifecycleNotification(RESOURCE_CREATED, modelPackageUri, model, provider, service, name, null,
                 null);
         eventBus.deliver(ln.getTopic(), ln);
     }
@@ -117,8 +117,8 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @param name     the resource name
      */
     @Override
-    public void removeResource(String model, String provider, String service, String name) {
-        LifecycleNotification ln = createLifecycleNotification(RESOURCE_DELETED, model, provider, service, name, null,
+    public void removeResource(String modelPackageUri, String model, String provider, String service, String name) {
+        LifecycleNotification ln = createLifecycleNotification(RESOURCE_DELETED, modelPackageUri, model, provider, service, name, null,
                 null);
         eventBus.deliver(ln.getTopic(), ln);
     }
@@ -137,14 +137,14 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @throws NullPointerException if the timestamp is null
      */
     @Override
-    public void metadataValueUpdate(String model, String provider, String service, String resource,
+    public void metadataValueUpdate(String modelPackageUri, String model, String provider, String service, String resource,
             Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
 
         Map<String, Object> nonNullOldValues = oldValues == null ? emptyMap() : oldValues;
         Map<String, Object> nonNullNewValues = newValues == null ? emptyMap() : newValues;
         Objects.requireNonNull(timestamp);
 
-        ResourceMetaDataNotification rmn = createResourceMetaDataNotification(model, provider, service, resource,
+        ResourceMetaDataNotification rmn = createResourceMetaDataNotification(modelPackageUri, model, provider, service, resource,
                 nonNullOldValues, nonNullNewValues, timestamp);
 
         eventBus.deliver(rmn.getTopic(), rmn);
@@ -164,11 +164,11 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @throws NullPointerException if the timestamp is null
      */
     @Override
-    public void resourceValueUpdate(String model, String provider, String service, String resource, Class<?> type,
+    public void resourceValueUpdate(String modelPackageUri, String model, String provider, String service, String resource, Class<?> type,
             Object oldValue, Object newValue, Instant timestamp) {
         Objects.requireNonNull(timestamp);
 
-        ResourceDataNotification rdn = createResourceDataNotification(model, provider, service, resource, type,
+        ResourceDataNotification rdn = createResourceDataNotification(modelPackageUri, model, provider, service, resource, type,
                 oldValue, newValue, timestamp);
         eventBus.deliver(rdn.getTopic(), rdn);
     }
@@ -184,10 +184,10 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      * @param timestamp the latest timestamp of the value after the update
      */
     @Override
-    public void resourceAction(String model, String provider, String service, String resource, Instant timestamp) {
+    public void resourceAction(String modelPackageUri, String model, String provider, String service, String resource, Instant timestamp) {
         Objects.requireNonNull(timestamp);
 
-        ResourceActionNotification ran = createResourceActionNotification(model, provider, service, resource,
+        ResourceActionNotification ran = createResourceActionNotification(modelPackageUri, model, provider, service, resource,
                 timestamp);
         eventBus.deliver(ran.getTopic(), ran);
     }

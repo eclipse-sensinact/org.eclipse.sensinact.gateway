@@ -31,6 +31,7 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceLifecycleNotificationDTO;
 import org.eclipse.sensinact.northbound.rest.integration.TestUtils;
@@ -165,9 +166,11 @@ public class ResourceNotificationsTest {
             // First will be admin friendlyName
             ResourceDataNotification friendlyName = queue.poll(1, TimeUnit.SECONDS);
             assertNotNull(friendlyName);
-            assertEquals("friendlyName", friendlyName.resource,
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), friendlyName.resource,
                     "First event was not FriendlyName, so the Provider already exists. It is likely that the data folder wasn't cleared and this is a remnant of a previous testrun.");
-            // second will be will be admin modelURI
+            // second will be will be admin model
+            assertNotNull(queue.poll(1, TimeUnit.SECONDS));
+            // third will be will be admin model package uri
             assertNotNull(queue.poll(1, TimeUnit.SECONDS));
             // now ours should arrive
             ResourceDataNotification localNotif = queue.poll(2, TimeUnit.SECONDS);

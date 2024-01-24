@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import java.time.Instant;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
@@ -58,6 +59,8 @@ class NotificationSenderTest {
     private static final String RESOURCE = "resource";
     private static final String RESOURCE_2 = "resource2";
 
+    private final String MODEL_PKG = EMFUtil.constructPackageUri(MODEL);
+
     @Mock
     TypedEventBus bus;
 
@@ -72,7 +75,7 @@ class NotificationSenderTest {
     class ProviderLifecycleTests {
         @Test
         void testAddProvider() {
-            accumulator.addProvider(MODEL, PROVIDER);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
@@ -82,7 +85,7 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveProvider() {
-            accumulator.removeProvider(MODEL, PROVIDER);
+            accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
@@ -92,8 +95,8 @@ class NotificationSenderTest {
 
         @Test
         void testAddRemoveProvider() {
-            accumulator.addProvider(MODEL, PROVIDER);
-            accumulator.removeProvider(MODEL, PROVIDER);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
+            accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             Mockito.verifyNoInteractions(bus);
@@ -101,8 +104,8 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveAddProvider() {
-            accumulator.removeProvider(MODEL, PROVIDER);
-            accumulator.addProvider(MODEL, PROVIDER);
+            accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -115,8 +118,8 @@ class NotificationSenderTest {
 
         @Test
         void testAddAddProvider() {
-            accumulator.addProvider(MODEL, PROVIDER);
-            accumulator.addProvider(MODEL, PROVIDER);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
@@ -126,8 +129,8 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveRemoveProvider() {
-            accumulator.removeProvider(MODEL, PROVIDER);
-            accumulator.removeProvider(MODEL, PROVIDER);
+            accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
+            accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
@@ -137,9 +140,9 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveAddRemoveProvider() {
-            accumulator.removeProvider(MODEL, PROVIDER);
-            accumulator.addProvider(MODEL, PROVIDER);
-            accumulator.removeProvider(MODEL, PROVIDER);
+            accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
+            accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
@@ -149,8 +152,8 @@ class NotificationSenderTest {
 
         @Test
         void testAddProviders() {
-            accumulator.addProvider(MODEL, PROVIDER);
-            accumulator.addProvider(MODEL, PROVIDER_2);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER_2);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -166,7 +169,7 @@ class NotificationSenderTest {
     class ServiceLifecycleTests {
         @Test
         void testAddService() {
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
@@ -176,7 +179,7 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveService() {
-            accumulator.removeService(MODEL, PROVIDER, SERVICE);
+            accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
@@ -186,8 +189,8 @@ class NotificationSenderTest {
 
         @Test
         void testAddRemoveService() {
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
-            accumulator.removeService(MODEL, PROVIDER, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
             Mockito.verifyNoInteractions(bus);
@@ -195,8 +198,8 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveAddService() {
-            accumulator.removeService(MODEL, PROVIDER, SERVICE);
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
+            accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -209,8 +212,8 @@ class NotificationSenderTest {
 
         @Test
         void testAddAddService() {
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
@@ -220,8 +223,8 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveRemoveService() {
-            accumulator.removeService(MODEL, PROVIDER, SERVICE);
-            accumulator.removeService(MODEL, PROVIDER, SERVICE);
+            accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
@@ -231,9 +234,9 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveAddRemoveService() {
-            accumulator.removeService(MODEL, PROVIDER, SERVICE);
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
-            accumulator.removeService(MODEL, PROVIDER, SERVICE);
+            accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
@@ -243,9 +246,9 @@ class NotificationSenderTest {
 
         @Test
         void testAddServices() {
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
-            accumulator.addService(MODEL, PROVIDER, SERVICE_2);
-            accumulator.addService(MODEL, PROVIDER_2, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE_2);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER_2, SERVICE);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -263,7 +266,7 @@ class NotificationSenderTest {
     class ResourceLifecycleTests {
         @Test
         void testAddResource() {
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -273,7 +276,7 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveResource() {
-            accumulator.removeResource(MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -283,8 +286,8 @@ class NotificationSenderTest {
 
         @Test
         void testAddRemoveResource() {
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.removeResource(MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             Mockito.verifyNoInteractions(bus);
@@ -292,8 +295,8 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveAddResource() {
-            accumulator.removeResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -306,8 +309,8 @@ class NotificationSenderTest {
 
         @Test
         void testAddAddResource() {
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -317,8 +320,8 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveRemoveResource() {
-            accumulator.removeResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.removeResource(MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -328,9 +331,9 @@ class NotificationSenderTest {
 
         @Test
         void testRemoveAddRemoveResource() {
-            accumulator.removeResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.removeResource(MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -340,10 +343,10 @@ class NotificationSenderTest {
 
         @Test
         void testAddServices() {
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE_2);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE_2, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER_2, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE_2, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER_2, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -371,7 +374,7 @@ class NotificationSenderTest {
         void testAddNullMetadata() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, null, null, now);
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null, null, now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -383,7 +386,7 @@ class NotificationSenderTest {
         void testAddNewMetadata() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now);
             accumulator.completeAndSend();
 
@@ -397,7 +400,7 @@ class NotificationSenderTest {
         void testRemoveMetadata() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
                     singletonMap(METADATA_KEY, METADATA_VALUE), null, now);
             accumulator.completeAndSend();
 
@@ -411,9 +414,9 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCalls() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now);
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
                     singletonMap(METADATA_KEY, METADATA_VALUE),
                     Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
@@ -428,9 +431,9 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCallsWithTimeChange() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now.minusSeconds(10));
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
                     singletonMap(METADATA_KEY, METADATA_VALUE),
                     Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
@@ -445,11 +448,11 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCallsReverseTime() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now);
 
             Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE,
+                accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
                         singletonMap(METADATA_KEY, METADATA_VALUE), Map.of(METADATA_KEY_2, METADATA_VALUE_2),
                         now.minusSeconds(10));
             });
@@ -461,9 +464,9 @@ class NotificationSenderTest {
         void testAddRemoveMetadataAcrossMultipleCalls() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now.minusSeconds(10));
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
                     singletonMap(METADATA_KEY, METADATA_VALUE), singletonMap(METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
@@ -484,7 +487,7 @@ class NotificationSenderTest {
         void testUpdateNull() {
             Instant now = Instant.now();
 
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, String.class, null, null, now);
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, String.class, null, null, now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("DATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -496,7 +499,7 @@ class NotificationSenderTest {
         void testUpdateValue() {
             Instant now = Instant.now();
 
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
                     now);
             accumulator.completeAndSend();
 
@@ -509,9 +512,9 @@ class NotificationSenderTest {
         void testMultipleUpdate() {
             Instant now = Instant.now();
 
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
                     now);
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, INTEGER_VALUE,
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, INTEGER_VALUE,
                     INTEGER_VALUE_2, now);
             accumulator.completeAndSend();
 
@@ -524,9 +527,9 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCallsWithTimeChange() {
             Instant now = Instant.now();
 
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
                     now.minusSeconds(10));
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, INTEGER_VALUE,
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, INTEGER_VALUE,
                     INTEGER_VALUE_2, now);
             accumulator.completeAndSend();
 
@@ -539,10 +542,10 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCallsReverseTime() {
             Instant now = Instant.now();
 
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
                     now);
             Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, INTEGER_VALUE,
+                accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, INTEGER_VALUE,
                         INTEGER_VALUE_2, now.minusSeconds(10));
             });
 
@@ -557,7 +560,7 @@ class NotificationSenderTest {
         void testAction() {
             Instant now = Instant.now();
 
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now);
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -569,8 +572,8 @@ class NotificationSenderTest {
         void testMultiAction() {
             Instant now = Instant.now();
 
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now);
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now);
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus, Mockito.times(2)).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
@@ -582,8 +585,8 @@ class NotificationSenderTest {
         void testMultiActionDifferentTimes() {
             Instant now = Instant.now();
 
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now.minusSeconds(10));
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now);
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now.minusSeconds(10));
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -599,8 +602,8 @@ class NotificationSenderTest {
         void testMultiActionDifferentTimesReverseOrder() {
             Instant now = Instant.now();
 
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now);
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now.minusSeconds(10));
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now.minusSeconds(10));
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
@@ -620,30 +623,30 @@ class NotificationSenderTest {
         void testNotificationOrdering() {
             Instant now = Instant.now();
 
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE_2, now.minusSeconds(10));
-            accumulator.resourceAction(MODEL, PROVIDER, SERVICE, RESOURCE, now);
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE_2, Integer.class, null, INTEGER_VALUE,
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2, now.minusSeconds(10));
+            accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2, Integer.class, null, INTEGER_VALUE,
                     now);
-            accumulator.resourceValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE_2,
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE_2,
                     now);
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE_2, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2, null,
                     singletonMap(METADATA_KEY_2, METADATA_VALUE_2), now);
-            accumulator.metadataValueUpdate(MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now);
-            accumulator.addResource(MODEL, PROVIDER_2, SERVICE_2, RESOURCE_2);
-            accumulator.addResource(MODEL, PROVIDER_2, SERVICE_2, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER_2, SERVICE, RESOURCE_2);
-            accumulator.addResource(MODEL, PROVIDER_2, SERVICE, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE_2, RESOURCE_2);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE_2, RESOURCE);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE_2);
-            accumulator.addResource(MODEL, PROVIDER, SERVICE, RESOURCE);
-            accumulator.addService(MODEL, PROVIDER_2, SERVICE_2);
-            accumulator.addService(MODEL, PROVIDER_2, SERVICE);
-            accumulator.addService(MODEL, PROVIDER, SERVICE_2);
-            accumulator.addService(MODEL, PROVIDER, SERVICE);
-            accumulator.addProvider(MODEL, PROVIDER_2);
-            accumulator.addProvider(MODEL, PROVIDER);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER_2, SERVICE_2, RESOURCE_2);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER_2, SERVICE_2, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER_2, SERVICE, RESOURCE_2);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER_2, SERVICE, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE_2, RESOURCE_2);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE_2, RESOURCE);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2);
+            accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER_2, SERVICE_2);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER_2, SERVICE);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE_2);
+            accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER_2);
+            accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);

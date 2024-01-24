@@ -98,7 +98,14 @@ public class SubscribeTest {
 
         assertEquals(PROVIDER, notification.provider);
         assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), notification.resource);
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), notification.resource);
+        assertEquals(null, notification.oldValue);
+
+        notification = queue.poll(1, TimeUnit.SECONDS);
+
+        assertEquals(PROVIDER, notification.provider);
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), notification.resource);
         assertEquals(null, notification.oldValue);
 
         notification = queue.poll(1, TimeUnit.SECONDS);

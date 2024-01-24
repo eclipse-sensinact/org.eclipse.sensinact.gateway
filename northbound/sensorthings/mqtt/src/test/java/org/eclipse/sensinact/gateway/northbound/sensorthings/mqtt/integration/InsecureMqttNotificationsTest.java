@@ -46,6 +46,7 @@ import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -206,38 +207,42 @@ public class InsecureMqttNotificationsTest {
             // by including other resources
             createResource("data", "bar", "foobar", 17);
 
-            List<Datastream> streams = readMessages(6, Datastream.class);
+            List<Datastream> streams = readMessages(8, Datastream.class);
 
             // Creation in sorted event order (p/s/r uri)
-            assertEquals("friendlyName", streams.get(0).name);
-            assertEquals("modelUri", streams.get(1).name);
-            assertEquals("foobar", streams.get(2).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(0).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(1).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(2).name);
+            assertEquals("foobar", streams.get(3).name);
 
             // metadata update in sorted event order (p/s/r uri)
-            assertEquals("friendlyName", streams.get(3).name);
-            assertEquals("modelUri", streams.get(4).name);
-            assertEquals("foobar", streams.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(4).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(6).name);
+            assertEquals("foobar", streams.get(7).name);
 
             Point p = new Point();
             p.coordinates = new Coordinates();
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("data", "admin", "location", p);
+            createResource("data", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
-            streams = readMessages(6, Datastream.class);
+            streams = readMessages(7, Datastream.class);
 
             // location creation
-            assertEquals("location", streams.get(0).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(0).name);
 
             // location metadata update
-            assertEquals("location", streams.get(1).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(1).name);
 
             // location value update
-            assertEquals("friendlyName", streams.get(2).name);
-            assertEquals("location", streams.get(3).name);
-            assertEquals("modelUri", streams.get(4).name);
-            assertEquals("foobar", streams.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(2).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(3).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(4).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(5).name);
+            assertEquals("foobar", streams.get(6).name);
         }
 
         @Test
@@ -252,7 +257,8 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
             List<Datastream> streams = readMessages(3, Datastream.class);
 
@@ -277,7 +283,8 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(3, Map.class);
@@ -302,7 +309,7 @@ public class InsecureMqttNotificationsTest {
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(2, Map.class);
 
-            updateMetadata("foo", "bar", "fizzbuzz", "friendlyName", "foobar");
+            updateMetadata("foo", "bar", "fizzbuzz", ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), "foobar");
 
             streams.addAll(readMessages(1, Map.class));
 
@@ -326,7 +333,8 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
             List<FeatureOfInterest> fois = readMessages(1, FeatureOfInterest.class);
 
@@ -344,8 +352,10 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p);
-            createResource("bar", "admin", "location", p);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
             List<FeatureOfInterest> fois = readMessages(1, FeatureOfInterest.class);
 
@@ -364,8 +374,10 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p);
-            createResource("bar", "admin", "location", p);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
             @SuppressWarnings("rawtypes")
             List<Map> fois = readMessages(1, Map.class);
@@ -392,13 +404,15 @@ public class InsecureMqttNotificationsTest {
             f.geometry = p;
             f.properties = Map.of("name", "fizzbuzz");
 
-            createResource("bar", "admin", "location", f);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
 
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(1, Map.class);
 
             f.properties = Map.of("name", "foobar");
-            createResource("bar", "admin", "location", f);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
 
             streams.addAll(readMessages(1, Map.class));
 
@@ -423,7 +437,8 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p, testTime);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
 
             List<HistoricalLocation> hls = readMessages(1, HistoricalLocation.class);
 
@@ -441,8 +456,10 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p, testTime);
-            createResource("bar", "admin", "location", p, testTime);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
 
             List<HistoricalLocation> hls = readMessages(1, HistoricalLocation.class);
 
@@ -461,8 +478,10 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p, testTime);
-            createResource("bar", "admin", "location", p, testTime);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
 
             @SuppressWarnings("rawtypes")
             List<Map> hls = readMessages(1, Map.class);
@@ -493,7 +512,8 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p, testTime);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
 
             List<Location> hls = readMessages(1, Location.class);
 
@@ -511,8 +531,10 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p, testTime);
-            createResource("bar", "admin", "location", p, testTime);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
 
             List<Location> hls = readMessages(1, Location.class);
 
@@ -532,8 +554,10 @@ public class InsecureMqttNotificationsTest {
             p.coordinates.latitude = 12d;
             p.coordinates.longitude = 34d;
 
-            createResource("foo", "admin", "location", p, testTime);
-            createResource("bar", "admin", "location", p, testTime);
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
 
             @SuppressWarnings("rawtypes")
             List<Map> hls = readMessages(1, Map.class);
@@ -541,8 +565,9 @@ public class InsecureMqttNotificationsTest {
             // Creation, value setting, metadata update
             for (@SuppressWarnings("rawtypes")
             Map m : hls) {
-                assertEquals(Set.of("@iot.id", "location"), m.keySet());
-                assertEquals(GeoJsonType.Point.name(), ((Map<String, Object>) m.get("location")).get("type"));
+                assertEquals(Set.of("@iot.id", ProviderPackage.Literals.ADMIN__LOCATION.getName()), m.keySet());
+                assertEquals(GeoJsonType.Point.name(),
+                        ((Map<String, Object>) m.get(ProviderPackage.Literals.ADMIN__LOCATION.getName())).get("type"));
                 assertEquals("bar~", String.valueOf(m.get("@iot.id")).substring(0, 4));
             }
         }
@@ -560,13 +585,15 @@ public class InsecureMqttNotificationsTest {
             f.geometry = p;
             f.properties = Map.of("name", "fizzbuzz");
 
-            createResource("bar", "admin", "location", f);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
 
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(1, Map.class);
 
             f.properties = Map.of("name", "foobar");
-            createResource("bar", "admin", "location", f);
+            createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
 
             streams.addAll(readMessages(1, Map.class));
 
@@ -588,18 +615,32 @@ public class InsecureMqttNotificationsTest {
 
             createResource("foo", "bar", "foobar", 42, testTime);
 
-            List<Observation> obs = readMessages(3, Observation.class);
+            List<Observation> obs = readMessages(4, Observation.class);
 
             assertEquals("foo", obs.get(0).result);
             assertEquals(testTime, obs.get(0).resultTime);
-            assertEquals("foo~admin~friendlyName", String.valueOf(obs.get(0).id).substring(0, 22));
+            assertEquals(
+                    "foo~" + ProviderPackage.Literals.PROVIDER__ADMIN.getName() + "~"
+                            + ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(),
+                    String.valueOf(obs.get(0).id).substring(0, 22));
 
             assertEquals(testTime, obs.get(1).resultTime);
-            assertEquals("foo~admin~modelUri", String.valueOf(obs.get(1).id).substring(0, 18));
+            assertEquals(
+                    "foo~" + ProviderPackage.Literals.PROVIDER__ADMIN.getName() + "~"
+                            + ProviderPackage.Literals.ADMIN__MODEL.getName(),
+                    String.valueOf(obs.get(1).id).substring(0, 15));
 
-            assertEquals(42, obs.get(2).result);
             assertEquals(testTime, obs.get(2).resultTime);
-            assertEquals("foo~bar~foobar", String.valueOf(obs.get(2).id).substring(0, 14));
+            assertEquals(
+                    "foo~" + ProviderPackage.Literals.PROVIDER__ADMIN
+                            .getName() + "~" + ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(),
+                    String.valueOf(obs.get(2).id).substring(0,
+                            ("foo~" + ProviderPackage.Literals.PROVIDER__ADMIN.getName() + "~"
+                                    + ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName()).length()));
+
+            assertEquals(42, obs.get(3).result);
+            assertEquals(testTime, obs.get(3).resultTime);
+            assertEquals("foo~bar~foobar", String.valueOf(obs.get(3).id).substring(0, 14));
         }
 
         @Test
@@ -677,17 +718,19 @@ public class InsecureMqttNotificationsTest {
             // We must use a different model as otherwise the other tests interfere
             createResource("obs", "bar", "foobar", 42, testTime);
 
-            List<ObservedProperty> obs = readMessages(6, ObservedProperty.class);
+            List<ObservedProperty> obs = readMessages(8, ObservedProperty.class);
 
             // Creation
-            assertEquals("friendlyName", obs.get(0).name);
-            assertEquals("modelUri", obs.get(1).name);
-            assertEquals("foobar", obs.get(2).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), obs.get(0).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), obs.get(1).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), obs.get(2).name);
+            assertEquals("foobar", obs.get(3).name);
 
             // metadata update
-            assertEquals("friendlyName", obs.get(3).name);
-            assertEquals("modelUri", obs.get(4).name);
-            assertEquals("foobar", obs.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), obs.get(4).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), obs.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), obs.get(6).name);
+            assertEquals("foobar", obs.get(7).name);
 
         }
 
@@ -739,7 +782,7 @@ public class InsecureMqttNotificationsTest {
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(2, Map.class);
 
-            updateMetadata("foo", "bar", "fizzbuzz", "friendlyName", "foobar");
+            updateMetadata("foo", "bar", "fizzbuzz", ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), "foobar");
 
             streams.addAll(readMessages(1, Map.class));
 
@@ -764,17 +807,19 @@ public class InsecureMqttNotificationsTest {
             // by including other resources
             createResource("sens", "bar", "foobar", 42, testTime);
 
-            List<Sensor> sens = readMessages(6, Sensor.class);
+            List<Sensor> sens = readMessages(8, Sensor.class);
 
             // Creation
-            assertEquals("friendlyName", sens.get(0).name);
-            assertEquals("modelUri", sens.get(1).name);
-            assertEquals("foobar", sens.get(2).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), sens.get(0).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), sens.get(1).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), sens.get(2).name);
+            assertEquals("foobar", sens.get(3).name);
 
             // metadata update
-            assertEquals("friendlyName", sens.get(3).name);
-            assertEquals("modelUri", sens.get(4).name);
-            assertEquals("foobar", sens.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), sens.get(4).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), sens.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), sens.get(6).name);
+            assertEquals("foobar", sens.get(7).name);
 
         }
 
@@ -826,7 +871,7 @@ public class InsecureMqttNotificationsTest {
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(2, Map.class);
 
-            updateMetadata("foo", "bar", "fizzbuzz", "friendlyName", "foobar");
+            updateMetadata("foo", "bar", "fizzbuzz", ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), "foobar");
 
             streams.addAll(readMessages(1, Map.class));
 
@@ -903,7 +948,8 @@ public class InsecureMqttNotificationsTest {
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(1, Map.class);
 
-            createResource("foo", "admin", "friendlyName", "foobar");
+            createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), "foobar");
 
             streams.addAll(readMessages(1, Map.class));
 

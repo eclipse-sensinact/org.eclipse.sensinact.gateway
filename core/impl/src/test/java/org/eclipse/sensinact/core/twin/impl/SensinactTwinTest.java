@@ -37,6 +37,7 @@ import org.eclipse.sensinact.core.command.impl.ActionHandler;
 import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -143,7 +144,7 @@ public class SensinactTwinTest {
 
             Map<String, Object> arguments = Map.of("foo", "bar", "foobar", Instant.now());
 
-            Mockito.when(actionHandler.act(TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_ACTION_RESOURCE, arguments))
+            Mockito.when(actionHandler.act(EMFUtil.constructPackageUri(TEST_MODEL), TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_ACTION_RESOURCE, arguments))
                     .thenReturn(promiseFactory.<Object>resolved(4.2D).delay(1000));
 
             Promise<Object> act = resource.act(arguments);

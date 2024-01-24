@@ -161,7 +161,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                         .map(x -> null);
             } else {
                 // No external setter: update the twin
-                modelNexus.handleDataUpdate(EMFUtil.getModelName(provider.eClass()), provider, service,
+                modelNexus.handleDataUpdate(provider, service,
                         (EStructuralFeature) resource, value, timestamp);
                 return promiseFactory.resolved(null);
             }

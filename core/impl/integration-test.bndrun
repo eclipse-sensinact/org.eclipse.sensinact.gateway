@@ -8,14 +8,15 @@
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
 
-# These packages are also provided by the gecko.emf.osgi.component project
-# so we blacklist the API for resolve consistency
--runblacklist: bnd.identity;id='org.gecko.emf.osgi.api'
-
 # This will help us keep -runbundles sorted
 -runstartlevel: \
 	order=sortbynameversion,\
 	begin=-1
+-resolve: auto
+
+# This blacklist ensures consistent resolution locally and in CI
+-runblacklist: bnd.identity;id='org.osgi.service.cm'
+
 -runbundles: \
 	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
 	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\

@@ -99,9 +99,9 @@ abstract class AbstractResourceMethod {
         return method.getReturnType();
     }
 
-    protected <A extends Annotation, E extends Enum<E>> Object invoke(String model, String provider, String service,
-            String resource, Map<Object, Object> params, Class<A> extraArgumentAnnotation,
-            Function<A, E> argNameExtractor) throws Exception {
+    protected <A extends Annotation, E extends Enum<E>> Object invoke(String modelPackageUri, String model,
+            String provider, String service, String resource, Map<Object, Object> params,
+            Class<A> extraArgumentAnnotation, Function<A, E> argNameExtractor) throws Exception {
         Parameter[] parameters = method.getParameters();
         Object[] args = new Object[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
@@ -109,6 +109,9 @@ abstract class AbstractResourceMethod {
             final UriParam param = p.getAnnotation(UriParam.class);
             if (param != null) {
                 switch (param.value()) {
+                case MODEL_PACKAGE_URI:
+                    args[i] = modelPackageUri;
+                    break;
                 case MODEL:
                     args[i] = model;
                     break;

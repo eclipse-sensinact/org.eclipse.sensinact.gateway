@@ -22,10 +22,10 @@ class ActMethod extends AbstractResourceMethod {
         super(method, instance, serviceId, providers);
     }
 
-    public Object invoke(String model, String provider, String service, String resource, Map<String, Object> params)
+    public Object invoke(String modelPackageUri,String model, String provider, String service, String resource, Map<String, Object> params)
             throws Exception {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Map<Object, Object> rawParam = (Map) params;
-        return super.invoke(model, provider, service, resource, rawParam, null, null);
+        return super.invoke(modelPackageUri, model, provider, service, resource, rawParam, null, null);
     }
 }

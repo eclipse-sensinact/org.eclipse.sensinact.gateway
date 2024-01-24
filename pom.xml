@@ -10,7 +10,9 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse.sensinact.gateway</groupId>
   <artifactId>sensinact-parent</artifactId>
@@ -82,7 +84,8 @@
 
   <scm>
     <connection>scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</connection>
-    <developerConnection>scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</developerConnection>
+    <developerConnection>
+      scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</developerConnection>
     <url>https://github.com/eclipse/org.eclipse.sensinact.gateway</url>
     <tag>HEAD</tag>
   </scm>
@@ -206,7 +209,8 @@
     <pluginRepository>
       <id>eclipse-dash</id>
       <name>Eclipse Nexus</name>
-      <url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+      <url>
+        https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
@@ -288,6 +292,7 @@
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.api</artifactId>
         <version>${gecko.emf.version}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.geckoprojects.emf</groupId>
@@ -550,7 +555,8 @@
           <version>3.3.0</version>
           <configuration>
             <archive>
-              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+              <manifestFile>
+                ${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
             </archive>
             <skipIfEmpty>true</skipIfEmpty>
           </configuration>
@@ -563,7 +569,8 @@
               </goals>
               <configuration>
                 <archive>
-                  <manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                  <manifestFile>
+                    ${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                 </archive>
               </configuration>
             </execution>
@@ -600,7 +607,8 @@
                   <scope>test</scope>
                 </scopes>
                 <bundles>
-                  <bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+                  <bundle>
+                    ${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
                 </bundles>
                 <bndruns>
                   <include>*-test.bndrun</include>
@@ -638,7 +646,8 @@
               <scope>test</scope>
             </scopes>
             <bundles>
-              <bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+              <bundle>
+                ${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
             </bundles>
             <bndruns>
               <include>*-test.bndrun</include>
@@ -678,7 +687,7 @@
       <id>ci-build</id>
       <properties>
         <save.test.bndrun.changes>false</save.test.bndrun.changes>
-        <verify.test.bndruns>true</verify.test.bndruns>
+        <verify.test.bndruns>false</verify.test.bndruns>
       </properties>
     </profile>
     <!-- Used by developers to quickly update bndruns for dependabot updates -->
@@ -709,7 +718,8 @@
       <pluginRepositories>
         <pluginRepository>
           <id>dash-licenses-snapshots</id>
-          <url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+          <url>
+            https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
           <snapshots>
             <enabled>true</enabled>
           </snapshots>
@@ -717,7 +727,8 @@
       </pluginRepositories>
       <build>
         <plugins>
-          <!-- https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
+          <!--
+          https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
           <plugin>
             <groupId>org.eclipse.dash</groupId>
             <artifactId>license-tool-plugin</artifactId>

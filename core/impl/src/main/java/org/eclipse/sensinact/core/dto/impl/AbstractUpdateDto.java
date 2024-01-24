@@ -17,6 +17,11 @@ import java.time.Instant;
 public abstract class AbstractUpdateDto {
 
     /**
+     * The package URI of the model to use, if null then a unique package URI will be derived from the model name
+     */
+    public String modelPackageUri;
+
+    /**
      * The model to use, if null then a unique model may be created
      */
     public String model;

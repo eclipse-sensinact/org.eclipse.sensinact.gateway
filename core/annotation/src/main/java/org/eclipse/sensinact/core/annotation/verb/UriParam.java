@@ -36,6 +36,8 @@ public @interface UriParam {
     public enum UriSegment {
         /** The whole URI */
         URI,
+        /** The model package URI*/
+        MODEL_PACKAGE_URI,
         /** The model name */
         MODEL,
         /** The provider name */

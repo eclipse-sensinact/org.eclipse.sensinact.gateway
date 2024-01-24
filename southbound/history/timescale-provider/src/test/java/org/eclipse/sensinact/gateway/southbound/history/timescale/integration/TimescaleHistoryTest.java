@@ -42,6 +42,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -123,7 +124,7 @@ public class TimescaleHistoryTest {
                 // Ignore
                 lastError = e;
             }
-        } while(!ready && System.currentTimeMillis() < timeout);
+        } while (!ready && System.currentTimeMillis() < timeout);
 
         assertTrue(ready, "History provider setup timed out: " + lastError);
     }
@@ -244,15 +245,18 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 7);
+            waitForRowCount("sensinact.text_data", 9);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement()
                             .executeQuery("SELECT * FROM sensinact.text_data WHERE provider = 'bar' ORDER BY time;")) {
 
                 assertTrue(result.next());
-                checkResult(result, "admin", "friendlyName", "bar", TS_2012);
-                // Just skip the modelURI
+                checkResult(result, ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                        ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), "bar", TS_2012);
+                // Just skip the model
+                assertTrue(result.next());
+                // Just skip the model package uri
                 assertTrue(result.next());
                 assertTrue(result.next());
                 checkResult(result, "fizz", TS_2012);
@@ -349,9 +353,10 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 7);
+            waitForRowCount("sensinact.text_data", 9);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "single") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "single") {
 
                 @Override
                 protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
@@ -396,7 +401,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.numeric_data", 3);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "single") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "single") {
 
                 @Override
                 protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
@@ -434,7 +440,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.numeric_data", 3);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "single") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "single") {
 
                 @Override
                 protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
@@ -470,9 +477,10 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 7);
+            waitForRowCount("sensinact.text_data", 9);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
 
                 @SuppressWarnings("unchecked")
                 @Override
@@ -519,7 +527,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.numeric_data", 3);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
 
                 @SuppressWarnings("unchecked")
                 @Override
@@ -558,7 +567,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.numeric_data", 3);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
 
                 @SuppressWarnings("unchecked")
                 @Override
@@ -594,9 +604,10 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1004);
+            waitForRowCount("sensinact.text_data", 1006);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
 
                 @SuppressWarnings("unchecked")
                 @Override
@@ -666,9 +677,10 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1004);
+            waitForRowCount("sensinact.text_data", 1006);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "count") {
 
                 @Override
                 protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
@@ -709,7 +721,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.text_data", 1002);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
 
                 @SuppressWarnings("unchecked")
                 @Override
@@ -781,7 +794,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.text_data", 1002);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "count") {
 
                 @Override
                 protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
@@ -822,7 +836,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.text_data", 1002);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "range") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
 
                 @SuppressWarnings("unchecked")
                 @Override
@@ -893,7 +908,8 @@ public class TimescaleHistoryTest {
 
             waitForRowCount("sensinact.text_data", 1002);
 
-            thread.execute(new ResourceCommand<Void>("sensiNactHistory", "timescale-history", "history", "count") {
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "count") {
 
                 @Override
                 protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {

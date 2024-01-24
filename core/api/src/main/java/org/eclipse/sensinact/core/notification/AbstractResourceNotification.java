@@ -14,6 +14,8 @@ package org.eclipse.sensinact.core.notification;
 
 public abstract class AbstractResourceNotification {
 
+    public String modelPackageUri;
+
     public String model;
 
     public String provider;

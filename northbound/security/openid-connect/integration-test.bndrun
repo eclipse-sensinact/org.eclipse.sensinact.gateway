@@ -2,13 +2,17 @@
 
 -runrequires: \
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
-	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='slf4j.simple',\
 	bnd.identity;id='io.jsonwebtoken.jjwt-impl'
 -resolve.effective: active
 
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
+
+# These packages are also provided by the gecko.emf.osgi.component project
+# so we blacklist the API for resolve consistency
+-runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
+	bnd.identity;id='org.osgi.service.cm'
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \
@@ -46,7 +50,6 @@
 	org.mockito.mockito-core;version='[4.7.0,4.7.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
-	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.test.common;version='[1.2.1,1.2.2)',\
 	org.osgi.test.junit5;version='[1.2.1,1.2.2)',\

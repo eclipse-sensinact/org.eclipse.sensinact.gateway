@@ -24,11 +24,17 @@ public interface SensinactModelManager extends CommandScoped {
 
     ModelBuilder createModel(String model);
 
+    ModelBuilder createModel(String modelPackageUri, String model);
+
     Model getModel(String model);
+
+    Model getModel(String modelPackageUri, String model);
 
     void deleteModel(String model);
 
-    void registerModel(String model);
+    void deleteModel(String modelPackageUri, String model);
+
+    void registerModel(String modelPackageUri, String model);
 
     void registerModel(InputStream model);
 
