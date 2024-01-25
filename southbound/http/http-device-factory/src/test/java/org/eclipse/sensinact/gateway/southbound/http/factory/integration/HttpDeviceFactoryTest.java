@@ -49,18 +49,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests the HTTP device factory
  */
-@ExtendWith(ServiceExtension.class)
 public class HttpDeviceFactoryTest {
 
     static QueuedThreadPool threadPool;

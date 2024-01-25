@@ -121,20 +121,20 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Gecko -->
+    <!-- Jersey based OSGi REST Whiteboard -->
     <dependency>
-      <groupId>org.geckoprojects.jakartars</groupId>
-      <artifactId>org.gecko.rest.jersey.config</artifactId>
+      <groupId>org.eclipse.osgi-technology.rest</groupId>
+      <artifactId>org.eclipse.osgitech.rest</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.geckoprojects.jakartars</groupId>
-      <artifactId>org.gecko.rest.jersey.sse</artifactId>
+      <groupId>org.eclipse.osgi-technology.rest</groupId>
+      <artifactId>org.eclipse.osgitech.rest.sse</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.geckoprojects.jakartars</groupId>
-      <artifactId>org.gecko.rest.jersey.jetty</artifactId>
+      <groupId>org.eclipse.osgi-technology.rest</groupId>
+      <artifactId>org.eclipse.osgitech.rest.jetty</artifactId>
       <scope>test</scope>
     </dependency>
 

@@ -30,11 +30,8 @@ import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith(ServiceExtension.class)
 public class SubscribeTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
