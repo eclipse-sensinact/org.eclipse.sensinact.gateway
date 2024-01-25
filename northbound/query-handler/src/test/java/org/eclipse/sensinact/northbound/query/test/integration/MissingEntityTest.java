@@ -42,14 +42,10 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith(ServiceExtension.class)
 public class MissingEntityTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
@@ -59,8 +55,6 @@ public class MissingEntityTest {
     private static final String RESOURCE = "resource";
     private static final Integer VALUE = 42;
 
-    @InjectService
-    SensiNactSessionManager sessionManager;
     SensiNactSession session;
 
     @InjectService
@@ -72,13 +66,8 @@ public class MissingEntityTest {
     final TestUtils utils = new TestUtils();
 
     @BeforeEach
-    void start() throws InterruptedException {
+    void start(@InjectService SensiNactSessionManager sessionManager) throws InterruptedException {
         session = sessionManager.getDefaultSession(USER);
-    }
-
-    @AfterEach
-    void stop() {
-        session = null;
     }
 
     /**

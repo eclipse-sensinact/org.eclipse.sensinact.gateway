@@ -30,10 +30,8 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.InjectService;
@@ -41,12 +39,9 @@ import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 import jakarta.ws.rs.core.Application;
 
-@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class MissingEntityTest {
 
     @BeforeEach
@@ -68,12 +63,6 @@ public class MissingEntityTest {
             Thread.sleep(200);
         }
         throw new AssertionFailedError("REST API did not appear");
-    }
-
-    @AfterEach
-    public void clear(@InjectConfiguration("sensinact.northbound.rest") Configuration cm) throws Exception {
-        cm.delete();
-        Thread.sleep(500);
     }
 
     private static final String PROVIDER = "RestMissingSvcProvider";

@@ -35,6 +35,8 @@ Import-Package: \
     restrict:=warning; is:=ignore,\
     "While traversing the type tree for org.keycloak.representations.* cannot find class org.eclipse.microprofile.openapi.annotations.*"; \
     restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class com.google.auto.service.*"; \
+    restrict:=warning; is:=ignore,\
     "While traversing the type tree for org.testcontainers.* cannot find class com.google.j2objc.annotations.*"; \
     restrict:=warning; is:=ignore,\
     "While traversing the type tree for org.testcontainers.* cannot find class lombok.*"; \

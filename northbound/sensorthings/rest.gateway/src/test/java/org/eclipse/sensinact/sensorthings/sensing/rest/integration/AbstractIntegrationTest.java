@@ -95,7 +95,6 @@ public class AbstractIntegrationTest {
     @AfterEach
     void stop() {
         session.expire();
-        session = null;
 
         thread.execute(new AbstractSensinactCommand<Void>() {
             @Override
