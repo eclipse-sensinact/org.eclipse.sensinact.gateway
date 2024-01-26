@@ -270,6 +270,13 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
         final String provider = NamingUtils.sanitizeName(rawProvider, false);
 
+        // Extract the modelPackageUri
+        String modelPackageUri = null;
+        if (recordState.placeholders.containsKey(KEY_MODEL_PACKAGE_URI)) {
+            modelPackageUri = getFieldString(record, recordState.placeholders.get(KEY_MODEL_PACKAGE_URI),
+                    options);
+        }
+
         // Extract the model
         final String model;
         if (recordState.placeholders.containsKey(KEY_MODEL)) {
@@ -294,7 +301,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (nameKey != null) {
             final String name = getFieldString(record, nameKey, options);
             if (name != null) {
-                bulk.add(makeDto(model, provider, "admin", "friendlyName", name, timestamp));
+                bulk.add(makeDto(modelPackageUri, model, provider, "admin", "friendlyName", name, timestamp));
             }
         }
 
@@ -303,7 +310,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         try {
             location = computeLocation(record, recordState.placeholders, configuration.mappingOptions);
             if (location != null) {
-                bulk.add(makeDto(model, provider, "admin", "location", location, timestamp));
+                bulk.add(makeDto(modelPackageUri, model, provider, "admin", "location", location, timestamp));
             }
         } catch (JsonProcessingException e) {
             throw new ParserException("Error parsing location of " + provider, e);
@@ -319,7 +326,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     if (rcMapping.isMetadata()) {
                         logger.warn("Metadata update not supported.");
                     } else {
-                        bulk.add(makeDto(model, provider, service, rcName, value, timestamp));
+                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value, timestamp));
                     }
                 }
             } catch (Exception e) {
@@ -337,7 +344,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     if (rcLiteral.isMetadata()) {
                         logger.warn("Metadata update not supported.");
                     } else {
-                        bulk.add(makeDto(model, provider, service, rcName, value, timestamp));
+                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value, timestamp));
                     }
                 }
             } catch (Exception e) {
@@ -356,9 +363,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Prepares a generic DTO from the given information
      */
-    private GenericDto makeDto(final String model, final String provider, final String service, final String resource,
+    private GenericDto makeDto(final String modelPackageUri, final String model, final String provider,
+            final String service, final String resource,
             final Object value, Instant timestamp) {
         final GenericDto dto = new GenericDto();
+        dto.modelPackageUri = modelPackageUri;
         dto.model = model;
         dto.provider = provider;
         dto.service = service;
