@@ -1,6 +1,9 @@
 {
   "parser": "json",
   "mapping": {
+    "@modelPackageUri": {
+      "literal": "http://test.de"
+    },
     "@provider": "Name",
     "data/value": "Value",
     "sensor/city": {

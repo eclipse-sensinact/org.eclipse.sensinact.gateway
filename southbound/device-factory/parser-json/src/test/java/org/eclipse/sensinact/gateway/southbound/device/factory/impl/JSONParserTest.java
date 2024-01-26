@@ -123,6 +123,18 @@ public class JSONParserTest {
     }
 
     /**
+     * Get the DTO matching the given resource
+     */
+    GenericDto checkModelPackageUri(final String modelPackageUri) {
+        for (BulkGenericDto bulk : bulks) {
+            for (GenericDto dto : bulk.dtos) {
+                assertEquals(modelPackageUri, dto.modelPackageUri);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Get the value of the resource in the bulks
      */
     <T> T getResourceValue(final String provider, final String service, final String resource, Class<T> rcType) {
@@ -151,6 +163,8 @@ public class JSONParserTest {
 
         // Apply mapping
         deviceMapper.handle(config, Map.of(), fileContent);
+
+        checkModelPackageUri("http://test.de");
 
         // Ensure value and type
         assertEquals(94, getResourceValue(provider1, "data", "value", Integer.class));

@@ -18,6 +18,11 @@ package org.eclipse.sensinact.gateway.southbound.device.factory;
 public interface IPlaceHolderKeys {
 
     /**
+     * Record value is the model package uri
+     */
+    String KEY_MODEL_PACKAGE_URI = "@modelPackageUri";
+
+    /**
      * Record value is the model name
      */
     String KEY_MODEL = "@model";
