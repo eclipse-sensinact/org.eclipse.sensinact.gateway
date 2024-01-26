@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2024 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.sensinact.northbound.query.dto.jackson.SensinactPathDeserializer;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -110,6 +113,7 @@ public class SensinactPath {
     /**
      * Checks if this path has any meaningful value
      */
+    @JsonIgnore
     public boolean isEmpty() {
         return !hasProvider() && !hasService() && !hasResource() && !hasMetadata();
     }

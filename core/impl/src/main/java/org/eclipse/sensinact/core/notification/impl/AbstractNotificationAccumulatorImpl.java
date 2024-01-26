@@ -40,9 +40,10 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         }
     }
 
-    protected LifecycleNotification createLifecycleNotification(Status status, String model, String provider,
+    protected LifecycleNotification createLifecycleNotification(Status status, String modelPackageUri, String model, String provider,
             String service, String resource, Object initialValue, Map<String, Object> initialMetadata) {
         LifecycleNotification ln = new LifecycleNotification();
+        ln.modelPackageUri = modelPackageUri;
         ln.model = model;
         ln.provider = provider;
         ln.service = service;
@@ -53,10 +54,11 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         return ln;
     }
 
-    protected ResourceMetaDataNotification createResourceMetaDataNotification(String model, String provider,
+    protected ResourceMetaDataNotification createResourceMetaDataNotification(String modelPackageUri, String model, String provider,
             String service, String resource, Map<String, Object> oldValues, Map<String, Object> newValues,
             Instant timestamp) {
         ResourceMetaDataNotification rn = new ResourceMetaDataNotification();
+        rn.modelPackageUri = modelPackageUri;
         rn.model = model;
         rn.provider = provider;
         rn.service = service;
@@ -67,9 +69,10 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         return rn;
     }
 
-    protected ResourceDataNotification createResourceDataNotification(String model, String provider, String service,
+    protected ResourceDataNotification createResourceDataNotification(String modelPackageUri, String model, String provider, String service,
             String resource, Class<?> type, Object oldValue, Object newValue, Instant timestamp) {
         ResourceDataNotification rn = new ResourceDataNotification();
+        rn.modelPackageUri = modelPackageUri;
         rn.model = model;
         rn.provider = provider;
         rn.service = service;
@@ -81,9 +84,10 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         return rn;
     }
 
-    protected ResourceActionNotification createResourceActionNotification(String model, String provider, String service,
+    protected ResourceActionNotification createResourceActionNotification(String modelPackageUri, String model, String provider, String service,
             String resource, Instant timestamp) {
         ResourceActionNotification rn = new ResourceActionNotification();
+        rn.modelPackageUri = modelPackageUri;
         rn.model = model;
         rn.provider = provider;
         rn.service = service;

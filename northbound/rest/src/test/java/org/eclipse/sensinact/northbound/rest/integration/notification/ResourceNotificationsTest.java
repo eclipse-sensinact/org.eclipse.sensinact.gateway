@@ -31,13 +31,13 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceLifecycleNotificationDTO;
 import org.eclipse.sensinact.northbound.rest.integration.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.jakartars.client.SseEventSourceFactory;
@@ -46,8 +46,6 @@ import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
@@ -56,7 +54,6 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.sse.SseEventSource;
 
-@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class ResourceNotificationsTest {
 
     @BeforeEach
@@ -78,12 +75,6 @@ public class ResourceNotificationsTest {
             Thread.sleep(200);
         }
         throw new AssertionFailedError("REST API did not appear");
-    }
-
-    @AfterEach
-    public void clear(@InjectConfiguration("sensinact.northbound.rest") Configuration cm) throws Exception {
-        cm.delete();
-        Thread.sleep(500);
     }
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
@@ -165,9 +156,11 @@ public class ResourceNotificationsTest {
             // First will be admin friendlyName
             ResourceDataNotification friendlyName = queue.poll(1, TimeUnit.SECONDS);
             assertNotNull(friendlyName);
-            assertEquals("friendlyName", friendlyName.resource,
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), friendlyName.resource,
                     "First event was not FriendlyName, so the Provider already exists. It is likely that the data folder wasn't cleared and this is a remnant of a previous testrun.");
-            // second will be will be admin modelURI
+            // second will be will be admin model
+            assertNotNull(queue.poll(1, TimeUnit.SECONDS));
+            // third will be will be admin model package uri
             assertNotNull(queue.poll(1, TimeUnit.SECONDS));
             // now ours should arrive
             ResourceDataNotification localNotif = queue.poll(2, TimeUnit.SECONDS);

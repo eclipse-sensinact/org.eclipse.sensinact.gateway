@@ -66,8 +66,6 @@ public class ResourceAccessTest {
     private static final Integer VALUE = 42;
     private static final Integer VALUE_2 = 84;
 
-    @InjectService
-    SensiNactSessionManager sessionManager;
     SensiNactSession session;
 
     @InjectService
@@ -81,17 +79,14 @@ public class ResourceAccessTest {
     final TestUtils utils = new TestUtils();
 
     @BeforeEach
-    void start() throws Exception {
+    void start(@InjectService SensiNactSessionManager sessionManager) throws Exception {
         session = sessionManager.getDefaultSession(USER);
     }
 
     @AfterEach
     void stop() {
-        if (queue != null) {
-            session.activeListeners().keySet().forEach(session::removeListener);
-            queue = null;
-        }
-        session = null;
+        session.activeListeners().keySet().forEach(session::removeListener);
+        session.expire();
     }
 
     /**

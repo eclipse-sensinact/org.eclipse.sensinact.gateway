@@ -30,17 +30,13 @@ import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.common.annotation.config.InjectConfiguration;
-import org.osgi.test.common.annotation.config.WithConfiguration;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class TemperatureSensorTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
@@ -60,15 +56,14 @@ public class TemperatureSensorTest {
      * @throws Exception
      */
     @Test
-    void basicSubscribe(
-            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.virtual.temperature", location = "?")) Configuration config)
-            throws Exception {
+    void basicSubscribe(@InjectService ConfigurationAdmin configAdmin) throws Exception {
 
         BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
 
         SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.addListener(List.of("*"), (t, e) -> queue.offer(e), null, null, null);
 
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.virtual.temperature", "?");
         config.update(new Hashtable<String, Object>(
                 Map.of("name", "temp1", "latitude", 1.0d, "longitude", 2.0d, "interval", 1000L)));
 
@@ -76,15 +71,15 @@ public class TemperatureSensorTest {
 
         assertNotNull(notification);
         assertEquals("temp1", notification.provider);
-        assertEquals("admin", notification.service);
-        assertEquals("friendlyName", notification.resource);
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), notification.resource);
 
         notification = queue.poll(5, TimeUnit.SECONDS);
 
         assertNotNull(notification);
         assertEquals("temp1", notification.provider);
-        assertEquals("admin", notification.service);
-        assertEquals("location", notification.resource);
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), notification.resource);
         assertNull(notification.oldValue);
         assertInstanceOf(Point.class, notification.newValue);
         Point p = (Point) notification.newValue;
@@ -95,8 +90,15 @@ public class TemperatureSensorTest {
 
         assertNotNull(notification);
         assertEquals("temp1", notification.provider);
-        assertEquals("admin", notification.service);
-        assertEquals("modelUri", notification.resource);
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), notification.resource);
+
+        notification = queue.poll(5, TimeUnit.SECONDS);
+
+        assertNotNull(notification);
+        assertEquals("temp1", notification.provider);
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), notification.resource);
 
         notification = queue.poll(100, TimeUnit.MILLISECONDS);
         assertNotNull(notification);

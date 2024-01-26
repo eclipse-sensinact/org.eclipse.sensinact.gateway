@@ -33,6 +33,7 @@ import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.MapAction;
 import org.eclipse.sensinact.core.annotation.dto.Metadata;
 import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
@@ -105,6 +106,7 @@ public class AnnotationMapping {
         String fieldName = f.getName();
         Class<?> type = data.type() == Object.class ? f.getType() : data.type();
 
+        Function<Object, String> modelPackageUri = getModelPackageUriMappingForField(clazz, f);
         Function<Object, String> model = getModelNameMappingForField(clazz, f);
         Function<Object, String> provider = getProviderNameMappingForField(clazz, f);
         Function<Object, String> service = getServiceNameMappingForField(clazz, f);
@@ -121,6 +123,7 @@ public class AnnotationMapping {
                 return null;
             }
 
+            dto.modelPackageUri = modelPackageUri.apply(o);
             dto.model = model.apply(o);
             dto.provider = provider.apply(o);
             dto.service = service.apply(o);
@@ -136,6 +139,7 @@ public class AnnotationMapping {
             Metadata metadata) {
         String fieldName = f.getName();
 
+        Function<Object, String> modelPackageUri = getModelPackageUriMappingForField(clazz, f);
         Function<Object, String> model = getModelNameMappingForField(clazz, f);
         Function<Object, String> provider = getProviderNameMappingForField(clazz, f);
         Function<Object, String> service = getServiceNameMappingForField(clazz, f);
@@ -177,7 +181,8 @@ public class AnnotationMapping {
             } else {
                 processedMd = Collections.singletonMap(key, md);
             }
-
+            String modelPackageUriValue = modelPackageUri.apply(o);
+            dto.modelPackageUri = NOT_SET.equals(modelPackageUriValue) ? null : modelPackageUriValue;
             dto.model = model.apply(o);
             dto.provider = provider.apply(o);
             dto.service = service.apply(o);
@@ -187,6 +192,15 @@ public class AnnotationMapping {
             return dto;
         };
         return dtoMapper;
+    }
+
+    private static Function<Object, String> getModelPackageUriMappingForField(Class<?> clazz, Field f) {
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, ModelPackageUri.class);
+        if (mapping == null) {
+            // Models are optional
+            mapping = o -> null;
+        }
+        return mapping;
     }
 
     private static Function<Object, String> getModelNameMappingForField(Class<?> clazz, Field f) {

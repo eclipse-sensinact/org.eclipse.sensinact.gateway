@@ -12,6 +12,7 @@ deploy.sh
 bin
 build
 nbproject
+generated
 
 # ANTLR
 .antlr/

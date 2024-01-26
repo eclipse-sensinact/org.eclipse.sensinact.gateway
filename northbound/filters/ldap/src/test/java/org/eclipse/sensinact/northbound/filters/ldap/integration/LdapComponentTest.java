@@ -29,11 +29,8 @@ import org.eclipse.sensinact.northbound.filters.api.FilterCommandHelper;
 import org.eclipse.sensinact.northbound.filters.api.IFilterHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith(ServiceExtension.class)
 public class LdapComponentTest {
 
     @InjectService

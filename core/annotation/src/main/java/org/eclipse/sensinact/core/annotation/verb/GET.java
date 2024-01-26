@@ -19,6 +19,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.temporal.ChronoUnit;
 
+import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 
 /**
@@ -43,12 +44,21 @@ public @interface GET {
     ReturnType value() default ReturnType.VALUE;
 
     /**
+     * The model package URI for the model that this GET method applies to, can be omitted if {@link #value()}
+     * is {@link ReturnType#DTO} and the dto defines the model names and package URIs. If neither is supplied,
+     * a package URI will be derived from the model name.
+     *
+     * @return
+     */
+    String modelPackageUri() default AnnotationConstants.NOT_SET;;
+
+    /**
      * The model that this GET method applies to, can be omitted if {@link #value()}
      * is {@link ReturnType#DTO} and the dto defines the model names
      *
      * @return
      */
-    String model() default "<<NOT_SET>>";
+    String model() default AnnotationConstants.NOT_SET;;
 
     /**
      * The service that this GET method applies to, can be omitted if
@@ -57,14 +67,14 @@ public @interface GET {
      *
      * @return
      */
-    String service() default "<<NOT_SET>>";
+    String service() default AnnotationConstants.NOT_SET;;
 
     /**
      * The resource that this GET method applies to
      *
      * @return
      */
-    String resource() default "<<NOT_SET>>";
+    String resource() default AnnotationConstants.NOT_SET;;
 
     /**
      * The type of the resource data. If not set then the return type of the method

@@ -38,16 +38,16 @@ import java.time.Instant;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.spi.JsonProvider;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.spi.JsonProvider;
 
-import org.apache.felix.cm.json.ConfigurationReader;
-import org.apache.felix.cm.json.ConfigurationResource;
-import org.apache.felix.cm.json.Configurations;
+import org.apache.felix.cm.json.io.ConfigurationReader;
+import org.apache.felix.cm.json.io.ConfigurationResource;
+import org.apache.felix.cm.json.io.Configurations;
 import org.eclipse.sensinact.gateway.feature.utilities.test.ServerProcessHandler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

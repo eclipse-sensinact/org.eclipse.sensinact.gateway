@@ -24,12 +24,13 @@ public interface NotificationAccumulator {
      * <li>DELETED: then an added event is added next</li>
      * </ul>
      *
+     * @param model the provider model package uri
      * @param model the provider model
      * @param name  the provider name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
-    void addProvider(String model, String name);
+    void addProvider(String modelPackageUri, String model, String name);
 
     /**
      * Called to remove a provider. If the latest event for this provider is:
@@ -38,12 +39,13 @@ public interface NotificationAccumulator {
      * <li>DELETED: then the events are collapsed</li>
      * </ul>
      *
+     * @param model the provider model package uri
      * @param model the provider model
      * @param name  the provider name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
-    void removeProvider(String model, String name);
+    void removeProvider(String modelPackageUri, String model, String name);
 
     /**
      * Called to add a service. If the latest event for this service is:
@@ -52,13 +54,14 @@ public interface NotificationAccumulator {
      * <li>DELETED: then an added event is added next</li>
      * </ul>
      *
+     * @param model the provider model package uri
      * @param model    the provider model
      * @param provider the provider name
      * @param name     the service name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
-    void addService(String model, String provider, String name);
+    void addService(String modelPackageUri, String model, String provider, String name);
 
     /**
      * Called to remove a service. If the latest event for this service is:
@@ -67,13 +70,14 @@ public interface NotificationAccumulator {
      * <li>DELETED: then the events are collapsed</li>
      * </ul>
      *
+     * @param model the provider model package uri
      * @param model    the provider model
      * @param provider the provider name
      * @param name     the service name
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
-    void removeService(String model, String provider, String name);
+    void removeService(String modelPackageUri, String model, String provider, String name);
 
     /**
      * Called to add a resource. If the latest event for this resource is:
@@ -82,6 +86,7 @@ public interface NotificationAccumulator {
      * <li>DELETED: then an added event is added next</li>
      * </ul>
      *
+     * @param model the provider model package uri
      * @param model    the provider model
      * @param provider the provider name
      * @param service  the service name
@@ -89,7 +94,7 @@ public interface NotificationAccumulator {
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
-    void addResource(String model, String provider, String service, String name);
+    void addResource(String modelPackageUri, String model, String provider, String service, String name);
 
     /**
      * Called to remove a resource. If the latest event for this resource is:
@@ -98,6 +103,7 @@ public interface NotificationAccumulator {
      * <li>DELETED: then the events are collapsed</li>
      * </ul>
      *
+     * @param model the provider model package uri
      * @param model    the provider model
      * @param provider the provider name
      * @param service  the service name
@@ -105,12 +111,13 @@ public interface NotificationAccumulator {
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
-    void removeResource(String model, String provider, String service, String name);
+    void removeResource(String modelPackageUri, String model, String provider, String service, String name);
 
     /**
      * Called to update metadata - provides the complete snapshot of metadata before
      * and after
      *
+     * @param model the provider model package uri
      * @param model     the provider model
      * @param provider  the provider name
      * @param service   the service name
@@ -124,13 +131,14 @@ public interface NotificationAccumulator {
      * @throws IllegalStateException    if this accumulator has been completed with
      *                                  {@link #completeAndSend()}
      */
-    void metadataValueUpdate(String model, String provider, String service, String resource,
+    void metadataValueUpdate(String modelPackageUri, String model, String provider, String service, String resource,
             Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp);
 
     /**
      * Called to update a resource value. If multiple updates occur they will be
      * collapsed into single events
      *
+     * @param model the provider model package uri
      * @param model     the provider model
      * @param provider  the provider name
      * @param service   the service name
@@ -145,13 +153,14 @@ public interface NotificationAccumulator {
      * @throws IllegalStateException    if this accumulator has been completed with
      *                                  {@link #completeAndSend()}
      */
-    void resourceValueUpdate(String model, String provider, String service, String resource, Class<?> type,
+    void resourceValueUpdate(String modelPackageUri, String model, String provider, String service, String resource, Class<?> type,
             Object oldValue, Object newValue, Instant timestamp);
 
     /**
      * Called to notify of a resource action - if multiple actions occur they will
      * be sorted into timestamp order
      *
+     * @param model the provider model package uri
      * @param model     the provider model
      * @param provider  the provider name
      * @param service   the service name
@@ -163,7 +172,7 @@ public interface NotificationAccumulator {
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}
      */
-    void resourceAction(String model, String provider, String service, String resource, Instant timestamp);
+    void resourceAction(String modelPackageUri, String model, String provider, String service, String resource, Instant timestamp);
 
     /**
      * Called to complete a batch of notifications and triggers sending.

@@ -22,19 +22,15 @@ import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.security.UserInfo;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
@@ -46,13 +42,10 @@ import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response.Status;
 
-@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 public class SecureAccessTest {
 
     @BeforeEach
@@ -76,12 +69,6 @@ public class SecureAccessTest {
         throw new AssertionFailedError("REST API did not appear");
     }
 
-    @AfterEach
-    public void clear(@InjectConfiguration("sensinact.northbound.rest") Configuration cm) throws Exception {
-        cm.delete();
-        Thread.sleep(500);
-    }
-
     private static final String PROVIDER = "RestSecureAccessProvider";
     private static final String SERVICE = "service";
     private static final String RESOURCE = "resource";
@@ -95,9 +82,6 @@ public class SecureAccessTest {
     private static final String CREDENTIAL = "Secret";
 
     private static final String BASIC_HEADER = "Basic QWxpY2U6U2VjcmV0";
-
-    @InjectService
-    SensiNactSessionManager sessionManager;
 
     @InjectService
     DataUpdate push;

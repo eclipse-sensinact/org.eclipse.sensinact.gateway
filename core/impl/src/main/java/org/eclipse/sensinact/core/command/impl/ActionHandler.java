@@ -18,6 +18,6 @@ import org.osgi.util.promise.Promise;
 
 public interface ActionHandler {
 
-    public Promise<Object> act(String model, String provider, String service, String resource,
+    public Promise<Object> act(String modelPackageUri, String model, String provider, String service, String resource,
             Map<String, Object> parameters);
 }

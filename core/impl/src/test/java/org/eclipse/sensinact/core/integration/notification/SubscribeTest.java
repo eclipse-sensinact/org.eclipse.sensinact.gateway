@@ -30,11 +30,8 @@ import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith(ServiceExtension.class)
 public class SubscribeTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
@@ -98,7 +95,14 @@ public class SubscribeTest {
 
         assertEquals(PROVIDER, notification.provider);
         assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_URI.getName(), notification.resource);
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), notification.resource);
+        assertEquals(null, notification.oldValue);
+
+        notification = queue.poll(1, TimeUnit.SECONDS);
+
+        assertEquals(PROVIDER, notification.provider);
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), notification.resource);
         assertEquals(null, notification.oldValue);
 
         notification = queue.poll(1, TimeUnit.SECONDS);

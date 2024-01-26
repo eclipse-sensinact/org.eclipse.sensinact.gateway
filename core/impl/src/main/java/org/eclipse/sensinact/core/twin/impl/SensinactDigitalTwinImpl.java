@@ -32,6 +32,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
@@ -68,8 +69,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.eclipse.sensinact.core.twin.SensinactDigitalTwin#getProvider(org.
+     * @see org.eclipse.sensinact.core.twin.SensinactDigitalTwin#getProvider(org.
      * eclipse.emf.ecore.EClass, java.lang.String)
      */
     @Override
@@ -89,15 +89,16 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     /**
      * Returns the known providers
      */
-    public List<SensinactProviderImpl> getProviders(String model) {
+    public List<SensinactProviderImpl> getProviders(String modelPackageUri, String model) {
         checkValid();
-        return nexusImpl.getProviders(model).stream().map(this::toProvider).collect(Collectors.toList());
+        return nexusImpl.getProviders(modelPackageUri, model).stream().map(this::toProvider)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public SensinactProviderImpl getProvider(String model, String providerName) {
+    public SensinactProviderImpl getProvider(String modelPackageUri, String model, String providerName) {
         checkValid();
-        final Provider provider = nexusImpl.getProvider(model, providerName);
+        final Provider provider = nexusImpl.getProvider(modelPackageUri, model, providerName);
         if (provider == null) {
             return null;
         }
@@ -117,20 +118,21 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     }
 
     @Override
-    public SensinactEMFProvider createProvider(String model, String providerName) {
-        return toProvider(nexusImpl.createProviderInstance(model, providerName));
+    public SensinactEMFProvider createProvider(String modelPackageUri, String model, String providerName) {
+        return toProvider(nexusImpl.createProviderInstance(modelPackageUri, model, providerName));
     }
 
     @Override
-    public SensinactEMFProvider createProvider(String model, String providerName, Instant instant) {
+    public SensinactEMFProvider createProvider(String modelPackageUri, String model, String providerName,
+            Instant instant) {
         return instant == null ? createProvider(model, providerName)
-                : toProvider(nexusImpl.createProviderInstance(model, providerName, instant));
+                : toProvider(nexusImpl.createProviderInstance(modelPackageUri, model, providerName, instant));
     }
 
     @Override
-    public SensinactServiceImpl getService(String model, String providerName, String service) {
+    public SensinactServiceImpl getService(String modelPackageUri, String model, String providerName, String service) {
         checkValid();
-        return getService(nexusImpl.getProvider(model, providerName), model, service);
+        return getService(nexusImpl.getProvider(modelPackageUri, model, providerName), model, service);
     }
 
     @Override
@@ -138,6 +140,18 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         checkValid();
         Provider provider = nexusImpl.getProvider(providerName);
         return getService(provider, nexusImpl.getProviderModel(providerName), service);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.core.twin.SensinactDigitalTwin#getService(java.lang.
+     * String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public SensinactService getService(String model, String providerName, String service) {
+        return getService(null, model, providerName, service);
     }
 
     private SensinactServiceImpl getService(Provider provider, String model, String service) {
@@ -154,10 +168,23 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return toService(snProvider, provider, (EReference) svcFeature);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.core.twin.SensinactDigitalTwin#getResource(java.lang.
+     * String, java.lang.String, java.lang.String, java.lang.String)
+     */
     @Override
-    public SensinactResourceImpl getResource(String model, String providerName, String service, String resource) {
+    public SensinactResource getResource(String model, String providerName, String service, String resource) {
+        return getResource(null, model, providerName, service, resource);
+    }
+
+    @Override
+    public SensinactResourceImpl getResource(String modelPackageUri, String model, String providerName, String service,
+            String resource) {
         checkValid();
-        return getResource(nexusImpl.getProvider(model, providerName), model, service, resource);
+        return getResource(nexusImpl.getProvider(modelPackageUri, model, providerName), model, service, resource);
     }
 
     public SensinactResourceImpl getResource(String providerName, String service, String resource) {
@@ -194,10 +221,10 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return toResource(snSvc, provider, svcFeature, rcFeature);
     }
 
-    public <T> TimedValue<T> getResourceValue(String model, String providerName, String service, String resource,
-            Class<T> type) {
+    public <T> TimedValue<T> getResourceValue(String modelPackageUri, String model, String providerName, String service,
+            String resource, Class<T> type) {
         checkValid();
-        return getResourceValue(nexusImpl.getProvider(model, providerName), service, resource, type);
+        return getResourceValue(nexusImpl.getProvider(modelPackageUri, model, providerName), service, resource, type);
     }
 
     public <T> TimedValue<T> getResourceValue(String providerName, String service, String resource, Class<T> type) {
@@ -442,8 +469,9 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
 
         final EStructuralFeature sf = nexusProvider.eClass().getEStructuralFeature(serviceName);
-        final Optional<ETypedElement> foundRc = nexusImpl.getResourcesForService((EClass) sf.getEType()).filter(f -> f.getName().equals(resourceName)).findFirst();
-        if(foundRc.isEmpty()) {
+        final Optional<ETypedElement> foundRc = nexusImpl.getResourcesForService((EClass) sf.getEType())
+                .filter(f -> f.getName().equals(resourceName)).findFirst();
+        if (foundRc.isEmpty()) {
             // Resource not found
             return null;
         }
@@ -463,5 +491,53 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         fillInResource(rcSnapshot);
         svcSnapshot.add(rcSnapshot);
         return rcSnapshot;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin#getProviders(java
+     * .lang.String)
+     */
+    @Override
+    public List<? extends SensinactEMFProvider> getProviders(String model) {
+        return getProviders(null, model);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin#getProvider(java.
+     * lang.String, java.lang.String)
+     */
+    @Override
+    public SensinactEMFProvider getProvider(String model, String providerName) {
+        return getProvider(null, model, providerName);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin#createProvider(
+     * java.lang.String, java.lang.String)
+     */
+    @Override
+    public SensinactEMFProvider createProvider(String model, String providerName) {
+        return createProvider(null, model, providerName);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin#createProvider(
+     * java.lang.String, java.lang.String, java.time.Instant)
+     */
+    @Override
+    public SensinactEMFProvider createProvider(String model, String providerName, Instant created) {
+        return createProvider(null, model, providerName, created);
     }
 }

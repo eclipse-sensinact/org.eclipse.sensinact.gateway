@@ -23,13 +23,19 @@ public abstract class ResourceCommand<T> extends AbstractTwinCommand<T> {
     private final String provider;
     private final String service;
     private final String resource;
+    private String packageUri;
 
     public ResourceCommand(String provider, String service, String resource) {
-        this(null, provider, service, resource);
+        this(null, null, provider, service, resource);
     }
 
     public ResourceCommand(String model, String provider, String service, String resource) {
+        this(null, model, provider, service, resource);
+    }
+
+    public ResourceCommand(String packageUri, String model, String provider, String service, String resource) {
         super();
+        this.packageUri = packageUri;
         this.model = model;
         this.provider = provider;
         this.service = service;
@@ -39,7 +45,7 @@ public abstract class ResourceCommand<T> extends AbstractTwinCommand<T> {
     @Override
     protected final Promise<T> call(SensinactDigitalTwin twin, PromiseFactory pf) {
         SensinactResource r = model == null ? twin.getResource(provider, service, resource)
-                : twin.getResource(model, provider, service, resource);
+                : twin.getResource(packageUri, model, provider, service, resource);
         if (r == null) {
             return pf.failed(new IllegalArgumentException("Resource not found"));
         } else {

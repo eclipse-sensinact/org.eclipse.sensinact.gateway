@@ -94,7 +94,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     @Override
     public void delete() {
         checkValid();
-        nexus.deleteProvider(getModelName(), getName());
+        nexus.deleteProvider(provider.eClass().getEPackage().getNsURI(), getModelName(), getName());
     }
 
     public Promise<Void> update(Provider newVersion) {

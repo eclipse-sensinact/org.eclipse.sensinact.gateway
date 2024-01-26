@@ -18,13 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,21 +36,16 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
 import org.osgi.test.junit5.context.BundleContextExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 /**
  * Tests the metrics service
  */
-@ExtendWith({ BundleContextExtension.class, ServiceExtension.class, ConfigurationExtension.class })
 public class MetricsTest {
 
     private static final String GAUGE_NAME = "test.gauge";
@@ -61,36 +55,19 @@ public class MetricsTest {
     private static final String[] GAUGES_NAMES = new String[] { GAUGES_1, GAUGES_2 };
 
     /**
-     * Tested service
-     */
-    @InjectService
-    IMetricsManager metrics;
-
-    /**
-     * Bundle context
-     */
-    @InjectBundleContext
-    BundleContext context;
-
-    /**
      * Blocking queue to wait for events
      */
-    BlockingQueue<BulkGenericDto> queue;
+    final BlockingQueue<BulkGenericDto> queue = new ArrayBlockingQueue<>(4);
 
     /**
      * Flag to indicate if a gauge callback has been called
      */
-    AtomicBoolean gaugeCalled;
+    final AtomicBoolean gaugeCalled = new AtomicBoolean();
 
     /**
      * Flags to indicate which gauge callback were called
      */
-    Map<String, Boolean> gaugesCalled;
-
-    /**
-     * List of active service registrations
-     */
-    private final List<ServiceRegistration<?>> svcRegs = new ArrayList<>();
+    final Map<String, Boolean> gaugesCalled = new ConcurrentHashMap<>();
 
     /**
      * Test gauge class
@@ -128,46 +105,34 @@ public class MetricsTest {
         }
     }
 
-    @BeforeEach
-    void setUp() throws Exception {
-        queue = new ArrayBlockingQueue<>(4);
-        gaugeCalled = new AtomicBoolean();
-        gaugesCalled = new HashMap<>();
-
-        registerServices();
-    }
-
-    @AfterEach
-    void cleanUp() {
-        for (ServiceRegistration<?> ref : svcRegs) {
-            ref.unregister();
-        }
-        svcRegs.clear();
-
-        metrics.clear();
-
-        queue = null;
-        gaugeCalled = null;
-        gaugesCalled = null;
-    }
-
     /**
      * Registers a listener and gauges
      */
-    private void registerServices() throws Exception {
-        svcRegs.add(context.registerService(IMetricsListener.class, new TestListener(), null));
+    @BeforeEach
+    void setUp(@InjectBundleContext BundleContext context) throws Exception {
+        context.registerService(IMetricsListener.class, new TestListener(), null);
 
         TestGauge gauge = new TestGauge();
-        svcRegs.add(context.registerService(IMetricsGauge.class, gauge,
-                new Hashtable<>(Map.of(IMetricsGauge.NAME, GAUGE_NAME))));
-        svcRegs.add(context.registerService(IMetricsMultiGauge.class, gauge,
-                new Hashtable<>(Map.of(IMetricsMultiGauge.NAMES, GAUGES_NAMES))));
+        context.registerService(IMetricsGauge.class, gauge,
+                new Hashtable<>(Map.of(IMetricsGauge.NAME, GAUGE_NAME)));
+        context.registerService(IMetricsMultiGauge.class, gauge,
+                new Hashtable<>(Map.of(IMetricsMultiGauge.NAMES, GAUGES_NAMES)));
+    }
+
+    /**
+     * Registered services will be cleaned up by the {@link BundleContextExtension}.
+     * instance fields will be cleared out by the standard per-test instance lifecycle
+     * @param metrics
+     */
+    @AfterEach
+    void cleanUp(@InjectService IMetricsManager metrics) {
+        metrics.clear();
     }
 
     @Test
     @WithConfiguration(pid = "sensinact.metrics", location = "?", properties = {
             @Property(key = "enabled", value = "false"), @Property(key = "metrics.rate", value = "1") })
-    void testDisabled() throws Exception {
+    void testDisabled(@InjectService(filter = "(enabled=false)") IMetricsManager metrics) throws Exception {
         // At this point, listener and gauges should be registered
         metrics.getCounter("toto").inc();
 
@@ -179,7 +144,7 @@ public class MetricsTest {
     @Test
     @WithConfiguration(pid = "sensinact.metrics", location = "?", properties = {
             @Property(key = "enabled", value = "true"), @Property(key = "metrics.rate", value = "1") })
-    void testEnabled() throws Exception {
+    void testEnabled(@InjectService(filter = "(enabled=true)") IMetricsManager metrics) throws Exception {
         metrics.getCounter("toto").inc();
 
         // Wait for a bit

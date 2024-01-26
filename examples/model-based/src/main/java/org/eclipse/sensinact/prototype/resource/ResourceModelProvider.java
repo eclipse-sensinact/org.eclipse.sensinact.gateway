@@ -25,7 +25,7 @@ public class ResourceModelProvider implements ModelProvider {
 
     @Override
     public void init(SensinactModelManager manager) {
-        manager.registerModel("fan-resource.xml");
+        manager.registerModel("https://eclipse.org/sensinact/fan/1.0", "fan-resource.xml");
     }
 
     @Override

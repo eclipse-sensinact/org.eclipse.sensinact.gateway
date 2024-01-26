@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2024 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,32 +20,26 @@ import java.util.Map.Entry;
 import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
 
 import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Handles the deserialization of method parameters
  */
-public class ActParametersDeserializer extends StdDeserializer<Map<String, Object>> {
+public class ActParametersDeserializer extends StdNodeBasedDeserializer<Map<String, Object>> {
 
     private static final long serialVersionUID = 1L;
 
     public ActParametersDeserializer() {
-        this(null);
-    }
-
-    protected ActParametersDeserializer(final Class<?> vc) {
-        super(vc);
+        super(TypeFactory.defaultInstance().constructMapLikeType(Map.class, String.class, Object.class));
     }
 
     @Override
-    public Map<String, Object> deserialize(final JsonParser parser, final DeserializationContext ctxt)
-            throws IOException, JacksonException {
+    public Map<String, Object> convert(JsonNode node, DeserializationContext ctxt) throws IOException, JacksonException {
 
-        final JsonNode node = parser.getCodec().readTree(parser);
         if (node.isNull()) {
             return Map.of();
         }

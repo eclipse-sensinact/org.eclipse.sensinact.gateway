@@ -1,0 +1,15 @@
+{
+  ":configurator:resource-version": 1,
+  ":configurator:symbolic-name": "org.eclipse.sensinact.gateway.feature.null.test",
+  ":configurator:version": "0.0.1",
+  "test.null": {
+    "foo": null,
+    "valid": 42,
+    "test": {
+      "titi": null
+    }
+  },
+  "test.valid": {
+    "valid": 1
+  }
+}

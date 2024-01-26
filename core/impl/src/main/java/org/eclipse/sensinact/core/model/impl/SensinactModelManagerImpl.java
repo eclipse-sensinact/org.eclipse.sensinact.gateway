@@ -39,23 +39,47 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
     @Override
     public ModelBuilder createModel(String model) {
         checkValid();
-        return new ModelBuilderImpl(active, nexusImpl, model);
+        return new ModelBuilderImpl(active, nexusImpl, null, model);
+    }
+
+    @Override
+    public ModelBuilder createModel(String packageUri, String model) {
+        checkValid();
+        return new ModelBuilderImpl(active, nexusImpl, packageUri, model);
     }
 
     @Override
     public Model getModel(String model) {
-        checkValid();
-        return nexusImpl.getModel(model).map(eClass -> new ModelImpl(active, model, eClass, nexusImpl)).orElse(null);
+        return getModel(null, model);
     }
 
     @Override
+    public Model getModel(String packageUri, String model) {
+        checkValid();
+        return nexusImpl.getModel(packageUri, model).map(eClass -> new ModelImpl(active, model, eClass, nexusImpl))
+                .orElse(null);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.sensinact.core.model.SensinactModelManager#deleteModel(java.lang.
+     * String)
+     */
+    @Override
     public void deleteModel(String model) {
+        deleteModel(null, model);
+    }
+
+    @Override
+    public void deleteModel(String packageUri, String model) {
         checkValid();
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    public void registerModel(String model) {
+    public void registerModel(String packageUri, String model) {
         checkValid();
         throw new RuntimeException("Not implemented");
     }
@@ -75,8 +99,7 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.eclipse.sensinact.core.model.SensinactModelManager#getModel(org.
+     * @see org.eclipse.sensinact.core.model.SensinactModelManager#getModel(org.
      * eclipse.emf.ecore.EClass)
      */
     @Override
@@ -90,13 +113,11 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
     /*
      * (non-Javadoc)
      *
-     * @see
-     * org.eclipse.sensinact.core.model.SensinactModelManager#createModel(org.
+     * @see org.eclipse.sensinact.core.model.SensinactModelManager#createModel(org.
      * eclipse.emf.ecore.EClass)
      */
     @Override
     public ModelBuilder createModel(EClass model) {
         return new ModelBuilderImpl(active, nexusImpl, model);
     }
-
 }

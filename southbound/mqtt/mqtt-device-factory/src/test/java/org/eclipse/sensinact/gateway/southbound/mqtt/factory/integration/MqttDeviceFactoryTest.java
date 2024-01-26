@@ -41,12 +41,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
 
 import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
@@ -56,7 +54,6 @@ import io.moquette.broker.config.MemoryConfig;
 /**
  * Tests for the MQTT device factory
  */
-@ExtendWith(ConfigurationExtension.class)
 @WithFactoryConfiguration(factoryPid = "sensinact.southbound.mqtt", name = "h1", location = "?", properties = {
         @Property(key = "id", value = "handler1"), @Property(key = "host", value = "127.0.0.1"),
         @Property(key = "port", value = "2183"), @Property(key = "topics", value = "sensinact/mqtt/test1/+"), })

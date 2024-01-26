@@ -1,7 +1,7 @@
 {
   "id": "org.eclipse.sensinact.gateway.distribution.features:northbound-ogc-sensorthings-mqtt-feature:osgifeature:0.0.2-SNAPSHOT",
   "bundles": [
-    { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0" },
+    { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1" },
     { "id": "io.netty:netty-common:4.1.77.Final" },
     { "id": "io.netty:netty-buffer:4.1.77.Final" },
     { "id": "io.netty:netty-codec:4.1.77.Final" },

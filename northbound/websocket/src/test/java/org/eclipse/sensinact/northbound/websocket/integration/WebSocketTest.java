@@ -36,7 +36,6 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
@@ -51,22 +50,15 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultSubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultUnsubscribeDTO;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
 @WithConfiguration(pid = "sensinact.northbound.websocket", properties = @Property(key = "allow.anonymous", value = "true"))
 public class WebSocketTest {
-
-    @InjectService
-    SensiNactSessionManager sessionManager;
 
     @InjectService
     DataUpdate push;

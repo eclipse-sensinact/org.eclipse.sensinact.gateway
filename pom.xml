@@ -10,7 +10,9 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse.sensinact.gateway</groupId>
   <artifactId>sensinact-parent</artifactId>
@@ -82,7 +84,8 @@
 
   <scm>
     <connection>scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</connection>
-    <developerConnection>scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</developerConnection>
+    <developerConnection>
+      scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</developerConnection>
     <url>https://github.com/eclipse/org.eclipse.sensinact.gateway</url>
     <tag>HEAD</tag>
   </scm>
@@ -124,30 +127,35 @@
     <emf.ecore.version>2.33.0</emf.ecore.version>
     <emf.ecore.xmi.version>2.18.0</emf.ecore.xmi.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <jackson.version>2.14.0</jackson.version>
+    <jackson.version>2.16.1</jackson.version>
     <jjwt.version>0.11.5</jjwt.version>
 
     <!-- runtime dependencies -->
     <felix.framework.version>7.0.3</felix.framework.version>
     <felix.scr.version>2.2.2</felix.scr.version>
     <felix.configadmin.version>1.9.24</felix.configadmin.version>
-    <felix.cm.json.version>1.0.6</felix.cm.json.version>
-    <felix.feature.version>1.0.0</felix.feature.version>
-    <johnzon.version>1.2.19</johnzon.version>
+    <felix.cm.json.version>2.0.4</felix.cm.json.version>
+    <felix.feature.version>1.0.2</felix.feature.version>
+    <johnzon.version>2.0.0</johnzon.version>
     <aries.component-dsl.version>1.2.2</aries.component-dsl.version>
     <aries.typedevent.version>0.0.2-SNAPSHOT</aries.typedevent.version>
-    <aries.spifly.version>1.3.6</aries.spifly.version>
+    <aries.spifly.version>1.3.7</aries.spifly.version>
     <felix.servlet.version>2.1.0</felix.servlet.version>
     <antlr.version>4.12.0</antlr.version>
     <metrics.version>4.2.19</metrics.version>
 
     <!-- test dependency versions -->
-    <junit.version>5.9.0</junit.version>
-    <mockito.version>4.7.0</mockito.version>
-    <osgi.test.version>1.2.1</osgi.test.version>
+    <junit.version>5.10.1</junit.version>
+    <mockito.version>5.10.0</mockito.version>
+    <osgi.test.version>1.3.0-SNAPSHOT</osgi.test.version>
 
     <!-- plugin dependency versions -->
-    <bnd.version>7.0.0-SNAPSHOT</bnd.version>
+    <bnd.version>7.0.0</bnd.version>
+
+    <!-- Default properties for resolver setup in development -->
+    <save.test.bndrun.changes>true</save.test.bndrun.changes>
+    <verify.test.bndruns>false</verify.test.bndruns>
+
   </properties>
 
   <repositories>
@@ -201,7 +209,8 @@
     <pluginRepository>
       <id>eclipse-dash</id>
       <name>Eclipse Nexus</name>
-      <url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+      <url>
+        https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
@@ -283,6 +292,7 @@
         <groupId>org.geckoprojects.emf</groupId>
         <artifactId>org.gecko.emf.osgi.api</artifactId>
         <version>${gecko.emf.version}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.geckoprojects.emf</groupId>
@@ -402,9 +412,9 @@
         <scope>runtime</scope>
       </dependency>
       <dependency>
-        <groupId>org.apache.geronimo.specs</groupId>
-        <artifactId>geronimo-json_1.1_spec</artifactId>
-        <version>1.5</version>
+        <groupId>jakarta.json</groupId>
+        <artifactId>jakarta.json-api</artifactId>
+        <version>2.1.3</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>
@@ -545,7 +555,8 @@
           <version>3.3.0</version>
           <configuration>
             <archive>
-              <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+              <manifestFile>
+                ${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
             </archive>
             <skipIfEmpty>true</skipIfEmpty>
           </configuration>
@@ -558,7 +569,8 @@
               </goals>
               <configuration>
                 <archive>
-                  <manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                  <manifestFile>
+                    ${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                 </archive>
               </configuration>
             </execution>
@@ -586,8 +598,8 @@
                 <goal>resolve</goal>
               </goals>
               <configuration>
-                <writeOnChanges>true</writeOnChanges>
-                <failOnChanges>false</failOnChanges>
+                <writeOnChanges>${save.test.bndrun.changes}</writeOnChanges>
+                <failOnChanges>${verify.test.bndruns}</failOnChanges>
                 <includeDependencyManagement>true</includeDependencyManagement>
                 <scopes>
                   <scope>compile</scope>
@@ -595,7 +607,8 @@
                   <scope>test</scope>
                 </scopes>
                 <bundles>
-                  <bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+                  <bundle>
+                    ${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
                 </bundles>
                 <bndruns>
                   <include>*-test.bndrun</include>
@@ -633,7 +646,8 @@
               <scope>test</scope>
             </scopes>
             <bundles>
-              <bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+              <bundle>
+                ${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
             </bundles>
             <bndruns>
               <include>*-test.bndrun</include>
@@ -668,6 +682,31 @@
 
 
   <profiles>
+    <!-- Used in CI to treat bndruns as immutable source -->
+    <profile>
+      <id>ci-build</id>
+      <properties>
+        <save.test.bndrun.changes>false</save.test.bndrun.changes>
+        <verify.test.bndruns>false</verify.test.bndruns>
+      </properties>
+    </profile>
+    <!-- Used by developers to quickly update bndruns for dependabot updates -->
+    <profile>
+      <id>dependabot</id>
+      <properties>
+        <save.test.bndrun.changes>true</save.test.bndrun.changes>
+        <verify.test.bndruns>false</verify.test.bndruns>
+        <skipTests>true</skipTests>
+      </properties>
+    </profile>
+    <!-- Used by developers for normal development (restating the default)  -->
+    <profile>
+      <id>dev</id>
+      <properties>
+        <save.test.bndrun.changes>true</save.test.bndrun.changes>
+        <verify.test.bndruns>false</verify.test.bndruns>
+      </properties>
+    </profile>
     <profile>
       <id>eclipse-licenses-check</id>
       <activation>
@@ -679,7 +718,8 @@
       <pluginRepositories>
         <pluginRepository>
           <id>dash-licenses-snapshots</id>
-          <url>https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
+          <url>
+            https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
           <snapshots>
             <enabled>true</enabled>
           </snapshots>
@@ -687,7 +727,8 @@
       </pluginRepositories>
       <build>
         <plugins>
-          <!-- https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
+          <!--
+          https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
           <plugin>
             <groupId>org.eclipse.dash</groupId>
             <artifactId>license-tool-plugin</artifactId>

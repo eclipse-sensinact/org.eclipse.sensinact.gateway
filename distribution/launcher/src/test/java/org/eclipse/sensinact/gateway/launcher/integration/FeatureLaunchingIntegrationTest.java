@@ -12,13 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.launcher.integration;
 
-import static java.lang.ProcessBuilder.Redirect.PIPE;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -26,48 +23,28 @@ import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 
+import org.eclipse.sensinact.gateway.feature.utilities.test.ServerProcessHandler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class FeatureLaunchingIntegrationTest {
 
-    private static Process OSGI_PROCESS;
-
-    private static Thread outputThread;
+    private static ServerProcessHandler server = new ServerProcessHandler();
 
     @BeforeAll
     static void startServer() throws Exception {
-
-        String javaCmd = ProcessHandle.current().info().command().orElse("java");
-        OSGI_PROCESS = new ProcessBuilder(javaCmd, "-Dsensinact.config.dir=src/it/resources/config",
-                "-jar", "target/export.jar")
-                .redirectInput(PIPE)
-                .redirectOutput(PIPE)
-                .redirectErrorStream(true)
-                .start();
-
-        outputThread = new Thread(new InputStreamConsumer(OSGI_PROCESS.getInputStream()));
-        outputThread.start();
+        Files.copy(Paths.get("target/export.jar"), Paths.get("target/it/launcher.jar"), REPLACE_EXISTING);
+        server.startSensinact();
     }
 
     @AfterAll
     static void stopServer() throws Exception {
-
-        try {
-            OutputStream stream = OSGI_PROCESS.getOutputStream();
-            stream.write("exit 0\n".getBytes(UTF_8));
-            stream.flush();
-            OSGI_PROCESS.waitFor(5, SECONDS);
-        } finally {
-            if (OSGI_PROCESS.isAlive()) {
-                OSGI_PROCESS.destroyForcibly();
-            }
-        }
-
-        outputThread.join(1000);
+        server.stopSensinact();
     }
 
     @Test
@@ -78,7 +55,7 @@ class FeatureLaunchingIntegrationTest {
 
         // Try a few times to check an Http endpoint is there
         for (int i = 0; i < 10; i++) {
-            if (!OSGI_PROCESS.isAlive()) {
+            if (!server.isAlive()) {
                 fail("Server process lost");
             }
 

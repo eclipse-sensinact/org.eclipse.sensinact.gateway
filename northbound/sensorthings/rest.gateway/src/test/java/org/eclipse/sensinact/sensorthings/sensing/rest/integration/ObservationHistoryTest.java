@@ -39,14 +39,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.context.BundleContextExtension;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -55,7 +51,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-@ExtendWith({ BundleContextExtension.class, ConfigurationExtension.class, MockitoExtension.class })
 public class ObservationHistoryTest extends AbstractIntegrationTest {
 
     private static final Instant TS_2012 = Instant.parse("2012-01-01T00:00:00.00Z");
@@ -240,8 +235,9 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 4000; i++) {
             createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        // 1004: 1000 updates + history provider name & modelUri + foo provider name & modelUri
-        waitForRowCount("sensinact.text_data", 1004);
+        // 1006: 1000 updates + history provider name & model & modelPackageUri + foo
+        // provider name & modelUri
+        waitForRowCount("sensinact.text_data", 1006);
         waitForRowCount("sensinact.numeric_data", 4000);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",
@@ -287,8 +283,9 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("fizz", "buzz", "fizzbuzz", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        // 14: 10 updates + history provider name & modelUri + fizz provider name & modelUri
-        waitForRowCount("sensinact.text_data", 14);
+        // 16: 10 updates + history provider name & model & modelPackageUri + fizz
+        // provider name & modelUri
+        waitForRowCount("sensinact.text_data", 16);
 
         String id = String.format("%s~%s~%s~%s", "fizz", "buzz", "fizzbuzz",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -305,7 +302,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 14);
+        waitForRowCount("sensinact.text_data", 16);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });

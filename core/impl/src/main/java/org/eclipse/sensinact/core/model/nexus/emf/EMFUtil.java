@@ -39,6 +39,8 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.emf.ecore.impl.EFactoryImpl;
+import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -82,6 +84,10 @@ public class EMFUtil {
         ProviderPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
         MetadataPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
     }
+
+    // TODO: what to use as good default?
+    public static final String BASE_PACKAGE_URI = "https://eclipse.org/sensinact/";
+    public static final String DEFAULT_SENSINACT_PACKAGE_URI = BASE_PACKAGE_URI + "default";
 
     private static Object fallbackConversion(Object o, Type t) {
         try {
@@ -196,6 +202,14 @@ public class EMFUtil {
         ePackage.setName(name);
         ePackage.setNsPrefix(prefix);
         ePackage.setNsURI(nsUri);
+        ePackage.setEFactoryInstance(new EFactoryImpl() {
+            @Override
+            protected EObject basicCreate(EClass eClass) {
+                return eClass.getInstanceClassName() == "java.util.Map$Entry"
+                        ? new MinimalEObjectImpl.Container.Dynamic.BasicEMapEntry<String, String>(eClass)
+                        : new MinimalEObjectImpl.Container.Dynamic.Permissive(eClass);
+            }
+        });
         resourceSet.getPackageRegistry().put(nsUri, ePackage);
         return ePackage;
     }
@@ -342,5 +356,35 @@ public class EMFUtil {
         } else {
             return model.getName();
         }
+    }
+
+    /**
+     * TODO: we have to sanatize the name, so it fits the conventions of EMF
+     *
+     * @param modelName the modelname to construct a URI from
+     * @return the constructed uri of the package, using the given basepackage
+     */
+    public static String constructPackageUri(String baseUri, String modelName) {
+        StringBuilder uri = new StringBuilder(baseUri);
+        if (!baseUri.endsWith("/")) {
+            uri.append("/");
+        }
+        return uri.append(modelName).toString();
+    }
+
+    /**
+     * @param modelName
+     * @return
+     */
+    public static String constructPackageUri(String modelName) {
+        return constructPackageUri(BASE_PACKAGE_URI, modelName);
+    }
+
+    /**
+     * @param model
+     * @return
+     */
+    public static String constructPackageUri(EClass eClass) {
+        return constructPackageUri(BASE_PACKAGE_URI, getModelName(eClass));
     }
 }

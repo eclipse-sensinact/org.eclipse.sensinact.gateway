@@ -28,16 +28,13 @@ import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests the behavior around the admin service
  */
-@ExtendWith(ServiceExtension.class)
 public class AdminServiceTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
@@ -59,7 +56,7 @@ public class AdminServiceTest {
 
     @AfterEach
     void stop() {
-        session = null;
+        session.expire();
     }
 
     /**

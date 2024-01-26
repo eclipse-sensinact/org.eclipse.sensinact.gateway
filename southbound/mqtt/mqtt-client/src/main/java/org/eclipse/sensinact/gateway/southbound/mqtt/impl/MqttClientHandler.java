@@ -12,8 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.mqtt.impl;
 
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -78,6 +80,12 @@ public class MqttClientHandler implements MqttCallback {
     private Map<IMqttMessageListener, Predicate<String>> listeners = Collections
             .synchronizedMap(new IdentityHashMap<>());
 
+    private String[] topics;
+
+    private String clientId;
+
+    private MqttConnectOptions connectOptions;
+
     /**
      * MQTT listener registered
      */
@@ -100,9 +108,15 @@ public class MqttClientHandler implements MqttCallback {
     @Activate
     public void activate(final MqttClientConfiguration config) throws Exception {
         // Validate configuration
+        reconnectDelayMs = config.client_reconnect_delay();
+        if(reconnectDelayMs < 100) {
+            reconnectDelayMs = 100;
+        } else if (reconnectDelayMs > Duration.ofHours(1).toMillis()) {
+            reconnectDelayMs = (int) Duration.ofHours(1).toMillis();
+        }
         final String broker = makeBrokerUri(config);
-        final String clientId = makeClientId(config);
-        final String[] topics = config.topics();
+        clientId = makeClientId(config);
+        topics = config.topics();
         if (topics == null || topics.length == 0) {
             logger.error("No topic to subscribe to");
             throw new IllegalArgumentException("No MQTT topic given");
@@ -115,24 +129,42 @@ public class MqttClientHandler implements MqttCallback {
             handlerId = configId;
         }
 
-        // Setup options
-        final MqttConnectOptions options = setupOptions(config);
+        connectOptions = setupOptions(config);
 
         // Start client (blocking)
         logger.debug("Connecting MQTT client with ID {}", clientId);
         client = new MqttClient(broker, clientId);
         client.setCallback(this);
         client.setManualAcks(true);
-        client.connect(options);
-
-        // Register to topics (we're now connected)
-        for (String topic : topics) {
-            logger.debug("Subscribing MQTT client {} to topic: {}", clientId, topic);
-            client.subscribe(topic);
+        try {
+            client.connect(connectOptions);
+        } catch (MqttException e) {
+            if(e.getCause() instanceof ConnectException) {
+                connectionLost(e);
+                logger.warn("MQTT client {} started, but currently unconnected", clientId);
+                return;
+            } else {
+                // We fail to start due to the misconfiguration
+                throw e;
+            }
         }
+
+        subscribe();
 
         // All done
         logger.info("MQTT client {} started", clientId);
+    }
+
+    private void subscribe() {
+        // Register to topics (we're now connected)
+        for (String topic : topics) {
+            logger.debug("Subscribing MQTT client {} to topic: {}", clientId, topic);
+            try {
+                client.subscribe(topic);
+            } catch (MqttException e) {
+                logger.error("MQTT Client {} is unable to subscribe to topic {}", clientId, topic);
+            }
+        }
     }
 
     @Deactivate
@@ -230,11 +262,17 @@ public class MqttClientHandler implements MqttCallback {
             @Override
             public void run() {
                 try {
-                    client.reconnect();
+                    client.connect(connectOptions);
                 } catch (MqttException e) {
-                    logger.error("Error trying to reconnect to MQTT broker: {}", e.getMessage(), e);
-                    connectionLost(e);
+                    if(e.getCause() instanceof ConnectException) {
+                        logger.error("Error trying to reconnect to MQTT broker: {}", e.getMessage(), e);
+                        connectionLost(e);
+                    } else {
+                        logger.error("Fatal error trying to reconnect to MQTT broker: {}. No further reconnection will be attempted", e.getMessage(), e);
+                    }
+                    return;
                 }
+                subscribe();
             }
         }, reconnectDelayMs);
     }

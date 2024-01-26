@@ -27,12 +27,12 @@ class SetMethod extends AbstractResourceMethod {
         super(method, instance, serviceId, providers);
     }
 
-    public <T> Object invoke(String model, String provider, String service, String resource, Class<T> resultType,
+    public <T> Object invoke(String modelPackageUri, String model, String provider, String service, String resource, Class<T> resultType,
             TimedValue<T> cachedValue, TimedValue<T> newValue) throws Exception {
         final Map<Object, Object> params = new HashMap<>();
         params.put(SetSegment.RESULT_TYPE, resultType);
         params.put(SetSegment.CACHED_VALUE, cachedValue);
         params.put(SetSegment.NEW_VALUE, newValue);
-        return super.invoke(model, provider, service, resource, params, SetParam.class, SetParam::value);
+        return super.invoke(modelPackageUri, model, provider, service, resource, params, SetParam.class, SetParam::value);
     }
 }

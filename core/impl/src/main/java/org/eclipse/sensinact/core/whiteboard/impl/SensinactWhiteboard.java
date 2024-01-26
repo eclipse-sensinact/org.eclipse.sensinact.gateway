@@ -319,7 +319,7 @@ public class SensinactWhiteboard {
         for (Method annotatedMethod : getMethods) {
             if (annotatedMethod.isAnnotationPresent(GET.class)) {
                 final GET get = annotatedMethod.getAnnotation(GET.class);
-                final RegistryKey key = new RegistryKey(get.model(), get.service(), get.resource());
+                final RegistryKey key = new RegistryKey(get.modelPackageUri(), get.model(), get.service(), get.resource());
                 resources.add(key);
 
                 final GetMethod getMethod = cachedMethod.computeIfAbsent(get.onNull(),
@@ -334,7 +334,7 @@ public class SensinactWhiteboard {
             if (annotatedMethod.isAnnotationPresent(GETs.class)) {
                 final GETs gets = annotatedMethod.getAnnotation(GETs.class);
                 for (GET get : gets.value()) {
-                    final RegistryKey key = new RegistryKey(get.model(), get.service(), get.resource());
+                    final RegistryKey key = new RegistryKey(get.modelPackageUri(), get.model(), get.service(), get.resource());
                     resources.add(key);
 
                     final GetMethod getMethod = cachedMethod.computeIfAbsent(get.onNull(),
@@ -355,7 +355,7 @@ public class SensinactWhiteboard {
 
             if (annotatedMethod.isAnnotationPresent(SET.class)) {
                 final SET set = annotatedMethod.getAnnotation(SET.class);
-                final RegistryKey key = new RegistryKey(set.model(), set.service(), set.resource());
+                final RegistryKey key = new RegistryKey(set.modelPackageUri(), set.model(), set.service(), set.resource());
                 resources.add(key);
 
                 final MethodHolder<SET, SetMethod> setHolder = new MethodHolder<>();
@@ -366,7 +366,7 @@ public class SensinactWhiteboard {
             if (annotatedMethod.isAnnotationPresent(SETs.class)) {
                 final SETs sets = annotatedMethod.getAnnotation(SETs.class);
                 for (SET set : sets.value()) {
-                    final RegistryKey key = new RegistryKey(set.model(), set.service(), set.resource());
+                    final RegistryKey key = new RegistryKey(set.modelPackageUri(), set.model(), set.service(), set.resource());
                     resources.add(key);
                     final MethodHolder<SET, SetMethod> setHolder = new MethodHolder<>();
                     setHolder.annotation = set;
@@ -432,7 +432,7 @@ public class SensinactWhiteboard {
 
                 Model model = modelMgr.getModel(key.getModel());
                 if (model == null) {
-                    builder = modelMgr.createModel(key.getModel()).withService(key.getService())
+                    builder = modelMgr.createModel(key.getModelPackageUri(), key.getModel()).withService(key.getService())
                             .withResource(key.getResource());
                 } else {
                     Service service = model.getServices().get(key.getService());
@@ -470,7 +470,7 @@ public class SensinactWhiteboard {
     }
 
     private void processActMethod(ActMethod method, ACT annotation) {
-        RegistryKey key = new RegistryKey(annotation.model(), annotation.service(), annotation.resource());
+        RegistryKey key = new RegistryKey(annotation.modelPackageUri(), annotation.model(), annotation.service(), annotation.resource());
         processAnnotatedMethod(key, (type) -> type == ResourceType.ACTION,
                 (b) -> b.withType(method.getReturnType()).withAction(method.getNamedParameterTypes()).buildAll(),
                 method, actMethodRegistry, serviceIdToActMethods);
@@ -499,9 +499,9 @@ public class SensinactWhiteboard {
         }, method, setMethodRegistry, serviceIdToSetMethods);
     }
 
-    public Promise<Object> act(String model, String provider, String service, String resource,
+    public Promise<Object> act(String modelPackageUri, String model, String provider, String service, String resource,
             Map<String, Object> arguments) {
-        RegistryKey key = new RegistryKey(model, service, resource);
+        RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
 
         Optional<ActMethod> opt = actMethodRegistry.getOrDefault(key, List.of()).stream()
                 .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
@@ -513,13 +513,13 @@ public class SensinactWhiteboard {
         } else {
             Deferred<Object> d = promiseFactory.deferred();
             final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.act.request",
-                    "sensinact.whiteboard.act.request." + String.join(".", model, service, resource),
+                    "sensinact.whiteboard.act.request." + String.join(".", modelPackageUri, model, service, resource),
                     "sensinact.whiteboard.act.request." + String.join(".", provider, service, resource));
             promiseFactory.executor().execute(() -> {
                 try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.act.task",
-                        "sensinact.whiteboard.act.task." + String.join(".", model, service, resource),
+                        "sensinact.whiteboard.act.task." + String.join(".", modelPackageUri, model, service, resource),
                         "sensinact.whiteboard.act.task." + String.join(".", provider, service, resource))) {
-                    Object o = opt.get().invoke(model, provider, service, resource, arguments);
+                    Object o = opt.get().invoke(modelPackageUri, model, provider, service, resource, arguments);
                     if (o instanceof Promise) {
                         d.resolveWith((Promise<?>) o);
                     } else {
@@ -534,10 +534,10 @@ public class SensinactWhiteboard {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Promise<TimedValue<T>> pullValue(String model, String provider, String service, String resource,
+    public <T> Promise<TimedValue<T>> pullValue(String modelPackageUri, String model, String provider, String service, String resource,
             Class<T> type, TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate) {
         // Find the handler method
-        RegistryKey key = new RegistryKey(model, service, resource);
+        RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
 
         Optional<GetMethod> opt = getMethodRegistry.getOrDefault(key, List.of()).stream()
                 .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
@@ -560,13 +560,13 @@ public class SensinactWhiteboard {
                 final GetMethod getMethod = opt.get();
 
                 final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.pull.request",
-                        "sensinact.whiteboard.pull.request." + String.join(".", model, service, resource),
+                        "sensinact.whiteboard.pull.request." + String.join(".", modelPackageUri, model, service, resource),
                         "sensinact.whiteboard.pull.request." + String.join(".", provider, service, resource));
                 promiseFactory.executor().execute(() -> {
                     try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.pull.task",
-                            "sensinact.whiteboard.pull.task." + String.join(".", model, service, resource),
+                            "sensinact.whiteboard.pull.task." + String.join(".", modelPackageUri, model, service, resource),
                             "sensinact.whiteboard.pull.task." + String.join(".", provider, service, resource))) {
-                        final Object result = getMethod.invoke(model, provider, service, resource, type, cachedValue);
+                        final Object result = getMethod.invoke(modelPackageUri, model, provider, service, resource, type, cachedValue);
                         if (result instanceof Promise) {
                             d.resolveWith((Promise<TimedValue<T>>) result);
                         } else if (result instanceof TimedValue) {
@@ -608,9 +608,9 @@ public class SensinactWhiteboard {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Promise<TimedValue<T>> pushValue(String model, String provider, String service, String resource,
+    public <T> Promise<TimedValue<T>> pushValue(String modelPackageUri, String model, String provider, String service, String resource,
             Class<T> type, TimedValue<T> cachedValue, TimedValue<T> newValue, Consumer<TimedValue<T>> gatewayUpdate) {
-        RegistryKey key = new RegistryKey(model, service, resource);
+        RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
 
         Optional<SetMethod> opt = setMethodRegistry.getOrDefault(key, List.of()).stream()
                 .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
@@ -624,13 +624,13 @@ public class SensinactWhiteboard {
             final SetMethod setMethod = opt.get();
 
             final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.pull.request",
-                    "sensinact.whiteboard.pull.request." + String.join(".", model, service, resource),
+                    "sensinact.whiteboard.pull.request." + String.join(".", modelPackageUri, model, service, resource),
                     "sensinact.whiteboard.pull.request." + String.join(".", provider, service, resource));
             promiseFactory.executor().execute(() -> {
                 try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.push.task",
-                        "sensinact.whiteboard.push.task." + String.join(".", model, service, resource),
+                        "sensinact.whiteboard.push.task." + String.join(".", modelPackageUri, model, service, resource),
                         "sensinact.whiteboard.push.task." + String.join(".", provider, service, resource))) {
-                    final Object o = setMethod.invoke(model, provider, service, resource, type, cachedValue, newValue);
+                    final Object o = setMethod.invoke(modelPackageUri, model, provider, service, resource, type, cachedValue, newValue);
                     if (o instanceof Promise) {
                         d.resolveWith((Promise<TimedValue<T>>) o);
                     } else if (o instanceof TimedValue) {

@@ -28,23 +28,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.sensinact.gateway.southbound.http.callback.api.HttpCallback;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.context.BundleContextExtension;
 
-@ExtendWith({ BundleContextExtension.class, ConfigurationExtension.class, MockitoExtension.class })
+@MockitoSettings
 public class HttpCallbackWhiteboardTest {
-
-    @InjectBundleContext
-    BundleContext context;
 
     @Mock
     HttpCallback callback;
@@ -54,7 +48,7 @@ public class HttpCallbackWhiteboardTest {
             @Property(key = "org.apache.felix.http.host", value = "127.0.0.1") })
     @WithConfiguration(pid = "sensinact.http.callback.whiteboard", location = "?", properties = {})
     @Test
-    void basicWhiteboard() throws Exception {
+    void basicWhiteboard(@InjectBundleContext BundleContext context) throws Exception {
 
         context.registerService(HttpCallback.class, callback, null);
 
@@ -91,7 +85,7 @@ public class HttpCallbackWhiteboardTest {
             @Property(key = "org.apache.felix.http.host", value = "127.0.0.1") })
     @WithConfiguration(pid = "sensinact.http.callback.whiteboard", location = "?", properties = @Property(key = "base.uri", value = "http://foo.com/bar"))
     @Test
-    void customBaseUri() throws Exception {
+    void customBaseUri(@InjectBundleContext BundleContext context) throws Exception {
 
         context.registerService(HttpCallback.class, callback, null);
 

@@ -34,7 +34,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -47,9 +49,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.apache.felix.cm.json.ConfigurationReader;
-import org.apache.felix.cm.json.ConfigurationResource;
-import org.apache.felix.cm.json.Configurations;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.stream.JsonParser;
+
+import org.apache.felix.cm.json.io.ConfigurationReader;
+import org.apache.felix.cm.json.io.ConfigurationResource;
+import org.apache.felix.cm.json.io.Configurations;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
@@ -169,19 +177,58 @@ public class ConfigurationManager {
         }
     }
 
+    private List<String> cleanupJson(final JsonObject raw, final int depth) {
+        return cleanupJson(raw, depth, null);
+    }
+
+    private List<String> cleanupJson(final JsonObject raw, final int depth, final String prefix) {
+        if (depth < 0) {
+            return List.of();
+        }
+
+        final List<String> invalid = new LinkedList<String>();
+        Iterator<Entry<String, JsonValue>> iterator = raw.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<String, JsonValue> entry = iterator.next();
+            final JsonValue value = entry.getValue();
+            if (value == JsonValue.NULL) {
+                if (prefix == null) {
+                    invalid.add(entry.getKey());
+                } else {
+                    invalid.add(prefix + "/" + entry.getKey());
+                }
+                iterator.remove();
+            } else if (value.getValueType() == ValueType.OBJECT && depth != 0) {
+                final List<String> subInvalid = cleanupJson(value.asJsonObject(), depth - 1, entry.getKey());
+                if (subInvalid != null) {
+                    invalid.addAll(subInvalid);
+                }
+            }
+        }
+
+        return invalid;
+    }
+
     private ConfigurationResource loadConfigFile() throws IOException {
         final ConfigurationResource config;
         if (Files.exists(configFile)) {
+            final JsonObject root;
             try (Reader reader = Files.newBufferedReader(configFile)) {
-                ConfigurationReader configReader = Configurations.buildReader()
-                        .withConfiguratorPropertyHandler((a, b, c) -> {
-                        }).build(reader);
-
-                config = configReader.readConfigurationResource();
-
-                for (String warning : configReader.getIgnoredErrors()) {
-                    LOGGER.warn("Configuration file parsing warning. Error was\n{}", warning);
+                final JsonParser parser = Json.createParser(Configurations.jsonCommentAwareReader(reader));
+                root = parser.getObject();
+                final List<String> invalidKeys = cleanupJson(root, 1);
+                for (String invalidKey : invalidKeys) {
+                    LOGGER.warn("Configuration file parsing warning. Ignoring configuration key {}", invalidKey);
                 }
+            }
+
+            ConfigurationReader configReader = Configurations.buildReader()
+                    .withConfiguratorPropertyHandler((a, b, c) -> {
+                    }).build(root);
+            config = configReader.readConfigurationResource();
+
+            for (String warning : configReader.getIgnoredErrors()) {
+                LOGGER.warn("Configuration file parsing warning. Error was\n{}", warning);
             }
         } else {
             config = new ConfigurationResource();

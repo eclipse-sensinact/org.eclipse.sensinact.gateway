@@ -10,9 +10,9 @@ The JSON parser bundle is: `org.eclipse.sensinact.gateway.southbound.device-fact
 It requires the following bundles to be resolved:
 * the device factory core
 * the Jackson JSON data bind library:
-  * `com.fasterxml.jackson.core:jackson-annotations:2.14.0`
-  * `com.fasterxml.jackson.core:jackson-core:2.14.0`
-  * `com.fasterxml.jackson.core:jackson-databind:2.14.0`
+  * `com.fasterxml.jackson.core:jackson-annotations:2.16.1`
+  * `com.fasterxml.jackson.core:jackson-core:2.16.1`
+  * `com.fasterxml.jackson.core:jackson-databind:2.16.1`
 
 ## Parser paths
 

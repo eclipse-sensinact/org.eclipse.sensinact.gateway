@@ -31,10 +31,12 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
     private final List<NestableBuilderImpl<?, ModelImpl, ?>> nested = new ArrayList<>();
     private Instant creationTime;
     private final EClass modelEClass;
+    private String packageUri;
 
-    public ModelBuilderImpl(AtomicBoolean active, ModelNexus nexusImpl, String name) {
+    public ModelBuilderImpl(AtomicBoolean active, ModelNexus nexusImpl, String packageUri, String name) {
         super(active);
         this.nexusImpl = nexusImpl;
+        this.packageUri = packageUri;
         this.name = name;
         this.modelEClass = null;
     }
@@ -44,6 +46,7 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
         this.nexusImpl = nexusImpl;
         this.modelEClass = model;
         this.name = EMFUtil.getModelName(model);
+        this.packageUri = model.getEPackage().getNsURI();
     }
 
     @Override
@@ -81,11 +84,12 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
         checkValid();
         if (modelEClass != null) {
             return new ModelImpl(active, name,
-                    nexusImpl.registerModel(modelEClass, creationTime == null ? Instant.now() : creationTime),
+                    nexusImpl.registerModel(modelEClass, creationTime == null ? Instant.now() : creationTime, false),
                     nexusImpl);
         }
         ModelImpl modelImpl = new ModelImpl(active, name,
-                nexusImpl.createModel(name, creationTime == null ? Instant.now() : creationTime), nexusImpl);
+                nexusImpl.createModel(packageUri, name, creationTime == null ? Instant.now() : creationTime),
+                nexusImpl);
         nested.forEach(n -> n.doBuild(modelImpl));
         return modelImpl;
     }
