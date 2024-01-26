@@ -51,6 +51,7 @@ import org.eclipse.sensinact.core.command.impl.ResourcePullHandler;
 import org.eclipse.sensinact.core.command.impl.ResourcePushHandler;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+import org.eclipse.sensinact.core.model.nexus.emf.NamingUtils;
 import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -577,7 +578,7 @@ public class ModelNexus {
             throw new IllegalArgumentException("There is an existing model with name " + modelName);
         }
 
-        String modelClassName = firstToUpper(modelName);
+        String modelClassName = NamingUtils.sanitizeName(modelName, false);
         EPackage ePackage = resourceSet.getPackageRegistry().getEPackage(theModelPackageUri);
         if (ePackage == null) {
             ePackage = EMFUtil.createPackage(modelName, theModelPackageUri, modelName, resourceSet);
@@ -590,7 +591,7 @@ public class ModelNexus {
 
     private EReference doCreateService(EClass model, String name, Instant timestamp) {
         EPackage ePackage = model.getEPackage();
-        EClass service = EMFUtil.createEClass(constructServiceEClassName(model.getName(), name), ePackage,
+        EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(name, false), ePackage,
                 (ec) -> createEClassAnnotations(timestamp), ProviderPackage.Literals.SERVICE);
         ServiceReference ref = EMFUtil.createServiceReference(model, name, service, true);
         EMFUtil.fillMetadata(ref, timestamp, false, name, List.of());
@@ -610,23 +611,6 @@ public class ModelNexus {
                 EMFUtil.createEAnnotation("model", Map.of("name", model)));
     }
 
-    /**
-     * We need a Unique name for the Service Class if they reside in the same
-     * Package. Thus we create a hopefully unique name.
-     *
-     * TODO: Place each Provider in its own Subpackage?
-     *
-     * @param providerName
-     * @param serviceName
-     * @return
-     */
-    private String constructServiceEClassName(String providerName, String serviceName) {
-        return firstToUpper(providerName) + firstToUpper(serviceName);
-    }
-
-    private String firstToUpper(String str) {
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
-    }
 
     public Map<String, Object> getResourceMetadata(Provider provider, EStructuralFeature svcFeature,
             final ETypedElement rcFeature) {

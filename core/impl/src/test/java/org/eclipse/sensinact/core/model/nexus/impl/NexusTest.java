@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.model.nexus.impl;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -67,6 +68,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -251,7 +254,7 @@ public class NexusTest {
             assertNotNull(serviceFeature);
             assertEquals(TESTSERVICE, serviceFeature.getName());
             EClass eClass = (EClass) serviceFeature.getEType();
-            assertEquals("TestModelTestservice", eClass.getName());
+            assertEquals("Testservice", eClass.getName());
 
             Service svc = (Service) provider.eGet(serviceFeature);
 
@@ -623,6 +626,20 @@ public class NexusTest {
 
             assertThrows(IllegalArgumentException.class,
                     () -> nexus.createProviderInstance(TEST_PKG, "TestModel2", TESTPROVIDER, now));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = { "test", "123Test", "final", "http://test.de/asldjkhasdlj", "123$.final/-",
+                "protected", })
+        void testCreateModelWithStrangeName(String name) {
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+
+            nexus.createModel(name, Instant.now());
+            Provider providerInstance = nexus.createProviderInstance(name, "test", Instant.now());
+            System.out.println(name + " - " + providerInstance.eClass().getName());
+            assertNotNull(providerInstance);
+            assertEquals(name, EMFUtil.getModelName(providerInstance.eClass()));
+            assertNotEquals(name, providerInstance.eClass().getName());
         }
     }
 
