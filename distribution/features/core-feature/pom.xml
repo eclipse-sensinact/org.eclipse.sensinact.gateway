@@ -110,7 +110,7 @@
     </dependency>
     <dependency>
       <groupId>org.geckoprojects.emf</groupId>
-      <artifactId>org.gecko.emf.osgi.component</artifactId>
+      <artifactId>org.gecko.emf.osgi.component.minimal</artifactId>
     </dependency>
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
