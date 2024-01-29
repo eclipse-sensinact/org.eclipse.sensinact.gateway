@@ -15,8 +15,6 @@
 # These packages are also provided by the gecko.emf.osgi.component project
 # so we blacklist the API for resolve consistency
 -runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
-	bnd.identity;id='slf4j.log4j12',\
-	bnd.identity;id='log4j.over.slf4j',\
 	bnd.identity;id='org.osgi.service.cm'
 
 # This will help us keep -runbundles sorted
