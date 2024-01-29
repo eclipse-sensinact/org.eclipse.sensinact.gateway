@@ -22,6 +22,7 @@
 	order=sortbynameversion,\
 	begin=-1
 -runbundles: \
+	jakarta.servlet-api;version='[5.0.0,5.0.1)',\
 	junit-jupiter-api;version='[5.10.1,5.10.2)',\
 	junit-jupiter-engine;version='[5.10.1,5.10.2)',\
 	junit-jupiter-params;version='[5.10.1,5.10.2)',\
@@ -30,6 +31,7 @@
 	junit-platform-launcher;version='[1.10.1,1.10.2)',\
 	net.bytebuddy.byte-buddy;version='[1.14.11,1.14.12)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.14.11,1.14.12)',\
+	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.7,1.3.8)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.felix.http.jetty;version='[5.0.0,5.0.1)',\
 	org.apache.felix.http.servlet-api;version='[2.1.0,2.1.1)',\
@@ -48,5 +50,5 @@
 	org.osgi.test.junit5.cm;version='[1.3.0,1.3.1)',\
 	org.osgi.util.function;version='[1.1.0,1.1.1)',\
 	org.osgi.util.promise;version='[1.3.0,1.3.1)',\
-	slf4j.api;version='[1.7.36,1.7.37)',\
-	slf4j.simple;version='[1.7.36,1.7.37)'
+	slf4j.api;version='[2.0.11,2.0.12)',\
+	slf4j.simple;version='[2.0.11,2.0.12)'
