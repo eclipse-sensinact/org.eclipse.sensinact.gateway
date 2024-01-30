@@ -2,15 +2,16 @@
 
 -runrequires: \
 	bnd.identity;id='${project.groupId}.${project.artifactId}-tests',\
-	bnd.identity;id='slf4j.simple',\
 	bnd.identity;id='org.apache.felix.configurator',\
 	bnd.identity;id='org.apache.felix.cm.json',\
 	bnd.identity;id='org.eclipse.osgitech.rest.jetty',\
 	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
-	bnd.identity;id='org.eclipse.sensinact.gateway.southbound.history.timescale-provider'
+	bnd.identity;id='org.eclipse.sensinact.gateway.southbound.history.timescale-provider',\
+	bnd.identity;id='ch.qos.logback.classic'
+
 -resolve.effective: active
 
--runee: JavaSE-11
+-runee: JavaSE-17
 -runfw: org.apache.felix.framework
 
 # These packages are also provided by the gecko.emf.osgi.component project
@@ -22,7 +23,11 @@
 -runstartlevel: \
 	order=sortbynameversion,\
 	begin=-1
+
+	
 -runbundles: \
+	ch.qos.logback.classic;version='[1.4.14,1.4.15)',\
+	ch.qos.logback.core;version='[1.4.14,1.4.15)',\
 	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
 	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\
 	com.fasterxml.jackson.core.jackson-databind;version='[2.16.1,2.16.2)',\
@@ -112,7 +117,5 @@
 	org.osgi.util.pushstream;version='[1.0.2,1.0.3)',\
 	org.postgresql.jdbc;version='[42.5.1,42.5.2)',\
 	slf4j.api;version='[2.0.11,2.0.12)',\
-	slf4j.simple;version='[2.0.11,2.0.12)',\
 	tx-control-provider-jdbc-local;version='[1.0.1,1.0.2)',\
 	tx-control-service-local;version='[1.0.1,1.0.2)'
-	org.objectweb.asm;version='[9.3.0,9.3.1)'
