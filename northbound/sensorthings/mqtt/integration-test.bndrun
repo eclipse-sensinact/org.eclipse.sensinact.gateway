@@ -12,7 +12,7 @@
 	bnd.identity;id='org.osgi.service.cm',\
 	bnd.identity;id='slf4j.reload4k'
 
--runee: JavaSE-17
+-runee: JavaSE-11
 -runfw: org.apache.felix.framework
 
 # This will help us keep -runbundles sorted

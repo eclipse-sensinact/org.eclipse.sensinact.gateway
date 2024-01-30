@@ -7,7 +7,7 @@
 	bnd.identity;id='ch.qos.logback.classic'
 -resolve.effective: active
 
--runee: JavaSE-17
+-runee: JavaSE-11
 -runfw: org.apache.felix.framework
 
 # This blacklist ensures consistent resolution locally and in CI

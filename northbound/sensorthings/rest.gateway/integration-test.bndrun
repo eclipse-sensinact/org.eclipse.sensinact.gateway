@@ -11,7 +11,7 @@
 
 -resolve.effective: active
 
--runee: JavaSE-17
+-runee: JavaSE-11
 -runfw: org.apache.felix.framework
 
 # These packages are also provided by the gecko.emf.osgi.component project
