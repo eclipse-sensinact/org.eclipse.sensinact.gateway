@@ -9,9 +9,7 @@
 
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
-
-# This blacklist ensures consistent resolution locally and in CI
--runblacklist: bnd.identity;id='org.osgi.service.cm'
+-runproperties: logback.configurationFile=${project.build.testOutputDirectory}/logback-test.xml
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \

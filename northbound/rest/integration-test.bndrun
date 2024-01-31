@@ -8,16 +8,14 @@
 	bnd.identity;id='org.eclipse.osgitech.rest.jetty',\
 	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.northbound.filters.ldap',\
-	bnd.identity;id='ch.qos.logback.classic'
+	bnd.identity;id='ch.qos.logback.classic',\
+	bnd.identity;id='jul.to.slf4j'
+
 -resolve.effective: active
 
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
-
-# These packages are also provided by the gecko.emf.osgi.component project
-# so we blacklist the API for resolve consistency
--runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
-	bnd.identity;id='org.osgi.service.cm'
+-runproperties: logback.configurationFile=${project.build.testOutputDirectory}/logback-test.xml
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \
@@ -40,6 +38,7 @@
 	jakarta.ws.rs-api;version='[3.1.0,3.1.1)',\
 	jakarta.xml.bind-api;version='[4.0.0,4.0.1)',\
 	javassist;version='[3.29.2,3.29.3)',\
+	jul.to.slf4j;version='[2.0.11,2.0.12)',\
 	junit-jupiter-api;version='[5.10.1,5.10.2)',\
 	junit-jupiter-engine;version='[5.10.1,5.10.2)',\
 	junit-jupiter-params;version='[5.10.1,5.10.2)',\
@@ -53,16 +52,15 @@
 	org.apache.felix.cm.json;version='[2.0.0,2.0.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.felix.configurator;version='[1.0.18,1.0.19)',\
+	org.apache.felix.http.jetty;version='[5.0.4,5.0.5)',\
 	org.apache.felix.http.servlet-api;version='[2.1.0,2.1.1)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
 	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
 	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.servlet;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.osgitech.rest;version='[1.2.2,1.2.3)',\
 	org.eclipse.osgitech.rest.jetty;version='[1.2.2,1.2.3)',\
