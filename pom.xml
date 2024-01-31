@@ -127,6 +127,7 @@
     <emf.ecore.version>2.35.0</emf.ecore.version>
     <emf.ecore.xmi.version>2.36.0</emf.ecore.xmi.version>
     <slf4j.version>2.0.11</slf4j.version>
+    <logback.version>1.4.14</logback.version>
     <jackson.version>2.16.1</jackson.version>
     <jjwt.version>0.11.5</jjwt.version>
 
@@ -413,12 +414,6 @@
         <scope>runtime</scope>
       </dependency>
       <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>${slf4j.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.http.servlet-api</artifactId>
         <version>${felix.servlet.version}</version>
@@ -434,6 +429,12 @@
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-impl</artifactId>
         <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>${logback.version}</version>
         <scope>runtime</scope>
       </dependency>
 
@@ -491,6 +492,11 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.test.junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
