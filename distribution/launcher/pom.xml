@@ -21,8 +21,7 @@
   </parent>
   <artifactId>launcher</artifactId>
   <name>Eclipse sensiNact Feature Launcher</name>
-  <description>This project contains code for launching sensiNact gateway
-    features</description>
+  <description>This project contains code for launching sensiNact gateway features</description>
 
   <properties>
     <verify.test.bndruns>true</verify.test.bndruns>
@@ -87,6 +86,30 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-resolver-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>verify-export</id>
+            <phase>package</phase>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <includeDependencyManagement>true</includeDependencyManagement>
+              <scopes>
+                <scope>compile</scope>
+                <scope>runtime</scope>
+              </scopes>
+              <bundles>
+                <bundle>
+                  ${project.build.directory}/${project.build.finalName}.jar
+                </bundle>
+              </bundles>
+              <bndruns>
+                <bndrun>export.bndrun</bndrun>
+              </bndruns>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>

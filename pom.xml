@@ -152,6 +152,7 @@
 
     <!-- plugin dependency versions -->
     <bnd.version>7.0.0</bnd.version>
+    <bnd.resolver.version>7.1.0-SNAPSHOT</bnd.resolver.version>
 
     <!-- Default properties for resolver setup in development -->
     <save.test.bndrun.changes>true</save.test.bndrun.changes>
@@ -590,7 +591,7 @@
         <plugin>
           <groupId>biz.aQute.bnd</groupId>
           <artifactId>bnd-resolver-maven-plugin</artifactId>
-          <version>${bnd.version}</version>
+          <version>${bnd.resolver.version}</version>
           <executions>
             <execution>
               <id>resolve-test</id>
@@ -690,6 +691,48 @@
         <save.test.bndrun.changes>false</save.test.bndrun.changes>
         <verify.test.bndruns>false</verify.test.bndruns>
       </properties>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>biz.aQute.bnd</groupId>
+              <artifactId>bnd-resolver-maven-plugin</artifactId>
+              <version>${bnd.resolver.version}</version>
+              <executions>
+                <execution>
+                  <id>resolve-test</id>
+                  <configuration>
+                    <skip>true</skip>
+                  </configuration>
+                </execution>
+                <execution>
+                  <id>verify-test</id>
+                  <phase>pre-integration-test</phase>
+                  <goals>
+                    <goal>verify</goal>
+                  </goals>
+                  <configuration>
+                    <includeDependencyManagement>true</includeDependencyManagement>
+                    <scopes>
+                      <scope>compile</scope>
+                      <scope>runtime</scope>
+                      <scope>test</scope>
+                    </scopes>
+                    <bundles>
+                      <bundle>
+                        ${project.build.directory}/${project.build.finalName}-tests.jar
+                      </bundle>
+                    </bundles>
+                    <bndruns>
+                      <include>*-test.bndrun</include>
+                    </bndruns>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
     </profile>
     <!-- Used by developers to quickly update bndruns for dependabot updates -->
     <profile>
