@@ -11,12 +11,7 @@
 
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
-
-# These packages are also provided by the gecko.emf.osgi.component project
-# so we blacklist the API for resolve consistency
--runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
-	bnd.identity;id='org.osgi.service.cm',\
-	bnd.identity;id='org.eclipse.jetty.http'
+-runproperties: logback.configurationFile=${project.build.testOutputDirectory}/logback-test.xml
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \
@@ -56,9 +51,15 @@
 	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
 	org.eclipse.jetty.alpn.client;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.annotations;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.client;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.jndi;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.plus;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet-api;version='[5.0.2,5.0.3)',\
 	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.webapp;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.api;version='[11.0.13,11.0.14)',\

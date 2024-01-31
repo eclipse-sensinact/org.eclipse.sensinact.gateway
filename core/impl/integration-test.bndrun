@@ -8,16 +8,14 @@
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
 -runproperties: \
-	org.osgi.framework.bootdelegation=org.mockito.internal.creation.bytebuddy.inject
+	org.osgi.framework.bootdelegation=org.mockito.internal.creation.bytebuddy.inject,\
+	logback.configurationFile=${project.build.testOutputDirectory}/logback-test.xml
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \
 	order=sortbynameversion,\
 	begin=-1
 -resolve: auto
-
-# This blacklist ensures consistent resolution locally and in CI
--runblacklist: bnd.identity;id='org.osgi.service.cm'
 
 -runbundles: \
 	ch.qos.logback.classic;version='[1.4.14,1.4.15)',\

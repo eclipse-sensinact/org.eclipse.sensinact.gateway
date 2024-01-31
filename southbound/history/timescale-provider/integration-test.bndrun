@@ -8,11 +8,7 @@
 
 -runee: JavaSE-11
 -runfw: org.apache.felix.framework
-
-# These packages are also provided by the gecko.emf.osgi.component project
-# so we blacklist the API for resolve consistency
--runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
-	bnd.identity;id='org.osgi.service.cm'
+-runproperties: logback.configurationFile=${project.build.testOutputDirectory}/logback-test.xml
 
 # This will help us keep -runbundles sorted
 -runstartlevel: \

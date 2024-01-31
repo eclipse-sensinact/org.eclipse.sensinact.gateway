@@ -92,7 +92,7 @@ public class WhiteboardImplTest {
         lenient().when(metrics.getCounter(anyString())).thenReturn(counter);
         lenient().when(metrics.getHistogram(anyString())).thenReturn(histogram);
         lenient().when(metrics.withTimer(anyString())).thenReturn(timer);
-        lenient().when(metrics.withTimers(any())).thenReturn(timer);
+        lenient().when(metrics.withTimers(any(String[].class))).thenReturn(timer);
 
         thread = new GatewayThreadImpl(metrics, typedEventBus, resourceSet, ProviderPackage.eINSTANCE);
     }
