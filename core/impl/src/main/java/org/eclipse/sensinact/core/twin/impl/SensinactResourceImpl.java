@@ -37,7 +37,6 @@ import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.impl.ResourceImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 

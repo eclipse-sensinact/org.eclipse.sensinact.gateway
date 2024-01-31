@@ -15,7 +15,6 @@ package org.eclipse.sensinact.core.impl;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
-import org.eclipse.sensinact.core.model.ResourceBuilder;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ValueType;
