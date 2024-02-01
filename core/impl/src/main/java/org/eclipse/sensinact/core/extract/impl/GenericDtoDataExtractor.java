@@ -17,26 +17,49 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
-import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 
 public class GenericDtoDataExtractor implements DataExtractor {
 
     @Override
     public List<? extends AbstractUpdateDto> getUpdates(Object update) {
 
-        GenericDto dto = check(update);
+        GenericDto dto;
 
-        List<AbstractUpdateDto> list = new ArrayList<>();
+        try {
+            dto = GenericDto.class.cast(update);
+        } catch (ClassCastException e) {
+            FailedMappingDto fmd = getFailedMappingDto(update,
+                    new IllegalArgumentException("The supplied update dto is not of the correct type to extract", e));
+            fmd.timestamp = Instant.now();
+            return List.of(fmd);
+        }
 
         Instant instant = dto.timestamp == null ? Instant.now() : dto.timestamp;
 
+        if (dto.provider == null) {
+            return List.of(copyCommonFields(dto, instant,
+                    getFailedMappingDto(dto, new IllegalArgumentException("No provider is defined"))));
+        }
+        if (dto.service == null) {
+            return List.of(copyCommonFields(dto, instant,
+                    getFailedMappingDto(dto, new IllegalArgumentException("No service is defined"))));
+        }
+        if (dto.resource == null) {
+            return List.of(copyCommonFields(dto, instant,
+                    getFailedMappingDto(dto, new IllegalArgumentException("No resource is defined"))));
+        }
+
+
+        List<AbstractUpdateDto> list = new ArrayList<>();
+
         // Accept a null value if this is not a metadata update
         if (dto.value != null || dto.nullAction == NullAction.UPDATE) {
-            DataUpdateDto dud = new DataUpdateDto();
-            instant = copyCommonFields(dto, instant, dud);
+            DataUpdateDto dud = copyCommonFields(dto, instant, new DataUpdateDto());
             if (dto.type != null)
                 dud.type = dto.type;
             dud.data = dto.value;
@@ -44,8 +67,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
         }
 
         if (dto.metadata != null) {
-            MetadataUpdateDto dud = new MetadataUpdateDto();
-            instant = copyCommonFields(dto, instant, dud);
+            MetadataUpdateDto dud = copyCommonFields(dto, instant, new MetadataUpdateDto());
             dud.metadata = dto.metadata;
             dud.removeNullValues = true;
             list.add(dud);
@@ -54,34 +76,22 @@ public class GenericDtoDataExtractor implements DataExtractor {
         return list;
     }
 
-    private Instant copyCommonFields(GenericDto dto, Instant instant, AbstractUpdateDto dud) {
+    private FailedMappingDto getFailedMappingDto(Object originalDto, Throwable mappingFailure) {
+        FailedMappingDto fmd = new FailedMappingDto();
+        fmd.mappingFailure = mappingFailure;
+        fmd.originalDto = originalDto;
+        return fmd;
+    }
+
+    private <T extends AbstractUpdateDto> T copyCommonFields(GenericDto dto, Instant instant, T dud) {
         dud.modelPackageUri = dto.modelPackageUri;
         dud.model = dto.model;
         dud.provider = dto.provider;
         dud.service = dto.service;
         dud.resource = dto.resource;
         dud.timestamp = instant;
-        return instant;
+        dud.originalDto = dto;
+        return dud;
     }
 
-    private GenericDto check(Object update) {
-        GenericDto dto;
-        try {
-            dto = GenericDto.class.cast(update);
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("The supplied update dto is not of the correct type to extract", e);
-        }
-
-        if (dto.provider == null) {
-            throw new IllegalArgumentException("No provider is defined");
-        }
-        if (dto.service == null) {
-            throw new IllegalArgumentException("No service is defined");
-        }
-        if (dto.resource == null) {
-            throw new IllegalArgumentException("No resource is defined");
-        }
-
-        return dto;
-    }
 }

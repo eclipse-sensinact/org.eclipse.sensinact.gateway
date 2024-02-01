@@ -15,8 +15,9 @@ package org.eclipse.sensinact.core.extract.impl;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
@@ -24,11 +25,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
-import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -57,29 +59,47 @@ public class GenericDtoExtractorTest {
     class MissingIdentity {
         @Test
         void missingProvider() {
-            Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                extractor().getUpdates(makeTestDto(null, SERVICE, RESOURCE, VALUE, null, null));
-            });
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(makeTestDto(null, SERVICE, RESOURCE, VALUE, null, null));
+            assertEquals(1, updates.size());
+            AbstractUpdateDto aud = updates.get(0);
+            assertNull(aud.provider);
+            assertEquals(SERVICE, aud.service);
+            assertEquals(RESOURCE, aud.resource);
 
-            assertTrue(thrown.getMessage().contains("provider"), "Wrong message: " + thrown.getMessage());
+            assertInstanceOf(FailedMappingDto.class, aud);
+            FailedMappingDto fmd = (FailedMappingDto) aud;
+            assertNotNull(fmd.mappingFailure);
+            assertTrue(fmd.mappingFailure.getMessage().contains("provider"), "Wrong message: " + fmd.mappingFailure.getMessage());
         }
 
         @Test
         void missingService() {
-            Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                extractor().getUpdates(makeTestDto(PROVIDER, null, RESOURCE, VALUE, null, null));
-            });
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(makeTestDto(PROVIDER, null, RESOURCE, VALUE, null, null));
+            assertEquals(1, updates.size());
+            AbstractUpdateDto aud = updates.get(0);
+            assertEquals(PROVIDER, aud.provider);
+            assertNull(aud.service);
+            assertEquals(RESOURCE, aud.resource);
 
-            assertTrue(thrown.getMessage().contains("service"), "Wrong message: " + thrown.getMessage());
+            assertInstanceOf(FailedMappingDto.class, aud);
+            FailedMappingDto fmd = (FailedMappingDto) aud;
+            assertNotNull(fmd.mappingFailure);
+            assertTrue(fmd.mappingFailure.getMessage().contains("service"), "Wrong message: " + fmd.mappingFailure.getMessage());
         }
 
         @Test
         void missingResource() {
-            Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                extractor().getUpdates(makeTestDto(PROVIDER, SERVICE, null, VALUE, null, null));
-            });
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(makeTestDto(PROVIDER, SERVICE, null, VALUE, null, null));
+            assertEquals(1, updates.size());
+            AbstractUpdateDto aud = updates.get(0);
+            assertEquals(PROVIDER, aud.provider);
+            assertEquals(SERVICE, aud.service);
+            assertNull(aud.resource);
 
-            assertTrue(thrown.getMessage().contains("resource"), "Wrong message: " + thrown.getMessage());
+            assertInstanceOf(FailedMappingDto.class, aud);
+            FailedMappingDto fmd = (FailedMappingDto) aud;
+            assertNotNull(fmd.mappingFailure);
+            assertTrue(fmd.mappingFailure.getMessage().contains("resource"), "Wrong message: " + fmd.mappingFailure.getMessage());
         }
     }
 
