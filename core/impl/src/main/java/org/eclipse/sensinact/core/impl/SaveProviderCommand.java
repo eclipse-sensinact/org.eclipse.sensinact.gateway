@@ -41,7 +41,7 @@ public class SaveProviderCommand extends AbstractSensinactEMFCommand<Void> {
         }
         SensinactEMFProvider sp = twin.getProvider(model.getName(), provider.getId());
         if (sp == null) {
-            sp = twin.createProvider(model.getName(), provider.getId(), Instant.now());
+            sp = twin.createProvider(provider);
         }
 
         return sp.update(provider);
