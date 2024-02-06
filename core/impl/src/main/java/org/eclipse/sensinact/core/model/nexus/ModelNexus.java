@@ -934,7 +934,8 @@ public class ModelNexus {
      */
     public void addEPackage(EPackage ePackage) {
         if (ePackage != providerPackage) {
-            getProviderEClassesFromEPackage(ePackage).forEach(ec -> registerModel(ec, Instant.now(), false));
+            getProviderEClassesFromEPackage(ePackage).filter(Predicate.not(this::registered))
+                    .forEach(ec -> registerModel(ec, Instant.now(), false));
         }
     }
 
