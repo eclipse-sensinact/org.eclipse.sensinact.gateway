@@ -25,9 +25,15 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
+import org.eclipse.sensinact.core.impl.snapshot.ProviderSnapshotImpl;
+import org.eclipse.sensinact.core.impl.snapshot.ResourceSnapshotImpl;
+import org.eclipse.sensinact.core.impl.snapshot.ServiceSnapshotImpl;
 import org.eclipse.sensinact.core.model.ResourceType;
+import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -40,11 +46,6 @@ import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.core.impl.snapshot.ProviderSnapshotImpl;
-import org.eclipse.sensinact.core.impl.snapshot.ResourceSnapshotImpl;
-import org.eclipse.sensinact.core.impl.snapshot.ServiceSnapshotImpl;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactDigitalTwinImpl extends CommandScopedImpl implements SensinactEMFDigitalTwin {
@@ -127,6 +128,12 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             Instant instant) {
         return instant == null ? createProvider(model, providerName)
                 : toProvider(nexusImpl.createProviderInstance(modelPackageUri, model, providerName, instant));
+    }
+
+    @Override
+    public SensinactEMFProvider createProvider(Provider provider) {
+        return createProvider(provider.eClass().getEPackage().getNsURI(), EMFUtil.getModelName(provider.eClass()),
+                provider.getId());
     }
 
     @Override

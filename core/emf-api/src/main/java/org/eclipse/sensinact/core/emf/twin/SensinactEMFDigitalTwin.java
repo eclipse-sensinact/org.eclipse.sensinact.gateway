@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.model.core.provider.Provider;
 
 /**
  * The {@link SensinactEMFDigitalTwin} provides access to the in-memory digital
@@ -102,6 +103,14 @@ public interface SensinactEMFDigitalTwin extends SensinactDigitalTwin {
      * @return
      */
     SensinactEMFProvider getProvider(EClass model, String id);
+
+    /**
+     * Create a provider instance with the given Provider as template
+     *
+     * @param provider
+     * @return
+     */
+    SensinactEMFProvider createProvider(Provider provider);
 
     /**
      * Create a provider instance for the named model
