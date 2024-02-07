@@ -33,11 +33,11 @@ public enum ValueType {
     /**
      * Represent available types
      */
-    AS_IS("any", null),
-    STRING("string", (v, o) -> String.valueOf(v)),
+    AS_IS("any", null, null),
+    STRING("string", (v, o) -> String.valueOf(v), String.class),
     CHAR("char", (v, o) -> {
         if (v instanceof Character) {
-            return v;
+            return (Character) v;
         } else if (v instanceof CharSequence) {
             final String str = v.toString();
             if (!str.isEmpty()) {
@@ -55,10 +55,10 @@ public enum ValueType {
         } else {
             return null;
         }
-    }),
+    }, Character.class),
     BOOLEAN("boolean", (v, o) -> {
         if (v instanceof Boolean) {
-            return v;
+            return (Boolean) v;
         } else if (v instanceof Number) {
             return ((Number) v).longValue() != 0;
         } else if (v instanceof CharSequence) {
@@ -66,41 +66,41 @@ public enum ValueType {
         } else {
             return null;
         }
-    }),
+    }, Boolean.class),
     BYTE("byte", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.byteValue() : null;
-    }),
+    }, Byte.class),
     SHORT("short", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.shortValue() : null;
-    }),
+    }, Short.class),
     INT("int", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.intValue() : null;
-    }),
+    }, Integer.class),
     LONG("long", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.longValue() : null;
-    }),
+    }, Long.class),
     FLOAT("float", (v, o) -> {
         final Number parsed = parseNumber(v, false, o);
         return parsed != null ? parsed.floatValue() : null;
-    }),
+    }, Float.class),
     DOUBLE("double", (v, o) -> {
         final Number parsed = parseNumber(v, false, o);
         return parsed != null ? parsed.doubleValue() : null;
-    }),
-    ANY_ARRAY("any[]", (v, o) -> asList(v, o, AS_IS.converter)),
-    STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING.converter)),
-    CHAR_ARRAY("char[]", (v, o) -> asList(v, o, CHAR.converter)),
-    BOOLEAN_ARRAY("boolean[]", (v, o) -> asList(v, o, BOOLEAN.converter)),
-    BYTE_ARRAY("byte[]", (v, o) -> asList(v, o, BYTE.converter)),
-    SHORT_ARRAY("short[]", (v, o) -> asList(v, o, SHORT.converter)),
-    INT_ARRAY("int[]", (v, o) -> asList(v, o, INT.converter)),
-    LONG_ARRAY("long[]", (v, o) -> asList(v, o, LONG.converter)),
-    FLOAT_ARRAY("float[]", (v, o) -> asList(v, o, FLOAT.converter)),
-    DOUBLE_ARRAY("double[]", (v, o) -> asList(v, o, DOUBLE.converter));
+    }, Double.class),
+    ANY_ARRAY("any[]", (v, o) -> asList(v, o, AS_IS), List.class),
+    STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING), List.class),
+    CHAR_ARRAY("char[]", (v, o) -> asList(v, o, CHAR), List.class),
+    BOOLEAN_ARRAY("boolean[]", (v, o) -> asList(v, o, BOOLEAN), List.class),
+    BYTE_ARRAY("byte[]", (v, o) -> asList(v, o, BYTE), List.class),
+    SHORT_ARRAY("short[]", (v, o) -> asList(v, o, SHORT), List.class),
+    INT_ARRAY("int[]", (v, o) -> asList(v, o, INT), List.class),
+    LONG_ARRAY("long[]", (v, o) -> asList(v, o, LONG), List.class),
+    FLOAT_ARRAY("float[]", (v, o) -> asList(v, o, FLOAT), List.class),
+    DOUBLE_ARRAY("double[]", (v, o) -> asList(v, o, DOUBLE), List.class);
 
     private static final Logger logger = LoggerFactory.getLogger(ValueType.class);
 
@@ -112,7 +112,12 @@ public enum ValueType {
     /**
      * Converter function
      */
-    private final BiFunction<Object, DeviceMappingOptionsDTO, Object> converter;
+    private final BiFunction<Object, DeviceMappingOptionsDTO, ?> converter;
+
+    /**
+     * Java class represented by the value type
+     */
+    private final Class<?> javaClass;
 
     /**
      * Try to find the number format matching the given locale
@@ -210,16 +215,27 @@ public enum ValueType {
     /**
      * Sets up the custom enumeration
      *
-     * @param strRepr
+     * @param strRepr   String representation of the value type used in mapping
+     *                  configuration
+     * @param converter Function to convert any input to the value type
+     * @param javaClass Java class represented by the value type
      */
-    ValueType(final String strRepr, final BiFunction<Object, DeviceMappingOptionsDTO, Object> converter) {
+    <T> ValueType(final String strRepr, final BiFunction<Object, DeviceMappingOptionsDTO, T> converter, final Class<T> javaClass) {
         this.repr = strRepr;
         this.converter = converter;
+        this.javaClass = javaClass != null ? javaClass : Object.class;
     }
 
     @Override
     public String toString() {
         return repr;
+    }
+
+    /**
+     * Returns the Java class associated to the value type
+     */
+    public Class<?> toJavaClass() {
+        return this.javaClass;
     }
 
     /**
@@ -242,13 +258,12 @@ public enum ValueType {
     /**
      * Converts input value to a list
      *
-     * @param value         Input value
-     * @param options       Mapping options
-     * @param itemConverter Input array item converter
+     * @param value    Input value
+     * @param options  Mapping options
+     * @param itemType List item type
      * @return The converted list
      */
-    private static Object asList(Object value, DeviceMappingOptionsDTO options,
-            final BiFunction<Object, DeviceMappingOptionsDTO, Object> itemConverter) {
+    private static List<?> asList(final Object value, final DeviceMappingOptionsDTO options, final ValueType itemType) {
         Stream<?> stream;
         if (value instanceof String) {
             stream = Arrays.stream(((String) value).split(";|,")).map(String::trim);
@@ -267,8 +282,8 @@ public enum ValueType {
             stream = Stream.of(value);
         }
 
-        if (itemConverter != null) {
-            stream = stream.map(v -> itemConverter.apply(v, options));
+        if (itemType.converter != null) {
+            stream = stream.map(v -> itemType.converter.apply(v, options));
         }
 
         return stream.collect(Collectors.toList());
