@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -342,12 +343,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     final ValueType valueType = rcMapping.getRecordPath().getValueType();
                     if (rcMapping.isMetadata()) {
                         logger.warn("Metadata update not supported.");
-                    } else if (value != null || valueType != ValueType.AS_IS) {
+                    } else {
                         bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
                                 valueType.toJavaClass(), timestamp));
-                    } else if (options.logErrors) {
-                        logger.debug("Rejected update of {}/{}/{}: null value without explicit type", provider, service,
-                                rcName);
                     }
                 }
             } catch (Exception e) {
@@ -374,6 +372,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
             }
         }
+
+        // Remove null entries
+        bulk.removeIf(Objects::isNull);
 
         // Set the null action to all DTOs
         bulk.stream().forEach(dto -> {

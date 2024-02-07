@@ -56,7 +56,10 @@ public class ResourceMappingHandler {
     public IResourceMapping parseMapping(final String key, final Object rawMapping)
             throws InvalidResourcePathException, IllegalArgumentException {
 
-        if (rawMapping instanceof String) {
+        if (rawMapping == null) {
+            // Null mapping: consider a null value for an object
+            return new ResourceLiteralMapping(key, ValueType.AS_IS, null);
+        } else if (rawMapping instanceof String) {
             // String path (JSON path or CSV column name)
             return new ResourceRecordMapping(key, new RecordPath((String) rawMapping));
         } else if (rawMapping instanceof Integer) {
