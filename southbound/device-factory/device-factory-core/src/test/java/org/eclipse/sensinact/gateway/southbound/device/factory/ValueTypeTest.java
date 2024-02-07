@@ -146,4 +146,15 @@ public class ValueTypeTest {
         assertEquals(List.of("1", "2", "3"), ValueType.STRING_ARRAY.convert(strArray, options));
         assertEquals(List.of("1", "2", "3"), ValueType.ANY_ARRAY.convert(strArray, options));
     }
+
+    @Test
+    void testChar() {
+        final DeviceMappingOptionsDTO options = new DeviceMappingOptionsDTO();
+
+        assertEquals('a', ValueType.CHAR.convert('a', options));
+        assertEquals('a', ValueType.CHAR.convert("a", options));
+        assertEquals('a', ValueType.CHAR.convert(0x61, options));
+
+        assertEquals(List.of('a', 'b', 'c'), ValueType.CHAR_ARRAY.convert("a, b, c", options));
+    }
 }

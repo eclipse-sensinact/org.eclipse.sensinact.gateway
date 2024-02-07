@@ -35,6 +35,27 @@ public enum ValueType {
      */
     AS_IS("any", null),
     STRING("string", (v, o) -> String.valueOf(v)),
+    CHAR("char", (v, o) -> {
+        if (v instanceof Character) {
+            return v;
+        } else if (v instanceof CharSequence) {
+            final String str = v.toString();
+            if (!str.isEmpty()) {
+                return str.charAt(0);
+            } else {
+                return null;
+            }
+        } else if (v instanceof Number) {
+            int value = ((Number) v).intValue();
+            if (value > Character.MAX_VALUE || value < Character.MIN_VALUE) {
+                return null;
+            } else {
+                return (char) value;
+            }
+        } else {
+            return null;
+        }
+    }),
     BOOLEAN("boolean", (v, o) -> {
         if (v instanceof Boolean) {
             return v;
@@ -72,6 +93,7 @@ public enum ValueType {
     }),
     ANY_ARRAY("any[]", (v, o) -> asList(v, o, AS_IS.converter)),
     STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING.converter)),
+    CHAR_ARRAY("char[]", (v, o) -> asList(v, o, CHAR.converter)),
     BOOLEAN_ARRAY("boolean[]", (v, o) -> asList(v, o, BOOLEAN.converter)),
     BYTE_ARRAY("byte[]", (v, o) -> asList(v, o, BYTE.converter)),
     SHORT_ARRAY("short[]", (v, o) -> asList(v, o, SHORT.converter)),
