@@ -45,4 +45,9 @@ public abstract class AbstractUpdateDto {
      * The timestamp for this update. If not set then the current time is used.
      */
     public Instant timestamp;
+
+    /**
+     * The original object which this update is derived from
+     */
+    public Object originalDto;
 }

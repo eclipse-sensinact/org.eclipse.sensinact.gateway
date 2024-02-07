@@ -41,33 +41,79 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
 
 public class AnnotationMapping {
 
     static Function<Object, List<? extends AbstractUpdateDto>> getUpdateDtoMappings(Class<?> clazz) {
-        Map<Field, Data> dataFields = getAnnotatedFields(clazz, Data.class);
-        Map<Field, Metadata> metadataFields = getAnnotatedFields(clazz, Metadata.class);
+        try {
+            Map<Field, Data> dataFields = getAnnotatedFields(clazz, Data.class);
+            Map<Field, Metadata> metadataFields = getAnnotatedFields(clazz, Metadata.class);
 
-        Function<Object, Instant> timestamp = getTimestampMapping(clazz);
+            Function<Object, Instant> timestamp = getTimestampMapping(clazz);
 
-        List<Function<Object, ? extends AbstractUpdateDto>> list = new ArrayList<>();
+            List<Function<Object, ? extends AbstractUpdateDto>> list = new ArrayList<>();
 
-        for (Entry<Field, Data> e : dataFields.entrySet()) {
-            list.add(createDataMapping(clazz, e.getKey(), e.getValue()));
+            for (Entry<Field, Data> e : dataFields.entrySet()) {
+                list.add(createDataMapping(clazz, e.getKey(), e.getValue()));
+            }
+
+            for (Entry<Field, Metadata> e : metadataFields.entrySet()) {
+                list.add(createMetaDataMapping(clazz, e.getKey(), e.getValue()));
+            }
+
+            return o -> {
+                Instant t = null;
+                Throwable tFail = null;
+                try {
+                    t = timestamp.apply(o);
+                } catch (Throwable thr) {
+                    tFail = thr;
+                }
+                Instant fT = t;
+                Throwable fTFail = tFail;
+
+                return list.stream().map(f -> f.apply(o)).filter(d -> d != null).map(d -> {
+                    d.originalDto = o;
+                    if(d instanceof FailedMappingDto) {
+                        return d;
+                    } else if(fTFail != null) {
+                        FailedMappingDto fmd = getFailureDto(d);
+                        fmd.mappingFailure = fTFail;
+                        return fmd;
+                    } else {
+                        d.timestamp = fT;
+                        return d;
+                    }
+                }).collect(Collectors.toList());
+            };
+        } catch (Throwable t) {
+            Throwable fail = new IllegalArgumentException(String.format("The mapping for class %s is not properly defined", clazz.getName()), t);
+            return o -> {
+                FailedMappingDto fmd = new FailedMappingDto();
+                fmd.mappingFailure = fail;
+                return List.of(fmd);
+            };
         }
+    }
 
-        for (Entry<Field, Metadata> e : metadataFields.entrySet()) {
-            list.add(createMetaDataMapping(clazz, e.getKey(), e.getValue()));
-        }
+    private static FailedMappingDto getFailureDto(AbstractUpdateDto dto) {
+        FailedMappingDto fmd = new FailedMappingDto();
+        fmd.modelPackageUri = dto.modelPackageUri;
+        fmd.model = dto.model;
+        fmd.provider = dto.provider;
+        fmd.service = dto.service;
+        fmd.resource = dto.resource;
+        fmd.timestamp = dto.timestamp;
+        fmd.originalDto = dto.originalDto;
+        return fmd;
+    }
 
-        return o -> {
-            Instant t = timestamp.apply(o);
-            return list.stream().map(f -> f.apply(o)).filter(d -> d != null).map(d -> {
-                d.timestamp = t;
-                return d;
-            }).collect(Collectors.toList());
-        };
+    private static FailedMappingDto getFailureDto(AbstractUpdateDto dto, Throwable cause) {
+        FailedMappingDto fmd = getFailureDto(dto);
+        fmd.mappingFailure = cause;
+        return fmd;
     }
 
     private static <T extends Annotation> Map<Field, T> getAnnotatedFields(Class<?> clazz, Class<T> annotationType) {
@@ -102,7 +148,7 @@ public class AnnotationMapping {
 
     }
 
-    private static Function<Object, DataUpdateDto> createDataMapping(Class<?> clazz, Field f, Data data) {
+    private static Function<Object, ? extends AbstractUpdateDto> createDataMapping(Class<?> clazz, Field f, Data data) {
         String fieldName = f.getName();
         Class<?> type = data.type() == Object.class ? f.getType() : data.type();
 
@@ -115,27 +161,57 @@ public class AnnotationMapping {
         Function<Object, Object> dataValue = o -> getValueFromField(fieldName, o);
 
         // Do not capture the field or class in this lambda
-        Function<Object, DataUpdateDto> dtoMapper = o -> {
+        Function<Object, ? extends AbstractUpdateDto> dtoMapper = o -> {
             DataUpdateDto dto = new DataUpdateDto();
-            dto.data = dataValue.apply(o);
+            Throwable firstFailure = null;
 
-            if (dto.data == null && data.onNull() == NullAction.IGNORE) {
+            try {
+                dto.data = dataValue.apply(o);
+            } catch (Throwable t) {
+                firstFailure = t;
+            }
+
+            if (dto.data == null && data.onNull() == NullAction.IGNORE && firstFailure == null) {
                 return null;
             }
 
-            dto.modelPackageUri = modelPackageUri.apply(o);
-            dto.model = model.apply(o);
-            dto.provider = provider.apply(o);
-            dto.service = service.apply(o);
-            dto.resource = resource.apply(o);
+            try {
+                dto.modelPackageUri = modelPackageUri.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.model = model.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.provider = provider.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.service = service.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.resource = resource.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
             dto.type = type;
+
+            if(firstFailure != null) {
+                return getFailureDto(dto, firstFailure);
+            }
 
             return dto;
         };
         return dtoMapper;
     }
 
-    private static Function<Object, MetadataUpdateDto> createMetaDataMapping(Class<?> clazz, Field f,
+    private static Function<Object, ? extends AbstractUpdateDto> createMetaDataMapping(Class<?> clazz, Field f,
             Metadata metadata) {
         String fieldName = f.getName();
 
@@ -148,11 +224,19 @@ public class AnnotationMapping {
         Function<Object, Object> metadataValue = o -> getValueFromField(fieldName, o);
 
         // Do not capture the field or class in this lambda
-        Function<Object, MetadataUpdateDto> dtoMapper = o -> {
+        Function<Object, ? extends AbstractUpdateDto> dtoMapper = o -> {
             MetadataUpdateDto dto = new MetadataUpdateDto();
-            Object md = metadataValue.apply(o);
 
-            if (md == null && metadata.onNull() == NullAction.IGNORE) {
+            Throwable firstFailure = null;
+
+            Object md = null;
+            try {
+                md = metadataValue.apply(o);
+            } catch (Throwable t) {
+                firstFailure = t;
+            }
+
+            if (md == null && metadata.onNull() == NullAction.IGNORE && firstFailure == null) {
                 return null;
             }
             String key = NOT_SET.equals(metadata.value()) ? fieldName : metadata.value();
@@ -174,20 +258,43 @@ public class AnnotationMapping {
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Entry::getValue));
                         break;
                     default:
-                        throw new IllegalArgumentException("Unrecognised Map Action " + ma);
+                        firstFailure = new IllegalArgumentException("Unrecognised Map Action " + ma + " for field " + f.getName() + " in class " + clazz.getName());
                     }
                 }
 
             } else {
                 processedMd = Collections.singletonMap(key, md);
             }
-            String modelPackageUriValue = modelPackageUri.apply(o);
-            dto.modelPackageUri = NOT_SET.equals(modelPackageUriValue) ? null : modelPackageUriValue;
-            dto.model = model.apply(o);
-            dto.provider = provider.apply(o);
-            dto.service = service.apply(o);
-            dto.resource = resource.apply(o);
+            try {
+                dto.modelPackageUri = modelPackageUri.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.model = model.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.provider = provider.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.service = service.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.resource = resource.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
             dto.metadata = processedMd;
+
+            if(firstFailure != null) {
+                return getFailureDto(dto, firstFailure);
+            }
 
             return dto;
         };
@@ -215,7 +322,7 @@ public class AnnotationMapping {
     private static Function<Object, String> getProviderNameMappingForField(Class<?> clazz, Field f) {
         Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Provider.class);
         if (mapping == null) {
-            throw new IllegalArgumentException("No provider is defined for the field " + f.getName());
+            throw new IllegalArgumentException(String.format("No provider is defined for the field %s in class %s", f.getName(), clazz.getName()));
         }
         return mapping;
     }
@@ -223,7 +330,7 @@ public class AnnotationMapping {
     private static Function<Object, String> getServiceNameMappingForField(Class<?> clazz, Field f) {
         Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Service.class);
         if (mapping == null) {
-            throw new IllegalArgumentException("No provider is defined for the field " + f.getName());
+            throw new IllegalArgumentException(String.format("No service is defined for the field %s in class %s", f.getName(), clazz.getName()));
         }
         return mapping;
     }
@@ -256,7 +363,7 @@ public class AnnotationMapping {
     private static Function<Object, String> getResourceNameMappingForMetadataField(Class<?> clazz, Field f) {
         Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Resource.class);
         if (mapping == null) {
-            throw new IllegalArgumentException("No resource is defined for the field " + f.getName());
+            throw new IllegalArgumentException(String.format("No resource is defined for the field %s in class %s", f.getName(), clazz.getName()));
         }
         return mapping;
     }

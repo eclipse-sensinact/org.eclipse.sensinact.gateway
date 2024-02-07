@@ -18,6 +18,7 @@ import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
@@ -33,10 +34,18 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
         this.dataUpdateDto = dataUpdateDto;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
             PromiseFactory promiseFactory) {
+        return doCall(twin, modelMgr, promiseFactory).recoverWith(p -> {
+            return promiseFactory.failed(new DataUpdateException(dataUpdateDto.modelPackageUri,
+                    dataUpdateDto.model, dataUpdateDto.provider, dataUpdateDto.service,
+                    dataUpdateDto.resource, dataUpdateDto.originalDto, p.getFailure()));
+        });
+    }
+
+    private Promise<Void> doCall(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                PromiseFactory promiseFactory) {
         String packageUri = dataUpdateDto.modelPackageUri;
         String mod = dataUpdateDto.model == null ? dataUpdateDto.provider : dataUpdateDto.model;
         String provider = dataUpdateDto.provider;
@@ -63,7 +72,7 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
 
             if (r == null) {
                 r = service.createResource(res).withValueType(ValueType.UPDATABLE)
-                        .withType((Class<Object>) dataUpdateDto.type).build();
+                        .withType((Class<?>) dataUpdateDto.type).build();
             }
 
             SensinactProvider sp = twin.getProvider(packageUri, mod, provider);

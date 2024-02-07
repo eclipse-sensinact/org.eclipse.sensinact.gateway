@@ -15,7 +15,8 @@ package org.eclipse.sensinact.core.extract.impl;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
@@ -34,6 +35,7 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -132,23 +134,41 @@ public class AnnotationBasedDtoExtractorTest {
         @Test
         void missingProviderName() {
 
-            Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                extractor(BasicDtoClassLevelError.class);
-            });
+            DataExtractor extractor = extractor(BasicDtoClassLevelError.class);
+            List<? extends AbstractUpdateDto> updates = extractor.getUpdates(new BasicDtoClassLevel());
 
-            assertTrue(thrown.getMessage().contains("annotated with Provider but that annotation has no value"),
-                    "Wrong message: " + thrown.getMessage());
+            assertNotNull(updates);
+            assertEquals(1, updates.size());
+            AbstractUpdateDto aud = updates.get(0);
+            assertNotNull(aud);
+            assertInstanceOf(FailedMappingDto.class, aud);
+            FailedMappingDto fmd = (FailedMappingDto) aud;
+            assertNotNull(fmd.mappingFailure);
+
+            assertTrue(fmd.mappingFailure.getMessage().contains("not properly defined"),
+                    "Wrong message: " + fmd.mappingFailure.getMessage());
+            assertTrue(fmd.mappingFailure.getCause().getMessage().contains("annotated with Provider but that annotation has no value"),
+                    "Wrong message: " + fmd.mappingFailure.getCause().getMessage());
         }
 
         @Test
         void missingServiceName() {
 
-            Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                extractor(BasicDtoClassLevelError2.class);
-            });
+            DataExtractor extractor = extractor(BasicDtoClassLevelError2.class);
+            List<? extends AbstractUpdateDto> updates = extractor.getUpdates(new BasicDtoClassLevelError2());
 
-            assertTrue(thrown.getMessage().contains("annotated with Service but that annotation has no value"),
-                    "Wrong message: " + thrown.getMessage());
+            assertNotNull(updates);
+            assertEquals(1, updates.size());
+            AbstractUpdateDto aud = updates.get(0);
+            assertNotNull(aud);
+            assertInstanceOf(FailedMappingDto.class, aud);
+            FailedMappingDto fmd = (FailedMappingDto) aud;
+            assertNotNull(fmd.mappingFailure);
+
+            assertTrue(fmd.mappingFailure.getMessage().contains("not properly defined"),
+                    "Wrong message: " + fmd.mappingFailure.getMessage());
+            assertTrue(fmd.mappingFailure.getCause().getMessage().contains("annotated with Service but that annotation has no value"),
+                    "Wrong message: " + fmd.mappingFailure.getCause().getMessage());
         }
 
         @Test

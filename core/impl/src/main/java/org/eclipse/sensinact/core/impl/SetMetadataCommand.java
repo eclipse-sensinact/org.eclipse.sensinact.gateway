@@ -15,9 +15,11 @@ package org.eclipse.sensinact.core.impl;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
@@ -41,12 +43,19 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
                         metadataUpdateDto.resource)
                 : twin.getResource(metadataUpdateDto.provider, metadataUpdateDto.service, metadataUpdateDto.resource);
 
+        Stream<Promise<Void>> stream;
         if (metadataUpdateDto.removeMissingValues) {
-            throw new UnsupportedOperationException("Not yet implemented");
+            stream = Stream.of(promiseFactory.failed(new UnsupportedOperationException("Not yet implemented")));
+        } else {
+            stream = metadataUpdateDto.metadata.entrySet().stream()
+                    .map(e -> resource.setMetadataValue(e.getKey(), e.getValue(), metadataUpdateDto.timestamp));
         }
 
-        List<Promise<Void>> updates = metadataUpdateDto.metadata.entrySet().stream()
-                .map(e -> resource.setMetadataValue(e.getKey(), e.getValue(), metadataUpdateDto.timestamp))
+        List<Promise<Void>> updates = stream.map(p -> p.recoverWith(pf -> {
+                            return promiseFactory.failed(new DataUpdateException(metadataUpdateDto.modelPackageUri,
+                                    metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
+                                    metadataUpdateDto.resource, metadataUpdateDto.originalDto, pf.getFailure()));
+                        }))
                 .collect(toList());
 
         return promiseFactory.all(updates).map(x -> null);

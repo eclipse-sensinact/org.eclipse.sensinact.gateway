@@ -18,28 +18,41 @@ import static java.util.stream.Collectors.toList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.command.IndependentCommands;
-import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
-import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
 import org.eclipse.sensinact.core.extract.impl.BulkGenericDtoDataExtractor;
 import org.eclipse.sensinact.core.extract.impl.CustomDtoDataExtractor;
 import org.eclipse.sensinact.core.extract.impl.DataExtractor;
 import org.eclipse.sensinact.core.extract.impl.GenericDtoDataExtractor;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.push.DataMappingException;
+import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.push.DataUpdateException;
+import org.eclipse.sensinact.core.push.FailedUpdatesException;
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.model.core.provider.Provider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.util.promise.FailedPromisesException;
 import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class DataUpdateImpl implements DataUpdate {
-    // TODO wrap this in a more pleasant type?
+
+    private static final Logger LOG = LoggerFactory.getLogger(DataUpdateImpl.class);
+
     @Reference
     GatewayThread thread;
 
@@ -50,7 +63,33 @@ public class DataUpdateImpl implements DataUpdate {
 
     @Override
     public Promise<?> pushUpdate(Object o) {
+        return doPushUpdate(o)
+                .recoverWith(p -> thread.getPromiseFactory()
+                        .failed(new FailedUpdatesException(toStreamOfDataUpdateFailures(p.getFailure()))));
+    }
 
+    private Stream<DataUpdateException> toStreamOfDataUpdateFailures(Throwable t) {
+        if(t instanceof DataUpdateException) {
+            return Stream.of((DataUpdateException) t);
+        } else if (t instanceof FailedUpdatesException) {
+            return ((FailedUpdatesException)t).getFailedUpdates().stream();
+        } else if (t instanceof FailedPromisesException) {
+            return ((FailedPromisesException)t).getFailedPromises().stream().flatMap(p -> {
+                try {
+                    return toStreamOfDataUpdateFailures(p.getFailure());
+                } catch (InterruptedException e) {
+                    // This should never happen
+                    LOG.error("An InterruptedException occurred getting failures from completed promises", e);
+                    return Stream.empty();
+                }
+            });
+        } else {
+            LOG.error("An unexpected exception type occurred getting failures from data updates", t);
+            return Stream.empty();
+        }
+    }
+
+    private Promise<?> doPushUpdate(Object o) {
         if (o instanceof Provider) {
             return thread.execute(new SaveProviderCommand((Provider) o));
         }
@@ -83,9 +122,27 @@ public class DataUpdateImpl implements DataUpdate {
             return new SetValueCommand((DataUpdateDto) dto);
         } else if (dto instanceof MetadataUpdateDto) {
             return new SetMetadataCommand((MetadataUpdateDto) dto);
+        } else if (dto instanceof FailedMappingDto) {
+            return new FailureCommand((FailedMappingDto) dto);
         } else {
             throw new IllegalArgumentException("Unknown dto type " + dto.getClass().toString());
         }
     }
 
+    static class FailureCommand extends AbstractSensinactCommand<Void> {
+
+        private final FailedMappingDto dto;
+
+        public FailureCommand(FailedMappingDto dto) {
+            this.dto = dto;
+        }
+
+        @Override
+        protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                PromiseFactory promiseFactory) {
+            return promiseFactory.failed(new DataMappingException(dto.modelPackageUri, dto.model,
+                    dto.provider, dto.service, dto.resource, dto.originalDto, dto.mappingFailure));
+        }
+
+    }
 }
