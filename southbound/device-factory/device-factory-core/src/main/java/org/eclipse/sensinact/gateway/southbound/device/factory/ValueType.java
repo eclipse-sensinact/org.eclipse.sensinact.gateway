@@ -35,6 +35,25 @@ public enum ValueType {
      */
     AS_IS("any", null),
     STRING("string", (v, o) -> String.valueOf(v)),
+    BOOLEAN("boolean", (v, o) -> {
+        if (v instanceof Boolean) {
+            return v;
+        } else if (v instanceof Number) {
+            return ((Number) v).longValue() != 0;
+        } else if (v instanceof CharSequence) {
+            return Boolean.valueOf(v.toString());
+        } else {
+            return null;
+        }
+    }),
+    BYTE("byte", (v, o) -> {
+        final Number parsed = parseNumber(v, true, o);
+        return parsed != null ? parsed.byteValue() : null;
+    }),
+    SHORT("short", (v, o) -> {
+        final Number parsed = parseNumber(v, true, o);
+        return parsed != null ? parsed.shortValue() : null;
+    }),
     INT("int", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.intValue() : null;
@@ -51,7 +70,11 @@ public enum ValueType {
         final Number parsed = parseNumber(v, false, o);
         return parsed != null ? parsed.doubleValue() : null;
     }),
+    ANY_ARRAY("any[]", (v, o) -> asList(v, o, AS_IS.converter)),
     STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING.converter)),
+    BOOLEAN_ARRAY("boolean[]", (v, o) -> asList(v, o, BOOLEAN.converter)),
+    BYTE_ARRAY("byte[]", (v, o) -> asList(v, o, BYTE.converter)),
+    SHORT_ARRAY("short[]", (v, o) -> asList(v, o, SHORT.converter)),
     INT_ARRAY("int[]", (v, o) -> asList(v, o, INT.converter)),
     LONG_ARRAY("long[]", (v, o) -> asList(v, o, LONG.converter)),
     FLOAT_ARRAY("float[]", (v, o) -> asList(v, o, FLOAT.converter)),
@@ -206,7 +229,7 @@ public enum ValueType {
             final BiFunction<Object, DeviceMappingOptionsDTO, Object> itemConverter) {
         Stream<?> stream;
         if (value instanceof String) {
-            stream = Arrays.stream(((String) value).split(";|,"));
+            stream = Arrays.stream(((String) value).split(";|,")).map(String::trim);
         } else if (value instanceof Collection) {
             stream = ((Collection<?>) value).stream();
         } else if (value.getClass().isArray()) {
@@ -219,10 +242,14 @@ public enum ValueType {
             stream = arrayAsList.stream();
         } else {
             // Maybe a single item
-            return List.of(itemConverter.apply(value, options));
+            stream = Stream.of(value);
         }
 
-        return stream.map(v -> itemConverter.apply(v, options)).collect(Collectors.toList());
+        if (itemConverter != null) {
+            stream = stream.map(v -> itemConverter.apply(v, options));
+        }
+
+        return stream.collect(Collectors.toList());
     }
 
     /**
