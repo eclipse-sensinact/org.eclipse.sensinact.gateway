@@ -55,6 +55,7 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePa
 import org.eclipse.sensinact.gateway.southbound.device.factory.MissingParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.ParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
+import org.eclipse.sensinact.gateway.southbound.device.factory.ValueType;
 import org.eclipse.sensinact.gateway.southbound.device.factory.VariableNotFoundException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
@@ -168,7 +169,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Check parser ID
         final String parserId = configuration.parser;
         if (parserId == null || parserId.isBlank()) {
-            throw new MissingParserException(String.format("No parser ID given", parserId));
+            throw new MissingParserException("No parser ID given");
         }
 
         // Extract mapping information
@@ -323,10 +324,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             try {
                 final Object value = record.getField(rcMapping.getRecordPath(), options);
                 if (value != Constants.IGNORE) {
+                    final ValueType valueType = rcMapping.getRecordPath().getValueType();
                     if (rcMapping.isMetadata()) {
                         logger.warn("Metadata update not supported.");
-                    } else {
-                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value, timestamp));
+                    } else if (value != null || valueType != ValueType.AS_IS) {
+                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
+                                valueType.toJavaClass(), timestamp));
                     }
                 }
             } catch (Exception e) {
@@ -341,10 +344,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             try {
                 final Object value = rcLiteral.getTypedValue(options);
                 if (value != Constants.IGNORE) {
+                    final ValueType valueType = rcLiteral.getValueType();
                     if (rcLiteral.isMetadata()) {
                         logger.warn("Metadata update not supported.");
-                    } else {
-                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value, timestamp));
+                    } else if (value != null || valueType != ValueType.AS_IS) {
+                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
+                                valueType.toJavaClass(), timestamp));
                     }
                 }
             } catch (Exception e) {
@@ -364,8 +369,16 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * Prepares a generic DTO from the given information
      */
     private GenericDto makeDto(final String modelPackageUri, final String model, final String provider,
-            final String service, final String resource,
-            final Object value, Instant timestamp) {
+            final String service, final String resource, final Object value, final Instant timestamp) {
+        return makeDto(modelPackageUri, model, provider, service, resource, value, null, timestamp);
+    }
+
+    /**
+     * Prepares a generic DTO from the given information
+     */
+    private GenericDto makeDto(final String modelPackageUri, final String model, final String provider,
+            final String service, final String resource, final Object value, final Class<?> valueType,
+            final Instant timestamp) {
         final GenericDto dto = new GenericDto();
         dto.modelPackageUri = modelPackageUri;
         dto.model = model;
@@ -373,7 +386,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         dto.service = service;
         dto.resource = resource;
         dto.value = value;
-        if (value != null) {
+        if (valueType != null) {
+            dto.type = valueType;
+        } else if (value != null) {
             dto.type = value.getClass();
         }
         if (timestamp != null) {

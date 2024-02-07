@@ -258,7 +258,10 @@ public class RecordHandlingTest {
         // Test default configuration (update)
         config.mapping.put("@provider", "p");
         config.mapping.put("data/val", "nonNullVal");
-        config.mapping.put("data/null", "nullVal");
+        final Map<String, Object> mappingNullVal = new HashMap<>();
+        mappingNullVal.put("path", "nullVal");
+        mappingNullVal.put("type", "string");
+        config.mapping.put("data/null", mappingNullVal);
         deviceMapper.handle(config, Map.of(), new byte[0]);
 
         GenericDto dto = getResourceValue("provider", "data", "null");
