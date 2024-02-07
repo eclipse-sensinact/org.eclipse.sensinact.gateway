@@ -38,4 +38,7 @@ public class DeviceMappingOptionsDTO {
 
     @JsonProperty("null.action")
     public NullAction nullAction = NullAction.UPDATE;
+
+    @JsonProperty("log.errors")
+    public boolean logErrors = false;
 }

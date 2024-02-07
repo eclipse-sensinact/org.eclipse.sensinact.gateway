@@ -64,6 +64,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,6 +181,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             throw new IllegalArgumentException("No provider mapping given");
         }
 
+        final boolean logErrors = configuration.mappingOptions.logErrors;
+
         // Find it
         final ComponentServiceObjects<IDeviceMappingParser> cso = findParser(parserId);
         final IDeviceMappingParser parser = cso.getService();
@@ -195,15 +198,28 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     try {
                         bulk.dtos.addAll(handleRecord(configuration, globalState, record));
                     } catch (InvalidResourcePathException | ParserException | VariableNotFoundException e) {
-                        logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
+                        if (logErrors) {
+                            logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
+                        }
                     }
                 }
 
                 if (!bulk.dtos.isEmpty()) {
                     // Send all updates to the gateway thread at once
-                    dataUpdate.pushUpdate(bulk);
+                    Promise<?> pushUpdate = dataUpdate.pushUpdate(bulk);
+                    if (logErrors) {
+                        pushUpdate = pushUpdate.onFailure((t) -> logger
+                                .error("Error updating digital twin with parser {}: {}", parserId, t.getMessage(), t));
+                    }
                 }
+            } else if (logErrors) {
+                logger.error("No record found by parser {}", parserId);
             }
+        } catch (Exception e) {
+            if (logErrors) {
+                logger.error("Error parsing payload with parser {}", parserId, e);
+            }
+            throw e;
         } finally {
             cso.ungetService(parser);
         }
@@ -274,8 +290,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Extract the modelPackageUri
         String modelPackageUri = null;
         if (recordState.placeholders.containsKey(KEY_MODEL_PACKAGE_URI)) {
-            modelPackageUri = getFieldString(record, recordState.placeholders.get(KEY_MODEL_PACKAGE_URI),
-                    options);
+            modelPackageUri = getFieldString(record, recordState.placeholders.get(KEY_MODEL_PACKAGE_URI), options);
         }
 
         // Extract the model
@@ -330,6 +345,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     } else if (value != null || valueType != ValueType.AS_IS) {
                         bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
                                 valueType.toJavaClass(), timestamp));
+                    } else if (options.logErrors) {
+                        logger.debug("Rejected update of {}/{}/{}: null value without explicit type", provider, service,
+                                rcName);
                     }
                 }
             } catch (Exception e) {
@@ -347,7 +365,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     final ValueType valueType = rcLiteral.getValueType();
                     if (rcLiteral.isMetadata()) {
                         logger.warn("Metadata update not supported.");
-                    } else if (value != null || valueType != ValueType.AS_IS) {
+                    } else {
                         bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
                                 valueType.toJavaClass(), timestamp));
                     }
@@ -390,6 +408,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             dto.type = valueType;
         } else if (value != null) {
             dto.type = value.getClass();
+        } else {
+            logger.debug("Ignoring {}/{}/{}: null value without explicit type", provider, service, resource);
+            return null;
         }
         if (timestamp != null) {
             dto.timestamp = timestamp;
@@ -600,7 +621,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                         // Short format location: lat:lon[:alt]
                         final String[] parts = strLocation.split(":");
                         if (parts.length >= 2) {
-                            return makeLocation(parts[0], parts[1], parts.length >= 3 ? parts[2] : null);
+                            return makeLocation(parts[0], parts[1], parts.length >= 3 ? parts[2] : null,
+                                    options.logErrors);
                         }
                     }
                 } else if (locationValue instanceof Map) {
@@ -627,7 +649,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             altitude = getFieldValue(record, altitudePath, options);
         }
 
-        return makeLocation(latitude, longitude, altitude);
+        return makeLocation(latitude, longitude, altitude, options.logErrors);
     }
 
     /**
@@ -710,13 +732,17 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Prepares a GeoJSON object for the point at the given location
      */
-    private Point makeLocation(final Object latitude, final Object longitude, final Object altitude) {
+    private Point makeLocation(final Object latitude, final Object longitude, final Object altitude,
+            final boolean logErrors) {
         Float lat = toFloat(latitude);
         Float lon = toFloat(longitude);
         Float alt = toFloat(altitude);
 
         if (lat == null || lon == null) {
             // Invalid location
+            if (logErrors) {
+                logger.debug("Invalid location: lat={} lon={} alt={}", lat, lon, alt);
+            }
             return null;
         }
 
