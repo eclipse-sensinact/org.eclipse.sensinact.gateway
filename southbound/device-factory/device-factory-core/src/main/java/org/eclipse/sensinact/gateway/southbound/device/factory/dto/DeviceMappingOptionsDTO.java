@@ -30,6 +30,15 @@ public class DeviceMappingOptionsDTO {
     @JsonProperty("format.datetime")
     public String formatDateTime;
 
+    @JsonProperty("format.datetime.locale")
+    public String formatDateTimeLocale;
+
+    @JsonProperty("format.date.style")
+    public String formatDateStyle;
+
+    @JsonProperty("format.time.style")
+    public String formatTimeStyle;
+
     @JsonProperty("datetime.timezone")
     public String dateTimezone;
 

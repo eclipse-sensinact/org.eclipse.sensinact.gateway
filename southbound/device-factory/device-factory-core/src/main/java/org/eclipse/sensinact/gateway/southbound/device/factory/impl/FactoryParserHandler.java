@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.chrono.ChronoZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.UnsupportedTemporalTypeException;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -53,6 +55,7 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRec
 import org.eclipse.sensinact.gateway.southbound.device.factory.IPlaceHolderKeys;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
 import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
+import org.eclipse.sensinact.gateway.southbound.device.factory.LocaleUtils;
 import org.eclipse.sensinact.gateway.southbound.device.factory.MissingParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.ParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
@@ -799,12 +802,15 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
 
         final ZoneId timezone = getTimezone(configuration.mappingOptions.dateTimezone);
+        final Locale locale = LocaleUtils.fromString(configuration.mappingOptions.formatDateTimeLocale);
 
         final IResourceMapping dateTimePath = placeholders.get(KEY_DATETIME);
         if (dateTimePath != null) {
             final String strDateTime = getFieldString(record, dateTimePath, options);
             if (strDateTime != null && !strDateTime.isBlank()) {
-                return parseDateTime(strDateTime, timezone, configuration.mappingOptions.formatDateTime);
+                final TemporalAccessor parsedDateTime = parseDateTime(strDateTime, configuration.mappingOptions,
+                        locale);
+                return extractDateTime(parsedDateTime, timezone);
             }
         }
 
@@ -813,7 +819,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (datePath != null) {
             final String strDate = getFieldString(record, datePath, options);
             if (strDate != null && !strDate.isBlank()) {
-                date = parseDate(strDate, configuration.mappingOptions.formatDate);
+                date = parseDate(strDate, configuration.mappingOptions, locale);
             }
         }
 
@@ -822,7 +828,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (timePath != null) {
             final String strTime = getFieldString(record, timePath, options);
             if (strTime != null && !strTime.isBlank()) {
-                time = parseTime(strTime, date, timezone, configuration.mappingOptions.formatTime);
+                time = parseTime(strTime, date, timezone, configuration.mappingOptions, locale);
             }
         }
 
@@ -878,31 +884,45 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             second = 0;
         }
 
+        int nanoOfSecond;
+        try {
+            nanoOfSecond = parsedTime.get(ChronoField.NANO_OF_SECOND);
+        } catch (Exception e) {
+            nanoOfSecond = 0;
+        }
+
         ZoneOffset offset;
         try {
             offset = ZoneOffset.ofTotalSeconds(parsedTime.get(ChronoField.OFFSET_SECONDS));
         } catch (UnsupportedTemporalTypeException e) {
             if (expectedDate != null) {
-                offset = timezone.getRules().getOffset(expectedDate.atTime(hour, minute, second));
+                offset = timezone.getRules().getOffset(expectedDate.atTime(hour, minute, second, nanoOfSecond));
             } else {
                 offset = timezone.getRules().getOffset(Instant.now());
             }
         }
 
-        return OffsetTime.of(hour, minute, second, 0, offset);
+        return OffsetTime.of(hour, minute, second, nanoOfSecond, offset);
     }
 
     /**
      * Parses a date string
      *
-     * @param strDate    Date string
-     * @param formatDate Custom parsing format (can be null)
+     * @param strDate Date string
+     * @param options Device mapping options
+     * @param locale  Configured locale
      * @return The parsed date
      */
-    private LocalDate parseDate(String strDate, String formatDate) {
+    private LocalDate parseDate(final String strDate, final DeviceMappingOptionsDTO options, final Locale locale) {
         DateTimeFormatter format = DateTimeFormatter.ISO_LOCAL_DATE;
-        if (formatDate != null && !formatDate.isBlank()) {
-            format = DateTimeFormatter.ofPattern(formatDate);
+        if (options.formatDate != null && !options.formatDate.isBlank()) {
+            format = DateTimeFormatter.ofPattern(options.formatDate);
+        } else if (options.formatDateStyle != null && !options.formatDateStyle.isBlank()) {
+            format = DateTimeFormatter.ofLocalizedDate(FormatStyle.valueOf(options.formatDateStyle.toUpperCase()));
+        }
+
+        if (locale != null) {
+            format = format.withLocale(locale);
         }
 
         return extractDate(format.parse(strDate));
@@ -911,35 +931,75 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Parses a time string
      *
-     * @param strTime    Time string
-     * @param timezone   Fallback timezone
-     * @param formatTime Custom parsing format (can be null)
-     * @return The parsed date
+     * @param strTime      Time string
+     * @param expectedDate Expected date of the time (today if null)
+     * @param timezone     Fallback timezone
+     * @param options      Device mapping options
+     * @param locale       Configured locale
+     * @return The parsed time at the expected date or today
      */
-    private OffsetTime parseTime(String strTime, LocalDate expectedDate, ZoneId timezone, String formatTime) {
+    private OffsetTime parseTime(final String strTime, final LocalDate expectedDate, final ZoneId timezone,
+            final DeviceMappingOptionsDTO options, final Locale locale) {
         DateTimeFormatter format = DateTimeFormatter.ISO_OFFSET_TIME;
-        if (formatTime != null && !formatTime.isBlank()) {
-            format = DateTimeFormatter.ofPattern(formatTime);
+        if (options.formatTime != null && !options.formatTime.isBlank()) {
+            format = DateTimeFormatter.ofPattern(options.formatTime);
+        } else if (options.formatTimeStyle != null && !options.formatTimeStyle.isBlank()) {
+            format = DateTimeFormatter.ofLocalizedDate(FormatStyle.valueOf(options.formatTimeStyle.toUpperCase()));
+        }
+
+        if (locale != null) {
+            format = format.withLocale(locale);
         }
 
         return extractTime(format.parse(strTime), expectedDate, timezone);
     }
 
     /**
-     * Parses a date/time string
+     * Parses a date time according to mapping options
      *
-     * @param strDateTime    Date/time string
-     * @param timezone       Fallback timezone
-     * @param formatDateTime Custom parsing format (can be null)
-     * @return The parsed date as an instant
+     * @param strDateTime String value of the date time
+     * @param options     Mapping options
+     * @param locale      Configured locale
+     * @return The parsed date time
      */
-    private Instant parseDateTime(String strDateTime, ZoneId timezone, String formatDateTime) {
+    private TemporalAccessor parseDateTime(final String strDateTime, final DeviceMappingOptionsDTO options,
+            final Locale locale) {
         DateTimeFormatter format = DateTimeFormatter.ISO_DATE_TIME;
+
+        final String formatDateTime = options.formatDateTime;
         if (formatDateTime != null && !formatDateTime.isBlank()) {
             format = DateTimeFormatter.ofPattern(formatDateTime);
+        } else {
+            String formatDateStyle = options.formatDateStyle;
+            String formatTimeStyle = options.formatTimeStyle;
+
+            if (formatTimeStyle == null || formatTimeStyle.isBlank()) {
+                formatTimeStyle = formatDateStyle;
+            } else if (formatDateStyle == null || formatDateStyle.isBlank()) {
+                formatDateStyle = formatTimeStyle;
+            }
+
+            if (formatTimeStyle != null && !formatTimeStyle.isBlank()) {
+                format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.valueOf(formatDateStyle.toUpperCase()),
+                        FormatStyle.valueOf(formatTimeStyle.toUpperCase()));
+            }
         }
 
-        final TemporalAccessor parsedTime = format.parse(strDateTime);
+        if (locale != null) {
+            format = format.withLocale(locale);
+        }
+
+        return format.parse(strDateTime);
+    }
+
+    /**
+     * Extract date and time from a parsed temporal accessor
+     *
+     * @param parsedTime Parsed date time
+     * @param timezone   Fallback timezone
+     * @return The parsed date as an instant
+     */
+    private Instant extractDateTime(final TemporalAccessor parsedTime, final ZoneId timezone) {
         final LocalDate date = extractDate(parsedTime);
         final OffsetTime offsetTime = extractTime(parsedTime, date, timezone);
         final OffsetDateTime dateTime = OffsetDateTime.of(date, offsetTime.toLocalTime(), offsetTime.getOffset());
@@ -955,15 +1015,14 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      */
     private Instant convertTimestamp(final String provider, final Long timestamp) {
 
-        int currentLogMs = (int) Math.log10(System.currentTimeMillis());
-        int currentLogNs = (int) Math.log10(System.nanoTime());
+        int log10ms = (int) Math.log10(System.currentTimeMillis());
         int timestampLog = (int) Math.log10(timestamp);
 
-        if (timestampLog == currentLogMs) {
+        if (timestampLog == log10ms) {
             return Instant.ofEpochMilli(timestamp);
-        } else if (timestampLog == currentLogMs - 3) {
+        } else if (timestampLog == log10ms - 3) {
             return Instant.ofEpochSecond(timestamp);
-        } else if (timestampLog == currentLogNs) {
+        } else if (timestampLog == log10ms + 6) {
             return Instant.EPOCH.plusNanos(timestamp);
         } else {
             logger.warn("Can't parse timestamp {} for provider {}", timestamp, provider);

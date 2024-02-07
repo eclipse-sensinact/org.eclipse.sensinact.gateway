@@ -26,16 +26,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public enum ValueType {
     /**
      * Represent available types
      */
-    AS_IS("any", null, null),
-    STRING("string", (v, o) -> String.valueOf(v), String.class),
-    CHAR("char", (v, o) -> {
+    AS_IS("any", null, null), STRING("string", (v, o) -> String.valueOf(v), String.class), CHAR("char", (v, o) -> {
         if (v instanceof Character) {
             return (Character) v;
         } else if (v instanceof CharSequence) {
@@ -55,8 +51,7 @@ public enum ValueType {
         } else {
             return null;
         }
-    }, Character.class),
-    BOOLEAN("boolean", (v, o) -> {
+    }, Character.class), BOOLEAN("boolean", (v, o) -> {
         if (v instanceof Boolean) {
             return (Boolean) v;
         } else if (v instanceof Number) {
@@ -66,32 +61,25 @@ public enum ValueType {
         } else {
             return null;
         }
-    }, Boolean.class),
-    BYTE("byte", (v, o) -> {
+    }, Boolean.class), BYTE("byte", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.byteValue() : null;
-    }, Byte.class),
-    SHORT("short", (v, o) -> {
+    }, Byte.class), SHORT("short", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.shortValue() : null;
-    }, Short.class),
-    INT("int", (v, o) -> {
+    }, Short.class), INT("int", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.intValue() : null;
-    }, Integer.class),
-    LONG("long", (v, o) -> {
+    }, Integer.class), LONG("long", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.longValue() : null;
-    }, Long.class),
-    FLOAT("float", (v, o) -> {
+    }, Long.class), FLOAT("float", (v, o) -> {
         final Number parsed = parseNumber(v, false, o);
         return parsed != null ? parsed.floatValue() : null;
-    }, Float.class),
-    DOUBLE("double", (v, o) -> {
+    }, Float.class), DOUBLE("double", (v, o) -> {
         final Number parsed = parseNumber(v, false, o);
         return parsed != null ? parsed.doubleValue() : null;
-    }, Double.class),
-    ANY_ARRAY("any[]", (v, o) -> asList(v, o, AS_IS), List.class),
+    }, Double.class), ANY_ARRAY("any[]", (v, o) -> asList(v, o, AS_IS), List.class),
     STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING), List.class),
     CHAR_ARRAY("char[]", (v, o) -> asList(v, o, CHAR), List.class),
     BOOLEAN_ARRAY("boolean[]", (v, o) -> asList(v, o, BOOLEAN), List.class),
@@ -101,8 +89,6 @@ public enum ValueType {
     LONG_ARRAY("long[]", (v, o) -> asList(v, o, LONG), List.class),
     FLOAT_ARRAY("float[]", (v, o) -> asList(v, o, FLOAT), List.class),
     DOUBLE_ARRAY("double[]", (v, o) -> asList(v, o, DOUBLE), List.class);
-
-    private static final Logger logger = LoggerFactory.getLogger(ValueType.class);
 
     /**
      * String representation
@@ -126,28 +112,8 @@ public enum ValueType {
      * @return The number format for the given locale or null
      */
     private static NumberFormat getNumberFormat(final DeviceMappingOptionsDTO options, boolean integers) {
-        final String strLocale = options.numbersLocale;
-        if (strLocale == null || strLocale.isBlank()) {
-            return null;
-        }
-
-        final String[] parts = strLocale.split("_");
-        final Locale locale;
-        switch (parts.length) {
-        case 1:
-            locale = new Locale(parts[0]);
-            break;
-
-        case 2:
-            locale = new Locale(parts[0], parts[1]);
-            break;
-
-        case 3:
-            locale = new Locale(parts[0], parts[1], parts[2]);
-            break;
-
-        default:
-            logger.warn("Unhandled number locale {}", strLocale);
+        final Locale locale = LocaleUtils.fromString(options.numbersLocale);
+        if (locale == null) {
             return null;
         }
 
@@ -220,7 +186,8 @@ public enum ValueType {
      * @param converter Function to convert any input to the value type
      * @param javaClass Java class represented by the value type
      */
-    <T> ValueType(final String strRepr, final BiFunction<Object, DeviceMappingOptionsDTO, T> converter, final Class<T> javaClass) {
+    <T> ValueType(final String strRepr, final BiFunction<Object, DeviceMappingOptionsDTO, T> converter,
+            final Class<T> javaClass) {
         this.repr = strRepr;
         this.converter = converter;
         this.javaClass = javaClass != null ? javaClass : Object.class;
