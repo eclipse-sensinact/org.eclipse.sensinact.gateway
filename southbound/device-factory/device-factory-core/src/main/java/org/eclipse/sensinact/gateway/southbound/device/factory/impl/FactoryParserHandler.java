@@ -1030,16 +1030,14 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         int log10ms = (int) Math.log10(System.currentTimeMillis());
         int timestampLog = (int) Math.log10(timestamp);
 
-        if (timestampLog == log10ms) {
-            return Instant.ofEpochMilli(timestamp);
-        } else if (timestampLog == log10ms - 3) {
-            return Instant.ofEpochSecond(timestamp);
-        } else if (timestampLog == log10ms + 6) {
+        if (timestampLog > (log10ms + 2)) {
+            // Over 500 years in the future - guess nanos
             return Instant.EPOCH.plusNanos(timestamp);
+        } else if (timestampLog < (log10ms - 1)) {
+            // Over 45 years in the past, guess seconds
+            return Instant.ofEpochSecond(timestamp);
         } else {
-            logger.warn("Can't parse timestamp {} for provider {}", timestamp, provider);
+            return Instant.ofEpochMilli(timestamp);
         }
-
-        return Instant.now();
     }
 }
