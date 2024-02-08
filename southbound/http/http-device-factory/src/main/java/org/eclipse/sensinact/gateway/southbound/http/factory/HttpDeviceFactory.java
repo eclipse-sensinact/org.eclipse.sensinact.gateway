@@ -182,21 +182,29 @@ public class HttpDeviceFactory {
                 }
 
                 @Override
-                public void onComplete(final Result result) {
-                    try {
-                        if (result.isSucceeded()) {
-                            try {
-                                mappingHandler.handle(task.mapping, headers.get(), getContent());
-                            } catch (DeviceFactoryException e) {
-                                logger.error("Error parsing input from {}", task.url, e);
-                            }
-                        } else {
-                            logger.error("Error {} accessing {}", result.getResponse().getStatus(), task.url);
+                public void onFailure(final Response response, final Throwable failure) {
+                    logger.error("Error accessing {}: {} ({})", task.url, failure.getMessage(),
+                            failure.getClass().getName(), failure);
+                }
+
+                @Override
+                public void onSuccess(final Response response) {
+                    final int status = response.getStatus();
+                    if (status >= 200 && status < 300) {
+                        try {
+                            mappingHandler.handle(task.mapping, headers.get(), getContent());
+                        } catch (DeviceFactoryException e) {
+                            logger.error("Error parsing input from {}: {}", task.url, e.getMessage(), e);
                         }
-                    } finally {
-                        // According to the documentation, calling client.stop() would cause a dead lock
-                        new Thread(() -> LifeCycle.stop(client)).start();
+                    } else {
+                        logger.error("HTTP error {} accessing {}", status, task.url);
                     }
+                }
+
+                @Override
+                public void onComplete(final Result result) {
+                    // According to the documentation, calling client.stop() would cause a dead lock
+                    scheduledExecutor.submit(() -> LifeCycle.stop(client));
                 }
             });
         } catch (Exception ex) {

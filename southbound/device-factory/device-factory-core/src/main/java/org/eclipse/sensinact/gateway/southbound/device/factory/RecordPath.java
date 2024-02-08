@@ -206,6 +206,13 @@ public class RecordPath {
     }
 
     /**
+     * Returns the value type associated to the path
+     */
+    public ValueType getValueType() {
+        return valueType;
+    }
+
+    /**
      * Returns a new instance of the record path with resolved variables
      *
      * @param variables Resolved variables

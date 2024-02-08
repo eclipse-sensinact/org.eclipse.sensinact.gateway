@@ -44,6 +44,8 @@ import org.eclipse.sensinact.core.session.ResourceDescription;
 import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
+import org.eclipse.sensinact.gateway.southbound.http.factory.HttpDeviceFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,8 +54,13 @@ import org.junit.jupiter.api.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 
 /**
  * Tests the HTTP device factory
@@ -398,6 +405,53 @@ public class HttpDeviceFactoryTest {
             assertEquals(1, handler.nbVisits("/static"));
             assertEquals(2, handler.nbVisits("/dynamic"));
         } finally {
+            config.delete();
+        }
+    }
+
+    @Test
+    void testError() throws Exception {
+
+        // Listen to logs
+        final Logger logger = (Logger) LoggerFactory.getLogger(HttpDeviceFactory.class);
+
+        final BlockingQueue<String> queue = new ArrayBlockingQueue<String>(128);
+        final AppenderBase<ILoggingEvent> logSpy = new AppenderBase<>() {
+            @Override
+            protected void append(ILoggingEvent eventObject) {
+                try {
+                    queue.put(eventObject.getFormattedMessage());
+                } catch (Exception e) {
+                    fail(e);
+                }
+            }
+        };
+        logSpy.start();
+        logger.addAppender(logSpy);
+
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            // Prepare some mapping configuration
+            final DeviceMappingConfigurationDTO mappingConf = new DeviceMappingConfigurationDTO();
+            mappingConf.mapping = Map.of("@provider", "provider");
+
+            // First try: handling of a 404 error
+            Map<String, Object> httpMapping = Map.of("url", "http://localhost:" + httpPort + "/non-existent", "mapping",
+                    mappingConf);
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", mapper.writeValueAsString(List.of(httpMapping)))));
+            String errorMessage = queue.poll(1, TimeUnit.SECONDS);
+            assertNotNull(errorMessage);
+            assertTrue(errorMessage.contains("404"));
+
+            // Second try: handling of connectivity error (failure)
+            httpMapping = Map.of("url", "https://localhost:" + httpPort + "/static", "mapping", mappingConf);
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", mapper.writeValueAsString(List.of(httpMapping)))));
+            errorMessage = queue.poll(1, TimeUnit.SECONDS);
+            assertNotNull(errorMessage);
+            assertTrue(errorMessage.contains("SSLHandshakeException"));
+        } finally {
+            logger.detachAppender(logSpy);
+            logSpy.stop();
             config.delete();
         }
     }

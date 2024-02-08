@@ -26,38 +26,69 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public enum ValueType {
     /**
      * Represent available types
      */
-    AS_IS("any", null),
-    STRING("string", (v, o) -> String.valueOf(v)),
-    INT("int", (v, o) -> {
+    AS_IS("any", null, null), STRING("string", (v, o) -> String.valueOf(v), String.class), CHAR("char", (v, o) -> {
+        if (v instanceof Character) {
+            return (Character) v;
+        } else if (v instanceof CharSequence) {
+            final CharSequence cs = (CharSequence) v;
+            if (cs.length() != 0) {
+                return cs.charAt(0);
+            } else {
+                return null;
+            }
+        } else if (v instanceof Number) {
+            int value = ((Number) v).intValue();
+            if (value > Character.MAX_VALUE || value < Character.MIN_VALUE) {
+                return null;
+            } else {
+                return (char) value;
+            }
+        } else {
+            return null;
+        }
+    }, Character.class), BOOLEAN("boolean", (v, o) -> {
+        if (v instanceof Boolean) {
+            return (Boolean) v;
+        } else if (v instanceof Number) {
+            return ((Number) v).longValue() != 0;
+        } else if (v instanceof CharSequence) {
+            return Boolean.valueOf(v.toString());
+        } else {
+            return null;
+        }
+    }, Boolean.class), BYTE("byte", (v, o) -> {
+        final Number parsed = parseNumber(v, true, o);
+        return parsed != null ? parsed.byteValue() : null;
+    }, Byte.class), SHORT("short", (v, o) -> {
+        final Number parsed = parseNumber(v, true, o);
+        return parsed != null ? parsed.shortValue() : null;
+    }, Short.class), INT("int", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.intValue() : null;
-    }),
-    LONG("long", (v, o) -> {
+    }, Integer.class), LONG("long", (v, o) -> {
         final Number parsed = parseNumber(v, true, o);
         return parsed != null ? parsed.longValue() : null;
-    }),
-    FLOAT("float", (v, o) -> {
+    }, Long.class), FLOAT("float", (v, o) -> {
         final Number parsed = parseNumber(v, false, o);
         return parsed != null ? parsed.floatValue() : null;
-    }),
-    DOUBLE("double", (v, o) -> {
+    }, Float.class), DOUBLE("double", (v, o) -> {
         final Number parsed = parseNumber(v, false, o);
         return parsed != null ? parsed.doubleValue() : null;
-    }),
-    STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING.converter)),
-    INT_ARRAY("int[]", (v, o) -> asList(v, o, INT.converter)),
-    LONG_ARRAY("long[]", (v, o) -> asList(v, o, LONG.converter)),
-    FLOAT_ARRAY("float[]", (v, o) -> asList(v, o, FLOAT.converter)),
-    DOUBLE_ARRAY("double[]", (v, o) -> asList(v, o, DOUBLE.converter));
-
-    private static final Logger logger = LoggerFactory.getLogger(ValueType.class);
+    }, Double.class), ANY_ARRAY("any[]", (v, o) -> asList(v, o, AS_IS), List.class),
+    STRING_ARRAY("string[]", (v, o) -> asList(v, o, STRING), List.class),
+    CHAR_ARRAY("char[]", (v, o) -> asList(v, o, CHAR), List.class),
+    BOOLEAN_ARRAY("boolean[]", (v, o) -> asList(v, o, BOOLEAN), List.class),
+    BYTE_ARRAY("byte[]", (v, o) -> asList(v, o, BYTE), List.class),
+    SHORT_ARRAY("short[]", (v, o) -> asList(v, o, SHORT), List.class),
+    INT_ARRAY("int[]", (v, o) -> asList(v, o, INT), List.class),
+    LONG_ARRAY("long[]", (v, o) -> asList(v, o, LONG), List.class),
+    FLOAT_ARRAY("float[]", (v, o) -> asList(v, o, FLOAT), List.class),
+    DOUBLE_ARRAY("double[]", (v, o) -> asList(v, o, DOUBLE), List.class);
 
     /**
      * String representation
@@ -67,7 +98,12 @@ public enum ValueType {
     /**
      * Converter function
      */
-    private final BiFunction<Object, DeviceMappingOptionsDTO, Object> converter;
+    private final BiFunction<Object, DeviceMappingOptionsDTO, ?> converter;
+
+    /**
+     * Java class represented by the value type
+     */
+    private final Class<?> javaClass;
 
     /**
      * Try to find the number format matching the given locale
@@ -76,28 +112,8 @@ public enum ValueType {
      * @return The number format for the given locale or null
      */
     private static NumberFormat getNumberFormat(final DeviceMappingOptionsDTO options, boolean integers) {
-        final String strLocale = options.numbersLocale;
-        if (strLocale == null || strLocale.isBlank()) {
-            return null;
-        }
-
-        final String[] parts = strLocale.split("_");
-        final Locale locale;
-        switch (parts.length) {
-        case 1:
-            locale = new Locale(parts[0]);
-            break;
-
-        case 2:
-            locale = new Locale(parts[0], parts[1]);
-            break;
-
-        case 3:
-            locale = new Locale(parts[0], parts[1], parts[2]);
-            break;
-
-        default:
-            logger.warn("Unhandled number locale {}", strLocale);
+        final Locale locale = LocaleUtils.fromString(options.numbersLocale);
+        if (locale == null) {
             return null;
         }
 
@@ -165,16 +181,28 @@ public enum ValueType {
     /**
      * Sets up the custom enumeration
      *
-     * @param strRepr
+     * @param strRepr   String representation of the value type used in mapping
+     *                  configuration
+     * @param converter Function to convert any input to the value type
+     * @param javaClass Java class represented by the value type
      */
-    ValueType(final String strRepr, final BiFunction<Object, DeviceMappingOptionsDTO, Object> converter) {
+    <T> ValueType(final String strRepr, final BiFunction<Object, DeviceMappingOptionsDTO, T> converter,
+            final Class<T> javaClass) {
         this.repr = strRepr;
         this.converter = converter;
+        this.javaClass = javaClass != null ? javaClass : Object.class;
     }
 
     @Override
     public String toString() {
         return repr;
+    }
+
+    /**
+     * Returns the Java class associated to the value type
+     */
+    public Class<?> toJavaClass() {
+        return this.javaClass;
     }
 
     /**
@@ -197,16 +225,15 @@ public enum ValueType {
     /**
      * Converts input value to a list
      *
-     * @param value         Input value
-     * @param options       Mapping options
-     * @param itemConverter Input array item converter
+     * @param value    Input value
+     * @param options  Mapping options
+     * @param itemType List item type
      * @return The converted list
      */
-    private static Object asList(Object value, DeviceMappingOptionsDTO options,
-            final BiFunction<Object, DeviceMappingOptionsDTO, Object> itemConverter) {
+    private static List<?> asList(final Object value, final DeviceMappingOptionsDTO options, final ValueType itemType) {
         Stream<?> stream;
         if (value instanceof String) {
-            stream = Arrays.stream(((String) value).split(";|,"));
+            stream = Arrays.stream(((String) value).split(";|,")).map(String::trim);
         } else if (value instanceof Collection) {
             stream = ((Collection<?>) value).stream();
         } else if (value.getClass().isArray()) {
@@ -219,10 +246,14 @@ public enum ValueType {
             stream = arrayAsList.stream();
         } else {
             // Maybe a single item
-            return List.of(itemConverter.apply(value, options));
+            stream = Stream.of(value);
         }
 
-        return stream.map(v -> itemConverter.apply(v, options)).collect(Collectors.toList());
+        if (itemType.converter != null) {
+            stream = stream.map(v -> itemType.converter.apply(v, options));
+        }
+
+        return stream.collect(Collectors.toUnmodifiableList());
     }
 
     /**

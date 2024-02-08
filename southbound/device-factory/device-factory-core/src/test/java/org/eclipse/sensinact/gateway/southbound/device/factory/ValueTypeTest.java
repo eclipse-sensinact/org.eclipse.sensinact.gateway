@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 import org.junit.jupiter.api.Test;
@@ -32,15 +33,27 @@ public class ValueTypeTest {
         for (String nan : Arrays.asList("nan", "NaN")) {
             assertTrue(Double.isNaN((Float) ValueType.FLOAT.convert(nan, options)));
             assertTrue(Double.isNaN((Double) ValueType.DOUBLE.convert(nan, options)));
+
+            assertNull(ValueType.BYTE.convert(nan, options));
+            assertNull(ValueType.SHORT.convert(nan, options));
             assertNull(ValueType.INT.convert(nan, options));
             assertNull(ValueType.LONG.convert(nan, options));
+
+            assertEquals(nan, ValueType.AS_IS.convert(nan, options));
+            assertEquals(nan, ValueType.STRING.convert(nan, options));
         }
 
         for (String inf : Arrays.asList("inf", "Inf", "+inf", "+Inf", "-Inf", "-inf")) {
             assertTrue(Double.isInfinite((Float) ValueType.FLOAT.convert(inf, options)));
             assertTrue(Double.isInfinite((Double) ValueType.DOUBLE.convert(inf, options)));
+
+            assertNull(ValueType.BYTE.convert(inf, options));
+            assertNull(ValueType.SHORT.convert(inf, options));
             assertNull(ValueType.INT.convert(inf, options));
             assertNull(ValueType.LONG.convert(inf, options));
+
+            assertEquals(inf, ValueType.AS_IS.convert(inf, options));
+            assertEquals(inf, ValueType.STRING.convert(inf, options));
         }
     }
 
@@ -117,5 +130,31 @@ public class ValueTypeTest {
             assertEquals(strValue, ValueType.AS_IS.convert(strValue, options));
             assertEquals(doubleNegativeValue, ValueType.DOUBLE.convert(strValue, options));
         }
+    }
+
+    @Test
+    void testArray() {
+        final DeviceMappingOptionsDTO options = new DeviceMappingOptionsDTO();
+
+        final String strArray = "1, 2, 3";
+        assertEquals(List.of((byte) 1, (byte) 2, (byte) 3), ValueType.BYTE_ARRAY.convert(strArray, options));
+        assertEquals(List.of((short) 1, (short) 2, (short) 3), ValueType.SHORT_ARRAY.convert(strArray, options));
+        assertEquals(List.of(1, 2, 3), ValueType.INT_ARRAY.convert(strArray, options));
+        assertEquals(List.of(1L, 2L, 3L), ValueType.LONG_ARRAY.convert(strArray, options));
+        assertEquals(List.of(1f, 2f, 3f), ValueType.FLOAT_ARRAY.convert(strArray, options));
+        assertEquals(List.of(1d, 2d, 3d), ValueType.DOUBLE_ARRAY.convert(strArray, options));
+        assertEquals(List.of("1", "2", "3"), ValueType.STRING_ARRAY.convert(strArray, options));
+        assertEquals(List.of("1", "2", "3"), ValueType.ANY_ARRAY.convert(strArray, options));
+    }
+
+    @Test
+    void testChar() {
+        final DeviceMappingOptionsDTO options = new DeviceMappingOptionsDTO();
+
+        assertEquals('a', ValueType.CHAR.convert('a', options));
+        assertEquals('a', ValueType.CHAR.convert("a", options));
+        assertEquals('a', ValueType.CHAR.convert(0x61, options));
+
+        assertEquals(List.of('a', 'b', 'c'), ValueType.CHAR_ARRAY.convert("a, b, c", options));
     }
 }

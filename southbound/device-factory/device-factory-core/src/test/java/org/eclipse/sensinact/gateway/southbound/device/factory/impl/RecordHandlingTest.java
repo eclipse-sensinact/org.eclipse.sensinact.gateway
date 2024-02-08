@@ -16,10 +16,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.push.DataUpdate;
@@ -258,11 +266,27 @@ public class RecordHandlingTest {
         // Test default configuration (update)
         config.mapping.put("@provider", "p");
         config.mapping.put("data/val", "nonNullVal");
-        config.mapping.put("data/null", "nullVal");
+        config.mapping.put("data/nullVal", "nullVal");
+        final Map<String, Object> mappingNullVal = new HashMap<>();
+        mappingNullVal.put("path", "nullVal");
+        mappingNullVal.put("type", "string");
+        config.mapping.put("data/null", mappingNullVal);
+        config.mapping.put("data/nullMapping", null);
         deviceMapper.handle(config, Map.of(), new byte[0]);
 
         GenericDto dto = getResourceValue("provider", "data", "null");
         assertEquals(NullAction.UPDATE, dto.nullAction);
+        assertEquals(String.class, dto.type);
+        assertNull(dto.value);
+
+        dto = getResourceValue("provider", "data", "nullVal");
+        assertEquals(NullAction.UPDATE, dto.nullAction);
+        assertEquals(Object.class, dto.type);
+        assertNull(dto.value);
+
+        dto = getResourceValue("provider", "data", "nullMapping");
+        assertEquals(NullAction.UPDATE, dto.nullAction);
+        assertEquals(Object.class, dto.type);
         assertNull(dto.value);
 
         dto = getResourceValue("provider", "data", "val");
@@ -309,5 +333,95 @@ public class RecordHandlingTest {
 
         // Test values
         assertEquals(42, getResourceValue("provider", "svc", "rc").value);
+    }
+
+    @Test
+    void testTimestamp() throws Exception {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+
+        // Set a record
+        final Instant now = Instant.now();
+        final Map<String, Object> record = new HashMap<>();
+        record.put("provider", "provider");
+        record.put("timestamp_s", now.getEpochSecond());
+        record.put("timestamp_ms", now.toEpochMilli());
+        final long timestampNs = TimeUnit.SECONDS.toNanos(now.getEpochSecond()) + now.getNano();
+        record.put("timestamp_ns", timestampNs);
+        parser.setRecords(record);
+
+        // Auto-compute timestamp format: seconds
+        config.mapping.put("@provider", "provider");
+        config.mapping.put("data/val", null);
+        config.mapping.put("@timestamp", "timestamp_s");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        GenericDto dto = getResourceValue("provider", "data", "val");
+        assertEquals(Instant.ofEpochSecond(now.getEpochSecond()), dto.timestamp);
+
+        // Auto-compute timestamp format: milliseconds
+        bulks.clear();
+        config.mapping.put("@timestamp", "timestamp_ms");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        dto = getResourceValue("provider", "data", "val");
+        assertEquals(Instant.ofEpochMilli(now.toEpochMilli()), dto.timestamp);
+
+        // Auto-compute timestamp format: nanoseconds
+        bulks.clear();
+        config.mapping.put("@timestamp", "timestamp_ns");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        dto = getResourceValue("provider", "data", "val");
+        assertEquals(now, dto.timestamp);
+    }
+
+    @Test
+    void testDateTime() throws Exception {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+
+        // Set a record
+        final Instant now = Instant.now();
+        final OffsetDateTime date = now.atOffset(ZoneOffset.ofHours(1));
+        final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.MEDIUM);
+        final String strPattern = "MM dd, yyyy - Q - hh:mm a - s.n - X";
+
+        final Map<String, Object> record = new HashMap<>();
+        record.put("provider", "provider");
+        record.put("iso", date.toString());
+        record.put("custom", date.format(DateTimeFormatter.ofPattern(strPattern)));
+        record.put("locale_fr", date.format(formatter.withLocale(Locale.FRANCE)));
+        record.put("locale_de", date.format(formatter.withLocale(Locale.GERMAN)));
+        record.put("locale_en", date.format(formatter.withLocale(Locale.UK)));
+        record.put("locale_zh", date.format(formatter.withLocale(Locale.SIMPLIFIED_CHINESE)));
+        parser.setRecords(record);
+
+        // ISO format
+        config.mapping.put("@provider", "provider");
+        config.mapping.put("data/val", null);
+        config.mapping.put("@datetime", "iso");
+        config.mappingOptions.formatDateTime = null;
+        config.mappingOptions.dateTimezone = null;
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        GenericDto dto = getResourceValue("provider", "data", "val");
+        assertEquals(now, dto.timestamp);
+
+        // Custom pattern
+        bulks.clear();
+        config.mapping.put("@datetime", "custom");
+        config.mappingOptions.formatDateTime = strPattern;
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        dto = getResourceValue("provider", "data", "val");
+        assertEquals(now, dto.timestamp);
+
+        // Locale-based date (mix of country and language codes)
+        for (Locale locale : List.of(Locale.FRANCE, Locale.GERMAN, Locale.UK, Locale.SIMPLIFIED_CHINESE)) {
+            bulks.clear();
+            config.mapping.put("@datetime", "locale_" + locale.getLanguage());
+            config.mappingOptions.formatDateTime = null;
+            config.mappingOptions.formatDateTimeLocale = locale.toString();
+            config.mappingOptions.formatDateStyle = "long";
+            config.mappingOptions.formatTimeStyle = "medium";
+            config.mappingOptions.dateTimezone = "+01";
+            deviceMapper.handle(config, Map.of(), new byte[0]);
+            dto = getResourceValue("provider", "data", "val");
+            assertEquals(now.truncatedTo(ChronoUnit.SECONDS), dto.timestamp);
+        }
     }
 }

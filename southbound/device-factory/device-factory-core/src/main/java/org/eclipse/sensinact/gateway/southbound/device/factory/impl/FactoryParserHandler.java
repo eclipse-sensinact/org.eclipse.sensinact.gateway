@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.chrono.ChronoZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.UnsupportedTemporalTypeException;
@@ -30,8 +31,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -39,6 +42,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.push.DataUpdateException;
+import org.eclipse.sensinact.core.push.FailedUpdatesException;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -52,9 +57,11 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRec
 import org.eclipse.sensinact.gateway.southbound.device.factory.IPlaceHolderKeys;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
 import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
+import org.eclipse.sensinact.gateway.southbound.device.factory.LocaleUtils;
 import org.eclipse.sensinact.gateway.southbound.device.factory.MissingParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.ParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
+import org.eclipse.sensinact.gateway.southbound.device.factory.ValueType;
 import org.eclipse.sensinact.gateway.southbound.device.factory.VariableNotFoundException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
@@ -63,6 +70,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,7 +176,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Check parser ID
         final String parserId = configuration.parser;
         if (parserId == null || parserId.isBlank()) {
-            throw new MissingParserException(String.format("No parser ID given", parserId));
+            throw new MissingParserException("No parser ID given");
         }
 
         // Extract mapping information
@@ -178,6 +186,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (globalState.placeholders.get(KEY_PROVIDER) == null) {
             throw new IllegalArgumentException("No provider mapping given");
         }
+
+        final boolean logErrors = configuration.mappingOptions.logErrors;
 
         // Find it
         final ComponentServiceObjects<IDeviceMappingParser> cso = findParser(parserId);
@@ -194,15 +204,38 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     try {
                         bulk.dtos.addAll(handleRecord(configuration, globalState, record));
                     } catch (InvalidResourcePathException | ParserException | VariableNotFoundException e) {
-                        logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
+                        if (logErrors) {
+                            logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
+                        }
                     }
                 }
 
                 if (!bulk.dtos.isEmpty()) {
                     // Send all updates to the gateway thread at once
-                    dataUpdate.pushUpdate(bulk);
+                    Promise<?> pushUpdate = dataUpdate.pushUpdate(bulk);
+                    if (logErrors) {
+                        pushUpdate = pushUpdate.onFailure((t) -> {
+                            if (t instanceof FailedUpdatesException) {
+                                for (DataUpdateException ex : ((FailedUpdatesException) t).getFailedUpdates()) {
+                                    logger.error("Error updating digital twin of {}/{}/{} with parser {}: {}",
+                                            ex.getProvider(), ex.getService(), ex.getResource(), parserId,
+                                            ex.getMessage(), ex);
+                                }
+                            } else {
+                                logger.error("Error updating digital twin with parser {}: {}", parserId, t.getMessage(),
+                                        t);
+                            }
+                        });
+                    }
                 }
+            } else if (logErrors) {
+                logger.error("No record found by parser {}", parserId);
             }
+        } catch (Exception e) {
+            if (logErrors) {
+                logger.error("Error parsing payload with parser {}", parserId, e);
+            }
+            throw e;
         } finally {
             cso.ungetService(parser);
         }
@@ -273,8 +306,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Extract the modelPackageUri
         String modelPackageUri = null;
         if (recordState.placeholders.containsKey(KEY_MODEL_PACKAGE_URI)) {
-            modelPackageUri = getFieldString(record, recordState.placeholders.get(KEY_MODEL_PACKAGE_URI),
-                    options);
+            modelPackageUri = getFieldString(record, recordState.placeholders.get(KEY_MODEL_PACKAGE_URI), options);
         }
 
         // Extract the model
@@ -323,10 +355,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             try {
                 final Object value = record.getField(rcMapping.getRecordPath(), options);
                 if (value != Constants.IGNORE) {
+                    final ValueType valueType = rcMapping.getRecordPath().getValueType();
                     if (rcMapping.isMetadata()) {
                         logger.warn("Metadata update not supported.");
                     } else {
-                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value, timestamp));
+                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
+                                valueType.toJavaClass(), timestamp));
                     }
                 }
             } catch (Exception e) {
@@ -341,16 +375,21 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             try {
                 final Object value = rcLiteral.getTypedValue(options);
                 if (value != Constants.IGNORE) {
+                    final ValueType valueType = rcLiteral.getValueType();
                     if (rcLiteral.isMetadata()) {
                         logger.warn("Metadata update not supported.");
                     } else {
-                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value, timestamp));
+                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
+                                valueType.toJavaClass(), timestamp));
                     }
                 }
             } catch (Exception e) {
                 logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
             }
         }
+
+        // Remove null entries
+        bulk.removeIf(Objects::isNull);
 
         // Set the null action to all DTOs
         bulk.stream().forEach(dto -> {
@@ -364,8 +403,16 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * Prepares a generic DTO from the given information
      */
     private GenericDto makeDto(final String modelPackageUri, final String model, final String provider,
-            final String service, final String resource,
-            final Object value, Instant timestamp) {
+            final String service, final String resource, final Object value, final Instant timestamp) {
+        return makeDto(modelPackageUri, model, provider, service, resource, value, null, timestamp);
+    }
+
+    /**
+     * Prepares a generic DTO from the given information
+     */
+    private GenericDto makeDto(final String modelPackageUri, final String model, final String provider,
+            final String service, final String resource, final Object value, final Class<?> valueType,
+            final Instant timestamp) {
         final GenericDto dto = new GenericDto();
         dto.modelPackageUri = modelPackageUri;
         dto.model = model;
@@ -373,8 +420,13 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         dto.service = service;
         dto.resource = resource;
         dto.value = value;
-        if (value != null) {
+        if (valueType != null) {
+            dto.type = valueType;
+        } else if (value != null) {
             dto.type = value.getClass();
+        } else {
+            logger.debug("Ignoring {}/{}/{}: null value without explicit type", provider, service, resource);
+            return null;
         }
         if (timestamp != null) {
             dto.timestamp = timestamp;
@@ -585,7 +637,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                         // Short format location: lat:lon[:alt]
                         final String[] parts = strLocation.split(":");
                         if (parts.length >= 2) {
-                            return makeLocation(parts[0], parts[1], parts.length >= 3 ? parts[2] : null);
+                            return makeLocation(parts[0], parts[1], parts.length >= 3 ? parts[2] : null,
+                                    options.logErrors);
                         }
                     }
                 } else if (locationValue instanceof Map) {
@@ -612,7 +665,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             altitude = getFieldValue(record, altitudePath, options);
         }
 
-        return makeLocation(latitude, longitude, altitude);
+        return makeLocation(latitude, longitude, altitude, options.logErrors);
     }
 
     /**
@@ -695,13 +748,17 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Prepares a GeoJSON object for the point at the given location
      */
-    private Point makeLocation(final Object latitude, final Object longitude, final Object altitude) {
+    private Point makeLocation(final Object latitude, final Object longitude, final Object altitude,
+            final boolean logErrors) {
         Float lat = toFloat(latitude);
         Float lon = toFloat(longitude);
         Float alt = toFloat(altitude);
 
         if (lat == null || lon == null) {
             // Invalid location
+            if (logErrors) {
+                logger.debug("Invalid location: lat={} lon={} alt={}", lat, lon, alt);
+            }
             return null;
         }
 
@@ -757,12 +814,15 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
 
         final ZoneId timezone = getTimezone(configuration.mappingOptions.dateTimezone);
+        final Locale locale = LocaleUtils.fromString(configuration.mappingOptions.formatDateTimeLocale);
 
         final IResourceMapping dateTimePath = placeholders.get(KEY_DATETIME);
         if (dateTimePath != null) {
             final String strDateTime = getFieldString(record, dateTimePath, options);
             if (strDateTime != null && !strDateTime.isBlank()) {
-                return parseDateTime(strDateTime, timezone, configuration.mappingOptions.formatDateTime);
+                final TemporalAccessor parsedDateTime = parseDateTime(strDateTime, configuration.mappingOptions,
+                        locale);
+                return extractDateTime(parsedDateTime, timezone);
             }
         }
 
@@ -771,7 +831,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (datePath != null) {
             final String strDate = getFieldString(record, datePath, options);
             if (strDate != null && !strDate.isBlank()) {
-                date = parseDate(strDate, configuration.mappingOptions.formatDate);
+                date = parseDate(strDate, configuration.mappingOptions, locale);
             }
         }
 
@@ -780,7 +840,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (timePath != null) {
             final String strTime = getFieldString(record, timePath, options);
             if (strTime != null && !strTime.isBlank()) {
-                time = parseTime(strTime, date, timezone, configuration.mappingOptions.formatTime);
+                time = parseTime(strTime, date, timezone, configuration.mappingOptions, locale);
             }
         }
 
@@ -836,31 +896,45 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             second = 0;
         }
 
+        int nanoOfSecond;
+        try {
+            nanoOfSecond = parsedTime.get(ChronoField.NANO_OF_SECOND);
+        } catch (Exception e) {
+            nanoOfSecond = 0;
+        }
+
         ZoneOffset offset;
         try {
             offset = ZoneOffset.ofTotalSeconds(parsedTime.get(ChronoField.OFFSET_SECONDS));
         } catch (UnsupportedTemporalTypeException e) {
             if (expectedDate != null) {
-                offset = timezone.getRules().getOffset(expectedDate.atTime(hour, minute, second));
+                offset = timezone.getRules().getOffset(expectedDate.atTime(hour, minute, second, nanoOfSecond));
             } else {
                 offset = timezone.getRules().getOffset(Instant.now());
             }
         }
 
-        return OffsetTime.of(hour, minute, second, 0, offset);
+        return OffsetTime.of(hour, minute, second, nanoOfSecond, offset);
     }
 
     /**
      * Parses a date string
      *
-     * @param strDate    Date string
-     * @param formatDate Custom parsing format (can be null)
+     * @param strDate Date string
+     * @param options Device mapping options
+     * @param locale  Configured locale
      * @return The parsed date
      */
-    private LocalDate parseDate(String strDate, String formatDate) {
+    private LocalDate parseDate(final String strDate, final DeviceMappingOptionsDTO options, final Locale locale) {
         DateTimeFormatter format = DateTimeFormatter.ISO_LOCAL_DATE;
-        if (formatDate != null && !formatDate.isBlank()) {
-            format = DateTimeFormatter.ofPattern(formatDate);
+        if (options.formatDate != null && !options.formatDate.isBlank()) {
+            format = DateTimeFormatter.ofPattern(options.formatDate);
+        } else if (options.formatDateStyle != null && !options.formatDateStyle.isBlank()) {
+            format = DateTimeFormatter.ofLocalizedDate(FormatStyle.valueOf(options.formatDateStyle.toUpperCase()));
+        }
+
+        if (locale != null) {
+            format = format.withLocale(locale);
         }
 
         return extractDate(format.parse(strDate));
@@ -869,35 +943,75 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     /**
      * Parses a time string
      *
-     * @param strTime    Time string
-     * @param timezone   Fallback timezone
-     * @param formatTime Custom parsing format (can be null)
-     * @return The parsed date
+     * @param strTime      Time string
+     * @param expectedDate Expected date of the time (today if null)
+     * @param timezone     Fallback timezone
+     * @param options      Device mapping options
+     * @param locale       Configured locale
+     * @return The parsed time at the expected date or today
      */
-    private OffsetTime parseTime(String strTime, LocalDate expectedDate, ZoneId timezone, String formatTime) {
+    private OffsetTime parseTime(final String strTime, final LocalDate expectedDate, final ZoneId timezone,
+            final DeviceMappingOptionsDTO options, final Locale locale) {
         DateTimeFormatter format = DateTimeFormatter.ISO_OFFSET_TIME;
-        if (formatTime != null && !formatTime.isBlank()) {
-            format = DateTimeFormatter.ofPattern(formatTime);
+        if (options.formatTime != null && !options.formatTime.isBlank()) {
+            format = DateTimeFormatter.ofPattern(options.formatTime);
+        } else if (options.formatTimeStyle != null && !options.formatTimeStyle.isBlank()) {
+            format = DateTimeFormatter.ofLocalizedDate(FormatStyle.valueOf(options.formatTimeStyle.toUpperCase()));
+        }
+
+        if (locale != null) {
+            format = format.withLocale(locale);
         }
 
         return extractTime(format.parse(strTime), expectedDate, timezone);
     }
 
     /**
-     * Parses a date/time string
+     * Parses a date time according to mapping options
      *
-     * @param strDateTime    Date/time string
-     * @param timezone       Fallback timezone
-     * @param formatDateTime Custom parsing format (can be null)
-     * @return The parsed date as an instant
+     * @param strDateTime String value of the date time
+     * @param options     Mapping options
+     * @param locale      Configured locale
+     * @return The parsed date time
      */
-    private Instant parseDateTime(String strDateTime, ZoneId timezone, String formatDateTime) {
+    private TemporalAccessor parseDateTime(final String strDateTime, final DeviceMappingOptionsDTO options,
+            final Locale locale) {
         DateTimeFormatter format = DateTimeFormatter.ISO_DATE_TIME;
+
+        final String formatDateTime = options.formatDateTime;
         if (formatDateTime != null && !formatDateTime.isBlank()) {
             format = DateTimeFormatter.ofPattern(formatDateTime);
+        } else {
+            String formatDateStyle = options.formatDateStyle;
+            String formatTimeStyle = options.formatTimeStyle;
+
+            if (formatTimeStyle == null || formatTimeStyle.isBlank()) {
+                formatTimeStyle = formatDateStyle;
+            } else if (formatDateStyle == null || formatDateStyle.isBlank()) {
+                formatDateStyle = formatTimeStyle;
+            }
+
+            if (formatTimeStyle != null && !formatTimeStyle.isBlank()) {
+                format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.valueOf(formatDateStyle.toUpperCase()),
+                        FormatStyle.valueOf(formatTimeStyle.toUpperCase()));
+            }
         }
 
-        final TemporalAccessor parsedTime = format.parse(strDateTime);
+        if (locale != null) {
+            format = format.withLocale(locale);
+        }
+
+        return format.parse(strDateTime);
+    }
+
+    /**
+     * Extract date and time from a parsed temporal accessor
+     *
+     * @param parsedTime Parsed date time
+     * @param timezone   Fallback timezone
+     * @return The parsed date as an instant
+     */
+    private Instant extractDateTime(final TemporalAccessor parsedTime, final ZoneId timezone) {
         final LocalDate date = extractDate(parsedTime);
         final OffsetTime offsetTime = extractTime(parsedTime, date, timezone);
         final OffsetDateTime dateTime = OffsetDateTime.of(date, offsetTime.toLocalTime(), offsetTime.getOffset());
@@ -913,20 +1027,17 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      */
     private Instant convertTimestamp(final String provider, final Long timestamp) {
 
-        int currentLogMs = (int) Math.log10(System.currentTimeMillis());
-        int currentLogNs = (int) Math.log10(System.nanoTime());
+        int log10ms = (int) Math.log10(System.currentTimeMillis());
         int timestampLog = (int) Math.log10(timestamp);
 
-        if (timestampLog == currentLogMs) {
-            return Instant.ofEpochMilli(timestamp);
-        } else if (timestampLog == currentLogMs - 3) {
-            return Instant.ofEpochSecond(timestamp);
-        } else if (timestampLog == currentLogNs) {
+        if (timestampLog > (log10ms + 2)) {
+            // Over 500 years in the future - guess nanos
             return Instant.EPOCH.plusNanos(timestamp);
+        } else if (timestampLog < (log10ms - 1)) {
+            // Over 45 years in the past, guess seconds
+            return Instant.ofEpochSecond(timestamp);
         } else {
-            logger.warn("Can't parse timestamp {} for provider {}", timestamp, provider);
+            return Instant.ofEpochMilli(timestamp);
         }
-
-        return Instant.now();
     }
 }
