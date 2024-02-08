@@ -35,9 +35,9 @@ public enum ValueType {
         if (v instanceof Character) {
             return (Character) v;
         } else if (v instanceof CharSequence) {
-            final String str = v.toString();
-            if (!str.isEmpty()) {
-                return str.charAt(0);
+            final CharSequence cs = (CharSequence) v;
+            if (cs.length() != 0) {
+                return cs.charAt(0);
             } else {
                 return null;
             }
@@ -253,7 +253,7 @@ public enum ValueType {
             stream = stream.map(v -> itemType.converter.apply(v, options));
         }
 
-        return stream.collect(Collectors.toList());
+        return stream.collect(Collectors.toUnmodifiableList());
     }
 
     /**

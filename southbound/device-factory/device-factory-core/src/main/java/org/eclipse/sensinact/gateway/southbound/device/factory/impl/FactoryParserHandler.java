@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.push.DataUpdateException;
+import org.eclipse.sensinact.core.push.FailedUpdatesException;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -212,8 +214,18 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     // Send all updates to the gateway thread at once
                     Promise<?> pushUpdate = dataUpdate.pushUpdate(bulk);
                     if (logErrors) {
-                        pushUpdate = pushUpdate.onFailure((t) -> logger
-                                .error("Error updating digital twin with parser {}: {}", parserId, t.getMessage(), t));
+                        pushUpdate = pushUpdate.onFailure((t) -> {
+                            if (t instanceof FailedUpdatesException) {
+                                for (DataUpdateException ex : ((FailedUpdatesException) t).getFailedUpdates()) {
+                                    logger.error("Error updating digital twin of {}/{}/{} with parser {}: {}",
+                                            ex.getProvider(), ex.getService(), ex.getResource(), parserId,
+                                            ex.getMessage(), ex);
+                                }
+                            } else {
+                                logger.error("Error updating digital twin with parser {}: {}", parserId, t.getMessage(),
+                                        t);
+                            }
+                        });
                     }
                 }
             } else if (logErrors) {
