@@ -183,15 +183,21 @@ public class HttpDeviceFactory {
 
                 @Override
                 public void onFailure(final Response response, final Throwable failure) {
-                    logger.error("Error {} requesting {}: {}", response.getStatus(), task.url, failure);
+                    logger.error("Error accessing {}: {} ({})", task.url, failure.getMessage(),
+                            failure.getClass().getName(), failure);
                 }
 
                 @Override
                 public void onSuccess(final Response response) {
-                    try {
-                        mappingHandler.handle(task.mapping, headers.get(), getContent());
-                    } catch (DeviceFactoryException e) {
-                        logger.error("Error parsing input from {}", task.url, e);
+                    final int status = response.getStatus();
+                    if (status >= 200 && status < 300) {
+                        try {
+                            mappingHandler.handle(task.mapping, headers.get(), getContent());
+                        } catch (DeviceFactoryException e) {
+                            logger.error("Error parsing input from {}: {}", task.url, e.getMessage(), e);
+                        }
+                    } else {
+                        logger.error("HTTP error {} accessing {}", status, task.url);
                     }
                 }
 
