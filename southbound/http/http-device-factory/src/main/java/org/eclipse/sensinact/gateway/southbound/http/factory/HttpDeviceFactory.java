@@ -182,21 +182,23 @@ public class HttpDeviceFactory {
                 }
 
                 @Override
-                public void onComplete(final Result result) {
+                public void onFailure(final Response response, final Throwable failure) {
+                    logger.error("Error {} requesting {}: {}", response.getStatus(), task.url, failure);
+                }
+
+                @Override
+                public void onSuccess(final Response response) {
                     try {
-                        if (result.isSucceeded()) {
-                            try {
-                                mappingHandler.handle(task.mapping, headers.get(), getContent());
-                            } catch (DeviceFactoryException e) {
-                                logger.error("Error parsing input from {}", task.url, e);
-                            }
-                        } else {
-                            logger.error("Error {} accessing {}", result.getResponse().getStatus(), task.url);
-                        }
-                    } finally {
-                        // According to the documentation, calling client.stop() would cause a dead lock
-                        new Thread(() -> LifeCycle.stop(client)).start();
+                        mappingHandler.handle(task.mapping, headers.get(), getContent());
+                    } catch (DeviceFactoryException e) {
+                        logger.error("Error parsing input from {}", task.url, e);
                     }
+                }
+
+                @Override
+                public void onComplete(final Result result) {
+                    // According to the documentation, calling client.stop() would cause a dead lock
+                    scheduledExecutor.submit(() -> LifeCycle.stop(client));
                 }
             });
         } catch (Exception ex) {
