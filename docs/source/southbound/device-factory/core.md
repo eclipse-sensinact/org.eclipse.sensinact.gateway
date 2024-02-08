@@ -72,7 +72,7 @@ The key of the mapping entry can be in the following formats:
     * `@longitude`: the longitude of the provider, to construct its location. This placeholder **must** be combined with `@latitude`.
     * `@altitude`: the altitude of the provider, to construct its location. This placeholder **must** be combined with `@latitude` and `@longitude`.
   * Update timestamp
-    * `@timestamp`: the timestamp of the update either in millisecond or second precision (auto-detected). Overrides `datetime`, `@date` and `@time` if they are defined.
+    * `@timestamp`: the timestamp of the update either in second, millisecond or nanosecond precision (auto-detected). Overrides `datetime`, `@date` and `@time` if they are defined.
     * `@datetime`: the date and time of the update. Overrides `@date` and `@time` if they are defined. The datetime format can be defined in the mapping options.
     * `@date`: the date of the update, should be used with `@time`. The date format can be defined in the mapping options.
     * `@time`: the time of the update, should be used with `@date`. The time format can be defined in the mapping options.
@@ -200,16 +200,42 @@ The available types are:
 * `int`, `long`: convert the value to an integer
 * `float`, `double`: convert the value to floating point number
 * `boolean`: convert the value to a boolean, truth being any number other than 0 or a string equal to `true` (case ignored)
-* `any[]`: convert the value to an array of objects
-* `string[]`: convert the value to an array of strings
-* `char[]`: convert the value to an array of Java characters
-* `byte[]`: convert the value to an array of bytes
-* `short[]`: convert the value to an array of short integers
-* `int[]`, `long[]`: convert to an array of integers
-* `float[]`, `double[]`: convert to an array of floating point numbers
-* `boolean[]`: convert to an array of booleans
+* `any[]`: convert the value to a list of objects
+* `string[]`: convert the value to a list of strings
+* `char[]`: convert the value to a list of Java characters
+* `byte[]`: convert the value to a list of bytes
+* `short[]`: convert the value to a list of short integers
+* `int[]`, `long[]`: convert to a list of integers
+* `float[]`, `double[]`: convert to a list of floating point numbers
+* `boolean[]`: convert to a list of booleans
 
-**Note:** Arrays can contain null values.
+:::{note}
+If it is expected that the parsed field can have null value, it is recommended to explicit its type to correctly set up the right model inside Eclipse sensiNact.
+
+For example:
+```json
+{
+    "sensor/pedestrians": {
+        "path": "nbPersons",
+        "type": "float"
+    }
+}
+```
+
+It is also possible to set a default value:
+```json
+{
+    "sensor/pedestrians": {
+        "path": "nbPersons",
+        "type": "float",
+        "default": 0.0
+    }
+}
+```
+:::
+
+
+**Note 2:**
 
 ##### Default value
 
@@ -316,15 +342,40 @@ For example:
 ## Mapping options
 
 The device factory mapper itself can be fine-tuned with the `mapping.options` entry.
-The following entries are supported:
+Most of the options are relating to parsing patterns and input locales.
 
-* Date inputs format: the given pattern must be valid for [java.time.format.DateTimeFormatter](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html). The default format is the ISO-8601.
-  * `format.datetime`: the format of the value read by `@datetime`.
-  * `format.date`: the format of the value read by `@date`
-  * `format.time`: the format of the value read by `@time`
-* Complement to date input
+### Date time parsing options
+
+Date inputs are given to a Java [`java.time.format.DateTimeFormatter`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html) constructed based on the following configuration options.
+If not configuration is provided, the default parsing format is ISO-8601 (for example: `2024-02-08T10:22:09.6012629+01:00`).
+
+The Device Factory mapper first looks at explicit patterns.
+See the [`DateTimeFormatter` patterns](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns) for more information:
+  * `format.datetime`: the format of the value read by `@datetime`, for example `yyyy-MM-dd'T'HH:mm:ss.nz` for ISO dates.
+  * `format.date`: the format of the value read by `@date`, for example `yyyy/MM/dd`
+  * `format.time`: the format of the value read by `@time`, for example `hhmm a`
+
+If no explicit pattern has been configured, the Device Factory mapper will then use the locale-based configuration, if it exists.
+  * `format.datetime.locale`: the locale to use to parse date inputs, *e.g.* `fr`, `en_us`, `zh_Hand_TW`.
+  * `format.date.style`: the locale date format style, either `short`, `medium`, `long` or `full`.
+  * `format.time.style`: the locale time format style, either `short`, `medium`, `long` or `full`.
+
+The following array shows the difference between styles:
+
+| Format style | US Locale                                                              | FR locale                                                      |
+|--------------|------------------------------------------------------------------------|----------------------------------------------------------------|
+| short        | 2/8/24, 11:03 AM                                                       | 08/02/2024 11:03                                               |
+| medium       | Feb 8, 2024, 11:03:17 AM                                               | 8 févr. 2024, 11:03:17                                         |
+| long         | February 8, 2024, 11:03:17 AM CET                                      | 8 février 2024, 11:03:17 CET                                   |
+| full         | Thursday, February 8, 2024, 11:03:17 AM Central European Standard Time | jeudi 8 février 2024, 11:03:17 heure normale d'Europe centrale |
+
+Finally, it is possible to give an expected time zone.
+Dates without timezone are considered to be in UTC.
   * `datetime.timezone`: Name of the timezone of the date and time inputs.
-  It must be valid for the [java.time.ZoneId.of()](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html#of(java.lang.String)), for example: `Europe/Paris` or `+0200`.
-  Dates without timezone are considered to be in UTC.
-* Number inputs:
+  It must be valid for the [`java.time.ZoneId.of()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html#of(java.lang.String)), for example: `Europe/Paris`, `+02` or `+0200`.
+
+### Number parsing options
+
+Some locale use specific characters for decimal separator or negative sign.
+It is possible to set the locale for all numbers parsed in a record using:
   * `numbers.locale`: the name of the locale to use to parse numbers, *e.g.* `fr`, `en_us`, `zh_Hand_TW`.
