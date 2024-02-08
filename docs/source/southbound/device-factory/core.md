@@ -194,11 +194,22 @@ We would a provider `ABC` with the following mapped resources in the `sensor` se
 The available types are:
 * `any`: use the value as it was parsed (default)
 * `string`: convert the value to a string
+* `char`: convert the value to a Java character (2 bytes unsigned integer)
+* `byte`: convert the value to a Java byte (1 byte signed integer)
+* `short`: convert the value to a Java short integer (2 bytes signed)
 * `int`, `long`: convert the value to an integer
 * `float`, `double`: convert the value to floating point number
+* `boolean`: convert the value to a boolean, truth being any number other than 0 or a string equal to `true` (case ignored)
+* `any[]`: convert the value to an array of objects
 * `string[]`: convert the value to an array of strings
+* `char[]`: convert the value to an array of Java characters
+* `byte[]`: convert the value to an array of bytes
+* `short[]`: convert the value to an array of short integers
 * `int[]`, `long[]`: convert to an array of integers
 * `float[]`, `double[]`: convert to an array of floating point numbers
+* `boolean[]`: convert to an array of booleans
+
+**Note:** Arrays can contain null values.
 
 ##### Default value
 
@@ -207,7 +218,7 @@ The default value will be treated as if it was read by the parser and will there
 
 ```json
 {
-    "vehicle/count" {
+    "vehicle/count": {
         "path": "nbVehicles",
         "type": "int",
         "default": 0
