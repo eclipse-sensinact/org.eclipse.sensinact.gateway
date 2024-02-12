@@ -652,4 +652,51 @@ public class WhiteboardImplTest {
             }
         }
     }
+
+    public static class TwoPullResourceTest {
+
+        @GET(model = "fizz", service = "buzz", resource = "version")
+        public String version() {
+            return "1.0.0";
+        }
+
+        @GET(model = "fizz", service = "buzz", resource = "count")
+        public Integer count() {
+            return 42;
+        }
+    }
+
+    @Nested
+    class TwoPullBasedResourceTest {
+
+        @Test
+        void testPushPull() throws Throwable {
+            TwoPullResourceTest resourceProvider = new TwoPullResourceTest();
+            thread.addWhiteboardService(resourceProvider,
+                    Map.of("service.id", 259L, "sensiNact.whiteboard.resource", true));
+
+            final String svc = "buzz";
+            createProviders("fizz", svc);
+
+            runRcCommand(PROVIDER_A, svc, "version", (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                return null;
+            });
+            runRcCommand(PROVIDER_A, svc, "count", (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                return null;
+            });
+
+            // Initial values from the getter
+            TimedValue<String> result = getValue(PROVIDER_A, svc, "version", String.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals("1.0.0", result.getValue());
+
+            TimedValue<Integer> result2 = getValue(PROVIDER_A, svc, "count", Integer.class);
+            assertNotNull(result2.getValue(), "No value");
+            assertNotNull(result2.getTimestamp(), "No timestamp");
+            assertEquals(42, result2.getValue());
+        }
+    }
 }

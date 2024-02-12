@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.whiteboard.impl;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
 import static java.util.stream.Stream.of;
 
 import java.lang.annotation.Annotation;
@@ -57,9 +58,9 @@ import org.eclipse.sensinact.core.model.ResourceBuilder;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.Service;
+import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.osgi.framework.Constants;
 import org.osgi.util.promise.Deferred;
@@ -300,15 +301,19 @@ public class SensinactWhiteboard {
         }
     }
 
+    static final class MethodHolder<A extends Annotation, RM extends AbstractResourceMethod> {
+        final A annotation;
+        final RM rcMethod;
+
+        public MethodHolder(A annotation, RM rcMethod) {
+            this.annotation = annotation;
+            this.rcMethod = rcMethod;
+        }
+    }
+
     private void handlePullMethods(Long serviceId, Object service, Set<String> providers, List<Method> getMethods,
             List<Method> setMethods) {
-        // We can find different behaviors for the handling of NullAction
-        final Map<NullAction, GetMethod> cachedMethod = new HashMap<>();
 
-        final class MethodHolder<A extends Annotation, RM extends AbstractResourceMethod> {
-            A annotation;
-            RM rcMethod;
-        }
 
         // List the resources that are GET only, SET only or both
         final Set<RegistryKey> resources = new LinkedHashSet<>();
@@ -317,64 +322,42 @@ public class SensinactWhiteboard {
 
         // Walk GET-annotated methods
         for (Method annotatedMethod : getMethods) {
-            if (annotatedMethod.isAnnotationPresent(GET.class)) {
-                final GET get = annotatedMethod.getAnnotation(GET.class);
+            // We can find different behaviors for the handling of NullAction
+            final Map<NullAction, GetMethod> cachedMethod = new HashMap<>();
+            Stream<GET> getStream = Optional.ofNullable(annotatedMethod.getAnnotation(GET.class))
+                    .map(Stream::of).orElse(empty());
+
+            Stream<GET> getsStream = Optional.ofNullable(annotatedMethod.getAnnotation(GETs.class))
+                    .map(GETs::value).map(Arrays::stream).orElse(empty());
+
+            Stream.concat(getStream, getsStream).forEach(get -> {
                 final RegistryKey key = new RegistryKey(get.modelPackageUri(), get.model(), get.service(), get.resource());
                 resources.add(key);
 
                 final GetMethod getMethod = cachedMethod.computeIfAbsent(get.onNull(),
                         (onNull) -> new GetMethod(annotatedMethod, service, serviceId, providers, onNull));
 
-                final MethodHolder<GET, GetMethod> getHolder = new MethodHolder<>();
-                getHolder.annotation = get;
-                getHolder.rcMethod = getMethod;
-                listGetMethods.computeIfAbsent(key, k -> new ArrayList<MethodHolder<GET, GetMethod>>()).add(getHolder);
-            }
-
-            if (annotatedMethod.isAnnotationPresent(GETs.class)) {
-                final GETs gets = annotatedMethod.getAnnotation(GETs.class);
-                for (GET get : gets.value()) {
-                    final RegistryKey key = new RegistryKey(get.modelPackageUri(), get.model(), get.service(), get.resource());
-                    resources.add(key);
-
-                    final GetMethod getMethod = cachedMethod.computeIfAbsent(get.onNull(),
-                            (onNull) -> new GetMethod(annotatedMethod, service, serviceId, providers, onNull));
-
-                    final MethodHolder<GET, GetMethod> getHolder = new MethodHolder<>();
-                    getHolder.annotation = get;
-                    getHolder.rcMethod = getMethod;
-                    listGetMethods.computeIfAbsent(key, k -> new ArrayList<MethodHolder<GET, GetMethod>>())
-                            .add(getHolder);
-                }
-            }
+                listGetMethods.computeIfAbsent(key, k -> new ArrayList<>()).add(new MethodHolder<>(get, getMethod));
+            });
         }
 
         // Walk SET-annotated methods
         for (Method annotatedMethod : setMethods) {
             final SetMethod setMethod = new SetMethod(annotatedMethod, service, serviceId, providers);
 
-            if (annotatedMethod.isAnnotationPresent(SET.class)) {
-                final SET set = annotatedMethod.getAnnotation(SET.class);
+            Stream<SET> setStream = Optional.ofNullable(annotatedMethod.getAnnotation(SET.class))
+                    .map(Stream::of).orElse(empty());
+
+            Stream<SET> setsStream = Optional.ofNullable(annotatedMethod.getAnnotation(SETs.class))
+                    .map(SETs::value).map(Arrays::stream).orElse(empty());
+
+            Stream.concat(setStream, setsStream).forEach(set -> {
                 final RegistryKey key = new RegistryKey(set.modelPackageUri(), set.model(), set.service(), set.resource());
                 resources.add(key);
 
-                final MethodHolder<SET, SetMethod> setHolder = new MethodHolder<>();
-                setHolder.annotation = set;
-                setHolder.rcMethod = setMethod;
+                final MethodHolder<SET, SetMethod> setHolder = new MethodHolder<>(set, setMethod);
                 listSetMethods.computeIfAbsent(key, k -> new ArrayList<MethodHolder<SET, SetMethod>>()).add(setHolder);
-            }
-            if (annotatedMethod.isAnnotationPresent(SETs.class)) {
-                final SETs sets = annotatedMethod.getAnnotation(SETs.class);
-                for (SET set : sets.value()) {
-                    final RegistryKey key = new RegistryKey(set.modelPackageUri(), set.model(), set.service(), set.resource());
-                    resources.add(key);
-                    final MethodHolder<SET, SetMethod> setHolder = new MethodHolder<>();
-                    setHolder.annotation = set;
-                    setHolder.rcMethod = setMethod;
-                    listSetMethods.computeIfAbsent(key, k -> new ArrayList<MethodHolder<SET, SetMethod>>())
-                            .add(setHolder);
-                }
-            }
+            });
         }
 
         for (final RegistryKey key : resources) {
