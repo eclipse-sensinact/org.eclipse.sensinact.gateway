@@ -99,6 +99,11 @@ class NotificationSnapshot {
         }
 
         @Override
+        public String getModelPackageUri() {
+            return "https://eclipse.org/sensinact/test/";
+        }
+
+        @Override
         public String getModelName() {
             return notification.model;
         }

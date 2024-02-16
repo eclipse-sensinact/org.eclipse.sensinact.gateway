@@ -147,6 +147,11 @@ public class LdapParserTest {
                             }
 
                             @Override
+                            public String getModelPackageUri() {
+                                return "https://eclipse.org/sensinact/test/";
+                            }
+
+                            @Override
                             public String getModelName() {
                                 return "model1";
                             }
@@ -387,5 +392,25 @@ public class LdapParserTest {
 
         query = "(filename=C:\\5cMyFile)";
         assertQueryTrue(query, makeResource("test", "filename", "C:\\MyFile"));
+    }
+
+    @Test
+    void testSpecificCriteria() throws Exception {
+        ResourceSnapshot rc = makeResource("test", "test", 42);
+        assertQueryTrue("(MODEL=model1)", rc);
+        assertQueryFalse("(MODEL=model2)", rc);
+        assertQueryTrue("(MODEL=model*)", rc);
+
+        assertQueryTrue("(PACKAGE=https://eclipse.org/sensinact/test/)", rc);
+        assertQueryFalse("(PACKAGE=https://eclipse.org/sensinact/test)", rc);
+        assertQueryFalse("(PACKAGE=https://eclipse.org/sensinact/)", rc);
+        assertQueryFalse("(PACKAGE=https://eclipse.org/sensinact/test2)", rc);
+        assertQueryTrue("(PACKAGE=https://eclipse.org/sensinact/*)", rc);
+        assertQueryTrue("(PACKAGE=https://eclipse.org/*)", rc);
+        assertQueryTrue("(PACKAGE=*test*)", rc);
+
+        assertQueryTrue("(PROVIDER=provider1)", rc);
+        assertQueryFalse("(PROVIDER=provider2)", rc);
+        assertQueryTrue("(PROVIDER=provider*)", rc);
     }
 }

@@ -17,6 +17,8 @@ import java.util.List;
 
 public interface ProviderSnapshot extends Snapshot {
 
+    String getModelPackageUri();
+
     String getModelName();
 
     <T extends ServiceSnapshot> List<T> getServices();

@@ -29,6 +29,11 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     private final List<ServiceSnapshotImpl> services = new ArrayList<>();
 
     /**
+     * Provider model package URI
+     */
+    private final String modelPackageUri;
+
+    /**
      * Provider model name
      */
     private final String modelName;
@@ -39,21 +44,31 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     private Provider modelProvider;
 
     /**
+     * @param modelPackageUri Provider model package URI
      * @param modelName       Provider model name
      * @param provider        Provider model
      * @param snapshotInstant Instant of snapshot
      */
-    public ProviderSnapshotImpl(final String modelName, final Provider provider, final Instant snapshotInstant) {
+    public ProviderSnapshotImpl(final String modelPackageUri, final String modelName, final Provider provider,
+            final Instant snapshotInstant) {
         super(provider.getId(), snapshotInstant);
+        this.modelPackageUri = modelPackageUri;
         this.modelName = modelName;
         this.modelProvider = provider;
     }
 
     @Override
     public String toString() {
-        return String.format("ProviderSnapshot(%s/%s, %s)", modelName, getName(), getSnapshotTime());
+        return String.format("ProviderSnapshot(%s/%s/%s, %s)", modelPackageUri, modelName, getName(),
+                getSnapshotTime());
     }
 
+    @Override
+    public String getModelPackageUri() {
+        return modelPackageUri;
+    }
+
+    @Override
     public String getModelName() {
         return modelName;
     }
@@ -62,6 +77,7 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
         this.services.add(svc);
     }
 
+    @Override
     public List<ServiceSnapshotImpl> getServices() {
         return services;
     }
