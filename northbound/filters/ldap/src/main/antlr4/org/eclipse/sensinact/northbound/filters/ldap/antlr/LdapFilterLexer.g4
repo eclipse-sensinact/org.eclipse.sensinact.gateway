@@ -37,7 +37,7 @@ EQUAL: '=';
 
 DOT: '.';
 STAR: '*';
-UNDERCORE: '_';
+UNDERSCORE: '_';
 PLUS: '+';
 MINUS: '-';
 COLUMN: ':';

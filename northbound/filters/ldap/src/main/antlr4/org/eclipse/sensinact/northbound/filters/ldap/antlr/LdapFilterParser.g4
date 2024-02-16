@@ -26,11 +26,11 @@ escaped_quote: ESCAPE_CHAR QUOTE;
 escaped_escape: ESCAPE_CHAR ESCAPE_CHAR;
 alpha: HEX_ALPHA | OTHER_ALPHA;
 
-valid_attr: (STAR | (alpha | DIGIT | UNDERCORE)+) (
+valid_attr: (STAR | (alpha | DIGIT | UNDERSCORE)+) (
     alpha
     | DIGIT
     | MINUS
-    | UNDERCORE
+    | UNDERSCORE
     | COLUMN
   )*;
 number: DIGIT+;
@@ -63,7 +63,7 @@ pureString: (
     | DOT
     | OR
     | AND
-    | UNDERCORE
+    | UNDERSCORE
     | MINUS
     | PLUS
     | comparator
