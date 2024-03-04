@@ -43,6 +43,11 @@ public class RcUtils {
             }
 
             @Override
+            public String getModelPackageUri() {
+                return "https://eclipse.org/sensinact/test/";
+            }
+
+            @Override
             public String getName() {
                 return providerName;
             }

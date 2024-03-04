@@ -342,7 +342,8 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Filter providers with their API model
         Stream<ProviderSnapshotImpl> providersStream = rawProvidersStream
-                .map(p -> new ProviderSnapshotImpl(nexusImpl.getProviderModel(p.getId()), p, snapshotTime));
+                .map(p -> new ProviderSnapshotImpl(nexusImpl.getProviderPackageUri(p.getId()),
+                        nexusImpl.getProviderModel(p.getId()), p, snapshotTime));
         if (providerFilter != null) {
             providersStream = providersStream.filter(providerFilter);
         }
@@ -398,6 +399,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
 
         final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
+                nexusImpl.getProviderPackageUri(nexusProvider.getId()),
                 nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
 
         // Add all services
@@ -439,6 +441,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Minimal snapshot of the provider owning the service
         final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
+                nexusImpl.getProviderPackageUri(nexusProvider.getId()),
                 nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
 
         // Describe the service
@@ -485,6 +488,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Minimal description of the provider owning the service
         final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
+                nexusImpl.getProviderPackageUri(nexusProvider.getId()),
                 nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
 
         // Minimal description of the service owning the resource

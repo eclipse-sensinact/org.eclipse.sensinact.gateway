@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.filters.ldap.antlr.impl;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 
 /**
  * Common code for Provider field comparison
@@ -73,5 +74,10 @@ public abstract class AbstractProviderCriterion extends AbstractCriterion {
         } else {
             return p -> expectedValue.matches(getProviderFieldValue(p), approxMatch);
         }
+    }
+
+    @Override
+    public ResourceValueFilter getResourceValueFilter() {
+        return (p, rs) -> !rs.isEmpty() && getProviderFilter().test(p);
     }
 }

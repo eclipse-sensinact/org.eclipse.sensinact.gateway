@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2024 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,13 @@ public class LdapFilterTest {
 
     private GenericDto makeRc(final String model, final String provider, final String service, final String resource,
             final Object value) {
+        return makeRc(null, model, provider, service, resource, value);
+    }
+
+    private GenericDto makeRc(final String packageUri, final String model, final String provider, final String service,
+            final String resource, final Object value) {
         GenericDto dto = new GenericDto();
+        dto.modelPackageUri = packageUri;
         dto.model = model;
         dto.provider = provider;
         dto.service = service;
@@ -74,6 +80,8 @@ public class LdapFilterTest {
         dtos.dtos.add(makeRc("gas", "Detect2", "sensor", "O3", 4));
         dtos.dtos.add(makeRc("test", "test", "sensor", "temperature", 4));
         dtos.dtos.add(makeRc("test", "test", "sensor", "O3", 4));
+        dtos.dtos.add(makeRc("https://eclipse.org/sensinact/ldap/test", "naming1", "naming", "sensor-1", 0));
+        dtos.dtos.add(makeRc("https://eclipse.org/sensinact/ldap/test", "naming2", "naming", "sensor_2", 0));
         push.pushUpdate(dtos).getValue();
     }
 
@@ -207,5 +215,16 @@ public class LdapFilterTest {
         results = applyFilter("(|(MODEL=gas)(MODEL=temperature)(PROVIDER=test))");
         assertEquals(6, results.size());
         assertFindProviders(results, "Temp1", "Temp2", "Temp3", "Detect1", "Detect2", "test");
+    }
+
+    @Test
+    void testNaming() throws Exception {
+        List<ProviderSnapshot> results = applyFilter("(naming.sensor-1=*)");
+        assertEquals(1, results.size());
+        assertFindProviders(results, "naming1");
+
+        results = applyFilter("(naming.sensor_2=*)");
+        assertEquals(1, results.size());
+        assertFindProviders(results, "naming2");
     }
 }

@@ -134,6 +134,25 @@ public class FilterVisitor extends LdapFilterParserBaseVisitor<ILdapCriterion> {
         }
 
         switch (node.getSymbol().getType()) {
+        case LdapFilterLexer.PACKAGE:
+            // Target a model package URI
+            if (value == null) {
+                throw new IllegalArgumentException("Package URIs can't be null");
+            } else if (value == Constants.ANY) {
+                // Ignore test: model package URI are always set
+                return null;
+            }
+
+            switch (comparator) {
+                case APPROX:
+                case EQUAL:
+                    return new CriterionProviderPackageUri(strValue, comparator);
+
+                default:
+                    throw new IllegalArgumentException(
+                            "Model package URIs can only be tested with ~= or =, not " + comparator);
+            }
+
         case LdapFilterLexer.MODEL:
             // Target a model
             if (value == null) {

@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -26,11 +26,11 @@ escaped_quote: ESCAPE_CHAR QUOTE;
 escaped_escape: ESCAPE_CHAR ESCAPE_CHAR;
 alpha: HEX_ALPHA | OTHER_ALPHA;
 
-valid_attr: (STAR | (alpha | DIGIT | UNDERCORE)+) (
+valid_attr: (STAR | (alpha | DIGIT | UNDERSCORE)+) (
     alpha
     | DIGIT
     | MINUS
-    | UNDERCORE
+    | UNDERSCORE
     | COLUMN
   )*;
 number: DIGIT+;
@@ -42,7 +42,7 @@ andFilter: AND filter+;
 orFilter: OR filter+;
 notFilter: NOT filter;
 
-attr: MODEL | PROVIDER | (valid_attr (DOT valid_attr)*);
+attr: PACKAGE | MODEL | PROVIDER | (valid_attr (DOT valid_attr)*);
 
 value:
   anyValue
@@ -63,11 +63,12 @@ pureString: (
     | DOT
     | OR
     | AND
-    | UNDERCORE
+    | UNDERSCORE
     | MINUS
     | PLUS
     | comparator
     | WS
+    | PACKAGE
     | MODEL
     | PROVIDER
     | COLUMN
