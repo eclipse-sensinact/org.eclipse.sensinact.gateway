@@ -97,6 +97,7 @@
 
   <modules>
     <module>core</module>
+    <module>platform</module>
     <module>southbound</module>
     <module>northbound</module>
     <module>examples</module>
