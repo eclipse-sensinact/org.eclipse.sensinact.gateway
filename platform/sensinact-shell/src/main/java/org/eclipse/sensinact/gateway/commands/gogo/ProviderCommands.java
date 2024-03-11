@@ -19,7 +19,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author David Leangen
@@ -37,10 +36,8 @@ public class ProviderCommands {
      * List all providers.
      */
     @Descriptor("List all providers")
-    public List<String> providers() {
-        return session.get().listProviders().stream()
-                .map(description -> description.provider)
-                .collect(Collectors.toList());
+    public List<ProviderDescription> providers() {
+        return session.get().listProviders();
     }
 
     /**
@@ -49,19 +46,7 @@ public class ProviderCommands {
      * @param provider the ID of the provider
      */
     @Descriptor("Describe a provider")
-    public String provider(@Descriptor("the provider ID") String provider) {
-        final ProviderDescription description = session.get().describeProvider(provider);
-        if (description == null)
-            return "<NULL>";
-
-        final String services = description.services.stream()
-                .collect(Collectors.joining("\n  "));
-
-        return "\n"
-                + "Provider: " + description.provider + "\n"
-                + "\n"
-                + "  Services\n"
-                + "  --------\n"
-                + "  " + services + "\n";
+    public ProviderDescription provider(@Descriptor("the provider ID") String provider) {
+        return session.get().describeProvider(provider);
     }
 }

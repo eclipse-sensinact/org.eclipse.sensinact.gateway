@@ -55,7 +55,6 @@ public class GetCommands {
      * @param resource  the ID of the resource
      * @param type      type shorthand type of the resource to get (String, Integer, int)
      */
-    @SuppressWarnings("unchecked")
     @Descriptor("Get the value of a resource.\n\n   This variant accepts a simplified type for convenience.\n")
     public <T>T get(
             @Descriptor("      the provider ID") String provider,
@@ -63,10 +62,7 @@ public class GetCommands {
             @Descriptor("      the resource ID") String resource,
             @Descriptor("the simplified type of the resource value to get (one of: String, Integer, int)") ResourceType<T> type ) {
 
-        final T result = session.get().getResourceValue(provider, service, resource, type.type);
-        if (result == null)
-            return (T)"<NULL>";
-        return result;
+        return session.get().getResourceValue(provider, service, resource, type.type);
     }
 
     /**
@@ -77,7 +73,6 @@ public class GetCommands {
      * @param resource  the ID of the resource
      * @param type      type fqn of the type of the resource to get
      */
-    @SuppressWarnings("unchecked")
     @Descriptor("Get the value of a resource.\n\n   This variant requires the FQN of the value type (i.e. java.lang.String).\n")
     public <T>T get(
             @Descriptor("the provider ID") String provider,
@@ -85,9 +80,6 @@ public class GetCommands {
             @Descriptor("the resource ID") String resource,
             @Descriptor(" the type of the resource value to get") Class<T> type ) {
 
-        final T result = session.get().getResourceValue(provider, service, resource, type);
-        if (result == null)
-            return (T)"<NULL>";
-        return result;
+        return session.get().getResourceValue(provider, service, resource, type);
     }
 }

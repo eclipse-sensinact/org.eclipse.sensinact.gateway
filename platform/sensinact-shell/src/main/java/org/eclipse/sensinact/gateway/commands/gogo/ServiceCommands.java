@@ -12,8 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.commands.gogo;
 
-import java.util.stream.Collectors;
-
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.annotations.GogoCommand;
 import org.eclipse.sensinact.core.session.ProviderDescription;
@@ -39,20 +37,8 @@ public class ServiceCommands {
      * @param provider the ID of the provider
      */
     @Descriptor("List all services for a given provider")
-    public String services(@Descriptor("the provider ID") String provider) {
-        final ProviderDescription description = session.get().describeProvider(provider);
-        if (description == null)
-            return "<NULL>";
-
-        final String services = description.services.stream()
-                .collect(Collectors.joining("\n  "));
-
-        return "\n"
-                + "Provider: " + description.provider + "\n"
-                + "\n"
-                + "  Services\n"
-                + "  --------\n"
-                + "  " + services + "\n";
+    public ProviderDescription services(@Descriptor("the provider ID") String provider) {
+        return session.get().describeProvider(provider);
     }
 
     /**
@@ -62,21 +48,9 @@ public class ServiceCommands {
      * @param service  the ID of the service
      */
     @Descriptor("Describe a service")
-    public String service(
+    public ServiceDescription service(
             @Descriptor("the provider ID") String provider,
             @Descriptor("the service ID") String service) {
-        final ServiceDescription description = session.get().describeService(provider, service);
-        if (description == null)
-            return "<NULL>";
-
-        final String services = description.resources.stream()
-                .collect(Collectors.joining("\n  "));
-
-        return "\n"
-                + "Service: " + description.provider + "\n"
-                + "\n"
-                + "  Resources\n"
-                + "  ---------\n"
-                + "  " + services + "\n";
+        return session.get().describeService(provider, service);
     }
 }

@@ -30,6 +30,13 @@ import org.osgi.service.component.annotations.Reference;
     )
 public class MetaCommands {
 
+    public static class MetaDTO {
+        public String provider;
+        public String service;
+        public String resource;
+        public Map<String, Object> metadata;
+    }
+
     @Reference private SensiNactCommandSession session;
 
     /**
@@ -40,25 +47,18 @@ public class MetaCommands {
      * @param resource  the ID of the resource
      */
     @Descriptor("List all the metadata properties for a resource")
-    public String meta(
+    public MetaDTO meta(
             @Descriptor("the provider ID") String provider,
             @Descriptor("the service ID") String service,
             @Descriptor("the resource ID") String resource) {
 
-        final Map<String, Object> description = session.get().getResourceMetadata(provider, service, resource);
-        if (description == null)
-            return "<NULL>";
-
-        final String data = description.entrySet().stream()
-                .map(e -> "  " + e.getKey() + " = " + e.getValue())
-                .collect(Collectors.joining("\n  "));
-
-        return "\n"
-                + "Resource: " + provider + "/" + service + "/" + resource + "\n"
-                + "\n"
-                + "  Metadata\n"
-                + "  --------\n"
-                + "  " + data + "\n";
+        final Map<String, Object> metadata = session.get().getResourceMetadata(provider, service, resource);
+        final MetaDTO dto = new MetaDTO();
+        dto.provider = provider;
+        dto.service = service;
+        dto.resource = resource;
+        dto.metadata = metadata;
+        return dto;
     }
 
     /**
