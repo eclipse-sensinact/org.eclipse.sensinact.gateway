@@ -38,6 +38,7 @@
     <module>websocket</module>
     <module>sensorthings</module>
     <module>security</module>
+    <module>gogo-shell</module>
   </modules>
 
   <dependencyManagement>

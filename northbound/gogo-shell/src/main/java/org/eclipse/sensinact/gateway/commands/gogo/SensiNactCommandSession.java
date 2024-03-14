@@ -46,8 +46,9 @@ public class SensiNactCommandSession {
      * Returns the command session. Value will never be null;
      */
     public SensiNactSession get() {
-        // TODO: Can the session expire?
-        //       What to do in that case??
+        if (session.isExpired())
+            session = sessionManager.createNewAnonymousSession();
+
         return session;
     }
 

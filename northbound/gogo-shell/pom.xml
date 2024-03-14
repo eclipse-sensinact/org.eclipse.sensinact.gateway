@@ -13,13 +13,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.eclipse.sensinact.gateway.platform</groupId>
-    <artifactId>platform</artifactId>
+    <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
+    <artifactId>northbound</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
-  <artifactId>sensinact-shell</artifactId>
-  <name>SensiNact Shell Commands</name>
-  <description>Shell UI for sensiNact based on gogo shell</description>
+  <artifactId>gogo-shell</artifactId>
+  <name>SensiNact Northbound Gogo Shell Commands</name>
+  <description>Shell UI for northbound providers based on gogo shell</description>
 
   <properties>
     <org.apache.felix.gogo.command.version>1.1.2</org.apache.felix.gogo.command.version>
