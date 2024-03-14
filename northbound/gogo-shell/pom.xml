@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2022 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
+    <artifactId>northbound</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>gogo-shell</artifactId>
+  <name>SensiNact Northbound Gogo Shell Commands</name>
+  <description>Shell UI for northbound providers based on gogo shell</description>
+
+  <properties>
+    <org.apache.felix.gogo.command.version>1.1.2</org.apache.felix.gogo.command.version>
+    <org.apache.felix.gogo.shell.version>1.1.4</org.apache.felix.gogo.shell.version>
+    <org.apache.felix.gogo.jline.version>1.1.8</org.apache.felix.gogo.jline.version>
+    <org.apache.felix.gogo.runtime.version>1.1.4</org.apache.felix.gogo.runtime.version>
+    <org.json.version>20190722</org.json.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.gogo.command</artifactId>
+        <version>${org.apache.felix.gogo.command.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.gogo.jline</artifactId>
+        <version>${org.apache.felix.gogo.jline.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.gogo.runtime</artifactId>
+        <version>${org.apache.felix.gogo.runtime.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>${org.json.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-testing-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-resolver-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
