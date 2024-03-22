@@ -51,6 +51,7 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.southbound.device.factory.Constants;
 import org.eclipse.sensinact.gateway.southbound.device.factory.DeviceFactoryException;
+import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceCustomPayloadHandler;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingHandler;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingParser;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
@@ -58,6 +59,7 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.IPlaceHolderKeys;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
 import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.LocaleUtils;
+import org.eclipse.sensinact.gateway.southbound.device.factory.MissingCustomHandlerException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.MissingParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.ParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
@@ -124,6 +126,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     private final Map<String, List<ComponentServiceObjects<IDeviceMappingParser>>> parsers = new ConcurrentHashMap<>();
 
     /**
+     * Available custom handlers
+     */
+    private final Map<String, List<ComponentServiceObjects<IDeviceCustomPayloadHandler>>> handlers = new ConcurrentHashMap<>();
+
+    /**
      * SensiNact update endpoint
      */
     @Reference
@@ -169,75 +176,136 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         return matchingParsers.get(0);
     }
 
+    /**
+     * New custom handler service registered
+     */
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    void addCustomHandler(final ComponentServiceObjects<IDeviceCustomPayloadHandler> handler,
+            final Map<String, Object> properties) {
+        handlers.merge((String) properties.get(IDeviceCustomPayloadHandler.HANDLER_ID), List.of(handler),
+                (x, v) -> Stream.concat(Stream.of(handler), v.stream()).collect(Collectors.toList()));
+    }
+
+    /**
+     * Custom handler service unregistered
+     */
+    void removeCustomHandler(final ComponentServiceObjects<IDeviceCustomPayloadHandler> handler,
+            final Map<String, Object> properties) {
+        handlers.computeIfPresent((String) properties.get(IDeviceCustomPayloadHandler.HANDLER_ID), (x, v) -> {
+            List<ComponentServiceObjects<IDeviceCustomPayloadHandler>> list = v.stream()
+                    .filter(c -> !c.getServiceReference().equals(handler.getServiceReference()))
+                    .collect(Collectors.toList());
+            return list.isEmpty() ? null : list;
+        });
+    }
+
+    /**
+     * Looks for the custom handler with the given ID
+     */
+    private ComponentServiceObjects<IDeviceCustomPayloadHandler> findHandler(final String handlerId)
+            throws MissingCustomHandlerException {
+        final List<ComponentServiceObjects<IDeviceCustomPayloadHandler>> matchingHandlers = handlers.get(handlerId);
+        if (matchingHandlers == null || matchingHandlers.isEmpty()) {
+            throw new MissingCustomHandlerException(String.format("No custom handler found with ID '%s'", handlerId));
+        }
+
+        return matchingHandlers.get(0);
+    }
+
     @Override
     public void handle(final DeviceMappingConfigurationDTO configuration, final Map<String, String> context,
             final byte[] payload) throws DeviceFactoryException {
 
-        // Check parser ID
-        final String parserId = configuration.parser;
-        if (parserId == null || parserId.isBlank()) {
-            throw new MissingParserException("No parser ID given");
-        }
-
-        // Extract mapping information
-        final RecordState globalState = computeInitialState(configuration, context);
-
-        // Check if a provider is set
-        if (globalState.placeholders.get(KEY_PROVIDER) == null) {
-            throw new IllegalArgumentException("No provider mapping given");
-        }
-
         final boolean logErrors = configuration.mappingOptions.logErrors;
 
-        // Find it
-        final ComponentServiceObjects<IDeviceMappingParser> cso = findParser(parserId);
-        final IDeviceMappingParser parser = cso.getService();
-        try {
-            // Use it
-            final List<? extends IDeviceMappingRecord> records = parser.parseRecords(payload,
-                    configuration.parserOptions, context);
-            if (records != null) {
-                final BulkGenericDto bulk = new BulkGenericDto();
-                bulk.dtos = new ArrayList<>();
+        final BulkGenericDto bulk = new BulkGenericDto();
+        bulk.dtos = new ArrayList<>();
 
-                for (final IDeviceMappingRecord record : records) {
-                    try {
-                        bulk.dtos.addAll(handleRecord(configuration, globalState, record));
-                    } catch (InvalidResourcePathException | ParserException | VariableNotFoundException e) {
-                        if (logErrors) {
-                            logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
+        final String handlerId = configuration.handler;
+        final boolean useHandler = handlerId != null && !handlerId.isBlank();
+        if (useHandler) {
+            // Use a sub-handler first
+            final ComponentServiceObjects<IDeviceCustomPayloadHandler> handlerCso = findHandler(handlerId);
+            final IDeviceCustomPayloadHandler handler = handlerCso.getService();
+            try {
+                final List<GenericDto> dtos = handler.handlePayload(configuration, context, payload);
+                if (dtos != null) {
+                    bulk.dtos.addAll(dtos);
+                } else if (logErrors) {
+                    logger.debug("No DTOs returned by handler {}", handlerId);
+                }
+            } catch (DeviceFactoryException e) {
+                if (logErrors) {
+                    logger.error("Error calling handler {}", handlerId, e);
+                }
+                throw e;
+            } finally {
+                handlerCso.ungetService(handler);
+            }
+        }
+
+        // Check parser ID
+        final String parserId = configuration.parser;
+        final boolean useParser = parserId != null && !parserId.isBlank();
+        if (!useHandler && !useParser) {
+            throw new MissingParserException("No parser nor handler ID given");
+        } else if (useParser) {
+            // Find it
+            final ComponentServiceObjects<IDeviceMappingParser> cso = findParser(parserId);
+            final IDeviceMappingParser parser = cso.getService();
+            try {
+                // Extract mapping information
+                final RecordState globalState = computeInitialState(configuration, context);
+
+                // Check if a provider is set
+                if (globalState.placeholders.get(KEY_PROVIDER) == null) {
+                    throw new IllegalArgumentException("No provider mapping given");
+                }
+
+                // Use it
+                final List<? extends IDeviceMappingRecord> records = parser.parseRecords(payload,
+                        configuration.parserOptions, context);
+                if (records != null) {
+                    for (final IDeviceMappingRecord record : records) {
+                        try {
+                            bulk.dtos.addAll(handleRecord(configuration, globalState, record));
+                        } catch (InvalidResourcePathException | ParserException | VariableNotFoundException e) {
+                            if (logErrors) {
+                                logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
+                            }
                         }
                     }
+                } else if (logErrors) {
+                    logger.error("No record found by parser {}", parserId);
                 }
+            } catch (Exception e) {
+                if (logErrors) {
+                    logger.error("Error parsing payload with parser {}", parserId, e);
+                }
+                throw e;
+            } finally {
+                cso.ungetService(parser);
+            }
+        }
 
-                if (!bulk.dtos.isEmpty()) {
-                    // Send all updates to the gateway thread at once
-                    Promise<?> pushUpdate = dataUpdate.pushUpdate(bulk);
-                    if (logErrors) {
-                        pushUpdate = pushUpdate.onFailure((t) -> {
-                            if (t instanceof FailedUpdatesException) {
-                                for (DataUpdateException ex : ((FailedUpdatesException) t).getFailedUpdates()) {
-                                    logger.error("Error updating digital twin of {}/{}/{} with parser {}: {}",
-                                            ex.getProvider(), ex.getService(), ex.getResource(), parserId,
-                                            ex.getMessage(), ex);
-                                }
-                            } else {
-                                logger.error("Error updating digital twin with parser {}: {}", parserId, t.getMessage(),
-                                        t);
-                            }
-                        });
-                    }
-                }
-            } else if (logErrors) {
-                logger.error("No record found by parser {}", parserId);
-            }
-        } catch (Exception e) {
+        if (!bulk.dtos.isEmpty()) {
+            // Send all updates to the gateway thread at once
+            Promise<?> pushUpdate = dataUpdate.pushUpdate(bulk);
             if (logErrors) {
-                logger.error("Error parsing payload with parser {}", parserId, e);
+                pushUpdate = pushUpdate.onFailure((t) -> {
+                    if (t instanceof FailedUpdatesException) {
+                        for (DataUpdateException ex : ((FailedUpdatesException) t).getFailedUpdates()) {
+                            logger.error("Error updating digital twin of {}/{}/{} with parser {}: {}", ex.getProvider(),
+                                    ex.getService(), ex.getResource(), parserId, ex.getMessage(), ex);
+                        }
+                    } else {
+                        logger.error("Error updating digital twin with parser {}: {}", parserId, t.getMessage(), t);
+                    }
+                });
             }
-            throw e;
-        } finally {
-            cso.ungetService(parser);
+        } else if (logErrors) {
+            logger.debug("No data found by {} {}", handlerId != null ? "handler" : "parser",
+                    handlerId != null ? handlerId : parserId);
         }
     }
 

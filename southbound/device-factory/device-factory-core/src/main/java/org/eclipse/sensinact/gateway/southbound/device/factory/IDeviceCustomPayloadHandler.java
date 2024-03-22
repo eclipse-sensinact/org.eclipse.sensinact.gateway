@@ -12,27 +12,30 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory;
 
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
 
 /**
- * Definition of the device mapping handler
+ * Definition of a custom payload handler
  */
-public interface IDeviceMappingHandler {
+public interface IDeviceCustomPayloadHandler {
+
+    /**
+     * Property to identify a device mapping handler
+     */
+    String HANDLER_ID = "sensinact.device.custom.handler.id";
 
     /**
      * Handles the content of the given payload and updates resources accordingly
      *
-     * @param configuration Mapping configuration (must contain the parser ID)
+     * @param configuration Mapping configuration
      * @param context       Context variables provided by the caller
      * @param payload       Raw content to parse
-     * @throws MissingParserException       Payload parser not found
-     * @throws InvalidResourcePathException Invalid path found in mapping
-     * @throws ParserException              Error parsing payload
-     * @throws DeviceFactoryException       Error handling records
+     * @throws DeviceFactoryException Error handling records
      */
-    void handle(DeviceMappingConfigurationDTO configuration, Map<String, String> context, byte[] payload)
-            throws MissingParserException, InvalidResourcePathException, ParserException, DeviceFactoryException;
-
+    List<GenericDto> handlePayload(DeviceMappingConfigurationDTO handlerConfiguration, Map<String, String> context,
+            byte[] payload) throws DeviceFactoryException;
 }

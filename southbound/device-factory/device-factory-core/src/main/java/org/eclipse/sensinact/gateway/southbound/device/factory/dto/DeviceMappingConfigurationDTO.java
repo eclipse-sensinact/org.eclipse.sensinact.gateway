@@ -22,6 +22,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DeviceMappingConfigurationDTO {
 
     /**
+     * ID of a custom handler to use
+     */
+    public String handler;
+
+    /**
+     * Options of the custom handler
+     */
+    @JsonProperty("handler.options")
+    public Map<String, Object> handlerOptions = Map.of();
+
+    /**
      * ID of the parser to use
      */
     public String parser;
