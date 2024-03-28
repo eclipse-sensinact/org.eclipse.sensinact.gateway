@@ -41,6 +41,8 @@
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.virtual.virtual-temperature-sensor;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.virtual.virtual-temperature-sensor-tests;version='[0.0.2,0.0.3)',\
 	org.gecko.emf.osgi.component.minimal;version='[6.1.0,6.1.1)',\

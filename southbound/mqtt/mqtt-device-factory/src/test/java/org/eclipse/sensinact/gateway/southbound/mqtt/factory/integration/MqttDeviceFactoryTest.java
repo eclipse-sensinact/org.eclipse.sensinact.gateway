@@ -32,15 +32,17 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.security.UserInfo;
-import org.eclipse.sensinact.core.session.ResourceDescription;
-import org.eclipse.sensinact.core.session.SensiNactSession;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.northbound.session.ResourceDescription;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.osgi.annotation.bundle.Requirement;
+import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
@@ -71,6 +73,7 @@ import io.moquette.broker.config.MemoryConfig;
                 + "    \"data/testName\": { \"literal\": \"${context.topic-2}\" },\n"
                 + "    \"data/value\": { \"path\": \"Value\", \"type\": \"int\" }\n" + "  },\n"
                 + "  \"mapping.options\": { \"format.date\": \"d.M.y\", \"format.time\": \"H:m\" }\n" + "}"), })
+@Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
 public class MqttDeviceFactoryTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;

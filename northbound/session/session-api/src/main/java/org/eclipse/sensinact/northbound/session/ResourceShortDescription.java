@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.session;
+package org.eclipse.sensinact.northbound.session;
 
 import java.util.List;
 import java.util.Map.Entry;

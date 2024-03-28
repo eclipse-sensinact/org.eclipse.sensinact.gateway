@@ -12,8 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.api;
 
-import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 /**
  * Handles a standard sensiNact query

@@ -15,7 +15,7 @@ package notification;
 import java.util.List;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;

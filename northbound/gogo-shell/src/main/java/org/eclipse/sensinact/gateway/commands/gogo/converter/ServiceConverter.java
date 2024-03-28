@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.commands.gogo.converter;
 import java.util.stream.Collectors;
 
 import org.apache.felix.service.command.Converter;
-import org.eclipse.sensinact.core.session.ServiceDescription;
+import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.osgi.service.component.annotations.Component;
 
 /**

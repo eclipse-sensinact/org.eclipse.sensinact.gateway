@@ -13,8 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import org.eclipse.sensinact.core.security.UserInfo;
-import org.eclipse.sensinact.core.session.SensiNactSession;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;

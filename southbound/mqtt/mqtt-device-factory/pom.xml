@@ -44,6 +44,18 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+      <artifactId>session-api</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+      <artifactId>session-impl</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
       <artifactId>parser-csv</artifactId>
       <version>${project.version}</version>

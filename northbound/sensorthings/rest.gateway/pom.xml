@@ -39,6 +39,10 @@
       <artifactId>api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+      <artifactId>session-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
@@ -52,6 +56,12 @@
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>impl</artifactId>
       <version>${sensinact.core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+      <artifactId>session-impl</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

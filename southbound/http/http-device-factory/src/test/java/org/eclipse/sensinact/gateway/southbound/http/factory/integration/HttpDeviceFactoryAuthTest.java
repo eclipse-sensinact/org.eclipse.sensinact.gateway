@@ -43,14 +43,16 @@ import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.security.UserInfo;
-import org.eclipse.sensinact.core.session.ResourceDescription;
-import org.eclipse.sensinact.core.session.SensiNactSession;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
+import org.eclipse.sensinact.northbound.session.ResourceDescription;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.osgi.annotation.bundle.Requirement;
+import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
@@ -58,6 +60,7 @@ import org.osgi.test.common.annotation.InjectService;
 /**
  * Tests the HTTP device factory with authentication
  */
+@Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
 public class HttpDeviceFactoryAuthTest {
 
     static QueuedThreadPool threadPool;

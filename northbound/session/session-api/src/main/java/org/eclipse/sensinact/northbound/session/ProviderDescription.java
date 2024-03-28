@@ -10,15 +10,13 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.session;
+package org.eclipse.sensinact.northbound.session;
 
 import java.util.List;
 
-public class ServiceDescription {
+public class ProviderDescription {
 
     public String provider;
 
-    public String service;
-
-    public List<String> resources;
+    public List<String> services;
 }
