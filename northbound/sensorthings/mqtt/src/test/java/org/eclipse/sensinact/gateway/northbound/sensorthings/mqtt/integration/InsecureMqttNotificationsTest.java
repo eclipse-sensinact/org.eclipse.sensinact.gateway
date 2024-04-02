@@ -15,6 +15,7 @@ package org.eclipse.sensinact.gateway.northbound.sensorthings.mqtt.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +23,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,9 +59,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -72,6 +72,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+@WithFactoryConfiguration(factoryPid = "sensiNact.northbound.sensorthings.mqtt", properties = {
+        @Property(key = "port", value = "13579"),
+        @Property(key = "websocket.enable", value = "false")
+})
 public class InsecureMqttNotificationsTest {
 
     @InjectService
@@ -88,41 +92,36 @@ public class InsecureMqttNotificationsTest {
 
     private ObjectMapper mapper;
 
-    private Configuration configuration;
-
     @BeforeEach
-    void start(@InjectService ConfigurationAdmin cm) throws Exception {
-
-        configuration = cm.getConfiguration("sensiNact.northbound.sensorthings.mqtt", "?");
-        if (configuration.updateIfDifferent(new Hashtable<>(getConfig()))) {
-            Thread.sleep(2000);
-        }
-
+    void start() throws Exception {
         client = new MqttAsyncClient(getMqttURL(), "test-client");
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
         options.setConnectionTimeout(500);
+        boolean connected = false;
         for (int i = 0; i < 5; i++) {
             try {
                 client.connect(options).waitForCompletion(1000);
+                connected = true;
             } catch (MqttException e) {
                 e.printStackTrace();
                 if (e.getCause() instanceof ConnectException) {
                     Thread.sleep(500);
                     continue;
                 }
+                throw e;
             }
             break;
+        }
+
+        if(!connected) {
+            fail("Not connected to the MQTT broker");
         }
 
         listener = (t, m) -> messages.put(new String(m.getPayload(), StandardCharsets.UTF_8));
 
         mapper = JsonMapper.builder().addModule(new JavaTimeModule())
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true).build();
-    }
-
-    protected Map<String, Object> getConfig() {
-        return Map.of("port", 13579, "websocket.enable", false);
     }
 
     protected String getMqttURL() {
