@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.felix.service.command.Converter;
-import org.eclipse.sensinact.core.session.ResourceDescription;
+import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.osgi.service.component.annotations.Component;
 
 /**

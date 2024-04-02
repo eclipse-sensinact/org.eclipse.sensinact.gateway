@@ -83,6 +83,8 @@
 	org.eclipse.sensinact.gateway.northbound.filters.ldap;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.authentication-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.websocket;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.websocket-tests;version='[0.0.2,0.0.3)',\
 	org.gecko.emf.osgi.component.minimal;version='[6.1.0,6.1.1)',\

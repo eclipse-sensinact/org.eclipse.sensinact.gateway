@@ -42,6 +42,11 @@
         <version>${sensinact.core.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+        <artifactId>session-api</artifactId>
+        <version>${sensinact.core.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.eclipse.sensinact.gateway.core</groupId>
         <artifactId>geo-json</artifactId>
         <version>${sensinact.core.version}</version>

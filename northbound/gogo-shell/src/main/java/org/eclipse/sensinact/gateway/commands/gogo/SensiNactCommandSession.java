@@ -13,8 +13,8 @@
 package org.eclipse.sensinact.gateway.commands.gogo;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.session.SensiNactSession;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

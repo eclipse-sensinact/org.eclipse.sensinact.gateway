@@ -29,18 +29,16 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.push.FailedUpdatesException;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.security.UserInfo;
-import org.eclipse.sensinact.core.session.SensiNactSession;
-import org.eclipse.sensinact.core.session.SensiNactSessionManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
@@ -52,8 +50,6 @@ import org.osgi.util.promise.PromiseFactory;
  */
 public class DataUpdateServiceTest {
 
-    private static final UserInfo USER = UserInfo.ANONYMOUS;
-
     private static final String PROVIDER = "DataUpdateServiceTestProvider";
     private static final String SERVICE = "service";
     private static final String RESOURCE = "resource";
@@ -61,23 +57,26 @@ public class DataUpdateServiceTest {
     @InjectService
     DataUpdate push;
     @InjectService
-    SensiNactSessionManager sessionManager;
-    SensiNactSession session;
-
-    @BeforeEach
-    void start() {
-        session = sessionManager.getDefaultSession(USER);
-    }
+    GatewayThread gt;
 
     @AfterEach
     void stop(@InjectService GatewayThread gt) throws InvocationTargetException, InterruptedException {
-        session.expire();
         gt.execute(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                 Optional.ofNullable(twin.getProvider(PROVIDER))
                     .ifPresent(SensinactProvider::delete);
                 return pf.resolved(null);
+            }
+        }).getValue();
+    }
+
+    private Integer getResourceValue() throws Exception {
+        return gt.execute(new ResourceCommand<Integer>(PROVIDER, SERVICE, RESOURCE) {
+
+            @Override
+            protected Promise<Integer> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue().map(t -> (Integer) t.getValue());
             }
         }).getValue();
     }
@@ -118,7 +117,7 @@ public class DataUpdateServiceTest {
             dto.timestamp = timestamp;
             push.pushUpdate(dto).getValue();
 
-            assertEquals(42, session.getResourceValue(PROVIDER, SERVICE, RESOURCE, Integer.class));
+            assertEquals(42, getResourceValue());
         }
 
         @Test
@@ -134,7 +133,7 @@ public class DataUpdateServiceTest {
             dto.time = String.valueOf(timestamp.toEpochMilli());
             push.pushUpdate(dto).getValue();
 
-            assertEquals(42, session.getResourceValue(PROVIDER, SERVICE, RESOURCE, Integer.class));
+            assertEquals(42, getResourceValue());
         }
     }
 
@@ -427,7 +426,7 @@ public class DataUpdateServiceTest {
 
             Throwable t = push.pushUpdate(bulk).getFailure();
 
-            assertEquals(45, session.getResourceValue(PROVIDER, SERVICE, RESOURCE, Integer.class));
+            assertEquals(45, getResourceValue());
 
             assertNotNull(t);
             assertInstanceOf(FailedUpdatesException.class, t);

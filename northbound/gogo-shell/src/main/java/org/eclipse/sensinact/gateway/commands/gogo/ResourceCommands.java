@@ -14,8 +14,8 @@ package org.eclipse.sensinact.gateway.commands.gogo;
 
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.annotations.GogoCommand;
-import org.eclipse.sensinact.core.session.ResourceDescription;
-import org.eclipse.sensinact.core.session.ServiceDescription;
+import org.eclipse.sensinact.northbound.session.ResourceDescription;
+import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 

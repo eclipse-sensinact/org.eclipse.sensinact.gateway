@@ -35,7 +35,6 @@ import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.session.SensiNactSession;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -57,6 +56,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryUnsubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultSubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultUnsubscribeDTO;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

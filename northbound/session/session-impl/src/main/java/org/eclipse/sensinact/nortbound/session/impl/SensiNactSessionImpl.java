@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.impl;
+package org.eclipse.sensinact.nortbound.session.impl;
 
 import static java.util.stream.Collectors.toList;
 
@@ -45,16 +45,16 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.security.UserInfo;
-import org.eclipse.sensinact.core.session.ProviderDescription;
-import org.eclipse.sensinact.core.session.ResourceDescription;
-import org.eclipse.sensinact.core.session.ResourceShortDescription;
-import org.eclipse.sensinact.core.session.SensiNactSession;
-import org.eclipse.sensinact.core.session.ServiceDescription;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.northbound.session.ProviderDescription;
+import org.eclipse.sensinact.northbound.session.ResourceDescription;
+import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 

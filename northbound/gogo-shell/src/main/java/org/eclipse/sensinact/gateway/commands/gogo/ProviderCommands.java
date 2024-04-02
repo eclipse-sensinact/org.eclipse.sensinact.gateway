@@ -12,13 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.commands.gogo;
 
+import java.util.List;
+
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.annotations.GogoCommand;
-import org.eclipse.sensinact.core.session.ProviderDescription;
+import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.List;
 
 /**
  * @author David Leangen

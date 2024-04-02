@@ -82,6 +82,8 @@
 	org.eclipse.sensinact.gateway.northbound.sensorthings.rest.api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.sensorthings.rest.gateway;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.sensorthings.rest.gateway-tests;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider;version='[0.0.2,0.0.3)',\
 	org.gecko.emf.osgi.component.minimal;version='[6.1.0,6.1.1)',\

@@ -60,6 +60,8 @@
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.device-factory.device-factory-core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.device-factory.parser-csv;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.mqtt.mqtt-client;version='[0.0.2,0.0.3)',\

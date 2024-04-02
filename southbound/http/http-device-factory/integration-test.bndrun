@@ -12,7 +12,7 @@
 	bnd.identity;id='ch.qos.logback.classic'
 -resolve.effective: active
 
--runee: JavaSE-11
+-runee: JavaSE-17
 -runfw: org.apache.felix.framework
 
 # This will help us keep -runbundles sorted
@@ -56,6 +56,8 @@
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.device-factory.device-factory-core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.device-factory.parser-csv;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-device-factory;version='[0.0.2,0.0.3)',\
