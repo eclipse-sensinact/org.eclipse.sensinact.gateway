@@ -12,15 +12,16 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt;
 
-import static io.moquette.BrokerConstants.HOST_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.JKS_PATH_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.KEY_STORE_TYPE;
-import static io.moquette.BrokerConstants.PORT_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.SSL_PORT_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME;
-import static io.moquette.BrokerConstants.WSS_PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.HOST_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.JKS_PATH_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_STORE_TYPE;
+import static io.moquette.broker.config.IConfig.PERSISTENCE_ENABLED_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.SSL_PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.WEB_SOCKET_PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.WSS_PORT_PROPERTY_NAME;
 import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 
 import java.io.IOException;
@@ -141,6 +142,7 @@ public class SensorthingsMqttNorthbound extends AbstractInterceptHandler
             if (config.websocket_enable() && config.websocket_port() >= 0) {
                 props.setProperty(WEB_SOCKET_PORT_PROPERTY_NAME, String.valueOf(config.websocket_port()));
             }
+            props.setProperty(PERSISTENCE_ENABLED_PROPERTY_NAME, "false");
 
             IConfig serverConfig = new MemoryConfig(props);
 
@@ -230,6 +232,11 @@ public class SensorthingsMqttNorthbound extends AbstractInterceptHandler
         } catch (JsonProcessingException e) {
             LOG.warn("An error occurred creating a notification for topic {}", topic, e);
         }
+    }
+
+    @Override
+    public void onSessionLoopError(Throwable error) {
+        LOG.error("An unknown error occurred", error);
     }
 
 }
