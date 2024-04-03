@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.security;
+package org.eclipse.sensinact.northbound.security.api;
 
 public interface UserInfo {
 

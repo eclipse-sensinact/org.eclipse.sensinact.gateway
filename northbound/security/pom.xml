@@ -26,6 +26,6 @@
 
   <modules>
       <module>openid-connect</module>
-      <module>authentication-api</module>
+      <module>security-api</module>
   </modules>
 </project>

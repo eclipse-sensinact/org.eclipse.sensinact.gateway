@@ -14,7 +14,7 @@ package org.eclipse.sensinact.northbound.session;
 
 import java.util.List;
 
-import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
 public interface SensiNactSessionManager {
 

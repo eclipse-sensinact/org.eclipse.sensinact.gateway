@@ -30,8 +30,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

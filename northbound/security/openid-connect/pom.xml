@@ -41,7 +41,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>authentication-api</artifactId>
+      <artifactId>security-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

@@ -17,7 +17,7 @@
     <artifactId>security</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
-  <artifactId>authentication-api</artifactId>
+  <artifactId>security-api</artifactId>
   <name>SensiNact Northbound Security API</name>
   <description>The Security API for sensiNact gateway Northbound providers</description>
   <!-- No integration tests -->

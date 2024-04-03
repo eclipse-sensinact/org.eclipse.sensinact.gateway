@@ -41,12 +41,9 @@
 	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
-	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.northbound.security.authentication-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.openid-connect;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.openid-connect-tests;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.security.security-api;version='[0.0.2,0.0.3)',\
 	org.mockito.junit-jupiter;version='[5.10.0,5.10.1)',\
 	org.mockito.mockito-core;version='[5.10.0,5.10.1)',\
 	org.objenesis;version='[3.3.0,3.3.1)',\

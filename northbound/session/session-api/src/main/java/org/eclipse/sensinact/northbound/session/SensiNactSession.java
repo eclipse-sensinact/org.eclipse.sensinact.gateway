@@ -22,10 +22,10 @@ import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ClientMetadataListener;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
 public interface SensiNactSession {
 
