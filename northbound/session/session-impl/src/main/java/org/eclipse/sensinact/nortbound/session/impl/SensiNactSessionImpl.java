@@ -309,12 +309,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     @Override
-    public Map<String, Object> getResourceMetadataValue(String provider, String service, String resource,
+    public TimedValue<Object> getResourceMetadataValue(String provider, String service, String resource,
             String metadata) {
-        return safeExecute(new ResourceCommand<Map<String, Object>>(provider, service, resource) {
+        return safeExecute(new ResourceCommand<TimedValue<Object>>(provider, service, resource) {
             @Override
-            protected Promise<Map<String, Object>> call(SensinactResource resource, PromiseFactory pf) {
-                return resource.getMetadataValues();
+            protected Promise<TimedValue<Object>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMetadataValue(metadata);
             }
         });
     }

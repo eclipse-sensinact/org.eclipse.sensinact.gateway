@@ -34,6 +34,13 @@ public interface SensinactProvider extends CommandScoped {
      *
      * @return
      */
+    String getModelPackageUri();
+    
+    /**
+     * The model name for this provider
+     *
+     * @return
+     */
     String getModelName();
 
     /**

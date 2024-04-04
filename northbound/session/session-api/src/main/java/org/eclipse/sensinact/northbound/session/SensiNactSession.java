@@ -223,7 +223,7 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    Map<String, Object> getResourceMetadataValue(String provider, String service, String resource, String metadata);
+    TimedValue<Object> getResourceMetadataValue(String provider, String service, String resource, String metadata);
 
     /**
      * Set a metadata value for a resource

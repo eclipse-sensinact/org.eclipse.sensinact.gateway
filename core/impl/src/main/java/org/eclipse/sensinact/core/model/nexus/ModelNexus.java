@@ -55,6 +55,7 @@ import org.eclipse.sensinact.core.model.nexus.emf.NamingUtils;
 import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
 import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
@@ -631,6 +632,24 @@ public class ModelNexus {
         final Map<String, Object> rcMeta = new HashMap<>();
         rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata, rcFeature));
         return rcMeta;
+    }
+    
+    public TimedValue<Object> getResourceMetadataValue(Provider provider, EStructuralFeature svcFeature,
+            final ETypedElement rcFeature, String key) {
+        final Service svc = (Service) provider.eGet(svcFeature);
+        if (svc == null) {
+            return null;
+        }
+
+        final ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(rcFeature);
+        if (metadata != null) {
+            for (FeatureCustomMetadata entry : metadata.getExtra()) {
+                if(entry.getName().equals(key) ) {
+                    return new TimedValueImpl<Object>(entry.getValue(), entry.getTimestamp());
+                }
+            }
+        }
+        return null;
     }
 
     public void setResourceMetadata(Provider provider, EStructuralFeature svcFeature, ETypedElement resource,
