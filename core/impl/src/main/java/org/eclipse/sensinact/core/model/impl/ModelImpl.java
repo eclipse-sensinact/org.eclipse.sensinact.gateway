@@ -19,10 +19,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ServiceBuilder;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 
 public class ModelImpl extends CommandScopedImpl implements Model {
@@ -68,8 +68,9 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     public Map<String, ? extends Service> getServices() {
         checkValid();
         // Use nexusImpl to get services reliably
-        return nexusImpl.getServicesForModel(eClass)
-                .collect(toMap(EReference::getName, r -> new ServiceImpl(active, this, r, nexusImpl)));
+        return nexusImpl.getServiceReferencesForModel(eClass)
+                .collect(toMap(EReference::getName,
+                        r -> new ServiceImpl(active, this, r.getName(), r.getEReferenceType(), nexusImpl)));
     }
 
     EClass getModelEClass() {

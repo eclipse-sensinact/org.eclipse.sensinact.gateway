@@ -60,6 +60,7 @@ import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.Admin;
+import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
@@ -722,6 +723,87 @@ public class NexusTest {
 
             nexus.unlinkProviders("testprovider", "testproviderNew", Instant.now());
             assertEquals(1, provider.getLinkedProviders().size());
+        }
+    }
+
+    @Nested
+    public class DynamicProviderTests {
+
+        private EPackage ePackage;
+        private ModelNexus nexus;
+
+        @BeforeEach
+        public void setup() throws IOException {
+            URI ProviderPackageURI = URI.createURI(ProviderPackage.eNS_URI);
+
+            URIMappingRegistryImpl.INSTANCE.put(
+                    URI.createURI("https://eclipse.org/../../../models/src/main/resources/model/sensinact.ecore"),
+                    ProviderPackageURI);
+
+            XMLResource.URIHandler handler = new XMLResource.URIHandler() {
+
+                @Override
+                public URI deresolve(URI arg0) {
+                    return arg0;
+                }
+
+                @Override
+                public URI resolve(URI arg0) {
+                    if (arg0.lastSegment().equals("sensinact.ecore")) {
+                        return ProviderPackageURI.appendFragment(arg0.fragment());
+                    }
+                    return arg0;
+                }
+
+                @Override
+                public void setBaseURI(URI arg0) {
+                    // TODO Auto-generated method stub
+                }
+            };
+
+            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+
+            Resource extendedPackageResource = resourceSet
+                    .createResource(URI.createURI("https://eclipse.org/sensinact/test/1.0"));
+            InputStream ín = getClass().getResourceAsStream("/model/extended.ecore");
+
+            assertNotNull(ín);
+
+            extendedPackageResource.load(ín, Collections.singletonMap(XMLResource.OPTION_URI_HANDLER, handler));
+
+            ePackage = (EPackage) extendedPackageResource.getContents().get(0);
+
+            assertNotNull(ePackage);
+
+        }
+
+        @Test
+        void duplicatedServiceTest() {
+
+            DynamicProvider provider = (DynamicProvider) EcoreUtil
+                    .create((EClass) ePackage.getEClassifier("DynamicTemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Service testService3 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService4 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.getServices().put("testService1", testService3);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+            testService3.eSet(testService3.eClass().getEStructuralFeature("foo"), "fizz");
+            testService4.eSet(testService4.eClass().getEStructuralFeature("bar"), "buzz");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            assertThrows(IllegalArgumentException.class, () -> nexus.save(provider));
         }
     }
 

@@ -30,18 +30,19 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
 import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
 import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
 import org.eclipse.sensinact.model.core.provider.Admin;
+import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.model.core.provider.impl.FeatureCustomMetadataImpl;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 
 /**
  * Helper to Compare EObjects
@@ -51,43 +52,49 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
  */
 public class EMFCompareUtil {
 
-    public static void compareAndSet(Provider incomming, Provider original, NotificationAccumulator accumulator) {
-        if (incomming == null || original == null) {
+    public static void compareAndSet(Provider incmming, Provider original, NotificationAccumulator accumulator) {
+        if (incmming == null || original == null) {
             return;
         }
 
-        if (incomming.eClass() != original.eClass()) {
+        if (incmming.eClass() != original.eClass()) {
             throw new IllegalArgumentException(
                     String.format("The given incomming Provider %s is of type %s but should be of type %s",
-                            incomming.toString(), incomming.eClass().getName(), original.eClass().getName()));
+                            incmming.toString(), incmming.eClass().getName(), original.eClass().getName()));
         }
 
-        EClass eClass = incomming.eClass();
+        EClass eClass = incmming.eClass();
 
         // We can simply set all attributes at the Provider level without any checks as
         // they are out of the
-        EMFUtil.streamAttributes(eClass).forEach(ea -> original.eSet(ea, incomming.eGet(ea)));
+        EMFUtil.streamAttributes(eClass).forEach(ea -> original.eSet(ea, incmming.eGet(ea)));
         // The same goes for any Reference that is not of type Service or is the linked
-        // Provider Reference
+        // Provider Reference or the map of Services
         eClass.getEAllReferences().stream()
                 // We don't want references from EObject and anything above
                 .filter(er -> er.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
                 .filter(Predicate.not(ProviderPackage.Literals.PROVIDER__LINKED_PROVIDERS::equals))
-                .filter(er -> !ProviderPackage.Literals.SERVICE.isSuperTypeOf(er.getEReferenceType())).forEach(er -> {
+                .filter(er -> !ProviderPackage.Literals.SERVICE.isSuperTypeOf(er.getEReferenceType()))
+                .filter(Predicate.not(ProviderPackage.Literals.DYNAMIC_PROVIDER__SERVICES::equals)).forEach(er -> {
                     original.eSet(er,
-                            er.isContainment() ? EcoreUtil.copy((EObject) incomming.eGet(er)) : incomming.eGet(er));
+                            er.isContainment() ? EcoreUtil.copy((EObject) incmming.eGet(er)) : incmming.eGet(er));
                 });
 
-        updateAdmin(incomming, original, accumulator);
+        updateAdmin(incmming, original, accumulator);
 
         eClass.getEAllReferences().stream()
                 // We don't want references from EObject and anything above
                 .filter(er -> er.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
                 .filter(Predicate.not(ProviderPackage.Literals.PROVIDER__LINKED_PROVIDERS::equals))
                 .filter(Predicate.not(ProviderPackage.Literals.PROVIDER__ADMIN::equals))
+                .filter(Predicate.not(ProviderPackage.Literals.DYNAMIC_PROVIDER__SERVICES::equals))
                 .filter(er -> ProviderPackage.Literals.SERVICE.isSuperTypeOf(er.getEReferenceType())).forEach(er -> {
-                    serviceUpdate(er, incomming, original, accumulator, Collections.emptyList());
+                    serviceUpdate(er, incmming, original, accumulator, Collections.emptyList());
                 });
+        if (incmming instanceof DynamicProvider) {
+            servicesMapUpdate((DynamicProvider) incmming, (DynamicProvider) original, accumulator,
+                    Collections.emptyList());
+        }
     }
 
     private static void updateAdmin(Provider incomming, Provider original, NotificationAccumulator accumulator) {
@@ -108,9 +115,9 @@ public class EMFCompareUtil {
         } else if (newService != null && oldService == null) {
             Service copy = EcoreUtil.copy(newService);
             original.eSet(reference, copy);
-            notifyServiceAdd(original, copy, reference, accumulator);
+            notifyServiceAdd(original, copy, reference.getName(), accumulator);
         } else if (newService == null && oldService != null) {
-            notifyServiceRemove(original, oldService, reference, accumulator);
+            notifyServiceRemove(original, oldService, reference.getName(), accumulator);
             original.eUnset(reference);
         } else {
             if (newService.eClass() != oldService.eClass()) {
@@ -122,7 +129,48 @@ public class EMFCompareUtil {
                             + newService.eClass().getName() + " must be a subtype of " + oldService.eClass().getName());
                 }
             }
-            mergeAndNotify(reference, newService, oldService, blackList, accumulator);
+            mergeAndNotify(reference.getName(), newService, oldService, blackList, accumulator);
+        }
+    }
+
+    private static void servicesMapUpdate(DynamicProvider incomming, DynamicProvider original,
+            NotificationAccumulator accumulator,
+            List<EStructuralFeature> blackList) {
+
+        List<String> toDelete = new ArrayList<>(original.getServices().keySet());
+        List<String> toAdd = new ArrayList<>(incomming.getServices().keySet());
+        List<String> toUpdate = new ArrayList<>(original.getServices().keySet());
+
+        for (Iterator<String> iterator = toAdd.iterator(); iterator.hasNext();) {
+            String serviceName = iterator.next();
+            if (toDelete.remove(serviceName)) {
+                iterator.remove();
+                toUpdate.add(serviceName);
+            }
+        }
+
+        for (String serviceName : toAdd) {
+            Service copy = EcoreUtil.copy(incomming.getServices().get(serviceName));
+            original.getServices().put(serviceName, copy);
+            notifyServiceAdd(original, copy, serviceName, accumulator);
+        }
+        for (String serviceName : toDelete) {
+            Service oldService = original.getServices().removeKey(serviceName);
+            notifyServiceRemove(original, oldService, serviceName, accumulator);
+        }
+        for (String serviceName : toUpdate) {
+            Service newService = incomming.getServices().get(serviceName);
+            Service oldService = original.getServices().get(serviceName);
+            if (newService.eClass() != oldService.eClass()) {
+                if (oldService.eClass().isSuperTypeOf(newService.eClass())) {
+                    oldService = copyOldService(oldService, newService.eClass());
+                    original.getServices().put(serviceName, oldService);
+                } else {
+                    throw new RuntimeException("Merging Services of different Types is not possible."
+                            + newService.eClass().getName() + " must be a subtype of " + oldService.eClass().getName());
+                }
+            }
+            mergeAndNotify(serviceName, newService, oldService, blackList, accumulator);
         }
     }
 
@@ -146,7 +194,7 @@ public class EMFCompareUtil {
 //        mergeAndNotify(reference, newService, originalService, Collections.emptyList(), accumulator);
 //    }
 
-    private static void mergeAndNotify(EReference reference, Service newService, Service originalService,
+    private static void mergeAndNotify(String serviceName, Service newService, Service originalService,
             List<EStructuralFeature> blackList, NotificationAccumulator accumulator) {
 
         if (newService.eClass() != originalService.eClass()) {
@@ -168,7 +216,7 @@ public class EMFCompareUtil {
                 // We don't want references from EObject and anything above
                 .filter(er -> er.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
                 .filter(Predicate.not(blackList::contains)).forEach(er -> {
-                    notifyAttributeChange(er, newService, originalService, accumulator);
+                    notifyAttributeChange(er, serviceName, newService, originalService, accumulator);
                 });
 
     }
@@ -180,14 +228,13 @@ public class EMFCompareUtil {
     // 4. Attribute changed; timestamp changed; update attribute and timestamp if
     // new is after old timetamp
     // 5. Attribute not changed, but timestamp updated: same as 4.
-    private static void notifyAttributeChange(EAttribute resource, Service newService, Service originalService,
-            NotificationAccumulator accumulator) {
+    private static void notifyAttributeChange(EAttribute resource, String serviceName, Service newService,
+            Service originalService, NotificationAccumulator accumulator) {
         EObject container = originalService.eContainer();
         if (container instanceof Provider) {
             String packageUri = container.eClass().getEPackage().getNsURI();
             String modelName = EMFUtil.getModelName(container.eClass());
             String providerName = ((Provider) container).getId();
-            String serviceName = originalService.eContainingFeature().getName();
             Metadata originalMetadata = originalService.getMetadata().get(resource);
 
             boolean isNew = !originalService.eIsSet(resource);
@@ -224,7 +271,7 @@ public class EMFCompareUtil {
                 oldMetaData = extractMetadataMap(oldValue, originalMetadata, resource);
             }
 
-            Metadata updatedMetadata = updateMetadata(resource, newService, originalService, newTimestamp);
+            Metadata updatedMetadata = updateMetadata(resource, serviceName, newService, originalService, newTimestamp);
 
             originalService.eSet(resource, newValue);
 
@@ -250,19 +297,19 @@ public class EMFCompareUtil {
         return newMetaData;
     }
 
-    private static ResourceMetadata updateMetadata(EAttribute resource, Service newService, Service originalService,
-            Instant newTimestamp) {
+    private static ResourceMetadata updateMetadata(EAttribute resource, String serviceName, Service newService,
+            Service originalService, Instant newTimestamp) {
         ResourceMetadata resourceMetadata = checkMetadata(originalService, resource);
         resourceMetadata.setTimestamp(newTimestamp);
         Metadata update = newService.getMetadata().get(resource);
         if (update != null && update.eIsSet(ProviderPackage.Literals.METADATA__EXTRA)) {
-            updateAndNotifyExtraMetadata(update.getExtra(), resourceMetadata.getExtra(), newTimestamp);
+            updateExtraMetadata(update.getExtra(), resourceMetadata.getExtra(), newTimestamp);
         }
 
         return resourceMetadata;
     }
 
-    private static void updateAndNotifyExtraMetadata(EList<FeatureCustomMetadata> extraNew,
+    private static void updateExtraMetadata(EList<FeatureCustomMetadata> extraNew,
             EList<FeatureCustomMetadata> extraOriginal, Instant newTimestamp) {
         if (extraNew.isEmpty() && extraOriginal.isEmpty()) {
             return;
@@ -307,12 +354,11 @@ public class EMFCompareUtil {
         return null;
     }
 
-    private static void notifyServiceAdd(Provider container, Service service, EReference reference,
+    private static void notifyServiceAdd(Provider container, Service service, String serviceName,
             NotificationAccumulator accumulator) {
         String packageUri = container.eClass().getEPackage().getNsURI();
         String model = EMFUtil.getModelName(container.eClass());
         String providerName = container.getId();
-        String serviceName = reference.getName();
 
         accumulator.addService(packageUri, model, providerName, serviceName);
 
@@ -331,12 +377,11 @@ public class EMFCompareUtil {
         });
     }
 
-    private static void notifyServiceRemove(Provider container, Service value, EReference reference,
+    private static void notifyServiceRemove(Provider container, Service value, String serviceName,
             NotificationAccumulator accumulator) {
         String packageUri = container.eClass().getEPackage().getNsURI();
         String model = EMFUtil.getModelName(container.eClass());
         String providerName = container.getId();
-        String serviceName = reference.getName();
 
         EMFUtil.streamAttributes(value.eClass()).filter(ea -> value.eIsSet(ea)).forEach(ea -> {
             accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),

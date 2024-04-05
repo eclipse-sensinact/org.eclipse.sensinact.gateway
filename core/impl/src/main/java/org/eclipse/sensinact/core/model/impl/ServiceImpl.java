@@ -17,31 +17,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceBuilder;
 import org.eclipse.sensinact.core.model.Service;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 
 public class ServiceImpl extends CommandScopedImpl implements Service {
 
     private final Model model;
-    private final EReference service;
+    private final String serviceName;
     private final ModelNexus nexusImpl;
+    private EClass serviceEClass;
 
-    public ServiceImpl(AtomicBoolean active, Model model, EReference service, ModelNexus nexusImpl) {
+    public ServiceImpl(AtomicBoolean active, Model model, String serviceName, EClass serviceEClass,
+            ModelNexus nexusImpl) {
         super(active);
         this.model = model;
-        this.service = service;
+        this.serviceEClass = serviceEClass;
+        this.serviceName = serviceName;
         this.nexusImpl = nexusImpl;
     }
 
     @Override
     public String getName() {
         checkValid();
-        return service.getName();
+        return serviceName;
     }
 
     @Override
@@ -76,6 +78,6 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
     }
 
     EClass getServiceEClass() {
-        return service.getEReferenceType();
+        return serviceEClass;
     }
 }

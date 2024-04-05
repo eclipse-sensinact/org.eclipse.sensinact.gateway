@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.model.ResourceBuilder;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ServiceBuilder;
@@ -65,8 +66,9 @@ public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, Ser
 
     protected Service doBuild(ModelImpl builtParent) {
         checkValid();
-        ServiceImpl s = new ServiceImpl(active, builtParent, nexusImpl.createService(builtParent.getModelEClass(), name,
-                creationTimestamp == null ? Instant.now() : creationTimestamp), nexusImpl);
+        EReference service = nexusImpl.createService(builtParent.getModelEClass(), name,
+                creationTimestamp == null ? Instant.now() : creationTimestamp);
+        ServiceImpl s = new ServiceImpl(active, builtParent, service.getName(), service.getEReferenceType(), nexusImpl);
         nested.forEach(n -> n.doBuild(s));
         return s;
     }

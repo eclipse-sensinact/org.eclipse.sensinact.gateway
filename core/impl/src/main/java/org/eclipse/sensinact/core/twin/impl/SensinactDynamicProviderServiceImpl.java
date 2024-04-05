@@ -23,35 +23,40 @@ import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
-import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SensinactServiceImpl extends CommandScopedImpl implements SensinactService {
+public class SensinactDynamicProviderServiceImpl extends CommandScopedImpl implements SensinactService {
 
     private final SensinactProvider sensinactProvider;
-    private final Provider provider;
-    private final String serviceName;
+    private final DynamicProvider provider;
     private final ModelNexus nexus;
     private final PromiseFactory promiseFactory;
-    private EClass service;
+    private String serviceName;
 
-    public SensinactServiceImpl(AtomicBoolean active, SensinactProvider sensinactProvider, Provider provider,
-            String serviceName, EClass service, ModelNexus nexus, PromiseFactory promiseFactory) {
+    /**
+     * Creates a new instance that uses the services Map instead of a direct
+     * Reference.
+     */
+    public SensinactDynamicProviderServiceImpl(AtomicBoolean active, SensinactProviderImpl sensinactProvider,
+            DynamicProvider provider,
+            String serviceName, ModelNexus nexus, PromiseFactory promiseFactory) {
         super(active);
         this.sensinactProvider = sensinactProvider;
         this.provider = provider;
-        this.serviceName = serviceName;
-        this.service = service;
         this.nexus = nexus;
         this.promiseFactory = promiseFactory;
+        this.serviceName = serviceName;
     }
 
     @Override
     public Map<String, SensinactResource> getResources() {
         checkValid();
-        return nexus.getResourcesForService(service)
-                .collect(Collectors.toMap(ETypedElement::getName, a -> new SensinactResourceImpl(active, this, provider,
-                        serviceName, a, a.getEType().getInstanceClass(), nexus, promiseFactory)));
+        EClass serviceEClass = ((DynamicProvider) provider).getServices().get(serviceName).eClass();
+        ;
+        return nexus.getResourcesForService(serviceEClass)
+                .collect(Collectors.toMap(ETypedElement::getName, a -> new SensinactDynamicProviderResourceImpl(active,
+                        this, provider, serviceName, a, a.getEType().getInstanceClass(), nexus, promiseFactory)));
     }
 
     @Override

@@ -18,14 +18,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
+import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.model.core.provider.Provider;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -48,8 +47,10 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     @Override
     public Map<String, SensinactService> getServices() {
         checkValid();
-        return nexus.getServicesForModel(provider.eClass()).collect(Collectors.toMap(EReference::getName,
-                r -> new SensinactServiceImpl(active, this, provider, r, nexus, promiseFactory)));
+
+        return nexus.getDefinedServiceForProvider(provider).entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new SensinactServiceImpl(active, this, provider,
+                        e.getKey(), e.getValue(), nexus, promiseFactory)));
     }
 
     @Override

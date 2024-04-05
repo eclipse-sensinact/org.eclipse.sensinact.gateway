@@ -15,29 +15,45 @@ package org.eclipse.sensinact.core.twin.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.sensinact.core.model.ResourceType;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.twin.SensinactProvider;
-import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.command.impl.ActionHandler;
 import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
+import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.model.core.provider.Admin;
+import org.eclipse.sensinact.model.core.provider.DynamicProvider;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -78,8 +94,10 @@ public class SensinactTwinTest {
 
     private SensinactDigitalTwinImpl twinImpl;
 
+    private EPackage ePackage;
+
     @BeforeEach
-    void start() {
+    void start() throws IOException {
         resourceSet = EMFTestUtil.createResourceSet();
         nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator, actionHandler);
         manager = new SensinactModelManagerImpl(nexus);
@@ -89,6 +107,46 @@ public class SensinactTwinTest {
                 .build().withResource(TEST_ACTION_RESOURCE).withType(Double.class)
                 .withAction(List.of(new SimpleEntry<>("foo", String.class), new SimpleEntry<>("bar", Instant.class)))
                 .buildAll();
+
+        URI ProviderPackageURI = URI.createURI(ProviderPackage.eNS_URI);
+
+        URIMappingRegistryImpl.INSTANCE.put(
+                URI.createURI("https://eclipse.org/../../../models/src/main/resources/model/sensinact.ecore"),
+                ProviderPackageURI);
+
+        XMLResource.URIHandler handler = new XMLResource.URIHandler() {
+
+            @Override
+            public URI deresolve(URI arg0) {
+                return arg0;
+            }
+
+            @Override
+            public URI resolve(URI arg0) {
+                if (arg0.lastSegment().equals("sensinact.ecore")) {
+                    return ProviderPackageURI.appendFragment(arg0.fragment());
+                }
+                return arg0;
+            }
+
+            @Override
+            public void setBaseURI(URI arg0) {
+                // TODO Auto-generated method stub
+            }
+        };
+
+        Resource extendedPackageResource = resourceSet
+                .createResource(URI.createURI("https://eclipse.org/sensinact/test/1.0"));
+        InputStream ín = getClass().getResourceAsStream("/model/extended.ecore");
+
+        assertNotNull(ín);
+
+        extendedPackageResource.load(ín, Collections.singletonMap(XMLResource.OPTION_URI_HANDLER, handler));
+
+        ePackage = (EPackage) extendedPackageResource.getContents().get(0);
+
+        assertNotNull(ePackage);
+
     }
 
     @Nested
@@ -188,7 +246,42 @@ public class SensinactTwinTest {
             List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, null, null, p);
             assertEquals(1, list.size());
             assertEquals(2, list.get(0).getServices().size());
-            assertEquals(5, list.get(0).getServices().get(1).getResources().get(0).getValue().getValue());
+            ServiceSnapshot serviceSnapshot = list.get(0).getServices().stream()
+                    .filter(s -> TEST_SERVICE.equals(s.getName())).findFirst().get();
+            assertEquals(5, serviceSnapshot.getResources().get(0).getValue().getValue());
+        }
+
+        @Test
+        void simpleResourceValueFilterWithDynamicResource() throws Exception {
+            DynamicProvider provider = (DynamicProvider) EcoreUtil
+                    .create((EClass) ePackage.getEClassifier("DynamicTemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.getServices().put(TEST_SERVICE, testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("foo"), "fizz");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            nexus.save(provider);
+
+            Predicate<ResourceSnapshot> p = r -> "foo".equals(r.getName());
+
+            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, null, null, p);
+            assertEquals(1, list.size());
+            assertEquals(3, list.get(0).getServices().size());
+            ServiceSnapshot serviceSnapshot = list.get(0).getServices().stream()
+                    .filter(s -> TEST_SERVICE.equals(s.getName())).findFirst().get();
+            assertEquals("fizz", serviceSnapshot.getResources().get(0).getValue().getValue());
         }
     }
 }

@@ -34,23 +34,24 @@ import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
 import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
-import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SensinactResourceImpl extends CommandScopedImpl implements SensinactResource {
+public class SensinactDynamicProviderResourceImpl extends CommandScopedImpl implements SensinactResource {
 
     private final SensinactService svc;
-    private final Provider provider;
+    private final DynamicProvider provider;
     private final String serviceName;
     private final ETypedElement resource;
     private final Class<?> type;
     private final ModelNexus modelNexus;
     private final PromiseFactory promiseFactory;
 
-    public SensinactResourceImpl(AtomicBoolean active, SensinactService svc, Provider provider, String serviceName,
-            ETypedElement resource, Class<?> type, ModelNexus nexusImpl, PromiseFactory promiseFactory) {
+    public SensinactDynamicProviderResourceImpl(AtomicBoolean active, SensinactService svc, DynamicProvider provider,
+            String serviceName, ETypedElement resource, Class<?> type, ModelNexus nexusImpl,
+            PromiseFactory promiseFactory) {
         super(active);
         this.svc = svc;
         this.provider = provider;
@@ -105,7 +106,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     private <T> TimedValue<T> getValueFromTwin(final Class<T> type) {
         final Instant currentTimestamp;
         final T currentValue;
-        final Service svc = modelNexus.getServiceFromProvider(serviceName, provider);
+        final Service svc = provider.getServices().get(serviceName);
         if (svc != null) {
             // Service is there
             final Object rawValue = svc.eGet((EAttribute) resource);
@@ -155,8 +156,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                 final TimedValue<?> cachedValue = getValueFromTwin(type);
                 final TimedValue<T> newValue = new TimedValueImpl<T>(value, timestamp);
                 return modelNexus
-                        .pushValue(provider, serviceName, resource, (Class<T>) type, (TimedValue<T>) cachedValue,
-                                newValue)
+                        .pushValue(provider, serviceName, resource, (Class<T>) type, (TimedValue<T>) cachedValue, newValue)
                         .map(x -> null);
             } else {
                 // No external setter: update the twin
