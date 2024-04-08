@@ -252,6 +252,8 @@ public class ResourceAccessTest {
         assertEquals(204, result.statusCode);
         ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
 
+        // Wait for any lifecycle events from this provider to complete to
+        // to avoid them showing up later
         Thread.sleep(500);
 
         queue = new ArrayBlockingQueue<>(32);
