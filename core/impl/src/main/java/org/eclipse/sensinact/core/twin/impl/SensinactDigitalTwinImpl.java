@@ -340,7 +340,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         if (providerFilter != null) {
             providersStream = providersStream.filter(providerFilter);
         }
-        
+
         // Filter providers by location (raw provider)
         if (geoFilter != null) {
             // Filter the provider location

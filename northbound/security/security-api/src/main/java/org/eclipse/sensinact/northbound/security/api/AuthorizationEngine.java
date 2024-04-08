@@ -15,76 +15,74 @@ package org.eclipse.sensinact.northbound.security.api;
 import java.util.Collection;
 
 /**
- * The {@link AuthorizationEngine} is responsible for checking whether a 
+ * The {@link AuthorizationEngine} is responsible for checking whether a
  * given user has access to the defined resources
  */
 public interface AuthorizationEngine {
-    
+
     /**
      * Create an {@link Authorizer} for the supplied user
      * @param user
      * @return
      */
     Authorizer createAuthorizer(UserInfo user);
-    
+
     /**
      * The Authorizer is designed to be cacheable and Thread safe.
      */
     public interface Authorizer {
-        
-        
-        public enum PreAuth { 
+
+        public enum PreAuth {
             /** Auth is known and failed - deny access */
             DENY,
             /** Auth is known and successful - permit access */
-            ALLOW, 
+            ALLOW,
             /** Auth is unknown - use a full auth method **/
             UNKNOWN }
-        
+
         /**
          * Check pre-authorization for the named provider.
          * <p>
          * Pre authorisation may use the existing cache to avoid needing a full lookup
-         * including model name and uri. This can be helpful to avoid touching the 
+         * including model name and uri. This can be helpful to avoid touching the
          * gateway thread when you don't know the model name or package uri.
-         * 
+         *
          * @param level
          * @param provider
          * @return
          */
         PreAuth preAuthProvider(PermissionLevel level, String provider);
-        
+
         /**
          * Check pre-authorization for the named service.
          * <p>
          * Pre authorisation may use the existing cache to avoid needing a full lookup
-         * including model name and uri. This can be helpful to avoid touching the 
+         * including model name and uri. This can be helpful to avoid touching the
          * gateway thread when you don't know the model name or package uri.
-         * 
+         *
          * @param level
          * @param provider
          * @param service
          * @return
          */
-        
+
         PreAuth preAuthService(PermissionLevel level, String provider, String service);
         /**
          * Check pre-authorization for the named resource.
          * <p>
          * Pre authorisation may use the existing cache to avoid needing a full lookup
-         * including model name and uri. This can be helpful to avoid touching the 
+         * including model name and uri. This can be helpful to avoid touching the
          * gateway thread when you don't know the model name or package uri.
-         * 
+         *
          * @param level
          * @param provider
          * @return
          */
         PreAuth preAuthResource(PermissionLevel level, String provider, String service, String resource);
-        
-        
+
         /**
          * Test whether this authorizer has the necessary access level for the named provider
-         * 
+         *
          * @param level
          * @param modelPackageUri
          * @param model
@@ -92,10 +90,10 @@ public interface AuthorizationEngine {
          * @return
          */
         boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model, String provider);
-        
+
         /**
          * Test whether the user has the necessary access level for the named service
-         * 
+         *
          * @param level
          * @param modelPackageUri
          * @param model
@@ -104,10 +102,10 @@ public interface AuthorizationEngine {
          * @return
          */
         boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model, String provider, String service);
-        
+
         /**
          * Test whether the user has the necessary access level for the named resource
-         * 
+         *
          * @param level
          * @param modelPackageUri
          * @param model
@@ -117,7 +115,7 @@ public interface AuthorizationEngine {
          * @return
          */
         boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model, String provider, String service, String resource);
-        
+
         /**
          * Restrict a collection of services to those which are visible
          * @param modelPackageUri
@@ -138,14 +136,14 @@ public interface AuthorizationEngine {
          */
         Collection<String> visibleResources(String modelPackageUri, String model, String provider, String service, Collection<String> resources);
     }
-    
+
     public enum PermissionLevel {
         DESCRIBE,
         READ,
         UPDATE,
         ACT
     }
-    
+
     public class NotPermittedException extends RuntimeException {
 
         private static final long serialVersionUID = 2073211687446420674L;

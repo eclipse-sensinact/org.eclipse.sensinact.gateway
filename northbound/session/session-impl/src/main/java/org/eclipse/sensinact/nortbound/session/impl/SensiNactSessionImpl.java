@@ -80,7 +80,7 @@ import org.slf4j.LoggerFactory;
 public class SensiNactSessionImpl implements SensiNactSession {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensiNactSessionImpl.class);
-    
+
     private final Object lock = new Object();
 
     private final String sessionId = UUID.randomUUID().toString();
@@ -97,7 +97,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private final GatewayThread thread;
 
     private final UserInfo user;
-    
+
     private final Authorizer authorizer;
 
     public SensiNactSessionImpl(final UserInfo user, final Authorizer authorizer, final GatewayThread thread) {
@@ -291,7 +291,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private <T> TimedValue<T> doGetResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
             GetLevel getLevel) {
-        return doResourceWork(provider, service, resource, sr -> sr.getValue(clazz, getLevel), READ, () -> String.format("The user %s does not have permission to read resource %s", 
+        return doResourceWork(provider, service, resource, sr -> sr.getValue(clazz, getLevel), READ, () -> String.format("The user %s does not have permission to read resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
     }
 
@@ -306,18 +306,18 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     private void doSetResourceValue(String provider, String service, String resource, Object o, Instant instant) {
-        doResourceWork(provider, service, resource, sr -> sr.setValue(o, instant), UPDATE, () -> String.format("The user %s does not have permission to set resource %s", 
+        doResourceWork(provider, service, resource, sr -> sr.setValue(o, instant), UPDATE, () -> String.format("The user %s does not have permission to set resource %s",
                 user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
     }
 
     private <T> T doResourceWork(String provider, String service, String resource, Function<SensinactResource, Promise<T>> work,
             PermissionLevel permissionLevel, Supplier<String> authFailureMessage) {
-        
+
         final PreAuth preAuth = authorizer.preAuthResource(permissionLevel, provider, service, resource);
         if(preAuth == DENY) {
             throw new NotPermittedException(authFailureMessage.get());
         }
-        
+
         return safeExecute(new AbstractTwinCommand<T>() {
             @Override
             protected Promise<T> call(SensinactDigitalTwin model, PromiseFactory pf) {
@@ -326,7 +326,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     if (sensinactResource != null) {
                         if(preAuth == UNKNOWN) {
                             // Authorisation check
-                            SensinactProvider sp = sensinactResource.getService().getProvider(); 
+                            SensinactProvider sp = sensinactResource.getService().getProvider();
                             if(!authorizer.hasResourcePermission(permissionLevel, sp.getModelPackageUri(), sp.getModelName(), provider, service, resource)) {
                                 return pf.failed(new NotPermittedException(authFailureMessage.get()));
                             }
@@ -360,7 +360,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public Map<String, Object> getResourceMetadata(String provider, String service, String resource) {
-        return Map.copyOf(doResourceWork(provider, service, resource, SensinactResource::getMetadataValues, READ, () -> String.format("The user %s does not have permission to read metadata for resource %s", 
+        return Map.copyOf(doResourceWork(provider, service, resource, SensinactResource::getMetadataValues, READ, () -> String.format("The user %s does not have permission to read metadata for resource %s",
                 user.getUserId(), String.format("%s/%s/%s", provider, service, resource))));
     }
 
@@ -372,14 +372,14 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         .map(e -> sr.setMetadataValue(e.getKey(), e.getValue(), timestamp))
                         .collect(Collectors.toList()))
                 .map(x -> null);
-        doResourceWork(provider, service, resource, setMetadata, UPDATE, () -> String.format("The user %s does not have permission to set metadata for resource %s", 
+        doResourceWork(provider, service, resource, setMetadata, UPDATE, () -> String.format("The user %s does not have permission to set metadata for resource %s",
                 user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
     }
 
     @Override
     public TimedValue<Object> getResourceMetadataValue(String provider, String service, String resource,
             String metadata) {
-        return doResourceWork(provider, service, resource, sr -> sr.getMetadataValue(metadata), READ, () -> String.format("The user %s does not have permission to read metadata for resource %s", 
+        return doResourceWork(provider, service, resource, sr -> sr.getMetadataValue(metadata), READ, () -> String.format("The user %s does not have permission to read metadata for resource %s",
                 user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
     }
 
@@ -412,7 +412,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public ResourceDescription describeResource(String provider, String service, String resource) {
         final PreAuth preAuth = authorizer.preAuthResource(DESCRIBE, provider, service, resource);
         if(preAuth == DENY) {
-            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
         }
         // Avoid ResourceCommand as we return null on missing resources, not fail
@@ -421,16 +421,16 @@ public class SensiNactSessionImpl implements SensiNactSession {
             protected Promise<ResourceDescription> call(SensinactDigitalTwin model, PromiseFactory pf) {
                 try {
                     final SensinactResource sensinactResource = model.getResource(provider, service, resource);
-                    
+
                     if (sensinactResource != null) {
                         if(preAuth == UNKNOWN) {
                             SensinactProvider sp = sensinactResource.getService().getProvider();
                             if(!authorizer.hasResourcePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service, resource)) {
-                                throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+                                throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                                         user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
                             }
                         }
-                        
+
                         ResourceType resourceType = sensinactResource.getResourceType();
                         final Promise<TimedValue<Object>> val;
                         switch (resourceType) {
@@ -476,12 +476,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
                             SensinactProvider sp = model.getProvider(provider);
                             if(sp != null) {
                                 if(!authorizer.hasResourcePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service, resource)) {
-                                    throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+                                    throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                                             user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
                                 }
                             } else {
                                 if(!authorizer.hasResourcePermission(DESCRIBE, null, null, provider, service, resource)) {
-                                    throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+                                    throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                                             user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
                                 }
                             }
@@ -497,20 +497,20 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
-        
+
         final PreAuth preAuth = authorizer.preAuthResource(DESCRIBE, provider, service, resource);
         if(preAuth == DENY) {
-            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
         }
-        
+
         return executeGetCommand((m) -> {
                 SensinactResource sr = m.getResource(provider, service, resource);
                 if(sr != null) {
                     if(preAuth == UNKNOWN) {
                         SensinactProvider sp = sr.getService().getProvider();
                         if(!authorizer.hasResourcePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service, resource)) {
-                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
                         }
                     }
@@ -518,12 +518,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     SensinactProvider sp = m.getProvider(provider);
                     if(sp != null) {
                         if(!authorizer.hasResourcePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service, resource)) {
-                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
                         }
                     } else {
                         if(!authorizer.hasResourcePermission(DESCRIBE, null, null, provider, service, resource)) {
-                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s", 
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
                         }
                     }
@@ -548,17 +548,17 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public ServiceDescription describeService(String provider, String service) {
         final PreAuth preAuth = authorizer.preAuthService(DESCRIBE, provider, service);
         if(preAuth == DENY) {
-            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s", 
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                     user.getUserId(), String.format("%s/%s", provider, service)));
         }
-        
+
         return executeGetCommand((m) -> {
             SensinactService ss = m.getService(provider, service);
             if(ss != null) {
                 if(preAuth == UNKNOWN) {
                     SensinactProvider sp = ss.getProvider();
                     if(!authorizer.hasServicePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service)) {
-                        throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s", 
+                        throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                                 user.getUserId(), String.format("%s/%s", provider, service)));
                     }
                 }
@@ -566,12 +566,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 SensinactProvider sp = m.getProvider(provider);
                 if(sp != null) {
                     if(!authorizer.hasServicePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service)) {
-                        throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s", 
+                        throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                                 user.getUserId(), String.format("%s/%s", provider, service)));
                     }
                 } else {
                     if(!authorizer.hasServicePermission(DESCRIBE, null, null, provider, service)) {
-                        throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s", 
+                        throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                                 user.getUserId(), String.format("%s/%s", provider, service)));
                     }
                 }
@@ -582,7 +582,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             final ServiceDescription description = new ServiceDescription();
             description.service = snSvc.getName();
             description.provider = snSvc.getProvider().getName();
-            description.resources = List.copyOf(authorizer.visibleResources(sp.getModelPackageUri(), sp.getModelName(), provider, service, 
+            description.resources = List.copyOf(authorizer.visibleResources(sp.getModelPackageUri(), sp.getModelName(), provider, service,
                     snSvc.getResources().keySet()));
             return description;
         });
@@ -592,21 +592,21 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public ProviderDescription describeProvider(String provider) {
         final PreAuth preAuth = authorizer.preAuthProvider(DESCRIBE, provider);
         if(preAuth == DENY) {
-            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s", 
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                     user.getUserId(), String.format("%s", provider)));
         }
-        
+
         return executeGetCommand((m) -> {
                 SensinactProvider sp = m.getProvider(provider);
                 if(preAuth == UNKNOWN) {
                     if(sp != null) {
                         if(!authorizer.hasProviderPermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider)) {
-                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s", 
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
                                     user.getUserId(), String.format("%s", provider)));
                         }
                     } else {
                         if(!authorizer.hasProviderPermission(DESCRIBE, null, null, provider)) {
-                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s", 
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
                                     user.getUserId(), String.format("%s", provider)));
                         }
                     }
@@ -615,7 +615,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             }, (snProvider) -> {
                 final ProviderDescription description = new ProviderDescription();
                 description.provider = snProvider.getName();
-                description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(), 
+                description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(),
                         snProvider.getModelName(), provider, snProvider.getServices().keySet()));
                 return description;
             });
@@ -624,12 +624,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public List<ProviderDescription> listProviders() {
         return executeGetCommand((m) -> m.getProviders(), (providers) -> providers.stream()
-                .filter(snProvider -> authorizer.hasProviderPermission(DESCRIBE, snProvider.getModelPackageUri(), 
+                .filter(snProvider -> authorizer.hasProviderPermission(DESCRIBE, snProvider.getModelPackageUri(),
                         snProvider.getModelName(), snProvider.getName()))
                 .map((snProvider) -> {
                     final ProviderDescription description = new ProviderDescription();
                     description.provider = snProvider.getName();
-                    description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(), 
+                    description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(),
                             snProvider.getModelName(), snProvider.getName(), snProvider.getServices().keySet()));
                     return description;
                 }).collect(Collectors.toList()), List.of());
@@ -639,9 +639,9 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public List<ProviderSnapshot> filteredSnapshot(ICriterion filter) {
         Predicate<ServiceSnapshot> service = this::authorizeService;
         Predicate<ResourceSnapshot> resource = this::authorizeResource;
-        
+
         if (filter == null) {
-            return executeGetCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false), 
+            return executeGetCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
                     service, resource), Function.identity());
         } else {
             Predicate<GeoJsonObject> location = filter.getLocationFilter();
@@ -653,13 +653,13 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity());
         }
     }
-    
+
     private boolean authorizeProvider(ProviderSnapshot ps, boolean useLocation) {
-        if(useLocation && !authorizer.hasResourcePermission(READ, ps.getModelPackageUri(), ps.getModelName(), 
+        if(useLocation && !authorizer.hasResourcePermission(READ, ps.getModelPackageUri(), ps.getModelName(),
                 ps.getName(), "admin", "location")) {
             return false;
         }
-        
+
         return authorizer.hasProviderPermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName());
     }
 
@@ -670,7 +670,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private boolean authorizeResource(ResourceSnapshot sr) {
         ServiceSnapshot ss = sr.getService();
         ProviderSnapshot ps = ss.getProvider();
-        return authorizer.hasResourcePermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName(), 
+        return authorizer.hasResourcePermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName(),
                 ss.getName(), sr.getName());
     }
 
@@ -758,14 +758,14 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private static class SessionLifecycleListener extends SessionListenerRegistration {
 
         private final ClientLifecycleListener listener;
-        
+
         public SessionLifecycleListener(String subscriptionId, Authorizer authorizer, ClientLifecycleListener listener) {
             super(subscriptionId, authorizer);
             this.listener = listener;
         }
 
         public void notify(String topic, AbstractResourceNotification notification) {
-            
+
             LifecycleNotification ln = (LifecycleNotification) notification;
 
             switch(ln.status) {
@@ -808,7 +808,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri, notification.model, notification.provider, notification.service, notification.resource)) {
                 return;
             }
-            
+
             listener.notify(topic, (ResourceMetaDataNotification) notification);
         }
     }

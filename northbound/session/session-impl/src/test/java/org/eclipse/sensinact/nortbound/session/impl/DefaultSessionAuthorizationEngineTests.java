@@ -42,35 +42,35 @@ public class DefaultSessionAuthorizationEngineTests {
     private static final String PROVIDER = "provider";
     private static final String SERVICE = "service";
     private static final String RESOURCE = "resource";
-    
+
     @ParameterizedTest
     @MethodSource("testArgs")
     void testAuthorizer(DefaultAuthPolicy policy, UserInfo user, Authorizer.PreAuth preAuth, boolean permission,
             Function<Collection<String>, Collection<String>> transform) {
         DefaultSessionAuthorizationEngine engine = new DefaultSessionAuthorizationEngine(policy);
         Authorizer authorizer = engine.createAuthorizer(user);
-        
+
         assertEquals(preAuth, authorizer.preAuthProvider(DESCRIBE, PROVIDER));
         assertEquals(preAuth, authorizer.preAuthService(DESCRIBE, PROVIDER, SERVICE));
         assertEquals(preAuth, authorizer.preAuthResource(DESCRIBE, PROVIDER, SERVICE, RESOURCE));
-        
+
         assertEquals(permission, authorizer.hasProviderPermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER));
         assertEquals(permission, authorizer.hasServicePermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER, SERVICE));
         assertEquals(permission, authorizer.hasResourcePermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER, SERVICE, RESOURCE));
-        
+
         Set<String> set = Set.of(SERVICE);
         assertEquals(transform.apply(set), authorizer.visibleServices(MODEL_URI, MODEL, PROVIDER, set));
 
         set = Set.of(RESOURCE);
         assertEquals(transform.apply(set), authorizer.visibleResources(MODEL_URI, MODEL, PROVIDER, SERVICE, set));
     }
-    
+
     static List<Arguments> testArgs () {
-        UserInfo anon = new TestUserInfo("<ANON>", false); 
-        UserInfo bob = new TestUserInfo("bob", true); 
+        UserInfo anon = new TestUserInfo("<ANON>", false);
+        UserInfo bob = new TestUserInfo("bob", true);
         Function<Collection<String>, Collection<String>> copy = List::copyOf;
         Function<Collection<String>, Collection<String>> remove = x -> List.of();
-        
+
         return List.of(
                 arguments(ALLOW_ALL, anon, ALLOW, true, copy),
                 arguments(ALLOW_ALL, bob, ALLOW, true, copy),

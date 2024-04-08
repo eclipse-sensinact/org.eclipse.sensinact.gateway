@@ -48,7 +48,7 @@ import org.osgi.util.promise.PromiseFactory;
 @WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
 public class SensinactSessionTest {
 
-    private static final UserInfo ANON = new TestUserInfo("<ANON>", false); 
+    private static final UserInfo ANON = new TestUserInfo("<ANON>", false);
     private static final UserInfo BOB = new TestUserInfo("bob", true);
 
     private static final String PROVIDER = "SensinactSessionTestProvider";
@@ -109,7 +109,7 @@ public class SensinactSessionTest {
             // Admin resources must have a timestamp
             // friendlyName has a set value, so it's timestamp is set
             assertThrows(NotPermittedException.class, () -> anonSession.getResourceValue(PROVIDER, "admin", "friendlyName", String.class));
-            
+
             String name = bobSession.getResourceValue(PROVIDER, "admin", "friendlyName", String.class);
             assertNotNull(name);
         }
@@ -118,7 +118,7 @@ public class SensinactSessionTest {
         void getResourceNeverSet() {
             // location is not set, so it's timestamp is EPOCH
             assertThrows(NotPermittedException.class, () -> anonSession.getResourceValue(PROVIDER, "admin", "location", String.class));
-            
+
             String location = bobSession.getResourceValue(PROVIDER, "admin", "location", String.class);
             assertNull(location);
         }
@@ -154,7 +154,7 @@ public class SensinactSessionTest {
         void setResourceValue() {
             // Set the value with a future timestamp
             final Instant future = timestamp.plusSeconds(1);
-            
+
             assertThrows(NotPermittedException.class, () -> anonSession.setResourceValue(PROVIDER, "admin", "friendlyName", "eclipse", future));
 
             bobSession.setResourceValue(PROVIDER, "admin", "friendlyName", "eclipse", future);

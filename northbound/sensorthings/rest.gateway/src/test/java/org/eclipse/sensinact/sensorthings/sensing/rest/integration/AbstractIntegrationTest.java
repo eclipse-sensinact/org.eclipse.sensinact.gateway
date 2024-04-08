@@ -60,7 +60,7 @@ import jakarta.ws.rs.core.Application;
         @Property(key = "sessionManager.target", value = "(test.class=%s)", templateArguments = @TemplateArgument(source = ValueSource.TestClass))
 })
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
-        @Property(key = "auth.policy", value = "ALLOW_ALL"),       
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
         @Property(key = "test.class", source = ValueSource.TestClass)
 })
 public class AbstractIntegrationTest {
@@ -87,26 +87,26 @@ public class AbstractIntegrationTest {
     protected SensiNactSession session;
 
     protected final TestUtils utils = new TestUtils();
-    
+
     @BeforeEach
     void start(@InjectBundleContext BundleContext bc, TestInfo info) throws Exception {
-        
+
         Class<?> test = info.getTestClass().get();
         while(test.isMemberClass()) {
             test = test.getEnclosingClass();
         }
-        
-        ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc, 
+
+        ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc,
                 bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"), null);
-        
+
         tracker.open();
-        
+
         Application app = tracker.waitForService(5000);
         assertNotNull(app);
         assertInstanceOf(SensinactSensorthingsApplication.class, app);
-        
+
         sessionManager = ((SensinactSensorthingsApplication) app).getSessionManager();
-        
+
         session = sessionManager.getDefaultSession(USER);
 
         // Wait for the servlet to be ready

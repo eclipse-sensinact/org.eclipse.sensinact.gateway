@@ -44,7 +44,7 @@ import org.osgi.util.promise.PromiseFactory;
 @WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
 public class SessionSubscribeTest {
 
-    private static final UserInfo ANON = new TestUserInfo("<ANON>", false); 
+    private static final UserInfo ANON = new TestUserInfo("<ANON>", false);
     private static final UserInfo BOB = new TestUserInfo("bob", true);
 
     private static final String MODEL = "model";
@@ -68,7 +68,7 @@ public class SessionSubscribeTest {
         session = sessionManager.getDefaultSession(BOB);
         session.activeListeners().keySet().forEach(session::removeListener);
     }
-    
+
     @AfterEach
     void deleteProvider(@InjectService GatewayThread gt) throws Exception {
         gt.execute(new AbstractTwinCommand<Void>() {
@@ -161,7 +161,7 @@ public class SessionSubscribeTest {
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
     }
-    
+
     /**
      * Show that data updates result in events received by subscribers
      *

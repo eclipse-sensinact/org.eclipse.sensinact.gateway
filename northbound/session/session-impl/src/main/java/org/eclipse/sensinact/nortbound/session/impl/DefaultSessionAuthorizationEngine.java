@@ -16,9 +16,9 @@ import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
 public class DefaultSessionAuthorizationEngine implements AuthorizationEngine {
-    
+
     private final DefaultAuthPolicy policy;
-    
+
     public DefaultSessionAuthorizationEngine(DefaultAuthPolicy policy) {
         super();
         this.policy = policy;

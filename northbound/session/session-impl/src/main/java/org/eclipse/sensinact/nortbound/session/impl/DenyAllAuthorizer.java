@@ -66,5 +66,5 @@ class DenyAllAuthorizer implements Authorizer {
             String service, Collection<String> services) {
         return List.of();
     }
-    
+
 }

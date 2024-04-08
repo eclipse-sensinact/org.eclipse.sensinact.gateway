@@ -253,12 +253,12 @@ public class ResourceAccessTest {
         ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
 
         Thread.sleep(500);
-        
+
         queue = new ArrayBlockingQueue<>(32);
         SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.addListener(List.of(provider + "/*"), (t, e) -> queue.offer(e), null, null, null);
         ResourceDataNotification notification = queue.poll(500, TimeUnit.MILLISECONDS);
-        assertNull(notification, () -> String.format("notification was for %s/%s/%s with old: %s and new: %s", 
+        assertNull(notification, () -> String.format("notification was for %s/%s/%s with old: %s and new: %s",
                 notification.provider, notification.service, notification.resource, notification.oldValue,
                 notification.newValue));
 

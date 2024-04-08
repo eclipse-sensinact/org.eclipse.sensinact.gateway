@@ -113,7 +113,7 @@ public class SecureAccessTest {
         ctx.registerService(Authenticator.class, new BasicValidator(USER, CREDENTIAL), null);
 
         Thread.sleep(500);
-        
+
         response = utils.queryStatus(path);
         assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());
         assertEquals("Bearer realm=test, Basic realm=test2", response.headers().firstValue(WWW_AUTHENTICATE).get());

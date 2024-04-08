@@ -66,5 +66,5 @@ class AllowAllAuthorizer implements Authorizer {
             String service, Collection<String> resources) {
         return List.copyOf(resources);
     }
-    
+
 }

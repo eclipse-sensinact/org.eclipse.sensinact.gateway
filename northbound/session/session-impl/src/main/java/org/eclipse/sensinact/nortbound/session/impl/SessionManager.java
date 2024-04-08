@@ -49,7 +49,7 @@ public class SessionManager
         implements SensiNactSessionManager, TypedEventHandler<AbstractResourceNotification>, IMetricsGauge {
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
-    
+
     @Reference
     GatewayThread thread;
 
@@ -60,18 +60,18 @@ public class SessionManager
     private final Map<String, Set<String>> sessionsByUser = new HashMap<>();
 
     private final Map<String, String> userDefaultSessionIds = new HashMap<>();
-    
+
     private AuthorizationEngine authEngine;
-    
+
     private boolean active;
-    
+
     private Config config;
-    
+
     public @interface Config {
         int expiry() default 600;
         DefaultAuthPolicy auth_policy() default DefaultAuthPolicy.DENY_ALL;
     }
-    
+
     @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
     void setAuthorization(AuthorizationEngine auth) {
         if(LOG.isDebugEnabled()) {
@@ -90,7 +90,7 @@ public class SessionManager
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
-    
+
     void unsetAuthorization(AuthorizationEngine auth) {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Removing an external Authorization Engine. Existing sessions will be invalidated");
@@ -112,11 +112,11 @@ public class SessionManager
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
-    
+
     @Activate
     void start(Config config) {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Starting the Session Manager with session lifetime {} and default authorization policy {}", 
+            LOG.debug("Starting the Session Manager with session lifetime {} and default authorization policy {}",
                     config.expiry(), config.auth_policy());
         }
         synchronized (lock) {
@@ -124,7 +124,7 @@ public class SessionManager
             this.config = config;
         }
     }
-    
+
     @Deactivate
     void stop() {
         if(LOG.isDebugEnabled()) {
@@ -140,7 +140,7 @@ public class SessionManager
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
-    
+
     @Override
     public Object gauge() {
         synchronized (lock) {
@@ -156,7 +156,7 @@ public class SessionManager
             throw new IllegalStateException("The session manager is closed");
         }
     }
-    
+
     @Override
     public SensiNactSession getDefaultSession(UserInfo user) {
         Objects.requireNonNull(user);
@@ -242,7 +242,7 @@ public class SessionManager
         if(LOG.isDebugEnabled()) {
             LOG.debug("Getting session {} for user {}", sessionId, userId);
         }
-        
+
         synchronized (lock) {
             doCheck();
             if (sessionsByUser.getOrDefault(userId, Set.of()).contains(sessionId)) {
@@ -268,11 +268,11 @@ public class SessionManager
     public List<String> getSessionIds(UserInfo user) {
         Objects.requireNonNull(user);
         String userId = user.getUserId();
-        
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Retrieving active session ids for user {}", userId);
         }
-        
+
         List<String> ids;
         synchronized (lock) {
             doCheck();
@@ -292,22 +292,22 @@ public class SessionManager
                 it.remove();
             }
         }
-        
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("User {} has sessions {}", userId, ids);
         }
-        
+
         return ids;
     }
 
     @Override
     public SensiNactSession createNewSession(UserInfo user) {
         Objects.requireNonNull(user);
-        
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Creating a new session for user {}", user.getUserId());
         }
-        
+
         AuthorizationEngine auth;
         DefaultAuthPolicy policy;
         synchronized (lock) {
@@ -315,7 +315,7 @@ public class SessionManager
             auth = authEngine;
             policy = config.auth_policy();
         }
-        
+
         SensiNactSessionImpl session;
         if(auth == null) {
             if(LOG.isDebugEnabled()) {
@@ -326,7 +326,7 @@ public class SessionManager
         } else {
             session = new SensiNactSessionImpl(user, auth.createAuthorizer(user), thread);
         }
-        
+
         String sessionId = session.getSessionId();
 
         boolean authChanged;
@@ -340,7 +340,7 @@ public class SessionManager
                 authChanged = true;
             }
         }
-        
+
         if(authChanged) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("The Authorization Engine changed. Recreating the new session");

@@ -633,7 +633,7 @@ public class ModelNexus {
         rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata, rcFeature));
         return rcMeta;
     }
-    
+
     public TimedValue<Object> getResourceMetadataValue(Provider provider, EStructuralFeature svcFeature,
             final ETypedElement rcFeature, String key) {
         final Service svc = (Service) provider.eGet(svcFeature);

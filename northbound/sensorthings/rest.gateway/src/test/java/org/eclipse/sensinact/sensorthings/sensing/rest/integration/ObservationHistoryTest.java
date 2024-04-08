@@ -96,17 +96,17 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
         historyConfig.update(new Hashtable<>(Map.of("url", container.getJdbcUrl(), "user", container.getUsername(),
                 ".password", container.getPassword())));
-        
+
         Hashtable<String, Object> newProps = new Hashtable<String, Object>();
         newProps.put("history.provider", "timescale-history");
-        
+
         Dictionary<String,Object> properties = sensorthingsConfig.getProperties();
         Enumeration<String> keys = properties.keys();
         while(keys.hasMoreElements()) {
             String key = keys.nextElement();
             newProps.put(key, properties.get(key));
         }
-        
+
         sensorthingsConfig.update(newProps);
 
         // Wait for the tables to be ready
