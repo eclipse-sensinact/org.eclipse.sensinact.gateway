@@ -226,14 +226,14 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
-    public Promise<Object> getMetadataValue(String name) {
+    public Promise<TimedValue<Object>> getMetadataValue(String name) {
         checkValid();
 
-        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider, service, resource);
+        final TimedValue<Object> resourceMetadata = modelNexus.getResourceMetadataValue(provider, service, resource, name);
         if (resourceMetadata == null) {
-            return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
+            return promiseFactory.failed(new IllegalArgumentException("Resource metadata not found"));
         } else {
-            return promiseFactory.resolved(resourceMetadata.get(name));
+            return promiseFactory.resolved(resourceMetadata);
         }
     }
 

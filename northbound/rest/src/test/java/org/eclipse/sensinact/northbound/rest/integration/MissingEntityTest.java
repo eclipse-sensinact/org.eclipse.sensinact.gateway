@@ -42,6 +42,7 @@ import org.osgi.test.common.service.ServiceAware;
 
 import jakarta.ws.rs.core.Application;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class MissingEntityTest {
 
     @BeforeEach

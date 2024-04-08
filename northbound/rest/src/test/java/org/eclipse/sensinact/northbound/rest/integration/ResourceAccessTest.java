@@ -33,7 +33,6 @@ import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -43,6 +42,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallP
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
@@ -64,6 +64,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.ws.rs.core.Application;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class ResourceAccessTest {
 
     @BeforeEach
@@ -251,10 +252,17 @@ public class ResourceAccessTest {
         assertEquals(204, result.statusCode);
         ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
 
+        // Wait for any lifecycle events from this provider to complete to
+        // to avoid them showing up later
+        Thread.sleep(500);
+
         queue = new ArrayBlockingQueue<>(32);
         SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.addListener(List.of(provider + "/*"), (t, e) -> queue.offer(e), null, null, null);
-        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
+        ResourceDataNotification notification = queue.poll(500, TimeUnit.MILLISECONDS);
+        assertNull(notification, () -> String.format("notification was for %s/%s/%s with old: %s and new: %s",
+                notification.provider, notification.service, notification.resource, notification.oldValue,
+                notification.newValue));
 
         Point p = new Point();
         p.coordinates = new Coordinates();

@@ -28,11 +28,11 @@ import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceLifecycleNotificationDTO;
 import org.eclipse.sensinact.northbound.rest.integration.TestUtils;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
@@ -54,6 +54,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.sse.SseEventSource;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class ResourceNotificationsTest {
 
     @BeforeEach

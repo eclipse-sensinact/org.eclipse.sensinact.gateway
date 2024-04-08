@@ -6,7 +6,7 @@
     { "id": "org.antlr:antlr4-runtime:4.12.0" },
     { "id": "org.eclipse.sensinact.gateway.northbound.filters:ldap:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound:query-handler:0.0.2-SNAPSHOT" },
-    { "id": "org.eclipse.sensinact.gateway.northbound.security:authentication-api:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.security:security-api:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.session:session-api:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.session:session-impl:0.0.2-SNAPSHOT" },
     { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1" },

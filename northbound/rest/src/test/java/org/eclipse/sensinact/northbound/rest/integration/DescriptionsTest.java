@@ -45,7 +45,6 @@ import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.InjectService;
@@ -53,8 +52,6 @@ import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -62,7 +59,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.ws.rs.core.Application;
 
-@ExtendWith({ ServiceExtension.class, ConfigurationExtension.class })
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class DescriptionsTest {
 
     @BeforeEach

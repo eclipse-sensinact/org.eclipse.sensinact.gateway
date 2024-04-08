@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
@@ -38,6 +37,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +45,11 @@ import org.junit.jupiter.api.Test;
 import org.osgi.annotation.bundle.Requirement;
 import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
+
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class DescriptionsTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;

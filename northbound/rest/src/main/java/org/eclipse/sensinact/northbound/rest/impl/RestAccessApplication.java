@@ -12,9 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.rest.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
@@ -48,7 +49,7 @@ public class RestAccessApplication extends Application {
     IQueryHandler queryHandler;
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    final Set<Authenticator> authenticators = new CopyOnWriteArraySet<>();
+    final List<Authenticator> authenticators = new CopyOnWriteArrayList<>();
 
     @Activate
     Config config;

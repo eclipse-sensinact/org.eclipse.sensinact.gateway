@@ -32,7 +32,6 @@ import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
@@ -43,18 +42,19 @@ import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
-@ExtendWith(ServiceExtension.class)
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class ResourceAccessTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;

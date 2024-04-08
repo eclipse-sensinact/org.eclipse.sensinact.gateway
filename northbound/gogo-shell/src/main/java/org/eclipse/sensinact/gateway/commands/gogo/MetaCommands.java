@@ -13,10 +13,10 @@
 package org.eclipse.sensinact.gateway.commands.gogo;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.annotations.GogoCommand;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -76,13 +76,11 @@ public class MetaCommands {
             @Descriptor("the resource ID") String resource,
             @Descriptor("the metadata property to get") String metadata ) {
 
-        final Map<String, Object> data = session.get().getResourceMetadataValue(provider, service, resource, metadata);
+        final TimedValue<Object> data = session.get().getResourceMetadataValue(provider, service, resource, metadata);
         if (data == null)
             return "<NULL>";
 
-        return data.entrySet().stream()
-                .map(e -> e.getValue().toString())
-                .collect(Collectors.joining(", "));
+        return data.toString();
     }
 
     /**

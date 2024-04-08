@@ -43,7 +43,7 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
-      <artifactId>authentication-api</artifactId>
+      <artifactId>security-api</artifactId>
       <version>${rest.version}</version>
     </dependency>
     <dependency>

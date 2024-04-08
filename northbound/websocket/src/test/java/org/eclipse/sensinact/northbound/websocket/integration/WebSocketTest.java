@@ -58,6 +58,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WithConfiguration(pid = "sensinact.northbound.websocket", properties = @Property(key = "allow.anonymous", value = "true"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class WebSocketTest {
 
     @InjectService

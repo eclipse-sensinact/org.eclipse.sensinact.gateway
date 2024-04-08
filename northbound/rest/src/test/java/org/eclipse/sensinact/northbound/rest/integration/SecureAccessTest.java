@@ -25,11 +25,11 @@ import java.util.Map;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -46,6 +46,7 @@ import org.osgi.test.common.service.ServiceAware;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response.Status;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class SecureAccessTest {
 
     @BeforeEach
@@ -110,6 +111,8 @@ public class SecureAccessTest {
 
         ctx.registerService(Authenticator.class, new TokenValidator(TOKEN), null);
         ctx.registerService(Authenticator.class, new BasicValidator(USER, CREDENTIAL), null);
+
+        Thread.sleep(500);
 
         response = utils.queryStatus(path);
         assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());

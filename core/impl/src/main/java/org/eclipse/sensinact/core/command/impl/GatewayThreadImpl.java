@@ -52,7 +52,7 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 //TODO decide if this is the right level to be a component
-@Component
+@Component(immediate = true)
 public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     private final TypedEventBus typedEventBus;

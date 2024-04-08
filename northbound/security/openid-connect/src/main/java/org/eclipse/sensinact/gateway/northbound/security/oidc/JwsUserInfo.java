@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.northbound.security.oidc;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

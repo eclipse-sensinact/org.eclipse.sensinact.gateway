@@ -1,7 +1,7 @@
 {
   "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-oidc-authenticator-feature:osgifeature:0.0.1-SNAPSHOT",
   "bundles":[
-    { "id": "org.eclipse.sensinact.gateway.northbound.security:authentication-api:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.security:security-api:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.security:openid-connect:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.jetty:jetty-client:11.0.13" },
     { "id": "org.eclipse.jetty:jetty-alpn-client:11.0.13" },

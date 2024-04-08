@@ -42,7 +42,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.security.Password;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.security.UserInfo;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
@@ -56,11 +56,14 @@ import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
 /**
  * Tests the HTTP device factory with authentication
  */
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class HttpDeviceFactoryAuthTest {
 
     static QueuedThreadPool threadPool;

@@ -8,6 +8,7 @@
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:filter:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.api:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.gateway:0.0.2-SNAPSHOT" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.security:security-api:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.session:session-api:0.0.2-SNAPSHOT" },
     { "id": "org.eclipse.sensinact.gateway.northbound.session:session-impl:0.0.2-SNAPSHOT" },
     { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1" },

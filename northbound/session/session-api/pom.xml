@@ -40,6 +40,11 @@
       <artifactId>api</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
+      <artifactId>security-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
