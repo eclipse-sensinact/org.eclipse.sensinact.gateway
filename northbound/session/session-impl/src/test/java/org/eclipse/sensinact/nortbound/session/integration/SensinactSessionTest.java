@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Instant;
 
@@ -25,7 +26,9 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.nortbound.session.impl.TestUserInfo;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.NotPermittedException;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
@@ -34,15 +37,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 /**
  * Tests the get/set behaviour of the Session
  */
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
 public class SensinactSessionTest {
 
-    private static final UserInfo USER = UserInfo.ANONYMOUS;
+    private static final UserInfo ANON = new TestUserInfo("<ANON>", false); 
+    private static final UserInfo BOB = new TestUserInfo("bob", true);
 
     private static final String PROVIDER = "SensinactSessionTestProvider";
     private static final String SERVICE = "service";
@@ -80,16 +87,19 @@ public class SensinactSessionTest {
 
     @InjectService
     SensiNactSessionManager sessionManager;
-    SensiNactSession session;
+    SensiNactSession anonSession;
+    SensiNactSession bobSession;
 
     @BeforeEach
     void start() {
-        session = sessionManager.getDefaultSession(USER);
+        anonSession = sessionManager.getDefaultSession(ANON);
+        bobSession = sessionManager.getDefaultSession(BOB);
     }
 
     @AfterEach
     void stop() {
-        session.expire();
+        anonSession.expire();
+        bobSession.expire();
     }
 
     @Nested
@@ -98,14 +108,18 @@ public class SensinactSessionTest {
         void getResourceValue() {
             // Admin resources must have a timestamp
             // friendlyName has a set value, so it's timestamp is set
-            String name = session.getResourceValue(PROVIDER, "admin", "friendlyName", String.class);
+            assertThrows(NotPermittedException.class, () -> anonSession.getResourceValue(PROVIDER, "admin", "friendlyName", String.class));
+            
+            String name = bobSession.getResourceValue(PROVIDER, "admin", "friendlyName", String.class);
             assertNotNull(name);
         }
 
         @Test
         void getResourceNeverSet() {
             // location is not set, so it's timestamp is EPOCH
-            String location = session.getResourceValue(PROVIDER, "admin", "location", String.class);
+            assertThrows(NotPermittedException.class, () -> anonSession.getResourceValue(PROVIDER, "admin", "location", String.class));
+            
+            String location = bobSession.getResourceValue(PROVIDER, "admin", "location", String.class);
             assertNull(location);
         }
     }
@@ -116,7 +130,9 @@ public class SensinactSessionTest {
         void describeResource() {
             // Admin resources must have a timestamp
             // friendlyName has a set value, so it's timestamp is set
-            ResourceDescription descr = session.describeResource(PROVIDER, "admin", "friendlyName");
+            assertThrows(NotPermittedException.class, () -> anonSession.describeResource(PROVIDER, "admin", "friendlyName"));
+
+            ResourceDescription descr = bobSession.describeResource(PROVIDER, "admin", "friendlyName");
             assertEquals(PROVIDER, descr.value);
             assertEquals(timestamp, descr.timestamp);
         }
@@ -124,7 +140,9 @@ public class SensinactSessionTest {
         @Test
         void describeResourceNeverSet() {
             // location is not set, so it's timestamp is EPOCH
-            ResourceDescription descr = session.describeResource(PROVIDER, "admin", "location");
+            assertThrows(NotPermittedException.class, () -> anonSession.describeResource(PROVIDER, "admin", "location"));
+
+            ResourceDescription descr = bobSession.describeResource(PROVIDER, "admin", "location");
             assertNull(descr.value);
             assertNull(descr.timestamp);
         }
@@ -136,8 +154,11 @@ public class SensinactSessionTest {
         void setResourceValue() {
             // Set the value with a future timestamp
             final Instant future = timestamp.plusSeconds(1);
-            session.setResourceValue(PROVIDER, "admin", "friendlyName", "eclipse", future);
-            ResourceDescription descr = session.describeResource(PROVIDER, "admin", "friendlyName");
+            
+            assertThrows(NotPermittedException.class, () -> anonSession.setResourceValue(PROVIDER, "admin", "friendlyName", "eclipse", future));
+
+            bobSession.setResourceValue(PROVIDER, "admin", "friendlyName", "eclipse", future);
+            ResourceDescription descr = bobSession.describeResource(PROVIDER, "admin", "friendlyName");
             assertEquals("eclipse", descr.value);
             assertEquals(future, descr.timestamp);
         }
@@ -145,8 +166,10 @@ public class SensinactSessionTest {
         @Test
         void blockSetWithEarlyTimestamp() {
             // Ensure we reject setting a value with an earlier timestamp
-            session.setResourceValue(PROVIDER, "admin", "friendlyName", "foo", timestamp.minusSeconds(1));
-            ResourceDescription descr = session.describeResource(PROVIDER, "admin", "friendlyName");
+            assertThrows(NotPermittedException.class, () -> anonSession.setResourceValue(PROVIDER, "admin", "friendlyName", "foo", timestamp.minusSeconds(1)));
+
+            bobSession.setResourceValue(PROVIDER, "admin", "friendlyName", "foo", timestamp.minusSeconds(1));
+            ResourceDescription descr = bobSession.describeResource(PROVIDER, "admin", "friendlyName");
             assertNotEquals("foo", descr.value);
             assertEquals(timestamp, descr.timestamp);
         }

@@ -64,6 +64,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.ws.rs.core.Application;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class ResourceAccessTest {
 
     @BeforeEach
@@ -251,10 +252,15 @@ public class ResourceAccessTest {
         assertEquals(204, result.statusCode);
         ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
 
+        Thread.sleep(500);
+        
         queue = new ArrayBlockingQueue<>(32);
         SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.addListener(List.of(provider + "/*"), (t, e) -> queue.offer(e), null, null, null);
-        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
+        ResourceDataNotification notification = queue.poll(500, TimeUnit.MILLISECONDS);
+        assertNull(notification, () -> String.format("notification was for %s/%s/%s with old: %s and new: %s", 
+                notification.provider, notification.service, notification.resource, notification.oldValue,
+                notification.newValue));
 
         Point p = new Point();
         p.coordinates = new Coordinates();

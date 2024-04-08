@@ -73,6 +73,7 @@ import io.moquette.broker.config.MemoryConfig;
                 + "    \"data/testName\": { \"literal\": \"${context.topic-2}\" },\n"
                 + "    \"data/value\": { \"path\": \"Value\", \"type\": \"int\" }\n" + "  },\n"
                 + "  \"mapping.options\": { \"format.date\": \"d.M.y\", \"format.time\": \"H:m\" }\n" + "}"), })
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
 public class MqttDeviceFactoryTest {
 

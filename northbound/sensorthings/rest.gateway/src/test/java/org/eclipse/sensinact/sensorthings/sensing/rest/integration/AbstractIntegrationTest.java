@@ -12,9 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 
@@ -31,18 +32,37 @@ import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensinactSensorthingsApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.Property.TemplateArgument;
+import org.osgi.test.common.annotation.Property.ValueSource;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import jakarta.ws.rs.core.Application;
+
 /**
  * Common setup for the tests
  */
+@WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", properties = {
+        @Property(key = "test.class", source = ValueSource.TestClass),
+        @Property(key = "sessionManager.target", value = "(test.class=%s)", templateArguments = @TemplateArgument(source = ValueSource.TestClass))
+})
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),       
+        @Property(key = "test.class", source = ValueSource.TestClass)
+})
 public class AbstractIntegrationTest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -63,14 +83,30 @@ public class AbstractIntegrationTest {
     @InjectService
     protected GatewayThread thread;
 
-    @InjectService
     protected SensiNactSessionManager sessionManager;
     protected SensiNactSession session;
 
     protected final TestUtils utils = new TestUtils();
-
+    
     @BeforeEach
-    void start() throws IOException, InterruptedException {
+    void start(@InjectBundleContext BundleContext bc, TestInfo info) throws Exception {
+        
+        Class<?> test = info.getTestClass().get();
+        while(test.isMemberClass()) {
+            test = test.getEnclosingClass();
+        }
+        
+        ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc, 
+                bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"), null);
+        
+        tracker.open();
+        
+        Application app = tracker.waitForService(5000);
+        assertNotNull(app);
+        assertInstanceOf(SensinactSensorthingsApplication.class, app);
+        
+        sessionManager = ((SensinactSensorthingsApplication) app).getSessionManager();
+        
         session = sessionManager.getDefaultSession(USER);
 
         // Wait for the servlet to be ready
@@ -84,7 +120,7 @@ public class AbstractIntegrationTest {
 
             // Not ready yet
             System.out.println("Waiting for the SensorThings servlet to come up...");
-            Thread.sleep(1000);
+            Thread.sleep(200);
         }
 
         if (!ready) {

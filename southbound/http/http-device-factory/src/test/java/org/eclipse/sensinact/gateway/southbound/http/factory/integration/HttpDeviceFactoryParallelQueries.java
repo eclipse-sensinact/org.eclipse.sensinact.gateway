@@ -46,10 +46,13 @@ import org.junit.jupiter.api.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
 /**
  * Tests the HTTP device factory behavior with parallel calls
  */
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class HttpDeviceFactoryParallelQueries {
 
     static final String TEMPLATE = "Name,Value\n%s,%s\n";

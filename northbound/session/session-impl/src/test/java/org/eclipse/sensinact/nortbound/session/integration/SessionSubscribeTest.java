@@ -21,20 +21,31 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.nortbound.session.impl.TestUserInfo;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
 public class SessionSubscribeTest {
 
-    private static final UserInfo USER = UserInfo.ANONYMOUS;
+    private static final UserInfo ANON = new TestUserInfo("<ANON>", false); 
+    private static final UserInfo BOB = new TestUserInfo("bob", true);
 
     private static final String MODEL = "model";
     private static final String PROVIDER = "provider";
@@ -52,8 +63,24 @@ public class SessionSubscribeTest {
 
     @AfterEach
     void stop() {
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
+        SensiNactSession session = sessionManager.getDefaultSession(ANON);
         session.activeListeners().keySet().forEach(session::removeListener);
+        session = sessionManager.getDefaultSession(BOB);
+        session.activeListeners().keySet().forEach(session::removeListener);
+    }
+    
+    @AfterEach
+    void deleteProvider(@InjectService GatewayThread gt) throws Exception {
+        gt.execute(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider sp = twin.getProvider(PROVIDER);
+                if(sp != null) {
+                    sp.delete();
+                }
+                return pf.resolved(null);
+            }
+        }).getValue();
     }
 
     /**
@@ -66,7 +93,7 @@ public class SessionSubscribeTest {
 
         BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
 
-        SensiNactSession session = sessionManager.getDefaultSession(USER);
+        SensiNactSession session = sessionManager.getDefaultSession(BOB);
         session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
@@ -133,5 +160,33 @@ public class SessionSubscribeTest {
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
+    }
+    
+    /**
+     * Show that data updates result in events received by subscribers
+     *
+     * @throws Exception
+     */
+    @Test
+    void basicSubscribeWithoutPermission() throws Exception {
+
+        BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
+
+        SensiNactSession session = sessionManager.getDefaultSession(ANON);
+        session.addListener(List.of(PROVIDER_TOPIC), (t, e) -> queue.offer(e), null, null, null);
+
+        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
+
+        GenericDto dto = new GenericDto();
+        dto.model = MODEL;
+        dto.provider = PROVIDER;
+        dto.service = SERVICE;
+        dto.resource = RESOURCE;
+        dto.value = VALUE;
+        dto.type = Integer.class;
+
+        push.pushUpdate(dto);
+
+        assertNull(queue.poll(1, TimeUnit.SECONDS));
     }
 }

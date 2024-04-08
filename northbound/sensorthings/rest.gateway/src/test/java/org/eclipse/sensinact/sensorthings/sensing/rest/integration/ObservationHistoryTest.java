@@ -26,6 +26,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -94,7 +96,18 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
         historyConfig.update(new Hashtable<>(Map.of("url", container.getJdbcUrl(), "user", container.getUsername(),
                 ".password", container.getPassword())));
-        sensorthingsConfig.update(new Hashtable<>(Map.of("history.provider", "timescale-history")));
+        
+        Hashtable<String, Object> newProps = new Hashtable<String, Object>();
+        newProps.put("history.provider", "timescale-history");
+        
+        Dictionary<String,Object> properties = sensorthingsConfig.getProperties();
+        Enumeration<String> keys = properties.keys();
+        while(keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            newProps.put(key, properties.get(key));
+        }
+        
+        sensorthingsConfig.update(newProps);
 
         // Wait for the tables to be ready
         waitForHistoryTables();

@@ -12,7 +12,7 @@
 	bnd.identity;id='ch.qos.logback.classic'
 -resolve.effective: active
 
--runee: JavaSE-17
+-runee: JavaSE-11
 -runfw: org.apache.felix.framework
 
 # This will help us keep -runbundles sorted
@@ -69,6 +69,7 @@
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\
 	org.osgi.test.common;version='[1.3.0,1.3.1)',\
 	org.osgi.test.junit5;version='[1.3.0,1.3.1)',\
+	org.osgi.test.junit5.cm;version='[1.3.0,1.3.1)',\
 	org.osgi.util.converter;version='[1.0.9,1.0.10)',\
 	org.osgi.util.function;version='[1.1.0,1.1.1)',\
 	org.osgi.util.promise;version='[1.3.0,1.3.1)',\

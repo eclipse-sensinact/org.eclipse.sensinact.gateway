@@ -45,7 +45,10 @@ import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class MissingEntityTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;

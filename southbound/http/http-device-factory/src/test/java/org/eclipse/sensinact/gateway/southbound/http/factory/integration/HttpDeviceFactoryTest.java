@@ -54,6 +54,8 @@ import org.junit.jupiter.api.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,6 +67,7 @@ import ch.qos.logback.core.AppenderBase;
 /**
  * Tests the HTTP device factory
  */
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class HttpDeviceFactoryTest {
 
     static QueuedThreadPool threadPool;

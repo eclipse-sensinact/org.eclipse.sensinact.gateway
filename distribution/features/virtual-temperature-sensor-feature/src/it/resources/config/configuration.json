@@ -23,6 +23,9 @@
   "sensinact.northbound.rest": {
     "allow.anonymous": "true"
   },
+  "sensinact.session.manager": {
+    "auth.policy": "ALLOW_ALL"
+  },  
   "sensinact.virtual.temperature": {
     "name": "temp1",
     "latitude": 1.0,

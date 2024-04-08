@@ -46,6 +46,7 @@ import org.osgi.test.common.service.ServiceAware;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response.Status;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class SecureAccessTest {
 
     @BeforeEach
@@ -111,6 +112,8 @@ public class SecureAccessTest {
         ctx.registerService(Authenticator.class, new TokenValidator(TOKEN), null);
         ctx.registerService(Authenticator.class, new BasicValidator(USER, CREDENTIAL), null);
 
+        Thread.sleep(500);
+        
         response = utils.queryStatus(path);
         assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());
         assertEquals("Bearer realm=test, Basic realm=test2", response.headers().firstValue(WWW_AUTHENTICATE).get());

@@ -48,13 +48,13 @@ import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.junit5.service.ServiceExtension;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
-@ExtendWith(ServiceExtension.class)
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class ResourceAccessTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;

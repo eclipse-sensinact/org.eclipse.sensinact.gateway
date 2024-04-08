@@ -54,6 +54,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.sse.SseEventSource;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class ResourceNotificationsTest {
 
     @BeforeEach

@@ -52,10 +52,13 @@ import org.junit.jupiter.api.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
 /**
  * Tests the HTTP device factory with authentication
  */
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 public class HttpDeviceFactorySSLTest {
 
     QueuedThreadPool threadPool;

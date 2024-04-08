@@ -46,10 +46,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
 public class SecureWebSocketTest {
 
     final ObjectMapper mapper = new ObjectMapper();
