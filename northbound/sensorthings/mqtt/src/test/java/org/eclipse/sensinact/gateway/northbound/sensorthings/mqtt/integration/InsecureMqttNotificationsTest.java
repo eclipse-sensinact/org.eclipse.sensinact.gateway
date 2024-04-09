@@ -73,9 +73,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @WithFactoryConfiguration(factoryPid = "sensiNact.northbound.sensorthings.mqtt", properties = {
-        @Property(key = "port", value = "13579"),
-        @Property(key = "websocket.enable", value = "false")
-})
+        @Property(key = "port", value = "13579"), @Property(key = "websocket.enable", value = "false") })
 public class InsecureMqttNotificationsTest {
 
     @InjectService
@@ -114,7 +112,7 @@ public class InsecureMqttNotificationsTest {
             break;
         }
 
-        if(!connected) {
+        if (!connected) {
             fail("Not connected to the MQTT broker");
         }
 
@@ -229,6 +227,7 @@ public class InsecureMqttNotificationsTest {
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
             streams = readMessages(7, Datastream.class);
+            streams.forEach(d -> System.err.println(d.name));
 
             // location creation
             assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(0).name);

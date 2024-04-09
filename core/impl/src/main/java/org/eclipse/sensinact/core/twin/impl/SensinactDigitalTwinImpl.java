@@ -334,20 +334,20 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         final Instant snapshotTime = Instant.now();
 
-        // Filter providers by location (raw provider)
-        Stream<Provider> rawProvidersStream = nexusImpl.getProviders().stream();
-        if (geoFilter != null) {
-            // Filter the provider location
-            rawProvidersStream = rawProvidersStream.filter(p -> geoFilter.test(p.getAdmin().getLocation()));
-        }
-
         // Filter providers with their API model
-        Stream<ProviderSnapshotImpl> providersStream = rawProvidersStream
-                .map(p -> new ProviderSnapshotImpl(nexusImpl.getProviderPackageUri(p.getId()),
-                        nexusImpl.getProviderModel(p.getId()), p, snapshotTime));
+        Stream<ProviderSnapshotImpl> providersStream = nexusImpl.getProviders().stream()
+                .map(p -> new ProviderSnapshotImpl(p.eClass().getEPackage().getNsURI(),
+                        EMFUtil.getModelName(p.eClass()), p, snapshotTime));
         if (providerFilter != null) {
             providersStream = providersStream.filter(providerFilter);
         }
+
+        // Filter providers by location (raw provider)
+        if (geoFilter != null) {
+            // Filter the provider location
+            providersStream = providersStream.filter(p -> geoFilter.test(p.getModelProvider().getAdmin().getLocation()));
+        }
+
 
         // Filter providers according to their services
         providersStream = providersStream.map(p -> {

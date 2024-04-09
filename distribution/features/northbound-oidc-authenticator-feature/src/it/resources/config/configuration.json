@@ -24,6 +24,9 @@
   "sensinact.northbound.rest": {
     "allow.anonymous": false
   },
+  "sensinact.session.manager": {
+    "auth.policy": "AUTHENTICATED_ONLY"
+  },
   "sensinact.northbound.auth.oidc~test": {
     "realm": "test",
     "discoveryURL": "http://127.0.0.1:24680/discovery"

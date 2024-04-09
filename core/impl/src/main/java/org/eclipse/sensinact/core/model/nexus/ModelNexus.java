@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -58,6 +59,7 @@ import org.eclipse.sensinact.core.model.nexus.emf.NamingUtils;
 import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
 import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
 import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
@@ -177,6 +179,7 @@ public class ModelNexus {
                     resource.getContents().forEach(e -> {
                         EPackage ePackage = (EPackage) e;
                         resource.setURI(URI.createURI(ePackage.getNsURI()));
+                        EcoreUtil.resolveAll(ePackage);
                         resourceSet.getPackageRegistry().put(ePackage.getNsURI(), ePackage);
                     });
 
@@ -337,8 +340,8 @@ public class ModelNexus {
         // accumulator.unlink(...)
     }
 
-    public void handleDataUpdate(Provider provider, String serviceName,
-            EStructuralFeature resourceFeature, Object data, Instant timestamp) {
+    public void handleDataUpdate(Provider provider, String serviceName, EStructuralFeature resourceFeature, Object data,
+            Instant timestamp) {
 
         Service service = getServiceFromProvider(serviceName, provider);
         if (service == null) {
@@ -358,8 +361,8 @@ public class ModelNexus {
 
         String packageUri = provider.eClass().getEPackage().getNsURI();
 
-        handleDataUpdate(provider, serviceName, service, resourceFeature, data, timestamp, accumulator,
-                packageUri, modelName, providerName);
+        handleDataUpdate(provider, serviceName, service, resourceFeature, data, timestamp, accumulator, packageUri,
+                modelName, providerName);
     }
 
     public void handleDataUpdate(Provider provider, EStructuralFeature serviceFeature,
@@ -421,8 +424,7 @@ public class ModelNexus {
             oldMetaData = EMFCompareUtil.extractMetadataMap(oldValue, metadata, resourceFeature);
         }
         if (oldValue == null) {
-            accumulator.addResource(packageUri, modelName, providerName, serviceName,
-                    resourceFeature.getName());
+            accumulator.addResource(packageUri, modelName, providerName, serviceName, resourceFeature.getName());
         }
 
         // Allow an update if the resource didn't exist or if the update timestamp is
@@ -441,8 +443,8 @@ public class ModelNexus {
             } else {
                 service.eSet(resourceFeature, EMFUtil.convertToTargetType(resourceType, data));
             }
-            accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName,
-                    resourceFeature.getName(), resourceType.getInstanceClass(), oldValue, data, timestamp);
+            accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
+                    resourceType.getInstanceClass(), oldValue, data, timestamp);
         } else {
             return;
         }
@@ -455,8 +457,8 @@ public class ModelNexus {
 
         Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata, resourceFeature);
 
-        accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName,
-                resourceFeature.getName(), oldMetaData, newMetaData, timestamp);
+        accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
+                oldMetaData, newMetaData, timestamp);
     }
 
     /**
@@ -698,14 +700,32 @@ public class ModelNexus {
         return rcMeta;
     }
 
+    public TimedValue<Object> getResourceMetadataValue(Provider provider, String serviceName,
+            final ETypedElement rcFeature, String key) {
+        final Service svc = getServiceFromProvider(serviceName, provider);
+        if (svc == null) {
+            return null;
+        }
+
+        final ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(rcFeature);
+        if (metadata != null) {
+            for (FeatureCustomMetadata entry : metadata.getExtra()) {
+                if (entry.getName().equals(key)) {
+                    return new TimedValueImpl<Object>(entry.getValue(), entry.getTimestamp());
+                }
+            }
+        }
+        return null;
+    }
+
     public void setResourceMetadata(Provider provider, EStructuralFeature svcFeature, ETypedElement resource,
             String metadataKey, Object value, Instant timestamp) {
         final Service svc = (Service) provider.eGet(svcFeature);
         setResourceMetadata(provider, svcFeature.getName(), svc, resource, metadataKey, value, timestamp);
     }
 
-    public void setResourceMetadata(Provider provider, String serviceName, ETypedElement resource,
-            String metadataKey, Object value, Instant timestamp) {
+    public void setResourceMetadata(Provider provider, String serviceName, ETypedElement resource, String metadataKey,
+            Object value, Instant timestamp) {
         EStructuralFeature feature = provider.eClass().getEStructuralFeature(serviceName);
         if (feature != null) {
             setResourceMetadata(provider, feature, resource, metadataKey, value, timestamp);
@@ -719,8 +739,7 @@ public class ModelNexus {
     }
 
     public void setResourceMetadata(Provider provider, String serviceName, Service svc, ETypedElement resource,
-            String metadataKey,
-            Object value, Instant timestamp) {
+            String metadataKey, Object value, Instant timestamp) {
         if (svc == null) {
             throw new IllegalArgumentException("Service must not be null");
         }
@@ -751,8 +770,8 @@ public class ModelNexus {
         Map<String, Object> newMetadata = toMetadataMap(resource, metadata);
 
         notificationAccumulator.get().metadataValueUpdate(provider.eClass().getEPackage().getNsURI(),
-                EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(),
-                oldMetadata, newMetadata, timestamp);
+                EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(), oldMetadata,
+                newMetadata, timestamp);
 
     }
 
@@ -827,7 +846,7 @@ public class ModelNexus {
     }
 
     public Map<String, EClass> getDefinedServiceForProvider(Provider provider) {
-        Map<String, EClass> result = new HashMap<>();
+        Map<String, EClass> result = new LinkedHashMap<>();
         getServiceReferencesForModel(provider.eClass()).forEach((feature) -> {
             result.put(feature.getName(), feature.getEReferenceType());
         });
@@ -839,7 +858,7 @@ public class ModelNexus {
     }
 
     public Map<String, Service> getServiceInstancesForProvider(Provider provider) {
-        Map<String, Service> result = new HashMap<>();
+        Map<String, Service> result = new LinkedHashMap<>();
         getServiceReferencesForModel(provider.eClass()).filter(provider::eIsSet).forEach((feature) -> {
             result.put(feature.getName(), (Service) provider.eGet(feature));
         });
@@ -1017,7 +1036,7 @@ public class ModelNexus {
             return Promises.failed(t);
         }
     }
-    
+
     /**
      * Uses the white board to push the value to a resource external setter and
      * updates the twin on success.

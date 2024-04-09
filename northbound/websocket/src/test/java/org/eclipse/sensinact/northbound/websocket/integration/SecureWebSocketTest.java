@@ -32,7 +32,6 @@ import org.eclipse.jetty.websocket.api.exceptions.UpgradeException;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
-import org.eclipse.sensinact.core.security.UserInfo;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
@@ -41,15 +40,19 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
 public class SecureWebSocketTest {
 
     final ObjectMapper mapper = new ObjectMapper();

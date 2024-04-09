@@ -66,6 +66,12 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
+    public String getModelPackageUri() {
+        checkValid();
+        return provider.eClass().getEPackage().getNsURI();
+    }
+
+    @Override
     public String toString() {
         checkValid();
         return String.format("SensiNactProvider(model=%s, name=%s, services=%s)", getModelName(), getName(),

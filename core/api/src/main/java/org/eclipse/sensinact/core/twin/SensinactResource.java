@@ -125,7 +125,7 @@ public interface SensinactResource extends CommandScoped {
      * @param timestamp
      * @return
      */
-    Promise<Object> getMetadataValue(String name);
+    Promise<TimedValue<Object>> getMetadataValue(String name);
 
     /**
      * Get all metadata values for the resource

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2024 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,27 +10,23 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.security;
+package org.eclipse.sensinact.nortbound.session.impl;
 
-public interface UserInfo {
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
-    public static final UserInfo ANONYMOUS = new AnonymousUser();
+public class TestUserInfo implements UserInfo {
 
-    public String getUserId();
+    private final String user;
+    private final boolean authenticated;
 
-    public boolean isMemberOfGroup(String group);
-
-    boolean isAnonymous();
-
-    boolean isAuthenticated();
-
-}
-
-class AnonymousUser implements UserInfo {
+    public TestUserInfo(String user, boolean authenticated) {
+        this.user = user;
+        this.authenticated = authenticated;
+    }
 
     @Override
     public String getUserId() {
-        return "<ANONYMOUS>";
+        return user;
     }
 
     @Override
@@ -40,12 +36,16 @@ class AnonymousUser implements UserInfo {
 
     @Override
     public boolean isAnonymous() {
-        return true;
+        return !authenticated;
     }
 
     @Override
     public boolean isAuthenticated() {
-        return false;
+        return authenticated;
     }
 
+    @Override
+    public String toString() {
+        return "TestUserInfo [user=" + user + ", authenticated=" + authenticated + "]";
+    }
 }

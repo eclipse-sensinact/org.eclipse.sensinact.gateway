@@ -54,6 +54,11 @@
       <version>${sensorthings.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
+      <artifactId>security-api</artifactId>
+      <version>${sensorthings.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
       <artifactId>session-api</artifactId>
       <version>${sensorthings.version}</version>

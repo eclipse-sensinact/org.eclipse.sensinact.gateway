@@ -102,11 +102,10 @@ public class LifecycleNotification extends AbstractResourceNotification {
         RESOURCE_CREATED("%s/%s/%s"),
 
         /**
-         * Resource created,
+         * Resource deleted,
          * <ul>
-         * <li>{@link LifecycleNotification#initialMetadata} will be the initial
-         * metadata</li>
-         * <li>{@link LifecycleNotification#initialValue} will be the initial value</li>
+         * <li>{@link LifecycleNotification#initialMetadata} will be null</li>
+         * <li>{@link LifecycleNotification#initialValue} will be null</li>
          * </ul>
          */
         RESOURCE_DELETED("%s/%s/%s");
