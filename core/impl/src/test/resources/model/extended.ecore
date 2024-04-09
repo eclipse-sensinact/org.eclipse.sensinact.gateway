@@ -5,7 +5,7 @@
     <details key="ecore" value="http://www.eclipse.org/emf/2002/Ecore"/>
     <details key="sensinactCore" value="../../../../../models/src/main/resources/model/sensinact.ecore#/"/>
   </eAnnotations>
-  <eClassifiers xsi:type="ecore:EClass" name="TemperatureSensor" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Provider">
+  <eClassifiers xsi:type="ecore:EClass" name="TemperatureSensor" eSuperTypes="https://eclipse.org/sensinact/core/provider/1.0#//Provider">
     <eStructuralFeatures xsi:type="ecore:EReference" name="testService1" lowerBound="1"
         eType="#//TestService1" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="testService2" lowerBound="1"
@@ -13,11 +13,11 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="testAttribute" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TestService1" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Service">
+  <eClassifiers xsi:type="ecore:EClass" name="TestService1" eSuperTypes="https://eclipse.org/sensinact/core/provider/1.0#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="foo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="foo2" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TestService2" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Service">
+  <eClassifiers xsi:type="ecore:EClass" name="TestService2" eSuperTypes="https://eclipse.org/sensinact/core/provider/1.0#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="bar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="annotated" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
       <eAnnotations source="Metadata">
@@ -26,8 +26,16 @@
       </eAnnotations>
     </eStructuralFeatures>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TestAdmin" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Admin">
+  <eClassifiers xsi:type="ecore:EClass" name="TestAdmin" eSuperTypes="https://eclipse.org/sensinact/core/provider/1.0#//Admin">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="testAdmin" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBigInteger"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DynamicTemperatureSensor" eSuperTypes="https://eclipse.org/sensinact/core/provider/1.0#//DynamicProvider">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="testService1" lowerBound="1"
+        eType="#//TestService1" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="testService2" lowerBound="1"
+        eType="#//TestService2" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="testAttribute" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>

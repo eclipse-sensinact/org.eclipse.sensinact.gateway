@@ -54,5 +54,12 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/value"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/timestamp"/>
     </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//ServiceMap">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//ServiceMap/value"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ServiceMap/key"/>
+    </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//DynamicProvider">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//DynamicProvider/services"/>
+    </genClasses>
   </genPackages>
 </genmodel:GenModel>

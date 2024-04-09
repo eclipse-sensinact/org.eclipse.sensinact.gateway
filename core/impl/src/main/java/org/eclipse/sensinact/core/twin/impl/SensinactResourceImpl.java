@@ -21,12 +21,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EOperation;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.command.GetLevel;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.model.impl.ResourceImpl;
+import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -34,9 +36,6 @@ import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
 import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.core.model.impl.ResourceImpl;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -44,18 +43,18 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
     private final SensinactService svc;
     private final Provider provider;
-    private final EReference service;
+    private final String serviceName;
     private final ETypedElement resource;
     private final Class<?> type;
     private final ModelNexus modelNexus;
     private final PromiseFactory promiseFactory;
 
-    public SensinactResourceImpl(AtomicBoolean active, SensinactService svc, Provider provider, EReference service,
+    public SensinactResourceImpl(AtomicBoolean active, SensinactService svc, Provider provider, String serviceName,
             ETypedElement resource, Class<?> type, ModelNexus nexusImpl, PromiseFactory promiseFactory) {
         super(active);
         this.svc = svc;
         this.provider = provider;
-        this.service = service;
+        this.serviceName = serviceName;
         this.resource = resource;
         this.type = type;
         this.modelNexus = nexusImpl;
@@ -106,7 +105,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     private <T> TimedValue<T> getValueFromTwin(final Class<T> type) {
         final Instant currentTimestamp;
         final T currentValue;
-        final Service svc = (Service) provider.eGet(service);
+        final Service svc = modelNexus.getServiceFromProvider(serviceName, provider);
         if (svc != null) {
             // Service is there
             final Object rawValue = svc.eGet((EAttribute) resource);
@@ -156,11 +155,12 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                 final TimedValue<?> cachedValue = getValueFromTwin(type);
                 final TimedValue<T> newValue = new TimedValueImpl<T>(value, timestamp);
                 return modelNexus
-                        .pushValue(provider, service, resource, (Class<T>) type, (TimedValue<T>) cachedValue, newValue)
+                        .pushValue(provider, serviceName, resource, (Class<T>) type, (TimedValue<T>) cachedValue,
+                                newValue)
                         .map(x -> null);
             } else {
                 // No external setter: update the twin
-                modelNexus.handleDataUpdate(provider, service,
+                modelNexus.handleDataUpdate(provider, serviceName,
                         (EStructuralFeature) resource, value, timestamp);
                 return promiseFactory.resolved(null);
             }
@@ -200,7 +200,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                 || Instant.now().minus(cacheThreshold).isAfter(cachedValue.getTimestamp())) {
             // Hard get or no value or no cache policy or threshold exceed: pull the
             // value...
-            return modelNexus.pullValue(provider, service, resource, type, cachedValue);
+            return modelNexus.pullValue(provider, serviceName, resource, type, cachedValue);
         } else {
             // Return the cached value
             return promiseFactory.resolved(cachedValue);
@@ -218,7 +218,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         checkValid();
 
         try {
-            modelNexus.setResourceMetadata(provider, service, resource, name, value, timestamp);
+            modelNexus.setResourceMetadata(provider, serviceName, resource, name, value, timestamp);
             return promiseFactory.resolved(null);
         } catch (Throwable t) {
             return promiseFactory.failed(t);
@@ -229,7 +229,9 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     public Promise<TimedValue<Object>> getMetadataValue(String name) {
         checkValid();
 
-        final TimedValue<Object> resourceMetadata = modelNexus.getResourceMetadataValue(provider, service, resource, name);
+//        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider, serviceName, resource);
+        final TimedValue<Object> resourceMetadata = modelNexus.getResourceMetadataValue(provider, serviceName, resource,
+                name);
         if (resourceMetadata == null) {
             return promiseFactory.failed(new IllegalArgumentException("Resource metadata not found"));
         } else {
@@ -241,7 +243,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     public Promise<Map<String, Object>> getMetadataValues() {
         checkValid();
 
-        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider, service, resource);
+        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider, serviceName, resource);
         if (resourceMetadata == null) {
             return promiseFactory.failed(new IllegalArgumentException("Resource not found"));
         } else {
@@ -258,7 +260,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                             + " is not an ACTION. Only ACTION resources can use the ACT operation");
         }
 
-        return modelNexus.act(provider, service, resource, parameters);
+        return modelNexus.act(provider, serviceName, resource, parameters);
     }
 
 }

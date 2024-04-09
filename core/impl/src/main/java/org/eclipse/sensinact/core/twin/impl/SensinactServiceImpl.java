@@ -16,30 +16,32 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
+import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.model.core.provider.Provider;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactServiceImpl extends CommandScopedImpl implements SensinactService {
 
     private final SensinactProvider sensinactProvider;
     private final Provider provider;
-    private final EReference svcFeature;
+    private final String serviceName;
     private final ModelNexus nexus;
     private final PromiseFactory promiseFactory;
+    private EClass service;
 
     public SensinactServiceImpl(AtomicBoolean active, SensinactProvider sensinactProvider, Provider provider,
-            EReference svcFeature, ModelNexus nexus, PromiseFactory promiseFactory) {
+            String serviceName, EClass service, ModelNexus nexus, PromiseFactory promiseFactory) {
         super(active);
         this.sensinactProvider = sensinactProvider;
         this.provider = provider;
-        this.svcFeature = svcFeature;
+        this.serviceName = serviceName;
+        this.service = service;
         this.nexus = nexus;
         this.promiseFactory = promiseFactory;
     }
@@ -47,15 +49,15 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
     @Override
     public Map<String, SensinactResource> getResources() {
         checkValid();
-        return nexus.getResourcesForService(svcFeature.getEReferenceType())
+        return nexus.getResourcesForService(service)
                 .collect(Collectors.toMap(ETypedElement::getName, a -> new SensinactResourceImpl(active, this, provider,
-                        svcFeature, a, a.getEType().getInstanceClass(), nexus, promiseFactory)));
+                        serviceName, a, a.getEType().getInstanceClass(), nexus, promiseFactory)));
     }
 
     @Override
     public String getName() {
         checkValid();
-        return svcFeature.getName();
+        return serviceName;
     }
 
     @Override
