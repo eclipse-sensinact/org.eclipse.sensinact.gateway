@@ -456,13 +456,52 @@ public class SubscriptionTest {
             testAdmin.setFriendlyName(provider.getId());
             testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
 
-
             provider.getServices().put("testService3", testService3);
             provider.getServices().put("testService4", testService4);
 
             Provider saved = nexus.save(provider);
 
             verifyNewProviderNotification(accumulator, saved);
+        }
+
+        @Test
+        void pushEObjectTestSimpleWithServiceMapRemoveService() throws IOException {
+
+            DynamicProvider provider = (DynamicProvider) EcoreUtil
+                    .create((EClass) ePackage.getEClassifier("DynamicTemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+            Service testService3 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService1"));
+            Service testService4 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService3.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService4.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            provider.getServices().put("testService3", testService3);
+            provider.getServices().put("testService4", testService4);
+
+            Provider saved = nexus.save(provider);
+            assertTrue(saved instanceof DynamicProvider);
+            verifyNewProviderNotification(accumulator, saved);
+
+            DynamicProvider dynamic = (DynamicProvider) saved;
+            Service service = dynamic.getServices().removeKey("testService4");
+            dynamic.getServices().put("bla", service);
+
+            saved = nexus.save(dynamic);
+
+            verifyProviderUpdateNotification(accumulator, provider, saved);
         }
 
         /**
@@ -1239,9 +1278,9 @@ public class SubscriptionTest {
      */
     private static void verifyServiceChangeNottification(NotificationAccumulator accumulator, Provider provider,
             Service oldService, Service newService, String serviceName) {
-        EMFUtil.streamAttributes(oldService.eClass()).filter(oldService::eIsSet).forEach(
-                ea -> verifyServiceAttributeChangeNotification(accumulator, provider, oldService, newService, ea,
-                        serviceName));
+        EMFUtil.streamAttributes(oldService.eClass()).filter(oldService::eIsSet)
+                .forEach(ea -> verifyServiceAttributeChangeNotification(accumulator, provider, oldService, newService,
+                        ea, serviceName));
     }
 
     /**
@@ -1262,12 +1301,11 @@ public class SubscriptionTest {
                 EMFUtil.getModelName(provider.eClass()), provider.getId());
         provider.eClass().getEAllReferences().stream()
                 .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE).filter(provider::eIsSet)
-                .map(provider::eGet).filter(Service.class::isInstance).map(Service.class::cast)
-                .forEach(
+                .map(provider::eGet).filter(Service.class::isInstance).map(Service.class::cast).forEach(
                         s -> verifyNewServiceNottification(accumulator, provider, s, s.eContainingFeature().getName()));
         if (provider instanceof DynamicProvider) {
             ((DynamicProvider) provider).getServices()
-                .forEach(e -> verifyNewServiceNottification(accumulator, provider, e.getValue(), e.getKey()));
+                    .forEach(e -> verifyNewServiceNottification(accumulator, provider, e.getValue(), e.getKey()));
         }
     }
 
@@ -1285,9 +1323,8 @@ public class SubscriptionTest {
         Mockito.verify(accumulator).addResource(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
                 serviceName, attribute.getName());
         Mockito.verify(accumulator).resourceValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
-                provider.getId(), serviceName, attribute.getName(),
-                attribute.getEType().getInstanceClass(), null, service.eGet(attribute),
-                getTimestampForService(service, attribute));
+                provider.getId(), serviceName, attribute.getName(), attribute.getEType().getInstanceClass(), null,
+                service.eGet(attribute), getTimestampForService(service, attribute));
         Mockito.verify(accumulator).metadataValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
                 provider.getId(), serviceName, attribute.getName(), null,
                 Map.of("value", service.eGet(attribute), "timestamp", getTimestampForService(service, attribute)),

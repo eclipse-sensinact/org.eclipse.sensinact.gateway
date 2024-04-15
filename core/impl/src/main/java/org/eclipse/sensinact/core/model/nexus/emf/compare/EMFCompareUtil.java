@@ -134,12 +134,11 @@ public class EMFCompareUtil {
     }
 
     private static void servicesMapUpdate(DynamicProvider incomming, DynamicProvider original,
-            NotificationAccumulator accumulator,
-            List<EStructuralFeature> blackList) {
+            NotificationAccumulator accumulator, List<EStructuralFeature> blackList) {
 
         List<String> toDelete = new ArrayList<>(original.getServices().keySet());
         List<String> toAdd = new ArrayList<>(incomming.getServices().keySet());
-        List<String> toUpdate = new ArrayList<>(original.getServices().keySet());
+        List<String> toUpdate = new ArrayList<>();
 
         for (Iterator<String> iterator = toAdd.iterator(); iterator.hasNext();) {
             String serviceName = iterator.next();
