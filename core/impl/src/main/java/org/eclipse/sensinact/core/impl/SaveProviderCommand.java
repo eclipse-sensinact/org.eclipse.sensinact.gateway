@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.impl;
 
 import java.time.Instant;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.emf.command.AbstractSensinactEMFCommand;
 import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
@@ -35,11 +36,12 @@ public class SaveProviderCommand extends AbstractSensinactEMFCommand<Void> {
     protected Promise<Void> call(SensinactEMFDigitalTwin twin, SensinactEMFModelManager modelMgr,
             PromiseFactory promiseFactory) {
 
-        Model model = modelMgr.getModel(provider.eClass());
+        EClass eClass = provider.eClass();
+        Model model = modelMgr.getModel(eClass);
         if (model == null) {
-            model = modelMgr.createModel(provider.eClass()).withCreationTime(Instant.now()).build();
+            model = modelMgr.createModel(eClass).withCreationTime(Instant.now()).build();
         }
-        SensinactEMFProvider sp = twin.getProvider(model.getName(), provider.getId());
+        SensinactEMFProvider sp = twin.getProvider(model.getPackageUri(), model.getName(), provider.getId());
         if (sp == null) {
             sp = twin.createProvider(provider);
         }

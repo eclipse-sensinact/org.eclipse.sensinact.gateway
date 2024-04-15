@@ -47,6 +47,12 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     }
 
     @Override
+    public String getPackageUri() {
+        checkValid();
+        return eClass.getEPackage().getNsURI();
+    }
+
+    @Override
     public boolean isExclusivelyOwned() {
         checkValid();
         throw new RuntimeException("Not implemented");

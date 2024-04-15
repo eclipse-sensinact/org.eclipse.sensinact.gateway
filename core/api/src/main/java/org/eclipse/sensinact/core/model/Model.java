@@ -21,6 +21,8 @@ import org.eclipse.sensinact.core.command.CommandScoped;
  */
 public interface Model extends Modelled, CommandScoped {
 
+    String getPackageUri();
+
     ServiceBuilder<Service> createService(String service);
 
     Map<String, ? extends Service> getServices();
