@@ -343,7 +343,7 @@ public class ModelNexus {
     public void handleDataUpdate(Provider provider, String serviceName, EStructuralFeature resourceFeature, Object data,
             Instant timestamp) {
 
-        Service service = getServiceFromProvider(serviceName, provider);
+        Service service = provider.getService(serviceName);
         if (service == null) {
             Optional<EReference> serviceFeature = getServiceReferencesForModel(provider.eClass())
                     .filter(ref -> serviceName.equals(ref.getName())).findFirst();
@@ -690,7 +690,7 @@ public class ModelNexus {
 
     public Map<String, Object> getResourceMetadata(Provider provider, String serviceName,
             final ETypedElement rcFeature) {
-        Service svc = getServiceFromProvider(serviceName, provider);
+        Service svc = provider.getService(serviceName);
         return getResourceMetadata(svc, rcFeature);
     }
 
@@ -702,7 +702,7 @@ public class ModelNexus {
 
     public TimedValue<Object> getResourceMetadataValue(Provider provider, String serviceName,
             final ETypedElement rcFeature, String key) {
-        final Service svc = getServiceFromProvider(serviceName, provider);
+        final Service svc = provider.getService(serviceName);
         if (svc == null) {
             return null;
         }
@@ -897,9 +897,7 @@ public class ModelNexus {
         List<ActionParameter> params = namedParameterTypes.stream().map(EMFUtil::createActionParameter)
                 .collect(Collectors.toList());
 
-        Action action = EMFUtil.createAction(serviceEClass, name, type, params);
-
-        return action;
+        return EMFUtil.createAction(serviceEClass, name, type, params);
     }
 
     /**
@@ -1151,7 +1149,6 @@ public class ModelNexus {
         }
 
         return id;
-
     }
 
     public Provider getProvider(EClass model, String id) {
@@ -1203,20 +1200,5 @@ public class ModelNexus {
             getProviderofEPackage(ePackage).collect(Collectors.toSet())
                     .forEach(p -> doDeleteProvider(ePackage.getNsURI(), EMFUtil.getModelName(p.eClass()), p.getId()));
         }
-    }
-
-    /**
-     * @return the Service either from a Reference or from the dynamic service list.
-     */
-    public Service getServiceFromProvider(String serviceName, Provider provider) {
-
-        EStructuralFeature eStructuralFeature = provider.eClass().getEStructuralFeature(serviceName);
-        if (eStructuralFeature == null) {
-            if (provider instanceof DynamicProvider) {
-                return ((DynamicProvider) provider).getServices().get(serviceName);
-            }
-            return null;
-        }
-        return (Service) provider.eGet(eStructuralFeature);
     }
 }

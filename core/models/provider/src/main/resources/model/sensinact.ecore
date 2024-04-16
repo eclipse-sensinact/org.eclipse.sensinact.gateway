@@ -6,6 +6,18 @@
     <details key="ecore" value="http://www.eclipse.org/emf/2002/Ecore"/>
   </eAnnotations>
   <eClassifiers xsi:type="ecore:EClass" name="Provider">
+    <eOperations name="getService" eType="#//Service">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="EStructuralFeature serviceFeature = eClass().getEStructuralFeature(serviceName);&#xA;if (serviceFeature instanceof &lt;%org.eclipse.emf.ecore.EReference%>) {&#xA;&#x9;EClass refEClass = ((EReference) serviceFeature).getEReferenceType();&#xA;&#x9;return ProviderPackage.Literals.SERVICE.isSuperTypeOf(refEClass) ? (Service) eGet(serviceFeature) : null;&#xA;}&#xA;return null;"/>
+      </eAnnotations>
+      <eParameters name="serviceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="getServiceEClass" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EClass">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="&lt;%org.eclipse.emf.ecore.EStructuralFeature%> serviceFeature = eClass().getEStructuralFeature(serviceName);&#xA;if (serviceFeature instanceof &lt;%org.eclipse.emf.ecore.EReference%>) {&#xA;&#x9;&lt;%org.eclipse.emf.ecore.EClass%> refEClass = ((EReference) serviceFeature).getEReferenceType();&#xA;&#x9;return ProviderPackage.Literals.SERVICE.isSuperTypeOf(refEClass) ? refEClass : null;&#xA;}&#xA;return null;"/>
+      </eAnnotations>
+      <eParameters name="serviceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         unsettable="true" iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="admin" eType="#//Admin"
@@ -67,6 +79,18 @@
     <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
       <details key="documentation" value="To achieve a good Model, concrete EClasses that inherit from Provider should &#xA;use References for predefined Services.&#xA;Sometimes however you can't know how many Services a Provider can have. &#xA;In such a case, this Map can be used in addtion to directly Referenced Services.&#xA;&#xA;As an example: Such a Provider can be a Camera that can detect Objects like cars, &#xA;bikes or pedestriance in configureable zones. Each zone can in this case be a &#xA;Service with defined Resources. How may zones exist however, depdends on the &#xA;configuration. Thus our camera model can benefit from service map in addition&#xA;some predefined fix services it might have.&#xA;&#xA;Service names must still be unique and must not collide with existing References.&#xA;"/>
     </eAnnotations>
+    <eOperations name="getService" eType="#//Service">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="Service service = super.getService(serviceName);&#xA;return service != null ? service : getServices().get(serviceName);"/>
+      </eAnnotations>
+      <eParameters name="serviceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eOperations name="getServiceEClass" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EClass">
+      <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="EClass serviceType = super.getServiceEClass(serviceName);&#xA;return serviceType != null ? serviceType : getServices().get(serviceName).eClass();"/>
+      </eAnnotations>
+      <eParameters name="serviceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
     <eStructuralFeatures xsi:type="ecore:EReference" name="services" upperBound="-1"
         eType="#//ServiceMap" containment="true">
       <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">

@@ -105,7 +105,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     private <T> TimedValue<T> getValueFromTwin(final Class<T> type) {
         final Instant currentTimestamp;
         final T currentValue;
-        final Service svc = modelNexus.getServiceFromProvider(serviceName, provider);
+        final Service svc = provider.getService(serviceName);
         if (svc != null) {
             // Service is there
             final Object rawValue = svc.eGet((EAttribute) resource);

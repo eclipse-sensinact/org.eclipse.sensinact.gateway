@@ -24,9 +24,19 @@
     <genDataTypes ecoreDataType="sensinact.ecore#//EInstant" create="return Instant.parse(it);"
         convert="return it.toString();"/>
     <genClasses ecoreClass="sensinact.ecore#//Provider">
+      <genAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="org.eclipse.emf.ecore.EStructuralFeature serviceFeature = eClass().getEStructuralFeature(service);\nreturn serviceFeature != null ? (Service) eGet(serviceFeature) : null;"/>
+      </genAnnotations>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Provider/id"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//Provider/admin"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//Provider/linkedProviders"/>
+      <genOperations ecoreOperation="sensinact.ecore#//Provider/getService" body="EStructuralFeature serviceFeature = eClass().getEStructuralFeature(serviceName);&#xA;if (serviceFeature instanceof &lt;%org.eclipse.emf.ecore.EReference%>) {&#xA;&#x9;EClass refEClass = ((EReference) serviceFeature).getEReferenceType();&#xA;&#x9;return ProviderPackage.Literals.SERVICE.isSuperTypeOf(refEClass) ? (Service) eGet(serviceFeature) : null;&#xA;}&#xA;return null;">
+        <genParameters ecoreParameter="sensinact.ecore#//Provider/getService/serviceName"/>
+      </genOperations>
+      <genOperations ecoreOperation="sensinact.ecore#//Provider/getServiceEClass"
+          body="&lt;%org.eclipse.emf.ecore.EStructuralFeature%> serviceFeature = eClass().getEStructuralFeature(serviceName);&#xA;if (serviceFeature instanceof &lt;%org.eclipse.emf.ecore.EReference%>) {&#xA;&#x9;&lt;%org.eclipse.emf.ecore.EClass%> refEClass = ((EReference) serviceFeature).getEReferenceType();&#xA;&#x9;return ProviderPackage.Literals.SERVICE.isSuperTypeOf(refEClass) ? refEClass : null;&#xA;}&#xA;return null;">
+        <genParameters ecoreParameter="sensinact.ecore#//Provider/getServiceEClass/serviceName"/>
+      </genOperations>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//Admin">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/friendlyName"/>
@@ -59,7 +69,18 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ServiceMap/key"/>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//DynamicProvider">
+      <genAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
+        <details key="body" value="return getServices().get(service);"/>
+      </genAnnotations>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//DynamicProvider/services"/>
+      <genOperations ecoreOperation="sensinact.ecore#//DynamicProvider/getService"
+          body="Service service = super.getService(serviceName);&#xA;return service != null ? service : getServices().get(serviceName);">
+        <genParameters ecoreParameter="sensinact.ecore#//DynamicProvider/getService/serviceName"/>
+      </genOperations>
+      <genOperations ecoreOperation="sensinact.ecore#//DynamicProvider/getServiceEClass"
+          body="EClass serviceType = super.getServiceEClass(serviceName);&#xA;return serviceType != null ? serviceType : getServices().get(serviceName).eClass();">
+        <genParameters ecoreParameter="sensinact.ecore#//DynamicProvider/getServiceEClass/serviceName"/>
+      </genOperations>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
