@@ -159,17 +159,17 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return getService(null, model, providerName, service);
     }
 
-	private SensinactServiceImpl getService(Provider provider, String model, String serviceName) {
-		if (provider == null) {
-			return null;
-		}
-		EClass serviceType = provider.getServiceEClass(serviceName);
-		if (serviceType == null) {
-			return null;
-		}
-		final SensinactProviderImpl snProvider = toProvider(provider);
-		return toService(provider, serviceName, serviceType, snProvider);
-	}
+    private SensinactServiceImpl getService(Provider provider, String model, String serviceName) {
+        if (provider == null) {
+            return null;
+        }
+        EClass serviceType = provider.getServiceEClass(serviceName);
+        if (serviceType == null) {
+            return null;
+        }
+        final SensinactProviderImpl snProvider = toProvider(provider);
+        return toService(provider, serviceName, serviceType, snProvider);
+    }
 
     /*
      * (non-Javadoc)
@@ -200,10 +200,10 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         if (provider == null) {
             return null;
         }
-		final EClass serviceEClass = provider.getServiceEClass(serviceName);
-		if (serviceEClass == null) {
-			return null;
-		}
+        final EClass serviceEClass = provider.getServiceEClass(serviceName);
+        if (serviceEClass == null) {
+            return null;
+        }
 
         final ETypedElement rcFeature = Optional.ofNullable(serviceEClass.getEStructuralFeature(resource))
                 .map(ETypedElement.class::cast)
@@ -241,11 +241,11 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             return null;
         }
 
-		final Service svc = provider.getService(serviceName);
-		if (svc == null) {
-			return null;
-		}
-		
+        final Service svc = provider.getService(serviceName);
+        if (svc == null) {
+            return null;
+        }
+
         final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resource);
         if (rcFeature == null) {
             return null;
@@ -277,17 +277,17 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     }
 
     private SensinactResourceImpl toResource(final SensinactService parent, Provider provider, String serviceName,
-			final ETypedElement rcFeature) {
-		return new SensinactResourceImpl(active, parent, provider, serviceName, rcFeature,
-				rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
-	}
+            final ETypedElement rcFeature) {
+        return new SensinactResourceImpl(active, parent, provider, serviceName, rcFeature,
+                rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
+    }
 
-	private SensinactServiceImpl toService(Provider provider, String serviceName, final EClass serviceEClass,
-			final SensinactProviderImpl snProvider) {
-		return new SensinactServiceImpl(active, snProvider, provider, serviceName, serviceEClass, nexusImpl, pf);
-	}
+    private SensinactServiceImpl toService(Provider provider, String serviceName, final EClass serviceEClass,
+            final SensinactProviderImpl snProvider) {
+        return new SensinactServiceImpl(active, snProvider, provider, serviceName, serviceEClass, nexusImpl, pf);
+    }
 
-	/**
+    /**
      * Fills the fields of the given resource snapshot
      *
      * @param rcSnapshot Resource snapshot
