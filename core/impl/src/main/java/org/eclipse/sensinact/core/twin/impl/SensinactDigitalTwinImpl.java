@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
@@ -37,7 +36,6 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -161,18 +159,16 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return getService(null, model, providerName, service);
     }
 
-    private SensinactServiceImpl getService(Provider provider, String model, String service) {
+    private SensinactServiceImpl getService(Provider provider, String model, String serviceName) {
         if (provider == null) {
             return null;
         }
-
-        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(service);
-        if (svcFeature == null) {
+        EClass serviceType = provider.getServiceEClass(serviceName);
+        if (serviceType == null) {
             return null;
         }
-
         final SensinactProviderImpl snProvider = toProvider(provider);
-        return toService(snProvider, provider, (EReference) svcFeature);
+        return toService(provider, serviceName, serviceType, snProvider);
     }
 
     /*
@@ -200,17 +196,14 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return getResource(provider, nexusImpl.getProviderModel(providerName), service, resource);
     }
 
-    private SensinactResourceImpl getResource(Provider provider, String model, String service, String resource) {
+    private SensinactResourceImpl getResource(Provider provider, String model, String serviceName, String resource) {
         if (provider == null) {
             return null;
         }
-
-        final EReference svcFeature = (EReference) provider.eClass().getEStructuralFeature(service);
-        if (svcFeature == null) {
+        final EClass serviceEClass = provider.getServiceEClass(serviceName);
+        if (serviceEClass == null) {
             return null;
         }
-
-        final EClass serviceEClass = svcFeature.getEReferenceType();
 
         final ETypedElement rcFeature = Optional.ofNullable(serviceEClass.getEStructuralFeature(resource))
                 .map(ETypedElement.class::cast)
@@ -224,8 +217,8 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Construct the resource
         final SensinactProviderImpl snProvider = toProvider(provider);
-        final SensinactServiceImpl snSvc = toService(snProvider, provider, svcFeature);
-        return toResource(snSvc, provider, svcFeature, rcFeature);
+        final SensinactServiceImpl snService = toService(provider, serviceName, serviceEClass, snProvider);
+        return toResource(snService, provider, serviceName, rcFeature);
     }
 
     public <T> TimedValue<T> getResourceValue(String modelPackageUri, String model, String providerName, String service,
@@ -239,7 +232,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return getResourceValue(nexusImpl.getProvider(providerName), service, resource, type);
     }
 
-    private <T> TimedValue<T> getResourceValue(Provider provider, String service, String resource, Class<T> type) {
+    private <T> TimedValue<T> getResourceValue(Provider provider, String serviceName, String resource, Class<T> type) {
         if (type == null) {
             throw new IllegalArgumentException("Resource type must not be null");
         }
@@ -248,14 +241,12 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             return null;
         }
 
-        final EStructuralFeature svcFeature = provider.eClass().getEStructuralFeature(service);
-        if (svcFeature == null) {
+        final Service svc = provider.getService(serviceName);
+        if (svc == null) {
             return null;
         }
-        final Service svc = (Service) provider.eGet(svcFeature);
 
         final EStructuralFeature rcFeature = svc.eClass().getEStructuralFeature(resource);
-
         if (rcFeature == null) {
             return null;
         }
@@ -285,15 +276,15 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return new SensinactProviderImpl(active, modelProvider, nexusImpl, pf);
     }
 
-    private SensinactServiceImpl toService(final SensinactProvider parent, Provider provider, EReference ref) {
-        return new SensinactServiceImpl(active, parent, provider, ref.getName(), ref.getEReferenceType(), nexusImpl,
-                pf);
+    private SensinactResourceImpl toResource(final SensinactService parent, Provider provider, String serviceName,
+            final ETypedElement rcFeature) {
+        return new SensinactResourceImpl(active, parent, provider, serviceName, rcFeature,
+                rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
     }
 
-    private SensinactResourceImpl toResource(final SensinactService parent, Provider provider, EReference svcFeature,
-            final ETypedElement rcFeature) {
-        return new SensinactResourceImpl(active, parent, provider, svcFeature.getName(),
-                rcFeature, rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
+    private SensinactServiceImpl toService(Provider provider, String serviceName, final EClass serviceEClass,
+            final SensinactProviderImpl snProvider) {
+        return new SensinactServiceImpl(active, snProvider, provider, serviceName, serviceEClass, nexusImpl, pf);
     }
 
     /**
