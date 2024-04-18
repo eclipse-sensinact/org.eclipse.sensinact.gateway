@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
     <artifactId>distribution</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
 
   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
@@ -39,7 +39,8 @@
   </modules>
 
   <properties>
-    <launcher.version>0.0.2-SNAPSHOT</launcher.version>
+    <launcher.version>${project.version}</launcher.version>
+    <gateway.version>${project.version}</gateway.version>
   </properties>
 
   <dependencies>
@@ -52,6 +53,12 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -154,7 +161,7 @@
                   <unzip src="${project.build.directory}/repository.zip"
                     dest="${project.build.directory}/it/repository/" />
                   <copy todir="${project.build.directory}/it/features/">
-                    <fileset dir="${basedir}/src/main/resources/" includes="*.json" />
+                    <fileset dir="${project.build.directory}/generated/features/" includes="*.json" />
                   </copy>
                 </target>
               </configuration>
@@ -179,7 +186,7 @@
                     <classifier>osgifeaturerepo</classifier>
                   </artifact>
                   <artifact>
-                    <file>${basedir}/src/main/resources/${project.artifactId}.json</file>
+                    <file>${project.build.directory}/generated/features/${project.artifactId}.json</file>
                     <type>json</type>
                     <classifier>osgifeature</classifier>
                   </artifact>
@@ -190,5 +197,22 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/generated/features/</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>

@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
     <artifactId>filters</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>ldap</artifactId>
   <name>SensiNact Northbound Filters :: LDAP</name>

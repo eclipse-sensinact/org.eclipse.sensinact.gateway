@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway</groupId>
     <artifactId>sensinact-parent</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
   <artifactId>northbound</artifactId>
