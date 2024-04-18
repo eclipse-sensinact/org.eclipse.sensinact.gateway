@@ -18,7 +18,7 @@
     <relativePath>../pom.xml</relativePath>
     <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
     <artifactId>models</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>metadata</artifactId>
   <name>SensiNact internal Metadata Model</name>

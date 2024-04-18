@@ -1,5 +1,5 @@
 {
-  "id": "org.eclipse.sensinact.gateway.distribution.features:northbound-ogc-sensorthings-mqtt-feature:osgifeature:0.0.2-SNAPSHOT",
+  "id": "org.eclipse.sensinact.gateway.distribution.features:northbound-ogc-sensorthings-mqtt-feature:osgifeature:${project.version}",
   "bundles": [
     { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1" },
     { "id": "io.netty:netty-common:4.1.93.Final" },
@@ -13,8 +13,8 @@
     { "id": "io.netty:netty-transport:4.1.93.Final" },
     { "id": "io.netty:netty-transport-classes-epoll:4.1.93.Final" },
     { "id": "io.netty:netty-transport-native-unix-common:4.1.93.Final" },
-    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:dto:0.0.2-SNAPSHOT" },
-    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:mqtt:0.0.2-SNAPSHOT" }
+    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:dto:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:mqtt:${gateway.version}" }
 ],
   "extensions": {
     "sensinact.feature.depends": {
@@ -22,7 +22,7 @@
       "type": "artifacts",
       "artifacts": [
         {
-          "id": "org.eclipse.sensinact.gateway.distribution.features:core-feature:osgifeature:0.0.2-SNAPSHOT"
+          "id": "org.eclipse.sensinact.gateway.distribution.features:core-feature:osgifeature:${gateway.version}"
         }
       ]
     }

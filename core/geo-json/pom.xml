@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.core</groupId>
     <artifactId>core</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>geo-json</artifactId>
   <name>SensiNact GeoJSON mapping types</name>

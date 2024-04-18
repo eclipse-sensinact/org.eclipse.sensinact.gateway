@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
     <artifactId>history</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>history-api</artifactId>
 

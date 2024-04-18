@@ -16,7 +16,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
     <artifactId>features</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
 
   <artifactId>northbound-ogc-sensorthings-mqtt-feature</artifactId>
@@ -25,8 +25,8 @@
   <packaging>pom</packaging>
 
   <properties>
-    <sensinact.version>0.0.2-SNAPSHOT</sensinact.version>
-    <sensorthings.version>0.0.2-SNAPSHOT</sensorthings.version>
+    <sensinact.version>${revision}${changelist}</sensinact.version>
+    <sensorthings.version>${revision}${changelist}</sensorthings.version>
     <moquette.version>0.17</moquette.version>
     <netty.version>4.1.93.Final</netty.version>
   </properties>

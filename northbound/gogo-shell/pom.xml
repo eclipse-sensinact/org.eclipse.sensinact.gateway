@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
     <artifactId>northbound</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>gogo-shell</artifactId>
   <name>SensiNact Northbound Gogo Shell Commands</name>
@@ -26,7 +26,6 @@
     <org.apache.felix.gogo.shell.version>1.1.4</org.apache.felix.gogo.shell.version>
     <org.apache.felix.gogo.jline.version>1.1.8</org.apache.felix.gogo.jline.version>
     <org.apache.felix.gogo.runtime.version>1.1.4</org.apache.felix.gogo.runtime.version>
-    <org.json.version>20190722</org.json.version>
   </properties>
 
   <dependencyManagement>
@@ -45,11 +44,6 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.gogo.runtime</artifactId>
         <version>${org.apache.felix.gogo.runtime.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>${org.json.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

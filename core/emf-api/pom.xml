@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.core</groupId>
     <artifactId>core</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>emf-api</artifactId>
   <name>SensiNact core API with EMF dependencies</name>
@@ -48,16 +48,11 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>geo-json</artifactId>
       <version>${project.version}</version>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>${project.groupId}.models</groupId>
       <artifactId>provider</artifactId>
       <version>${project.version}</version>
-    </dependency> -->
-    <dependency>
-        <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
-        <artifactId>provider</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
