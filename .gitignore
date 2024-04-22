@@ -22,6 +22,9 @@ webclient/node_modules
 webclient/package-lock.json
 webclient/dist
 
+# POM flattening
+.flattened-pom.xml
+
 # MQTT tests
 .moquette_uuid
 
