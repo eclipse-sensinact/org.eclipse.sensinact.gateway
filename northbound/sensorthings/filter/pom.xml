@@ -15,13 +15,13 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
     <artifactId>sensorthings</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>filter</artifactId>
   <name>SensiNact Northbound SensorThings :: Filter Parser</name>
   <description>Converts OGC SensorThings filters to SensiNact filters</description>
   <properties>
-    <sensinact.core.version>0.0.2-SNAPSHOT</sensinact.core.version>
+    <sensinact.core.version>${project.version}</sensinact.core.version>
   </properties>
   <dependencies>
     <dependency>

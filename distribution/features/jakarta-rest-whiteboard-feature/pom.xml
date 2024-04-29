@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
     <artifactId>features</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>jakarta-rest-whiteboard-feature</artifactId>
   <packaging>pom</packaging>
@@ -195,7 +195,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
-                  <version>0.0.2-SNAPSHOT</version>
+                  <version>${revision}${changelist}</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>jakarta-servlet-whiteboard-feature.json</destFileName>
@@ -203,7 +203,7 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>gogo-shell-feature</artifactId>
-                  <version>0.0.2-SNAPSHOT</version>
+                  <version>${revision}${changelist}</version>
                   <type>json</type>
                   <classifier>osgifeature</classifier>
                   <destFileName>gogo-shell-feature.json</destFileName>
@@ -219,14 +219,14 @@
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
-                  <version>0.0.2-SNAPSHOT</version>
+                  <version>${revision}${changelist}</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
                   <artifactId>gogo-shell-feature</artifactId>
-                  <version>0.0.2-SNAPSHOT</version>
+                  <version>${revision}${changelist}</version>
                   <type>zip</type>
                   <classifier>osgifeaturerepo</classifier>
                 </artifactItem>

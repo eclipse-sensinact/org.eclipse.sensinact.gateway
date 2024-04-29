@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
     <artifactId>security</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>openid-connect</artifactId>
   <name>SensiNact Northbound Open Id Connect authentication validator</name>

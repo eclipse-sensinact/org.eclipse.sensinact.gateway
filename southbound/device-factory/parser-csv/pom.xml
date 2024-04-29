@@ -15,7 +15,7 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
     <artifactId>device-factory</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
   </parent>
   <artifactId>parser-csv</artifactId>
   <name>SensiNact Southbound Device factory :: CSV parser</name>
