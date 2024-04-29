@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +23,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.emf.common.util.EMap;
 import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.Metadata;
+import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
@@ -38,6 +43,12 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.model.core.testdata.DynamicTestSensor;
+import org.eclipse.sensinact.model.core.testdata.TestAdmin;
+import org.eclipse.sensinact.model.core.testdata.TestSensor;
+import org.eclipse.sensinact.model.core.testdata.TestTemperatur;
+import org.eclipse.sensinact.model.core.testdata.TestdataFactory;
+import org.eclipse.sensinact.model.core.testdata.TestdataPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -446,6 +457,104 @@ public class DataUpdateServiceTest {
             assertEquals(PROVIDER, due.getProvider());
             assertEquals(SERVICE, due.getService());
             assertEquals(RESOURCE, due.getResource());
+        }
+    }
+    
+    
+
+    @Nested
+    public class EMFBasedDTO {
+        
+        @ModelPackageUri(TestdataPackage.eNS_URI)
+        @Model("DynamicTestSensor")
+        @Provider(PROVIDER)
+        @Service("temp")
+        public class TestModelDTO {
+            @Resource("v1")
+            @Data
+            public String data;
+
+            @Metadata
+            public String units;
+        }
+        
+        @Test
+        void basic() throws Exception {
+            
+            TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
+            TestAdmin admin = TestdataFactory.eINSTANCE.createTestAdmin();
+            admin.setTestAdmin("meta1");
+            TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
+            temp.setV1("12 °C");
+            sensor.setTemp(temp);
+            sensor.setId(PROVIDER);
+            sensor.setAdmin(admin);
+            
+            Promise<?> update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            Object value = getResourceValue("TestSensor", "temp", "v1");
+            
+            assertEquals("12 °C", value);
+
+//            Throwable failure = update.getFailure();
+//            assertNotNull(failure);
+//            failure.printStackTrace();
+//            AbstractUpdateDto abstractUpdateDto = updates.get(0                  );
+//            System.out.println(abstractUpdateDto);
+            
+            
+        }
+        @Test
+        void serviceOnly() throws Exception {
+//            TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
+//            TestAdmin admin = TestdataFactory.eINSTANCE.createTestAdmin();
+//            admin.setTestAdmin("meta1");
+            TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
+            temp.setV1("12 °C");
+//            sensor.setTemp(temp);
+//            sensor.setId(PROVIDER);
+//            sensor.setAdmin(admin);
+            
+            Promise<?> update = push.pushUpdate(temp);
+            assertNull(update.getFailure());
+            Object value = getResourceValue(PROVIDER, "temp", "v1");
+            
+            assertEquals("12 °C", value);
+        }
+        @Test
+        void dynamic() throws Exception {
+            DynamicTestSensor sensor = TestdataFactory.eINSTANCE.createDynamicTestSensor();
+            sensor.setId(PROVIDER);
+            TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
+            temp.setV1("12 °C");
+            
+            EMap<String, org.eclipse.sensinact.model.core.provider.Service> services = sensor.getServices();
+            services.put("temp", temp);
+            Promise<?> update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            assertEquals("12 °C", getResourceValue("DynamicTestSensor", "temp", "v1"));
+            
+            TestModelDTO dto = new TestModelDTO();
+            dto.data = "13 °C";
+            
+            update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            t.printStackTrace();
+            assertNull(t);
+            assertEquals("13 °C", getResourceValue("TestSensor", "temp", "v1"));
+        }
+        
+        
+
+        private Object getResourceValue(String model,String service, String resource) throws InvocationTargetException, InterruptedException {
+            Object value = gt.execute(new ResourceCommand<Object>(TestdataPackage.eNS_URI, model, PROVIDER, service, resource) {
+            
+                @Override
+                protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
+                    return resource.getValue().map(t ->  t.getValue());
+                }
+            }).getValue();
+            return value;
         }
     }
 }
