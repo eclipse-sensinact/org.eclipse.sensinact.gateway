@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2022 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <relativePath>../pom.xml</relativePath>
+    <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
+    <artifactId>models</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>testdata</artifactId>
+  <name>SensiNact internal Testdata Model</name>
+  <description>The model for sensinact gateway core testdata.</description>
+  <!-- No integration tests -->
+  <properties>
+    <bnd-tests.skip>true</bnd-tests.skip>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
+      <artifactId>provider</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.emf</groupId>
+      <artifactId>org.gecko.emf.osgi.api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-generate-maven-plugin</artifactId>
+        <version>${bnd.version}</version>
+        <configuration>
+          <externalPlugins>
+            <dependency>
+              <groupId>org.geckoprojects.emf</groupId>
+              <artifactId>org.gecko.emf.osgi.codegen</artifactId>
+            </dependency>
+          </externalPlugins>
+          <steps>
+            <step>
+              <trigger>src/main/resources/model/testdata.genmodel</trigger>
+              <generateCommand>geckoEMF</generateCommand>
+              <output>src/main/java</output>
+              <clear>false</clear>
+              <properties>
+                <genmodel>src/main/resources/model/testdata.genmodel</genmodel>
+              </properties>
+            </step>
+          </steps>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
