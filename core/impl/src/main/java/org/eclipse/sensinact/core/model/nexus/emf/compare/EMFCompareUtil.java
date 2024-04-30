@@ -43,6 +43,7 @@ import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.model.core.provider.impl.FeatureCustomMetadataImpl;
+import org.eclipse.sensinact.model.core.provider.impl.ServiceMapImpl;
 
 /**
  * Helper to Compare EObjects
@@ -230,6 +231,9 @@ public class EMFCompareUtil {
     private static void notifyAttributeChange(EAttribute resource, String serviceName, Service newService,
             Service originalService, NotificationAccumulator accumulator) {
         EObject container = originalService.eContainer();
+        if (container instanceof ServiceMapImpl) {
+            container = container.eContainer();
+        }
         if (container instanceof Provider) {
             String packageUri = container.eClass().getEPackage().getNsURI();
             String modelName = EMFUtil.getModelName(container.eClass());
