@@ -11,6 +11,7 @@
       ecorePackage="testdata.ecore#/">
     <genClasses ecoreClass="testdata.ecore#//TestSensor">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference testdata.ecore#//TestSensor/temp"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference testdata.ecore#//TestSensor/tempNonContaint"/>
     </genClasses>
     <genClasses ecoreClass="testdata.ecore#//TestTemperatur">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//TestTemperatur/v1"/>

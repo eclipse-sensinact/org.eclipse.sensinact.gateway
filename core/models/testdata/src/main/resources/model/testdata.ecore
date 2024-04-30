@@ -6,7 +6,9 @@
     <details key="ecore" value="http://www.eclipse.org/emf/2002/Ecore"/>
   </eAnnotations>
   <eClassifiers xsi:type="ecore:EClass" name="TestSensor" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Provider">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="temp" eType="#//TestTemperatur"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="temp" eType="#//TestTemperatur"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tempNonContaint" eType="#//TestTemperatur"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TestTemperatur" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="v1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
