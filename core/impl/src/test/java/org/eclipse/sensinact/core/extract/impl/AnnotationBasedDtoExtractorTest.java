@@ -24,6 +24,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.Metadata;
 import org.eclipse.sensinact.core.annotation.dto.Model;
@@ -37,6 +39,7 @@ import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
+import org.eclipse.sensinact.model.core.testdata.TestdataPackage;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -125,6 +128,26 @@ public class AnnotationBasedDtoExtractorTest {
         public String bar;
     }
 
+    @Provider(PROVIDER)
+    public static class EMFTestDto {
+
+        @Model
+        public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
+
+        @Service
+        public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
+
+        @Service
+        public EReference service = TestdataPackage.Literals.TEST_SENSOR__TEMP;
+
+        @Service
+        public String serviceName = "temp";
+
+        @Data
+        public String v1;
+
+    }
+
     /**
      * Tests for class level annotations for provider/service/resource
      */
@@ -147,7 +170,9 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertTrue(fmd.mappingFailure.getMessage().contains("not properly defined"),
                     "Wrong message: " + fmd.mappingFailure.getMessage());
-            assertTrue(fmd.mappingFailure.getCause().getMessage().contains("annotated with Provider but that annotation has no value"),
+            assertTrue(
+                    fmd.mappingFailure.getCause().getMessage()
+                            .contains("annotated with Provider but that annotation has no value"),
                     "Wrong message: " + fmd.mappingFailure.getCause().getMessage());
         }
 
@@ -167,7 +192,9 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertTrue(fmd.mappingFailure.getMessage().contains("not properly defined"),
                     "Wrong message: " + fmd.mappingFailure.getMessage());
-            assertTrue(fmd.mappingFailure.getCause().getMessage().contains("annotated with Service but that annotation has no value"),
+            assertTrue(
+                    fmd.mappingFailure.getCause().getMessage()
+                            .contains("annotated with Service but that annotation has no value"),
                     "Wrong message: " + fmd.mappingFailure.getCause().getMessage());
         }
 
@@ -428,6 +455,32 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+        }
+    }
+
+    /**
+     * Tests for resource name defaulting based on field name
+     */
+    @Nested
+    public class EMFAnnotated {
+        @Test
+        void basicDtoWithBothValuesAndMetadataValues() {
+
+            Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
+
+            EMFTestDto dto = new EMFTestDto();
+
+            dto.v1 = VALUE_2;
+
+            List<? extends AbstractUpdateDto> updates = extractor(EMFTestDto.class).getUpdates(dto);
+
+            assertEquals(1, updates.size());
+
+            DataUpdateDto extracted = updates.stream().findFirst().map(DataUpdateDto.class::cast).get();
+
+            assertEquals(TestdataPackage.Literals.TEST_SENSOR, extracted.modelEClass);
+            assertEquals(TestdataPackage.Literals.TEST_TEMPERATUR, extracted.serviceEClass);
+            assertEquals(TestdataPackage.Literals.TEST_SENSOR__TEMP, extracted.serviceReference);
         }
     }
 

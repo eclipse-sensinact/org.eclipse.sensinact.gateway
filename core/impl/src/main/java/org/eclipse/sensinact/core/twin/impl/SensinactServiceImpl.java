@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
-import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.osgi.util.promise.PromiseFactory;
 
-public class SensinactServiceImpl extends CommandScopedImpl implements SensinactService {
+public class SensinactServiceImpl extends CommandScopedImpl implements SensinactEMFService {
 
     private final SensinactProvider sensinactProvider;
     private final Provider provider;
@@ -71,5 +71,11 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
         checkValid();
         return String.format("SensiNactService(provider=%s, name=%s, resources=%s)", provider.getId(), getName(),
                 getResources().keySet());
+    }
+
+    @Override
+    public EClass getServiceEClass() {
+        checkValid();
+        return service;
     }
 }

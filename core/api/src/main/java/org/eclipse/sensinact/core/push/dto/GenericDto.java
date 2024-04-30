@@ -23,7 +23,7 @@ import org.eclipse.sensinact.core.annotation.dto.NullAction;
  * Used to define a schema for generic device access with no model (e.g. driven
  * by configuration)
  */
-public final class GenericDto extends BaseValueDto {
+public class GenericDto extends BaseValueDto {
 
     public Class<?> type;
 

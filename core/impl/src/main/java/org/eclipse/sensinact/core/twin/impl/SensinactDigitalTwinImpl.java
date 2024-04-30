@@ -27,6 +27,7 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.impl.snapshot.ProviderSnapshotImpl;
 import org.eclipse.sensinact.core.impl.snapshot.ResourceSnapshotImpl;
 import org.eclipse.sensinact.core.impl.snapshot.ServiceSnapshotImpl;
@@ -278,7 +279,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
     private SensinactResourceImpl toResource(final SensinactService parent, Provider provider, String serviceName,
             final ETypedElement rcFeature) {
-        return new SensinactResourceImpl(active, parent, provider, serviceName, rcFeature,
+        return new SensinactResourceImpl(active, (SensinactEMFService) parent, provider, serviceName, rcFeature,
                 rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
     }
 
@@ -336,9 +337,9 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Filter providers by location (raw provider)
         if (geoFilter != null) {
             // Filter the provider location
-            providersStream = providersStream.filter(p -> geoFilter.test(p.getModelProvider().getAdmin().getLocation()));
+            providersStream = providersStream
+                    .filter(p -> geoFilter.test(p.getModelProvider().getAdmin().getLocation()));
         }
-
 
         // Filter providers according to their services
         providersStream = providersStream.map(p -> {

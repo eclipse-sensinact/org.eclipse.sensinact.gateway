@@ -27,9 +27,11 @@ import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
+import org.eclipse.sensinact.core.emf.dto.EMFGenericDto;
 import org.eclipse.sensinact.core.extract.impl.BulkGenericDtoDataExtractor;
 import org.eclipse.sensinact.core.extract.impl.CustomDtoDataExtractor;
 import org.eclipse.sensinact.core.extract.impl.DataExtractor;
+import org.eclipse.sensinact.core.extract.impl.EMFGenericDtoDataExtractor;
 import org.eclipse.sensinact.core.extract.impl.GenericDtoDataExtractor;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.push.DataMappingException;
@@ -63,18 +65,17 @@ public class DataUpdateImpl implements DataUpdate {
 
     @Override
     public Promise<?> pushUpdate(Object o) {
-        return doPushUpdate(o)
-                .recoverWith(p -> thread.getPromiseFactory()
-                        .failed(new FailedUpdatesException(toStreamOfDataUpdateFailures(p.getFailure()))));
+        return doPushUpdate(o).recoverWith(p -> thread.getPromiseFactory()
+                .failed(new FailedUpdatesException(toStreamOfDataUpdateFailures(p.getFailure()))));
     }
 
     private Stream<DataUpdateException> toStreamOfDataUpdateFailures(Throwable t) {
-        if(t instanceof DataUpdateException) {
+        if (t instanceof DataUpdateException) {
             return Stream.of((DataUpdateException) t);
         } else if (t instanceof FailedUpdatesException) {
-            return ((FailedUpdatesException)t).getFailedUpdates().stream();
+            return ((FailedUpdatesException) t).getFailedUpdates().stream();
         } else if (t instanceof FailedPromisesException) {
-            return ((FailedPromisesException)t).getFailedPromises().stream().flatMap(p -> {
+            return ((FailedPromisesException) t).getFailedPromises().stream().flatMap(p -> {
                 try {
                     return toStreamOfDataUpdateFailures(p.getFailure());
                 } catch (InterruptedException e) {
@@ -110,6 +111,8 @@ public class DataUpdateImpl implements DataUpdate {
     private DataExtractor createDataExtractor(Class<?> clazz) {
         if (clazz == GenericDto.class) {
             return new GenericDtoDataExtractor();
+        } else if (clazz == EMFGenericDto.class) {
+            return new EMFGenericDtoDataExtractor();
         } else if (clazz == BulkGenericDto.class) {
             return new BulkGenericDtoDataExtractor();
         } else {
@@ -140,8 +143,8 @@ public class DataUpdateImpl implements DataUpdate {
         @Override
         protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
                 PromiseFactory promiseFactory) {
-            return promiseFactory.failed(new DataMappingException(dto.modelPackageUri, dto.model,
-                    dto.provider, dto.service, dto.resource, dto.originalDto, dto.mappingFailure));
+            return promiseFactory.failed(new DataMappingException(dto.modelPackageUri, dto.model, dto.provider,
+                    dto.service, dto.resource, dto.originalDto, dto.mappingFailure));
         }
 
     }

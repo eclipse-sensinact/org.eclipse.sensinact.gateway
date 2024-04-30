@@ -26,4 +26,10 @@ public interface Modelled {
 
     boolean isAutoDelete();
 
+    /**
+     * Indicates if this is loaded Model, which is not allowed to be changed. Any
+     * changes to this model will result in an Exception. TODO: What kind of
+     * Exception?
+     */
+    boolean isFrozen();
 }

@@ -21,17 +21,18 @@ import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
+import org.eclipse.sensinact.core.emf.dto.EMFGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 
-public class GenericDtoDataExtractor implements DataExtractor {
+public class EMFGenericDtoDataExtractor implements DataExtractor {
 
     @Override
     public List<? extends AbstractUpdateDto> getUpdates(Object update) {
 
-        GenericDto dto;
+        EMFGenericDto dto;
 
         try {
-            dto = GenericDto.class.cast(update);
+            dto = EMFGenericDto.class.cast(update);
         } catch (ClassCastException e) {
             FailedMappingDto fmd = getFailedMappingDto(update,
                     new IllegalArgumentException("The supplied update dto is not of the correct type to extract", e));
@@ -46,12 +47,17 @@ public class GenericDtoDataExtractor implements DataExtractor {
                     getFailedMappingDto(dto, new IllegalArgumentException("No provider is defined"))));
         }
         if (dto.service == null) {
-            return List.of(copyCommonFields(dto, instant,
-                    getFailedMappingDto(dto, new IllegalArgumentException("No service is defined"))));
+            if (dto.serviceReference != null) {
+                dto.service = dto.serviceReference.getName();
+            } else {
+                return List.of(copyCommonFields(dto, instant,
+                        getFailedMappingDto(dto, new IllegalArgumentException("No service is defined"))));
+            }
         }
-        if (dto.resource == null) {
-            return List.of(copyCommonFields(dto, instant,
-                    getFailedMappingDto(dto, new IllegalArgumentException("No resource is defined"))));
+        if (dto.service != null && dto.serviceReference != null
+                && !dto.serviceReference.getName().equals(dto.service)) {
+            return List.of(copyCommonFields(dto, instant, getFailedMappingDto(dto,
+                    new IllegalArgumentException("Service and service reference have different names"))));
         }
 
         List<AbstractUpdateDto> list = new ArrayList<>();
@@ -62,6 +68,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
             if (dto.type != null)
                 dud.type = dto.type;
             dud.data = dto.value;
+            dud.modelEClass = dto.modelEClass;
             list.add(dud);
         }
 
@@ -90,6 +97,12 @@ public class GenericDtoDataExtractor implements DataExtractor {
         dud.resource = dto.resource;
         dud.timestamp = instant;
         dud.originalDto = dto;
+        if (dto instanceof EMFGenericDto) {
+            EMFGenericDto edto = (EMFGenericDto) dto;
+            dud.modelEClass = edto.modelEClass;
+            dud.serviceEClass = edto.serviceEClass;
+            dud.serviceReference = edto.serviceReference;
+        }
         return dud;
     }
 

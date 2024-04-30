@@ -18,13 +18,15 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
-import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.Service;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -45,7 +47,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
-    public Map<String, SensinactService> getServices() {
+    public Map<String, SensinactEMFService> getServices() {
         checkValid();
 
         return nexus.getDefinedServiceForProvider(provider).entrySet().stream()
@@ -117,5 +119,18 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
 
         return promiseFactory.resolved(null);
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider#getOrCreateService(
+     * java.lang.String)
+     */
+    @Override
+    public SensinactEMFService getOrCreateService(String name, EClass serviceEClass) {
+        Service serviceInstance = nexus.createServiceInstance(provider, name, serviceEClass);
+        return new SensinactServiceImpl(active, this, provider, name, serviceInstance.eClass(), nexus, promiseFactory);
     }
 }

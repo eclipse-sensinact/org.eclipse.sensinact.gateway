@@ -25,6 +25,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.model.impl.ResourceImpl;
@@ -41,7 +42,7 @@ import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactResourceImpl extends CommandScopedImpl implements SensinactResource {
 
-    private final SensinactService svc;
+    private final SensinactEMFService svc;
     private final Provider provider;
     private final String serviceName;
     private final ETypedElement resource;
@@ -49,7 +50,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     private final ModelNexus modelNexus;
     private final PromiseFactory promiseFactory;
 
-    public SensinactResourceImpl(AtomicBoolean active, SensinactService svc, Provider provider, String serviceName,
+    public SensinactResourceImpl(AtomicBoolean active, SensinactEMFService svc, Provider provider, String serviceName,
             ETypedElement resource, Class<?> type, ModelNexus nexusImpl, PromiseFactory promiseFactory) {
         super(active);
         this.svc = svc;
@@ -154,13 +155,11 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                 // Check new value type
                 final TimedValue<?> cachedValue = getValueFromTwin(type);
                 final TimedValue<T> newValue = new TimedValueImpl<T>(value, timestamp);
-                return modelNexus
-                        .pushValue(provider, serviceName, resource, (Class<T>) type, (TimedValue<T>) cachedValue,
-                                newValue)
-                        .map(x -> null);
+                return modelNexus.pushValue(provider, serviceName, resource, (Class<T>) type,
+                        (TimedValue<T>) cachedValue, newValue).map(x -> null);
             } else {
                 // No external setter: update the twin
-                modelNexus.handleDataUpdate(provider, serviceName,
+                modelNexus.handleDataUpdate(provider, serviceName, svc.getServiceEClass(),
                         (EStructuralFeature) resource, value, timestamp);
                 return promiseFactory.resolved(null);
             }
