@@ -25,7 +25,6 @@ import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ServiceBuilder;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 
 public class ModelImpl extends CommandScopedImpl implements Model {
 
@@ -50,7 +49,8 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     @Override
     public boolean isFrozen() {
         checkValid();
-        return !ProviderPackage.Literals.DYNAMIC_PROVIDER.isSuperTypeOf(eClass) && ((EClassImpl) eClass).isFrozen();
+//        return !ProviderPackage.Literals.DYNAMIC_PROVIDER.isSuperTypeOf(eClass) && ((EClassImpl) eClass).isFrozen();
+        return ((EClassImpl) eClass).isFrozen();
     }
 
     @Override
