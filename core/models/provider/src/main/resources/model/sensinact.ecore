@@ -87,7 +87,7 @@
     </eOperations>
     <eOperations name="getServiceEClass" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EClass">
       <eAnnotations source="http://www.eclipse.org/emf/2002/GenModel">
-        <details key="body" value="EClass serviceType = super.getServiceEClass(serviceName);&#xA;return serviceType != null ? serviceType : getServices().get(serviceName).eClass();"/>
+        <details key="body" value="EClass serviceType = super.getServiceEClass(serviceName);&#xA;if (serviceType != null) {&#xA;    return serviceType;&#xA;} else {&#xA;    Service service = getServices().get(serviceName);&#xA;    return service != null ? service.eClass() : null;&#xA;}"/>
       </eAnnotations>
       <eParameters name="serviceName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     </eOperations>

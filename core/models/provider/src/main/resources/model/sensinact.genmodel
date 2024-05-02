@@ -78,7 +78,7 @@
         <genParameters ecoreParameter="sensinact.ecore#//DynamicProvider/getService/serviceName"/>
       </genOperations>
       <genOperations ecoreOperation="sensinact.ecore#//DynamicProvider/getServiceEClass"
-          body="EClass serviceType = super.getServiceEClass(serviceName);&#xA;return serviceType != null ? serviceType : getServices().get(serviceName).eClass();">
+          body="EClass serviceType = super.getServiceEClass(serviceName);&#xA;if (serviceType != null) {&#xA;    return serviceType;&#xA;} else {&#xA;    Service service = getServices().get(serviceName);&#xA;    return service != null ? service.eClass() : null;&#xA;}">
         <genParameters ecoreParameter="sensinact.ecore#//DynamicProvider/getServiceEClass/serviceName"/>
       </genOperations>
     </genClasses>

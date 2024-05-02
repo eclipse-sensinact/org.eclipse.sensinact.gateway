@@ -128,25 +128,7 @@ public class AnnotationBasedDtoExtractorTest {
         public String bar;
     }
 
-    @Provider(PROVIDER)
-    public static class EMFTestDto {
-
-        @Model
-        public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
-
-        @Service
-        public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
-
-        @Service
-        public EReference service = TestdataPackage.Literals.TEST_SENSOR__TEMP;
-
-        @Service
-        public String serviceName = "temp";
-
-        @Data
-        public String v1;
-
-    }
+    
 
     /**
      * Tests for class level annotations for provider/service/resource
@@ -463,10 +445,28 @@ public class AnnotationBasedDtoExtractorTest {
      */
     @Nested
     public class EMFAnnotated {
+        @Provider(PROVIDER)
+        public class EMFTestDto {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
+
+            @Service
+            public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
+
+            @Service
+            public EReference service = TestdataPackage.Literals.TEST_SENSOR__TEMP;
+
+            @Service
+            public String serviceName = "temp";
+
+            @Data
+            public String v1;
+
+        }
+        
         @Test
         void basicDtoWithBothValuesAndMetadataValues() {
-
-            Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
 
             EMFTestDto dto = new EMFTestDto();
 
