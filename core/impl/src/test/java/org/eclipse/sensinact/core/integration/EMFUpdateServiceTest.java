@@ -12,6 +12,7 @@
 package org.eclipse.sensinact.core.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.lang.reflect.InvocationTargetException;
@@ -195,7 +196,7 @@ public class EMFUpdateServiceTest {
         }
 
         @Provider(DYNAMIC_PROVIDER)
-        public class DynTestEClassDTO {
+        public class DynamicTestEClassDTO {
 
             @Model
             public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
@@ -204,15 +205,32 @@ public class EMFUpdateServiceTest {
             public EClass service = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Resource(RESOURCE)
-            @Data
             @Service("tmp")
+            @Data
             public String data;
 
             @Timestamp(ChronoUnit.MILLIS)
             public long timestamp;
         }
 
-        
+        @Provider(PROVIDER)
+        public class NonDynamicTestEClassDTO {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
+
+            @Service
+            public EClass service = TestdataPackage.Literals.TEST_TEMPERATUR;
+
+            @Resource(RESOURCE)
+            @Service("tmp")
+            @Data
+            public String data;
+
+            @Timestamp(ChronoUnit.MILLIS)
+            public long timestamp;
+        }
+
         @Test
         void updateDTOERef() throws Exception {
             TestEClassDTO dto = new TestEClassDTO();
@@ -224,22 +242,9 @@ public class EMFUpdateServiceTest {
             assertNull(t);
             assertEquals("13 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
         }
-        
-        @Test
-        void dynamicUpdateDTOEClass() throws Exception {
-            DynTestEClassDTO dto = new DynTestEClassDTO();
-            dto.data = "13 °C";
-            dto.timestamp = Instant.now().toEpochMilli();
-            
-            Promise<?> update = push.pushUpdate(dto);
-            Throwable t = update.getFailure();
-            assertNull(t);
-            assertEquals("13 °C", getResourceValue("DynamicTestSensor", DYNAMIC_PROVIDER, "tmp", RESOURCE));
-        }
 
         @Test
         void updateDTOEClass() throws Exception {
-
             TestEClassServiceDTO dto = new TestEClassServiceDTO();
             dto.data = "13 °C";
             dto.timestamp = Instant.now().toEpochMilli();
@@ -250,6 +255,28 @@ public class EMFUpdateServiceTest {
             assertEquals("13 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
         }
 
+        @Test
+        void dynamicUpdateDTOEClass() throws Exception {
+            DynamicTestEClassDTO dto = new DynamicTestEClassDTO();
+            dto.data = "13 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            assertNull(t);
+            assertEquals("13 °C", getResourceValue("DynamicTestSensor", DYNAMIC_PROVIDER, "tmp", RESOURCE));
+        }
+
+        @Test
+        void nonDynamicUpdateDTOEClass() throws Exception {
+            NonDynamicTestEClassDTO dto = new NonDynamicTestEClassDTO();
+            dto.data = "13 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            assertNotNull(t);
+        }
     }
 
     private Object getResourceValue(String model, String provider, String service, String resource)

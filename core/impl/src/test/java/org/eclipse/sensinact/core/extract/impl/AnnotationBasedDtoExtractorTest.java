@@ -128,8 +128,6 @@ public class AnnotationBasedDtoExtractorTest {
         public String bar;
     }
 
-    
-
     /**
      * Tests for class level annotations for provider/service/resource
      */
@@ -441,7 +439,7 @@ public class AnnotationBasedDtoExtractorTest {
     }
 
     /**
-     * Tests for resource name defaulting based on field name
+     * Tests for EMF based DTOs
      */
     @Nested
     public class EMFAnnotated {
@@ -452,24 +450,68 @@ public class AnnotationBasedDtoExtractorTest {
             public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
 
             @Service
-            public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
-
-            @Service
             public EReference service = TestdataPackage.Literals.TEST_SENSOR__TEMP;
 
             @Service
-            public String serviceName = "temp";
+            public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Data
             public String v1;
 
         }
-        
+
+        @Provider(PROVIDER)
+        public class EMFTestDynamicDto {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
+
+            @Service
+            public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
+
+            @Service
+            public String serviceName = "humidity";
+
+            @Data
+            public String v1;
+
+        }
+
+        @Provider(PROVIDER)
+        public class EMFTestDynamicFailDto {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
+
+            @Service
+            public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
+
+            @Data
+            public String v1;
+
+        }
+
+        @Provider(PROVIDER)
+        public class EMFTestDifferentNameDto {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
+
+            @Service
+            public EReference service = TestdataPackage.Literals.TEST_SENSOR__TEMP;
+
+            @Service
+            public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
+
+            @Data
+            @Service("not_temp")
+            public String v1;
+
+        }
+
         @Test
-        void basicDtoWithBothValuesAndMetadataValues() {
-
+        void basicDtoWithServiceReference() {
             EMFTestDto dto = new EMFTestDto();
-
             dto.v1 = VALUE_2;
 
             List<? extends AbstractUpdateDto> updates = extractor(EMFTestDto.class).getUpdates(dto);
@@ -479,8 +521,59 @@ public class AnnotationBasedDtoExtractorTest {
             DataUpdateDto extracted = updates.stream().findFirst().map(DataUpdateDto.class::cast).get();
 
             assertEquals(TestdataPackage.Literals.TEST_SENSOR, extracted.modelEClass);
-            assertEquals(TestdataPackage.Literals.TEST_TEMPERATUR, extracted.serviceEClass);
             assertEquals(TestdataPackage.Literals.TEST_SENSOR__TEMP, extracted.serviceReference);
+        }
+
+        @Test
+        void dtoWithDynamicProviderAndServiceEClass() {
+            EMFTestDynamicDto dto = new EMFTestDynamicDto();
+            dto.v1 = VALUE_2;
+
+            List<? extends AbstractUpdateDto> updates = extractor(EMFTestDynamicDto.class).getUpdates(dto);
+
+            assertEquals(1, updates.size());
+
+            DataUpdateDto extracted = updates.stream().findFirst().map(DataUpdateDto.class::cast).get();
+
+            assertEquals(TestdataPackage.Literals.DYNAMIC_TEST_SENSOR, extracted.modelEClass);
+            assertEquals(TestdataPackage.Literals.TEST_TEMPERATUR, extracted.serviceEClass);
+            assertEquals("humidity", extracted.service);
+            assertEquals("v1", extracted.resource);
+        }
+
+        @Test
+        void differentServiceNames() {
+            EMFTestDifferentNameDto dto = new EMFTestDifferentNameDto();
+            dto.v1 = VALUE_2;
+
+            List<? extends AbstractUpdateDto> updates = extractor(EMFTestDifferentNameDto.class).getUpdates(dto);
+
+            assertEquals(1, updates.size());
+
+            FailedMappingDto extracted = updates.stream().findFirst().map(FailedMappingDto.class::cast).get();
+
+            assertNotNull(extracted.mappingFailure);
+            assertEquals(
+                    "The defined service name not_temp does not match the defined EReference temp for the field v1 in "
+                            + EMFTestDifferentNameDto.class,
+                    extracted.mappingFailure.getMessage());
+        }
+
+        @Test
+        void dynamicProviderWithMissingService() {
+            EMFTestDynamicFailDto dto = new EMFTestDynamicFailDto();
+            dto.v1 = VALUE_2;
+
+            List<? extends AbstractUpdateDto> updates = extractor(EMFTestDynamicFailDto.class).getUpdates(dto);
+
+            assertEquals(1, updates.size());
+
+            FailedMappingDto extracted = updates.stream().findFirst().map(FailedMappingDto.class::cast).get();
+
+            assertNotNull(extracted.mappingFailure);
+            assertEquals(
+                    "No service or service EReference is defined for the field v1 in " + EMFTestDynamicFailDto.class,
+                    extracted.mappingFailure.getMessage());
         }
     }
 
