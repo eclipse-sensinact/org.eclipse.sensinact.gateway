@@ -130,7 +130,10 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
      */
     @Override
     public SensinactEMFService getOrCreateService(String name, EClass serviceEClass) {
-        Service serviceInstance = nexus.createServiceInstance(provider, name, serviceEClass);
+        Service serviceInstance = provider.getService(name);
+        if (serviceInstance == null) {
+            serviceInstance = nexus.createServiceInstance(provider, name, serviceEClass);
+        }
         return new SensinactServiceImpl(active, this, provider, name, serviceInstance.eClass(), nexus, promiseFactory);
     }
 }
