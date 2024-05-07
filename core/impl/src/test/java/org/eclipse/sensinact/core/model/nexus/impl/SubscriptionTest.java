@@ -155,7 +155,8 @@ public class SubscriptionTest {
                     null);
             Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, now);
 
-            nexus.handleDataUpdate(p, service, resource, TEST_VALUE, now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, TEST_VALUE,
+                    now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
@@ -224,8 +225,10 @@ public class SubscriptionTest {
                     before, null);
             Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before);
 
-            nexus.handleDataUpdate(p, service, resource, TEST_VALUE, before);
-            nexus.handleDataUpdate(p, service, resource2, TEST_VALUE, now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, TEST_VALUE,
+                    before);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource2, TEST_VALUE,
+                    now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
@@ -298,8 +301,10 @@ public class SubscriptionTest {
                     before, null);
             Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, before);
 
-            nexus.handleDataUpdate(p, service, resource, TEST_VALUE, before);
-            nexus.handleDataUpdate(p, service2, resource2, TEST_VALUE_2, now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, TEST_VALUE,
+                    before);
+            nexus.handleDataUpdate(p, service2.getName(), service2, service2.getEReferenceType(), resource2,
+                    TEST_VALUE_2, now);
 
             Mockito.verify(accumulator).addProvider(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER);
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,

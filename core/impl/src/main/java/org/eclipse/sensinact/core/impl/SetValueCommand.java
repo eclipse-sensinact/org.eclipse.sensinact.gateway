@@ -12,7 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.impl;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
@@ -20,9 +25,7 @@ import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
-import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -37,19 +40,23 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
     @Override
     protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
             PromiseFactory promiseFactory) {
-        return doCall(twin, modelMgr, promiseFactory).recoverWith(p -> {
-            return promiseFactory.failed(new DataUpdateException(dataUpdateDto.modelPackageUri,
-                    dataUpdateDto.model, dataUpdateDto.provider, dataUpdateDto.service,
-                    dataUpdateDto.resource, dataUpdateDto.originalDto, p.getFailure()));
+        return doCall((SensinactEMFDigitalTwin) twin, modelMgr, promiseFactory).recoverWith(p -> {
+            return promiseFactory.failed(
+                    new DataUpdateException(dataUpdateDto.modelPackageUri, dataUpdateDto.model, dataUpdateDto.provider,
+                            dataUpdateDto.service, dataUpdateDto.resource, dataUpdateDto.originalDto, p.getFailure()));
         });
     }
 
-    private Promise<Void> doCall(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                PromiseFactory promiseFactory) {
-        String packageUri = dataUpdateDto.modelPackageUri;
-        String mod = dataUpdateDto.model == null ? dataUpdateDto.provider : dataUpdateDto.model;
+    private Promise<Void> doCall(SensinactEMFDigitalTwin twin, SensinactModelManager modelMgr,
+            PromiseFactory promiseFactory) {
+        EClass modelEClass = dataUpdateDto.modelEClass;
+        String packageUri = modelEClass == null ? dataUpdateDto.modelPackageUri : modelEClass.getEPackage().getNsURI();
+        String mod = modelEClass != null ? modelEClass.getName()
+                : (dataUpdateDto.model == null ? dataUpdateDto.provider : dataUpdateDto.model);
         String provider = dataUpdateDto.provider;
-        String svc = dataUpdateDto.service;
+        EReference svcReference = dataUpdateDto.serviceReference;
+        EClass svcEClass = svcReference != null ? svcReference.getEReferenceType() : dataUpdateDto.serviceEClass;
+        String svc = svcReference != null ? svcReference.getName() : dataUpdateDto.service;
         String res = dataUpdateDto.resource;
 
         if (mod == null || provider == null || svc == null || res == null) {
@@ -64,22 +71,24 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
             if (model == null) {
                 model = modelMgr.createModel(packageUri, mod).withCreationTime(dataUpdateDto.timestamp).build();
             }
-            Service service = model.getServices().get(svc);
-            if (service == null) {
-                service = model.createService(svc).withCreationTime(dataUpdateDto.timestamp).build();
-            }
-            Resource r = service.getResources().get(res);
+            if (!model.isFrozen()) {
+                Service service = model.getServices().get(svc);
+                if (service == null) {
+                    service = model.createService(svc).withCreationTime(dataUpdateDto.timestamp).build();
+                }
+                Resource r = service.getResources().get(res);
 
-            if (r == null) {
-                r = service.createResource(res).withValueType(ValueType.UPDATABLE)
-                        .withType((Class<?>) dataUpdateDto.type).build();
+                if (r == null) {
+                    r = service.createResource(res).withValueType(ValueType.UPDATABLE)
+                            .withType((Class<?>) dataUpdateDto.type).build();
+                }
             }
 
-            SensinactProvider sp = twin.getProvider(packageUri, mod, provider);
+            SensinactEMFProvider sp = twin.getProvider(packageUri, mod, provider);
             if (sp == null) {
                 sp = twin.createProvider(packageUri, mod, provider, dataUpdateDto.timestamp);
             }
-            resource = sp.getServices().get(svc).getResources().get(res);
+            resource = sp.getOrCreateService(svc, svcEClass).getResources().get(res);
         }
         return resource.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
     }

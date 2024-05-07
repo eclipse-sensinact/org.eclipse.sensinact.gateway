@@ -13,7 +13,9 @@
 package org.eclipse.sensinact.core.emf.twin;
 
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.osgi.util.promise.Promise;
@@ -36,4 +38,19 @@ public interface SensinactEMFProvider extends SensinactProvider {
      * @return
      */
     Promise<Void> update(Provider newVersion);
+
+    /**
+     * The digital twins for the services for this provider
+     *
+     * @return
+     */
+    Map<String, ? extends SensinactEMFService> getServices();
+
+    /**
+     * The digital twins for the service with the given name for this provider A new
+     * Instance will be create if non exists.
+     *
+     * @return
+     */
+    SensinactEMFService getOrCreateService(String name, EClass serviceEClass);
 }

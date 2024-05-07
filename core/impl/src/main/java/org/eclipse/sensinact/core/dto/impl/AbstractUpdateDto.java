@@ -14,10 +14,15 @@ package org.eclipse.sensinact.core.dto.impl;
 
 import java.time.Instant;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.model.core.provider.Provider;
+
 public abstract class AbstractUpdateDto {
 
     /**
-     * The package URI of the model to use, if null then a unique package URI will be derived from the model name
+     * The package URI of the model to use, if null then a unique package URI will
+     * be derived from the model name
      */
     public String modelPackageUri;
 
@@ -50,4 +55,16 @@ public abstract class AbstractUpdateDto {
      * The original object which this update is derived from
      */
     public Object originalDto;
+
+    public EClass modelEClass;
+
+    /**
+     * The services {@link EClass}, optional
+     */
+    public EClass serviceEClass;
+
+    /**
+     * The services {@link EReference} on the {@link Provider} model, optional
+     */
+    public EReference serviceReference;
 }

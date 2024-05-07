@@ -85,6 +85,7 @@ public class ThingsAccessImpl implements ThingsAccess {
         ResultList<Datastream> list = new ResultList<>();
         list.value = providerDescription.services.stream().map(s -> userSession.describeService(id, s))
                 .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
+                .filter(r -> !r.metadata.containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
                 .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
 
         return list;

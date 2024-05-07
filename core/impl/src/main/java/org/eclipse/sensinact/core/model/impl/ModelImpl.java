@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Service;
@@ -38,6 +39,18 @@ public class ModelImpl extends CommandScopedImpl implements Model {
         this.name = name;
         this.eClass = eClass;
         this.nexusImpl = nexusImpl;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.eclipse.sensinact.core.model.Model#isFrozen()
+     */
+    @Override
+    public boolean isFrozen() {
+        checkValid();
+//        return !ProviderPackage.Literals.DYNAMIC_PROVIDER.isSuperTypeOf(eClass) && ((EClassImpl) eClass).isFrozen();
+        return ((EClassImpl) eClass).isFrozen();
     }
 
     @Override
@@ -67,6 +80,9 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     @Override
     public ServiceBuilder<Service> createService(String service) {
         checkValid();
+        if (isFrozen()) {
+            throw new IllegalStateException("Model " + name + " is frozen and can't be modified.");
+        }
         return new ServiceBuilderImpl<>(active, null, this, service, nexusImpl);
     }
 
@@ -74,9 +90,8 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     public Map<String, ? extends Service> getServices() {
         checkValid();
         // Use nexusImpl to get services reliably
-        return nexusImpl.getServiceReferencesForModel(eClass)
-                .collect(toMap(EReference::getName,
-                        r -> new ServiceImpl(active, this, r.getName(), r.getEReferenceType(), nexusImpl)));
+        return nexusImpl.getServiceReferencesForModel(eClass).collect(toMap(EReference::getName,
+                r -> new ServiceImpl(active, this, r.getName(), r.getEReferenceType(), nexusImpl)));
     }
 
     EClass getModelEClass() {

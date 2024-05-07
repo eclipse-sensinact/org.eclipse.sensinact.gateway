@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.ETypedElement;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 
 public class ResourceImpl extends CommandScopedImpl implements Resource {
 
@@ -36,6 +36,11 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         super(active);
         this.service = service;
         this.feature = feature;
+    }
+
+    @Override
+    public boolean isFrozen() {
+        return service.isFrozen();
     }
 
     @Override

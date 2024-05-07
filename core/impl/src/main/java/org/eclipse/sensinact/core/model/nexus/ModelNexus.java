@@ -61,7 +61,6 @@ import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
-import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
 import org.eclipse.sensinact.model.core.metadata.AnnotationMetadata;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
@@ -236,8 +235,8 @@ public class ModelNexus {
             Provider provider = Optional.ofNullable(getProvider("sensiNact"))
                     .orElseGet(() -> doCreateProvider(sensiNactModel, "sensiNact", now));
 
-            handleDataUpdate(provider, svc, versionResource, 0.1D, now);
-            handleDataUpdate(provider, svc, startedResource, now, now);
+            handleDataUpdate(provider, svc.getName(), svcClass, versionResource, 0.1D, now);
+            handleDataUpdate(provider, svc.getName(), svcClass, startedResource, now, now);
         }
     }
 
@@ -340,50 +339,75 @@ public class ModelNexus {
         // accumulator.unlink(...)
     }
 
-    public void handleDataUpdate(Provider provider, String serviceName, EStructuralFeature resourceFeature, Object data,
-            Instant timestamp) {
+    public void handleDataUpdate(Provider provider, String serviceName, EClass serviceEClass,
+            EStructuralFeature resourceFeature, Object data, Instant timestamp) {
+        handleDataUpdate(provider, serviceName, null, serviceEClass, resourceFeature, data, timestamp);
+    }
+
+    public void handleDataUpdate(Provider provider, String serviceName, EReference serviceReferece,
+            EClass serviceEClass, EStructuralFeature resourceFeature, Object data, Instant timestamp) {
 
         Service service = provider.getService(serviceName);
-        if (service == null) {
-            Optional<EReference> serviceFeature = getServiceReferencesForModel(provider.eClass())
-                    .filter(ref -> serviceName.equals(ref.getName())).findFirst();
-            if (serviceFeature.isEmpty()) {
-                throw new IllegalArgumentException("No Service with name " + serviceName + " exists for provider "
-                        + provider.getId() + " of model " + EMFUtil.getModelName(provider.eClass()));
-            }
-            handleDataUpdate(provider, serviceFeature.get(), resourceFeature, data, timestamp);
-            return;
-        }
-
         String providerName = provider.getId();
         String modelName = EMFUtil.getModelName(provider.eClass());
-        NotificationAccumulator accumulator = notificationAccumulator.get();
-
         String packageUri = provider.eClass().getEPackage().getNsURI();
+        NotificationAccumulator accumulator = notificationAccumulator.get();
+        if (service == null) {
+            service = createServiceInstance(provider, serviceName, serviceEClass, serviceReferece);
+        }
 
         handleDataUpdate(provider, serviceName, service, resourceFeature, data, timestamp, accumulator, packageUri,
                 modelName, providerName);
     }
 
-    public void handleDataUpdate(Provider provider, EStructuralFeature serviceFeature,
-            EStructuralFeature resourceFeature, Object data, Instant timestamp) {
+    public Service createServiceInstance(Provider provider, String serviceName, EClass serviceEClass) {
+        return createServiceInstance(provider, serviceName, serviceEClass, null);
+    }
 
+    public Service createServiceInstance(Provider provider, String serviceName, EClass serviceEClass,
+            EReference serviceReferece) {
         String providerName = provider.getId();
         String modelName = EMFUtil.getModelName(provider.eClass());
-        NotificationAccumulator accumulator = notificationAccumulator.get();
-
         String packageUri = provider.eClass().getEPackage().getNsURI();
-
-        Service service = (Service) provider.eGet(serviceFeature);
-        if (service == null) {
-            service = (Service) EcoreUtil.create((EClass) serviceFeature.getEType());
-            provider.eSet(serviceFeature, service);
-            accumulator.addService(packageUri, modelName, providerName, serviceFeature.getName());
+        NotificationAccumulator accumulator = notificationAccumulator.get();
+        Service service = null;
+        Optional<EReference> serviceFeature = Optional.ofNullable(serviceReferece)
+                .or(() -> getServiceReferencesForModel(provider.eClass())
+                        .filter(ref -> serviceName.equals(ref.getName())).findFirst());
+        if (serviceFeature.isEmpty() && !(provider instanceof DynamicProvider)) {
+            throw new IllegalArgumentException("No Service with name " + serviceName + " exists for provider "
+                    + provider.getId() + " of model " + EMFUtil.getModelName(provider.eClass()));
         }
-
-        handleDataUpdate(provider, serviceFeature.getName(), service, resourceFeature, data, timestamp, accumulator,
-                packageUri, modelName, providerName);
+        if (serviceFeature.isEmpty() && provider instanceof DynamicProvider) {
+            service = (Service) EcoreUtil.create(serviceEClass);
+            ((DynamicProvider) provider).getServices().put(serviceName, service);
+        } else {
+            service = (Service) EcoreUtil.create((EClass) serviceFeature.get().getEType());
+            provider.eSet(serviceFeature.get(), service);
+        }
+        accumulator.addService(packageUri, modelName, providerName, serviceName);
+        return service;
     }
+
+//    public void handleDataUpdate(Provider provider, EStructuralFeature serviceFeature,
+//            EStructuralFeature resourceFeature, Object data, Instant timestamp) {
+//
+//        String providerName = provider.getId();
+//        String modelName = EMFUtil.getModelName(provider.eClass());
+//        NotificationAccumulator accumulator = notificationAccumulator.get();
+//
+//        String packageUri = provider.eClass().getEPackage().getNsURI();
+//
+//        Service service = (Service) provider.eGet(serviceFeature);
+//        if (service == null) {
+//            service = (Service) EcoreUtil.create((EClass) serviceFeature.getEType());
+//            provider.eSet(serviceFeature, service);
+//            accumulator.addService(packageUri, modelName, providerName, serviceFeature.getName());
+//        }
+//
+//        handleDataUpdate(provider, serviceFeature.getName(), service, resourceFeature, data, timestamp, accumulator,
+//                packageUri, modelName, providerName);
+//    }
 
     /**
      * This method allows to update Data on services in a DynamicProvider, that
@@ -393,22 +417,22 @@ public class ModelNexus {
      * @throws UnsupportedOperationException if the service intended to be updated
      *                                       does not exist.
      */
-    public void handleDataUpdate(DynamicProvider provider, String serviceName, EStructuralFeature resourceFeature,
-            Object data, Instant timestamp) {
-
-        Service service = provider.getServices().get(serviceName);
-        if (service == null) {
-            throw new UnsupportedOperationException("No service with the name " + serviceName
-                    + " exists. This Method is only inteded to be used with already existing Services");
-        }
-        String providerName = provider.getId();
-        String modelName = EMFUtil.getModelName(provider.eClass());
-        NotificationAccumulator accumulator = notificationAccumulator.get();
-        String packageUri = provider.eClass().getEPackage().getNsURI();
-
-        handleDataUpdate(provider, serviceName, service, resourceFeature, data, timestamp, accumulator, packageUri,
-                modelName, providerName);
-    }
+//    public void handleDataUpdate(DynamicProvider provider, String serviceName, EStructuralFeature resourceFeature,
+//            Object data, Instant timestamp) {
+//
+//        Service service = provider.getServices().get(serviceName);
+//        if (service == null) {
+//            throw new UnsupportedOperationException("No service with the name " + serviceName
+//                    + " exists. This Method is only inteded to be used with already existing Services");
+//        }
+//        String providerName = provider.getId();
+//        String modelName = EMFUtil.getModelName(provider.eClass());
+//        NotificationAccumulator accumulator = notificationAccumulator.get();
+//        String packageUri = provider.eClass().getEPackage().getNsURI();
+//
+//        handleDataUpdate(provider, serviceName, service, resourceFeature, data, timestamp, accumulator, packageUri,
+//                modelName, providerName);
+//    }
 
     private void handleDataUpdate(Provider provider, String serviceName, Service service,
             EStructuralFeature resourceFeature, Object data, Instant timestamp, NotificationAccumulator accumulator,
@@ -960,8 +984,8 @@ public class ModelNexus {
             return whiteboard.pullValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
                     serviceName, resource.getName(), valueType, cachedValue, (tv) -> {
                         if (tv != null) {
-                            handleDataUpdate(provider, serviceName, (EStructuralFeature) resource, tv.getValue(),
-                                    tv.getTimestamp());
+                            handleDataUpdate(provider, serviceName, (EClass) resource.eContainer(),
+                                    (EStructuralFeature) resource, tv.getValue(), tv.getTimestamp());
                         }
                     });
         } catch (Throwable t) {
@@ -981,7 +1005,7 @@ public class ModelNexus {
      * @param cachedValue Current twin value
      * @return The promise of the new value
      */
-    public <T> Promise<TimedValue<T>> pullValue(Provider provider, EStructuralFeature service, ETypedElement resource,
+    public <T> Promise<TimedValue<T>> pullValue(Provider provider, EReference service, ETypedElement resource,
             Class<T> valueType, TimedValue<T> cachedValue) {
         if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to pull a value without a pull handler"));
@@ -992,8 +1016,8 @@ public class ModelNexus {
             return whiteboard.pullValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
                     service.getName(), resource.getName(), valueType, cachedValue, (tv) -> {
                         if (tv != null) {
-                            handleDataUpdate(provider, service, (EStructuralFeature) resource, tv.getValue(),
-                                    tv.getTimestamp());
+                            handleDataUpdate(provider, service.getName(), service, (EClass) service.getEType(),
+                                    (EStructuralFeature) resource, tv.getValue(), tv.getTimestamp());
                         }
                     });
         } catch (Throwable t) {
@@ -1026,8 +1050,8 @@ public class ModelNexus {
             return whiteboard.pushValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
                     serviceName, resource.getName(), valueType, cachedValue, newValue, (tv) -> {
                         if (tv != null) {
-                            handleDataUpdate(provider, serviceName, (EStructuralFeature) resource, tv.getValue(),
-                                    tv.getTimestamp());
+                            handleDataUpdate(provider, serviceName, (EClass) resource.eContainer(),
+                                    (EStructuralFeature) resource, (Object) tv.getValue(), tv.getTimestamp());
                         }
                     });
         } catch (Throwable t) {
@@ -1049,7 +1073,7 @@ public class ModelNexus {
      * @return The promise of a new resource value (can differ from
      *         <code>newValue</code>)
      */
-    public <T> Promise<TimedValue<T>> pushValue(Provider provider, EStructuralFeature service, ETypedElement resource,
+    public <T> Promise<TimedValue<T>> pushValue(Provider provider, EReference service, ETypedElement resource,
             Class<T> valueType, TimedValue<T> cachedValue, TimedValue<T> newValue) {
         if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to push a value without a push handler"));
@@ -1060,8 +1084,8 @@ public class ModelNexus {
             return whiteboard.pushValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
                     service.getName(), resource.getName(), valueType, cachedValue, newValue, (tv) -> {
                         if (tv != null) {
-                            handleDataUpdate(provider, service, (EStructuralFeature) resource, tv.getValue(),
-                                    tv.getTimestamp());
+                            handleDataUpdate(provider, service.getName(), service, (EClass) service.getEType(),
+                                    (EStructuralFeature) resource, (Object) tv.getValue(), tv.getTimestamp());
                         }
                     });
         } catch (Throwable t) {

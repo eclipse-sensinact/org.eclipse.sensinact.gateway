@@ -243,7 +243,7 @@ public class NexusTest {
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
 
             Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
             assertNotNull(provider);
@@ -322,7 +322,7 @@ public class NexusTest {
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
 
             Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
             assertNotNull(provider);
@@ -339,7 +339,8 @@ public class NexusTest {
 
             EAttribute resource2 = nexus.createResource(service.getEReferenceType(), "testValue2", String.class, now,
                     null);
-            nexus.handleDataUpdate(p, service, resource2, "test", Instant.now());
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource2, "test",
+                    Instant.now());
 
             Provider updatedProvider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
             assertEquals(provider, updatedProvider);
@@ -371,7 +372,7 @@ public class NexusTest {
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
 
             Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
             assertNotNull(provider);
@@ -390,7 +391,8 @@ public class NexusTest {
             EReference service2 = nexus.createService(model, "testservice2", now);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_VALUE, String.class, now,
                     null);
-            nexus.handleDataUpdate(p, service2, resource2, "test2", Instant.now());
+            nexus.handleDataUpdate(p, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
+                    Instant.now());
 
             svc = (Service) p.eGet(serviceFeature);
             assertNotNull(valueFeature);
@@ -432,7 +434,8 @@ public class NexusTest {
 
                     System.out.println("Calling update with model_" + modelIdx + ", provider_" + modelIdx + ", service_"
                             + svcIdx + ", resource , 42...");
-                    nexus.handleDataUpdate(p, service, resource, 42, Instant.now());
+                    nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, 42,
+                            Instant.now());
                 }
             }
 
@@ -463,15 +466,16 @@ public class NexusTest {
                             Instant.now(), null);
                     Provider p;
                     if (svcIdx == 0) {
-                        p = nexus.createProviderInstance(TEST_PKG,
-                                EMFUtil.getModelName(model), "provider_" + modelIdx, Instant.now());
+                        p = nexus.createProviderInstance(TEST_PKG, EMFUtil.getModelName(model), "provider_" + modelIdx,
+                                Instant.now());
                     } else {
                         p = nexus.getProvider("provider_" + modelIdx);
                     }
 
                     System.out.println("Calling update with model_" + modelIdx + ", provider_" + modelIdx + ", service_"
                             + svcIdx + ", resource , 42...");
-                    nexus.handleDataUpdate(p, service, resource, 42, Instant.now());
+                    nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, 42,
+                            Instant.now());
                 }
             }
 
@@ -506,8 +510,9 @@ public class NexusTest {
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
-            nexus.handleDataUpdate(p, service2, resource2, "test2", now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
+            nexus.handleDataUpdate(p, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
+                    now);
 
             nexus.shutDown();
 
@@ -551,9 +556,11 @@ public class NexusTest {
             Provider p3 = nexus.createProviderInstance(EMFUtil.constructPackageUri("something_else"), "something_else",
                     "something_else", now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
-            nexus.handleDataUpdate(p2, service2, resource2, "test2", now);
-            nexus.handleDataUpdate(p3, service3, resource3, "test2", now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
+            nexus.handleDataUpdate(p2, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
+                    now);
+            nexus.handleDataUpdate(p3, service3.getName(), service3, service3.getEReferenceType(), resource3, "test2",
+                    now);
 
             nexus.shutDown();
 
@@ -594,7 +601,7 @@ public class NexusTest {
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
 
             assertEquals(TEST_MODEL, nexus.getProviderModel(TESTPROVIDER));
 
@@ -668,9 +675,11 @@ public class NexusTest {
             Provider p2 = nexus.createProviderInstance("TestModel", "testproviderNew", now);
             Provider p3 = nexus.createProviderInstance("something_else", "something_else", now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
-            nexus.handleDataUpdate(p2, service2, resource2, "test2", now);
-            nexus.handleDataUpdate(p3, service3, resource3, "test2", now);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
+            nexus.handleDataUpdate(p2, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
+                    now);
+            nexus.handleDataUpdate(p3, service3.getName(), service3, service3.getEReferenceType(), resource3, "test2",
+                    now);
 
             nexus.linkProviders("testprovider", "testproviderNew", Instant.now());
 
@@ -706,9 +715,9 @@ public class NexusTest {
             Provider p2 = nexus.createProviderInstance("TestModel", "testproviderNew", now);
             Provider p3 = nexus.createProviderInstance("something_else", "something_else", now);
 
-            nexus.handleDataUpdate(p, service, resource, "test", now);
-            nexus.handleDataUpdate(p2, service2, resource2, "test2", now);
-            nexus.handleDataUpdate(p3, service3, resource3, "test2", now);
+            nexus.handleDataUpdate(p, service.getName(), service, model2, resource, "test", now);
+            nexus.handleDataUpdate(p2, service2.getName(), service2, model2, resource2, "test2", now);
+            nexus.handleDataUpdate(p3, service3.getName(), service3, model2, resource3, "test2", now);
 
             nexus.linkProviders("testprovider", "testproviderNew", Instant.now());
 

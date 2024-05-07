@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
@@ -38,6 +39,17 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
         this.serviceEClass = serviceEClass;
         this.serviceName = serviceName;
         this.nexusImpl = nexusImpl;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.eclipse.sensinact.core.model.Model#isFrozen()
+     */
+    @Override
+    public boolean isFrozen() {
+        checkValid();
+        return ((EClassImpl) serviceEClass).isFrozen();
     }
 
     @Override

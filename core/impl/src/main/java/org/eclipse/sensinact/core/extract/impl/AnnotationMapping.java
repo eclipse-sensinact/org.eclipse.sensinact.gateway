@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.MapAction;
 import org.eclipse.sensinact.core.annotation.dto.Metadata;
@@ -76,9 +78,9 @@ public class AnnotationMapping {
 
                 return list.stream().map(f -> f.apply(o)).filter(d -> d != null).map(d -> {
                     d.originalDto = o;
-                    if(d instanceof FailedMappingDto) {
+                    if (d instanceof FailedMappingDto) {
                         return d;
-                    } else if(fTFail != null) {
+                    } else if (fTFail != null) {
                         FailedMappingDto fmd = getFailureDto(d);
                         fmd.mappingFailure = fTFail;
                         return fmd;
@@ -89,7 +91,8 @@ public class AnnotationMapping {
                 }).collect(Collectors.toList());
             };
         } catch (Throwable t) {
-            Throwable fail = new IllegalArgumentException(String.format("The mapping for class %s is not properly defined", clazz.getName()), t);
+            Throwable fail = new IllegalArgumentException(
+                    String.format("The mapping for class %s is not properly defined", clazz.getName()), t);
             return o -> {
                 FailedMappingDto fmd = new FailedMappingDto();
                 fmd.mappingFailure = fail;
@@ -154,8 +157,11 @@ public class AnnotationMapping {
 
         Function<Object, String> modelPackageUri = getModelPackageUriMappingForField(clazz, f);
         Function<Object, String> model = getModelNameMappingForField(clazz, f);
+        Function<Object, EClass> modelEClass = getModelEClassMappingForField(clazz, f);
         Function<Object, String> provider = getProviderNameMappingForField(clazz, f);
         Function<Object, String> service = getServiceNameMappingForField(clazz, f);
+        Function<Object, EClass> serviceEClass = getServiceEClassMappingForField(clazz, f);
+        Function<Object, EReference> serviceReference = getServiceEReferenceMappingForField(clazz, f);
         Function<Object, String> resource = getResourceNameMappingForDataField(clazz, f);
 
         Function<Object, Object> dataValue = o -> getValueFromField(fieldName, o);
@@ -186,7 +192,22 @@ public class AnnotationMapping {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
             try {
+                dto.modelEClass = modelEClass.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
                 dto.provider = provider.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.serviceEClass = serviceEClass.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.serviceReference = serviceReference.apply(o);
             } catch (Throwable t) {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
@@ -202,7 +223,31 @@ public class AnnotationMapping {
             }
             dto.type = type;
 
-            if(firstFailure != null) {
+            if (dto.service == null) {
+                if (dto.serviceReference != null) {
+                    dto.service = dto.serviceReference.getName();
+                } else {
+                    firstFailure = firstFailure == null ? new IllegalArgumentException(
+                            String.format("No service or service EReference is defined for the field %s in class %s",
+                                    f.getName(), clazz.getName()))
+                            : firstFailure;
+                }
+            }
+            if (dto.service != null && dto.serviceReference != null
+                    && !dto.serviceReference.getName().equals(dto.service)) {
+                firstFailure = firstFailure == null ? new IllegalArgumentException(String.format(
+                        "The defined service name %s does not match the defined EReference %s for the field %s in class %s",
+                        dto.service, dto.serviceReference.getName(), f.getName(), clazz.getName())) : firstFailure;
+            }
+            if (dto.serviceReference != null && dto.serviceEClass != null
+                    && !dto.serviceReference.getEReferenceType().isSuperTypeOf(dto.serviceEClass)) {
+                firstFailure = firstFailure == null ? new IllegalArgumentException(String.format(
+                        "The defined service EClass %s is no supertype EReferences return type %s for the field %s in class %s",
+                        dto.serviceEClass.getName(), dto.serviceReference.getEReferenceType().getName(), f.getName(),
+                        clazz.getName())) : firstFailure;
+            }
+
+            if (firstFailure != null) {
                 return getFailureDto(dto, firstFailure);
             }
 
@@ -217,8 +262,11 @@ public class AnnotationMapping {
 
         Function<Object, String> modelPackageUri = getModelPackageUriMappingForField(clazz, f);
         Function<Object, String> model = getModelNameMappingForField(clazz, f);
+        Function<Object, EClass> modelEClass = getModelEClassMappingForField(clazz, f);
         Function<Object, String> provider = getProviderNameMappingForField(clazz, f);
         Function<Object, String> service = getServiceNameMappingForField(clazz, f);
+        Function<Object, EClass> serviceEClass = getServiceEClassMappingForField(clazz, f);
+        Function<Object, EReference> serviceReference = getServiceEReferenceMappingForField(clazz, f);
         Function<Object, String> resource = getResourceNameMappingForMetadataField(clazz, f);
 
         Function<Object, Object> metadataValue = o -> getValueFromField(fieldName, o);
@@ -258,7 +306,8 @@ public class AnnotationMapping {
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Entry::getValue));
                         break;
                     default:
-                        firstFailure = new IllegalArgumentException("Unrecognised Map Action " + ma + " for field " + f.getName() + " in class " + clazz.getName());
+                        firstFailure = new IllegalArgumentException("Unrecognised Map Action " + ma + " for field "
+                                + f.getName() + " in class " + clazz.getName());
                     }
                 }
 
@@ -276,7 +325,22 @@ public class AnnotationMapping {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
             try {
+                dto.modelEClass = modelEClass.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
                 dto.provider = provider.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.serviceEClass = serviceEClass.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
+                dto.serviceReference = serviceReference.apply(o);
             } catch (Throwable t) {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
@@ -292,7 +356,7 @@ public class AnnotationMapping {
             }
             dto.metadata = processedMd;
 
-            if(firstFailure != null) {
+            if (firstFailure != null) {
                 return getFailureDto(dto, firstFailure);
             }
 
@@ -302,7 +366,7 @@ public class AnnotationMapping {
     }
 
     private static Function<Object, String> getModelPackageUriMappingForField(Class<?> clazz, Field f) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, ModelPackageUri.class);
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, ModelPackageUri.class, String.class);
         if (mapping == null) {
             // Models are optional
             mapping = o -> null;
@@ -311,7 +375,7 @@ public class AnnotationMapping {
     }
 
     private static Function<Object, String> getModelNameMappingForField(Class<?> clazz, Field f) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Model.class);
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Model.class, String.class);
         if (mapping == null) {
             // Models are optional
             mapping = o -> null;
@@ -319,24 +383,53 @@ public class AnnotationMapping {
         return mapping;
     }
 
-    private static Function<Object, String> getProviderNameMappingForField(Class<?> clazz, Field f) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Provider.class);
+    private static Function<Object, EClass> getModelEClassMappingForField(Class<?> clazz, Field f) {
+        Function<Object, EClass> mapping = getAnnotatedNameMapping(clazz, f, Model.class, EClass.class);
         if (mapping == null) {
-            throw new IllegalArgumentException(String.format("No provider is defined for the field %s in class %s", f.getName(), clazz.getName()));
+            // Models EClass is optional
+            mapping = o -> null;
+        }
+        return mapping;
+    }
+
+    private static Function<Object, String> getProviderNameMappingForField(Class<?> clazz, Field f) {
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Provider.class, String.class);
+        if (mapping == null) {
+            throw new IllegalArgumentException(
+                    String.format("No provider is defined for the field %s in class %s", f.getName(), clazz.getName()));
         }
         return mapping;
     }
 
     private static Function<Object, String> getServiceNameMappingForField(Class<?> clazz, Field f) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Service.class);
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Service.class, String.class);
         if (mapping == null) {
-            throw new IllegalArgumentException(String.format("No service is defined for the field %s in class %s", f.getName(), clazz.getName()));
+            // Models EClass is optional
+            mapping = o -> null;
+        }
+        return mapping;
+    }
+
+    private static Function<Object, EClass> getServiceEClassMappingForField(Class<?> clazz, Field f) {
+        Function<Object, EClass> mapping = getAnnotatedNameMapping(clazz, f, Service.class, EClass.class);
+        if (mapping == null) {
+            // Models EClass is optional
+            mapping = o -> null;
+        }
+        return mapping;
+    }
+
+    private static Function<Object, EReference> getServiceEReferenceMappingForField(Class<?> clazz, Field f) {
+        Function<Object, EReference> mapping = getAnnotatedNameMapping(clazz, f, Service.class, EReference.class);
+        if (mapping == null) {
+            // Models EClass is optional
+            mapping = o -> null;
         }
         return mapping;
     }
 
     private static Function<Object, String> getResourceNameMappingForDataField(Class<?> clazz, Field f) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Resource.class);
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Resource.class, String.class);
         if (mapping == null) {
             String fieldName = f.getName();
             mapping = x -> fieldName;
@@ -361,9 +454,10 @@ public class AnnotationMapping {
     }
 
     private static Function<Object, String> getResourceNameMappingForMetadataField(Class<?> clazz, Field f) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Resource.class);
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, f, Resource.class, String.class);
         if (mapping == null) {
-            throw new IllegalArgumentException(String.format("No resource is defined for the field %s in class %s", f.getName(), clazz.getName()));
+            throw new IllegalArgumentException(
+                    String.format("No resource is defined for the field %s in class %s", f.getName(), clazz.getName()));
         }
         return mapping;
     }
@@ -373,21 +467,24 @@ public class AnnotationMapping {
      * function as it will cause memory leaks if they are referenced in the value of
      * the weak cache
      *
+     * @param <T>
+     *
      * @param clazz
      * @param f
      * @param annotationType
      * @return
      */
-    private static Function<Object, String> getAnnotatedNameMapping(Class<?> clazz, Field f,
-            Class<? extends Annotation> annotationType) {
+    private static <T> Function<Object, T> getAnnotatedNameMapping(Class<?> clazz, Field f,
+            Class<? extends Annotation> annotationType, Class<T> resultType) {
 
-        Function<Object, String> mapping = null;
+        Function<Object, T> mapping = null;
 
         Method valueMethod = getValueMethod(annotationType);
 
-        // Directly on the field
-        if (f.isAnnotationPresent(annotationType)) {
-            String value = getAnnotationValue(f, annotationType, valueMethod);
+        // Directly on the field and only in the case a String is required
+        if (f.isAnnotationPresent(annotationType) && resultType == String.class) {
+            @SuppressWarnings("unchecked")
+            T value = (T) getAnnotationValue(f, annotationType, valueMethod);
             if (NOT_SET.equals(value))
                 throw new IllegalArgumentException(
                         String.format("The class %s has a field %s annotated with %s that has no value",
@@ -397,21 +494,23 @@ public class AnnotationMapping {
             // Check for an annotated field
             Field annotatedField = Arrays.stream(clazz.getFields())
                     .filter(r -> r.isAnnotationPresent(annotationType) && !r.isAnnotationPresent(Data.class))
-                    .findFirst().orElse(null);
+                    .filter(r -> resultType == r.getType()).findFirst().orElse(null);
 
             if (annotatedField != null) {
-                if (annotatedField.getType() != String.class) {
-                    throw new IllegalArgumentException(
-                            String.format("The class %s has a field %s annotated with %s that has a non String type %s",
-                                    clazz.getName(), annotatedField.getName(), annotationType.getSimpleName(),
-                                    annotatedField.getType()));
+                if (annotatedField.getType() != resultType) {
+//                    throw new IllegalArgumentException(
+//                            String.format("The class %s has a field %s annotated with %s that has a non String type %s",
+//                                    clazz.getName(), annotatedField.getName(), annotationType.getSimpleName(),
+//                                    annotatedField.getType()));
+                    return null;
                 }
                 String fieldName = annotatedField.getName();
-                mapping = o -> getTypedValueFromField(fieldName, o, annotationType, String.class);
-            } else {
+                mapping = o -> getTypedValueFromField(fieldName, o, annotationType, resultType);
+            } else if (resultType == String.class) {
                 // Check class level annotation
                 if (clazz.isAnnotationPresent(annotationType)) {
-                    String value = getAnnotationValue(clazz, annotationType, valueMethod);
+                    @SuppressWarnings("unchecked")
+                    T value = (T) getAnnotationValue(clazz, annotationType, valueMethod);
                     if (NOT_SET.equals(value))
                         throw new IllegalArgumentException(
                                 String.format("The class %s is annotated with %s but that annotation has no value",

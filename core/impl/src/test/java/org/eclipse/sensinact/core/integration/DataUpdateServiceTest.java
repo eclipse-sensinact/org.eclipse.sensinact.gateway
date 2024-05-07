@@ -64,8 +64,7 @@ public class DataUpdateServiceTest {
         gt.execute(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                Optional.ofNullable(twin.getProvider(PROVIDER))
-                    .ifPresent(SensinactProvider::delete);
+                Optional.ofNullable(twin.getProvider(PROVIDER)).ifPresent(SensinactProvider::delete);
                 return pf.resolved(null);
             }
         }).getValue();
@@ -448,4 +447,5 @@ public class DataUpdateServiceTest {
             assertEquals(RESOURCE, due.getResource());
         }
     }
+
 }
