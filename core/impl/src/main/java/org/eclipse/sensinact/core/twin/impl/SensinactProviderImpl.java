@@ -123,7 +123,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider#getOrCreateService(
      * java.lang.String)

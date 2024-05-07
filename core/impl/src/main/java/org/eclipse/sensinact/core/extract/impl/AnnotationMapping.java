@@ -466,7 +466,7 @@ public class AnnotationMapping {
      * This method must be careful not to capture the class or field in the returned
      * function as it will cause memory leaks if they are referenced in the value of
      * the weak cache
-     * 
+     *
      * @param <T>
      *
      * @param clazz

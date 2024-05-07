@@ -131,7 +131,6 @@ public class DtoMapper {
         return thing;
     }
 
-
     public static Location toLocation(SensiNactSession userSession, UriInfo uriInfo, ObjectMapper mapper,
             String providerName) {
         Location location = new Location();
@@ -243,7 +242,7 @@ public class DtoMapper {
         if (resource == null) {
             throw new NotFoundException();
         }
-         
+
         Datastream datastream = new Datastream();
 
         datastream.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
@@ -314,7 +313,6 @@ public class DtoMapper {
 
         return datastream;
     }
-
 
     public static Sensor toSensor(UriInfo uriInfo, ResourceDescription resource) {
         if (resource == null) {
@@ -503,54 +501,54 @@ public class DtoMapper {
     public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, UriInfo uriInfo,
             ObjectMapper mapper, String providerName) {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-    
+
         final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, false);
         final GeoJsonObject object = location.getValue();
-    
+
         featureOfInterest.id = providerName;
-    
+
         String friendlyName = getProperty(object, "name");
         featureOfInterest.name = Objects.requireNonNullElse(friendlyName, providerName);
-    
+
         String description = getProperty(object, DESCRIPTION);
         featureOfInterest.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
-    
+
         featureOfInterest.encodingType = ENCODING_TYPE_VND_GEO_JSON;
         featureOfInterest.feature = object;
-    
+
         featureOfInterest.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("FeaturesOfInterest({id})")
                 .resolveTemplate("id", featureOfInterest.id).build().toString();
         featureOfInterest.observationsLink = uriInfo.getBaseUriBuilder().uri(featureOfInterest.selfLink)
                 .path("Observations").build().toString();
-    
+
         return featureOfInterest;
     }
 
     public static FeatureOfInterest toFeatureOfInterest(UriInfo uriInfo, ObjectMapper mapper,
             ProviderSnapshot provider) {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-    
+
         final String providerName = provider.getName();
-    
+
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, false);
         final GeoJsonObject object = location.getValue();
-    
+
         featureOfInterest.id = providerName;
-    
+
         String friendlyName = getProperty(object, "name");
         featureOfInterest.name = Objects.requireNonNullElse(friendlyName, providerName);
-    
+
         String description = getProperty(object, DESCRIPTION);
         featureOfInterest.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
-    
+
         featureOfInterest.encodingType = ENCODING_TYPE_VND_GEO_JSON;
         featureOfInterest.feature = object;
-    
+
         featureOfInterest.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("FeaturesOfInterest({id})")
                 .resolveTemplate("id", featureOfInterest.id).build().toString();
         featureOfInterest.observationsLink = uriInfo.getBaseUriBuilder().uri(featureOfInterest.selfLink)
                 .path("Observations").build().toString();
-    
+
         return featureOfInterest;
     }
 
@@ -558,7 +556,7 @@ public class DtoMapper {
         if (id.isEmpty()) {
             throw new BadRequestException("Invalid id");
         }
-    
+
         int idx = id.indexOf('~');
         if (idx == -1) {
             // No segment found, return the whole ID
@@ -647,8 +645,8 @@ public class DtoMapper {
             location = getLocation(provider, mapper, allowNull);
         }
         return location;
-    }    
-    
+    }
+
     private static TimedValue<GeoJsonObject> getLocation(SensiNactSession userSession, ObjectMapper mapper,
             String providerName, boolean allowNull) {
         ResourceDescription locationResource = getProviderAdminField(userSession, providerName, LOCATION);
@@ -656,7 +654,7 @@ public class DtoMapper {
         final Object rawValue = locationResource.value;
         return getLocation(mapper, rawValue, time, allowNull);
     }
-    
+
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             boolean allowNull) {
         final Optional<ResourceSnapshot> locationResource = getProviderAdminField(provider, LOCATION);
@@ -678,7 +676,7 @@ public class DtoMapper {
         }
         return getLocation(mapper, rawValue, time, allowNull);
     }
-    
+
     private static TimedValue<GeoJsonObject> getLocation(ObjectMapper mapper, Object rawValue, Instant time,
             boolean allowNull) {
 

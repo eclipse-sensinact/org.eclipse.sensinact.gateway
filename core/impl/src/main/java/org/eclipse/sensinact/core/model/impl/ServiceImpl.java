@@ -43,7 +43,7 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.sensinact.core.model.Model#isFrozen()
      */
     @Override

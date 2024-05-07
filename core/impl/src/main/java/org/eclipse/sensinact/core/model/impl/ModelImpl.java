@@ -43,7 +43,7 @@ public class ModelImpl extends CommandScopedImpl implements Model {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.sensinact.core.model.Model#isFrozen()
      */
     @Override
