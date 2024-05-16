@@ -38,7 +38,9 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.testdata.DynamicTestSensor;
+import org.eclipse.sensinact.model.core.testdata.TestAdmin;
 import org.eclipse.sensinact.model.core.testdata.TestSensor;
 import org.eclipse.sensinact.model.core.testdata.TestTemperatur;
 import org.eclipse.sensinact.model.core.testdata.TestdataFactory;
@@ -116,6 +118,24 @@ public class EMFUpdateServiceTest {
             update = push.pushUpdate(temp2);
             assertNull(update.getFailure());
             assertEquals("14 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
+        }
+        @Test
+        void admin() throws Exception {
+            TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
+            TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
+            TestAdmin admin = TestdataFactory.eINSTANCE.createTestAdmin();
+            temp.setV1("14 °C");
+            sensor.setTemp(temp);
+            sensor.setId(PROVIDER);
+            sensor.setAdmin(admin);
+            admin.setTestAdmin("blub");
+            Point p = new Point();
+            admin.setLocation(p);
+
+            Promise<?> update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            assertEquals(p, getResourceValue("TestSensor", PROVIDER, "admin", "location"));
+            assertEquals("blub", getResourceValue("TestSensor", PROVIDER, "admin", "testAdmin"));
         }
 
     }
