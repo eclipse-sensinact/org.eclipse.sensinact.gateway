@@ -49,7 +49,7 @@ public class SessionSubscribeTest {
 
     private static final String MODEL = "model";
     private static final String PROVIDER = "provider";
-    private static final String PROVIDER_TOPIC = PROVIDER + "/*";
+    private static final String PROVIDER_TOPIC = MODEL + "/" + PROVIDER + "/*";
     private static final String SERVICE = "service";
     private static final String RESOURCE = "resource";
     private static final Integer VALUE = 42;

@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
+import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
@@ -301,6 +303,10 @@ public class RestNorthbound implements IRestNorthbound {
         final SensiNactSession session = getSession();
         final AtomicReference<String> listenerId = new AtomicReference<>();
 
+        // TODO replace this with a single-level wildcard when typed events permits it
+        Predicate<AbstractResourceNotification> filter = e -> providerId.equals(e.provider) &&
+                serviceName.equals(e.service) && rcName.equals(e.resource);
+
         final ClientDataListener cdl = (t, e) -> {
             if (eventSink.isClosed()) {
                 // Event sink is already closed: remove listener
@@ -308,8 +314,10 @@ public class RestNorthbound implements IRestNorthbound {
                 return;
             }
 
-            eventSink.send(sse.newEventBuilder().name("data").mediaType(MediaType.APPLICATION_JSON_TYPE)
-                    .data(new ResourceDataNotificationDTO(e)).build());
+            if(filter.test(e)) {
+                eventSink.send(sse.newEventBuilder().name("data").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                        .data(new ResourceDataNotificationDTO(e)).build());
+            }
         };
 
         final ClientLifecycleListener cll = (t, e) -> {
@@ -318,12 +326,14 @@ public class RestNorthbound implements IRestNorthbound {
                 session.removeListener(listenerId.get());
                 return;
             }
-            eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
-                    .data(new ResourceLifecycleNotificationDTO(e)).build());
+            if(filter.test(e)) {
+                eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                        .data(new ResourceLifecycleNotificationDTO(e)).build());
+            }
         };
 
         // Register the listener
-        final String topic = String.join("/", providerId, serviceName, rcName);
-        listenerId.set(session.addListener(List.of(topic), cdl, null, cll, null));
+        // TODO use single level wildcard final String topic = String.join("/", providerId, serviceName, rcName);
+        listenerId.set(session.addListener(List.of("*"), cdl, null, cll, null));
     }
 }

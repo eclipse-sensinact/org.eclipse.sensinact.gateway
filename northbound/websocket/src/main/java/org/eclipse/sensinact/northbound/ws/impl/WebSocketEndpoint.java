@@ -325,19 +325,24 @@ public class WebSocketEndpoint {
 
         final ResultSubscribeDTO result = new ResultSubscribeDTO();
         List<String> topics;
+        final Predicate<AbstractResourceNotification> eventPredicate;
         if (path.targetsSpecificResource()) {
             result.uri = path.toUri();
-            topics = List.of(result.uri.substring(1));
+            // TODO replace this with single level wildcard
+            topics = List.of("*");
+            eventPredicate = n -> query.uri.provider.equals(n.provider) && query.uri.service.equals(n.service)
+                    && query.uri.resource.equals(n.resource);
         } else {
             result.uri = "/";
             topics = List.of("*");
+            eventPredicate = n -> true;
         }
 
         final Predicate<AbstractResourceNotification> p;
         if (query.filter != null && !query.filter.isBlank()) {
-            p = prepareFilter(query);
+            p = eventPredicate.and(prepareFilter(query));
         } else {
-            p = null;
+            p = eventPredicate;
         }
 
         final ClientDataListener cld = (topic, evt) -> {
@@ -346,7 +351,7 @@ public class WebSocketEndpoint {
                 if (ws == null || !ws.isOpen()) {
                     logger.warn("Detected closed WebSocket. Stop listening");
                     userSession.removeListener(listenerId.get());
-                } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
+                } else if (p.test(evt) && checkLatch(latch)) {
                     sendNotification(ws, listenerId.get(), new ResourceDataNotificationDTO(evt));
                 }
             } catch (Throwable e) {

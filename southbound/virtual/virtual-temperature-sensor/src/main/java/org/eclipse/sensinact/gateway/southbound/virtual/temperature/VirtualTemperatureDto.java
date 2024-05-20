@@ -20,7 +20,7 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 @Model(VirtualTemperatureDto.VIRTUAL_TEMPERATURE_MODEL)
 public class VirtualTemperatureDto {
 
-    public static final String VIRTUAL_TEMPERATURE_MODEL = "virtual.temperature";
+    public static final String VIRTUAL_TEMPERATURE_MODEL = "virtual-temperature";
 
     @Provider
     public String provider;
