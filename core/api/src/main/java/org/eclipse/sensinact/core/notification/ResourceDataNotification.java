@@ -20,7 +20,7 @@ import java.util.Objects;
  *
  * Topic name is
  *
- * DATA/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
+ * DATA/&lt;model&gt;/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
 public class ResourceDataNotification extends AbstractResourceNotification {
 
@@ -37,7 +37,7 @@ public class ResourceDataNotification extends AbstractResourceNotification {
         Objects.requireNonNull(provider);
         Objects.requireNonNull(service);
         Objects.requireNonNull(resource);
-        return String.format("DATA/%s/%s/%s", provider, service, resource);
+        return String.format("DATA/%s/%s/%s/%s", model, provider, service, resource);
     }
 
 }

@@ -78,7 +78,7 @@ class NotificationSenderTest {
             accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_CREATED, PROVIDER)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -88,7 +88,7 @@ class NotificationSenderTest {
             accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_DELETED, PROVIDER)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -109,9 +109,9 @@ class NotificationSenderTest {
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_DELETED, PROVIDER)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_CREATED, PROVIDER)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -122,7 +122,7 @@ class NotificationSenderTest {
             accumulator.addProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_CREATED, PROVIDER)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -133,7 +133,7 @@ class NotificationSenderTest {
             accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_DELETED, PROVIDER)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -145,7 +145,7 @@ class NotificationSenderTest {
             accumulator.removeProvider(MODEL_PKG, MODEL, PROVIDER);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_DELETED, PROVIDER)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -157,9 +157,9 @@ class NotificationSenderTest {
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_CREATED, PROVIDER)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2),
                     argThat(isLifecycleNotificationWith(PROVIDER_CREATED, PROVIDER_2)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -172,7 +172,7 @@ class NotificationSenderTest {
             accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER, SERVICE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -182,7 +182,7 @@ class NotificationSenderTest {
             accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_DELETED, PROVIDER, SERVICE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -203,9 +203,9 @@ class NotificationSenderTest {
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_DELETED, PROVIDER, SERVICE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER, SERVICE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -216,7 +216,7 @@ class NotificationSenderTest {
             accumulator.addService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER, SERVICE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -227,7 +227,7 @@ class NotificationSenderTest {
             accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_DELETED, PROVIDER, SERVICE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -239,7 +239,7 @@ class NotificationSenderTest {
             accumulator.removeService(MODEL_PKG, MODEL, PROVIDER, SERVICE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_DELETED, PROVIDER, SERVICE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -252,11 +252,11 @@ class NotificationSenderTest {
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER, SERVICE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE_2),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER, SERVICE_2)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER_2, SERVICE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -269,7 +269,7 @@ class NotificationSenderTest {
             accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE, RESOURCE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -279,7 +279,7 @@ class NotificationSenderTest {
             accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_DELETED, PROVIDER, SERVICE, RESOURCE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -300,9 +300,9 @@ class NotificationSenderTest {
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_DELETED, PROVIDER, SERVICE, RESOURCE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE, RESOURCE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -313,7 +313,7 @@ class NotificationSenderTest {
             accumulator.addResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE, RESOURCE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -324,7 +324,7 @@ class NotificationSenderTest {
             accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_DELETED, PROVIDER, SERVICE, RESOURCE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -336,7 +336,7 @@ class NotificationSenderTest {
             accumulator.removeResource(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_DELETED, PROVIDER, SERVICE, RESOURCE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -350,13 +350,13 @@ class NotificationSenderTest {
             accumulator.completeAndSend();
 
             InOrder inOrder = Mockito.inOrder(bus);
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE, RESOURCE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE, RESOURCE_2)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE_2 + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE_2 + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE_2, RESOURCE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER_2, SERVICE, RESOURCE)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -377,7 +377,7 @@ class NotificationSenderTest {
             accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null, null, now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(), emptyMap(), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -390,7 +390,7 @@ class NotificationSenderTest {
                     singletonMap(METADATA_KEY, METADATA_VALUE), now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
                             singletonMap(METADATA_KEY, METADATA_VALUE), now)));
             Mockito.verifyNoMoreInteractions(bus);
@@ -404,7 +404,7 @@ class NotificationSenderTest {
                     singletonMap(METADATA_KEY, METADATA_VALUE), null, now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE,
                             singletonMap(METADATA_KEY, METADATA_VALUE), emptyMap(), now)));
             Mockito.verifyNoMoreInteractions(bus);
@@ -421,7 +421,7 @@ class NotificationSenderTest {
                     Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
                             Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now)));
             Mockito.verifyNoMoreInteractions(bus);
@@ -438,7 +438,7 @@ class NotificationSenderTest {
                     Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
                             Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now)));
             Mockito.verifyNoMoreInteractions(bus);
@@ -470,7 +470,7 @@ class NotificationSenderTest {
                     singletonMap(METADATA_KEY, METADATA_VALUE), singletonMap(METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
                             Map.of(METADATA_KEY_2, METADATA_VALUE_2), now)));
             Mockito.verifyNoMoreInteractions(bus);
@@ -490,7 +490,7 @@ class NotificationSenderTest {
             accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, String.class, null, null, now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("DATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, String.class, null, null, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -503,7 +503,7 @@ class NotificationSenderTest {
                     now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("DATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
                     isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -518,7 +518,7 @@ class NotificationSenderTest {
                     INTEGER_VALUE_2, now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("DATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
                     isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE_2, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -533,7 +533,7 @@ class NotificationSenderTest {
                     INTEGER_VALUE_2, now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("DATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
                     isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE_2, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -563,7 +563,7 @@ class NotificationSenderTest {
             accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -576,7 +576,7 @@ class NotificationSenderTest {
             accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
             accumulator.completeAndSend();
 
-            Mockito.verify(bus, Mockito.times(2)).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            Mockito.verify(bus, Mockito.times(2)).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -591,9 +591,9 @@ class NotificationSenderTest {
 
             InOrder inOrder = Mockito.inOrder(bus);
 
-            inOrder.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now.minusSeconds(10))));
-            inOrder.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -608,9 +608,9 @@ class NotificationSenderTest {
 
             InOrder inOrder = Mockito.inOrder(bus);
 
-            inOrder.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now.minusSeconds(10))));
-            inOrder.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -652,55 +652,55 @@ class NotificationSenderTest {
             InOrder inOrder = Mockito.inOrder(bus);
 
             // Depth first for provider
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER),
                     argThat(isLifecycleNotificationWith(PROVIDER_CREATED, PROVIDER)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER, SERVICE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE, RESOURCE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE, RESOURCE_2)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE_2),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER, SERVICE_2)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE_2 + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE_2 + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE_2, RESOURCE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER + "/" + SERVICE_2 + "/" + RESOURCE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER + "/" + SERVICE_2 + "/" + RESOURCE_2),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER, SERVICE_2, RESOURCE_2)));
 
             // Depth first for provider 2
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2),
                     argThat(isLifecycleNotificationWith(PROVIDER_CREATED, PROVIDER_2)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER_2, SERVICE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER_2, SERVICE, RESOURCE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE + "/" + RESOURCE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE + "/" + RESOURCE_2),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER_2, SERVICE, RESOURCE_2)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE_2),
                     argThat(isLifecycleNotificationWith(SERVICE_CREATED, PROVIDER_2, SERVICE_2)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE_2 + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE_2 + "/" + RESOURCE),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER_2, SERVICE_2, RESOURCE)));
-            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + PROVIDER_2 + "/" + SERVICE_2 + "/" + RESOURCE_2),
+            inOrder.verify(bus).deliver(eq("LIFECYCLE/" + MODEL + "/" + PROVIDER_2 + "/" + SERVICE_2 + "/" + RESOURCE_2),
                     argThat(isLifecycleNotificationWith(RESOURCE_CREATED, PROVIDER_2, SERVICE_2, RESOURCE_2)));
 
             // Metadata next
-            inOrder.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
                             singletonMap(METADATA_KEY, METADATA_VALUE), now)));
-            inOrder.verify(bus).deliver(eq("METADATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
+            inOrder.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
                     argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE_2, emptyMap(),
                             singletonMap(METADATA_KEY_2, METADATA_VALUE_2), now)));
 
             // Resource values next
-            inOrder.verify(bus).deliver(eq("DATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+            inOrder.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
                     isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE_2, now)));
-            inOrder.verify(bus).deliver(eq("DATA/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2), argThat(
+            inOrder.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2), argThat(
                     isValueNotificationWith(PROVIDER, SERVICE, RESOURCE_2, Integer.class, null, INTEGER_VALUE, now)));
 
             // Finally the actions
-            inOrder.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+            inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now)));
-            inOrder.verify(bus).deliver(eq("ACTION/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
+            inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE_2, now.minusSeconds(10))));
             Mockito.verifyNoMoreInteractions(bus);
         }

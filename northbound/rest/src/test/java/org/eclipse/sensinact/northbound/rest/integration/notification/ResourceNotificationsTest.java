@@ -81,7 +81,7 @@ public class ResourceNotificationsTest {
     private static final UserInfo USER = UserInfo.ANONYMOUS;
 
     private static final String PROVIDER = "RestNotificationProvider";
-    private static final String PROVIDER_TOPIC = PROVIDER + "/*";
+    private static final String PROVIDER_TOPIC = PROVIDER + "/" + PROVIDER + "/*";
 
     @InjectService
     protected SseEventSourceFactory sseClient;

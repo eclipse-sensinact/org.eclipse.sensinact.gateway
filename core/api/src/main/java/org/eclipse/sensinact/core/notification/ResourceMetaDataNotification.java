@@ -22,7 +22,7 @@ import java.util.Objects;
  *
  * Topic name is
  *
- * METADATA/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
+ * METADATA/&lt;model&gt;/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
 public class ResourceMetaDataNotification extends AbstractResourceNotification {
 
@@ -37,7 +37,7 @@ public class ResourceMetaDataNotification extends AbstractResourceNotification {
         Objects.requireNonNull(provider);
         Objects.requireNonNull(service);
         Objects.requireNonNull(resource);
-        return String.format("METADATA/%s/%s/%s", provider, service, resource);
+        return String.format("METADATA/%s/%s/%s/%s", model, provider, service, resource);
     }
 
 }

@@ -21,7 +21,7 @@ import java.util.Objects;
  *
  * Topic name is
  *
- * LIFECYCLE/&lt;provider&gt;[/&lt;service&gt;[/&lt;resource&gt;]]
+ * LIFECYCLE/&lt;model&gt;/&lt;provider&gt;[/&lt;service&gt;[/&lt;resource&gt;]]
  */
 public class LifecycleNotification extends AbstractResourceNotification {
 
@@ -43,7 +43,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
             Objects.requireNonNull(resource);
         }
 
-        return String.format("LIFECYCLE/%s", String.format(status.template, provider, service, resource));
+        return "LIFECYCLE/".concat(String.format(status.template, model, provider, service, resource));
     }
 
     public enum Status {
@@ -57,7 +57,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
          * service names for initial services</li>
          * </ul>
          */
-        PROVIDER_CREATED("%s"),
+        PROVIDER_CREATED("%s/%s"),
 
         /**
          * Provider deleted,
@@ -68,7 +68,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
          * <li>{@link LifecycleNotification#initialValue} will be null</li>
          * </ul>
          */
-        PROVIDER_DELETED("%s"),
+        PROVIDER_DELETED("%s/%s"),
 
         /**
          * Service created,
@@ -79,7 +79,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
          * service names for initial resources</li>
          * </ul>
          */
-        SERVICE_CREATED("%s/%s"),
+        SERVICE_CREATED("%s/%s/%s"),
 
         /**
          * Service deleted,
@@ -89,7 +89,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
          * <li>{@link LifecycleNotification#initialValue} will be null</li>
          * </ul>
          */
-        SERVICE_DELETED("%s/%s"),
+        SERVICE_DELETED("%s/%s/%s"),
 
         /**
          * Resource created,
@@ -99,7 +99,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
          * <li>{@link LifecycleNotification#initialValue} will be the initial value</li>
          * </ul>
          */
-        RESOURCE_CREATED("%s/%s/%s"),
+        RESOURCE_CREATED("%s/%s/%s/%s"),
 
         /**
          * Resource deleted,
@@ -108,7 +108,7 @@ public class LifecycleNotification extends AbstractResourceNotification {
          * <li>{@link LifecycleNotification#initialValue} will be null</li>
          * </ul>
          */
-        RESOURCE_DELETED("%s/%s/%s");
+        RESOURCE_DELETED("%s/%s/%s/%s");
 
         private final String template;
 
