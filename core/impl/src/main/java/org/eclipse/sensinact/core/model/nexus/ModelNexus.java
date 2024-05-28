@@ -893,7 +893,7 @@ public class ModelNexus {
         return Collections.unmodifiableMap(result);
     }
 
-    private EReference getServiceForModel(EClass model, String serviceName) {
+    public EReference getServiceForModel(EClass model, String serviceName) {
         EStructuralFeature feature = model.getEStructuralFeature(serviceName);
         EClass serviceEClass = ProviderPackage.Literals.SERVICE;
         if (feature != null && (!(feature instanceof EReference)

@@ -20,10 +20,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
+import org.eclipse.sensinact.core.emf.model.EMFModel;
+import org.eclipse.sensinact.core.emf.model.EMFModelBuilder;
 import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.model.Model;
-import org.eclipse.sensinact.core.model.ModelBuilder;
-import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 
@@ -37,24 +38,24 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
     }
 
     @Override
-    public ModelBuilder createModel(String model) {
+    public EMFModelBuilder createModel(String model) {
         checkValid();
         return new ModelBuilderImpl(active, nexusImpl, null, model);
     }
 
     @Override
-    public ModelBuilder createModel(String packageUri, String model) {
+    public EMFModelBuilder createModel(String packageUri, String model) {
         checkValid();
         return new ModelBuilderImpl(active, nexusImpl, packageUri, model);
     }
 
     @Override
-    public Model getModel(String model) {
+    public EMFModel getModel(String model) {
         return getModel(null, model);
     }
 
     @Override
-    public Model getModel(String packageUri, String model) {
+    public EMFModel getModel(String packageUri, String model) {
         checkValid();
         return nexusImpl.getModel(packageUri, model).map(eClass -> new ModelImpl(active, model, eClass, nexusImpl))
                 .orElse(null);
@@ -103,7 +104,7 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
      * eclipse.emf.ecore.EClass)
      */
     @Override
-    public Model getModel(EClass model) {
+    public EMFModel getModel(EClass model) {
         if (nexusImpl.registered(model)) {
             return new ModelImpl(active, EMFUtil.getModelName(model), model, nexusImpl);
         }
@@ -117,7 +118,7 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
      * eclipse.emf.ecore.EClass)
      */
     @Override
-    public ModelBuilder createModel(EClass model) {
+    public EMFModelBuilder createModel(EClass model) {
         return new ModelBuilderImpl(active, nexusImpl, model);
     }
 }

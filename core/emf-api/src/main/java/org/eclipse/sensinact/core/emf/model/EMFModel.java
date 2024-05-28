@@ -8,23 +8,27 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation
+*   Data In Motion - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.model;
+package org.eclipse.sensinact.core.emf.model;
 
 import java.util.Map;
 
-import org.eclipse.sensinact.core.command.CommandScoped;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.sensinact.core.model.Model;
 
 /**
  * A model for a Provider
  */
-public interface Model extends Modelled, CommandScoped {
+public interface EMFModel extends Model {
 
-    String getPackageUri();
+    EClass getModelEClass();
 
-    ServiceBuilder<? extends Service> createService(String service);
+    boolean isDynamic();
 
-    Map<String, ? extends Service> getServices();
+    Map<String, ? extends EMFService> getServices();
 
+    EMFServiceBuilder<EMFService> createService(String service);
+
+    EMFService createDynamicService(String svc, EClass svcEClass);
 }

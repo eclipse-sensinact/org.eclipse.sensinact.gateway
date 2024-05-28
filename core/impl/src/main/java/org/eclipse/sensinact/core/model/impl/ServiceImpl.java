@@ -19,20 +19,20 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.core.model.Model;
+import org.eclipse.sensinact.core.emf.model.EMFModel;
+import org.eclipse.sensinact.core.emf.model.EMFService;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceBuilder;
-import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 
-public class ServiceImpl extends CommandScopedImpl implements Service {
+public class ServiceImpl extends CommandScopedImpl implements EMFService {
 
-    private final Model model;
+    private final EMFModel model;
     private final String serviceName;
     private final ModelNexus nexusImpl;
     private EClass serviceEClass;
 
-    public ServiceImpl(AtomicBoolean active, Model model, String serviceName, EClass serviceEClass,
+    public ServiceImpl(AtomicBoolean active, EMFModel model, String serviceName, EClass serviceEClass,
             ModelNexus nexusImpl) {
         super(active);
         this.model = model;
@@ -84,12 +84,13 @@ public class ServiceImpl extends CommandScopedImpl implements Service {
     }
 
     @Override
-    public Model getModel() {
+    public EMFModel getModel() {
         checkValid();
         return model;
     }
 
-    EClass getServiceEClass() {
+    @Override
+    public EClass getServiceEClass() {
         return serviceEClass;
     }
 }

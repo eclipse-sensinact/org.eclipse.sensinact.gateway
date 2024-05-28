@@ -21,12 +21,13 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.core.model.Model;
-import org.eclipse.sensinact.core.model.Service;
-import org.eclipse.sensinact.core.model.ServiceBuilder;
+import org.eclipse.sensinact.core.emf.model.EMFModel;
+import org.eclipse.sensinact.core.emf.model.EMFService;
+import org.eclipse.sensinact.core.emf.model.EMFServiceBuilder;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 
-public class ModelImpl extends CommandScopedImpl implements Model {
+public class ModelImpl extends CommandScopedImpl implements EMFModel {
 
     private final String name;
 
@@ -41,16 +42,16 @@ public class ModelImpl extends CommandScopedImpl implements Model {
         this.nexusImpl = nexusImpl;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.sensinact.core.model.Model#isFrozen()
-     */
     @Override
     public boolean isFrozen() {
         checkValid();
-//        return !ProviderPackage.Literals.DYNAMIC_PROVIDER.isSuperTypeOf(eClass) && ((EClassImpl) eClass).isFrozen();
         return ((EClassImpl) eClass).isFrozen();
+    }
+
+    @Override
+    public boolean isDynamic() {
+        checkValid();
+        return !ProviderPackage.Literals.DYNAMIC_PROVIDER.isSuperTypeOf(eClass);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     }
 
     @Override
-    public ServiceBuilder<Service> createService(String service) {
+    public EMFServiceBuilder<EMFService> createService(String service) {
         checkValid();
         if (isFrozen()) {
             throw new IllegalStateException("Model " + name + " is frozen and can't be modified.");
@@ -87,14 +88,20 @@ public class ModelImpl extends CommandScopedImpl implements Model {
     }
 
     @Override
-    public Map<String, ? extends Service> getServices() {
+    public EMFService createDynamicService(String svc, EClass svcEClass) {
+        return new ServiceImpl(active, this, svc, svcEClass, nexusImpl);
+    }
+
+    @Override
+    public Map<String, ? extends EMFService> getServices() {
         checkValid();
         // Use nexusImpl to get services reliably
         return nexusImpl.getServiceReferencesForModel(eClass).collect(toMap(EReference::getName,
                 r -> new ServiceImpl(active, this, r.getName(), r.getEReferenceType(), nexusImpl)));
     }
 
-    EClass getModelEClass() {
+    @Override
+    public EClass getModelEClass() {
         return eClass;
     }
 

@@ -119,6 +119,7 @@ public class EMFUpdateServiceTest {
             assertNull(update.getFailure());
             assertEquals("14 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
         }
+
         @Test
         void admin() throws Exception {
             TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
@@ -252,6 +253,38 @@ public class EMFUpdateServiceTest {
             public long timestamp;
         }
 
+        @Provider(PROVIDER)
+        public class NonDynamicTestDTO {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
+
+            @Service
+            public EClass service = TestdataPackage.Literals.TEST_TEMPERATUR;
+
+            @Resource(RESOURCE)
+            @Service("tmp")
+            @Data
+            public String data;
+
+            @Timestamp(ChronoUnit.MILLIS)
+            public long timestamp;
+        }
+
+        @Provider(PROVIDER)
+        @ModelPackageUri(TestdataPackage.eNS_URI)
+        @Model("TestSensor")
+        public class NonDynamicTestNoEClassDTO {
+
+            @Resource(RESOURCE)
+            @Service("tmp")
+            @Data
+            public String data;
+
+            @Timestamp(ChronoUnit.MILLIS)
+            public long timestamp;
+        }
+
         @Test
         void updateDTOERef() throws Exception {
             TestEClassDTO dto = new TestEClassDTO();
@@ -291,6 +324,17 @@ public class EMFUpdateServiceTest {
         @Test
         void nonDynamicUpdateDTOEClass() throws Exception {
             NonDynamicTestEClassDTO dto = new NonDynamicTestEClassDTO();
+            dto.data = "13 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            assertNotNull(t);
+        }
+
+        @Test
+        void nonDynamicUpdateDTONoEClass() throws Exception {
+            NonDynamicTestNoEClassDTO dto = new NonDynamicTestNoEClassDTO();
             dto.data = "13 °C";
             dto.timestamp = Instant.now().toEpochMilli();
 
