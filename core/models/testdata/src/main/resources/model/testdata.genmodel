@@ -21,5 +21,15 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//TestAdmin/testAdmin"/>
     </genClasses>
     <genClasses ecoreClass="testdata.ecore#//DynamicTestSensor"/>
+    <genClasses ecoreClass="testdata.ecore#//ComplexTestSensor">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference testdata.ecore#//ComplexTestSensor/temp"/>
+    </genClasses>
+    <genClasses ecoreClass="testdata.ecore#//TestTemperaturWithComplex">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference testdata.ecore#//TestTemperaturWithComplex/testResource"/>
+    </genClasses>
+    <genClasses ecoreClass="testdata.ecore#//TestResource">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//TestResource/foo"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//TestResource/bar"/>
+    </genClasses>
   </genPackages>
 </genmodel:GenModel>

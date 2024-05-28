@@ -389,51 +389,6 @@ public class ModelNexus {
         return service;
     }
 
-//    public void handleDataUpdate(Provider provider, EStructuralFeature serviceFeature,
-//            EStructuralFeature resourceFeature, Object data, Instant timestamp) {
-//
-//        String providerName = provider.getId();
-//        String modelName = EMFUtil.getModelName(provider.eClass());
-//        NotificationAccumulator accumulator = notificationAccumulator.get();
-//
-//        String packageUri = provider.eClass().getEPackage().getNsURI();
-//
-//        Service service = (Service) provider.eGet(serviceFeature);
-//        if (service == null) {
-//            service = (Service) EcoreUtil.create((EClass) serviceFeature.getEType());
-//            provider.eSet(serviceFeature, service);
-//            accumulator.addService(packageUri, modelName, providerName, serviceFeature.getName());
-//        }
-//
-//        handleDataUpdate(provider, serviceFeature.getName(), service, resourceFeature, data, timestamp, accumulator,
-//                packageUri, modelName, providerName);
-//    }
-
-    /**
-     * This method allows to update Data on services in a DynamicProvider, that
-     * reside in the services Map. As they are somewhat special, they will not
-     * create new Services if non exists.
-     *
-     * @throws UnsupportedOperationException if the service intended to be updated
-     *                                       does not exist.
-     */
-//    public void handleDataUpdate(DynamicProvider provider, String serviceName, EStructuralFeature resourceFeature,
-//            Object data, Instant timestamp) {
-//
-//        Service service = provider.getServices().get(serviceName);
-//        if (service == null) {
-//            throw new UnsupportedOperationException("No service with the name " + serviceName
-//                    + " exists. This Method is only inteded to be used with already existing Services");
-//        }
-//        String providerName = provider.getId();
-//        String modelName = EMFUtil.getModelName(provider.eClass());
-//        NotificationAccumulator accumulator = notificationAccumulator.get();
-//        String packageUri = provider.eClass().getEPackage().getNsURI();
-//
-//        handleDataUpdate(provider, serviceName, service, resourceFeature, data, timestamp, accumulator, packageUri,
-//                modelName, providerName);
-//    }
-
     private void handleDataUpdate(Provider provider, String serviceName, Service service,
             EStructuralFeature resourceFeature, Object data, Instant timestamp, NotificationAccumulator accumulator,
             String packageUri, String modelName, String providerName) {
@@ -473,10 +428,6 @@ public class ModelNexus {
             return;
         }
 
-//        if (metadata == null) {
-//            metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-//            service.getMetadata().put(resourceFeature, metadata);
-//        }
         metadata.setTimestamp(timestamp);
 
         Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata, resourceFeature);
@@ -914,11 +865,16 @@ public class ModelNexus {
 
     public Stream<ETypedElement> getResourcesForService(EClass svcClass) {
         return Stream.concat(
-                svcClass.getEAllAttributes().stream()
-                        .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE),
-                svcClass.getEAllOperations().stream()
-                        .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
-                        .filter(Predicate.not(ProviderPackage.Literals.SERVICE___EIS_SET__ESTRUCTURALFEATURE::equals)));
+                Stream.concat(
+                        svcClass.getEAllAttributes().stream()
+                                .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE),
+                        svcClass.getEAllOperations().stream()
+                                .filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
+                                .filter(Predicate
+                                        .not(ProviderPackage.Literals.SERVICE___EIS_SET__ESTRUCTURALFEATURE::equals))),
+                svcClass.getEAllReferences().stream().filter(EReference::isContainment).filter(ref -> {
+                    return ref != ProviderPackage.Literals.SERVICE__METADATA;
+                }).filter(o -> o.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE));
     }
 
     public EOperation createActionResource(EClass serviceEClass, String name, Class<?> type,

@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -201,22 +200,24 @@ public class EMFCompareUtil {
             throw new UnsupportedOperationException("Merging Services of different Tyoes is not supported yet");
         }
 
-        // We can copy every Reference that might exist, as they are out of the scope
-        // of any notifications
+        // we can simply copy all non containments, as they are out of scope for
+        // notifications
         originalService.eClass().getEAllReferences().stream()
                 // We don't want references from EObject and anything above
                 .filter(er -> er.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
                 .filter(Predicate.not(ProviderPackage.Literals.SERVICE__METADATA::equals))
-                .filter(Predicate.not(blackList::contains)).forEach(er -> {
-                    originalService.eSet(er,
-                            er.isContainment() ? EcoreUtil.copy((EObject) newService.eGet(er)) : newService.eGet(er));
+                .filter(Predicate.not(EReference::isContainment)).filter(Predicate.not(blackList::contains))
+                .forEach(er -> {
+                    originalService.eSet(er, newService.eGet(er));
                 });
 
-        originalService.eClass().getEAllAttributes().stream()
+        originalService.eClass().getEAllStructuralFeatures().stream()
                 // We don't want references from EObject and anything above
                 .filter(er -> er.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE)
-                .filter(Predicate.not(blackList::contains)).forEach(er -> {
-                    notifyAttributeChange(er, serviceName, newService, originalService, accumulator);
+                .filter(Predicate.not(blackList::contains))
+                .filter(Predicate.not(ProviderPackage.Literals.SERVICE__METADATA::equals))
+                .filter(f -> f instanceof EReference ? ((EReference) f).isContainment() : true).forEach(er -> {
+                    notifyResourceChange(er, serviceName, newService, originalService, accumulator);
                 });
 
     }
@@ -228,7 +229,8 @@ public class EMFCompareUtil {
     // 4. Attribute changed; timestamp changed; update attribute and timestamp if
     // new is after old timetamp
     // 5. Attribute not changed, but timestamp updated: same as 4.
-    private static void notifyAttributeChange(EAttribute resource, String serviceName, Service newService,
+    @SuppressWarnings("unchecked")
+    private static void notifyResourceChange(EStructuralFeature resource, String serviceName, Service newService,
             Service originalService, NotificationAccumulator accumulator) {
         EObject container = originalService.eContainer();
         if (container instanceof ServiceMapImpl) {
@@ -250,8 +252,25 @@ public class EMFCompareUtil {
             if (originalMetadata != null) {
                 previousTimestamp = originalMetadata.getTimestamp();
             }
-
-            if (Objects.equals(oldValue, newValue) && Objects.equals(previousTimestamp, newTimestamp)) {
+            boolean isEqual = false;
+            if (resource instanceof EReference) {
+                if (resource.isMany()) {
+                    isEqual = EcoreUtil.equals((List<EObject>) oldValue, (List<EObject>) newValue);
+                    if (!isEqual) {
+                        oldValue = EcoreUtil.copyAll((List<EObject>) oldValue);
+                        newValue = EcoreUtil.copyAll((List<EObject>) newValue);
+                    }
+                } else {
+                    isEqual = EcoreUtil.equals((EObject) oldValue, (EObject) newValue);
+                    if (!isEqual) {
+                        oldValue = EcoreUtil.copy((EObject) oldValue);
+                        newValue = EcoreUtil.copy((EObject) newValue);
+                    }
+                }
+            } else {
+                isEqual = Objects.equals(oldValue, newValue);
+            }
+            if (isEqual && Objects.equals(previousTimestamp, newTimestamp)) {
                 return;
             }
             // if we already have a timestamp value that is newer we do nothing
@@ -279,7 +298,7 @@ public class EMFCompareUtil {
             originalService.eSet(resource, newValue);
 
             accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
-                    resource.getEAttributeType().getInstanceClass(), oldValue, newValue, newTimestamp);
+                    resource.getEType().getInstanceClass(), oldValue, newValue, newTimestamp);
 
             Map<String, Object> newMetaData = extractMetadataMap(newValue, updatedMetadata, resource);
 
@@ -300,7 +319,7 @@ public class EMFCompareUtil {
         return newMetaData;
     }
 
-    private static ResourceMetadata updateMetadata(EAttribute resource, String serviceName, Service newService,
+    private static ResourceMetadata updateMetadata(EStructuralFeature resource, String serviceName, Service newService,
             Service originalService, Instant newTimestamp) {
         ResourceMetadata resourceMetadata = checkMetadata(originalService, resource);
         resourceMetadata.setTimestamp(newTimestamp);
@@ -347,7 +366,7 @@ public class EMFCompareUtil {
         return null;
     }
 
-    private static Instant getNewTimestampFromMetadata(EAttribute resource, Service service) {
+    private static Instant getNewTimestampFromMetadata(EStructuralFeature resource, Service service) {
         Metadata metadata = service.getMetadata().get(resource);
         if (metadata != null) {
             if (metadata.getTimestamp() != null) {
@@ -400,7 +419,7 @@ public class EMFCompareUtil {
 //        service.getMetadata().removeKey(resource);
 //    }
 
-    protected static ResourceMetadata checkMetadata(Service service, EAttribute attribute) {
+    protected static ResourceMetadata checkMetadata(Service service, EStructuralFeature attribute) {
         ResourceMetadata result = null;
         if (!service.getMetadata().containsKey(attribute)) {
             result = MetadataFactory.eINSTANCE.createResourceMetadata();

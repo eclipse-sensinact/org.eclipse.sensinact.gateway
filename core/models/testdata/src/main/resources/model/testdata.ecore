@@ -18,4 +18,16 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="testAdmin" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DynamicTestSensor" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//DynamicProvider"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ComplexTestSensor" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Provider">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="temp" eType="#//TestTemperaturWithComplex"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TestTemperaturWithComplex" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Service">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="testResource" eType="#//TestResource"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TestResource">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="foo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="bar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
 </ecore:EPackage>
