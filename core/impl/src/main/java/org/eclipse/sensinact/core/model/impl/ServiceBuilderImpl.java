@@ -18,12 +18,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.emf.model.EMFService;
+import org.eclipse.sensinact.core.emf.model.EMFServiceBuilder;
 import org.eclipse.sensinact.core.model.ResourceBuilder;
-import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ServiceBuilder;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 
-public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, Service> implements ServiceBuilder<P> {
+public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, EMFService>
+        implements EMFServiceBuilder<P> {
 
     private final String name;
     private final ModelNexus nexusImpl;
@@ -37,19 +39,19 @@ public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, Ser
     }
 
     @Override
-    public ServiceBuilder<P> exclusivelyOwned(boolean exclusive) {
+    public EMFServiceBuilder<P> exclusivelyOwned(boolean exclusive) {
         checkValid();
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    public ServiceBuilder<P> withAutoDeletion(boolean autoDelete) {
+    public EMFServiceBuilder<P> withAutoDeletion(boolean autoDelete) {
         checkValid();
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    public ServiceBuilder<P> withCreationTime(Instant creationTime) {
+    public EMFServiceBuilder<P> withCreationTime(Instant creationTime) {
         checkValid();
         this.creationTimestamp = creationTime;
         return this;
@@ -64,7 +66,7 @@ public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, Ser
         return rb;
     }
 
-    protected Service doBuild(ModelImpl builtParent) {
+    protected EMFService doBuild(ModelImpl builtParent) {
         checkValid();
         EReference service = nexusImpl.createService(builtParent.getModelEClass(), name,
                 creationTimestamp == null ? Instant.now() : creationTimestamp);

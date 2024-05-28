@@ -13,8 +13,6 @@
 package org.eclipse.sensinact.core.emf.model;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.sensinact.core.model.Model;
-import org.eclipse.sensinact.core.model.ModelBuilder;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 
 /**
@@ -22,8 +20,16 @@ import org.eclipse.sensinact.core.model.SensinactModelManager;
  */
 public interface SensinactEMFModelManager extends SensinactModelManager {
 
-    Model getModel(EClass eClass);
+    EMFModel getModel(String model);
 
-    ModelBuilder createModel(EClass eClass);
+    EMFModel getModel(String modelPackageUri, String model);
+
+    EMFModel getModel(EClass eClass);
+
+    EMFModelBuilder createModel(EClass eClass);
+
+    EMFModelBuilder createModel(String model);
+
+    EMFModelBuilder createModel(String modelPackageUri, String model);
 
 }

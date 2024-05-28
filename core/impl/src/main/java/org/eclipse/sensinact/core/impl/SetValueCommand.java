@@ -16,16 +16,18 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
+import org.eclipse.sensinact.core.emf.model.EMFModel;
+import org.eclipse.sensinact.core.emf.model.EMFService;
+import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
-import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -40,14 +42,15 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
     @Override
     protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
             PromiseFactory promiseFactory) {
-        return doCall((SensinactEMFDigitalTwin) twin, modelMgr, promiseFactory).recoverWith(p -> {
-            return promiseFactory.failed(
-                    new DataUpdateException(dataUpdateDto.modelPackageUri, dataUpdateDto.model, dataUpdateDto.provider,
-                            dataUpdateDto.service, dataUpdateDto.resource, dataUpdateDto.originalDto, p.getFailure()));
-        });
+        return doCall((SensinactEMFDigitalTwin) twin, (SensinactEMFModelManager) modelMgr, promiseFactory)
+                .recoverWith(p -> {
+                    return promiseFactory.failed(new DataUpdateException(dataUpdateDto.modelPackageUri,
+                            dataUpdateDto.model, dataUpdateDto.provider, dataUpdateDto.service, dataUpdateDto.resource,
+                            dataUpdateDto.originalDto, p.getFailure()));
+                });
     }
 
-    private Promise<Void> doCall(SensinactEMFDigitalTwin twin, SensinactModelManager modelMgr,
+    private Promise<Void> doCall(SensinactEMFDigitalTwin twin, SensinactEMFModelManager modelMgr,
             PromiseFactory promiseFactory) {
         EClass modelEClass = dataUpdateDto.modelEClass;
         String packageUri = modelEClass == null ? dataUpdateDto.modelPackageUri : modelEClass.getEPackage().getNsURI();
@@ -67,21 +70,32 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
         SensinactResource resource = twin.getResource(packageUri, mod, provider, svc, res);
 
         if (resource == null) {
-            Model model = modelMgr.getModel(packageUri, mod);
-            if (model == null) {
-                model = modelMgr.createModel(packageUri, mod).withCreationTime(dataUpdateDto.timestamp).build();
+            EMFModel model = null;
+            if (modelEClass != null) {
+                model = modelMgr.getModel(modelEClass);
+            } else {
+                model = (EMFModel) modelMgr.getModel(packageUri, mod);
+                if (model == null) {
+                    model = modelMgr.createModel(packageUri, mod).withCreationTime(dataUpdateDto.timestamp).build();
+                }
+                modelEClass = model.getModelEClass();
             }
-            if (!model.isFrozen()) {
-                Service service = model.getServices().get(svc);
-                if (service == null) {
+            EMFService service = model.getServices().get(svc);
+            if (service == null) {
+                if (ProviderPackage.Literals.DYNAMIC_PROVIDER.isSuperTypeOf(model.getModelEClass())) {
+                    service = model.createDynamicService(svc, svcEClass);
+                } else if (!model.isFrozen()) {
                     service = model.createService(svc).withCreationTime(dataUpdateDto.timestamp).build();
                 }
-                Resource r = service.getResources().get(res);
+            }
 
-                if (r == null) {
-                    r = service.createResource(res).withValueType(ValueType.UPDATABLE)
-                            .withType((Class<?>) dataUpdateDto.type).build();
-                }
+            Resource r = service.getResources().get(res);
+            if (!model.isFrozen() && r == null) {
+                r = service.createResource(res).withValueType(ValueType.UPDATABLE)
+                        .withType((Class<?>) dataUpdateDto.type).build();
+            }
+            if (svcEClass == null) {
+                svcEClass = service.getServiceEClass();
             }
 
             SensinactEMFProvider sp = twin.getProvider(packageUri, mod, provider);

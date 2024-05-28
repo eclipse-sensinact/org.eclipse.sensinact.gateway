@@ -18,13 +18,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.sensinact.core.model.Model;
+import org.eclipse.sensinact.core.emf.model.EMFModel;
+import org.eclipse.sensinact.core.emf.model.EMFModelBuilder;
 import org.eclipse.sensinact.core.model.ModelBuilder;
 import org.eclipse.sensinact.core.model.ServiceBuilder;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 
-public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements ModelBuilder {
+public class ModelBuilderImpl extends AbstractBuilderImpl<EMFModel> implements EMFModelBuilder {
 
     private final ModelNexus nexusImpl;
     private final String name;
@@ -50,19 +51,19 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
     }
 
     @Override
-    public ModelBuilder exclusivelyOwned(boolean exclusive) {
+    public EMFModelBuilder exclusivelyOwned(boolean exclusive) {
         checkValid();
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    public ModelBuilder withAutoDeletion(boolean autoDelete) {
+    public EMFModelBuilder withAutoDeletion(boolean autoDelete) {
         checkValid();
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    public ModelBuilder withCreationTime(Instant creationTime) {
+    public EMFModelBuilder withCreationTime(Instant creationTime) {
         checkValid();
         this.creationTime = creationTime;
         return this;
@@ -80,7 +81,7 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<Model> implements Mode
     }
 
     @Override
-    protected Model doBuild() {
+    protected EMFModel doBuild() {
         checkValid();
         if (modelEClass != null) {
             return new ModelImpl(active, name,
