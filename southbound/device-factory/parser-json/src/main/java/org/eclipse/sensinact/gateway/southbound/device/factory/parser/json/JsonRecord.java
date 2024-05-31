@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory.parser.json;
 
-import java.awt.List;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
