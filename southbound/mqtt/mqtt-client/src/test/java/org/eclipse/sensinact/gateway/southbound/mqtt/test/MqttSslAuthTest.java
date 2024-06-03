@@ -353,19 +353,19 @@ public class MqttSslAuthTest {
     void start() throws Exception {
         server = new Server();
         final IConfig config = new MemoryConfig(new Properties());
-        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, "localhost");
-        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, BrokerConstants.DISABLED_PORT_BIND);
-        config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, "2183");
+        config.setProperty(IConfig.HOST_PROPERTY_NAME, "localhost");
+        config.setProperty(IConfig.PORT_PROPERTY_NAME, BrokerConstants.DISABLED_PORT_BIND);
+        config.setProperty(IConfig.SSL_PORT_PROPERTY_NAME, "2183");
 
         // WebSocket
-        config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, "2184");
-        config.setProperty(BrokerConstants.WEB_SOCKET_PATH_PROPERTY_NAME, "/ws");
+        config.setProperty(IConfig.WSS_PORT_PROPERTY_NAME, "2184");
+        config.setProperty(IConfig.WEB_SOCKET_PATH_PROPERTY_NAME, "/ws");
 
         // Setup SSL
-        config.setProperty(BrokerConstants.KEY_STORE_TYPE, SSLUtils.PKCS12);
-        config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, SERVER_CERT_P12);
-        config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
-        config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
+        config.setProperty(IConfig.KEY_STORE_TYPE, SSLUtils.PKCS12);
+        config.setProperty(IConfig.JKS_PATH_PROPERTY_NAME, SERVER_CERT_P12);
+        config.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
+        config.setProperty(IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
 
         // Client authentication
         config.setProperty(BrokerConstants.NEED_CLIENT_AUTH, "true");

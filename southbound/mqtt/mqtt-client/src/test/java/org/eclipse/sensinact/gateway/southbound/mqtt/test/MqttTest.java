@@ -39,7 +39,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
@@ -65,8 +64,8 @@ public class MqttTest {
     void start() throws Exception {
         server = new Server();
         IConfig config = new MemoryConfig(new Properties());
-        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, "127.0.0.1");
-        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "2183");
+        config.setProperty(IConfig.HOST_PROPERTY_NAME, "127.0.0.1");
+        config.setProperty(IConfig.PORT_PROPERTY_NAME, "2183");
         server.startServer(config);
 
         client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());
