@@ -81,7 +81,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -356,6 +357,10 @@ public class MqttSslAuthTest {
         config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, BrokerConstants.DISABLED_PORT_BIND);
         config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, "2183");
 
+        // WebSocket
+        config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, "2184");
+        config.setProperty(BrokerConstants.WEB_SOCKET_PATH_PROPERTY_NAME, "/ws");
+
         // Setup SSL
         config.setProperty(BrokerConstants.KEY_STORE_TYPE, SSLUtils.PKCS12);
         config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, SERVER_CERT_P12);
@@ -413,12 +418,20 @@ public class MqttSslAuthTest {
     }
 
     MqttClientHandler setupHandler(final MqttClientConfiguration baseSslConfig, final String handlerId,
-            final String... topics) throws Exception {
+            final boolean useWebsocket, final String... topics) throws Exception {
         MqttClientHandler handler = new MqttClientHandler();
         Mockito.when(baseSslConfig.id()).thenReturn(handlerId);
         Mockito.when(baseSslConfig.host()).thenReturn("localhost");
-        Mockito.when(baseSslConfig.port()).thenReturn(2183);
         Mockito.when(baseSslConfig.topics()).thenReturn(topics);
+
+        if (useWebsocket) {
+            Mockito.when(baseSslConfig.protocol()).thenReturn("ws");
+            Mockito.when(baseSslConfig.port()).thenReturn(2184);
+            Mockito.when(baseSslConfig.path()).thenReturn("/ws");
+        } else {
+            Mockito.when(baseSslConfig.port()).thenReturn(2183);
+        }
+
         handler.activate(baseSslConfig);
         return handler;
     }
@@ -428,8 +441,9 @@ public class MqttSslAuthTest {
     /**
      * Tests SSL client authentication
      */
-    @Test
-    void testMqttConnect() throws Exception {
+    @ParameterizedTest(name = "websocket={0}")
+    @ValueSource(booleans = { false, true })
+    void testMqttConnect(final boolean useWebsocket) throws Exception {
         // Register a listener as a service
         final BlockingQueue<IMqttMessage> messages = new ArrayBlockingQueue<>(32);
         final IMqttMessageListener listener = (handler, topic, msg) -> {
@@ -440,7 +454,7 @@ public class MqttSslAuthTest {
         final String topic = "sensinact/mqtt/test";
         final MqttClientConfiguration config = makeSslKeystoreConfig(CLIENT_CERT_P12, CLIENT_CERT_PASS, TRUST_CERT_P12,
                 TRUST_CERT_PASS);
-        handlers.add(setupHandler(config, "id-auth-ssl", topic));
+        handlers.add(setupHandler(config, "id-auth-ssl", useWebsocket, topic));
 
         for (MqttClientHandler handler : handlers) {
             handler.addListener(listener,
@@ -464,13 +478,14 @@ public class MqttSslAuthTest {
     /**
      * Ensure we are rejected correctly
      */
-    @Test
-    void testMqttRejectUnsigned() throws Exception {
+    @ParameterizedTest(name = "websocket={0}")
+    @ValueSource(booleans = { false, true })
+    void testMqttRejectUnsigned(final boolean useWebsocket) throws Exception {
         for (String certFile : List.of(CLIENT_CERT_UNSIGNED_P12, CLIENT_CERT_UNSIGNED_WITH_CA_P12)) {
             final MqttClientConfiguration config = makeSslKeystoreConfig(certFile, CLIENT_CERT_PASS, TRUST_CERT_P12,
                     TRUST_CERT_PASS);
             final MqttException ex = assertThrows(MqttException.class,
-                    () -> setupHandler(config, "id-auth-ssl", "sensinact/mqtt/test"));
+                    () -> setupHandler(config, "id-auth-ssl", useWebsocket, "sensinact/mqtt/test"));
             assertInstanceOf(SSLHandshakeException.class, ex.getCause());
         }
     }
@@ -478,8 +493,9 @@ public class MqttSslAuthTest {
     /**
      * Ensure we can load PEM files
      */
-    @Test
-    void testMqttConnectPem() throws Exception {
+    @ParameterizedTest(name = "websocket={0}")
+    @ValueSource(booleans = { false, true })
+    void testMqttConnectPem(final boolean useWebsocket) throws Exception {
         // Register a listener as a service
         final BlockingQueue<IMqttMessage> messages = new ArrayBlockingQueue<>(32);
         final IMqttMessageListener listener = (handler, topic, msg) -> {
@@ -490,7 +506,7 @@ public class MqttSslAuthTest {
         final String topic = "sensinact/mqtt/test";
         final MqttClientConfiguration config = makeSslPemConfig(CLIENT_CERT_PEM, CLIENT_CERT_KEY_PEM, CLIENT_CERT_PASS,
                 TRUST_CERT_PEM);
-        handlers.add(setupHandler(config, "id-auth-ssl", topic));
+        handlers.add(setupHandler(config, "id-auth-ssl", useWebsocket, topic));
 
         for (MqttClientHandler handler : handlers) {
             handler.addListener(listener,

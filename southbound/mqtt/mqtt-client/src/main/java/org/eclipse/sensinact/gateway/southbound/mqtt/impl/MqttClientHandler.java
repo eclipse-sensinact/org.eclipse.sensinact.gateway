@@ -201,7 +201,6 @@ public class MqttClientHandler implements MqttCallback {
 
         // Setup certificate-based authentication
         if (config.auth_keystore_path() != null || config.auth_clientcert_path() != null) {
-
             options.setSocketFactory(SSLUtils.setupSSLSocketFactory(config));
         }
 
@@ -222,15 +221,24 @@ public class MqttClientHandler implements MqttCallback {
 
         final boolean clientAuth = config.auth_keystore_path() != null || config.auth_clientcert_path() != null;
         String protocol = config.protocol();
-        if (protocol == null || protocol.isBlank() || (clientAuth && protocol.equalsIgnoreCase("tcp"))) {
-            if (clientAuth) {
+        if (protocol == null || protocol.isBlank()) {
+            protocol = "tcp";
+        } else {
+            protocol = protocol.strip().toLowerCase();
+        }
+
+        if (clientAuth) {
+            if ("tcp".equals(protocol)) {
                 protocol = "ssl";
+            } else if ("ws".equals(protocol)) {
+                protocol = "wss";
             } else {
-                protocol = "tcp";
+                logger.warn("Trying to use client authentication on an unsecure connection.");
             }
         }
 
-        return new URI(protocol, null, mqttHost, config.port(), null, null, null).toString();
+        final String path = protocol.startsWith("ws") ? config.path() : null;
+        return new URI(protocol, null, mqttHost, config.port(), path, null, null).toString();
     }
 
     /**
