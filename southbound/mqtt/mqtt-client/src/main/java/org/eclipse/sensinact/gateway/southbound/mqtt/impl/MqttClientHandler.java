@@ -109,7 +109,7 @@ public class MqttClientHandler implements MqttCallback {
     public void activate(final MqttClientConfiguration config) throws Exception {
         // Validate configuration
         reconnectDelayMs = config.client_reconnect_delay();
-        if(reconnectDelayMs < 100) {
+        if (reconnectDelayMs < 100) {
             reconnectDelayMs = 100;
         } else if (reconnectDelayMs > Duration.ofHours(1).toMillis()) {
             reconnectDelayMs = (int) Duration.ofHours(1).toMillis();
@@ -139,7 +139,7 @@ public class MqttClientHandler implements MqttCallback {
         try {
             client.connect(connectOptions);
         } catch (MqttException e) {
-            if(e.getCause() instanceof ConnectException) {
+            if (e.getCause() instanceof ConnectException) {
                 connectionLost(e);
                 logger.warn("MQTT client {} started, but currently unconnected", clientId);
                 return;
@@ -176,6 +176,11 @@ public class MqttClientHandler implements MqttCallback {
             client.close();
             logger.info("MQTT client {} stopped", client.getClientId());
             client = null;
+        }
+
+        if (reconnectTimer != null) {
+            reconnectTimer.cancel();
+            reconnectTimer = null;
         }
 
         handlerId = null;
@@ -270,13 +275,19 @@ public class MqttClientHandler implements MqttCallback {
             @Override
             public void run() {
                 try {
+                    if (client == null) {
+                        logger.error("Trying to reconnect a null client.");
+                        return;
+                    }
                     client.connect(connectOptions);
                 } catch (MqttException e) {
-                    if(e.getCause() instanceof ConnectException) {
+                    if (e.getCause() instanceof ConnectException) {
                         logger.error("Error trying to reconnect to MQTT broker: {}", e.getMessage(), e);
                         connectionLost(e);
                     } else {
-                        logger.error("Fatal error trying to reconnect to MQTT broker: {}. No further reconnection will be attempted", e.getMessage(), e);
+                        logger.error(
+                                "Fatal error trying to reconnect to MQTT broker: {}. No further reconnection will be attempted",
+                                e.getMessage(), e);
                     }
                     return;
                 }
