@@ -1,4 +1,4 @@
--includeresource: @moquette-broker-0.15.jar
+-includeresource: @moquette-broker-0.17.jar
 
 Import-Package: \
     !com.bugsnag, \

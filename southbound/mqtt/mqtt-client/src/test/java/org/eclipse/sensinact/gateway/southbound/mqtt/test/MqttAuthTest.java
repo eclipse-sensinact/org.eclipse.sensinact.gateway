@@ -39,7 +39,6 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
@@ -76,10 +75,10 @@ public class MqttAuthTest {
     void start() throws Exception {
         server = new Server();
         IConfig config = new MemoryConfig(new Properties());
-        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, "127.0.0.1");
-        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, "2183");
-        config.setProperty(BrokerConstants.AUTHENTICATOR_CLASS_NAME, TestAuth.class.getName());
-        config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, "false");
+        config.setProperty(IConfig.HOST_PROPERTY_NAME, "127.0.0.1");
+        config.setProperty(IConfig.PORT_PROPERTY_NAME, "2183");
+        config.setProperty(IConfig.AUTHENTICATOR_CLASS_NAME, TestAuth.class.getName());
+        config.setProperty(IConfig.ALLOW_ANONYMOUS_PROPERTY_NAME, "false");
         server.startServer(config);
 
         client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());

@@ -109,7 +109,7 @@ public class MqttClientHandler implements MqttCallback {
     public void activate(final MqttClientConfiguration config) throws Exception {
         // Validate configuration
         reconnectDelayMs = config.client_reconnect_delay();
-        if(reconnectDelayMs < 100) {
+        if (reconnectDelayMs < 100) {
             reconnectDelayMs = 100;
         } else if (reconnectDelayMs > Duration.ofHours(1).toMillis()) {
             reconnectDelayMs = (int) Duration.ofHours(1).toMillis();
@@ -139,7 +139,7 @@ public class MqttClientHandler implements MqttCallback {
         try {
             client.connect(connectOptions);
         } catch (MqttException e) {
-            if(e.getCause() instanceof ConnectException) {
+            if (e.getCause() instanceof ConnectException) {
                 connectionLost(e);
                 logger.warn("MQTT client {} started, but currently unconnected", clientId);
                 return;
@@ -178,6 +178,11 @@ public class MqttClientHandler implements MqttCallback {
             client = null;
         }
 
+        if (reconnectTimer != null) {
+            reconnectTimer.cancel();
+            reconnectTimer = null;
+        }
+
         handlerId = null;
     }
 
@@ -201,7 +206,6 @@ public class MqttClientHandler implements MqttCallback {
 
         // Setup certificate-based authentication
         if (config.auth_keystore_path() != null || config.auth_clientcert_path() != null) {
-
             options.setSocketFactory(SSLUtils.setupSSLSocketFactory(config));
         }
 
@@ -222,15 +226,24 @@ public class MqttClientHandler implements MqttCallback {
 
         final boolean clientAuth = config.auth_keystore_path() != null || config.auth_clientcert_path() != null;
         String protocol = config.protocol();
-        if (protocol == null || protocol.isBlank() || (clientAuth && protocol.equalsIgnoreCase("tcp"))) {
-            if (clientAuth) {
+        if (protocol == null || protocol.isBlank()) {
+            protocol = "tcp";
+        } else {
+            protocol = protocol.strip().toLowerCase();
+        }
+
+        if (clientAuth) {
+            if ("tcp".equals(protocol)) {
                 protocol = "ssl";
+            } else if ("ws".equals(protocol)) {
+                protocol = "wss";
             } else {
-                protocol = "tcp";
+                logger.warn("Trying to use client authentication on an unsecure connection.");
             }
         }
 
-        return new URI(protocol, null, mqttHost, config.port(), null, null, null).toString();
+        final String path = protocol.startsWith("ws") ? config.path() : null;
+        return new URI(protocol, null, mqttHost, config.port(), path, null, null).toString();
     }
 
     /**
@@ -262,13 +275,19 @@ public class MqttClientHandler implements MqttCallback {
             @Override
             public void run() {
                 try {
+                    if (client == null) {
+                        logger.error("Trying to reconnect a null client.");
+                        return;
+                    }
                     client.connect(connectOptions);
                 } catch (MqttException e) {
-                    if(e.getCause() instanceof ConnectException) {
+                    if (e.getCause() instanceof ConnectException) {
                         logger.error("Error trying to reconnect to MQTT broker: {}", e.getMessage(), e);
                         connectionLost(e);
                     } else {
-                        logger.error("Fatal error trying to reconnect to MQTT broker: {}. No further reconnection will be attempted", e.getMessage(), e);
+                        logger.error(
+                                "Fatal error trying to reconnect to MQTT broker: {}. No further reconnection will be attempted",
+                                e.getMessage(), e);
                     }
                     return;
                 }

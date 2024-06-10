@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -61,16 +60,14 @@ import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
 
 /**
- * Tests for the MQTT device factory
+ * Tests for the MQTT device factory using WebSockets
  */
 @WithFactoryConfiguration(factoryPid = "sensinact.southbound.mqtt", name = "h1", location = "?", properties = {
-        @Property(key = "id", value = "handler1"), @Property(key = "host", value = "127.0.0.1"),
-        @Property(key = "port", value = "2183"), @Property(key = "topics", value = "sensinact/mqtt/test1/+"), })
-@WithFactoryConfiguration(factoryPid = "sensinact.southbound.mqtt", name = "h2", location = "?", properties = {
-        @Property(key = "id", value = "handler2"), @Property(key = "host", value = "127.0.0.1"),
-        @Property(key = "port", value = "2183"), @Property(key = "topics", value = "sensinact/mqtt/test2/+"), })
+        @Property(key = "id", value = "handlerWS"), @Property(key = "protocol", value = "ws"),
+        @Property(key = "host", value = "127.0.0.1"), @Property(key = "port", value = "2184"),
+        @Property(key = "path", value = "/ws"), @Property(key = "topics", value = "sensinact/mqtt/testWS/+"), })
 @WithConfiguration(pid = "sensinact.mqtt.device.factory", location = "?", properties = {
-        @Property(key = "mqtt.handler.id", value = "handler1"),
+        @Property(key = "mqtt.handler.id", value = "handlerWS"),
         @Property(key = "mapping", value = "{\n" + "  \"parser\": \"csv\",\n"
                 + "  \"parser.options\": { \"header\": true },\n" + "  \"mapping\": {\n"
                 + "    \"@provider\": \"Name\",\n"
@@ -82,9 +79,13 @@ import io.moquette.broker.config.MemoryConfig;
                 + "  \"mapping.options\": { \"format.date\": \"d.M.y\", \"format.time\": \"H:m\" }\n" + "}"), })
 @WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
-public class MqttDeviceFactoryTest {
+public class MqttWSDeviceFactoryTest {
 
+    // Moquette server
     private static Server server;
+
+    // Target topic
+    private static String TOPIC = "sensinact/mqtt/testWS/handler";
 
     @InjectService
     GatewayThread thread;
@@ -96,9 +97,11 @@ public class MqttDeviceFactoryTest {
     BlockingQueue<ResourceDataNotification> queue;
 
     // Excepted providers
-    final String typedProvider1 = "typed-provider1";
-    final String typedProvider2 = "typed-provider2";
-    final String handlerProvider = "handler-provider1";
+    private final String typedProvider1 = "typed-provider1";
+    private final String typedProvider2 = "typed-provider2";
+
+    // MQTT client
+    private MqttClient client;
 
     @BeforeAll
     static void startBroker() throws IOException {
@@ -106,6 +109,8 @@ public class MqttDeviceFactoryTest {
         IConfig config = new MemoryConfig(new Properties());
         config.setProperty(IConfig.HOST_PROPERTY_NAME, "127.0.0.1");
         config.setProperty(IConfig.PORT_PROPERTY_NAME, "2183");
+        config.setProperty(IConfig.WEB_SOCKET_PORT_PROPERTY_NAME, "2184");
+        config.setProperty(IConfig.WEB_SOCKET_PATH_PROPERTY_NAME, "/ws");
         server.startServer(config);
     }
 
@@ -115,9 +120,12 @@ public class MqttDeviceFactoryTest {
     }
 
     @BeforeEach
-    void start() throws InterruptedException {
+    void start() throws Exception {
         session = sessionManager.getDefaultAnonymousSession();
         queue = new ArrayBlockingQueue<>(32);
+
+        client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());
+        client.connect();
     }
 
     @AfterEach
@@ -125,11 +133,18 @@ public class MqttDeviceFactoryTest {
         session.activeListeners().keySet().forEach(session::removeListener);
         session = null;
 
+        // Clear retained & Disconnect
+        if (client.isConnected()) {
+            client.publish(TOPIC, new byte[0], 1, true);
+            client.disconnect();
+        }
+        client.close();
+
         thread.execute(new AbstractSensinactCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
                     PromiseFactory promiseFactory) {
-                for (String provider : Arrays.asList(typedProvider1, typedProvider2, handlerProvider)) {
+                for (String provider : Arrays.asList(typedProvider1, typedProvider2)) {
                     Optional.ofNullable(twin.getProvider(provider)).ifPresent(p -> p.delete());
                 }
                 return Promises.resolved(null);
@@ -161,15 +176,9 @@ public class MqttDeviceFactoryTest {
         // Read the file
         byte[] csvContent = readFile("csv-header-typed.csv");
 
-        // Send MQTT message on handler 1
-        final MqttClient client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());
-        client.connect();
-        try {
-            client.publish("sensinact/mqtt/test1/handler", csvContent, 1, false);
-        } finally {
-            client.disconnect();
-            client.close();
-        }
+        // Send MQTT message on handler and retain it (sometimes this client publishes
+        // the message before the configured client has subscribed)
+        client.publish(TOPIC, csvContent, 1, true);
 
         // Wait for the provider to appear
         assertNotNull(queue.poll(1, TimeUnit.SECONDS));
@@ -203,37 +212,7 @@ public class MqttDeviceFactoryTest {
         assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
 
         // Ensure resources from context
-        assertEquals("test1", session.getResourceValue(typedProvider1, "data", "testName", String.class));
-        assertEquals("test1", session.getResourceValue(typedProvider2, "data", "testName", String.class));
-    }
-
-    /**
-     * Tests device registration
-     */
-    @Test
-    void testHandlerFilter() throws Exception {
-        // Register listener
-        session.addListener(List.of(handlerProvider + "/*"), (t, e) -> queue.offer(e), null, null, null);
-
-        // Providers shouldn't exist yet
-        assertNull(session.describeProvider(handlerProvider));
-
-        // Read the file and change the provider IDs
-        byte[] csvContent = new String(readFile("csv-header-typed.csv"), StandardCharsets.UTF_8)
-                .replace("typed-provider", "handler-provider").getBytes(StandardCharsets.UTF_8);
-
-        // Send MQTT message on handler 2
-        final MqttClient client = new MqttClient("tcp://broker.hivemq.com:1883", MqttClient.generateClientId());
-        client.connect();
-        try {
-            client.publish("sensinact/mqtt/test2/handler", csvContent, 1, false);
-        } finally {
-            client.disconnect();
-            client.close();
-        }
-
-        // Wait for the provider to NOT appear
-        assertNull(queue.poll(1, TimeUnit.SECONDS));
-        assertNull(session.describeProvider(handlerProvider));
+        assertEquals("testWS", session.getResourceValue(typedProvider1, "data", "testName", String.class));
+        assertEquals("testWS", session.getResourceValue(typedProvider2, "data", "testName", String.class));
     }
 }

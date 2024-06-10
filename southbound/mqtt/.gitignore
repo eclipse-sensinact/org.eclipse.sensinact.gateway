@@ -1,0 +1,8 @@
+# Paho session folder
+paho*/
+
+# Moquette data folder
+.moquette_uuid
+*.page
+checkpoint.properties
+moquette_*.h2

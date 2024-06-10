@@ -40,6 +40,11 @@ public @interface MqttClientConfiguration {
     int port() default 1883;
 
     /**
+     * WebSocket MQTT path
+     */
+    String path() default "/";
+
+    /**
      * Topics to subscribe to
      */
     String[] topics() default "";
