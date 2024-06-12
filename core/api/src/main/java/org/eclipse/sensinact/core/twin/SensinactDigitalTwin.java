@@ -47,6 +47,14 @@ public interface SensinactDigitalTwin extends CommandScoped {
     List<? extends SensinactProvider> getProviders(String model);
 
     /**
+     * List all providers for the named model
+     *
+     * @param model
+     * @return
+     */
+    List<? extends SensinactProvider> getProviders(String modelPackageUri, String model);
+
+    /**
      * Get a provider by name
      *
      * @param providerName
