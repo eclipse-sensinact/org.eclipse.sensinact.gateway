@@ -105,4 +105,11 @@ public class ModelImpl extends CommandScopedImpl implements EMFModel {
         return eClass;
     }
 
+    @Override
+    protected void checkValid() {
+        super.checkValid();
+        if(!nexusImpl.registered(eClass)) {
+            throw new IllegalStateException("This model has been deleted");
+        }
+    }
 }

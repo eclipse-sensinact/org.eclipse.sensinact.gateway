@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.model.nexus.impl;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -648,6 +649,57 @@ public class NexusTest {
             assertNotNull(providerInstance);
             assertEquals(name, EMFUtil.getModelName(providerInstance.eClass()));
             assertNotEquals(name, providerInstance.eClass().getName());
+        }
+
+        @Test
+        void testDeleteModel() {
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+
+            // Set up models and providers
+            Instant now = Instant.now();
+
+            EClass model = nexus.createModel(TEST_PKG, TEST_MODEL, now);
+            EClass model2 = nexus.createModel(TEST_PKG, "TestModel2", now);
+
+            EPackage ePackage = model.getEPackage();
+
+            assertFalse(nexus.getModel(TEST_PKG, TEST_MODEL).isEmpty());
+            assertFalse(nexus.getModel(TEST_PKG, "TestModel2").isEmpty());
+            assertTrue(nexus.registered(model));
+            assertTrue(nexus.registered(model2));
+
+            nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER);
+            nexus.createProviderInstance(TEST_PKG, "TestModel2", TESTPROVIDER + "2");
+
+            assertNotNull(nexus.getProvider(TESTPROVIDER));
+            assertNotNull(nexus.getProvider(TESTPROVIDER + "2"));
+
+
+            // Delete a model, the provider should also be deleted
+            nexus.deleteModel(TEST_PKG, "TestModel2");
+
+            assertFalse(nexus.getModel(TEST_PKG, TEST_MODEL).isEmpty());
+            assertNotNull(nexus.getProvider(TESTPROVIDER));
+            assertTrue(nexus.registered(model));
+
+            assertTrue(nexus.getModel(TEST_PKG, "TestModel2").isEmpty());
+            assertNull(nexus.getProvider(TESTPROVIDER + "2"));
+            assertFalse(nexus.registered(model2));
+
+            assertTrue(nexus.registered(ePackage));
+
+            // Delete the second model, everything should be deleted
+            nexus.deleteModel(TEST_PKG, TEST_MODEL);
+
+            assertTrue(nexus.getModel(TEST_PKG, TEST_MODEL).isEmpty());
+            assertNull(nexus.getProvider(TESTPROVIDER));
+            assertFalse(nexus.registered(model));
+
+            assertTrue(nexus.getModel(TEST_PKG, "TestModel2").isEmpty());
+            assertNull(nexus.getProvider(TESTPROVIDER + "2"));
+            assertFalse(nexus.registered(model2));
+
+            assertFalse(nexus.registered(ePackage));
         }
     }
 
