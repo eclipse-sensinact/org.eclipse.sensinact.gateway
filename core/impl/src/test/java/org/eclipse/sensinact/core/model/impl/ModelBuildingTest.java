@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.model.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -120,5 +121,19 @@ public class ModelBuildingTest {
             assertEquals(parameters, resource.getArguments());
         }
 
+        @Test
+        void testDeleteModel() {
+            Model model = manager.createModel(TEST_MODEL).build();
+            String packageUri = model.getPackageUri();
+            String name = model.getName();
+
+            assertTrue(nexus.getModel(packageUri, name).isPresent());
+
+            manager.deleteModel(packageUri, name);
+
+            assertFalse(nexus.getModel(packageUri, name).isPresent());
+
+            assertThrows(IllegalStateException.class, () -> model.getPackageUri());
+        }
     }
 }

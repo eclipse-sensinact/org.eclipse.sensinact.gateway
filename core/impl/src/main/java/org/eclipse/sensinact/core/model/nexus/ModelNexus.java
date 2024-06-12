@@ -607,9 +607,12 @@ public class ModelNexus {
      * Lists know providers
      */
     public List<Provider> getProviders(String modelPackageUri, String model) {
-        EClass m = getMandatoryModel(modelPackageUri, model);
+        return getProviders(getMandatoryModel(modelPackageUri, model));
+    }
+
+    private List<Provider> getProviders(EClass model) {
         // Don't use isInstance as subtypes have a different model
-        return providers.values().stream().filter(p -> EMFUtil.getModelName(p.eClass()).equals(m))
+        return providers.values().stream().filter(p -> p.eClass().equals(model))
                 .collect(Collectors.toList());
     }
 
@@ -848,7 +851,12 @@ public class ModelNexus {
     public boolean registered(EClass eClass) {
         EPackage ePackage = eClass.getEPackage();
         // if a package is registered, all EClasses are automatically registered
-        return resourceSet.getPackageRegistry().getEPackage(ePackage.getNsURI()) != null;
+        return ePackage != null && registered(ePackage) && ePackage.getEClassifiers().contains(eClass);
+    }
+
+    public boolean registered(EPackage ePackage) {
+        // if a package is registered, all EClasses are automatically registered
+        return ePackage.equals(resourceSet.getPackageRegistry().getEPackage(ePackage.getNsURI()));
     }
 
     private EClass getMandatoryModel(String modelPackageUri, String modelName) {
@@ -1223,6 +1231,26 @@ public class ModelNexus {
         if (ePackage != providerPackage) {
             getProviderofEPackage(ePackage).collect(Collectors.toSet())
                     .forEach(p -> doDeleteProvider(ePackage.getNsURI(), EMFUtil.getModelName(p.eClass()), p.getId()));
+            removeEPackageInternal(ePackage);
         }
+    }
+
+    private void removeEPackageInternal(EPackage ePackage) {
+        if (ePackage != providerPackage) {
+            resourceSet.getPackageRegistry().remove(ePackage.getNsURI());
+        }
+    }
+
+    public void deleteModel(String packageUri, String model) {
+        getModel(packageUri, model)
+            .ifPresent(e -> {
+                // Clear any providers using the model
+                getProviders(e).forEach(p -> doDeleteProvider(packageUri, model, p.getId()));
+                EPackage ePackage = e.getEPackage();
+                ePackage.getEClassifiers().remove(e);
+                if(ePackage.getEClassifiers().isEmpty()) {
+                    removeEPackageInternal(ePackage);
+                }
+            });
     }
 }

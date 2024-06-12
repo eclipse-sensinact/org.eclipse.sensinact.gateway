@@ -76,7 +76,7 @@ public class SensinactModelManagerImpl extends CommandScopedImpl implements Sens
     @Override
     public void deleteModel(String packageUri, String model) {
         checkValid();
-        throw new RuntimeException("Not implemented");
+        nexusImpl.deleteModel(packageUri, model);
     }
 
     @Override
