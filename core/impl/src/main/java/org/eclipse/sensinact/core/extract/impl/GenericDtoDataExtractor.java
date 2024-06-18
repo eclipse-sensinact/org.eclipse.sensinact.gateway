@@ -56,8 +56,8 @@ public class GenericDtoDataExtractor implements DataExtractor {
 
         List<AbstractUpdateDto> list = new ArrayList<>();
 
-        // Accept a null value if this is not a metadata update
-        if (dto.value != null || dto.nullAction == NullAction.UPDATE) {
+        // Accept a null value if this is not a pure metadata update
+        if (dto.value != null || dto.nullAction != NullAction.IGNORE) {
             DataUpdateDto dud = copyCommonFields(dto, instant, new DataUpdateDto());
             if (dto.type != null)
                 dud.type = dto.type;
@@ -89,6 +89,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
         dud.service = dto.service;
         dud.resource = dto.resource;
         dud.timestamp = instant;
+        dud.actionOnNull = dto.nullAction;
         dud.originalDto = dto;
         return dud;
     }

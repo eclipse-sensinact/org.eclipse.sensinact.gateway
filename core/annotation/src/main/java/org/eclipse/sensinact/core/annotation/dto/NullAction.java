@@ -23,5 +23,13 @@ public enum NullAction {
     /**
      * If the data field is null then set null as the value
      */
-    UPDATE
+    UPDATE,
+    /**
+     * If the data field is null then:
+     * <ul>
+     *   <li>If the resource has previously been set then set it to <code>null</code></li>
+     *   <li>If the resource has never been set then ignore this field and do not update the value</li>
+     * </ul>
+     */
+    UPDATE_IF_PRESENT
 }

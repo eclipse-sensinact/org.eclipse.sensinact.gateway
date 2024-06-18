@@ -30,10 +30,10 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
-import org.eclipse.sensinact.core.push.dto.BaseValueDto;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
+import org.eclipse.sensinact.core.push.dto.BaseValueDto;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -79,6 +79,9 @@ public class CustomBaseValueDtoExtractorTest {
         @Resource("null")
         @Data(onNull = NullAction.UPDATE)
         public String nullable;
+        @Resource("null2")
+        @Data(onNull = NullAction.UPDATE_IF_PRESENT)
+        public String nullable2;
 
         @Timestamp(ChronoUnit.SECONDS)
         public Long time;
@@ -266,7 +269,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             List<? extends AbstractUpdateDto> updates = extractor(ExtendedDto.class).getUpdates(dto);
 
-            assertEquals(4, updates.size());
+            assertEquals(5, updates.size());
 
             AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
                     .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
@@ -296,6 +299,15 @@ public class CustomBaseValueDtoExtractorTest {
                     .findFirst().get();
 
             checkCommonFields(extracted, "null", time);
+            assertEquals(NullAction.UPDATE, extracted.actionOnNull);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> "null2".equals(d.resource))
+                    .findFirst().get();
+
+            checkCommonFields(extracted, "null2", time);
+            assertEquals(NullAction.UPDATE_IF_PRESENT, extracted.actionOnNull);
 
             assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
 

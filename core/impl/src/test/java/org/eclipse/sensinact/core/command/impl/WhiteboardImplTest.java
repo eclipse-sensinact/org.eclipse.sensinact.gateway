@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.verb.ACT;
 import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.annotation.verb.GET;
@@ -323,14 +324,19 @@ public class WhiteboardImplTest {
     }
 
     public static class BasePullResourceTest {
+
+        public boolean bReturnNull = true;
+
         @GET(model = "bar", service = "pull", resource = "a")
-        @GET(model = "bar", service = "pull", resource = "b")
+        @GET(model = "bar", service = "pull", resource = "b", onNull = NullAction.UPDATE_IF_PRESENT)
         public String doMultiResource(@UriParam(UriSegment.RESOURCE) String resource,
                 @GetParam(GetSegment.RESULT_TYPE) Class<?> type,
                 @GetParam(GetSegment.CACHED_VALUE) TimedValue<?> cached) {
             switch (resource) {
-            case "a":
             case "b":
+                if(bReturnNull)
+                    return null;
+            case "a":
                 if (cached.getValue() != null) {
                     return "resource:" + cached.getValue();
                 } else {
@@ -368,28 +374,61 @@ public class WhiteboardImplTest {
             final String svc = "pull";
             createProviders("bar", svc);
 
-            for (String rc : List.of("a", "b")) {
-                runRcCommand(PROVIDER_A, svc, rc, (r) -> {
-                    assertThrows(IllegalArgumentException.class, () -> r.getArguments());
-                    return null;
-                });
+            runRcCommand(PROVIDER_A, svc, "a", (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                return null;
+            });
 
-                // No value at first
-                TimedValue<String> result = getValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
-                assertEquals(rc, result.getValue());
-                assertNotNull(result.getTimestamp(), "No timestamp returned");
-                final Instant initialTimestamp = result.getTimestamp();
+            // No value at first
+            TimedValue<String> result = getValue(PROVIDER_A, svc, "a", String.class, GetLevel.STRONG);
+            assertEquals("a", result.getValue());
+            assertNotNull(result.getTimestamp(), "No timestamp returned");
+            Instant initialTimestamp = result.getTimestamp();
 
-                // Wait a bit
-                Thread.sleep(200);
+            // Wait a bit
+            Thread.sleep(200);
 
-                result = getValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
-                assertEquals("resource:" + rc, result.getValue());
-                assertNotNull(result.getTimestamp(), "No timestamp returned");
-                final Instant secondTimestamp = result.getTimestamp();
-                assertTrue(secondTimestamp.isAfter(initialTimestamp),
-                        secondTimestamp + " should be after " + initialTimestamp);
-            }
+            result = getValue(PROVIDER_A, svc, "a", String.class, GetLevel.STRONG);
+            assertEquals("resource:" + "a", result.getValue());
+            assertNotNull(result.getTimestamp(), "No timestamp returned");
+            Instant secondTimestamp = result.getTimestamp();
+            assertTrue(secondTimestamp.isAfter(initialTimestamp),
+                    secondTimestamp + " should be after " + initialTimestamp);
+
+
+            // Now try for resource b
+            runRcCommand(PROVIDER_A, svc, "b", (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                return null;
+            });
+
+            // No value at first
+            result = getValue(PROVIDER_A, svc, "b", String.class, GetLevel.WEAK);
+            assertNull(result.getValue());
+            assertNull(result.getTimestamp());
+
+            // Still no value
+            result = getValue(PROVIDER_A, svc, "b", String.class, GetLevel.NORMAL);
+            assertNull(result.getValue());
+            assertNull(result.getTimestamp());
+
+            resourceProvider.bReturnNull = false;
+            result = getValue(PROVIDER_A, svc, "b", String.class, GetLevel.STRONG);
+            assertEquals("b", result.getValue());
+            assertNotNull(result.getTimestamp(), "No timestamp returned");
+            initialTimestamp = result.getTimestamp();
+
+            // Wait a bit
+            Thread.sleep(200);
+            resourceProvider.bReturnNull = true;
+
+            result = getValue(PROVIDER_A, svc, "b", String.class, GetLevel.STRONG);
+            assertEquals(null, result.getValue());
+            assertNotNull(result.getTimestamp(), "No timestamp returned");
+            secondTimestamp = result.getTimestamp();
+            assertTrue(secondTimestamp.isAfter(initialTimestamp),
+                    secondTimestamp + " should be after " + initialTimestamp);
+
         }
 
         @Test
