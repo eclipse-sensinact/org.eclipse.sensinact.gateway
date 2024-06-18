@@ -108,7 +108,7 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
             resource = sp.getOrCreateService(svc, svcEClass).getResources().get(res);
         }
 
-        if(dataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
+        if(dataUpdateDto.data == null && dataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
             // This must be a weak get so that it returns immediately with a resolved value
             Promise<TimedValue<Object>> p = resource.getValue(Object.class, GetLevel.WEAK).timeout(0);
             try {
