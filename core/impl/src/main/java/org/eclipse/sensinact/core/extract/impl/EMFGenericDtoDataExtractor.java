@@ -22,7 +22,6 @@ import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
 import org.eclipse.sensinact.core.emf.dto.EMFGenericDto;
-import org.eclipse.sensinact.core.push.dto.GenericDto;
 
 public class EMFGenericDtoDataExtractor implements DataExtractor {
 
@@ -89,7 +88,7 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
         return fmd;
     }
 
-    private <T extends AbstractUpdateDto> T copyCommonFields(GenericDto dto, Instant instant, T dud) {
+    private <T extends AbstractUpdateDto> T copyCommonFields(EMFGenericDto dto, Instant instant, T dud) {
         dud.modelPackageUri = dto.modelPackageUri;
         dud.model = dto.model;
         dud.provider = dto.provider;
@@ -98,12 +97,9 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
         dud.timestamp = instant;
         dud.actionOnNull = dto.nullAction;
         dud.originalDto = dto;
-        if (dto instanceof EMFGenericDto) {
-            EMFGenericDto edto = (EMFGenericDto) dto;
-            dud.modelEClass = edto.modelEClass;
-            dud.serviceEClass = edto.serviceEClass;
-            dud.serviceReference = edto.serviceReference;
-        }
+        dud.modelEClass = dto.modelEClass;
+        dud.serviceEClass = dto.serviceEClass;
+        dud.serviceReference = dto.serviceReference;
         return dud;
     }
 
