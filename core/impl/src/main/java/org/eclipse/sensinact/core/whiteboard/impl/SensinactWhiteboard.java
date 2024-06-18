@@ -559,7 +559,9 @@ public class SensinactWhiteboard {
                             case IGNORE:
                                 d.resolve(null);
                                 break;
-
+                            case UPDATE_IF_PRESENT:
+                                d.resolve(cachedValue == null || cachedValue.getTimestamp() == null ?
+                                        null : new TimedValueImpl<T>(null));
                             case UPDATE:
                                 d.resolve(new TimedValueImpl<T>(null));
                                 break;
@@ -585,7 +587,7 @@ public class SensinactWhiteboard {
                 };
 
                 final Promise<TimedValue<T>> promise = d.getPromise().onResolve(() -> overallTimer.close());
-                return runOnGateway(promise, coCall);
+                return runOnGateway(promise, coCall, cachedValue);
             }
         }
     }
@@ -631,7 +633,7 @@ public class SensinactWhiteboard {
             });
 
             final Promise<TimedValue<T>> promise = d.getPromise().onResolve(() -> overallTimer.close());
-            return runOnGateway(promise, gatewayUpdate);
+            return runOnGateway(promise, gatewayUpdate, cachedValue);
         }
     }
 
@@ -647,7 +649,7 @@ public class SensinactWhiteboard {
      * @return
      */
     private <T> Promise<TimedValue<T>> runOnGateway(final Promise<TimedValue<T>> promisedValue,
-            final Consumer<TimedValue<T>> gatewayUpdate) {
+            final Consumer<TimedValue<T>> gatewayUpdate, final TimedValue<T> cachedValue) {
         final PromiseFactory gatewayPromiseFactory = gatewayThread.getPromiseFactory();
         final Deferred<TimedValue<T>> deferred = gatewayPromiseFactory.deferred();
         if (gatewayUpdate == null) {
@@ -667,7 +669,7 @@ public class SensinactWhiteboard {
                                     SensinactModelManager modelMgr, PromiseFactory pf) {
                                 try {
                                     gatewayUpdate.accept(value);
-                                    return pf.resolved(value);
+                                    return pf.resolved(value == null ? cachedValue : value);
                                 } catch (Exception e) {
                                     return pf.failed(e);
                                 }

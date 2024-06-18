@@ -14,7 +14,9 @@ package org.eclipse.sensinact.core.impl;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.core.emf.model.EMFModel;
 import org.eclipse.sensinact.core.emf.model.EMFService;
@@ -27,6 +29,7 @@ import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -104,6 +107,25 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
             }
             resource = sp.getOrCreateService(svc, svcEClass).getResources().get(res);
         }
+
+        if(dataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
+            // This must be a weak get so that it returns immediately with a resolved value
+            Promise<TimedValue<Object>> p = resource.getValue(Object.class, GetLevel.WEAK).timeout(0);
+            try {
+                Throwable t = p.getFailure();
+                if(t != null) {
+                    return promiseFactory.failed(t);
+                } else {
+                    TimedValue<Object> value = p.getValue();
+                    if(value == null || value.getTimestamp() == null) {
+                        return promiseFactory.resolved(null);
+                    }
+                }
+            } catch (Exception e) {
+                return promiseFactory.failed(e);
+            }
+        }
+
         return resource.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
     }
 

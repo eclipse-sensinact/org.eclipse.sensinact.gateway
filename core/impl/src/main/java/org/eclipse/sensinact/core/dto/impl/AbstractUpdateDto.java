@@ -16,6 +16,7 @@ import java.time.Instant;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.model.core.provider.Provider;
 
 public abstract class AbstractUpdateDto {
@@ -67,4 +68,9 @@ public abstract class AbstractUpdateDto {
      * The services {@link EReference} on the {@link Provider} model, optional
      */
     public EReference serviceReference;
+
+    /**
+     * The action to take on a null update
+     */
+    public NullAction actionOnNull;
 }

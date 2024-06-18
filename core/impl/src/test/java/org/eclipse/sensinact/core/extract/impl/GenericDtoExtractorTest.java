@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.FailedMappingDto;
@@ -185,6 +186,28 @@ public class GenericDtoExtractorTest {
             assertEquals(VALUE_2, dud.data);
             assertNull(dud.type);
         }
+
+        @Test
+        void nullAction() {
+            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, VALUE_2, null, null);
+            testDto.nullAction = NullAction.UPDATE;
+            List<? extends AbstractUpdateDto> updates = extractor()
+                    .getUpdates(testDto);
+
+            assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
+
+            AbstractUpdateDto extracted = updates.get(0);
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE_2, dud.data);
+            assertNull(dud.type);
+            assertEquals(NullAction.UPDATE, dud.actionOnNull);
+        }
     }
 
     /**
@@ -230,6 +253,33 @@ public class GenericDtoExtractorTest {
             assertEquals(Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), dud.metadata);
             assertTrue(dud.removeNullValues, "Null values should be removed");
             assertFalse(dud.removeMissingValues, "Missing values should be kept");
+        }
+
+        @Test
+        void nullAction() {
+            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, null, null, singletonMap(METADATA_KEY, METADATA_VALUE));
+            testDto.nullAction = NullAction.UPDATE;
+
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(testDto);
+
+            assertEquals(2, updates.size(), "Wrong number of updates " + updates.size());
+
+            AbstractUpdateDto extracted = updates.get(0);
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof DataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+            assertEquals(NullAction.UPDATE, extracted.actionOnNull);
+
+            extracted = updates.get(1);
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud.metadata);
+            assertTrue(dud.removeNullValues, "Null values should be removed");
+            assertFalse(dud.removeMissingValues, "Missing values should be kept");
+            assertEquals(NullAction.UPDATE, dud.actionOnNull);
         }
     }
 

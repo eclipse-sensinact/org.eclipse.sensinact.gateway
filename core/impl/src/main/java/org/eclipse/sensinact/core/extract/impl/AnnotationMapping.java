@@ -179,6 +179,8 @@ public class AnnotationMapping {
 
             if (dto.data == null && data.onNull() == NullAction.IGNORE && firstFailure == null) {
                 return null;
+            } else {
+                dto.actionOnNull = data.onNull();
             }
 
             try {
@@ -286,7 +288,10 @@ public class AnnotationMapping {
 
             if (md == null && metadata.onNull() == NullAction.IGNORE && firstFailure == null) {
                 return null;
+            } else {
+                dto.actionOnNull = metadata.onNull();
             }
+
             String key = NOT_SET.equals(metadata.value()) ? fieldName : metadata.value();
 
             Map<String, Object> processedMd;
