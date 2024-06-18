@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
@@ -38,6 +40,7 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -80,6 +83,16 @@ public class DataUpdateServiceTest {
         }).getValue();
     }
 
+    private TimedValue<Integer> getResourceTimedValue() throws Exception {
+        return gt.execute(new ResourceCommand<TimedValue<Integer>>(PROVIDER, SERVICE, RESOURCE) {
+
+            @Override
+            protected Promise<TimedValue<Integer>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue(Integer.class);
+            }
+        }).getValue();
+    }
+
     public static class AnnotatedDTO {
         @Provider
         public String provider;
@@ -117,6 +130,88 @@ public class DataUpdateServiceTest {
             push.pushUpdate(dto).getValue();
 
             assertEquals(42, getResourceValue());
+        }
+
+        @Test
+        void testSimplePushUpdateIgnore() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = 42;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.nullAction = NullAction.IGNORE;
+            push.pushUpdate(dto).getValue();
+
+            push.pushUpdate(dto).getValue();
+
+            dto.value = null;
+            push.pushUpdate(dto).getValue();
+            assertEquals(42, getResourceValue());
+        }
+
+        @Test
+        void testSimplePushUpdateIfPresent() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = null;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.nullAction = NullAction.UPDATE_IF_PRESENT;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Integer> tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertNull(tv.getTimestamp());
+
+            dto.value = 42;
+            push.pushUpdate(dto).getValue();
+            assertEquals(42, getResourceValue());
+
+            dto.value = null;
+            push.pushUpdate(dto).getValue();
+            tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+        }
+
+        @Test
+        void testSimplePushUpdate() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = null;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.nullAction = NullAction.UPDATE;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Integer> tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.value = 42;
+            push.pushUpdate(dto).getValue();
+            assertEquals(42, getResourceValue());
+
+            dto.value = null;
+            push.pushUpdate(dto).getValue();
+            tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
         }
 
         @Test
