@@ -297,12 +297,10 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         final RecordState recordState = computeRecordState(configuration, globalState, record);
 
         // Extract the provider
-        final String rawProvider = getFieldString(record, recordState.placeholders.get(KEY_PROVIDER), options);
-        if (rawProvider == null || rawProvider.isBlank()) {
+        final String provider = getFieldString(record, recordState.placeholders.get(KEY_PROVIDER), options);
+        if (provider == null || provider.isBlank()) {
             throw new ParserException("Empty provider field");
         }
-        final String provider = NamingUtils.sanitizeName(rawProvider, false);
-
         // Extract the modelPackageUri
         String modelPackageUri = null;
         if (recordState.placeholders.containsKey(KEY_MODEL_PACKAGE_URI)) {
@@ -312,11 +310,9 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         // Extract the model
         final String model;
         if (recordState.placeholders.containsKey(KEY_MODEL)) {
-            final String rawModel = getFieldString(record, recordState.placeholders.get(KEY_MODEL), options);
-            if (rawModel == null || rawModel.isBlank()) {
+            model = getFieldString(record, recordState.placeholders.get(KEY_MODEL), options);
+            if (model == null || model.isBlank()) {
                 throw new ParserException("Empty model field for " + provider);
-            } else {
-                model = NamingUtils.sanitizeName(rawModel, false);
             }
         } else {
             model = provider;
