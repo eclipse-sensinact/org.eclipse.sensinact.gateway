@@ -27,12 +27,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.metrics.IMetricsGauge;
 import org.eclipse.sensinact.core.metrics.IMetricsListener;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.metrics.IMetricsMultiGauge;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +46,8 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 /**
  * Tests the metrics service
@@ -68,6 +74,9 @@ public class MetricsTest {
      * Flags to indicate which gauge callback were called
      */
     final Map<String, Boolean> gaugesCalled = new ConcurrentHashMap<>();
+
+    @InjectService
+    GatewayThread thread;
 
     /**
      * Test gauge class
@@ -113,15 +122,16 @@ public class MetricsTest {
         context.registerService(IMetricsListener.class, new TestListener(), null);
 
         TestGauge gauge = new TestGauge();
-        context.registerService(IMetricsGauge.class, gauge,
-                new Hashtable<>(Map.of(IMetricsGauge.NAME, GAUGE_NAME)));
+        context.registerService(IMetricsGauge.class, gauge, new Hashtable<>(Map.of(IMetricsGauge.NAME, GAUGE_NAME)));
         context.registerService(IMetricsMultiGauge.class, gauge,
                 new Hashtable<>(Map.of(IMetricsMultiGauge.NAMES, GAUGES_NAMES)));
     }
 
     /**
      * Registered services will be cleaned up by the {@link BundleContextExtension}.
-     * instance fields will be cleared out by the standard per-test instance lifecycle
+     * instance fields will be cleared out by the standard per-test instance
+     * lifecycle
+     *
      * @param metrics
      */
     @AfterEach
@@ -193,5 +203,32 @@ public class MetricsTest {
         assertEquals(dto.service, "metrics");
         assertEquals(dto.type, Long.class);
         assertEquals(dto.value, 2L);
+    }
+
+    @Test
+    @WithConfiguration(pid = "sensinact.metrics", location = "?", properties = {
+            @Property(key = "enabled", value = "true"), @Property(key = "metrics.rate", value = "1"),
+            @Property(key = "provider.enabled", value = "true") })
+    void testProvider(@InjectService(filter = "(enabled=true)") IMetricsManager metrics) throws Exception {
+        metrics.getCounter("toto").inc();
+
+        // Wait for a bit
+        final BulkGenericDto bulk = queue.poll(5, TimeUnit.SECONDS);
+        assertNotNull(bulk, "Listener was not notified");
+        assertTrue(gaugeCalled.get(), "Gauge was not called");
+        assertFalse(gaugesCalled.isEmpty(), "Multigauge was not called");
+
+        // Check if the provider exists
+        thread.execute(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactResource resource = twin.getResource("sensiNact-metrics", "metrics", "toto");
+                if (resource == null) {
+                    return pf.failed(new AssertionError("Resource not found"));
+                } else {
+                    return pf.resolved(null);
+                }
+            }
+        }).getValue();
     }
 }
