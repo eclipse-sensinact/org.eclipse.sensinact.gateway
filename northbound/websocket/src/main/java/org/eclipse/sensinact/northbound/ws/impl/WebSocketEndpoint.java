@@ -340,7 +340,12 @@ public class WebSocketEndpoint {
 
         final Predicate<AbstractResourceNotification> p;
         if (query.filter != null && !query.filter.isBlank()) {
-            p = eventPredicate.and(prepareFilter(query));
+            Predicate<AbstractResourceNotification> queryFilter = prepareFilter(query);
+            if (queryFilter != null) {
+                p = eventPredicate.and(queryFilter);
+            } else {
+                p = eventPredicate;
+            }
         } else {
             p = eventPredicate;
         }
