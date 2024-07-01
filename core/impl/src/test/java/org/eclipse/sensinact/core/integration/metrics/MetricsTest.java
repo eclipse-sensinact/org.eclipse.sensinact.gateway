@@ -18,8 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -41,6 +43,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
@@ -74,6 +77,11 @@ public class MetricsTest {
      * Flags to indicate which gauge callback were called
      */
     final Map<String, Boolean> gaugesCalled = new ConcurrentHashMap<>();
+
+    /**
+     * List of gauges services registrations
+     */
+    final List<ServiceRegistration<?>> svcRegs = new ArrayList<>();
 
     @InjectService
     GatewayThread thread;
@@ -119,12 +127,13 @@ public class MetricsTest {
      */
     @BeforeEach
     void setUp(@InjectBundleContext BundleContext context) throws Exception {
-        context.registerService(IMetricsListener.class, new TestListener(), null);
+        svcRegs.add(context.registerService(IMetricsListener.class, new TestListener(), null));
 
         TestGauge gauge = new TestGauge();
-        context.registerService(IMetricsGauge.class, gauge, new Hashtable<>(Map.of(IMetricsGauge.NAME, GAUGE_NAME)));
-        context.registerService(IMetricsMultiGauge.class, gauge,
-                new Hashtable<>(Map.of(IMetricsMultiGauge.NAMES, GAUGES_NAMES)));
+        svcRegs.add(context.registerService(IMetricsGauge.class, gauge,
+                new Hashtable<>(Map.of(IMetricsGauge.NAME, GAUGE_NAME))));
+        svcRegs.add(context.registerService(IMetricsMultiGauge.class, gauge,
+                new Hashtable<>(Map.of(IMetricsMultiGauge.NAMES, GAUGES_NAMES))));
     }
 
     /**
@@ -137,6 +146,8 @@ public class MetricsTest {
     @AfterEach
     void cleanUp(@InjectService IMetricsManager metrics) {
         metrics.clear();
+        svcRegs.forEach(ServiceRegistration::unregister);
+        svcRegs.clear();
     }
 
     @Test
@@ -213,8 +224,15 @@ public class MetricsTest {
         metrics.getCounter("toto").inc();
 
         // Wait for a bit
-        final BulkGenericDto bulk = queue.poll(5, TimeUnit.SECONDS);
-        assertNotNull(bulk, "Listener was not notified");
+        boolean atLeastOne = false;
+        for (int trial = 0; trial < 5; trial++) {
+            final BulkGenericDto bulk = queue.poll(1, TimeUnit.SECONDS);
+            atLeastOne |= bulk != null;
+            if (gaugeCalled.get() && !gaugesCalled.isEmpty()) {
+                break;
+            }
+        }
+        assertTrue(atLeastOne, "Listener was not notified");
         assertTrue(gaugeCalled.get(), "Gauge was not called");
         assertFalse(gaugesCalled.isEmpty(), "Multigauge was not called");
 
