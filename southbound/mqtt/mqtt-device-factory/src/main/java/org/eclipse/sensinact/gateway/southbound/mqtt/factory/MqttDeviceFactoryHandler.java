@@ -12,9 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.mqtt.factory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.DeviceFactoryException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingHandler;
@@ -142,26 +144,32 @@ public class MqttDeviceFactoryHandler implements IMqttMessageListener {
         }
     }
 
-    private void fillTopicSegments(String topic, Map<String, String> context) {
+    void fillTopicSegments(String topic, Map<String, String> context) {
         context.put("topic", topic);
 
-        int i = 0;
-        String segment;
-        int idx = 0;
+        boolean startingSlash = topic.indexOf('/') == 0;
+        boolean endingSlash = !topic.isEmpty() && topic.lastIndexOf('/') == topic.length() - 1;
+        String[] parts = Arrays.stream(topic.split("/")).filter(Predicate.not(String::isEmpty)).toArray(String[]::new);
 
-        do {
-            int slash = topic.indexOf('/', idx);
-            if (slash > 0) {
-                segment = topic.substring(idx, slash);
-                idx = slash + 1;
-            } else {
-                segment = topic.substring(idx);
-                idx = -1;
-            }
-            context.put("topic-".concat(Integer.toString(i)), segment);
-            i++;
-        } while (idx >= 0);
+        int segmentIdx = 0;
+        if (startingSlash || parts.length == 0) {
+            context.put("topic-0", "");
+            segmentIdx++;
+        }
 
-        context.put("topic-last", segment);
+        for (String part : parts) {
+            context.put("topic-" + segmentIdx, part);
+            segmentIdx++;
+        }
+
+        if (endingSlash) {
+            context.put("topic-" + segmentIdx, "");
+        }
+
+        if (endingSlash || parts.length == 0) {
+            context.put("topic-last", "");
+        } else {
+            context.put("topic-last", parts[parts.length - 1]);
+        }
     }
 }
