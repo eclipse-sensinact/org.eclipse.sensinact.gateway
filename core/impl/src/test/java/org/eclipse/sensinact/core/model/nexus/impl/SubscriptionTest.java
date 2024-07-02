@@ -1261,6 +1261,43 @@ public class SubscriptionTest {
             verifyProviderUpdateNotification(accumulator, saved, modified);
         }
 
+        @Test
+        void pushEObjectTestComplexResourceNoUpdate() throws IOException {
+
+            Provider provider = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+            Service testService1 = (Service) EcoreUtil
+                    .create((EClass) ePackage.getEClassifier("TestServiceWithComplex"));
+            Service testService2 = (Service) EcoreUtil.create((EClass) ePackage.getEClassifier("TestService2"));
+            Admin testAdmin = (Admin) EcoreUtil.create((EClass) ePackage.getEClassifier("TestAdmin"));
+
+            provider.setId("sensor");
+
+            provider.setAdmin(testAdmin);
+            provider.eSet(provider.eClass().getEStructuralFeature("testAttribute"), "someAttrib");
+            provider.eSet(provider.eClass().getEStructuralFeature("testService1"), testService1);
+            provider.eSet(provider.eClass().getEStructuralFeature("testService2"), testService2);
+
+            testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
+            testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
+
+            EObject fooBar = EcoreUtil.create((EClass) ePackage.getEClassifier("FooBar"));
+            fooBar.eSet(fooBar.eClass().getEStructuralFeature("test"), "foo");
+            testService1.eSet(testService1.eClass().getEStructuralFeature("complexTest"), fooBar);
+
+            testAdmin.setFriendlyName(provider.getId());
+            testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
+
+            Provider saved = nexus.save(provider);
+
+            verifyNewProviderNotification(accumulator, saved);
+            Mockito.clearInvocations(accumulator);
+//            stripMetadata(saved);
+
+            Provider modified = nexus.save(EcoreUtil.copy(saved));
+
+            Mockito.verifyNoMoreInteractions(accumulator);
+        }
+
         /**
          * @param modified
          */

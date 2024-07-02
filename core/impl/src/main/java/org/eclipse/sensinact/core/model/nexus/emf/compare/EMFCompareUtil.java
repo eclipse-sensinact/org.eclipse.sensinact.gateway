@@ -200,7 +200,7 @@ public class EMFCompareUtil {
             throw new UnsupportedOperationException("Merging Services of different Tyoes is not supported yet");
         }
 
-        // we can simply copy all non containments, as they are out of scope for
+        // We can simply copy all non containments, as they are out of scope for
         // notifications
         originalService.eClass().getEAllReferences().stream()
                 // We don't want references from EObject and anything above
