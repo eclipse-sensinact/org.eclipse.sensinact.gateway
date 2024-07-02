@@ -41,6 +41,7 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.testdata.DynamicTestSensor;
 import org.eclipse.sensinact.model.core.testdata.TestAdmin;
+import org.eclipse.sensinact.model.core.testdata.TestResource;
 import org.eclipse.sensinact.model.core.testdata.TestSensor;
 import org.eclipse.sensinact.model.core.testdata.TestTemperatur;
 import org.eclipse.sensinact.model.core.testdata.TestdataFactory;
@@ -285,6 +286,23 @@ public class EMFUpdateServiceTest {
             public long timestamp;
         }
 
+        @Provider(PROVIDER)
+        public class NonDynamicComplexObjectDTO {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.COMPLEX_TEST_SENSOR;
+
+            @Service
+            public EReference service = TestdataPackage.Literals.COMPLEX_TEST_SENSOR__TEMP;
+
+            @Resource("testResource")
+            @Data
+            public TestResource data;
+
+            @Timestamp(ChronoUnit.MILLIS)
+            public long timestamp;
+        }
+
         @Test
         void updateDTOERef() throws Exception {
             TestEClassDTO dto = new TestEClassDTO();
@@ -341,6 +359,24 @@ public class EMFUpdateServiceTest {
             Promise<?> update = push.pushUpdate(dto);
             Throwable t = update.getFailure();
             assertNotNull(t);
+        }
+
+        @Test
+        void complexResource() throws Exception {
+            NonDynamicComplexObjectDTO dto = new NonDynamicComplexObjectDTO();
+            TestResource resource = TestdataFactory.eINSTANCE.createTestResource();
+            resource.setFoo("test");
+            resource.setBar("test2");
+            dto.data = resource;
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            assertNull(t);
+            Object o = getResourceValue(TestdataPackage.Literals.COMPLEX_TEST_SENSOR.getName(), PROVIDER,
+                    TestdataPackage.Literals.COMPLEX_TEST_SENSOR__TEMP.getName(),
+                    TestdataPackage.Literals.TEST_TEMPERATUR_WITH_COMPLEX__TEST_RESOURCE.getName());
+            assertNotNull(o);
         }
     }
 

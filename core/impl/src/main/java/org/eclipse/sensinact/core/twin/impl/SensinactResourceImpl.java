@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
@@ -109,7 +108,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         final Service svc = provider.getService(serviceName);
         if (svc != null) {
             // Service is there
-            final Object rawValue = svc.eGet((EAttribute) resource);
+            final Object rawValue = svc.eGet((EStructuralFeature) resource);
             if (rawValue != null && type.isAssignableFrom(rawValue.getClass())) {
                 currentValue = type.cast(rawValue);
             } else {
