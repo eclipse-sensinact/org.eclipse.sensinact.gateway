@@ -29,11 +29,12 @@ import java.util.function.Function;
 import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.annotation.verb.UriParam;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardHandler;
 
 /**
  * Share code between ACT and GET methods
  */
-abstract class AbstractResourceMethod {
+abstract class AbstractResourceMethod implements WhiteboardHandler<Object> {
 
     /**
      * Invoked method

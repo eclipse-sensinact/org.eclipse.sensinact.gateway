@@ -16,16 +16,26 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
-class ActMethod extends AbstractResourceMethod {
+import org.eclipse.sensinact.core.whiteboard.WhiteboardAct;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
+
+class ActMethod extends AbstractResourceMethod implements WhiteboardAct<Object> {
 
     public ActMethod(Method method, Object instance, Long serviceId, Set<String> providers) {
         super(method, instance, serviceId, providers);
     }
 
-    public Object invoke(String modelPackageUri,String model, String provider, String service, String resource, Map<String, Object> params)
-            throws Exception {
+    @Override
+    public Promise<Object> act(PromiseFactory promiseFactory, String modelPackageUri, String model, String provider,
+            String service, String resource, Map<String, Object> arguments) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Map<Object, Object> rawParam = (Map) params;
-        return super.invoke(modelPackageUri, model, provider, service, resource, rawParam, null, null);
+        final Map<Object, Object> rawParam = (Map) arguments;
+        try {
+            return promiseFactory
+                    .resolved(super.invoke(modelPackageUri, model, provider, service, resource, rawParam, null, null));
+        } catch (Exception e) {
+            return promiseFactory.failed(e);
+        }
     }
 }
