@@ -70,6 +70,7 @@ import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveAct;
 import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveReadOnly;
 import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveReadWrite;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardAct;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardConstants;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardGet;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardSet;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -758,9 +759,9 @@ public class WhiteboardImplTest {
     class WhiteboardHandlerAutoCreateTest {
 
         Map<String, Object> makeProps(String model, String service, String resource) {
-            return Map.of(Constants.SERVICE_ID, 42L, "sensiNact.whiteboard.model", model,
-                    "sensiNact.whiteboard.service", service, "sensiNact.whiteboard.resource", resource,
-                    "sensiNact.whiteboard.create", true);
+            return Map.of(Constants.SERVICE_ID, 42L, WhiteboardConstants.PROP_MODEL, model,
+                    WhiteboardConstants.PROP_SERVICE, service, WhiteboardConstants.PROP_RESOURCE, resource,
+                    WhiteboardConstants.PROP_AUTO_CREATE, true);
         }
 
         @Test
@@ -921,8 +922,8 @@ public class WhiteboardImplTest {
     class WhiteboardHandlerTest {
 
         Map<String, Object> makeProps(String model, String service, String resource) {
-            return Map.of(Constants.SERVICE_ID, 42L, "sensiNact.whiteboard.model", model,
-                    "sensiNact.whiteboard.service", service, "sensiNact.whiteboard.resource", resource);
+            return Map.of(Constants.SERVICE_ID, 42L, WhiteboardConstants.PROP_MODEL, model,
+                    WhiteboardConstants.PROP_SERVICE, service, WhiteboardConstants.PROP_RESOURCE, resource);
         }
 
         void makeResource(final String modelName, final String serviceName, final String resourceName,
@@ -1118,10 +1119,10 @@ public class WhiteboardImplTest {
         Map<String, Object> makeProps(long svcId, String model, String service, String resource, String... providers) {
             Map<String, Object> props = new HashMap<>();
             props.put(Constants.SERVICE_ID, svcId);
-            props.put("sensiNact.whiteboard.model", model);
-            props.put("sensiNact.whiteboard.service", service);
-            props.put("sensiNact.whiteboard.resource", resource);
-            props.put("sensiNact.whiteboard.providers", providers.length == 0 ? null : providers);
+            props.put(WhiteboardConstants.PROP_MODEL, model);
+            props.put(WhiteboardConstants.PROP_SERVICE, service);
+            props.put(WhiteboardConstants.PROP_RESOURCE, resource);
+            props.put(WhiteboardConstants.PROP_PROVIDERS, providers.length == 0 ? null : providers);
             return props;
         }
 

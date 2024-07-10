@@ -62,6 +62,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardAct;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardActDescription;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardConstants;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardGet;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardHandler;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardResourceDescription;
@@ -138,6 +139,19 @@ public class SensinactWhiteboard {
     }
 
     /**
+     * Create a registry key from service properties
+     *
+     * @param props Service properties
+     * @return A new registry key
+     */
+    private RegistryKey keyFromServiceProperties(Map<String, Object> props) {
+        return new RegistryKey((String) props.get(WhiteboardConstants.PROP_MODEL_PACKAGE_URI),
+                (String) props.get(WhiteboardConstants.PROP_MODEL),
+                (String) props.get(WhiteboardConstants.PROP_SERVICE),
+                (String) props.get(WhiteboardConstants.PROP_RESOURCE));
+    }
+
+    /**
      * Register a whiteboard handler service. The handler must provider either
      * {@link WhiteboardAct} or {@link WhiteboardGet} and/or {@link WhiteboardSet}
      *
@@ -146,21 +160,19 @@ public class SensinactWhiteboard {
      */
     public void addWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
         final Long serviceId = (Long) props.get(Constants.SERVICE_ID);
-        Set<String> providers = toSet(props.get("sensiNact.whiteboard.providers"));
-        RegistryKey key = new RegistryKey((String) props.get("sensiNact.whiteboard.modelPackageUri"),
-                (String) props.get("sensiNact.whiteboard.model"), (String) props.get("sensiNact.whiteboard.service"),
-                (String) props.get("sensiNact.whiteboard.resource"));
+        final Set<String> providers = toSet(props.get(WhiteboardConstants.PROP_PROVIDERS));
+        final RegistryKey key = keyFromServiceProperties(props);
 
-        boolean isGet = handler instanceof WhiteboardGet;
-        boolean isSet = handler instanceof WhiteboardSet;
-        boolean isValue = isGet || isSet;
-        boolean isAct = handler instanceof WhiteboardAct;
+        final boolean isGet = handler instanceof WhiteboardGet;
+        final boolean isSet = handler instanceof WhiteboardSet;
+        final boolean isValue = isGet || isSet;
+        final boolean isAct = handler instanceof WhiteboardAct;
         if (!isAct && !isValue) {
             LOG.error("Whiteboard handler service {} for {} doesn't provider meaningful interfaces", serviceId, key);
             return;
         }
 
-        final Boolean createResource = (Boolean) props.get("sensiNact.whiteboard.create");
+        final Boolean createResource = (Boolean) props.get(WhiteboardConstants.PROP_AUTO_CREATE);
         if (createResource != null && createResource.booleanValue()) {
             if (isAct && isValue) {
                 LOG.error("Can't create a resource if its handler is both made for action and value resources");
@@ -214,7 +226,7 @@ public class SensinactWhiteboard {
 
     public void updatedWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
         Long serviceId = (Long) props.get(Constants.SERVICE_ID);
-        Set<String> providers = toSet(props.get("sensiNact.provider.name"));
+        Set<String> providers = toSet(props.get(WhiteboardConstants.PROP_PROVIDERS));
 
         updateServiceReferences("act", serviceId, providers, serviceIdToActMethods, actMethodRegistry);
         updateServiceReferences("get", serviceId, providers, serviceIdToGetMethods, getMethodRegistry);
@@ -259,7 +271,7 @@ public class SensinactWhiteboard {
     public void addWhiteboardService(Object service, Map<String, Object> props) {
         Long serviceId = (Long) props.get(Constants.SERVICE_ID);
 
-        Set<String> providers = toSet(props.get("sensiNact.provider.name"));
+        Set<String> providers = toSet(props.get(WhiteboardConstants.PROP_PROVIDERS));
 
         Class<?> clz = service.getClass();
 
@@ -337,7 +349,7 @@ public class SensinactWhiteboard {
      */
     public void updatedWhiteboardService(Object service, Map<String, Object> props) {
         Long serviceId = (Long) props.get(Constants.SERVICE_ID);
-        Set<String> providers = toSet(props.get("sensiNact.provider.name"));
+        Set<String> providers = toSet(props.get(WhiteboardConstants.PROP_PROVIDERS));
 
         updateServiceReferences("act", serviceId, providers, serviceIdToActMethods, actMethodRegistry);
         updateServiceReferences("get", serviceId, providers, serviceIdToGetMethods, getMethodRegistry);
