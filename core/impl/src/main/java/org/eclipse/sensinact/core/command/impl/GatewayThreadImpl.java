@@ -130,11 +130,15 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     }
 
     @Reference(service = WhiteboardHandler.class, cardinality = MULTIPLE, policy = DYNAMIC)
-    void addWhiteboardResourceHandler(WhiteboardHandler wbHandler, Map<String, Object> props) {
+    void addWhiteboardResourceHandler(WhiteboardHandler<?> wbHandler, Map<String, Object> props) {
         whiteboard.addWhiteboardHandler(wbHandler, props);
     }
 
-    void removeWhiteboardResourceHandler(WhiteboardHandler wbHandler, Map<String, Object> props) {
+    void updatedWhiteboardResourceHandler(WhiteboardHandler<?> wbHandler, Map<String, Object> props) {
+        whiteboard.updatedWhiteboardHandler(wbHandler, props);
+    }
+
+    void removeWhiteboardResourceHandler(WhiteboardHandler<?> wbHandler, Map<String, Object> props) {
         whiteboard.removeWhiteboardHandler(wbHandler, props);
     }
 

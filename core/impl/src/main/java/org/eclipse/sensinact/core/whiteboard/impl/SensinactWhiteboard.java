@@ -213,7 +213,16 @@ public class SensinactWhiteboard {
         }
     }
 
-    public <T> void removeWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
+    public void updatedWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
+        Long serviceId = (Long) props.get(Constants.SERVICE_ID);
+        Set<String> providers = toSet(props.get("sensiNact.provider.name"));
+
+        updateServiceReferences("act", serviceId, providers, serviceIdToActMethods, actMethodRegistry);
+        updateServiceReferences("get", serviceId, providers, serviceIdToGetMethods, getMethodRegistry);
+        updateServiceReferences("set", serviceId, providers, serviceIdToSetMethods, setMethodRegistry);
+    }
+
+    public void removeWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
         final Long serviceId = (Long) props.get(Constants.SERVICE_ID);
         clearServiceReferences(serviceId, serviceIdToActMethods, actMethodRegistry);
         clearServiceReferences(serviceId, serviceIdToGetMethods, getMethodRegistry);
