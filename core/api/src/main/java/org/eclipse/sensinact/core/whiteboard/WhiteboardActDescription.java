@@ -15,9 +15,21 @@ package org.eclipse.sensinact.core.whiteboard;
 import java.util.List;
 import java.util.Map.Entry;
 
+/**
+ * Interface that an auto-descriptive action resource handler must implement if
+ * it expects the whiteboard to create its resource automatically
+ *
+ * @param <T> Type of action result
+ */
 public interface WhiteboardActDescription<T> {
 
+    /**
+     * Type of the result returns by the action
+     */
     Class<T> getReturnType();
 
+    /**
+     * List of parameters: argument name -&gt; argument type
+     */
     List<Entry<String, Class<?>>> getNamedParameterTypes();
 }

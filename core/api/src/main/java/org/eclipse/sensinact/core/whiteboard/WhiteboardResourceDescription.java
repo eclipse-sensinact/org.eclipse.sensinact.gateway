@@ -14,9 +14,21 @@ package org.eclipse.sensinact.core.whiteboard;
 
 import java.time.Duration;
 
+/**
+ * Interface that an auto-descriptive value resource handler must implement if
+ * it expects the whiteboard to create its resource automatically
+ *
+ * @param <T> Type of resource
+ */
 public interface WhiteboardResourceDescription<T> {
 
+    /**
+     * Returns the type of the resource to create
+     */
     Class<T> getResourceType();
 
+    /**
+     * Returns the duration of the cache to avoid calling the handler too often
+     */
     Duration getCacheDuration();
 }
