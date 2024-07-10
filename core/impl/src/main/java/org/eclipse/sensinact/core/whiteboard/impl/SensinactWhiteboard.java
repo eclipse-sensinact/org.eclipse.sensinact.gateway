@@ -15,7 +15,6 @@ package org.eclipse.sensinact.core.whiteboard.impl;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
-import static java.util.stream.Stream.of;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -147,7 +146,7 @@ public class SensinactWhiteboard {
      */
     public void addWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
         final Long serviceId = (Long) props.get(Constants.SERVICE_ID);
-        Set<String> providers = toSet(props.get("sensiNact.provider.name"));
+        Set<String> providers = toSet(props.get("sensiNact.whiteboard.providers"));
         RegistryKey key = new RegistryKey((String) props.get("sensiNact.whiteboard.modelPackageUri"),
                 (String) props.get("sensiNact.whiteboard.model"), (String) props.get("sensiNact.whiteboard.service"),
                 (String) props.get("sensiNact.whiteboard.resource"));
@@ -241,13 +240,13 @@ public class SensinactWhiteboard {
     private <T extends WhiteboardHandler<?>> void storeWhiteboardHandler(WhiteboardContext<T> ctx, RegistryKey key,
             Map<Long, List<RegistryKey>> keyRegistry, Map<RegistryKey, List<WhiteboardContext<T>>> methodRegistry) {
         synchronized (keyRegistry) {
-            keyRegistry.merge(ctx.serviceId, List.of(key), (k, v) -> concat(v.stream(), of(key)).collect(toList()));
+            keyRegistry.merge(ctx.serviceId, List.of(key), (a, b) -> concat(a.stream(), b.stream()).collect(toList()));
         }
 
         synchronized (methodRegistry) {
             // FIXME: handle that better
             // Insert that handler as priority
-            methodRegistry.merge(key, List.of(ctx), (k, v) -> concat(of(ctx), v.stream()).collect(toList()));
+            methodRegistry.merge(key, List.of(ctx), (a, b) -> concat(b.stream(), a.stream()).collect(toList()));
         }
     }
 
@@ -511,7 +510,8 @@ public class SensinactWhiteboard {
             Map<RegistryKey, List<WhiteboardContext<T>>> methodsRegistry,
             Map<Long, List<RegistryKey>> serviceIdRegistry) {
 
-        serviceIdRegistry.merge(ctx.serviceId, List.of(key), (k, v) -> concat(v.stream(), of(key)).collect(toList()));
+        serviceIdRegistry.merge(ctx.serviceId, List.of(key),
+                (a, b) -> concat(a.stream(), b.stream()).collect(toList()));
 
         final Class<M> comparableType = ctx.getType();
 
@@ -519,19 +519,19 @@ public class SensinactWhiteboard {
             Stream<WhiteboardContext<T>> stream;
             if (ctx.handler.isCatchAll()) {
                 // FIXME test kind of content first
-                WhiteboardContext<T> previous = v.get(v.size() - 1);
+                WhiteboardContext<T> previous = k.get(k.size() - 1);
                 if (comparableType.isAssignableFrom(previous.handler.getClass())
                         && comparableType.cast(previous.handler).isCatchAll()) {
                     LOG.warn("There are two catch all services {} and {} defined for GET resource {}",
                             previous.serviceId, ctx.serviceId, key);
                 }
-                stream = concat(v.stream(), of((WhiteboardContext<T>) ctx));
+                stream = concat(k.stream(), v.stream());
             } else {
-                if (v.stream().anyMatch(a -> comparableType.isAssignableFrom(a.handler.getClass())
+                if (k.stream().anyMatch(a -> comparableType.isAssignableFrom(a.handler.getClass())
                         && comparableType.cast(a.handler).overlaps(ctx.handler))) {
-                    LOG.warn("There are overlapping services defined for GET resource {}: {}", key, v);
+                    LOG.warn("There are overlapping services defined for GET resource {}: {}", key, ctx);
                 }
-                stream = concat(of((WhiteboardContext<T>) ctx), v.stream());
+                stream = concat(v.stream(), k.stream());
             }
             return stream.collect(toList());
         });
@@ -623,16 +623,17 @@ public class SensinactWhiteboard {
 
     public Promise<Object> act(String modelPackageUri, String model, String provider, String service, String resource,
             Map<String, Object> arguments) {
-        RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
 
-        Optional<WhiteboardContext<WhiteboardAct<?>>> opt = actMethodRegistry.getOrDefault(key, List.of()).stream()
-                .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
+        final RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
+        final Optional<WhiteboardContext<WhiteboardAct<?>>> opt = lookupContext(key, provider, actMethodRegistry);
         if (opt.isEmpty()) {
             return promiseFactory.failed(new NoSuchElementException(String
                     .format("No suitable whiteboard handler for %s/%s/%s/%s", model, provider, service, resource)));
         }
 
         Deferred<Object> d = promiseFactory.deferred();
+        final WhiteboardContext<WhiteboardAct<?>> ctx = opt.get();
+
         final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.act.request",
                 "sensinact.whiteboard.act.request." + String.join(".", modelPackageUri, model, service, resource),
                 "sensinact.whiteboard.act.request." + String.join(".", provider, service, resource));
@@ -640,8 +641,8 @@ public class SensinactWhiteboard {
             try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.act.task",
                     "sensinact.whiteboard.act.task." + String.join(".", modelPackageUri, model, service, resource),
                     "sensinact.whiteboard.act.task." + String.join(".", provider, service, resource))) {
-                Promise<?> result = opt.get().handler.act(promiseFactory, modelPackageUri, model, provider, service,
-                        resource, arguments);
+                Promise<?> result = ctx.handler.act(promiseFactory, modelPackageUri, model, provider, service, resource,
+                        arguments);
                 if (result == null) {
                     d.fail(new NullPointerException(
                             String.format("Whiteboard action handler returned no promise for resource %s/%s/%s/%s",
@@ -656,28 +657,45 @@ public class SensinactWhiteboard {
         return d.getPromise().onResolve(() -> overallTimer.close());
     }
 
+    private <T extends WhiteboardHandler<?>> Optional<WhiteboardContext<T>> lookupContext(final RegistryKey key,
+            final String provider, final Map<RegistryKey, List<WhiteboardContext<T>>> registry) {
+        Optional<WhiteboardContext<T>> opt = Optional.empty();
+        RegistryKey lookupKey = key;
+        do {
+            opt = registry.getOrDefault(lookupKey, List.of()).stream().filter(a -> {
+                return a.providers.isEmpty() || a.providers.contains(provider);
+            }).sorted((a, b) -> {
+                // Prefer context with the smaller matching list of providers
+                if (a.providers.isEmpty()) {
+                    if (b.providers.isEmpty()) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                } else if (b.providers.isEmpty()) {
+                    return -1;
+                } else {
+                    return Integer.compare(a.providers.size(), b.providers.size());
+                }
+            }).findFirst();
+        } while (opt.isEmpty() && (lookupKey = lookupKey.levelUp()) != null);
+        return opt;
+    }
+
     @SuppressWarnings("unchecked")
     public <T> Promise<TimedValue<T>> pullValue(String modelPackageUri, String model, String provider, String service,
             String resource, Class<T> type, TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate) {
         // Find the handler method
-        RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
-
-        Optional<WhiteboardContext<WhiteboardGet<?>>> opt = getMethodRegistry.getOrDefault(key, List.of()).stream()
-                .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
+        final RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
+        final Optional<WhiteboardContext<WhiteboardGet<?>>> opt = lookupContext(key, provider, getMethodRegistry);
         if (opt.isEmpty()) {
             return promiseFactory.failed(new NoSuchElementException(String
                     .format("No suitable whiteboard handler for %s/%s/%s/%s", model, provider, service, resource)));
         }
 
         // Coudln't find a better way to manage casting with generics
-        return callGetMethod((WhiteboardContext<WhiteboardGet<T>>) (Object) opt.get(), key, modelPackageUri, model,
-                provider, service, resource, type, cachedValue, gatewayUpdate);
-    }
+        final WhiteboardContext<WhiteboardGet<T>> ctx = (WhiteboardContext<WhiteboardGet<T>>) (Object) opt.get();
 
-    @SuppressWarnings("unchecked")
-    private <T> Promise<TimedValue<T>> callGetMethod(WhiteboardContext<WhiteboardGet<T>> handler, RegistryKey key,
-            String modelPackageUri, String model, String provider, String service, String resource, Class<T> type,
-            TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate) {
         synchronized (concurrentGetHolder) {
             final Promise<TimedValue<?>> currentPromise = concurrentGetHolder.get(key);
             if (currentPromise != null) {
@@ -694,7 +712,7 @@ public class SensinactWhiteboard {
                 try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.pull.task",
                         "sensinact.whiteboard.pull.task." + String.join(".", modelPackageUri, model, service, resource),
                         "sensinact.whiteboard.pull.task." + String.join(".", provider, service, resource))) {
-                    d.resolveWith(handler.handler.pullValue(promiseFactory, modelPackageUri, model, provider, service,
+                    d.resolveWith(ctx.handler.pullValue(promiseFactory, modelPackageUri, model, provider, service,
                             resource, type, cachedValue));
                 } catch (Exception e) {
                     d.fail(e);
@@ -721,10 +739,8 @@ public class SensinactWhiteboard {
             String resource, Class<T> type, TimedValue<T> cachedValue, TimedValue<T> newValue,
             Consumer<TimedValue<T>> gatewayUpdate) {
 
-        RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
-
-        Optional<WhiteboardContext<WhiteboardSet<?>>> opt = setMethodRegistry.getOrDefault(key, List.of()).stream()
-                .filter(a -> a.providers.isEmpty() || a.providers.contains(provider)).findFirst();
+        final RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
+        final Optional<WhiteboardContext<WhiteboardSet<?>>> opt = lookupContext(key, provider, setMethodRegistry);
         if (opt.isEmpty()) {
             return promiseFactory.failed(new NoSuchElementException(String
                     .format("No suitable whiteboard handler for %s/%s/%s/%s", model, provider, service, resource)));
@@ -732,7 +748,7 @@ public class SensinactWhiteboard {
 
         final Deferred<TimedValue<T>> d = promiseFactory.deferred();
         // Coudln't find a better way to manage casting with generics
-        final WhiteboardContext<WhiteboardSet<T>> setMethod = (WhiteboardContext<WhiteboardSet<T>>) (Object) opt.get();
+        final WhiteboardContext<WhiteboardSet<T>> ctx = (WhiteboardContext<WhiteboardSet<T>>) (Object) opt.get();
 
         final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.pull.request",
                 "sensinact.whiteboard.pull.request." + String.join(".", modelPackageUri, model, service, resource),
@@ -741,8 +757,8 @@ public class SensinactWhiteboard {
             try (final IMetricTimer timer = metrics.withTimers("sensinact.whiteboard.push.task",
                     "sensinact.whiteboard.push.task." + String.join(".", modelPackageUri, model, service, resource),
                     "sensinact.whiteboard.push.task." + String.join(".", provider, service, resource))) {
-                d.resolveWith(setMethod.handler.pushValue(promiseFactory, modelPackageUri, model, provider, service,
-                        resource, type, cachedValue, newValue));
+                d.resolveWith(ctx.handler.pushValue(promiseFactory, modelPackageUri, model, provider, service, resource,
+                        type, cachedValue, newValue));
             } catch (Exception e) {
                 d.fail(e);
             }

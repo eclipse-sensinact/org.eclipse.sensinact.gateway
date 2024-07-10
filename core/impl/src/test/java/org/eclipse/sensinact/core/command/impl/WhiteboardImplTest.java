@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1109,6 +1110,185 @@ public class WhiteboardImplTest {
             assertThrows(IllegalArgumentException.class, () -> getValue(PROVIDER_A, svcName, rcName, String.class));
             assertThrows(IllegalArgumentException.class,
                     () -> setValue(PROVIDER_A, svcName, rcName, (r) -> r.setValue(1234, Instant.now())));
+        }
+    }
+
+    @Nested
+    class HandlerSelectionTest {
+        Map<String, Object> makeProps(long svcId, String model, String service, String resource, String... providers) {
+            Map<String, Object> props = new HashMap<>();
+            props.put(Constants.SERVICE_ID, svcId);
+            props.put("sensiNact.whiteboard.model", model);
+            props.put("sensiNact.whiteboard.service", service);
+            props.put("sensiNact.whiteboard.resource", resource);
+            props.put("sensiNact.whiteboard.providers", providers.length == 0 ? null : providers);
+            return props;
+        }
+
+        void makeResource(final String modelName, final String serviceName, final String resourceName,
+                final Consumer<ResourceBuilder<?, Object>> builderCaller) {
+            thread.execute(new AbstractSensinactCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    ResourceBuilder<?, Object> builder = null;
+                    Resource resource = null;
+
+                    Model model = modelMgr.getModel(modelName);
+                    if (model == null) {
+                        builder = modelMgr.createModel(null, modelName).withService(serviceName)
+                                .withResource(resourceName);
+                    } else {
+                        Service service = model.getServices().get(serviceName);
+                        if (service == null) {
+                            builder = model.createService(serviceName).withResource(resourceName);
+                        } else {
+                            resource = service.getResources().get(resourceName);
+                            if (resource == null) {
+                                builder = service.createResource(resourceName);
+                            }
+                        }
+                    }
+
+                    if (builder != null) {
+                        // Construct the resource
+                        builderCaller.accept(builder);
+                    }
+
+                    return promiseFactory.resolved(null);
+                }
+            });
+        }
+
+        void makeValueResource(final String modelName, final String serviceName, final String resourceName,
+                Class<?> type) {
+            makeResource(modelName, serviceName, resourceName,
+                    b -> b.withType(type).withGetter().withSetter().withGetterCache(Duration.ZERO).buildAll());
+        }
+
+        void makeActionResource(final String modelName, final String serviceName, final String resourceName,
+                Class<?> resultType, List<Entry<String, Class<?>>> params) {
+            makeResource(modelName, serviceName, resourceName,
+                    b -> b.withAction(params).withType(resultType).buildAll());
+        }
+
+        @Test
+        void testHandlersProviderFilter() throws Throwable {
+            WhiteboardGet<Integer> h1 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(1));
+            WhiteboardGet<Integer> h2 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(2));
+
+            final String modelName = "wbHandlerPriority";
+            final String svcName = "svc";
+            final String rcName = "rc";
+
+            // Register handlers
+            Map<String, Object> props1 = makeProps(41, modelName, svcName, rcName, PROVIDER_A);
+            thread.addWhiteboardResourceHandler(h1, props1);
+            thread.addWhiteboardResourceHandler(h2, makeProps(42, modelName, svcName, rcName));
+
+            // Create model
+            makeValueResource(modelName, svcName, rcName, Integer.class);
+
+            // Create providers
+            createProviders(modelName, svcName);
+
+            // Provider A should be handled by H1
+            TimedValue<Integer> result = getValue(PROVIDER_A, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1, result.getValue());
+
+            // Provider B should be handled by H2
+            result = getValue(PROVIDER_B, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // Remove handler 1
+            thread.removeWhiteboardResourceHandler(h1, props1);
+
+            // Provider A should be handled by H2
+            result = getValue(PROVIDER_A, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // Provider B should be handled by H2
+            result = getValue(PROVIDER_B, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // Add back H1
+            thread.addWhiteboardResourceHandler(h1, props1);
+
+            // Provider A should be handled by H1
+            result = getValue(PROVIDER_A, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1, result.getValue());
+
+            // Provider B should be handled by H2
+            result = getValue(PROVIDER_B, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+        }
+
+        @Test
+        void testHandlersWildcardFilter() throws Throwable {
+            WhiteboardGet<Integer> h1 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(1));
+            WhiteboardGet<Integer> h2 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(2));
+            WhiteboardGet<Integer> h3 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(3));
+
+            final String modelName = "wbHandlerPriority";
+            final String svcName1 = "svc1";
+            final String rcName1 = "rc";
+            final String svcName2 = "svc2";
+            final String rcName2 = "test";
+
+            // Register handlers
+            thread.addWhiteboardResourceHandler(h1, makeProps(41, modelName, svcName1, rcName1));
+            thread.addWhiteboardResourceHandler(h2, makeProps(42, modelName, svcName1, null));
+            thread.addWhiteboardResourceHandler(h3, makeProps(42, modelName, null, null));
+
+            // Create model
+            makeValueResource(modelName, svcName1, rcName1, Integer.class);
+            makeValueResource(modelName, svcName1, rcName2, Integer.class);
+            makeValueResource(modelName, svcName2, rcName1, Integer.class);
+            makeValueResource(modelName, svcName2, rcName2, Integer.class);
+
+            // Create providers
+            createProviders(modelName, svcName1);
+
+            // svc1/rc1 should be handled by H1
+            TimedValue<Integer> result = getValue(PROVIDER_A, svcName1, rcName1, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1, result.getValue());
+
+            // svc1/rc2 should be handled by H2
+            result = getValue(PROVIDER_B, svcName1, rcName2, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // svc2/rc1 should be handled by H3
+            result = getValue(PROVIDER_B, svcName2, rcName1, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(3, result.getValue());
+
+            // svc2/rc2 should be handled by H3
+            result = getValue(PROVIDER_B, svcName2, rcName2, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(3, result.getValue());
         }
     }
 }
