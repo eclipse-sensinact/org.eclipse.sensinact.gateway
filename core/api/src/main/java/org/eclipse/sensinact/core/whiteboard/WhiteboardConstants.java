@@ -49,7 +49,8 @@ public interface WhiteboardConstants {
      * Property held by whiteboard handler service to indicate the name of the
      * service it supports to be called for.
      *
-     * Property can be null to indicate any service
+     * Property can be null to indicate any service if and only if
+     * {@link #PROP_RESOURCE} is also null
      */
     String PROP_SERVICE = "sensiNact.whiteboard.service";
 
