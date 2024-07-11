@@ -17,7 +17,7 @@ import java.util.Set;
 
 import org.eclipse.sensinact.core.whiteboard.WhiteboardHandler;
 
-class WhiteboardContext<T extends WhiteboardHandler<?>> {
+class WhiteboardContext<T extends WhiteboardHandler> {
 
     /**
      * The underlying handler

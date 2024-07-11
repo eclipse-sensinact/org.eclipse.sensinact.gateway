@@ -21,7 +21,7 @@ import org.osgi.util.promise.PromiseFactory;
  *
  * @param <T> Resource type
  */
-public interface WhiteboardGet<T> extends WhiteboardHandler<T> {
+public interface WhiteboardGet<T> extends WhiteboardHandler {
 
     /**
      * Whiteboard is called to get the resource value as a promise

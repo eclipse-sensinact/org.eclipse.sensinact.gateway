@@ -34,7 +34,7 @@ import org.eclipse.sensinact.core.whiteboard.WhiteboardHandler;
 /**
  * Share code between ACT and GET methods
  */
-abstract class AbstractResourceMethod implements WhiteboardHandler<Object> {
+abstract class AbstractResourceMethod implements WhiteboardHandler {
 
     /**
      * Invoked method

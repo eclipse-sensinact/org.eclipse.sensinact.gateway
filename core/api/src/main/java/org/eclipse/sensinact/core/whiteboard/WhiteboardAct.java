@@ -20,7 +20,7 @@ import org.osgi.util.promise.PromiseFactory;
 /**
  * Whiteboard service to handle resource act operations
  */
-public interface WhiteboardAct<T> extends WhiteboardHandler<T> {
+public interface WhiteboardAct<T> extends WhiteboardHandler {
 
     /**
      * Whiteboard is called to get the resource value as a promise

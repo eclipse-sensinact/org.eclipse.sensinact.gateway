@@ -15,6 +15,6 @@ package org.eclipse.sensinact.core.whiteboard;
 /**
  * Common parent interface for whiteboard handlers
  */
-public interface WhiteboardHandler<T> {
+public interface WhiteboardHandler {
 
 }

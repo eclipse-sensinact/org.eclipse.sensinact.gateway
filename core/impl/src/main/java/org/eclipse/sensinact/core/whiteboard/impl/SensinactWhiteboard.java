@@ -158,7 +158,7 @@ public class SensinactWhiteboard {
      * @param handler The whiteboard handler service
      * @param props   The handler service properties
      */
-    public void addWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
+    public void addWhiteboardHandler(WhiteboardHandler handler, Map<String, Object> props) {
         final Long serviceId = (Long) props.get(Constants.SERVICE_ID);
         final Set<String> providers = toSet(props.get(WhiteboardConstants.PROP_PROVIDERS));
         final RegistryKey key = keyFromServiceProperties(props);
@@ -224,7 +224,7 @@ public class SensinactWhiteboard {
         }
     }
 
-    public void updatedWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
+    public void updatedWhiteboardHandler(WhiteboardHandler handler, Map<String, Object> props) {
         Long serviceId = (Long) props.get(Constants.SERVICE_ID);
         Set<String> providers = toSet(props.get(WhiteboardConstants.PROP_PROVIDERS));
 
@@ -233,7 +233,7 @@ public class SensinactWhiteboard {
         updateServiceReferences("set", serviceId, providers, serviceIdToSetMethods, setMethodRegistry);
     }
 
-    public void removeWhiteboardHandler(WhiteboardHandler<?> handler, Map<String, Object> props) {
+    public void removeWhiteboardHandler(WhiteboardHandler handler, Map<String, Object> props) {
         final Long serviceId = (Long) props.get(Constants.SERVICE_ID);
         clearServiceReferences(serviceId, serviceIdToActMethods, actMethodRegistry);
         clearServiceReferences(serviceId, serviceIdToGetMethods, getMethodRegistry);
@@ -249,7 +249,7 @@ public class SensinactWhiteboard {
      * @param keyRegistry    Service ID to registry keys map
      * @param methodRegistry Registry key to handlers contexts map
      */
-    private <T extends WhiteboardHandler<?>> void storeWhiteboardHandler(WhiteboardContext<T> ctx, RegistryKey key,
+    private <T extends WhiteboardHandler> void storeWhiteboardHandler(WhiteboardContext<T> ctx, RegistryKey key,
             Map<Long, List<RegistryKey>> keyRegistry, Map<RegistryKey, List<WhiteboardContext<T>>> methodRegistry) {
         synchronized (keyRegistry) {
             keyRegistry.merge(ctx.serviceId, List.of(key), (a, b) -> concat(a.stream(), b.stream()).collect(toList()));
@@ -310,7 +310,7 @@ public class SensinactWhiteboard {
      * @param methodRegistry    Registry associating handled resources to the
      *                          handling method
      */
-    private <T extends WhiteboardHandler<?>> void updateServiceReferences(final String kind, final Long serviceId,
+    private <T extends WhiteboardHandler> void updateServiceReferences(final String kind, final Long serviceId,
             final Set<String> providers, final Map<Long, List<RegistryKey>> serviceKeysHolder,
             final Map<RegistryKey, List<WhiteboardContext<T>>> methodRegistry) {
         for (RegistryKey key : serviceKeysHolder.getOrDefault(serviceId, List.of())) {
@@ -366,7 +366,7 @@ public class SensinactWhiteboard {
      * @param methodRegistry    Registry associating handled resources to the
      *                          handling method
      */
-    private <T extends WhiteboardHandler<?>> void clearServiceReferences(final Long serviceId,
+    private <T extends WhiteboardHandler> void clearServiceReferences(final Long serviceId,
             final Map<Long, List<RegistryKey>> serviceKeysHolder,
             final Map<RegistryKey, List<WhiteboardContext<T>>> methodRegistry) {
         final List<RegistryKey> keys = serviceKeysHolder.remove(serviceId);
@@ -516,7 +516,7 @@ public class SensinactWhiteboard {
     }
 
     @SuppressWarnings("unchecked")
-    private <M extends AbstractResourceMethod, T extends WhiteboardHandler<?>> void processAnnotatedMethod(
+    private <M extends AbstractResourceMethod, T extends WhiteboardHandler> void processAnnotatedMethod(
             final RegistryKey key, final Predicate<ResourceType> validateResourceType,
             final Consumer<ResourceBuilder<?, Object>> builderCaller, WhiteboardContext<M> ctx,
             Map<RegistryKey, List<WhiteboardContext<T>>> methodsRegistry,
@@ -669,7 +669,7 @@ public class SensinactWhiteboard {
         return d.getPromise().onResolve(() -> overallTimer.close());
     }
 
-    private <T extends WhiteboardHandler<?>> Optional<WhiteboardContext<T>> lookupContext(final RegistryKey key,
+    private <T extends WhiteboardHandler> Optional<WhiteboardContext<T>> lookupContext(final RegistryKey key,
             final String provider, final Map<RegistryKey, List<WhiteboardContext<T>>> registry) {
         Optional<WhiteboardContext<T>> opt = Optional.empty();
         RegistryKey lookupKey = key;
