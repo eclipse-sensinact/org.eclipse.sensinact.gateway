@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.commands.gogo;
 
+import java.util.Objects;
+
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.annotations.GogoCommand;
 import org.osgi.service.component.annotations.Component;
@@ -21,13 +23,11 @@ import org.osgi.service.component.annotations.Reference;
  * @author David Leangen
  */
 @Component(service = GetCommands.class)
-@GogoCommand(
-        scope = "sna",
-        function = {"get"}
-    )
+@GogoCommand(scope = "sna", function = { "get" })
 public class GetCommands {
 
-    @Reference private SensiNactCommandSession session;
+    @Reference
+    private SensiNactCommandSession session;
 
     /**
      * Get the String value of a resource.
@@ -36,15 +36,14 @@ public class GetCommands {
      * @param service   the ID of the service
      * @param resource  the ID of the resource
      */
-    @Descriptor("Get the value of a resource.\n\n   This variant assumes that the type of the value is String.\n")
+    @Descriptor("Get the value of a resource.\n\n   This variant assumes that the type of the value is Object.\n")
     public String get(
             @Descriptor("the provider ID") String provider,
             @Descriptor("the service ID") String service,
             @Descriptor("the resource ID") String resource) {
-
-        final ResourceType<String> type = new ResourceType<String>();
-        type.type = String.class;
-        return get(provider, service, resource, type);
+        final ResourceType<Object> type = new ResourceType<>();
+        type.type = Object.class;
+        return Objects.toString(get(provider, service, resource, type));
     }
 
     /**
@@ -57,11 +56,10 @@ public class GetCommands {
      */
     @Descriptor("Get the value of a resource.\n\n   This variant accepts a simplified type for convenience.\n")
     public <T>T get(
-            @Descriptor("      the provider ID") String provider,
-            @Descriptor("      the service ID") String service,
-            @Descriptor("      the resource ID") String resource,
-            @Descriptor("the simplified type of the resource value to get (one of: String, Integer, int)") ResourceType<T> type ) {
-
+            @Descriptor("the provider ID") String provider,
+            @Descriptor("the service ID") String service,
+            @Descriptor("the resource ID") String resource,
+            @Descriptor("the simplified type of the resource value to get (one of: String, Integer, int)") ResourceType<T> type) {
         return session.get().getResourceValue(provider, service, resource, type.type);
     }
 
@@ -78,8 +76,7 @@ public class GetCommands {
             @Descriptor("the provider ID") String provider,
             @Descriptor("the service ID") String service,
             @Descriptor("the resource ID") String resource,
-            @Descriptor(" the type of the resource value to get") Class<T> type ) {
-
+            @Descriptor("the type of the resource value to get") Class<T> type) {
         return session.get().getResourceValue(provider, service, resource, type);
     }
 }
