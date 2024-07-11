@@ -432,45 +432,34 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         }
 
                         ResourceType resourceType = sensinactResource.getResourceType();
-                        final Promise<TimedValue<Object>> val;
+
+                        final ResourceDescription result = new ResourceDescription();
+                        result.provider = provider;
+                        result.service = service;
+                        result.resource = resource;
+                        result.contentType = sensinactResource.getType();
+                        result.resourceType = resourceType;
+
+                        final Promise<ResourceDescription> val;
                         switch (resourceType) {
                         case ACTION:
-                            val = pf.resolved(null);
+                            result.actMethodArgumentsTypes = sensinactResource.getArguments();
+                            val = pf.resolved(result);
                             break;
 
                         default:
-                            val = sensinactResource.getValue(Object.class, GetLevel.NORMAL);
+                            val = sensinactResource.getValue(Object.class, GetLevel.NORMAL).map(tv -> {
+                                // Add the current value
+                                result.valueType = ValueType.UPDATABLE;
+                                result.value = tv.getValue();
+                                result.timestamp = tv.getTimestamp();
+                                return result;
+                            });
                             break;
                         }
 
                         final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
-
-                        return val.then(x -> metadata).then(x -> {
-                            ResourceDescription result = new ResourceDescription();
-                            result.provider = provider;
-                            result.service = service;
-                            result.resource = resource;
-                            result.contentType = sensinactResource.getType();
-                            result.resourceType = resourceType;
-                            result.metadata = metadata.getValue();
-
-                            switch (resourceType) {
-                            case ACTION:
-                                result.actMethodArgumentsTypes = sensinactResource.getArguments();
-                                break;
-
-                            default:
-                                // TODO: get it from the description
-                                result.valueType = ValueType.UPDATABLE;
-
-                                // Add the current value
-                                result.value = val.getValue().getValue();
-                                result.timestamp = val.getValue().getTimestamp();
-                                break;
-                            }
-
-                            return pf.resolved(result);
-                        });
+                        return metadata.flatMap(x -> val.thenAccept(r -> r.metadata = x));
                     } else {
                         if(preAuth == UNKNOWN) {
                             SensinactProvider sp = model.getProvider(provider);
@@ -729,6 +718,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
     }
 
+    @Override
     public void expire() {
         synchronized (lock) {
             expired = true;
@@ -764,6 +754,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             this.listener = listener;
         }
 
+        @Override
         public void notify(String topic, AbstractResourceNotification notification) {
 
             LifecycleNotification ln = (LifecycleNotification) notification;
@@ -804,6 +795,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             this.listener = listener;
         }
 
+        @Override
         public void notify(String topic, AbstractResourceNotification notification) {
             if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri, notification.model, notification.provider, notification.service, notification.resource)) {
                 return;
@@ -822,6 +814,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             this.listener = listener;
         }
 
+        @Override
         public void notify(String topic, AbstractResourceNotification notification) {
             if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri, notification.model, notification.provider, notification.service, notification.resource)) {
                 return;
@@ -840,6 +833,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             this.listener = listener;
         }
 
+        @Override
         public void notify(String topic, AbstractResourceNotification notification) {
             if(!authorizer.hasResourcePermission(ACT, notification.modelPackageUri, notification.model, notification.provider, notification.service, notification.resource)) {
                 return;
