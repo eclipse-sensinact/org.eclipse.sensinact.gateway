@@ -101,7 +101,7 @@ public class CallbackReporter extends ScheduledReporter {
      * @return Normalized name
      */
     private String normalizeName(final String resource) {
-        return resource.replaceAll("\\.", "-");
+        return resource.replaceAll("\\.", "-").replaceAll("[^\\-_A-Za-z0-9]", "_");
     }
 
     /**

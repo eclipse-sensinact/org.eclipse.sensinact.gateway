@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.metrics.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -108,10 +109,19 @@ public class MetricsManager implements IMetricsManager {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, fieldOption = FieldOption.UPDATE, policy = ReferencePolicy.DYNAMIC)
     private final List<IMetricsListener> listener = new CopyOnWriteArrayList<>();
 
+    /**
+     * Keep track of gauges bound before component activation
+     */
+    private final Map<String, Gauge<?>> pendingGauges = new HashMap<>();
+
     @Activate
     void activate(final MetricsConfiguration config) {
         activeMetrics.clear();
         registry = new MetricRegistry();
+
+        // Register pending gauges
+        pendingGauges.forEach(registry::registerGauge);
+        pendingGauges.clear();
 
         update(config);
     }
@@ -243,18 +253,27 @@ public class MetricsManager implements IMetricsManager {
      * @param gaugeCallback Gauge method
      */
     private <T> void registerGauge(final String name, final Callable<T> gaugeCallback) {
-        if (registry != null && gaugeCallback != null) {
-            registry.registerGauge(name, new Gauge<T>() {
-                @Override
-                public T getValue() {
-                    try {
-                        return gaugeCallback.call();
-                    } catch (Exception e) {
-                        logger.error("Error calling gauge {}: {}", name, e.getMessage(), e);
-                        return null;
-                    }
+        if (gaugeCallback == null) {
+            // No callback, nothing to do
+            return;
+        }
+
+        final Gauge<T> gauge = new Gauge<T>() {
+            @Override
+            public T getValue() {
+                try {
+                    return gaugeCallback.call();
+                } catch (Exception e) {
+                    logger.error("Error calling gauge {}: {}", name, e.getMessage(), e);
+                    return null;
                 }
-            });
+            }
+        };
+
+        if (registry != null) {
+            registry.registerGauge(name, gauge);
+        } else {
+            pendingGauges.put(name, gauge);
         }
     }
 
@@ -267,6 +286,8 @@ public class MetricsManager implements IMetricsManager {
         if (registry != null) {
             registry.remove(name);
         }
+
+        pendingGauges.remove(name);
     }
 
     /**
