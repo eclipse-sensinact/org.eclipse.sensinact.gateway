@@ -13,6 +13,14 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toDatastream;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toFeatureOfInterest;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toHistoricalLocation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toLocation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toObservation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toObservedProperty;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toSensor;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toThing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,39 +47,19 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.RootResourceAccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.ext.Providers;
 
-public class RootResourceAccessImpl implements RootResourceAccess {
-
-    @Context
-    UriInfo uriInfo;
-
-    @Context
-    Providers providers;
-
-    @Context
-    ContainerRequestContext requestContext;
-
-    private ObjectMapper getMapper() {
-        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
-
-    private SensiNactSession getSession() {
-        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
+public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess {
 
     private ISensorthingsFilterParser getFilterParser() {
         return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
@@ -148,7 +136,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Thing> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.THINGS);
-        list.value = providers.stream().map(p -> DtoMapper.toThing(uriInfo, p)).collect(toList());
+        list.value = providers.stream()
+                .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
+                .collect(toList());
 
         return list;
     }
@@ -160,7 +150,8 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
         list.value = providers.stream()
                 .filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> DtoMapper.toLocation(uriInfo, getMapper(), p)).collect(toList());
+                .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
+                .collect(toList());
 
         return list;
     }
@@ -172,7 +163,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
         list.value = providers.stream()
                 .filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> DtoMapper.toHistoricalLocation(getMapper(), uriInfo, p))
+                .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
                 .collect(toList());
         return list;
     }
@@ -182,7 +173,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Datastream> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listSetResources(EFilterContext.DATASTREAMS);
-        list.value = resources.stream().map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r)).collect(toList());
+        list.value = resources.stream()
+                .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .collect(toList());
 
         return list;
     }
@@ -192,7 +185,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Sensor> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listSetResources(EFilterContext.SENSORS);
-        list.value = resources.stream().map(r -> DtoMapper.toSensor(uriInfo, r)).collect(toList());
+        list.value = resources.stream().
+                map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .collect(toList());
 
         return list;
     }
@@ -203,7 +198,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<Observation> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVATIONS);
-        list.value = resources.stream().map(r -> DtoMapper.toObservation(uriInfo, r)).collect(toList());
+        list.value = resources.stream()
+                .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .collect(toList());
 
         return list;
     }
@@ -213,7 +210,9 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<ObservedProperty> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVED_PROPERTIES);
-        list.value = resources.stream().map(r -> DtoMapper.toObservedProperty(uriInfo, r)).collect(toList());
+        list.value = resources.stream()
+                .map(r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .collect(toList());
 
         return list;
     }
@@ -223,37 +222,38 @@ public class RootResourceAccessImpl implements RootResourceAccess {
         ResultList<FeatureOfInterest> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.FEATURES_OF_INTEREST);
-        list.value = providers.stream().map(p -> DtoMapper.toFeatureOfInterest(uriInfo, getMapper(), p))
+        list.value = providers.stream()
+                .map(p -> toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
                 .collect(toList());
 
         return list;
     }
 
     @SuppressWarnings("unchecked")
-    static ResultList<Observation> getObservationList(SensiNactSession userSession, UriInfo uriInfo,
-            Application application, String provider, String service, String resource) {
+    static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
+            int localResultLimit) {
 
-        ResourceSnapshot rd;
-        try {
-            List<ProviderSnapshot> list = userSession.filteredSnapshot(new SnapshotFilter(provider, service, resource));
-            if (list.isEmpty()) {
-                throw new NotFoundException(String.join("~", provider, service, resource));
-            }
-            rd = getResource(list.get(0), service, resource).orElseThrow(() -> new NotFoundException(String.join("~", provider, service, resource)));
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException(iae);
-        }
+        String provider = resourceSnapshot.getService().getProvider().getName();
+        String service = resourceSnapshot.getService().getName();
+        String resource = resourceSnapshot.getName();
 
         ResultList<Observation> list = new ResultList<>();
 
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
         Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
 
+        if(localResultLimit > 0) {
+            maxResults = Math.min(localResultLimit, maxResults);
+        }
+
         List<Observation> results = new ArrayList<>();
 
         if (historyProvider != null) {
             Long count = (Long) userSession.actOnResource(historyProvider, "history", "count",
                     Map.of("provider", provider, "service", service, "resource", resource));
+
+            list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
 
             Map<String, Object> params = new HashMap<>(
                     Map.of("provider", provider, "service", service, "resource", resource));
@@ -265,7 +265,7 @@ public class RootResourceAccessImpl implements RootResourceAccess {
 
                 timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
 
-                results.addAll(0, DtoMapper.toObservationList(uriInfo, provider, service, resource, timed));
+                results.addAll(0, DtoMapper.toObservationList(userSession, application, mapper, uriInfo, expansions, resourceSnapshot, timed));
 
                 if (timed.isEmpty()) {
                     break;
@@ -276,8 +276,8 @@ public class RootResourceAccessImpl implements RootResourceAccess {
             } while (results.size() < count && results.size() < maxResults);
         }
 
-        if (results.isEmpty() && rd.isSet()) {
-            results.add(DtoMapper.toObservation(uriInfo, rd));
+        if (results.isEmpty() && resourceSnapshot.isSet()) {
+            results.add(DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, resourceSnapshot));
         }
 
         list.value = results;

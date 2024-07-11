@@ -576,4 +576,89 @@ public class FiltersTest extends AbstractIntegrationTest {
             }
         }
     }
+
+    @Nested
+    class ExpandFilterTest {
+
+        @Test
+        void testExpand() throws IOException, InterruptedException {
+            final String provider = "expandTester";
+            final String svc = "sensor";
+            final String rc = "rc";
+            createResource(provider, svc, rc + "_1", 42);
+            createResource(provider, svc, rc + "_2", 24);
+
+            Set<String> expandedFields = Set.of("Datastreams/Observations", "Locations");
+            Map<?, ?> rawResultList = utils.queryJson("/Things/?$expand=" + String.join(",", expandedFields),
+                    Map.class);
+
+            // One Thing
+            List<?> items = (List<?>) rawResultList.get("value");
+            assertFalse(items.isEmpty());
+            assertEquals(1, items.size());
+
+            Map<?,?> rawThing = (Map<?, ?>) items.stream()
+                    .map(Map.class::cast)
+                    .filter(m -> !"sensiNact".equals(m.get("name")))
+                    .findFirst().get();
+
+            // Two data streams (one per resource)
+            List<?> rawDatastreamsList = (List<?>) rawThing.get("Datastreams");
+
+            assertNotNull(rawDatastreamsList);
+            assertEquals(6, rawDatastreamsList.size());
+
+            // One observation with the value
+            Map<?,?>  rawDatastream = (Map<?, ?>) rawDatastreamsList.stream()
+                    .map(Map.class::cast)
+                    .filter(m -> "expandTester~sensor~rc_1".equals(m.get("@iot.id")))
+                    .findFirst().get();
+
+            List<?> rawObservationsList = (List<?>) rawDatastream.get("Observations");
+
+            assertNotNull(rawObservationsList);
+            assertEquals(1, rawObservationsList.size());
+
+            Map<?,?> rawObservation = (Map<?, ?>) rawObservationsList.get(0);
+            assertNotNull(rawObservation);
+            assertEquals(42, rawObservation.get("result"));
+
+            // Check the second value
+            rawDatastream = (Map<?, ?>) rawDatastreamsList.stream()
+                    .map(Map.class::cast)
+                    .filter(m -> "expandTester~sensor~rc_2".equals(m.get("@iot.id")))
+                    .findFirst().get();
+
+            rawObservationsList = (List<?>) rawDatastream.get("Observations");
+
+            assertNotNull(rawObservationsList);
+            assertEquals(1, rawObservationsList.size());
+
+            rawObservation = (Map<?, ?>) rawObservationsList.get(0);
+            assertNotNull(rawObservation);
+            assertEquals(24, rawObservation.get("result"));
+        }
+
+        @Test
+        void testExpandSingle() throws IOException, InterruptedException {
+            final String provider = "expandTester";
+            final String svc = "sensor";
+            final String rc = "rc";
+            createResource(provider, svc, rc + "_1", 42);
+
+            Set<String> expandedFields = Set.of("Thing", "Sensor");
+            Map<?, ?> rawDatastream = utils.queryJson("/Datastreams(expandTester~sensor~rc_1)/?$expand=" + String.join(",", expandedFields),
+                    Map.class);
+
+            Map<?, ?> rawThing = (Map<?, ?>) rawDatastream.get("Thing");
+
+            assertNotNull(rawThing);
+            assertEquals(provider, rawThing.get("@iot.id"));
+
+            Map<?, ?> rawSensor = (Map<?, ?>) rawDatastream.get("Sensor");
+
+            assertNotNull(rawSensor);
+            assertEquals("expandTester~sensor~rc_1", rawSensor.get("@iot.id"));
+        }
+    }
 }

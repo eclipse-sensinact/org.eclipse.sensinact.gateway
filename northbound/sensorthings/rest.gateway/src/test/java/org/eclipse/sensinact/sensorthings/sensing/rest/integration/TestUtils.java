@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -175,6 +176,10 @@ public class TestUtils {
 
         // Look at class public fields
         for (final Field field : type.getFields()) {
+            if((field.getModifiers() & Modifier.STATIC) != 0) {
+                // Ignore static fields
+                continue;
+            }
             if (field.canAccess(expected)) {
                 try {
                     Class<?> fieldType = field.getType();

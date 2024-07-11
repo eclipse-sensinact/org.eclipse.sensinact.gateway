@@ -12,13 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
 
 import java.util.List;
 
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
@@ -26,45 +25,21 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.HistoricalLocationsAccess;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.ext.Providers;
 
-public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess {
-
-    @Context
-    UriInfo uriInfo;
-
-    @Context
-    Providers providers;
-
-    /**
-     * Returns a user session
-     */
-    private SensiNactSession getSession() {
-        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
-
-    /**
-     * Returns an object mapper
-     * @return
-     */
-    private ObjectMapper getMapper() {
-        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
-    }
+public class HistoricalLocationsAccessImpl extends AbstractAccess implements HistoricalLocationsAccess {
 
     @Override
     public HistoricalLocation getHistoricalLocation(String id) {
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                    getExpansions(), providerSnapshot);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -79,8 +54,11 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
         ResultList<Location> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider));
+        list.value = List.of(DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), providerSnapshot));
 
         return list;
     }
@@ -90,7 +68,10 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        Location loc = DtoMapper.toLocation(getSession(), uriInfo, getMapper(), provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
+        Location loc = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), providerSnapshot);
 
         if (!id2.equals(loc.id)) {
             throw new NotFoundException();
@@ -103,8 +84,11 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
         ResultList<Thing> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toThing(getSession(), uriInfo, provider));
+        list.value = List.of(DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), providerSnapshot));
 
         return list;
     }
@@ -121,9 +105,11 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
         Thing t;
         try {
-            t = DtoMapper.toThing(getSession(), uriInfo, provider);
+            t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), providerSnapshot);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -138,14 +124,8 @@ public class HistoricalLocationsAccessImpl implements HistoricalLocationsAccess 
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        SensiNactSession userSession = getSession();
-
-        ResultList<Datastream> list = new ResultList<>();
-        list.value = userSession.describeProvider(provider).services.stream()
-                .map(s -> userSession.describeService(provider, s))
-                .flatMap(s -> s.resources.stream().map(r -> userSession.describeResource(s.provider, s.service, r)))
-                .map(r -> DtoMapper.toDatastream(userSession, getMapper(), uriInfo, r)).collect(toList());
-        return list;
+        return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetProvider(provider));
     }
 
     @Override

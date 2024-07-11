@@ -17,6 +17,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.ext
 
 import java.util.List;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -28,66 +29,34 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.DatastreamsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.ext.Providers;
 
-public class DatastreamsAccessImpl implements DatastreamsAccess {
-
-    @Context
-    UriInfo uriInfo;
-
-    @Context
-    Providers providers;
-
-    @Context
-    Application application;
-
-    private ObjectMapper getMapper() {
-        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
-
-    private SensiNactSession getSession() {
-        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
+public class DatastreamsAccessImpl extends AbstractAccess implements DatastreamsAccess {
 
     @Override
     public Datastream getDatastream(String id) {
-        SensiNactSession userSession = getSession();
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-        return DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
-                userSession.describeResource(provider, service, resource));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetResourceSnapshot(id));
     }
 
     @PaginationLimit(500)
     @Override
     public ResultList<Observation> getDatastreamObservations(String id) {
-        SensiNactSession userSession = getSession();
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        return RootResourceAccessImpl.getObservationList(userSession, uriInfo, application, provider, service,
-                resource);
+        return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), validateAndGetResourceSnapshot(id), 0);
     }
 
     @Override
     public Observation getDatastreamObservation(String id, String id2) {
-        SensiNactSession userSession = getSession();
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        Observation o = DtoMapper.toObservation(uriInfo, userSession.describeResource(provider, service, resource));
+        Observation o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetResourceSnapshot(id));
 
         if (!id2.equals(o.id)) {
             throw new NotFoundException();
@@ -102,20 +71,15 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public FeatureOfInterest getDatastreamObservationFeatureOfInterest(String id, String id2) {
-        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
-        return DtoMapper.toFeatureOfInterest(userSession, uriInfo, getMapper(), provider);
+        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetProvider(provider));
     }
 
     @Override
     public ObservedProperty getDatastreamObservedProperty(String id) {
-        SensiNactSession userSession = getSession();
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        ObservedProperty o = DtoMapper.toObservedProperty(uriInfo,
-                userSession.describeResource(provider, service, resource));
+        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
+                uriInfo, getExpansions(), validateAndGetResourceSnapshot(id));
 
         if (!id.equals(o.id)) {
             throw new NotFoundException();
@@ -132,12 +96,8 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public Sensor getDatastreamSensor(String id) {
-        SensiNactSession userSession = getSession();
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        Sensor s = DtoMapper.toSensor(uriInfo, userSession.describeResource(provider, service, resource));
+        Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetResourceSnapshot(id));
 
         if (!id.equals(s.id)) {
             throw new NotFoundException();
@@ -152,31 +112,27 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public Thing getDatastreamThing(String id) {
-        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
-        return DtoMapper.toThing(userSession, uriInfo, provider);
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetProvider(provider));
     }
 
     @Override
     public ResultList<Datastream> getDatastreamThingDatastreams(String id) {
-        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
 
-        ResultList<Datastream> list = new ResultList<>();
-        list.value = userSession.filteredSnapshot(new SnapshotFilter(provider)).stream()
-                .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                .map(r -> DtoMapper.toDatastream(getMapper(), uriInfo, r)).collect(toList());
-        return list;
+        return getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetProvider(provider));
     }
 
     @Override
     public ResultList<HistoricalLocation> getDatastreamThingHistoricalLocations(String id) {
-        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
 
         HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(userSession, getMapper(), uriInfo, provider);
+            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                    getExpansions(), validateAndGetProvider(provider));
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
@@ -188,18 +144,28 @@ public class DatastreamsAccessImpl implements DatastreamsAccess {
 
     @Override
     public ResultList<Location> getDatastreamThingLocations(String id) {
-        SensiNactSession userSession = getSession();
         String provider = extractFirstIdSegment(id);
 
         Location hl;
         try {
-            hl = DtoMapper.toLocation(userSession, uriInfo, getMapper(), provider);
+            hl = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
+                    getExpansions(), validateAndGetProvider(provider));
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
 
         ResultList<Location> list = new ResultList<>();
         list.value = List.of(hl);
+        return list;
+    }
+
+    static ResultList<Datastream> getDataStreams(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot providerSnapshot) {
+        ResultList<Datastream> list = new ResultList<>();
+        list.value = providerSnapshot.getServices().stream()
+                .flatMap(s -> s.getResources().stream())
+                .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
+                .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r)).collect(toList());
         return list;
     }
 }

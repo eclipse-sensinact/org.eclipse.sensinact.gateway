@@ -279,8 +279,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         }
 
         observations = utils.queryJson("/Datastreams(foo~bar~foobar)/Observations?$count=true", RESULT_OBSERVATIONS);
-        // Note 3000, not 4000 as we limit the amount we retrieve
-        assertEquals(3000, observations.count);
+        assertEquals(4000, observations.count);
         assertEquals(500, observations.value.size());
         assertNotNull(observations.nextLink);
 

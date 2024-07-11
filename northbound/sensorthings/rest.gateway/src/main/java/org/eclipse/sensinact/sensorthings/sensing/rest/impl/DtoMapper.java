@@ -12,7 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.*;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.FeaturesOfInterestAccessImpl.getLiveObservations;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_OBSERVATION_QUALITY;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_SENSOR_ENCODING_TYPE;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_SENSOR_METADATA;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_UNIT_DEFINITION;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_UNIT_NAME;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,28 +39,30 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.geojson.Polygon;
-import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
 
 public class DtoMapper {
 
+    private static final String ADMIN = "admin";
     private static final String DESCRIPTION = "description";
     private static final String FRIENDLY_NAME = "friendlyName";
     private static final String LOCATION = "location";
@@ -64,20 +73,14 @@ public class DtoMapper {
     private static final String NO_DESCRIPTION = "No description";
     private static final String NO_DEFINITION = "No definition";
 
-    private static ResourceDescription getProviderAdminField(SensiNactSession userSession, String provider,
-            String resource) {
-        ResourceDescription description = userSession.describeResource(provider, "admin", resource);
-        // Use an empty description to avoid NPE elsewhere
-        return description == null ? new ResourceDescription() : description;
-    }
-
     private static Optional<ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
-        ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> "admin".equals(s.getName())).findFirst()
+        ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> ADMIN.equals(s.getName())).findFirst()
                 .get();
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
-    private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider, String resource) {
+    private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider,
+            String resource) {
         Optional<ResourceSnapshot> rc = getProviderAdminField(provider, resource);
         if (rc.isPresent()) {
             TimedValue<?> value = rc.get().getValue();
@@ -92,74 +95,52 @@ public class DtoMapper {
         return o == null ? null : String.valueOf(o);
     }
 
-    public static Thing toThing(SensiNactSession userSession, UriInfo uriInfo, String providerName) {
+    private static String toString(Optional<?> o) {
+        return o == null || o.isEmpty() ? null : String.valueOf(o.get());
+    }
+
+    public static Thing toThing(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
         Thing thing = new Thing();
-        thing.id = providerName;
+        thing.id = provider.getName();
 
-        String friendlyName = toString(getProviderAdminField(userSession, providerName, FRIENDLY_NAME).value);
-        thing.name = Objects.requireNonNullElse(friendlyName, providerName);
+        String friendlyName = toString(getProviderAdminFieldValue(provider, FRIENDLY_NAME));
+        thing.name = Objects.requireNonNullElse(friendlyName, provider.getName());
 
-        String description = toString(getProviderAdminField(userSession, providerName, DESCRIPTION).value);
+        String description = toString(getProviderAdminFieldValue(provider, DESCRIPTION));
         thing.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
 
         thing.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Things({id})")
-                .resolveTemplate("id", providerName).build().toString();
+                .resolveTemplate("id", thing.id).build().toString();
         thing.datastreamsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("Datastreams").build().toString();
         thing.historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("HistoricalLocations")
                 .build().toString();
         thing.locationsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("Locations").build().toString();
 
+
+        if(expansions.shouldExpand("Datastreams", thing)) {
+            expansions.addExpansion("Datastreams", thing, DatastreamsAccessImpl.getDataStreams(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), provider));
+        }
+
+        if(expansions.shouldExpand("HistoricalLocations", thing)) {
+            ResultList<HistoricalLocation> list = new ResultList<>();
+            list.value = List.of(DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("HistoricalLocations"), provider));
+            expansions.addExpansion("HistoricalLocations", thing, list);
+        }
+        if(expansions.shouldExpand("Locations", thing)) {
+            ResultList<Location> list = new ResultList<>();
+            list.value = List.of(DtoMapper.toLocation(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Locations"), provider));
+            expansions.addExpansion("Locations", thing, list);
+        }
+
         return thing;
     }
 
-    public static Thing toThing(UriInfo uriInfo, ProviderSnapshot provider) {
-        final String providerName = provider.getName();
-        Thing thing = new Thing();
-        thing.id = providerName;
-
-        thing.name = toString(getProviderAdminFieldValue(provider, FRIENDLY_NAME).orElse(providerName));
-
-        thing.description = toString(getProviderAdminFieldValue(provider, DESCRIPTION).orElse(NO_DESCRIPTION));
-
-        thing.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Things({id})")
-                .resolveTemplate("id", providerName).build().toString();
-        thing.datastreamsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("Datastreams").build().toString();
-        thing.historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("HistoricalLocations")
-                .build().toString();
-        thing.locationsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("Locations").build().toString();
-
-        return thing;
-    }
-
-    public static Location toLocation(SensiNactSession userSession, UriInfo uriInfo, ObjectMapper mapper,
-            String providerName) {
-        Location location = new Location();
-
-        final TimedValue<GeoJsonObject> rcLocation = getLocation(userSession, mapper, providerName, false);
-        final Instant time = rcLocation.getTimestamp();
-        final GeoJsonObject object = rcLocation.getValue();
-
-        location.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
-
-        String friendlyName = getProperty(object, "name");
-        location.name = Objects.requireNonNullElse(friendlyName, providerName);
-
-        String description = getProperty(object, DESCRIPTION);
-        location.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
-
-        location.encodingType = ENCODING_TYPE_VND_GEO_JSON;
-        location.location = object;
-
-        location.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Locations({id})")
-                .resolveTemplate("id", location.id).build().toString();
-        location.thingsLink = uriInfo.getBaseUriBuilder().uri(location.selfLink).path("Things").build().toString();
-        location.historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(location.selfLink)
-                .path("HistoricalLocations").build().toString();
-
-        return location;
-    }
-
-    public static Location toLocation(UriInfo uriInfo, ObjectMapper mapper, ProviderSnapshot provider) {
+    public static Location toLocation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
         Location location = new Location();
 
         final String providerName = provider.getName();
@@ -184,36 +165,24 @@ public class DtoMapper {
         location.historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(location.selfLink)
                 .path("HistoricalLocations").build().toString();
 
+        if(expansions.shouldExpand("Things", location)) {
+            ResultList<Thing> list = new ResultList<>();
+            list.value = List.of(DtoMapper.toThing(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Thing"), provider));
+            expansions.addExpansion("Things", location, list);
+        }
+        if(expansions.shouldExpand("HistoricalLocations", location)) {
+            ResultList<HistoricalLocation> list = new ResultList<>();
+            list.value = List.of(DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("HistoricalLocations"), provider));
+            expansions.addExpansion("HistoricalLocations", location, list);
+        }
+
         return location;
     }
 
-    public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, ObjectMapper mapper,
-            UriInfo uriInfo, String providerName) {
-        HistoricalLocation historicalLocation = new HistoricalLocation();
-
-        final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, true);
-        final Instant time;
-        if (location.getTimestamp() == null) {
-            time = Instant.EPOCH;
-        } else {
-            time = location.getTimestamp();
-        }
-
-        historicalLocation.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
-        historicalLocation.time = time;
-
-        historicalLocation.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("HistoricalLocations({id})")
-                .resolveTemplate("id", historicalLocation.id).build().toString();
-        historicalLocation.thingLink = uriInfo.getBaseUriBuilder().uri(historicalLocation.selfLink).path("Thing")
-                .build().toString();
-        historicalLocation.locationsLink = uriInfo.getBaseUriBuilder().uri(historicalLocation.selfLink)
-                .path("Locations").build().toString();
-
-        return historicalLocation;
-    }
-
-    public static HistoricalLocation toHistoricalLocation(ObjectMapper mapper, UriInfo uriInfo,
-            ProviderSnapshot provider) {
+    public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
         HistoricalLocation historicalLocation = new HistoricalLocation();
 
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
@@ -234,47 +203,22 @@ public class DtoMapper {
         historicalLocation.locationsLink = uriInfo.getBaseUriBuilder().uri(historicalLocation.selfLink)
                 .path("Locations").build().toString();
 
+        if(expansions.shouldExpand("Thing", historicalLocation)) {
+            expansions.addExpansion("Thing", historicalLocation, toThing(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Thing"), provider));
+        }
+        if(expansions.shouldExpand("Locations", historicalLocation)) {
+            ResultList<Location> list = new ResultList<>();
+            list.value = List.of(DtoMapper.toLocation(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Locations"), provider));
+            expansions.addExpansion("Locations", historicalLocation, list);
+        }
+
         return historicalLocation;
     }
 
-    public static Datastream toDatastream(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
-            ResourceDescription resource) {
-        if (resource == null) {
-            throw new NotFoundException();
-        }
-
-        Datastream datastream = new Datastream();
-
-        datastream.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
-
-        datastream.name = toString(resource.metadata.getOrDefault(FRIENDLY_NAME, resource.resource));
-        datastream.description = toString(resource.metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-
-        // TODO can we make this more fine-grained
-        datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
-
-        UnitOfMeasurement unit = new UnitOfMeasurement();
-        unit.symbol = Objects.toString(resource.metadata.get("unit"), null);
-        unit.name = Objects.toString(resource.metadata.get(SENSORTHINGS_UNIT_NAME), null);
-        unit.definition = Objects.toString(resource.metadata.get(SENSORTHINGS_UNIT_DEFINITION), null);
-        datastream.unitOfMeasurement = unit;
-
-        datastream.observedArea = getObservedArea(getLocation(userSession, mapper, resource, false).getValue());
-        datastream.properties = resource.metadata;
-
-        datastream.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})")
-                .resolveTemplate("id", datastream.id).build().toString();
-        datastream.observationsLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Observations").build()
-                .toString();
-        datastream.observedPropertyLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("ObservedProperty")
-                .build().toString();
-        datastream.sensorLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Sensor").build().toString();
-        datastream.thingLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Thing").build().toString();
-
-        return datastream;
-    }
-
-    public static Datastream toDatastream(ObjectMapper mapper, UriInfo uriInfo, ResourceSnapshot resource) {
+    public static Datastream toDatastream(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource) {
         if (resource == null) {
             throw new NotFoundException();
         }
@@ -311,42 +255,39 @@ public class DtoMapper {
         datastream.sensorLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Sensor").build().toString();
         datastream.thingLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Thing").build().toString();
 
+        if(expansions.shouldExpand("Observations", datastream)) {
+            expansions.addExpansion("Observations", datastream, RootResourceAccessImpl.getObservationList(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), resource, 25));
+        }
+
+        if(expansions.shouldExpand("ObservedProperty", datastream)) {
+            expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("ObservedProperty"), resource));
+        }
+
+        if(expansions.shouldExpand("Sensor", datastream)) {
+            expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Sensor"), resource));
+        }
+
+        if(expansions.shouldExpand("Thing", datastream)) {
+            expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Thing"), provider));
+        }
+
         return datastream;
     }
 
-    public static Sensor toSensor(UriInfo uriInfo, ResourceDescription resource) {
+    public static Sensor toSensor(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource) {
         if (resource == null) {
             throw new NotFoundException();
         }
 
         Sensor sensor = new Sensor();
 
-        sensor.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
-
-        sensor.name = toString(resource.metadata.getOrDefault(FRIENDLY_NAME, resource.resource));
-        sensor.description = toString(resource.metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-        sensor.properties = resource.metadata;
-
-        sensor.metadata = resource.metadata.getOrDefault(SENSORTHINGS_SENSOR_METADATA, "No metadata");
-        sensor.encodingType = toString(
-                resource.metadata.getOrDefault(SENSORTHINGS_SENSOR_ENCODING_TYPE, DEFAULT_ENCODING_TYPE));
-
-        sensor.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Sensors({id})")
-                .resolveTemplate("id", sensor.id).build().toString();
-        sensor.datastreamsLink = uriInfo.getBaseUriBuilder().uri(sensor.selfLink).path("Datastreams").build()
-                .toString();
-
-        return sensor;
-    }
-
-    public static Sensor toSensor(UriInfo uriInfo, ResourceSnapshot resource) {
-        if (resource == null) {
-            throw new NotFoundException();
-        }
-
-        Sensor sensor = new Sensor();
-
-        final String provider = resource.getService().getProvider().getName();
+        ProviderSnapshot providerSnapshot = resource.getService().getProvider();
+        final String provider = providerSnapshot.getName();
         final Map<String, Object> metadata = resource.getMetadata();
 
         sensor.id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
@@ -363,85 +304,52 @@ public class DtoMapper {
         sensor.datastreamsLink = uriInfo.getBaseUriBuilder().uri(sensor.selfLink).path("Datastreams").build()
                 .toString();
 
+        if(expansions.shouldExpand("Datastreams", sensor)) {
+            expansions.addExpansion("Datastreams", sensor, DatastreamsAccessImpl.getDataStreams(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), providerSnapshot));
+        }
+
         return sensor;
     }
 
-    public static Observation toObservation(UriInfo uriInfo, ResourceDescription resource) {
-        if (resource == null) {
-            throw new NotFoundException();
-        }
-
-        Observation observation = new Observation();
-
-        if (resource.timestamp != null) {
-            observation.id = String.format("%s~%s~%s~%s", resource.provider, resource.service, resource.resource,
-                    Long.toString(resource.timestamp.toEpochMilli(), 16));
-        } else {
-            observation.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
-        }
-
-        observation.resultTime = resource.timestamp;
-        observation.result = resource.value;
-        observation.phenomenonTime = resource.timestamp;
-        observation.resultQuality = resource.metadata.get(SENSORTHINGS_OBSERVATION_QUALITY);
-
-        observation.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
-                .resolveTemplate("id", observation.id).build().toString();
-        observation.datastreamLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink).path("Datastream").build()
-                .toString();
-        observation.featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink)
-                .path("FeatureOfInterest").build().toString();
-
-        return observation;
-    }
-
-    public static List<Observation> toObservationList(UriInfo uriInfo, String provider, String service, String resource,
-            List<TimedValue<?>> observations) {
-        if (resource == null) {
+    public static List<Observation> toObservationList(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ResourceSnapshot resourceSnapshot, List<TimedValue<?>> observations) {
+        if (resourceSnapshot == null) {
             throw new NotFoundException();
         }
 
         List<Observation> list = new ArrayList<>(observations.size());
         for (TimedValue<?> tv : observations) {
-            list.add(toObservation(uriInfo, provider, service, resource, tv));
+            list.add(toObservation(userSession, application, mapper, uriInfo, expansions,
+                    resourceSnapshot, Optional.of(tv)));
         }
 
         return list;
     }
 
-    public static Observation toObservation(UriInfo uriInfo, String provider, String service, String resource,
-            TimedValue<?> tv) {
-        Observation observation = new Observation();
-
-        observation.id = String.format("%s~%s~%s~%s", provider, service, resource,
-                Long.toString(tv.getTimestamp().toEpochMilli(), 16));
-
-        observation.resultTime = tv.getTimestamp();
-        observation.result = tv.getValue();
-        observation.phenomenonTime = tv.getTimestamp();
-
-        observation.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
-                .resolveTemplate("id", observation.id).build().toString();
-        observation.datastreamLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink).path("Datastream").build()
-                .toString();
-        observation.featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink)
-                .path("FeatureOfInterest").build().toString();
-        return observation;
+    public static Observation toObservation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ResourceSnapshot resource) {
+        return toObservation(userSession, application, mapper, uriInfo, expansions, resource, Optional.ofNullable(resource.getValue()));
     }
 
-    public static Observation toObservation(UriInfo uriInfo, ResourceSnapshot resource) {
+    public static Observation toObservation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ResourceSnapshot resource, Optional<TimedValue<?>> t) {
         if (resource == null) {
             throw new NotFoundException();
         }
 
         Observation observation = new Observation();
-        final Instant timestamp = resource.getValue().getTimestamp();
+        final Instant timestamp = t.map(TimedValue::getTimestamp).orElse(null);
 
-        observation.id = String.format("%s~%s~%s~%s", resource.getService().getProvider().getName(),
+        ProviderSnapshot providerSnapshot = resource.getService().getProvider();
+        observation.id = String.format("%s~%s~%s~%s", providerSnapshot.getName(),
                 resource.getService().getName(), resource.getName(), Long.toString(timestamp.toEpochMilli(), 16));
 
         observation.resultTime = timestamp;
-        observation.result = resource.getValue().getValue();
+        observation.result = t.map(TimedValue::getValue).orElse(null);
         observation.phenomenonTime = timestamp;
         observation.resultQuality = resource.getMetadata().get(SENSORTHINGS_OBSERVATION_QUALITY);
 
@@ -452,35 +360,27 @@ public class DtoMapper {
         observation.featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink)
                 .path("FeatureOfInterest").build().toString();
 
+        if(expansions.shouldExpand("Datastream", observation)) {
+            expansions.addExpansion("Datastream", observation, toDatastream(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Datastream"), resource));
+        }
+
+        if(expansions.shouldExpand("FeatureOfInterest", observation)) {
+            expansions.addExpansion("FeatureOfInterest", observation, toFeatureOfInterest(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("FeatureOfInterest"), providerSnapshot));
+        }
+
         return observation;
     }
 
-    public static ObservedProperty toObservedProperty(UriInfo uriInfo, ResourceDescription resource) {
-        ObservedProperty observedProperty = new ObservedProperty();
-
-        observedProperty.id = String.format("%s~%s~%s", resource.provider, resource.service, resource.resource);
-
-        observedProperty.name = toString(resource.metadata.getOrDefault(FRIENDLY_NAME, resource.resource));
-        observedProperty.description = toString(resource.metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-        observedProperty.properties = resource.metadata;
-
-        observedProperty.definition = toString(
-                resource.metadata.getOrDefault(SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION, NO_DEFINITION));
-
-        observedProperty.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("ObservedProperties({id})")
-                .resolveTemplate("id", observedProperty.id).build().toString();
-        observedProperty.datastreamsLink = uriInfo.getBaseUriBuilder().uri(observedProperty.selfLink)
-                .path("Datastreams").build().toString();
-
-        return observedProperty;
-    }
-
-    public static ObservedProperty toObservedProperty(UriInfo uriInfo, ResourceSnapshot resource) {
+    public static ObservedProperty toObservedProperty(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource) {
         ObservedProperty observedProperty = new ObservedProperty();
 
         final Map<String, Object> metadata = resource.getMetadata();
 
-        observedProperty.id = String.format("%s~%s~%s", resource.getService().getProvider().getName(),
+        ProviderSnapshot providerSnapshot = resource.getService().getProvider();
+        observedProperty.id = String.format("%s~%s~%s", providerSnapshot.getName(),
                 resource.getService().getName(), resource.getName());
 
         observedProperty.name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
@@ -495,37 +395,16 @@ public class DtoMapper {
         observedProperty.datastreamsLink = uriInfo.getBaseUriBuilder().uri(observedProperty.selfLink)
                 .path("Datastreams").build().toString();
 
+        if(expansions.shouldExpand("Datastreams", observedProperty)) {
+            expansions.addExpansion("Datastreams", observedProperty, DatastreamsAccessImpl.getDataStreams(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), providerSnapshot));
+        }
+
         return observedProperty;
     }
 
-    public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, UriInfo uriInfo,
-            ObjectMapper mapper, String providerName) {
-        FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-
-        final TimedValue<GeoJsonObject> location = getLocation(userSession, mapper, providerName, false);
-        final GeoJsonObject object = location.getValue();
-
-        featureOfInterest.id = providerName;
-
-        String friendlyName = getProperty(object, "name");
-        featureOfInterest.name = Objects.requireNonNullElse(friendlyName, providerName);
-
-        String description = getProperty(object, DESCRIPTION);
-        featureOfInterest.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
-
-        featureOfInterest.encodingType = ENCODING_TYPE_VND_GEO_JSON;
-        featureOfInterest.feature = object;
-
-        featureOfInterest.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("FeaturesOfInterest({id})")
-                .resolveTemplate("id", featureOfInterest.id).build().toString();
-        featureOfInterest.observationsLink = uriInfo.getBaseUriBuilder().uri(featureOfInterest.selfLink)
-                .path("Observations").build().toString();
-
-        return featureOfInterest;
-    }
-
-    public static FeatureOfInterest toFeatureOfInterest(UriInfo uriInfo, ObjectMapper mapper,
-            ProviderSnapshot provider) {
+    public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest();
 
         final String providerName = provider.getName();
@@ -548,6 +427,11 @@ public class DtoMapper {
                 .resolveTemplate("id", featureOfInterest.id).build().toString();
         featureOfInterest.observationsLink = uriInfo.getBaseUriBuilder().uri(featureOfInterest.selfLink)
                 .path("Observations").build().toString();
+
+        if(expansions.shouldExpand("Observations", featureOfInterest)) {
+            expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), provider));
+        }
 
         return featureOfInterest;
     }
@@ -612,26 +496,6 @@ public class DtoMapper {
         return null;
     }
 
-    private static TimedValue<GeoJsonObject> getLocation(SensiNactSession userSession, ObjectMapper mapper,
-            ResourceDescription resource, boolean allowNull) {
-        ServiceDescription describeService = userSession.describeService(resource.provider, resource.service);
-        Optional<ResourceDescription> optRD = describeService.resources.stream()
-                .map(r -> userSession.describeResource(resource.provider, resource.service, r))
-                .filter(describeResource -> describeResource.metadata.keySet().contains(SENSORTHINGS_OBSERVEDAREA))
-                .findFirst();
-        TimedValue<GeoJsonObject> location = null;
-        if (optRD.isPresent()) {
-            ResourceDescription describeResource = optRD.get();
-            location = getLocation(mapper, describeResource.value, describeResource.timestamp, allowNull);
-        }
-        if (location == null) {
-            ResourceDescription locationResource = getProviderAdminField(userSession, resource.provider, LOCATION);
-            Instant time = locationResource.timestamp != null ? locationResource.timestamp : Instant.EPOCH;
-            location = getLocation(mapper, locationResource.value, time, allowNull);
-        }
-        return location;
-    }
-
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             ResourceSnapshot resource, boolean allowNull) {
         Optional<ResourceSnapshot> optRS = resource.getService().getResources().stream()
@@ -645,14 +509,6 @@ public class DtoMapper {
             location = getLocation(provider, mapper, allowNull);
         }
         return location;
-    }
-
-    private static TimedValue<GeoJsonObject> getLocation(SensiNactSession userSession, ObjectMapper mapper,
-            String providerName, boolean allowNull) {
-        ResourceDescription locationResource = getProviderAdminField(userSession, providerName, LOCATION);
-        final Instant time = locationResource.timestamp != null ? locationResource.timestamp : Instant.EPOCH;
-        final Object rawValue = locationResource.value;
-        return getLocation(mapper, rawValue, time, allowNull);
     }
 
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,

@@ -17,5 +17,11 @@ public interface IFilterConstants {
     /**
      * Request context property holding the filter as a string
      */
-    String PROP_FILTER_STRING = "sensorthings.filter";
+    String PROP_FILTER_STRING = "sensinact.sensorthings.filter";
+
+    /**
+     * Request context property holding the filter as a string
+     */
+    String EXPAND_SETTINGS_STRING = "sensinact.sensorthings.expand";
+
 }

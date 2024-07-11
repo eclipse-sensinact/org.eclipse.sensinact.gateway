@@ -15,52 +15,34 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.FeaturesOfInterestAccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.ext.Providers;
 
-public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
-
-    @Context
-    UriInfo uriInfo;
-
-    @Context
-    Providers providers;
-
-    /**
-     * Returns a user session
-     */
-    private SensiNactSession getSession() {
-        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
-
-    /**
-     * Returns an object mapper
-     */
-    private ObjectMapper getMapper() {
-        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
-    }
+public class FeaturesOfInterestAccessImpl extends AbstractAccess implements FeaturesOfInterestAccess {
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
         String provider = extractFirstIdSegment(id);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
         FeatureOfInterest foi;
         try {
-            foi = DtoMapper.toFeatureOfInterest(getSession(), uriInfo, getMapper(), provider);
+            foi = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
+                    getExpansions(), providerSnapshot);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -75,12 +57,17 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
         String provider = extractFirstIdSegment(id);
 
-        SensiNactSession userSession = getSession();
+        return getLiveObservations(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), validateAndGetProvider(provider));
+    }
+
+    static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
         ResultList<Observation> list = new ResultList<>();
-        list.value = userSession.filteredSnapshot(new SnapshotFilter(provider)).stream()
-                .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+        list.value = provider.getServices().stream()
+                .flatMap(s -> s.getResources().stream())
                 .filter(ResourceSnapshot::isSet)
-                .map(r -> DtoMapper.toObservation(uriInfo, r)).collect(toList());
+                .map(r -> DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, r)).collect(toList());
         return list;
     }
 
@@ -92,12 +79,12 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }
 
-        String service = extractFirstIdSegment(id2.substring(provider2.length() + 1));
-        String resource = extractFirstIdSegment(id2.substring(provider.length() + service.length() + 2));
+        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id2);
 
         Observation o;
         try {
-            o = DtoMapper.toObservation(uriInfo, getSession().describeResource(provider2, service, resource));
+            o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    resourceSnapshot);
         } catch (Exception e) {
             throw new NotFoundException();
         }
@@ -117,19 +104,17 @@ public class FeaturesOfInterestAccessImpl implements FeaturesOfInterestAccess {
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }
 
-        String service = extractFirstIdSegment(id2.substring(provider2.length() + 1));
-        String resource = extractFirstIdSegment(id2.substring(provider.length() + service.length() + 2));
+        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id2);
 
-        SensiNactSession userSession = getSession();
         Datastream d;
         try {
-            d = DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
-                    userSession.describeResource(provider2, service, resource));
+            d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    resourceSnapshot);
         } catch (Exception e) {
             throw new NotFoundException();
         }
 
-        if (!String.join("~", provider, service, resource).equals(d.id)) {
+        if (!id2.startsWith(String.valueOf(d.id))) {
             throw new NotFoundException();
         }
 
