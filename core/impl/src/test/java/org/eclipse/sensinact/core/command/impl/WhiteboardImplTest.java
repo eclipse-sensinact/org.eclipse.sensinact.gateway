@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -787,8 +788,8 @@ public class WhiteboardImplTest {
             assertNotNull(result.getTimestamp(), "No timestamp");
             assertEquals(42, result.getValue());
 
-            // FIXME: Change exception type
-            assertThrows(Exception.class,
+            // Ensure an exception is thrown
+            assertThrows(NoSuchElementException.class,
                     () -> setValue(PROVIDER_A, svcName, "rc", (r) -> r.setValue(1234, Instant.now())));
         }
 
@@ -996,8 +997,8 @@ public class WhiteboardImplTest {
             assertNotNull(result.getTimestamp(), "No timestamp");
             assertEquals(42, result.getValue());
 
-            // FIXME: Change exception type
-            assertThrows(Exception.class,
+            // Ensure an exception is thrown
+            assertThrows(NoSuchElementException.class,
                     () -> setValue(PROVIDER_A, svcName, rcName, (r) -> r.setValue(1234, Instant.now())));
         }
 

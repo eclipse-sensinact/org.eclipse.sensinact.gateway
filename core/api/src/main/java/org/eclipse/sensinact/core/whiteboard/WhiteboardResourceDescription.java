@@ -20,7 +20,7 @@ import java.time.Duration;
  *
  * @param <T> Type of resource
  */
-public interface WhiteboardResourceDescription<T> {
+public interface WhiteboardResourceDescription<T> extends WhiteboardGet<T> {
 
     /**
      * Returns the type of the resource to create
