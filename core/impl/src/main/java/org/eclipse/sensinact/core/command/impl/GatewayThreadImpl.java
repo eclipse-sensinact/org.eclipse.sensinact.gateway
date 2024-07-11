@@ -39,6 +39,7 @@ import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.notification.impl.ImmediateNotificationAccumulator;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulatorImpl;
 import org.eclipse.sensinact.core.twin.impl.SensinactDigitalTwinImpl;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardHandler;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.service.component.AnyService;
@@ -126,6 +127,19 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
     void removeEPackage(EPackage ePackage) {
         nexusImpl.removeEPackage(ePackage);
+    }
+
+    @Reference(service = WhiteboardHandler.class, cardinality = MULTIPLE, policy = DYNAMIC)
+    void addWhiteboardResourceHandler(WhiteboardHandler wbHandler, Map<String, Object> props) {
+        whiteboard.addWhiteboardHandler(wbHandler, props);
+    }
+
+    void updatedWhiteboardResourceHandler(WhiteboardHandler wbHandler, Map<String, Object> props) {
+        whiteboard.updatedWhiteboardHandler(wbHandler, props);
+    }
+
+    void removeWhiteboardResourceHandler(WhiteboardHandler wbHandler, Map<String, Object> props) {
+        whiteboard.removeWhiteboardHandler(wbHandler, props);
     }
 
     @Reference(service = AnyService.class, target = "(sensiNact.whiteboard.resource=true)", cardinality = MULTIPLE, policy = DYNAMIC)

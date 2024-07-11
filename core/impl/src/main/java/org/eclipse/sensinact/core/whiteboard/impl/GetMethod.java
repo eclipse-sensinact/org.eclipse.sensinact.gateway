@@ -21,8 +21,12 @@ import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.verb.GetParam;
 import org.eclipse.sensinact.core.annotation.verb.GetParam.GetSegment;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardGet;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
-class GetMethod extends AbstractResourceMethod {
+class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> {
 
     /**
      * Action to apply when the result is null
@@ -34,15 +38,45 @@ class GetMethod extends AbstractResourceMethod {
         this.nullAction = onNull;
     }
 
-    public <T> Object invoke(String modelPackageUri, String model, String provider, String service, String resource, Class<T> resultType,
-            TimedValue<T> cachedValue) throws Exception {
-        final Map<Object, Object> params = new HashMap<>();
-        params.put(GetSegment.RESULT_TYPE, resultType);
-        params.put(GetSegment.CACHED_VALUE, cachedValue);
-        return super.invoke(modelPackageUri, model, provider, service, resource, params, GetParam.class, GetParam::value);
-    }
-
     public NullAction actionOnNull() {
         return nullAction;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Promise<TimedValue<Object>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
+            String provider, String service, String resource, Class<Object> resourceType, TimedValue<Object> cachedValue) {
+
+        try {
+            final Map<Object, Object> params = new HashMap<>();
+            params.put(GetSegment.RESULT_TYPE, resourceType);
+            params.put(GetSegment.CACHED_VALUE, cachedValue);
+            Object result = super.invoke(modelPackageUri, model, provider, service, resource, params, GetParam.class,
+                    GetParam::value);
+
+            if (result instanceof Promise) {
+                return (Promise<TimedValue<Object>>) result;
+            } else if (result instanceof TimedValue) {
+                return pf.resolved((TimedValue<Object>) result);
+            } else if (result == null) {
+                switch (nullAction) {
+                case IGNORE:
+                    return pf.resolved(null);
+                case UPDATE_IF_PRESENT:
+                    return pf.resolved(cachedValue == null || cachedValue.getTimestamp() == null ? null
+                            : new TimedValueImpl<Object>(null));
+                case UPDATE:
+                    return pf.resolved(new TimedValueImpl<Object>(null));
+                default:
+                    return pf.failed(new IllegalArgumentException("Unknown null action: " + nullAction));
+                }
+            } else if (resourceType.isAssignableFrom(result.getClass())) {
+                return pf.resolved(new TimedValueImpl<Object>(resourceType.cast(result)));
+            } else {
+                return pf.failed(new Exception("Invalid result type: " + result.getClass()));
+            }
+        } catch (Exception e) {
+            return pf.failed(e);
+        }
     }
 }

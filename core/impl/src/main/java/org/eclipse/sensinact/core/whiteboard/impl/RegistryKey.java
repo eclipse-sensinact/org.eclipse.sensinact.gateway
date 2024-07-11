@@ -18,19 +18,34 @@ import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 
 class RegistryKey {
+
+    private static enum KeyLevel {
+        MODEL_PACKAGE_URI, MODEL, SERVICE, RESOURCE
+    }
+
     private final String modelPackageUri;
     private final String model;
     private final String service;
     private final String resource;
+    private final KeyLevel level;
 
     public RegistryKey(String modelPackageUri, String model, String service, String resource) {
         this.modelPackageUri = (modelPackageUri == null || modelPackageUri.isBlank()
-                || AnnotationConstants.NOT_SET.equals(modelPackageUri))
-                ? EMFUtil.constructPackageUri(model)
-                : modelPackageUri;
+                || AnnotationConstants.NOT_SET.equals(modelPackageUri)) ? EMFUtil.constructPackageUri(model)
+                        : modelPackageUri;
         this.model = model;
         this.service = service;
         this.resource = resource;
+
+        if (resource != null) {
+            level = KeyLevel.RESOURCE;
+        } else if (service != null) {
+            level = KeyLevel.SERVICE;
+        } else if (model != null) {
+            level = KeyLevel.MODEL;
+        } else {
+            level = KeyLevel.MODEL_PACKAGE_URI;
+        }
     }
 
     public String getModelPackageUri() {
@@ -51,7 +66,7 @@ class RegistryKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(model, resource, service);
+        return Objects.hash(modelPackageUri, model, service, resource);
     }
 
     @Override
@@ -64,12 +79,29 @@ class RegistryKey {
             return false;
         RegistryKey other = (RegistryKey) obj;
         return Objects.equals(modelPackageUri, other.modelPackageUri) && Objects.equals(model, other.model)
-                && Objects.equals(resource, other.resource) && Objects.equals(service, other.service);
+                && Objects.equals(service, other.service) && Objects.equals(resource, other.resource);
     }
 
     @Override
     public String toString() {
         return "RegistryKey [modelPackageUri=" + modelPackageUri + ", model=" + model + ", service=" + service
-                + ", resource=" + resource + "]";
+                + ", resource=" + resource + ", level=" + level + "]";
+    }
+
+    public RegistryKey levelUp() {
+        switch (level) {
+        case RESOURCE:
+            return new RegistryKey(modelPackageUri, model, service, null);
+
+        case SERVICE:
+            return new RegistryKey(modelPackageUri, model, null, null);
+
+        case MODEL:
+            return new RegistryKey(modelPackageUri, null, null, null);
+
+        case MODEL_PACKAGE_URI:
+        default:
+            return null;
+        }
     }
 }

@@ -27,8 +27,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -43,27 +47,41 @@ import org.eclipse.sensinact.core.annotation.verb.SetParam;
 import org.eclipse.sensinact.core.annotation.verb.SetParam.SetSegment;
 import org.eclipse.sensinact.core.annotation.verb.UriParam;
 import org.eclipse.sensinact.core.annotation.verb.UriParam.UriSegment;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.metrics.IMetricCounter;
 import org.eclipse.sensinact.core.metrics.IMetricTimer;
 import org.eclipse.sensinact.core.metrics.IMetricsHistogram;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
+import org.eclipse.sensinact.core.model.Model;
+import org.eclipse.sensinact.core.model.Resource;
+import org.eclipse.sensinact.core.model.ResourceBuilder;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
-import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
+import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveAct;
+import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveReadOnly;
+import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveReadWrite;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardAct;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardConstants;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardGet;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardSet;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.osgi.framework.Constants;
 import org.osgi.service.typedevent.TypedEventBus;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -334,7 +352,7 @@ public class WhiteboardImplTest {
                 @GetParam(GetSegment.CACHED_VALUE) TimedValue<?> cached) {
             switch (resource) {
             case "b":
-                if(bReturnNull)
+                if (bReturnNull)
                     return null;
             case "a":
                 if (cached.getValue() != null) {
@@ -394,7 +412,6 @@ public class WhiteboardImplTest {
             Instant secondTimestamp = result.getTimestamp();
             assertTrue(secondTimestamp.isAfter(initialTimestamp),
                     secondTimestamp + " should be after " + initialTimestamp);
-
 
             // Now try for resource b
             runRcCommand(PROVIDER_A, svc, "b", (r) -> {
@@ -736,6 +753,544 @@ public class WhiteboardImplTest {
             assertNotNull(result2.getValue(), "No value");
             assertNotNull(result2.getTimestamp(), "No timestamp");
             assertEquals(42, result2.getValue());
+        }
+    }
+
+    @Nested
+    class WhiteboardHandlerAutoCreateTest {
+
+        Map<String, Object> makeProps(String model, String service, String resource) {
+            return Map.of(Constants.SERVICE_ID, 42L, WhiteboardConstants.PROP_MODEL, model,
+                    WhiteboardConstants.PROP_SERVICE, service, WhiteboardConstants.PROP_RESOURCE, resource,
+                    WhiteboardConstants.PROP_AUTO_CREATE, true);
+        }
+
+        @Test
+        void testReadOnly() throws Throwable {
+            AbstractDescriptiveReadOnly<Integer> getHandler = new AbstractDescriptiveReadOnly<>() {
+                @Override
+                public Promise<TimedValue<Integer>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, TimedValue<Integer> cachedValue) {
+                    return pf.resolved(new TimedValueImpl<>(42));
+                }
+            };
+
+            assertEquals(Integer.class, getHandler.getResourceType());
+
+            final String modelName = "wbHandlerROTest";
+            final String svcName = "svc";
+            thread.addWhiteboardResourceHandler(getHandler, makeProps(modelName, svcName, "rc"));
+
+            createProviders(modelName, svcName);
+
+            TimedValue<Integer> result = getValue(PROVIDER_A, svcName, "rc", Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(42, result.getValue());
+
+            // Ensure an exception is thrown
+            assertThrows(NoSuchElementException.class,
+                    () -> setValue(PROVIDER_A, svcName, "rc", (r) -> r.setValue(1234, Instant.now())));
+        }
+
+        @Test
+        void testReadWrite() throws Throwable {
+            AbstractDescriptiveReadWrite<Long> rcHandler = new AbstractDescriptiveReadWrite<>() {
+                Long value = 42L;
+
+                @Override
+                public Promise<TimedValue<Long>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, TimedValue<Long> cachedValue) {
+                    return pf.resolved(new TimedValueImpl<Long>(value));
+                }
+
+                @Override
+                public Promise<TimedValue<Long>> doPushValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, TimedValue<Long> cachedValue,
+                        TimedValue<Long> newValue) {
+                    this.value = newValue.getValue();
+                    return pf.resolved(new TimedValueImpl<Long>(value));
+                }
+            };
+
+            assertEquals(Long.class, rcHandler.getResourceType());
+
+            final String modelName = "wbHandlerRWTest";
+            final String svcName = "svc";
+            thread.addWhiteboardResourceHandler(rcHandler, makeProps(modelName, svcName, "rc"));
+
+            createProviders(modelName, svcName);
+
+            TimedValue<Long> result = getValue(PROVIDER_A, svcName, "rc", Long.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(42L, result.getValue());
+
+            setValue(PROVIDER_A, svcName, "rc", (r) -> r.setValue(1234L, Instant.now()));
+            result = getValue(PROVIDER_A, svcName, "rc", Long.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1234L, result.getValue());
+
+            setValue(PROVIDER_A, svcName, "rc", (r) -> r.setValue(null, Instant.now()));
+            result = getValue(PROVIDER_A, svcName, "rc", Long.class);
+            assertNull(result.getValue(), "Value still there");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+        }
+
+        @Test
+        void testActEcho() throws Throwable {
+            AbstractDescriptiveAct<String> providerEchoHandler = new AbstractDescriptiveAct<>() {
+                @Override
+                public List<Entry<String, Class<?>>> getNamedParameterTypes() {
+                    return List.of();
+                }
+
+                @Override
+                protected Promise<String> doAct(PromiseFactory promiseFactory, String modelPackageUri, String model,
+                        String provider, String service, String resource, Map<String, Object> arguments) {
+                    return promiseFactory.resolved(provider);
+                }
+            };
+
+            assertEquals(String.class, providerEchoHandler.getReturnType());
+
+            final String modelName = "wbHandlerActTest";
+            final String svcName = "svc";
+            thread.addWhiteboardResourceHandler(providerEchoHandler, makeProps(modelName, svcName, "rc"));
+
+            createProviders(modelName, svcName);
+
+            // Test action
+            assertEquals(PROVIDER_A, act(PROVIDER_A, svcName, "rc", Map.of()));
+            assertEquals(PROVIDER_B, act(PROVIDER_B, svcName, "rc", Map.of()));
+
+            // Other kinds of access must fail
+            assertThrows(IllegalArgumentException.class, () -> getValue(PROVIDER_A, svcName, "rc", String.class));
+            assertThrows(IllegalArgumentException.class,
+                    () -> setValue(PROVIDER_A, svcName, "rc", (r) -> r.setValue(1234, Instant.now())));
+        }
+
+        @Test
+        void testActArgs() throws Throwable {
+            AbstractDescriptiveAct<Integer> providerEchoHandler = new AbstractDescriptiveAct<>() {
+                @Override
+                public List<Entry<String, Class<?>>> getNamedParameterTypes() {
+                    return List.of(Map.entry("value", String.class), Map.entry("radix", Integer.class));
+                }
+
+                @Override
+                public Promise<Integer> doAct(PromiseFactory pf, String modelPackageUri, String model, String provider,
+                        String service, String resource, Map<String, Object> arguments) {
+
+                    String value = (String) arguments.get("value");
+                    if (value == null) {
+                        return pf.failed(new NullPointerException("No value given"));
+                    }
+
+                    Integer radix = (Integer) arguments.get("radix");
+                    if (radix == null) {
+                        radix = 10;
+                    }
+                    return pf.resolved(Integer.parseInt(value, radix));
+                }
+            };
+
+            final String modelName = "wbHandlerActTest2";
+            final String svcName = "svc";
+            thread.addWhiteboardResourceHandler(providerEchoHandler, makeProps(modelName, svcName, "rc"));
+
+            createProviders(modelName, svcName);
+
+            // Test action
+            assertEquals(10, act(PROVIDER_A, svcName, "rc", Map.of("value", "10")));
+            assertEquals(10, act(PROVIDER_A, svcName, "rc", Map.of("value", "10", "radix", 10)));
+            assertEquals(2, act(PROVIDER_A, svcName, "rc", Map.of("value", "10", "radix", 2)));
+            assertEquals(255, act(PROVIDER_A, svcName, "rc", Map.of("value", "FF", "radix", 16)));
+
+            // Test errors
+            assertThrows(NullPointerException.class, () -> act(PROVIDER_A, svcName, "rc", Map.of()));
+            assertThrows(NullPointerException.class, () -> act(PROVIDER_A, svcName, "rc", Map.of("value", null)));
+
+            // Other kinds of access must fail
+            assertThrows(IllegalArgumentException.class, () -> getValue(PROVIDER_A, svcName, "rc", String.class));
+            assertThrows(IllegalArgumentException.class,
+                    () -> setValue(PROVIDER_A, svcName, "rc", (r) -> r.setValue(1234, Instant.now())));
+        }
+    }
+
+    @Nested
+    class WhiteboardHandlerTest {
+
+        Map<String, Object> makeProps(String model, String service, String resource) {
+            return Map.of(Constants.SERVICE_ID, 42L, WhiteboardConstants.PROP_MODEL, model,
+                    WhiteboardConstants.PROP_SERVICE, service, WhiteboardConstants.PROP_RESOURCE, resource);
+        }
+
+        void makeResource(final String modelName, final String serviceName, final String resourceName,
+                final Consumer<ResourceBuilder<?, Object>> builderCaller) {
+            thread.execute(new AbstractSensinactCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    ResourceBuilder<?, Object> builder = null;
+                    Resource resource = null;
+
+                    Model model = modelMgr.getModel(modelName);
+                    if (model == null) {
+                        builder = modelMgr.createModel(null, modelName).withService(serviceName)
+                                .withResource(resourceName);
+                    } else {
+                        Service service = model.getServices().get(serviceName);
+                        if (service == null) {
+                            builder = model.createService(serviceName).withResource(resourceName);
+                        } else {
+                            resource = service.getResources().get(resourceName);
+                            if (resource == null) {
+                                builder = service.createResource(resourceName);
+                            }
+                        }
+                    }
+
+                    if (builder != null) {
+                        // Construct the resource
+                        builderCaller.accept(builder);
+                    }
+
+                    return promiseFactory.resolved(null);
+                }
+            });
+        }
+
+        void makeValueResource(final String modelName, final String serviceName, final String resourceName,
+                Class<?> type) {
+            makeResource(modelName, serviceName, resourceName,
+                    b -> b.withType(type).withGetter().withSetter().withGetterCache(Duration.ZERO).buildAll());
+        }
+
+        void makeActionResource(final String modelName, final String serviceName, final String resourceName,
+                Class<?> resultType, List<Entry<String, Class<?>>> params) {
+            makeResource(modelName, serviceName, resourceName,
+                    b -> b.withAction(params).withType(resultType).buildAll());
+        }
+
+        @Test
+        void testReadOnly() throws Throwable {
+            WhiteboardGet<Integer> getHandler = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(42));
+
+            final String modelName = "wbHandlerROTest";
+            final String svcName = "svc";
+            final String rcName = "rc";
+
+            // Register handler
+            thread.addWhiteboardResourceHandler(getHandler, makeProps(modelName, svcName, rcName));
+
+            // Create model
+            makeValueResource(modelName, svcName, rcName, Integer.class);
+
+            // Create providers
+            createProviders(modelName, svcName);
+
+            TimedValue<Integer> result = getValue(PROVIDER_A, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(42, result.getValue());
+
+            // Ensure an exception is thrown
+            assertThrows(NoSuchElementException.class,
+                    () -> setValue(PROVIDER_A, svcName, rcName, (r) -> r.setValue(1234, Instant.now())));
+        }
+
+        @Test
+        void testReadWrite() throws Throwable {
+            WhiteboardSet<Long> rcHandler = new WhiteboardSet<>() {
+                Long value = 42L;
+
+                @Override
+                public Promise<TimedValue<Long>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, Class<Long> resourceType,
+                        TimedValue<Long> cachedValue) {
+                    return pf.resolved(new TimedValueImpl<Long>(value));
+                }
+
+                @Override
+                public Promise<TimedValue<Long>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, Class<Long> resourceType,
+                        TimedValue<Long> cachedValue, TimedValue<Long> newValue) {
+                    this.value = newValue.getValue();
+                    return pf.resolved(new TimedValueImpl<Long>(value));
+                }
+            };
+
+            final String modelName = "wbHandlerRWTest";
+            final String svcName = "svc";
+            final String rcName = "rc";
+
+            // This time, prepare the provider before registering the handler
+            makeValueResource(modelName, svcName, rcName, Long.class);
+            createProviders(modelName, svcName);
+
+            thread.addWhiteboardResourceHandler(rcHandler, makeProps(modelName, svcName, rcName));
+
+            TimedValue<Long> result = getValue(PROVIDER_A, svcName, rcName, Long.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(42L, result.getValue());
+
+            setValue(PROVIDER_A, svcName, rcName, (r) -> r.setValue(1234L, Instant.now()));
+            result = getValue(PROVIDER_A, svcName, rcName, Long.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1234L, result.getValue());
+
+            setValue(PROVIDER_A, svcName, rcName, (r) -> r.setValue(null, Instant.now()));
+            result = getValue(PROVIDER_A, svcName, rcName, Long.class);
+            assertNull(result.getValue(), "Value still there");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+        }
+
+        @Test
+        void testActEcho() throws Throwable {
+            WhiteboardAct<String> providerEchoHandler = (promiseFactory, modelPackageUri, model, provider, service,
+                    resource, arguments) -> promiseFactory.resolved(provider);
+
+            final String modelName = "wbHandlerActTest";
+            final String svcName = "svc";
+            final String rcName = "rc";
+            thread.addWhiteboardResourceHandler(providerEchoHandler, makeProps(modelName, svcName, rcName));
+
+            makeActionResource(modelName, svcName, rcName, String.class, List.of());
+            createProviders(modelName, svcName);
+
+            // Test action
+            assertEquals(PROVIDER_A, act(PROVIDER_A, svcName, rcName, Map.of()));
+            assertEquals(PROVIDER_B, act(PROVIDER_B, svcName, rcName, Map.of()));
+
+            // Other kinds of access must fail
+            assertThrows(IllegalArgumentException.class, () -> getValue(PROVIDER_A, svcName, rcName, String.class));
+            assertThrows(IllegalArgumentException.class,
+                    () -> setValue(PROVIDER_A, svcName, rcName, (r) -> r.setValue(1234, Instant.now())));
+        }
+
+        @Test
+        void testActArgs() throws Throwable {
+            WhiteboardAct<Integer> providerEchoHandler = (pf, modelPackageUri, model, provider, service, resource,
+                    arguments) -> {
+                String value = (String) arguments.get("value");
+                if (value == null) {
+                    return pf.failed(new NullPointerException("No value given"));
+                }
+
+                Integer radix = (Integer) arguments.get("radix");
+                if (radix == null) {
+                    radix = 10;
+                }
+                return pf.resolved(Integer.parseInt(value, radix));
+            };
+
+            final String modelName = "wbHandlerActTest2";
+            final String svcName = "svc";
+            final String rcName = "rc";
+            thread.addWhiteboardResourceHandler(providerEchoHandler, makeProps(modelName, svcName, rcName));
+
+            makeActionResource(modelName, svcName, rcName, Integer.class,
+                    List.of(Map.entry("value", String.class), Map.entry("radix", Integer.class)));
+            createProviders(modelName, svcName);
+
+            // Test action
+            assertEquals(10, act(PROVIDER_A, svcName, rcName, Map.of("value", "10")));
+            assertEquals(10, act(PROVIDER_A, svcName, rcName, Map.of("value", "10", "radix", 10)));
+            assertEquals(2, act(PROVIDER_A, svcName, rcName, Map.of("value", "10", "radix", 2)));
+            assertEquals(255, act(PROVIDER_A, svcName, rcName, Map.of("value", "FF", "radix", 16)));
+
+            // Test errors
+            assertThrows(NullPointerException.class, () -> act(PROVIDER_A, svcName, rcName, Map.of()));
+            assertThrows(NullPointerException.class, () -> act(PROVIDER_A, svcName, rcName, Map.of("value", null)));
+
+            // Other kinds of access must fail
+            assertThrows(IllegalArgumentException.class, () -> getValue(PROVIDER_A, svcName, rcName, String.class));
+            assertThrows(IllegalArgumentException.class,
+                    () -> setValue(PROVIDER_A, svcName, rcName, (r) -> r.setValue(1234, Instant.now())));
+        }
+    }
+
+    @Nested
+    class HandlerSelectionTest {
+        Map<String, Object> makeProps(long svcId, String model, String service, String resource, String... providers) {
+            Map<String, Object> props = new HashMap<>();
+            props.put(Constants.SERVICE_ID, svcId);
+            props.put(WhiteboardConstants.PROP_MODEL, model);
+            props.put(WhiteboardConstants.PROP_SERVICE, service);
+            props.put(WhiteboardConstants.PROP_RESOURCE, resource);
+            props.put(WhiteboardConstants.PROP_PROVIDERS, providers.length == 0 ? null : providers);
+            return props;
+        }
+
+        void makeResource(final String modelName, final String serviceName, final String resourceName,
+                final Consumer<ResourceBuilder<?, Object>> builderCaller) {
+            thread.execute(new AbstractSensinactCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    ResourceBuilder<?, Object> builder = null;
+                    Resource resource = null;
+
+                    Model model = modelMgr.getModel(modelName);
+                    if (model == null) {
+                        builder = modelMgr.createModel(null, modelName).withService(serviceName)
+                                .withResource(resourceName);
+                    } else {
+                        Service service = model.getServices().get(serviceName);
+                        if (service == null) {
+                            builder = model.createService(serviceName).withResource(resourceName);
+                        } else {
+                            resource = service.getResources().get(resourceName);
+                            if (resource == null) {
+                                builder = service.createResource(resourceName);
+                            }
+                        }
+                    }
+
+                    if (builder != null) {
+                        // Construct the resource
+                        builderCaller.accept(builder);
+                    }
+
+                    return promiseFactory.resolved(null);
+                }
+            });
+        }
+
+        void makeValueResource(final String modelName, final String serviceName, final String resourceName,
+                Class<?> type) {
+            makeResource(modelName, serviceName, resourceName,
+                    b -> b.withType(type).withGetter().withSetter().withGetterCache(Duration.ZERO).buildAll());
+        }
+
+        void makeActionResource(final String modelName, final String serviceName, final String resourceName,
+                Class<?> resultType, List<Entry<String, Class<?>>> params) {
+            makeResource(modelName, serviceName, resourceName,
+                    b -> b.withAction(params).withType(resultType).buildAll());
+        }
+
+        @Test
+        void testHandlersProviderFilter() throws Throwable {
+            WhiteboardGet<Integer> h1 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(1));
+            WhiteboardGet<Integer> h2 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(2));
+
+            final String modelName = "wbHandlerPriority";
+            final String svcName = "svc";
+            final String rcName = "rc";
+
+            // Register handlers
+            Map<String, Object> props1 = makeProps(41, modelName, svcName, rcName, PROVIDER_A);
+            thread.addWhiteboardResourceHandler(h1, props1);
+            thread.addWhiteboardResourceHandler(h2, makeProps(42, modelName, svcName, rcName));
+
+            // Create model
+            makeValueResource(modelName, svcName, rcName, Integer.class);
+
+            // Create providers
+            createProviders(modelName, svcName);
+
+            // Provider A should be handled by H1
+            TimedValue<Integer> result = getValue(PROVIDER_A, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1, result.getValue());
+
+            // Provider B should be handled by H2
+            result = getValue(PROVIDER_B, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // Remove handler 1
+            thread.removeWhiteboardResourceHandler(h1, props1);
+
+            // Provider A should be handled by H2
+            result = getValue(PROVIDER_A, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // Provider B should be handled by H2
+            result = getValue(PROVIDER_B, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // Add back H1
+            thread.addWhiteboardResourceHandler(h1, props1);
+
+            // Provider A should be handled by H1
+            result = getValue(PROVIDER_A, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1, result.getValue());
+
+            // Provider B should be handled by H2
+            result = getValue(PROVIDER_B, svcName, rcName, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+        }
+
+        @Test
+        void testHandlersWildcardFilter() throws Throwable {
+            WhiteboardGet<Integer> h1 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(1));
+            WhiteboardGet<Integer> h2 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(2));
+            WhiteboardGet<Integer> h3 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
+                    cachedValue) -> pf.resolved(new TimedValueImpl<>(3));
+
+            final String modelName = "wbHandlerPriority";
+            final String svcName1 = "svc1";
+            final String rcName1 = "rc";
+            final String svcName2 = "svc2";
+            final String rcName2 = "test";
+
+            // Register handlers
+            thread.addWhiteboardResourceHandler(h1, makeProps(41, modelName, svcName1, rcName1));
+            thread.addWhiteboardResourceHandler(h2, makeProps(42, modelName, svcName1, null));
+            thread.addWhiteboardResourceHandler(h3, makeProps(42, modelName, null, null));
+
+            // Create model
+            makeValueResource(modelName, svcName1, rcName1, Integer.class);
+            makeValueResource(modelName, svcName1, rcName2, Integer.class);
+            makeValueResource(modelName, svcName2, rcName1, Integer.class);
+            makeValueResource(modelName, svcName2, rcName2, Integer.class);
+
+            // Create providers
+            createProviders(modelName, svcName1);
+
+            // svc1/rc1 should be handled by H1
+            TimedValue<Integer> result = getValue(PROVIDER_A, svcName1, rcName1, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(1, result.getValue());
+
+            // svc1/rc2 should be handled by H2
+            result = getValue(PROVIDER_B, svcName1, rcName2, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(2, result.getValue());
+
+            // svc2/rc1 should be handled by H3
+            result = getValue(PROVIDER_B, svcName2, rcName1, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(3, result.getValue());
+
+            // svc2/rc2 should be handled by H3
+            result = getValue(PROVIDER_B, svcName2, rcName2, Integer.class);
+            assertNotNull(result.getValue(), "No value");
+            assertNotNull(result.getTimestamp(), "No timestamp");
+            assertEquals(3, result.getValue());
         }
     }
 }

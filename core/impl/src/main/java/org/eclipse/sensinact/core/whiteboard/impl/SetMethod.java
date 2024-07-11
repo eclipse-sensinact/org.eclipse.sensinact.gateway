@@ -20,19 +20,50 @@ import java.util.Set;
 import org.eclipse.sensinact.core.annotation.verb.SetParam;
 import org.eclipse.sensinact.core.annotation.verb.SetParam.SetSegment;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
+import org.eclipse.sensinact.core.whiteboard.WhiteboardSet;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
-class SetMethod extends AbstractResourceMethod {
+class SetMethod extends AbstractResourceMethod implements WhiteboardSet<Object> {
 
     public SetMethod(Method method, Object instance, Long serviceId, Set<String> providers) {
         super(method, instance, serviceId, providers);
     }
 
-    public <T> Object invoke(String modelPackageUri, String model, String provider, String service, String resource, Class<T> resultType,
-            TimedValue<T> cachedValue, TimedValue<T> newValue) throws Exception {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Promise<TimedValue<Object>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
+            String provider, String service, String resource, Class<Object> resourceType,
+            TimedValue<Object> cachedValue, TimedValue<Object> newValue) {
+
         final Map<Object, Object> params = new HashMap<>();
-        params.put(SetSegment.RESULT_TYPE, resultType);
+        params.put(SetSegment.RESULT_TYPE, resourceType);
         params.put(SetSegment.CACHED_VALUE, cachedValue);
         params.put(SetSegment.NEW_VALUE, newValue);
-        return super.invoke(modelPackageUri, model, provider, service, resource, params, SetParam.class, SetParam::value);
+        try {
+            Object o = super.invoke(modelPackageUri, model, provider, service, resource, params, SetParam.class,
+                    SetParam::value);
+            if (o instanceof Promise) {
+                return ((Promise<TimedValue<Object>>) o);
+            } else if (o instanceof TimedValue) {
+                return pf.resolved((TimedValue<Object>) o);
+            } else if (o == null) {
+                return pf.resolved(null);
+            } else if (resourceType.isAssignableFrom(o.getClass())) {
+                return pf.resolved(new TimedValueImpl<Object>(resourceType.cast(o)));
+            } else {
+                return pf.failed(new Exception("Invalid result type: " + o.getClass()));
+            }
+        } catch (Exception e) {
+            return pf.failed(e);
+        }
+    }
+
+    @Override
+    public Promise<TimedValue<Object>> pullValue(PromiseFactory promiseFactory, String modelPackageUri, String model,
+            String provider, String service, String resource, Class<Object> resourceType,
+            TimedValue<Object> cachedValue) {
+        return promiseFactory.resolved(cachedValue);
     }
 }
