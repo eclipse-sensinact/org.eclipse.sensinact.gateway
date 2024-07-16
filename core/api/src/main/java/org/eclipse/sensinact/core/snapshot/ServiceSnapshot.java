@@ -17,7 +17,21 @@ import java.util.List;
 
 public interface ServiceSnapshot extends Snapshot {
 
+    /**
+     * Returns the snapshot of the parent provider
+     */
     ProviderSnapshot getProvider();
 
+    /**
+     * Returns the list of service resources
+     */
     <T extends ResourceSnapshot> List<T> getResources();
+
+    /**
+     * Returns the snapshot of the service resource with the given name
+     *
+     * @param name Resource name
+     * @return Resource snapshot, null if unknown
+     */
+    <T extends ResourceSnapshot> T getResource(String name);
 }

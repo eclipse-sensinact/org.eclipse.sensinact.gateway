@@ -14,8 +14,10 @@
 package org.eclipse.sensinact.core.impl.snapshot;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -26,7 +28,7 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     /**
      * List of provider services
      */
-    private final List<ServiceSnapshotImpl> services = new ArrayList<>();
+    private final Map<String, ServiceSnapshotImpl> services = new LinkedHashMap<>();
 
     /**
      * Provider model package URI
@@ -74,12 +76,26 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     }
 
     public void add(final ServiceSnapshotImpl svc) {
-        this.services.add(svc);
+        this.services.put(svc.getName(), svc);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ServiceSnapshotImpl> getServices() {
-        return services;
+        return List.copyOf(services.values());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ServiceSnapshotImpl getService(String name) {
+        return services.get(name);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ResourceSnapshotImpl getResource(String service, String resource) {
+        ServiceSnapshotImpl svc = services.get(service);
+        return svc != null ? svc.getResource(resource) : null;
     }
 
     public Provider getModelProvider() {
@@ -87,9 +103,10 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     }
 
     public void filterEmptyServices() {
-        final List<ServiceSnapshotImpl> filteredList = services.stream().filter(s -> !s.getResources().isEmpty())
-                .collect(Collectors.toList());
+        Map<String, ServiceSnapshotImpl> filtered = services.entrySet().stream()
+                .filter(e -> !e.getValue().getResources().isEmpty())
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
         services.clear();
-        services.addAll(filteredList);
+        services.putAll(filtered);
     }
 }

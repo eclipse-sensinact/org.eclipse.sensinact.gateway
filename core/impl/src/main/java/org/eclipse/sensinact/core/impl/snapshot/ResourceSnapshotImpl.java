@@ -20,13 +20,13 @@ import java.util.Map;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.model.impl.ResourceImpl;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Service;
-import org.eclipse.sensinact.core.model.impl.ResourceImpl;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 
 public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSnapshot {
 
@@ -94,6 +94,7 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
                 service.getName(), getName(), getSnapshotTime());
     }
 
+    @Override
     public ServiceSnapshotImpl getService() {
         return service;
     }
@@ -103,6 +104,7 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         return metadata;
     }
 
+    @Override
     public TimedValue<?> getValue() {
         return rcValue;
     }
@@ -116,6 +118,7 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         return getValue() != null && getValue().getTimestamp() != null;
     }
 
+    @Override
     public Class<?> getType() {
         return type;
     }

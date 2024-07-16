@@ -21,15 +21,40 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 
 public interface ResourceSnapshot extends Snapshot {
 
+    /**
+     * Returns the snapshot of the parent service
+     */
     ServiceSnapshot getService();
 
+    /**
+     * Flag to indicate if the resource has been set for that provider.
+     */
     boolean isSet();
 
+    /**
+     * Returns the class of the value this resource holds. (Object for any)
+     */
+    Class<?> getType();
+
+    /**
+     * Returns the (cached) value of the resource at the time of the snapshot. Can
+     * be null if the value was never set.
+     */
     TimedValue<?> getValue();
 
+    /**
+     * Returns the metadata associated to the resource
+     */
     Map<String, Object> getMetadata();
 
+    /**
+     * Returns the kind of resource, see {@link ResourceType}
+     */
     ResourceType getResourceType();
 
+    /**
+     * Returns the value type, <em>i.e.</em> the kind of access it allows. See
+     * {@link ValueType}.
+     */
     ValueType getValueType();
 }
