@@ -105,6 +105,11 @@ public class LdapParserTest {
             }
 
             @Override
+            public Class<?> getType() {
+                return Object.class;
+            }
+
+            @Override
             public ServiceSnapshot getService() {
                 return new ServiceSnapshot() {
 
@@ -125,6 +130,12 @@ public class LdapParserTest {
 
                     ServiceSnapshot getSvc() {
                         return this;
+                    }
+
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public ResourceSnapshot getResource(String name) {
+                        return getRc();
                     }
 
                     @Override
@@ -154,6 +165,18 @@ public class LdapParserTest {
                             @Override
                             public String getModelName() {
                                 return "model1";
+                            }
+
+                            @SuppressWarnings("unchecked")
+                            @Override
+                            public ServiceSnapshot getService(String name) {
+                                return getSvc();
+                            }
+
+                            @SuppressWarnings("unchecked")
+                            @Override
+                            public ResourceSnapshot getResource(String service, String resource) {
+                                return getRc();
                             }
                         };
                     }

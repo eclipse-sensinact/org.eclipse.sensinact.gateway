@@ -66,6 +66,18 @@ public class RcUtils {
             public String getModelName() {
                 return modelName;
             }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public ServiceSnapshot getService(String name) {
+                return services.stream().filter(s -> s.getName().equals(name)).findFirst().get();
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public ResourceSnapshot getResource(String service, String resource) {
+                return getService(service).getResource(resource);
+            }
         };
     }
 
@@ -96,6 +108,12 @@ public class RcUtils {
             @Override
             public ProviderSnapshot getProvider() {
                 return provider;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public ResourceSnapshot getResource(String name) {
+                return resources.stream().filter(r -> r.getName().equals(name)).findFirst().get();
             }
         };
         provider.getServices().add(svc);
@@ -167,6 +185,11 @@ public class RcUtils {
             @Override
             public boolean isSet() {
                 return true;
+            }
+
+            @Override
+            public Class<?> getType() {
+                return Object.class;
             }
         };
 

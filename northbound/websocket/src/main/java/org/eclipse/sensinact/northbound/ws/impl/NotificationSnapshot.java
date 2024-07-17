@@ -112,6 +112,25 @@ class NotificationSnapshot {
         public List<ServiceSnapshot> getServices() {
             return List.of(service);
         }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public ServiceSnapshot getService(String name) {
+            if (service.getName().equals(name)) {
+                return service;
+            }
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public ResourceSnapshot getResource(String service, String resource) {
+            if (NotificationSnapshot.this.service.getName().equals(service)
+                    && NotificationSnapshot.this.resource.getName().equals(resource)) {
+                return NotificationSnapshot.this.resource;
+            }
+            return null;
+        }
     }
 
     private class ServiceSnapshotImpl implements ServiceSnapshot {
@@ -134,6 +153,15 @@ class NotificationSnapshot {
         @Override
         public List<ResourceSnapshot> getResources() {
             return List.of(resource);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public ResourceSnapshot getResource(String name) {
+            if (resource.getName().equals(name)) {
+                return resource;
+            }
+            return null;
         }
     }
 
@@ -199,6 +227,11 @@ class NotificationSnapshot {
         @Override
         public ValueType getValueType() {
             return ValueType.UPDATABLE;
+        }
+
+        @Override
+        public Class<?> getType() {
+            return resource.getType();
         }
     }
 }
