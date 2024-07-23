@@ -409,7 +409,8 @@ public class ModelNexus {
 
         // Allow an update if the resource didn't exist or if the update timestamp is
         // equal to or after the one of the current value
-        if (metadata == null || !metadata.getTimestamp().isAfter(timestamp.plusMillis(1))) {
+        if (metadata == null || metadata.getTimestamp() == null
+                || !metadata.getTimestamp().isAfter(timestamp.plusMillis(1))) {
             EClassifier resourceType = resourceFeature.getEType();
 
             if (metadata == null) {
