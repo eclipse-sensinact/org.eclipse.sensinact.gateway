@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.core.twin.impl;
 
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -77,5 +79,10 @@ public class SensinactServiceImpl extends CommandScopedImpl implements Sensinact
     public EClass getServiceEClass() {
         checkValid();
         return service;
+    }
+
+    boolean isSet() {
+        return Optional.ofNullable(nexus.getServiceInstancesForProvider(provider).get(serviceName))
+                .map(Entry::getValue).isPresent();
     }
 }

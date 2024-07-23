@@ -717,7 +717,7 @@ public class ModelNexus {
         }
     }
 
-    public void setResourceMetadata(Provider provider, String serviceName, Service svc, ETypedElement resource,
+    private void setResourceMetadata(Provider provider, String serviceName, Service svc, ETypedElement resource,
             String metadataKey, Object value, Instant timestamp) {
         if (svc == null) {
             throw new IllegalArgumentException("Service must not be null");
@@ -730,18 +730,18 @@ public class ModelNexus {
             throw new IllegalArgumentException("Invalid timestamp");
         }
 
-        ResourceMetadata metadata = svc == null ? null : (ResourceMetadata) svc.getMetadata().get(resource);
-
+        ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(resource);
         if (metadata == null) {
-            throw new IllegalStateException("No existing metadata for resource");
+            metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+            svc.getMetadata().put(resource, metadata);
         }
 
         Map<String, Object> oldMetadata = toMetadataMap(resource, metadata);
 
-        metadata.setTimestamp(timestamp);
+        final ResourceMetadata metadataFixed = metadata;
         metadata.getExtra().stream().filter(fcm -> fcm.getName().equals(metadataKey)).findFirst()
                 .ifPresentOrElse(fcm -> handleFeatureCustomMetadata(fcm, metadataKey, timestamp, value),
-                        () -> metadata.getExtra()
+                        () -> metadataFixed.getExtra()
                                 .add(handleFeatureCustomMetadata(
                                         ProviderFactory.eINSTANCE.createFeatureCustomMetadata(), metadataKey, timestamp,
                                         value)));
