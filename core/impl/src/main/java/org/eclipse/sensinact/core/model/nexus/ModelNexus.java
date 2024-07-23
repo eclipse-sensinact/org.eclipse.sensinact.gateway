@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -301,7 +302,7 @@ public class ModelNexus {
         if (child == null) {
             throw new IllegalArgumentException("No child provider " + childProvider);
         }
-        ((Provider) parent).getLinkedProviders().add((Provider) child);
+        parent.getLinkedProviders().add(child);
 
         // TODO link event
         // accumulator.link(...)
@@ -333,7 +334,7 @@ public class ModelNexus {
         if (child == null) {
             throw new IllegalArgumentException("No child provider " + childProvider);
         }
-        ((Provider) parent).getLinkedProviders().remove(child);
+        parent.getLinkedProviders().remove(child);
 
         // TODO unlink event
         // accumulator.unlink(...)
@@ -840,14 +841,17 @@ public class ModelNexus {
         return Collections.unmodifiableMap(result);
     }
 
-    public Map<String, Service> getServiceInstancesForProvider(Provider provider) {
-        Map<String, Service> result = new LinkedHashMap<>();
-        getServiceReferencesForModel(provider.eClass()).filter(provider::eIsSet).forEach((feature) -> {
-            result.put(feature.getName(), (Service) provider.eGet(feature));
+    public Map<String, Entry<EClass,Service>> getServiceInstancesForProvider(Provider provider) {
+        Map<String, Entry<EClass,Service>> result = new LinkedHashMap<>();
+        getServiceReferencesForModel(provider.eClass()).forEach((feature) -> {
+            result.put(feature.getName(),
+                    new AbstractMap.SimpleImmutableEntry<>((EClass) feature.getEType(),
+                            provider.eIsSet(feature) ? (Service) provider.eGet(feature) : null));
         });
 
         if (provider instanceof DynamicProvider) {
-            ((DynamicProvider) provider).getServices().forEach(e -> result.put(e.getKey(), e.getValue()));
+            ((DynamicProvider) provider).getServices().forEach(e -> result.put(e.getKey(),
+                    new AbstractMap.SimpleImmutableEntry<>(e.getValue().eClass(), e.getValue())));
         }
         return Collections.unmodifiableMap(result);
     }

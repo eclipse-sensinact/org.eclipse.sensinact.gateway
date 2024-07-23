@@ -15,6 +15,8 @@ package org.eclipse.sensinact.core.model.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,20 +25,25 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.Service;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
-import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.impl.SensinactDigitalTwinImpl;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.osgi.util.promise.PromiseFactory;
 
 /**
  *
@@ -97,6 +104,30 @@ public class ModelBuildingTest {
             assertEquals(TEST_RESOURCE, resource.getName());
             assertEquals(Integer.class, resource.getType());
             assertEquals(ResourceType.SENSOR, resource.getResourceType());
+        }
+
+        @Test
+        void testResourcePresenceOnNewInstance() {
+            manager.createModel(TEST_MODEL).withService(TEST_SERVICE).withResource(TEST_RESOURCE)
+                    .withType(Integer.class).build().build().build();
+
+            final String providerName = "foobar";
+            nexus.createProviderInstance(TEST_MODEL, providerName);
+
+            List<ProviderSnapshot> filteredSnapshot = new SensinactDigitalTwinImpl(nexus,
+                    new PromiseFactory(PromiseFactory.inlineExecutor())).filteredSnapshot(null, null, null, null);
+
+            ProviderSnapshot provider = filteredSnapshot.stream().filter(p -> p.getName().equals(providerName))
+                    .findFirst().get();
+
+            ServiceSnapshot svc = provider.getServices().stream().filter(s -> TEST_SERVICE.equals(s.getName()))
+                    .findFirst().get();
+            assertNotNull(svc);
+
+            ResourceSnapshot rc = svc.getResources().stream().filter(r -> TEST_RESOURCE.equals(r.getName())).findFirst()
+                    .get();
+            assertNotNull(rc);
+            assertNull(rc.getValue());
         }
 
         @Test

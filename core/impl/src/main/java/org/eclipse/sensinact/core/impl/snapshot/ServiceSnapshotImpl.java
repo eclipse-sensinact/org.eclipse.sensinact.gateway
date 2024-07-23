@@ -16,7 +16,9 @@ package org.eclipse.sensinact.core.impl.snapshot;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.model.core.provider.Service;
@@ -36,13 +38,19 @@ public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnap
     /**
      * Model service
      */
+    private final EClass modelEClass;
+
+    /**
+     * Model service
+     */
     private final Service modelService;
 
-    public ServiceSnapshotImpl(final ProviderSnapshotImpl parent, final String serviceName, Service modelService,
-            Instant timestamp) {
+    public ServiceSnapshotImpl(final ProviderSnapshotImpl parent, final String serviceName,
+            Entry<EClass, Service> modelService, Instant timestamp) {
         super(serviceName, timestamp);
         this.provider = parent;
-        this.modelService = modelService;
+        this.modelEClass = modelService.getKey();
+        this.modelService = modelService.getValue();
     }
 
     @Override
@@ -52,8 +60,13 @@ public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnap
                 getSnapshotTime());
     }
 
+    @Override
     public ProviderSnapshotImpl getProvider() {
         return provider;
+    }
+
+    public EClass getModelEClass() {
+        return modelEClass;
     }
 
     public Service getModelService() {
@@ -64,6 +77,7 @@ public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnap
         resources.add(rc);
     }
 
+    @Override
     public List<ResourceSnapshotImpl> getResources() {
         return List.copyOf(resources);
     }
