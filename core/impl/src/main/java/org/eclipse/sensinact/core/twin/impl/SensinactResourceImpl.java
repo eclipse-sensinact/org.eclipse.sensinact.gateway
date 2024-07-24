@@ -24,7 +24,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
-import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.model.impl.ResourceImpl;
@@ -41,7 +40,7 @@ import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactResourceImpl extends CommandScopedImpl implements SensinactResource {
 
-    private final SensinactEMFService svc;
+    private final SensinactServiceImpl svc;
     private final Provider provider;
     private final String serviceName;
     private final ETypedElement resource;
@@ -49,7 +48,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     private final ModelNexus modelNexus;
     private final PromiseFactory promiseFactory;
 
-    public SensinactResourceImpl(AtomicBoolean active, SensinactEMFService svc, Provider provider, String serviceName,
+    public SensinactResourceImpl(AtomicBoolean active, SensinactServiceImpl svc, Provider provider, String serviceName,
             ETypedElement resource, Class<?> type, ModelNexus nexusImpl, PromiseFactory promiseFactory) {
         super(active);
         this.svc = svc;
@@ -216,6 +215,10 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         checkValid();
 
         try {
+            if (!svc.isSet()) {
+                modelNexus.createServiceInstance(provider, serviceName, svc.getServiceEClass());
+            }
+
             modelNexus.setResourceMetadata(provider, serviceName, resource, name, value, timestamp);
             return promiseFactory.resolved(null);
         } catch (Throwable t) {

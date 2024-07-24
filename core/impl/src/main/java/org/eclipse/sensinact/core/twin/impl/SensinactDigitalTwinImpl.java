@@ -28,7 +28,6 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
-import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.impl.snapshot.ProviderSnapshotImpl;
 import org.eclipse.sensinact.core.impl.snapshot.ResourceSnapshotImpl;
 import org.eclipse.sensinact.core.impl.snapshot.ServiceSnapshotImpl;
@@ -281,9 +280,9 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return new SensinactProviderImpl(active, modelProvider, nexusImpl, pf);
     }
 
-    private SensinactResourceImpl toResource(final SensinactService parent, Provider provider, String serviceName,
+    private SensinactResourceImpl toResource(final SensinactServiceImpl parent, Provider provider, String serviceName,
             final ETypedElement rcFeature) {
-        return new SensinactResourceImpl(active, (SensinactEMFService) parent, provider, serviceName, rcFeature,
+        return new SensinactResourceImpl(active, parent, provider, serviceName, rcFeature,
                 rcFeature.getEType().getInstanceClass(), nexusImpl, pf);
     }
 

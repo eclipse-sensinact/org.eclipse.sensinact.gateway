@@ -170,6 +170,14 @@ public class SensinactTwinTest {
         }
 
         @Test
+        void testMetadataWithoutValue() throws Exception {
+            twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+            SensinactResourceImpl rc = twinImpl.getResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
+            rc.setMetadataValue("description", "test", Instant.now()).getValue();
+            assertEquals("test", rc.getMetadataValue("description").getValue().getValue());
+        }
+
+        @Test
         void basicResourceSet() throws Exception {
             twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
             SensinactResourceImpl resource = twinImpl.getResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
