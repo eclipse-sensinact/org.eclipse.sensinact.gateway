@@ -5,7 +5,7 @@
   <eAnnotations source="http://www.eclipse.org/OCL/Import">
     <details key="ecore" value="http://www.eclipse.org/emf/2002/Ecore"/>
   </eAnnotations>
-  <eClassifiers xsi:type="ecore:EClass" name="NexusMetadata" abstract="true" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Metadata">
+  <eClassifiers xsi:type="ecore:EClass" name="NexusMetadata" abstract="true" eSuperTypes="../../../../../provider/src/main/resources/model/sensinact.ecore#//Metadata">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="locked" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
         defaultValueLiteral="false" unsettable="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="originalName" lowerBound="1"
@@ -13,9 +13,9 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="AnnotationMetadata" eSuperTypes="#//NexusMetadata"/>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceAttribute" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EAttribute #//NexusMetadata">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="resourceType" eType="ecore:EEnum ../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//ResourceType"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="resourceType" eType="ecore:EEnum ../../../../../provider/src/main/resources/model/sensinact.ecore#//ResourceType"
         defaultValueLiteral="SENSOR"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueType" eType="ecore:EEnum ../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//ValueType"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueType" eType="ecore:EEnum ../../../../../provider/src/main/resources/model/sensinact.ecore#//ValueType"
         defaultValueLiteral="MODIFIABLE"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGetCacheMs" eType="ecore:EDataType ../../../../../org.eclipse.emf.ecore/model/Ecore.ecore#//ELong"
@@ -30,7 +30,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="ServiceReference" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EReference #//NexusMetadata"/>
   <eClassifiers xsi:type="ecore:EClass" name="Action" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EOperation #//NexusMetadata"/>
   <eClassifiers xsi:type="ecore:EClass" name="ActionParameter" eSuperTypes="http://www.eclipse.org/emf/2002/Ecore#//EParameter">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="timestamp" eType="ecore:EDataType ../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//EInstant"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="timestamp" eType="ecore:EDataType ../../../../../provider/src/main/resources/model/sensinact.ecore#//EInstant"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceMetadata" eSuperTypes="#//NexusMetadata"/>
   <eClassifiers xsi:type="ecore:EClass" name="ActionMetadata" eSuperTypes="#//NexusMetadata"/>

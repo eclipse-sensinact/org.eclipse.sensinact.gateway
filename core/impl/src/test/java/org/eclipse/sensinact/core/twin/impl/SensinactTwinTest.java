@@ -16,10 +16,12 @@ package org.eclipse.sensinact.core.twin.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
@@ -49,6 +51,8 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
@@ -73,6 +77,7 @@ import org.osgi.util.promise.PromiseFactory;
 public class SensinactTwinTest {
 
     private static final String TEST_MODEL = "testmodel";
+    private static final String TEST_MODEL_WITH_METADATA = "testmodel_Metadata";
     private static final String TEST_PROVIDER = "testprovider";
     private static final String TEST_SERVICE = "testservice";
     private static final String TEST_RESOURCE = "testValue";
@@ -106,6 +111,13 @@ public class SensinactTwinTest {
         manager.createModel(TEST_MODEL).withService(TEST_SERVICE).withResource(TEST_RESOURCE).withType(Integer.class)
                 .build().withResource(TEST_ACTION_RESOURCE).withType(Double.class)
                 .withAction(List.of(new SimpleEntry<>("foo", String.class), new SimpleEntry<>("bar", Instant.class)))
+                .buildAll();
+
+        manager.createModel(TEST_MODEL_WITH_METADATA).withService(TEST_SERVICE)
+                    .withResource(TEST_RESOURCE).withType(Integer.class).withDefaultMetadata(Map.of("foo", "bar")).build()
+                    .withResource(TEST_ACTION_RESOURCE).withType(Double.class)
+                        .withAction(List.of(new SimpleEntry<>("foo", String.class), new SimpleEntry<>("bar", Instant.class)))
+                        .withDefaultMetadata(Map.of("fizz", "buzz"))
                 .buildAll();
 
         URI ProviderPackageURI = URI.createURI(ProviderPackage.eNS_URI);
@@ -178,6 +190,76 @@ public class SensinactTwinTest {
         }
 
         @Test
+        void testCreateProviderDefaultMetadata() throws InvocationTargetException, InterruptedException {
+            SensinactProvider provider = twinImpl.createProvider(TEST_MODEL_WITH_METADATA, TEST_PROVIDER);
+
+            SensinactService service = provider.getServices().get(TEST_SERVICE);
+            SensinactResource resource = service.getResources().get(TEST_RESOURCE);
+
+            Map<String, Object> metadata = resource.getMetadataValues().getValue();
+            assertEquals(Set.of("foo", "timestamp"), metadata.keySet());
+            assertEquals("bar", metadata.get("foo"));
+            assertNull(metadata.get("timestamp"));
+
+            TimedValue<Object> metadataValue = resource.getMetadataValue("foo").getValue();
+
+            assertEquals("bar", metadataValue.getValue());
+            assertNull(metadataValue.getTimestamp());
+
+            resource = service.getResources().get(TEST_ACTION_RESOURCE);
+
+            metadata = resource.getMetadataValues().getValue();
+            assertEquals(Set.of("fizz", "timestamp"), metadata.keySet());
+            assertEquals("buzz", metadata.get("fizz"));
+            assertNull(metadata.get("timestamp"));
+
+            metadataValue = resource.getMetadataValue("fizz").getValue();
+
+            assertEquals("buzz", metadataValue.getValue());
+            assertNull(metadataValue.getTimestamp());
+        }
+
+        @Test
+        void testOverrideProviderDefaultMetadata() throws InvocationTargetException, InterruptedException {
+            SensinactProvider provider = twinImpl.createProvider(TEST_MODEL_WITH_METADATA, TEST_PROVIDER);
+
+            SensinactService service = provider.getServices().get(TEST_SERVICE);
+            SensinactResource resource = service.getResources().get(TEST_RESOURCE);
+
+            Instant timestamp = Instant.parse("2020-01-01T00:00:00Z");
+            resource.setMetadataValue("extra", 42, timestamp).getValue();
+
+            Map<String, Object> metadata = resource.getMetadataValues().getValue();
+            assertEquals(Set.of("foo", "timestamp", "extra"), metadata.keySet());
+            assertEquals("bar", metadata.get("foo"));
+            assertEquals(42, metadata.get("extra"));
+            assertNull(metadata.get("timestamp"));
+
+            TimedValue<Object> metadataValue = resource.getMetadataValue("foo").getValue();
+
+            assertEquals("bar", metadataValue.getValue());
+            assertNull(metadataValue.getTimestamp());
+
+            metadataValue = resource.getMetadataValue("extra").getValue();
+
+            assertEquals(42, metadataValue.getValue());
+            assertEquals(timestamp, metadataValue.getTimestamp());
+
+            resource = service.getResources().get(TEST_ACTION_RESOURCE);
+            resource.setMetadataValue("fizz", 42, timestamp).getValue();
+
+            metadata = resource.getMetadataValues().getValue();
+            assertEquals(Set.of("fizz", "timestamp"), metadata.keySet());
+            assertEquals(42, metadata.get("fizz"));
+            assertNull(metadata.get("timestamp"));
+
+            metadataValue = resource.getMetadataValue("fizz").getValue();
+
+            assertEquals(42, metadataValue.getValue());
+            assertEquals(timestamp, metadataValue.getTimestamp());
+        }
+
+        @Test
         void basicResourceSet() throws Exception {
             twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
             SensinactResourceImpl resource = twinImpl.getResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE);
@@ -242,6 +324,36 @@ public class SensinactTwinTest {
 
             list = twinImpl.filteredSnapshot(null, p -> TEST_PROVIDER.equals(p.getName()), null, null);
             assertEquals(1, list.size());
+        }
+
+        @Test
+        void testSnapshotProviderDefaultMetadata() throws InvocationTargetException, InterruptedException {
+            twinImpl.createProvider(TEST_MODEL_WITH_METADATA, TEST_PROVIDER);
+
+            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, p -> TEST_PROVIDER.equals(p.getName()), null, null);
+            assertEquals(1, list.size());
+
+            ResourceSnapshot rs = list.get(0).getServices().stream()
+                .filter(s -> TEST_SERVICE.equals(s.getName()))
+                .flatMap(s -> s.getResources().stream())
+                .filter(r -> TEST_RESOURCE.equals(r.getName()))
+                .findFirst().get();
+
+            Map<String, Object> metadata = rs.getMetadata();
+            assertEquals(Set.of("foo", "timestamp"), metadata.keySet());
+            assertEquals("bar", metadata.get("foo"));
+            assertNull(metadata.get("timestamp"));
+
+            rs = list.get(0).getServices().stream()
+                    .filter(s -> TEST_SERVICE.equals(s.getName()))
+                    .flatMap(s -> s.getResources().stream())
+                    .filter(r -> TEST_ACTION_RESOURCE.equals(r.getName()))
+                    .findFirst().get();
+
+            metadata = rs.getMetadata();
+            assertEquals(Set.of("fizz", "timestamp"), metadata.keySet());
+            assertEquals("buzz", metadata.get("fizz"));
+            assertNull(metadata.get("timestamp"));
         }
 
         @Test

@@ -53,4 +53,10 @@ public interface Resource extends Modelled, CommandScoped {
 
     Service getService();
 
+    /**
+     * The Map of default metadata which is set for all resource instances
+     * @return
+     */
+    Map<String, Object> getDefaultMetadata();
+
 }

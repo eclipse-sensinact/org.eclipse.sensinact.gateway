@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.model.impl;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -33,6 +34,7 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     private Class<?> type;
     private Object initialValue;
     private Instant timestamp;
+    private Map<String, Object> defaultMetadata;
     private ResourceType resourceType = null;
     private List<Entry<String, Class<?>>> namedParameterTypes;
     private boolean hasGetter;
@@ -81,6 +83,13 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
         this.initialValue = initialValue;
         this.timestamp = timestamp;
         return (ResourceBuilder<R, U>) this;
+    }
+
+    @Override
+    public ResourceBuilder<R, T> withDefaultMetadata(Map<String, Object> defaultMetadata) {
+        checkValid();
+        this.defaultMetadata = Map.copyOf(defaultMetadata);
+        return this;
     }
 
     @Override
@@ -171,11 +180,11 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
         switch (resourceType) {
         case ACTION:
             createResource = nexusImpl.createActionResource(builtParent.getServiceEClass(), name, type,
-                    namedParameterTypes);
+                    namedParameterTypes, defaultMetadata);
             break;
         case SENSOR:
             createResource = nexusImpl.createResource(builtParent.getServiceEClass(), name, type, timestamp,
-                    initialValue, hasGetter, getterCacheMs, hasSetter);
+                    initialValue, defaultMetadata, hasGetter, getterCacheMs, hasSetter);
             break;
         case PROPERTY:
         case STATE_VARIABLE:

@@ -25,7 +25,10 @@ import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
 import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
+import org.eclipse.sensinact.model.core.provider.Metadata;
 
 public class ResourceImpl extends CommandScopedImpl implements Resource {
 
@@ -117,6 +120,14 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         // Check the metadata, Sensor if no info
         if (feature instanceof ResourceAttribute) {
             return ValueType.valueOf(((ResourceAttribute) feature).getValueType().getName());
+        }
+        throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
+    }
+
+    @Override
+    public Map<String, Object> getDefaultMetadata() {
+        if(feature instanceof Metadata) {
+            return EMFUtil.toMetadataAttributesToMap((Metadata) feature, feature);
         }
         throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
     }

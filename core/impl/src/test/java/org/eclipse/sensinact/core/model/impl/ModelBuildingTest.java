@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -165,6 +166,46 @@ public class ModelBuildingTest {
             assertFalse(nexus.getModel(packageUri, name).isPresent());
 
             assertThrows(IllegalStateException.class, () -> model.getPackageUri());
+        }
+
+        @Test
+        void resourceWithDefaultMetadata() {
+            Model model = manager.createModel(TEST_MODEL).withService(TEST_SERVICE).withResource(TEST_RESOURCE)
+                    .withType(Integer.class).withDefaultMetadata(Map.of("foo", "bar", "foobar", 42)).build().build().build();
+
+            Resource resource = model.getServices().get(TEST_SERVICE).getResources().get(TEST_RESOURCE);
+
+            assertEquals(TEST_RESOURCE, resource.getName());
+            assertEquals(Integer.class, resource.getType());
+            assertEquals(ResourceType.SENSOR, resource.getResourceType());
+
+            Map<String, Object> metadata = resource.getDefaultMetadata();
+
+            assertNotNull(metadata);
+            assertEquals("bar", metadata.get("foo"));
+            assertEquals(42, metadata.get("foobar"));
+        }
+
+        @Test
+        void actionWithDefaultMetadata() {
+            List<Entry<String, Class<?>>> parameters = List.of(new SimpleEntry<>("foo", Double.class),
+                    new SimpleEntry<>("bar", Long.class));
+            Model model = manager.createModel(TEST_MODEL).withService(TEST_SERVICE).withResource(TEST_RESOURCE)
+                    .withType(Integer.class).withAction(parameters)
+                    .withDefaultMetadata(Map.of("foo", "bar", "foobar", 42)).build().build().build();
+
+            Resource resource = model.getServices().get(TEST_SERVICE).getResources().get(TEST_RESOURCE);
+
+            assertEquals(TEST_RESOURCE, resource.getName());
+            assertEquals(Integer.class, resource.getType());
+            assertEquals(ResourceType.ACTION, resource.getResourceType());
+            assertEquals(parameters, resource.getArguments());
+
+            Map<String, Object> metadata = resource.getDefaultMetadata();
+
+            assertNotNull(metadata);
+            assertEquals("bar", metadata.get("foo"));
+            assertEquals(42, metadata.get("foobar"));
         }
     }
 }

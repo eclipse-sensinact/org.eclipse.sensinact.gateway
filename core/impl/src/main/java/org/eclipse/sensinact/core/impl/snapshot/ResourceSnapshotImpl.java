@@ -23,6 +23,7 @@ import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.eclipse.sensinact.core.model.impl.ResourceImpl;
@@ -77,15 +78,17 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
         this.valueType = ValueType.UPDATABLE;
 
         Service modelService = parent.getModelService();
-        final Metadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
+        Metadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
         if (rcMetadata == null) {
-            this.metadata = Map.of();
-        } else {
-            final Map<String, Object> rcMeta = new HashMap<>();
-            rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(rcMetadata, rcFeature));
-            this.metadata = rcMeta;
+            rcMetadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+            if(rcFeature instanceof Metadata) {
+                rcMetadata.getExtra().addAll(((Metadata)rcFeature).getExtra());
+            }
         }
-    }
+        final Map<String, Object> rcMeta = new HashMap<>();
+        rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(rcMetadata, rcFeature));
+        this.metadata = rcMeta;
+}
 
     @Override
     public String toString() {

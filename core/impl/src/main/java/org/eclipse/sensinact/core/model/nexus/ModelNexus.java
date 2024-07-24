@@ -62,6 +62,7 @@ import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
+import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
 import org.eclipse.sensinact.model.core.metadata.AnnotationMetadata;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
@@ -71,6 +72,7 @@ import org.eclipse.sensinact.model.core.metadata.ServiceReference;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -415,6 +417,9 @@ public class ModelNexus {
 
             if (metadata == null) {
                 metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+                if(resourceFeature instanceof Metadata) {
+                    metadata.getExtra().addAll(((Metadata)resourceFeature).getExtra());
+                }
                 service.getMetadata().put(resourceFeature, metadata);
             }
             metadata.setTimestamp(metaTimestamp);
@@ -480,6 +485,7 @@ public class ModelNexus {
                     || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI
                     || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL) {
                 ResourceMetadata metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+                // N.B. We currently don't copy default metadata for the admin resources
                 metadata.setOriginalName(resourceFeature.getName());
                 metadata.setTimestamp(timestamp);
                 adminSvc.getMetadata().put(resourceFeature, metadata);
@@ -571,24 +577,25 @@ public class ModelNexus {
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue) {
-        return createResource(service, resource, type, timestamp, defaultValue, false, 0, false);
+        return createResource(service, resource, type, timestamp, defaultValue, Map.of(), false, 0, false);
     }
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
-            Object defaultValue, boolean hasGetter, long getterCacheMs, boolean hasSetter) {
+            Object defaultValue, Map<String, Object> defaultMetadata, boolean hasGetter,
+            long getterCacheMs, boolean hasSetter) {
         // FIXME: WIP
         FeatureCustomMetadata resourceType = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
         resourceType.setName("resourceType");
         resourceType.setValue(ResourceType.SENSOR);
         resourceType.setTimestamp(Instant.EPOCH);
 
-        return doCreateResource(service, resource, type, timestamp, defaultValue, List.of(resourceType), hasGetter,
-                getterCacheMs, hasSetter);
+        return doCreateResource(service, resource, type, timestamp, defaultValue, defaultMetadata,
+                List.of(resourceType), hasGetter, getterCacheMs, hasSetter);
     }
 
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
-            Object defaultValue, List<FeatureCustomMetadata> metadata, boolean hasGetter, long getterCacheMs,
-            boolean hasSetter) {
+            Object defaultValue, Map<String, Object> defaultMetadata, List<FeatureCustomMetadata> metadata,
+            boolean hasGetter, long getterCacheMs, boolean hasSetter) {
         assertResourceNotExist(service, resource);
         ResourceAttribute feature = EMFUtil.createResourceAttribute(service, resource, type, defaultValue);
         feature.setExternalGet(hasGetter);
@@ -596,8 +603,18 @@ public class ModelNexus {
         if (getterCacheMs > 0) {
             feature.setExternalGetCacheMs(getterCacheMs);
         }
-        EMFUtil.fillMetadata(feature, timestamp, false, resource, List.of());
+        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ?
+                List.of() : toDefaultFeatureCustomMetadata(defaultMetadata);
+        EMFUtil.fillMetadata(feature, timestamp, false, resource, defaultFeatureMetadata);
         return feature;
+    }
+
+    private List<FeatureCustomMetadata> toDefaultFeatureCustomMetadata(Map<String, Object> defaultMetadata) {
+        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata.entrySet().stream()
+                .map(e -> handleFeatureCustomMetadata(
+                        ProviderFactory.eINSTANCE.createFeatureCustomMetadata(), e.getKey(), null, e.getValue()))
+                .collect(Collectors.toList());
+        return defaultFeatureMetadata;
     }
 
     private void assertResourceNotExist(EClass service, String resource) {
@@ -655,23 +672,32 @@ public class ModelNexus {
                 EMFUtil.createEAnnotation("model", Map.of("name", model)));
     }
 
-    public Map<String, Object> getResourceMetadata(Service svc, final ETypedElement rcFeature) {
+    private Map<String, Object> getResourceMetadata(Provider provider, Service svc,
+            String serviceName, final ETypedElement rcFeature) {
         if (svc == null) {
-            return Map.of();
+            svc = createServiceInstance(provider, serviceName, null, null);
         }
 
-        final ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(rcFeature);
+        ResourceMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
+        return toMetadataMap(rcFeature, metadata);
+    }
+
+    private ResourceMetadata getOrInitializeResourceMetadata(Service svc, final ETypedElement rcFeature) {
+        ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(rcFeature);
         if (metadata == null) {
-            return Map.of();
-        } else {
-            return toMetadataMap(rcFeature, metadata);
+            metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+            if(rcFeature instanceof Metadata) {
+                metadata.getExtra().addAll(((Metadata)rcFeature).getExtra());
+            }
+            svc.getMetadata().put(rcFeature, metadata);
         }
+        return metadata;
     }
 
     public Map<String, Object> getResourceMetadata(Provider provider, String serviceName,
             final ETypedElement rcFeature) {
         Service svc = provider.getService(serviceName);
-        return getResourceMetadata(svc, rcFeature);
+        return getResourceMetadata(provider, svc, serviceName, rcFeature);
     }
 
     private Map<String, Object> toMetadataMap(final ETypedElement rcFeature, final ResourceMetadata metadata) {
@@ -687,7 +713,7 @@ public class ModelNexus {
             return null;
         }
 
-        final ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(rcFeature);
+        final ResourceMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
         if (metadata != null) {
             for (FeatureCustomMetadata entry : metadata.getExtra()) {
                 if (entry.getName().equals(key)) {
@@ -734,6 +760,9 @@ public class ModelNexus {
         ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(resource);
         if (metadata == null) {
             metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+            if(resource instanceof Metadata) {
+                metadata.getExtra().addAll(((Metadata)resource).getExtra());
+            }
             svc.getMetadata().put(resource, metadata);
         }
 
@@ -883,14 +912,20 @@ public class ModelNexus {
     }
 
     public EOperation createActionResource(EClass serviceEClass, String name, Class<?> type,
-            List<Entry<String, Class<?>>> namedParameterTypes) {
+            List<Entry<String, Class<?>>> namedParameterTypes, Map<String, Object> defaultMetadata) {
 
         assertResourceNotExist(serviceEClass, name);
 
         List<ActionParameter> params = namedParameterTypes.stream().map(EMFUtil::createActionParameter)
                 .collect(Collectors.toList());
 
-        return EMFUtil.createAction(serviceEClass, name, type, params);
+        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ?
+                List.of() : toDefaultFeatureCustomMetadata(defaultMetadata);
+
+        Action action = EMFUtil.createAction(serviceEClass, name, type, params);
+        EMFUtil.fillMetadata(action, null, false, name, defaultFeatureMetadata);
+
+        return action;
     }
 
     /**
