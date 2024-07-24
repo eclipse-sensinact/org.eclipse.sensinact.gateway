@@ -14,11 +14,11 @@
 package org.eclipse.sensinact.core.impl.snapshot;
 
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.model.core.provider.Provider;
@@ -103,10 +103,12 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     }
 
     public void filterEmptyServices() {
-        Map<String, ServiceSnapshotImpl> filtered = services.entrySet().stream()
-                .filter(e -> !e.getValue().getResources().isEmpty())
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-        services.clear();
-        services.putAll(filtered);
+        Iterator<Entry<String, ServiceSnapshotImpl>> iter = services.entrySet().iterator();
+        while (iter.hasNext()) {
+            Entry<String, ServiceSnapshotImpl> entry = iter.next();
+            if (entry.getValue().getResources().isEmpty()) {
+                iter.remove();
+            }
+        }
     }
 }
