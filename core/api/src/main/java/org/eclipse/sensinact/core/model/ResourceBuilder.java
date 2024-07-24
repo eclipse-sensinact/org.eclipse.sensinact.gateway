@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.model;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -53,6 +54,13 @@ public interface ResourceBuilder<B, T> {
      * @return
      */
     <U extends T> ResourceBuilder<B, U> withInitialValue(U initialValue, Instant timestamp);
+
+    /**
+     * Default metadata that should be provided by the model for this resource
+     * @param defaultMetadata
+     * @return
+     */
+    ResourceBuilder<B, T> withDefaultMetadata(Map<String, Object> defaultMetadata);
 
     /**
      * The type of the value - must be consistent with the built model, e.g. if
