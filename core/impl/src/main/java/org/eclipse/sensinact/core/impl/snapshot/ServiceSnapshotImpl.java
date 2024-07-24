@@ -14,8 +14,9 @@
 package org.eclipse.sensinact.core.impl.snapshot;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.emf.ecore.EClass;
@@ -28,7 +29,7 @@ public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnap
     /**
      * List of service resources
      */
-    private final List<ResourceSnapshotImpl> resources = new ArrayList<>();
+    private final Map<String, ResourceSnapshotImpl> resources = new LinkedHashMap<>();
 
     /**
      * Parent provider
@@ -74,11 +75,18 @@ public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnap
     }
 
     public void add(final ResourceSnapshotImpl rc) {
-        resources.add(rc);
+        resources.put(rc.getName(), rc);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<ResourceSnapshotImpl> getResources() {
-        return List.copyOf(resources);
+        return List.copyOf(resources.values());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ResourceSnapshotImpl getResource(String name) {
+        return resources.get(name);
     }
 }

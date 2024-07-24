@@ -30,7 +30,6 @@ import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers.DatastreamMapper;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers.DatastreamsMapper;
@@ -152,19 +151,11 @@ public abstract class SensorthingsMapper<T> {
 
     protected Promise<ResourceSnapshot> getResource(final String providerName, final String serviceName,
             final String resourceName) {
-        final Promise<ProviderSnapshot> provider = getProvider(providerName);
-
-        return provider.map(p -> {
-            for (final ServiceSnapshot serviceSnapshot : p.getServices()) {
-                if (serviceSnapshot.getName().equals(serviceName)) {
-                    for (final ResourceSnapshot resourceSnapshot : serviceSnapshot.getResources()) {
-                        if (resourceSnapshot.getName().equals(resourceName)) {
-                            return resourceSnapshot;
-                        }
-                    }
-                }
+        return getProvider(providerName).map(p -> {
+            ResourceSnapshot rc = p.getResource(serviceName, resourceName);
+            if (rc != null) {
+                return rc;
             }
-
             throw new NotFoundException(String.join("~", providerName, serviceName, resourceName));
         });
     }
