@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.twin.impl;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -61,6 +62,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     /**
      * Returns the known providers
      */
+    @Override
     public List<SensinactProviderImpl> getProviders() {
         checkValid();
         return nexusImpl.getProviders().stream().map(this::toProvider).collect(Collectors.toList());
@@ -89,6 +91,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     /**
      * Returns the known providers
      */
+    @Override
     public List<SensinactProviderImpl> getProviders(String modelPackageUri, String model) {
         checkValid();
         return nexusImpl.getProviders(modelPackageUri, model).stream().map(this::toProvider)
@@ -191,6 +194,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         return getResource(nexusImpl.getProvider(modelPackageUri, model, providerName), model, service, resource);
     }
 
+    @Override
     public SensinactResourceImpl getResource(String providerName, String service, String resource) {
         checkValid();
         Provider provider = nexusImpl.getProvider(providerName);
@@ -303,7 +307,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Get the resource metadata
         final ETypedElement rcFeature = rcSnapshot.getFeature();
         final Service svc = rcSnapshot.getService().getModelService();
-        if (!svc.eIsSet((EStructuralFeature) rcFeature)) {
+        if (svc == null || !svc.eIsSet((EStructuralFeature) rcFeature)) {
             return;
         }
 
@@ -355,7 +359,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Filter providers according to their resources
         providersStream = providersStream.map(p -> {
             p.getServices().stream().forEach(s -> {
-                nexusImpl.getResourcesForService(s.getModelService().eClass())
+                nexusImpl.getResourcesForService(s.getModelEClass())
                         .forEach(f -> s.add(new ResourceSnapshotImpl(s, f, snapshotTime)));
             });
             return p;
@@ -394,11 +398,11 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Add all services
         nexusImpl.getServiceInstancesForProvider(nexusProvider).forEach((serviceName, service) -> {
             // Get the service
-            final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName, service,
-                    snapshotTime);
+            final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName,
+                    service, snapshotTime);
 
             // Get the resources
-            nexusImpl.getResourcesForService(service.eClass()).forEach(rcFeature -> {
+            nexusImpl.getResourcesForService(service.getKey()).forEach(rcFeature -> {
                 final ResourceSnapshotImpl rcSnapshot = new ResourceSnapshotImpl(svcSnapshot, rcFeature, snapshotTime);
                 fillInResource(rcSnapshot);
                 svcSnapshot.add(rcSnapshot);
@@ -420,7 +424,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             return null;
         }
 
-        Service service = nexusImpl.getServiceInstancesForProvider(nexusProvider).get(serviceName);
+        Entry<EClass,Service> service = nexusImpl.getServiceInstancesForProvider(nexusProvider).get(serviceName);
 
         if (service == null) {
             // Service not found
@@ -433,13 +437,12 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                 nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
 
         // Describe the service
-        final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName, service,
-                snapshotTime);
+        final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName,
+                service, snapshotTime);
         providerSnapshot.add(svcSnapshot);
 
         // Get the resources
-        final EStructuralFeature sf = nexusProvider.eClass().getEStructuralFeature(svcSnapshot.getName());
-        nexusImpl.getResourcesForService((EClass) sf.getEType()).forEach(rcFeature -> {
+        nexusImpl.getResourcesForService(service.getKey()).forEach(rcFeature -> {
             final ResourceSnapshotImpl rcSnapshot = new ResourceSnapshotImpl(svcSnapshot, rcFeature, snapshotTime);
             fillInResource(rcSnapshot);
             svcSnapshot.add(rcSnapshot);
@@ -458,7 +461,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             return null;
         }
 
-        Service service = nexusImpl.getServiceInstancesForProvider(nexusProvider).get(serviceName);
+        Entry<EClass, Service> service = nexusImpl.getServiceInstancesForProvider(nexusProvider).get(serviceName);
 
         if (service == null) {
             // Service not found
@@ -479,8 +482,8 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                 nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
 
         // Minimal description of the service owning the resource
-        final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName, service,
-                snapshotTime);
+        final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName,
+                service, snapshotTime);
         providerSnapshot.add(svcSnapshot);
 
         // Describe the resource

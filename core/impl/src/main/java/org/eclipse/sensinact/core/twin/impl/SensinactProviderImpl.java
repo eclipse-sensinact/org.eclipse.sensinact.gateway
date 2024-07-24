@@ -106,6 +106,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
         nexus.deleteProvider(provider.eClass().getEPackage().getNsURI(), getModelName(), getName());
     }
 
+    @Override
     public Promise<Void> update(Provider newVersion) {
 
         checkValid();
