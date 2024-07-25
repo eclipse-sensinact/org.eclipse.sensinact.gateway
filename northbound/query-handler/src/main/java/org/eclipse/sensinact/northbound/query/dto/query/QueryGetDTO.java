@@ -20,6 +20,11 @@ import org.eclipse.sensinact.northbound.query.api.EQueryType;
  */
 public class QueryGetDTO extends AbstractQueryDTO {
 
+    /**
+     * If set, include metadata in the result
+     */
+    public boolean includeMetadata = false;
+
     public QueryGetDTO() {
         super(EQueryType.GET);
     }

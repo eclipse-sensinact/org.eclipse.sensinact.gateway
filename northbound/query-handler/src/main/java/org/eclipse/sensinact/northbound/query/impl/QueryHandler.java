@@ -270,6 +270,10 @@ public class QueryHandler implements IQueryHandler {
             result.response.type = rcDesc.value.getClass().getName();
         }
 
+        if (dto.includeMetadata) {
+            result.response.attributes = generateMetadataDescriptions(rcDesc.metadata);
+        }
+
         if (rcDesc.timestamp != null) {
             result.statusCode = 200;
             result.response.value = rcDesc.value;

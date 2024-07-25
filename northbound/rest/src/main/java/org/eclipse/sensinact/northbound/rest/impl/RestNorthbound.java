@@ -185,9 +185,11 @@ public class RestNorthbound implements IRestNorthbound {
     }
 
     @Override
-    public AbstractResultDTO resourceGet(final String providerId, final String serviceName, final String rcName) {
+    public AbstractResultDTO resourceGet(final String providerId, final String serviceName, final String rcName,
+            final boolean includeMetadata) {
         final QueryGetDTO query = new QueryGetDTO();
         query.uri = new SensinactPath(providerId, serviceName, rcName);
+        query.includeMetadata = includeMetadata;
         return handleQuery(query);
     }
 

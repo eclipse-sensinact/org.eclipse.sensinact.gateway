@@ -17,11 +17,13 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.sse.SseEventSink;
@@ -64,7 +66,8 @@ public interface IRestNorthbound {
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/GET")
     @GET
     AbstractResultDTO resourceGet(@PathParam("providerId") String providerId,
-            @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName);
+            @PathParam("serviceName") String serviceName, @PathParam("rcName") String rcName,
+            @QueryParam("metadata") @DefaultValue("false") boolean includeMetadata);
 
     @Path("providers/{providerId}/services/{serviceName}/resources/{rcName}/SET")
     @POST

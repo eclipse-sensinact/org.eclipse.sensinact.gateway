@@ -12,6 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.result;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * Resource/metadata GET response
  */
@@ -36,4 +41,10 @@ public class ResponseGetDTO implements SubResult {
      * Resource value
      */
     public Object value;
+
+    /**
+     * Resource metadata, if requested
+     */
+    @JsonInclude(Include.NON_NULL)
+    public List<MetadataDTO> attributes;
 }
