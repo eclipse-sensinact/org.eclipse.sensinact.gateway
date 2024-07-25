@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.MetadataDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProviderDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
@@ -250,8 +252,27 @@ public class DescriptionsTest {
         AbstractResultDTO rawResult = handler.handleQuery(session, query);
         utils.assertResultSuccess(rawResult, EResultType.DESCRIBE_RESOURCE, PROVIDER, SERVICE, RESOURCE);
 
-        TypedResponse<?> result = (TypedResponse<?>) rawResult;
-        utils.assertResultSuccess(result, EResultType.DESCRIBE_RESOURCE, PROVIDER, SERVICE, RESOURCE);
-        assertEquals(RESOURCE, utils.convert(result, ResponseDescribeResourceDTO.class).name);
+        ResponseDescribeResourceDTO describeResourceDTO = utils.convert((TypedResponse<?>) rawResult, ResponseDescribeResourceDTO.class);
+        assertEquals(RESOURCE, describeResourceDTO.name);
+        assertTrue(describeResourceDTO.attributes.isEmpty());
+
+        // Add metadata
+        dto.metadata = Map.of("unit", "dB");
+        dto.type = null;
+        dto.value = null;
+        push.pushUpdate(dto).getValue();
+
+        // Check the resource
+        rawResult = handler.handleQuery(session, query);
+        utils.assertResultSuccess(rawResult, EResultType.DESCRIBE_RESOURCE, PROVIDER, SERVICE, RESOURCE);
+
+        describeResourceDTO = utils.convert((TypedResponse<?>) rawResult, ResponseDescribeResourceDTO.class);
+        assertEquals(RESOURCE, describeResourceDTO.name);
+        assertEquals(1, describeResourceDTO.attributes.size());
+
+        MetadataDTO metadataDTO = describeResourceDTO.attributes.get(0);
+        assertEquals("unit", metadataDTO.name);
+        assertEquals("dB", metadataDTO.value);
+        assertEquals(String.class.getName(), metadataDTO.type);
     }
 }

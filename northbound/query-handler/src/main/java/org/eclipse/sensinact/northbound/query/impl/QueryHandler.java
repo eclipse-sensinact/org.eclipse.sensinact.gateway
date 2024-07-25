@@ -591,31 +591,28 @@ public class QueryHandler implements IQueryHandler {
     }
 
     /**
-     * Generates the list of resource metadata
+     * Generates the list of resource metadata, excluding timestamp (shown alongside
+     * the resource value)
      *
      * @param resource Resource to describe
      * @param metadata Raw resource metadata
-     * @return Description of resource metadta
+     * @return Description of resource metadata
      */
-    private List<MetadataDTO> generateMetadataDescriptions(final SensinactResource resource,
-            Map<String, Object> metadataMap) {
-        final List<MetadataDTO> result;
+    private List<MetadataDTO> generateMetadataDescriptions(Map<String, Object> metadataMap) {
         if (metadataMap != null) {
-            result = new ArrayList<>(metadataMap.size());
-            for (final Entry<String, Object> entry : metadataMap.entrySet()) {
-                final Object value = entry.getValue();
-
+            return metadataMap.entrySet().stream().filter(e -> !"timestamp".equals(e.getKey())).map(e -> {
+                final Object value = e.getValue();
                 final MetadataDTO meta = new MetadataDTO();
-                meta.name = entry.getKey();
+                meta.name = e.getKey();
                 meta.value = value;
                 if (value != null) {
                     meta.type = value.getClass().getName();
                 }
-            }
+                return meta;
+            }).collect(Collectors.toList());
         } else {
-            result = List.of();
+            return List.of();
         }
-        return result;
     }
 
     /**
@@ -792,7 +789,7 @@ public class QueryHandler implements IQueryHandler {
                         dto.type = resource.getResourceType();
                         dto.accessMethods = generateAccessMethodsDescriptions(resource);
                         return resource.getMetadataValues().then(metadata -> {
-                            dto.attributes = generateMetadataDescriptions(resource, metadata.getValue());
+                            dto.attributes = generateMetadataDescriptions(metadata.getValue());
                             return pf.resolved(dto);
                         });
                     }
@@ -800,7 +797,7 @@ public class QueryHandler implements IQueryHandler {
                     final TypedResponse<ResponseDescribeResourceDTO> result = new TypedResponse<>(
                             EResultType.DESCRIBE_RESOURCE);
                     result.statusCode = 200;
-                    result.response = (ResponseDescribeResourceDTO) d.getValue();
+                    result.response = d.getValue();
                     return Promises.resolved((AbstractResultDTO) result);
                 }).fallbackTo(Promises.resolved(new ErrorResultDTO(404, "Resource not set"))).getValue();
     }
