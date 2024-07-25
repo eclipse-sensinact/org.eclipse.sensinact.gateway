@@ -345,15 +345,18 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
 
         // Loop on resources
+        final Map<String, Map<String, Map<String, Object>>> allMetadata = new HashMap<>();
         for (final ResourceRecordMapping rcMapping : recordState.rcMappings) {
             final String service = rcMapping.getService();
             final String rcName = rcMapping.getResource();
+
             try {
                 final Object value = record.getField(rcMapping.getRecordPath(), options);
                 if (value != Constants.IGNORE) {
                     final ValueType valueType = rcMapping.getRecordPath().getValueType();
                     if (rcMapping.isMetadata()) {
-                        logger.warn("Metadata update not supported.");
+                        allMetadata.computeIfAbsent(service, k -> new HashMap<>())
+                                .computeIfAbsent(rcName, k -> new HashMap<>()).put(rcMapping.getMetadata(), value);
                     } else {
                         bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
                                 valueType.toJavaClass(), timestamp));
@@ -373,7 +376,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 if (value != Constants.IGNORE) {
                     final ValueType valueType = rcLiteral.getValueType();
                     if (rcLiteral.isMetadata()) {
-                        logger.warn("Metadata update not supported.");
+                        allMetadata.computeIfAbsent(service, k -> new HashMap<>())
+                                .computeIfAbsent(rcName, k -> new HashMap<>()).put(rcLiteral.getMetadata(), value);
                     } else {
                         bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
                                 valueType.toJavaClass(), timestamp));
@@ -381,6 +385,16 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 }
             } catch (Exception e) {
                 logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
+            }
+        }
+
+        // Add metadata updates
+        for (Entry<String, Map<String, Map<String, Object>>> svcEntry : allMetadata.entrySet()) {
+            final String svcName = svcEntry.getKey();
+            for (Entry<String, Map<String, Object>> rcEntry : svcEntry.getValue().entrySet()) {
+                logger.warn("ADDING METADATA TO {}/{}/{} -> {}", provider, svcName, rcEntry.getKey(), rcEntry.getValue());
+                bulk.add(makeMetadataDto(modelPackageUri, model, provider, svcName, rcEntry.getKey(),
+                        rcEntry.getValue()));
             }
         }
 
@@ -427,6 +441,21 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (timestamp != null) {
             dto.timestamp = timestamp;
         }
+        return dto;
+    }
+
+    /**
+     * Prepares a resource metadata update DTO
+     */
+    private GenericDto makeMetadataDto(final String modelPackageUri, final String model, final String provider,
+            final String service, final String resource, final Map<String, Object> metadata) {
+        final GenericDto dto = new GenericDto();
+        dto.modelPackageUri = modelPackageUri;
+        dto.model = model;
+        dto.provider = provider;
+        dto.service = service;
+        dto.resource = resource;
+        dto.metadata = metadata;
         return dto;
     }
 
