@@ -103,7 +103,8 @@ public class RecordHandlingTest {
     GenericDto getResourceValue(final String provider, final String service, final String resource) {
         for (BulkGenericDto bulk : bulks) {
             for (GenericDto dto : bulk.dtos) {
-                if (dto.provider.equals(provider) && dto.service.equals(service) && dto.resource.equals(resource)) {
+                if (dto.provider.equals(provider) && dto.service.equals(service) && dto.resource.equals(resource)
+                        && dto.metadata == null) {
                     return dto;
                 }
             }
@@ -120,6 +121,18 @@ public class RecordHandlingTest {
             return rcType.cast(dto.value);
         }
 
+        return null;
+    }
+
+    Object getResourceMetadata(final String provider, final String service, final String resource, final String key) {
+        for (BulkGenericDto bulk : bulks) {
+            for (GenericDto dto : bulk.dtos) {
+                if (dto.provider.equals(provider) && dto.service.equals(service) && dto.resource.equals(resource)
+                        && dto.metadata != null) {
+                    return dto.metadata.get(key);
+                }
+            }
+        }
         return null;
     }
 
@@ -189,6 +202,41 @@ public class RecordHandlingTest {
         assertEquals("name", dto.value);
         assertEquals(provider, dto.provider);
         assertEquals(model, dto.model);
+    }
+
+    @Test
+    void testMetadataRecord() throws Exception {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+
+        final String model = "testModel";
+        final String provider = "testProvider";
+        parser.setRecords(Map.of("m", model, "p", provider, "n", "name", "lat", 45f, "lon", 5f, "val", 42, "foo", "bar",
+                "unit", "A"));
+
+        // Test w/o a model
+        config.mapping.put("@provider", "p");
+        config.mapping.put("@name", "n");
+        config.mapping.put("@latitude", "lat");
+        config.mapping.put("@longitude", "lon");
+        config.mapping.put("data/value", "val");
+        config.mapping.put("data/value/foo", "foo");
+        config.mapping.put("data/value/unit", "unit");
+        config.mapping.put("data/value/literal", Map.of("literal", "some-constant"));
+        config.mapping.put("meta/no-data/foo", "foo");
+        config.mapping.put("meta/no-data/unit", "unit");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+
+        // Check values
+        assertEquals(42, getResourceValue(provider, "data", "value", Integer.class));
+        assertEquals(null, getResourceValue(provider, "meta", "no-data", Object.class));
+
+        // Check metadata
+        assertEquals("bar", getResourceMetadata(provider, "data", "value", "foo"));
+        assertEquals("A", getResourceMetadata(provider, "data", "value", "unit"));
+        assertEquals("some-constant", getResourceMetadata(provider, "data", "value", "literal"));
+
+        assertEquals("bar", getResourceMetadata(provider, "meta", "no-data", "foo"));
+        assertEquals("A", getResourceMetadata(provider, "meta", "no-data", "unit"));
     }
 
     @Test
