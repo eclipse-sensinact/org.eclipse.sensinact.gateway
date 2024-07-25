@@ -16,7 +16,6 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.ext
 
 import java.util.List;
 
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -26,48 +25,14 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.ext.Providers;
 
-public class ObservedPropertiesAccessImpl implements ObservedPropertiesAccess {
-
-    @Context
-    UriInfo uriInfo;
-
-    @Context
-    Providers providers;
-
-    @Context
-    Application application;
-
-    /**
-     * Returns a user session
-     */
-    private SensiNactSession getSession() {
-        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
-
-    /**
-     * Returns an object mapper
-     */
-    private ObjectMapper getMapper() {
-        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
-    }
+public class ObservedPropertiesAccessImpl extends AbstractAccess implements ObservedPropertiesAccess {
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        ObservedProperty o = DtoMapper.toObservedProperty(uriInfo,
-                getSession().describeResource(provider, service, resource));
+        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
+                uriInfo, getExpansions(), validateAndGetResourceSnapshot(id));
 
         if (!id.equals(o.id)) {
             throw new NotFoundException();
@@ -89,13 +54,8 @@ public class ObservedPropertiesAccessImpl implements ObservedPropertiesAccess {
             throw new NotFoundException();
         }
 
-        SensiNactSession userSession = getSession();
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        return DtoMapper.toDatastream(userSession, getMapper(), uriInfo,
-                userSession.describeResource(provider, service, resource));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), validateAndGetResourceSnapshot(id2));
     }
 
     @PaginationLimit(500)
@@ -104,12 +64,8 @@ public class ObservedPropertiesAccessImpl implements ObservedPropertiesAccess {
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        return RootResourceAccessImpl.getObservationList(getSession(), uriInfo, application, provider, service,
-                resource);
+        return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), validateAndGetResourceSnapshot(id), 0);
     }
 
     @Override
@@ -125,11 +81,9 @@ public class ObservedPropertiesAccessImpl implements ObservedPropertiesAccess {
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        String provider = extractFirstIdSegment(id);
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
-        return DtoMapper.toSensor(uriInfo, getSession().describeResource(provider, service, resource));
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), validateAndGetResourceSnapshot(id2));
     }
 
     @Override
@@ -139,6 +93,7 @@ public class ObservedPropertiesAccessImpl implements ObservedPropertiesAccess {
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
-        return DtoMapper.toThing(getSession(), uriInfo, provider);
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), validateAndGetProvider(provider));
     }
 }

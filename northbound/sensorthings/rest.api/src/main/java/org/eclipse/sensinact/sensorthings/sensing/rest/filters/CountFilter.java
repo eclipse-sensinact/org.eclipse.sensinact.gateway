@@ -40,13 +40,15 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
             throws IOException {
         Boolean addCount = (Boolean) requestContext.getProperty(COUNT_PROP);
 
-        if (addCount != null && addCount) {
-            Object entity = responseContext.getEntity();
-            if (entity instanceof ResultList) {
-                ResultList<?> resultList = (ResultList<?>) entity;
-                if (resultList.count == null) {
-                    resultList.count = resultList.value.size();
-                }
+        addCount = addCount == null ? Boolean.FALSE : addCount;
+
+        Object entity = responseContext.getEntity();
+        if (entity instanceof ResultList) {
+            ResultList<?> resultList = (ResultList<?>) entity;
+            if(!addCount) {
+                resultList.count = null;
+            } else if (resultList.count == null) {
+                resultList.count = resultList.value.size();
             }
         }
     }
