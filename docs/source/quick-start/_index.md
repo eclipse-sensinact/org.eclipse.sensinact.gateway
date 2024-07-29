@@ -6,4 +6,5 @@ The following tutorial will help you to quickly get started with the sensiNact g
 :maxdepth: 1
 
 Northbound
+Southbound
 ```

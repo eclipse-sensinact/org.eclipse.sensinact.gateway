@@ -33,6 +33,7 @@ The following examples will help you to quickly get started with the sensiNact g
 
 * [Download and start](setup.md) sensiNact
 * [Add a northbound REST interface](quick-start/Northbound.md) and communicate with sensiNact via REST
+* [Add a southbound interface](quick-start/Southbound.md) for sensiNact to fetch data
 * [Interacting with a southbound device](examples/Interacting.md) - See how to read a device's data, change editable fields, and listen for updates.
 * Building your own Southbound Provider - TODO
 
