@@ -85,7 +85,7 @@ The updated configuration will look something like this:
 ```
 
 ```{seealso}
-You can take a look to more detailed guide [here](./examples/Configuring.md).
+You can take a look to more detailed guide [here](./quick-start/Northbound.md).
 ```
 
 ### Step 3: interact

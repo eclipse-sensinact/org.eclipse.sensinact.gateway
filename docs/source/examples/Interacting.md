@@ -6,7 +6,7 @@ To start with you will need a runnable gateway configured with REST access. If y
 
 ## Listing and Introspecting the gateway
 
-Listing the providers present in the gateway is very simple. Assuming that you're using the configuration from [the previous example](Configuring.md) then issuing a GET request to `http://localhost:8082/sensinact/providers` will return something like:
+Listing the providers present in the gateway is very simple. Assuming that you're using the configuration from [the previous example](../quick-start/Northbound.md) then issuing a GET request to `http://localhost:8082/sensinact/providers` will return something like:
 
 ```json
 {
