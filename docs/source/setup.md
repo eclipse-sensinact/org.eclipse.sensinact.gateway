@@ -1,35 +1,35 @@
-# Installation and configuration
+# Installation
 
-## Platform Recommendations
+## Requirements
 
 Eclipse sensiNact can work in various environment, from a Raspberry Pi 1 to a cloud instance.
 Its requirements will depend mainly on the number of updates and queries it must handle.
-
-The platform **requires** to run in a Java 17+ environment, with a minimum of 256MB of Java Heap space, 50 MB of disk space and a single core processor.
-For larger deployments with more users and sensors you will want to run with at least 2GB of available heap and a multi-core processor.
-
-## Installation
-
-The installation of Eclipse sensiNact is pretty simple: just unzip the distribution ZIP somewhere and configure it according to your need.
-
-For the rest of this document, we consider that Java 17 is installed.
-
 Eclipse sensiNact has been tested on Linux, Mac OS and Windows.
 
-### Get the distribution
+Minimum requirements
+* Linux, MacOS or Windows
+* Java 17
+* 256MB Java heap space
+* 50MB disk space
+
+Recommended requirements to support more users and sensors
+* 2GB Java heap space
+* multi-core processor
+
+## Get the distribution zip file
 
 Eclipse sensiNact is published to the Eclipse Nexus repository instance at [repo.eclipse.org](https://repo.eclipse.org) after each successful repository update.
+You may either get the latest public distribution or generate the distribution from source.
 
-#### Download the distribution manually
+### Get the zip file with a browser (easy)
 
-If you just want to download the distribution file without having installed Maven, you can obtain it using this [search link](https://repo.eclipse.org/#nexus-search;gav~org.eclipse.sensinact.gateway.distribution~assembly~~~).
+You may download the distribution with your web browser via the [search link](https://repo.eclipse.org/#nexus-search;gav~org.eclipse.sensinact.gateway.distribution~assembly~~~). Just download the artifact (assembly-XXX.zip file) to your computer.
 
-For now, we don't provide a stable link to the latest version of Eclipse sensiNact.
+### Get the zip file with Maven (medium)
 
-#### Download the distribution with Maven
+You can use maven to get the distribution zip file. You will need maven with the maven-dependency plugin.
 
-If Maven is installed, you can download the distribution ZIP file using the maven-dependency plugin:
-
+Get the sensinact.zip file:
 ```bash
 mvn dependency:get \
     -DremoteRepositories=https://repo.eclipse.org/content/groups/sensinact/ \
@@ -37,9 +37,9 @@ mvn dependency:get \
     -Ddest=sensinact.zip
 ```
 
-#### Compiling the project
+### Generate the zip file from source (hard)
 
-Finally, you can clone and compile the project to generate the distribution ZIP file:
+You can clone and compile the project to generate the distribution ZIP file. You will need git, maven and a java jdk.
 
 1. Clone the project [repository](https://github.com/eclipse/org.eclipse.sensinact.gateway): `git clone https://github.com/eclipse/org.eclipse.sensinact.gateway.git`
 2. Compile it using Maven: `mvn clean install`
@@ -47,17 +47,20 @@ Finally, you can clone and compile the project to generate the distribution ZIP 
    Some integration tests require Docker to run, for example to test the Timescale history provider.
    If Docker is not available, those tests will be skipped.
    ```
-3. Get the distribution ZIP file at `distribution/assembly/target/gateway.zip`
+3. The distribution ZIP file will be generated at `distribution/assembly/target/gateway.zip`
 
-### Distribution architecture
+## Install the distribution zip file
 
-Once you have obtained the sensiNact assembly you can unzip it using your favourite zip tool
+Once you have the distribution zip file (it may be named sensinact.zip, gateway.zip or assembly-XXX.zip), create a "sensiNact" directory on your computer and extract the zip file to that directory.
 
+Extract the zip file with your favorite zip tool or use the following command:
 ```bash
 unzip sensinact.zip
 ```
 
-The unzipped contents will include several folders and files including:
+### File architecture
+
+The zip will extract files and directories including:
 
 * `configuration` - the folder containing the configuration for the gateway instance
 * `features` - the folder containing the available features that can be installed into this gateway
@@ -65,24 +68,9 @@ The unzipped contents will include several folders and files including:
 * `repository` - a maven layout repository containing the bundles used by the gateway features
 * `start.sh` - a launch script for sensiNact
 
-## Configuration
+## Start sensiNact
 
-The sensiNact configuration file format is described [in detail here](distribution/Launcher.md#the-configuration-file), but the important facts are that:
-
-1. The configuration file lives in the `configuration` folder
-2. The configuration file is `JSON` and uses the OSGi<sup>®</sup> [Configuration Resource Format](https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.configurator.html#d0e132453)
-3. The configuration file is *live* and will be reloaded by the gateway whenever you save changes
-
-
-```{admonition} **TODO**
-:class: error
-
-Possibly describe the configuration format as in Configuring
-```
-
-## Starting sensiNact
-
-Starting sensiNact can be achieved simply by executing the start script
+Run the start.sh script to start sensiNact
 
 ```bash
 ./start.sh
