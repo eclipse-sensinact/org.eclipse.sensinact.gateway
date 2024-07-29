@@ -41,6 +41,7 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.push.FailedUpdatesException;
@@ -388,16 +389,6 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             }
         }
 
-        // Add metadata updates
-        for (Entry<String, Map<String, Map<String, Object>>> svcEntry : allMetadata.entrySet()) {
-            final String svcName = svcEntry.getKey();
-            for (Entry<String, Map<String, Object>> rcEntry : svcEntry.getValue().entrySet()) {
-                logger.warn("ADDING METADATA TO {}/{}/{} -> {}", provider, svcName, rcEntry.getKey(), rcEntry.getValue());
-                bulk.add(makeMetadataDto(modelPackageUri, model, provider, svcName, rcEntry.getKey(),
-                        rcEntry.getValue()));
-            }
-        }
-
         // Remove null entries
         bulk.removeIf(Objects::isNull);
 
@@ -405,6 +396,15 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         bulk.stream().forEach(dto -> {
             dto.nullAction = options.nullAction;
         });
+
+        // Add metadata updates afterwards, to avoid the null action to be overwritten
+        for (Entry<String, Map<String, Map<String, Object>>> svcEntry : allMetadata.entrySet()) {
+            final String svcName = svcEntry.getKey();
+            for (Entry<String, Map<String, Object>> rcEntry : svcEntry.getValue().entrySet()) {
+                bulk.add(makeMetadataDto(modelPackageUri, model, provider, svcName, rcEntry.getKey(),
+                        rcEntry.getValue()));
+            }
+        }
 
         return bulk;
     }
@@ -456,6 +456,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         dto.service = service;
         dto.resource = resource;
         dto.metadata = metadata;
+        dto.nullAction = NullAction.IGNORE;
         return dto;
     }
 
