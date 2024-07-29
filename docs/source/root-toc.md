@@ -6,7 +6,6 @@
 index
 news
 setup
-getting-started
 quick-start/_index
 references
 faq
