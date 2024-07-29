@@ -1,6 +1,6 @@
 # Configuring sensiNact
 
-In order to configure sensiNact you will need to have a launchable gateway. If you haven't already got one then [this example](Download.md) will tell you how to obtain one.
+In order to configure sensiNact you will need to have a launchable gateway. If you haven't already got one then [this example](../setup.md) will tell you how to obtain one.
 
 ## The sensiNact configuration file
 
