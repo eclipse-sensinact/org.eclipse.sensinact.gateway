@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.Metadata;
 import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
@@ -87,7 +88,7 @@ public class AnnotationBasedDtoExtractorTest {
         @Metadata
         public String units;
 
-        @Metadata(value = METADATA_KEY, onNull = NullAction.UPDATE)
+        @Metadata(value = METADATA_KEY, onNull = NullAction.UPDATE, onDuplicate = DuplicateAction.UPDATE_ALWAYS)
         public String fizzbuzz;
     }
 
@@ -108,7 +109,7 @@ public class AnnotationBasedDtoExtractorTest {
         public Integer foo;
 
         @Resource(RESOURCE_2)
-        @Data
+        @Data(onDuplicate = DuplicateAction.UPDATE_IF_DIFFERENT)
         public String bar;
 
         @Resource(RESOURCE)
@@ -116,7 +117,7 @@ public class AnnotationBasedDtoExtractorTest {
         public String units;
 
         @Resource(RESOURCE_2)
-        @Metadata(METADATA_KEY)
+        @Metadata(value = METADATA_KEY, onDuplicate = DuplicateAction.UPDATE_ALWAYS)
         public String fizzbuzz;
     }
 
@@ -124,7 +125,7 @@ public class AnnotationBasedDtoExtractorTest {
         @Data
         public Integer foo;
 
-        @Data
+        @Data(onDuplicate = DuplicateAction.UPDATE_IF_DIFFERENT)
         public String bar;
     }
 
@@ -200,6 +201,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -211,6 +213,7 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, null), dud2.metadata);
             assertFalse(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
         }
 
         @Test
@@ -235,6 +238,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
                     .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey(METADATA_KEY)).findFirst().get();
@@ -247,6 +251,7 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertFalse(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
                     .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey("units")).findFirst().get();
@@ -259,6 +264,7 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(singletonMap("units", METADATA_VALUE_2), dud2.metadata);
             assertFalse(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
     }
 
@@ -293,6 +299,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
 
         @Test
@@ -324,6 +331,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
                     .filter(d -> RESOURCE_2.equals(d.resource)).findFirst().get();
@@ -336,6 +344,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
                     .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey(METADATA_KEY)).findFirst().get();
@@ -348,6 +357,7 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertFalse(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
                     .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey("units")).findFirst().get();
@@ -360,6 +370,7 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(singletonMap("units", METADATA_VALUE_2), dud2.metadata);
             assertFalse(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
     }
 
@@ -394,6 +405,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
 
         @Test
@@ -423,6 +435,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> "bar".equals(d.resource))
                     .findFirst().get();
@@ -435,6 +448,7 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
         }
     }
 

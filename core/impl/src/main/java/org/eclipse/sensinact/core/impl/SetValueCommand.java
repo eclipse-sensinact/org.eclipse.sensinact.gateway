@@ -12,8 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.impl;
 
+import java.util.function.Function;
+
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GetLevel;
@@ -33,8 +36,12 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SetValueCommand extends AbstractSensinactCommand<Void> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SetValueCommand.class);
 
     private final DataUpdateDto dataUpdateDto;
 
@@ -108,25 +115,40 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
             resource = sp.getOrCreateService(svc, svcEClass).getResources().get(res);
         }
 
+        Function<TimedValue<Object>, Promise<Void>> cachedValueAction = null;
         if(dataUpdateDto.data == null && dataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
+            final SensinactResource toUpdate = resource;
+            cachedValueAction = v -> v.getTimestamp() == null ? promiseFactory.resolved(null) :
+                toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
+        } else if(dataUpdateDto.actionOnDuplicate == DuplicateAction.UPDATE_IF_DIFFERENT) {
+            final SensinactResource toUpdate = resource;
+            cachedValueAction = v -> {
+                if(v.getValue() == null) {
+                    return dataUpdateDto.data == null ? promiseFactory.resolved(null) :
+                        toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
+                } else {
+                    return v.getValue().equals(dataUpdateDto.data) ? promiseFactory.resolved(null) :
+                        toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
+                }
+            };
+        }
+
+        if(cachedValueAction != null) {
             // This must be a weak get so that it returns immediately with a resolved value
             Promise<TimedValue<Object>> p = resource.getValue(Object.class, GetLevel.WEAK).timeout(0);
             try {
                 Throwable t = p.getFailure();
                 if(t != null) {
+                    LOG.error("Unable to retrieve cached value for {}/{}/{}", provider, svc, res, t);
                     return promiseFactory.failed(t);
                 } else {
-                    TimedValue<Object> value = p.getValue();
-                    if(value == null || value.getTimestamp() == null) {
-                        return promiseFactory.resolved(null);
-                    }
+                    return cachedValueAction.apply(p.getValue());
                 }
             } catch (Exception e) {
                 return promiseFactory.failed(e);
             }
+        } else {
+            return resource.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
         }
-
-        return resource.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
     }
-
 }

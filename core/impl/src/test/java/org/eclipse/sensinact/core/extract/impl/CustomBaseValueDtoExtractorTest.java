@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
@@ -61,7 +62,7 @@ public class CustomBaseValueDtoExtractorTest {
         @Data
         public String foo;
 
-        @Data
+        @Data(onDuplicate = DuplicateAction.UPDATE_IF_DIFFERENT)
         public Integer bar;
     }
 
@@ -77,7 +78,7 @@ public class CustomBaseValueDtoExtractorTest {
         public Integer bar;
 
         @Resource("null")
-        @Data(onNull = NullAction.UPDATE)
+        @Data(onNull = NullAction.UPDATE, onDuplicate = DuplicateAction.UPDATE_IF_DIFFERENT)
         public String nullable;
         @Resource("null2")
         @Data(onNull = NullAction.UPDATE_IF_PRESENT)
@@ -114,6 +115,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -125,6 +127,7 @@ public class CustomBaseValueDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
     }
 
@@ -154,6 +157,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -165,6 +169,7 @@ public class CustomBaseValueDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
 
         @Test
@@ -188,6 +193,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -199,6 +205,7 @@ public class CustomBaseValueDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
 
         @Test
@@ -224,6 +231,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
                     .filter(d -> Integer.class == ((DataUpdateDto) d).type).findFirst().get();
@@ -236,6 +244,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -247,6 +256,7 @@ public class CustomBaseValueDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
 
     }
@@ -282,6 +292,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
                     .filter(d -> RESOURCE_2.equals(d.resource)).findFirst().get();
@@ -294,12 +305,14 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Long.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> "null".equals(d.resource))
                     .findFirst().get();
 
             checkCommonFields(extracted, "null", time);
             assertEquals(NullAction.UPDATE, extracted.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, extracted.actionOnDuplicate);
 
             assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
 
@@ -308,6 +321,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             checkCommonFields(extracted, "null2", time);
             assertEquals(NullAction.UPDATE_IF_PRESENT, extracted.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, extracted.actionOnDuplicate);
 
             assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
 
@@ -315,6 +329,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertNull(dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -326,6 +341,7 @@ public class CustomBaseValueDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
 
         }
 

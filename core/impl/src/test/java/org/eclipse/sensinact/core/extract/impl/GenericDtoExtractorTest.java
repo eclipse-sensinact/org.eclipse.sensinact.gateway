@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
@@ -127,6 +128,8 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertNull(dud.type);
+            assertEquals(NullAction.IGNORE, dud.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
 
         @Test
@@ -147,6 +150,8 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertNull(dud.type);
+            assertEquals(NullAction.IGNORE, dud.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
 
         @Test
@@ -166,6 +171,8 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Long.class, dud.type);
+            assertEquals(NullAction.IGNORE, dud.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
 
         @Test
@@ -185,6 +192,8 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertNull(dud.type);
+            assertEquals(NullAction.IGNORE, dud.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
 
         @Test
@@ -207,6 +216,29 @@ public class GenericDtoExtractorTest {
             assertEquals(VALUE_2, dud.data);
             assertNull(dud.type);
             assertEquals(NullAction.UPDATE, dud.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+        }
+
+        @Test
+        void duplicateAction() {
+            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, VALUE_2, null, null);
+            testDto.duplicateDataAction = DuplicateAction.UPDATE_IF_DIFFERENT;
+            List<? extends AbstractUpdateDto> updates = extractor()
+                    .getUpdates(testDto);
+
+            assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
+
+            AbstractUpdateDto extracted = updates.get(0);
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE_2, dud.data);
+            assertNull(dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
         }
     }
 
@@ -233,6 +265,7 @@ public class GenericDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud.metadata);
             assertTrue(dud.removeNullValues, "Null values should be removed");
             assertFalse(dud.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
         }
 
         @Test
@@ -253,6 +286,7 @@ public class GenericDtoExtractorTest {
             assertEquals(Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), dud.metadata);
             assertTrue(dud.removeNullValues, "Null values should be removed");
             assertFalse(dud.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
         }
 
         @Test
@@ -280,6 +314,31 @@ public class GenericDtoExtractorTest {
             assertTrue(dud.removeNullValues, "Null values should be removed");
             assertFalse(dud.removeMissingValues, "Missing values should be kept");
             assertEquals(NullAction.UPDATE, dud.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
+        }
+
+        @Test
+        void duplicateValue() {
+            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, null, null, singletonMap(METADATA_KEY, METADATA_VALUE));
+            testDto.duplicateMetadataAction = DuplicateAction.UPDATE_ALWAYS;
+
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(
+                    testDto);
+
+            assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
+
+            AbstractUpdateDto extracted = updates.get(0);
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud.metadata);
+            assertTrue(dud.removeNullValues, "Null values should be removed");
+            assertFalse(dud.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
     }
 
@@ -306,6 +365,7 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertNull(dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -317,6 +377,7 @@ public class GenericDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
 
         @Test
@@ -336,6 +397,7 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertNull(dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
 
@@ -347,6 +409,7 @@ public class GenericDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
         }
     }
 
@@ -365,6 +428,9 @@ public class GenericDtoExtractorTest {
                     makeTestDto(PROVIDER_2, SERVICE_2, RESOURCE_2, VALUE_2, null,
                             singletonMap(METADATA_KEY_2, METADATA_VALUE_2)));
 
+            dto.dtos.get(1).duplicateDataAction = DuplicateAction.UPDATE_IF_DIFFERENT;
+            dto.dtos.get(1).duplicateMetadataAction = DuplicateAction.UPDATE_ALWAYS;
+
             List<? extends AbstractUpdateDto> updates = multiExtractor().getUpdates(dto);
 
             assertEquals(4, updates.size(), "Wrong number of updates " + updates.size());
@@ -380,6 +446,7 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertNull(dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
                     .filter(d -> PROVIDER_2.equals(d.provider)).findFirst().get();
@@ -392,6 +459,7 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertNull(dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
                     .filter(d -> PROVIDER.equals(d.provider)).findFirst().get();
@@ -404,6 +472,7 @@ public class GenericDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
                     .filter(d -> PROVIDER_2.equals(d.provider)).findFirst().get();
@@ -416,6 +485,7 @@ public class GenericDtoExtractorTest {
             assertEquals(singletonMap(METADATA_KEY_2, METADATA_VALUE_2), dud2.metadata);
             assertTrue(dud2.removeNullValues, "Null values should be removed");
             assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
         }
     }
 
