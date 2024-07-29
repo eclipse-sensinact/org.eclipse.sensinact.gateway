@@ -9,7 +9,12 @@ Eclipse sensiNact aims at managing IoT protocols and devices heterogeneity and p
 
 The project is licensed under the terms of the [Eclipse Public License - v 2.0](EPL-2.0.md).
 
-## Main concepts
+## Northbound and Southbound
+Eclipse sensiNact supports a wide variety of communication interfaces. There are 2 kinds of interfaces:
+* [Northbound](northbound/_index.md) interfaces allow users to interact with sensiNact.
+* [Southbound](southbound/_index.md) interfaces allow sensiNact to communicate with sensors and actuator devices.
+
+## Data model
 
 Eclipse sensiNact represents its data using the following model:
 
@@ -21,7 +26,6 @@ Eclipse sensiNact represents its data using the following model:
 * **Resource**: a resource can either represent a property of the provider (like the temperature read from a sensor) or an action (for example to send a text message).
 
 The model is described more in detail in the [Data Model](./core/CoreModel.md){.clear-right} section.
-
 
 ## Getting Started
 
