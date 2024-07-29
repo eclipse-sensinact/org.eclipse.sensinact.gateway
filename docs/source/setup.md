@@ -88,4 +88,6 @@ java -D"sensinact.config.dir=configuration" -jar launch\launcher.jar
 ```
 :::
 
-Once you have started sensiNact you should see some logs written to the console indicating that the gateway is running. In order to interact with the gateway you will need to [configure a northbound provider](examples/Configuring.md)
+Once you have started sensiNact you should see some logs written to the console indicating that the gateway is running.
+
+You may now follow the quick-start tutorial and [configure a northbound provider](quick-start/Northbound.md)

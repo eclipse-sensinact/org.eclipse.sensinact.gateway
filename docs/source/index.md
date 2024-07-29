@@ -32,7 +32,7 @@ The model is described more in detail in the [Data Model](./core/CoreModel.md){.
 The following examples will help you to quickly get started with the sensiNact gateway
 
 * [Download and start](setup.md) sensiNact
-* [Configuring and Querying](examples/Configuring.md) - See how to change sensiNact's configuration and access the REST interface
+* [Add a northbound REST interface](quick-start/Northbound.md) and communicate with sensiNact via REST
 * [Interacting with a southbound device](examples/Interacting.md) - See how to read a device's data, change editable fields, and listen for updates.
 * Building your own Southbound Provider - TODO
 
