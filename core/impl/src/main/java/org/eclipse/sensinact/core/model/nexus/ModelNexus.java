@@ -720,6 +720,10 @@ public class ModelNexus {
                     return new TimedValueImpl<Object>(entry.getValue(), entry.getTimestamp());
                 }
             }
+            // If the resource exists but has no metadata for that key then return an
+            // empty timed value indicating that the resource exists but the metadata
+            // is not set
+            return new TimedValueImpl<Object>(null, null);
         }
         return null;
     }

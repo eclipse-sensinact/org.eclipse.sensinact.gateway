@@ -20,10 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
+import org.eclipse.sensinact.core.annotation.dto.Metadata;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
@@ -42,6 +46,7 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
@@ -93,6 +98,20 @@ public class DataUpdateServiceTest {
         }).getValue();
     }
 
+    private Object getResourceMetadataValue() throws Exception {
+        return getResourceMetadataTimedValue().getValue();
+    }
+
+    private TimedValue<Object> getResourceMetadataTimedValue() throws Exception {
+        return gt.execute(new ResourceCommand<TimedValue<Object>>(PROVIDER, SERVICE, RESOURCE) {
+
+            @Override
+            protected Promise<TimedValue<Object>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMetadataValue("foo");
+            }
+        }).getValue();
+    }
+
     public static class AnnotatedDTO {
         @Provider
         public String provider;
@@ -108,6 +127,29 @@ public class DataUpdateServiceTest {
 
         @Data(type = Integer.class)
         public String data;
+    }
+
+    @Provider(PROVIDER)
+    @Service(SERVICE)
+    @Resource(RESOURCE)
+    public static abstract class AnnotatedMetadataDto {
+        @Timestamp
+        public Instant time;
+    }
+
+    public static class DefaultMetadataDto extends AnnotatedMetadataDto {
+        @Metadata
+        public String foo;
+    }
+
+    public static class DuplicateMetadataDto extends AnnotatedMetadataDto {
+        @Metadata(onDuplicate = DuplicateAction.UPDATE_ALWAYS)
+        public String foo;
+    }
+
+    public static class NullMetadataDto extends AnnotatedMetadataDto {
+        @Metadata(onNull = NullAction.UPDATE)
+        public String foo;
     }
 
     /**
@@ -130,6 +172,36 @@ public class DataUpdateServiceTest {
             push.pushUpdate(dto).getValue();
 
             assertEquals(42, getResourceValue());
+        }
+
+        @Test
+        void testSimplePushUpdate() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = null;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.nullAction = NullAction.UPDATE;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Integer> tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.value = 42;
+            push.pushUpdate(dto).getValue();
+            assertEquals(42, getResourceValue());
+
+            dto.value = null;
+            push.pushUpdate(dto).getValue();
+            tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
         }
 
         @Test
@@ -185,36 +257,6 @@ public class DataUpdateServiceTest {
         }
 
         @Test
-        void testSimplePushUpdate() throws Exception {
-            final Instant timestamp = Instant.now();
-
-            // Create resource & provider using a push
-            GenericDto dto = new GenericDto();
-            dto.provider = PROVIDER;
-            dto.service = SERVICE;
-            dto.resource = RESOURCE;
-            dto.value = null;
-            dto.type = Integer.class;
-            dto.timestamp = timestamp;
-            dto.nullAction = NullAction.UPDATE;
-            push.pushUpdate(dto).getValue();
-
-            TimedValue<Integer> tv = getResourceTimedValue();
-            assertNull(tv.getValue());
-            assertEquals(timestamp, tv.getTimestamp());
-
-            dto.value = 42;
-            push.pushUpdate(dto).getValue();
-            assertEquals(42, getResourceValue());
-
-            dto.value = null;
-            push.pushUpdate(dto).getValue();
-            tv = getResourceTimedValue();
-            assertNull(tv.getValue());
-            assertEquals(timestamp, tv.getTimestamp());
-        }
-
-        @Test
         void testSimplePushAnnotated() throws Exception {
             final Instant timestamp = Instant.now();
 
@@ -228,6 +270,230 @@ public class DataUpdateServiceTest {
             push.pushUpdate(dto).getValue();
 
             assertEquals(42, getResourceValue());
+        }
+
+        @Test
+        void testSimplePushUpdateDuplicateDataDifferent() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = 42;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.duplicateDataAction = DuplicateAction.UPDATE_IF_DIFFERENT;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Integer> tv = getResourceTimedValue();
+
+            assertEquals(42, tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.timestamp = timestamp.plusSeconds(30);
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceTimedValue();
+
+            assertEquals(42, tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.value = 43;
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceTimedValue();
+
+            assertEquals(43, tv.getValue());
+            assertEquals(timestamp.plusSeconds(30), tv.getTimestamp());
+        }
+
+        @Test
+        void testSimplePushUpdateDuplicateDataAlways() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = 42;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.duplicateDataAction = DuplicateAction.UPDATE_ALWAYS;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Integer> tv = getResourceTimedValue();
+
+            assertEquals(42, tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.timestamp = timestamp.plusSeconds(30);
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceTimedValue();
+
+            assertEquals(42, tv.getValue());
+            assertEquals(timestamp.plusSeconds(30), tv.getTimestamp());
+
+            dto.value = 43;
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceTimedValue();
+
+            assertEquals(43, tv.getValue());
+            assertEquals(timestamp.plusSeconds(30), tv.getTimestamp());
+        }
+    }
+
+    @Nested
+    class ValidMetadataPushes {
+
+        @BeforeEach
+        void setupResource() throws Exception {
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = 42;
+            push.pushUpdate(dto).getValue();
+        }
+
+        @Test
+        void testSimplePush() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.timestamp = timestamp;
+            dto.metadata = Map.of("foo", "bar");
+            push.pushUpdate(dto).getValue();
+
+            assertEquals("bar", getResourceMetadataValue());
+        }
+
+        @Test
+        void testSimplePushUpdate() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.metadata = Map.of("foo", "bar");
+            dto.timestamp = timestamp;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Object> tv = getResourceMetadataTimedValue();
+            assertEquals("bar", tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.timestamp = timestamp.plusSeconds(30);
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertEquals("bar", tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.metadata = Map.of("foo", "foobar");
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertEquals("foobar", tv.getValue());
+            assertEquals(timestamp.plusSeconds(30), tv.getTimestamp());
+
+            dto.duplicateMetadataAction = DuplicateAction.UPDATE_ALWAYS;
+            dto.timestamp = timestamp.plusSeconds(60);
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertEquals("foobar", tv.getValue());
+            assertEquals(timestamp.plusSeconds(60), tv.getTimestamp());
+        }
+
+        @Test
+        void testAnnotatedPushUpdate() throws Exception {
+            final Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+            // Create resource & provider using a push
+            DefaultMetadataDto dto = new DefaultMetadataDto();
+            dto.foo = "bar";
+            dto.time = timestamp;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Object> tv = getResourceMetadataTimedValue();
+            assertEquals("bar", tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.time = timestamp.plusSeconds(30);
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertEquals("bar", tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.foo = "foobar";
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertEquals("foobar", tv.getValue());
+            assertEquals(timestamp.plusSeconds(30), tv.getTimestamp());
+
+            dto.foo = null;
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertEquals("foobar", tv.getValue());
+            assertEquals(timestamp.plusSeconds(30), tv.getTimestamp());
+        }
+
+        @Test
+        void testAnnotatedPushUpdateDuplicateAction() throws Exception {
+            final Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+            // Create resource & provider using a push
+            DuplicateMetadataDto dto = new DuplicateMetadataDto();
+            dto.foo = "bar";
+            dto.time = timestamp;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Object> tv = getResourceMetadataTimedValue();
+            assertEquals("bar", tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.time = timestamp.plusSeconds(30);
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertEquals("bar", tv.getValue());
+            assertEquals(timestamp.plusSeconds(30), tv.getTimestamp());
+        }
+
+        @Test
+        void testAnnotatedPushUpdateNullAction() throws Exception {
+            final Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+            // Create resource & provider using a push
+            NullMetadataDto dto = new NullMetadataDto();
+            dto.foo = "bar";
+            dto.time = timestamp;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Object> tv = getResourceMetadataTimedValue();
+            assertEquals("bar", tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.foo = null;
+            push.pushUpdate(dto).getValue();
+
+            tv = getResourceMetadataTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
         }
     }
 

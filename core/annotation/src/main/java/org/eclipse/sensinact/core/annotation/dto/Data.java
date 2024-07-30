@@ -46,4 +46,12 @@ public @interface Data {
      * @return
      */
     NullAction onNull() default NullAction.IGNORE;
+
+    /**
+     * The action to take if the current value is the same as the new value.
+     * The default is to always update, even if the value has not changed.
+     *
+     * @return
+     */
+    DuplicateAction onDuplicate() default DuplicateAction.UPDATE_ALWAYS;
 }

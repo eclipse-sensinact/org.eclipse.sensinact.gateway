@@ -16,6 +16,7 @@ import java.time.Instant;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.model.core.provider.Provider;
 
@@ -73,4 +74,9 @@ public abstract class AbstractUpdateDto {
      * The action to take on a null update
      */
     public NullAction actionOnNull;
+
+    /**
+     * The action to take when the new value is a duplicate of the old value
+     */
+    public DuplicateAction actionOnDuplicate;
 }

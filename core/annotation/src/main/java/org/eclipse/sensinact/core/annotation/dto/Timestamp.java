@@ -16,15 +16,18 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 
 /**
- * Marks a field as containing a timestamp. The field must be convertible to a
- * long, and will be interpreted based on the epoch.
- *
- * If the annotated field is <code>null</code> then the current system time will
- * be used when setting the data
- *
+ * Marks a field as containing a timestamp. The field must either be:
+ * <ul>
+ *  <li>A {@link Number} convertible to a long, which will be interpreted based on the epoch and {@link #value()}</li>
+ *  <li>A {@link Temporal} type indicating a Date/Time, assumed to be UTC if no offset is provided</li>
+ *  <li>A {@link String} parseable to a long, or with {@link DateTimeFormatter#ISO_DATE_TIME}.</li>
+ *  <li><code>null</code> meaning that the current system time will be used when setting the data</li>
+ * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

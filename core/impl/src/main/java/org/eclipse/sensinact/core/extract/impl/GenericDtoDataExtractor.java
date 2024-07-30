@@ -62,6 +62,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
             if (dto.type != null)
                 dud.type = dto.type;
             dud.data = dto.value;
+            dud.actionOnDuplicate = dto.duplicateDataAction;
             list.add(dud);
         }
 
@@ -69,6 +70,7 @@ public class GenericDtoDataExtractor implements DataExtractor {
             MetadataUpdateDto dud = copyCommonFields(dto, instant, new MetadataUpdateDto());
             dud.metadata = dto.metadata;
             dud.removeNullValues = true;
+            dud.actionOnDuplicate = dto.duplicateMetadataAction;
             list.add(dud);
         }
 

@@ -54,4 +54,12 @@ public @interface Metadata {
      * @return
      */
     MapAction[] onMap() default {};
+
+    /**
+     * The action to take if the current value is the same as the new value.
+     * The default is to only update if the value has changed
+     *
+     * @return
+     */
+    DuplicateAction onDuplicate() default DuplicateAction.UPDATE_IF_DIFFERENT;
 }

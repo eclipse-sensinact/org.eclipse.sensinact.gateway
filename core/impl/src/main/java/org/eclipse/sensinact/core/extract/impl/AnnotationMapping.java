@@ -19,7 +19,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -140,9 +142,16 @@ public class AnnotationMapping {
                 if (t == null)
                     return null;
                 if (t instanceof String)
-                    return Long.parseLong(t.toString());
+                    try {
+                        return Long.valueOf(t.toString());
+                    } catch (NumberFormatException nfe) {
+                        return unit.between(Instant.EPOCH, Instant.from(
+                                DateTimeFormatter.ISO_DATE_TIME.parse(t.toString())));
+                    }
                 if (t instanceof Number)
                     return ((Number) t).longValue();
+                if (t instanceof Temporal)
+                    return unit.between(Instant.EPOCH, (Temporal) t);
                 throw new IllegalArgumentException("Unable to read timestamp " + t + " from " + fieldName);
             };
 
@@ -182,6 +191,8 @@ public class AnnotationMapping {
             } else {
                 dto.actionOnNull = data.onNull();
             }
+
+            dto.actionOnDuplicate = data.onDuplicate();
 
             try {
                 dto.modelPackageUri = modelPackageUri.apply(o);
@@ -291,6 +302,8 @@ public class AnnotationMapping {
             } else {
                 dto.actionOnNull = metadata.onNull();
             }
+
+            dto.actionOnDuplicate = metadata.onDuplicate();
 
             String key = NOT_SET.equals(metadata.value()) ? fieldName : metadata.value();
 
