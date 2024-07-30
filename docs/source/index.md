@@ -9,7 +9,12 @@ Eclipse sensiNact aims at managing IoT protocols and devices heterogeneity and p
 
 The project is licensed under the terms of the [Eclipse Public License - v 2.0](EPL-2.0.md).
 
-## Main concepts
+## Northbound and Southbound
+Eclipse sensiNact supports a wide variety of communication interfaces. There are 2 kinds of interfaces:
+* [Northbound](northbound/_index.md) interfaces allow users to interact with sensiNact.
+* [Southbound](southbound/_index.md) interfaces allow sensiNact to communicate with sensors and actuator devices.
+
+## Data model
 
 Eclipse sensiNact represents its data using the following model:
 
@@ -22,13 +27,13 @@ Eclipse sensiNact represents its data using the following model:
 
 The model is described more in detail in the [Data Model](./core/CoreModel.md){.clear-right} section.
 
-
 ## Getting Started
 
 The following examples will help you to quickly get started with the sensiNact gateway
 
-* [Downloading and Launching](examples/Download.md) - See how to download and start sensiNact
-* [Configuring and Querying](examples/Configuring.md) - See how to change sensiNact's configuration and access the REST interface
+* [Download and start](setup.md) sensiNact
+* [Add a northbound REST interface](quick-start/Northbound.md) and communicate with sensiNact via REST
+* [Add a southbound interface](quick-start/Southbound.md) for sensiNact to fetch data
 * [Interacting with a southbound device](examples/Interacting.md) - See how to read a device's data, change editable fields, and listen for updates.
 * Building your own Southbound Provider - TODO
 

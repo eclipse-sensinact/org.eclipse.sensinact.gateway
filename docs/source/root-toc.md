@@ -6,9 +6,8 @@
 index
 news
 setup
-getting-started
+quick-start/_index
 references
-guides
 faq
 code-doc
 EPL-2.0

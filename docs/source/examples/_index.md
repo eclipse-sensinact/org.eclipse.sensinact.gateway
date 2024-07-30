@@ -5,7 +5,5 @@ The following examples will help you to quickly get started with the sensiNact g
 ```{toctree}
 :maxdepth: 2
 
-Download
-Configuring
 Interacting
 ```
