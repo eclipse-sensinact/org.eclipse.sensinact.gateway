@@ -48,6 +48,36 @@
         <artifactId>impl</artifactId>
         <version>${sensinact.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+        <artifactId>session-api</artifactId>
+        <version>${sensinact.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+        <artifactId>session-impl</artifactId>
+        <version>${sensinact.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
+        <artifactId>security-api</artifactId>
+        <version>${sensinact.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
+        <artifactId>query-handler</artifactId>
+        <version>${sensinact.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+        <artifactId>filters.core</artifactId>
+        <version>${sensinact.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+        <artifactId>ldap</artifactId>
+        <version>${sensinact.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
