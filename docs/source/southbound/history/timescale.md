@@ -51,7 +51,7 @@ docker run --rm -d --name timescale-db -p 5432:5432 \
 The matching history provider configuration with PID `sensinact.history.timescale` could be:
 ```json
 {
-    "url": "jdbc://localhost:5432/sensinactHistory",
+    "url": "jdbc:postgresql://localhost:5432/sensinactHistory",
     "user": "snaHistory",
     ".password": "test.password",
     "provider": "history"
