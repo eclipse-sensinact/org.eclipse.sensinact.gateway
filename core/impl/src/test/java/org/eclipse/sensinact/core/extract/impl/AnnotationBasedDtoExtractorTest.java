@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
@@ -129,6 +130,27 @@ public class AnnotationBasedDtoExtractorTest {
         public String bar;
     }
 
+    @ModelPackageUri(MODEL_PACKAGE_URI)
+    @Model(MODEL)
+    @Provider(PROVIDER)
+    @Service(SERVICE)
+    public static class MixedDefaultAndOverridden {
+
+        @Data
+        public Integer foo;
+
+        @Resource(RESOURCE)
+        @Metadata
+        public String units;
+
+        @Data
+        public String resource;
+
+        @Service("override")
+        @Data
+        public String resource2;
+
+    }
     /**
      * Tests for class level annotations for provider/service/resource
      */
@@ -449,6 +471,79 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
+        }
+
+        @Test
+        void mixedLevelAnnotationsAndOverrides() {
+
+            MixedDefaultAndOverridden dto = new MixedDefaultAndOverridden();
+
+            dto.foo = VALUE;
+            dto.resource = Integer.toBinaryString(VALUE);
+            dto.resource2 = VALUE_2;
+            dto.units = METADATA_VALUE;
+
+            List<? extends AbstractUpdateDto> updates = extractor(MixedDefaultAndOverridden.class).getUpdates(dto);
+
+            assertEquals(4, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> "foo".equals(d.resource)).findFirst().get();
+
+            // Foo uses class level service and default resource
+            checkCommonFields(extracted, "foo", null);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
+                    .findFirst().get();
+
+            // RESOURCE uses class level service and default resource
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertEquals("101", dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE_2.equals(d.resource))
+                    .findFirst().get();
+
+            // RESOURCE_2 uses field level service and default resource
+            assertEquals("override", extracted.service);
+            extracted.service = SERVICE;
+
+            checkCommonFields(extracted, false);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE_2, dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
+                    .findFirst().get();
+
+            // Units uses class level service and field level resource
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto mud = (MetadataUpdateDto) extracted;
+
+            assertEquals(Map.of("units", METADATA_VALUE), mud.metadata);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, mud.actionOnDuplicate);
         }
     }
 
