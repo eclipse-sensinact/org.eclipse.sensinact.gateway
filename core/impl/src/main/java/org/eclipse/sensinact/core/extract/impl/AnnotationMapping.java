@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.extract.impl;
 
+import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static org.eclipse.sensinact.core.annotation.dto.AnnotationConstants.NOT_SET;
 
 import java.lang.annotation.Annotation;
@@ -19,7 +20,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
@@ -137,25 +137,26 @@ public class AnnotationMapping {
             Function<Long, Instant> mapToTimestamp = t -> t == null ? Instant.now() : Instant.EPOCH.plus(t, unit);
 
             String fieldName = timestamp.getName();
-            Function<Object, Long> read = o -> {
+            Function<Object, Instant> read = o -> {
                 Object t = getValueFromField(fieldName, o);
                 if (t == null)
                     return null;
                 if (t instanceof String)
                     try {
-                        return Long.valueOf(t.toString());
+                        return mapToTimestamp.apply(Long.valueOf(t.toString()));
                     } catch (NumberFormatException nfe) {
-                        return unit.between(Instant.EPOCH, Instant.from(
-                                DateTimeFormatter.ISO_DATE_TIME.parse(t.toString())));
+                        return Instant.from(ISO_DATE_TIME.parse(t.toString()));
                     }
-                if (t instanceof Number)
-                    return ((Number) t).longValue();
+                if (t instanceof Number) {
+                    long l = ((Number) t).longValue();
+                    return mapToTimestamp.apply(l);
+                }
                 if (t instanceof Temporal)
-                    return unit.between(Instant.EPOCH, (Temporal) t);
+                    return mapToTimestamp.apply(unit.between(Instant.EPOCH, (Temporal) t));
                 throw new IllegalArgumentException("Unable to read timestamp " + t + " from " + fieldName);
             };
 
-            return read.andThen(mapToTimestamp);
+            return read;
         }
 
     }
@@ -511,7 +512,8 @@ public class AnnotationMapping {
         } else {
             // Check for an annotated field
             Field annotatedField = Arrays.stream(clazz.getFields())
-                    .filter(r -> r.isAnnotationPresent(annotationType) && !r.isAnnotationPresent(Data.class))
+                    .filter(r -> r.isAnnotationPresent(annotationType) && !r.isAnnotationPresent(Data.class)
+                            && !r.isAnnotationPresent(Metadata.class))
                     .filter(r -> resultType == r.getType()).findFirst().orElse(null);
 
             if (annotatedField != null) {
