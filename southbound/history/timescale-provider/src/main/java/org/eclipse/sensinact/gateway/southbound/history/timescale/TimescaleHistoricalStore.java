@@ -97,7 +97,7 @@ public class TimescaleHistoricalStore {
             setupTables();
         } catch (Exception e) {
             if (logger.isWarnEnabled()) {
-                logger.debug("An error occurred setting up database access", e);
+                logger.warn("An error occurred setting up database access", e);
             }
             safeUnregister();
             return;
