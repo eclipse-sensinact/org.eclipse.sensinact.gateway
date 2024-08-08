@@ -65,7 +65,9 @@ public class DataUpdateImpl implements DataUpdate {
 
     @Override
     public Promise<?> pushUpdate(Object o) {
-        return doPushUpdate(o).recoverWith(p -> thread.getPromiseFactory()
+        List<AbstractSensinactCommand<?>> commands = toStreamOfCommands(o).collect(toList());
+        IndependentCommands<?> multiCommand = new IndependentCommands<>(commands);
+        return thread.execute(multiCommand).recoverWith(p -> thread.getPromiseFactory()
                 .failed(new FailedUpdatesException(toStreamOfDataUpdateFailures(p.getFailure()))));
     }
 
@@ -90,9 +92,14 @@ public class DataUpdateImpl implements DataUpdate {
         }
     }
 
-    private Promise<?> doPushUpdate(Object o) {
+    private Stream<AbstractSensinactCommand<Void>> toStreamOfCommands(Object o) {
         if (o instanceof Provider) {
-            return thread.execute(new SaveProviderCommand((Provider) o));
+            return Stream.of(new SaveProviderCommand((Provider) o));
+        }
+
+        if (o instanceof List) {
+            List<Object> objects = (List) o;
+            return objects.stream().flatMap(item -> toStreamOfCommands(item));
         }
 
         DataExtractor extractor;
@@ -105,7 +112,7 @@ public class DataUpdateImpl implements DataUpdate {
 
         List<? extends AbstractUpdateDto> updates = extractor.getUpdates(o);
 
-        return thread.execute(new IndependentCommands<>(updates.stream().map(this::toCommand).collect(toList())));
+        return updates.stream().map(this::toCommand);
     }
 
     private DataExtractor createDataExtractor(Class<?> clazz) {
