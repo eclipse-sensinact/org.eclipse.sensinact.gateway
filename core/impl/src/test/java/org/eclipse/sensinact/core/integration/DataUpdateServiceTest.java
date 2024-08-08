@@ -809,4 +809,56 @@ public class DataUpdateServiceTest {
         }
     }
 
+
+    @Nested
+    class ListPushes {
+        @Test
+        void testEmptyList() throws Exception {
+            push.pushUpdate(List.of()).getValue();
+        }
+
+        @Test
+        void testOneItem() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = 42;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+
+            push.pushUpdate(List.of(dto)).getValue();
+
+            assertEquals(42, getResourceValue());
+        }
+
+        @Test
+        void testSeveralItems() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = 42;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+
+            AnnotatedDTO dto2 = new AnnotatedDTO();
+            dto2.provider = PROVIDER;
+            dto2.service = SERVICE;
+            dto2.resource = RESOURCE;
+            dto2.data = "43";
+            // adds 1second to avoid out of order update on the same resource using a truncated timestamp
+            dto2.time = String.valueOf(timestamp.toEpochMilli() + 1000);
+
+            push.pushUpdate(List.of(dto, dto2)).getValue();
+
+            assertEquals(43, getResourceValue());
+        }
+    }
 }
