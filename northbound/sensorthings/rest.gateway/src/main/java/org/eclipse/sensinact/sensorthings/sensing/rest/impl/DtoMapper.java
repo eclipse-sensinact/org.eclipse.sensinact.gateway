@@ -503,7 +503,10 @@ public class DtoMapper {
         TimedValue<GeoJsonObject> location = null;
         if (optRS.isPresent()) {
             ResourceSnapshot rs = optRS.get();
-            location = getLocation(mapper, rs.getValue().getValue(), rs.getValue().getTimestamp(), allowNull);
+            TimedValue<?> value = rs.getValue();
+            if(value != null) {
+                location = getLocation(mapper, value.getValue(), rs.getValue().getTimestamp(), allowNull);
+            }
         }
         if (location == null) {
             location = getLocation(provider, mapper, allowNull);
