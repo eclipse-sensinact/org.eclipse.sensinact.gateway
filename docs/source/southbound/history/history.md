@@ -31,25 +31,43 @@ It requires the following arguments:
 * `resource`: Resource name
 * `time`: The zoned date time to check in ISO-8601 format. If `null`, the earliest possible result will be return.
 
-For example, considering the history provider being `sensiNactHistory` and the REST gateway endpoint listening on port 8080, the following payload can be sent with a POST request on `http://localhost:8080/sensinact/providers/sensiNactHistory/services/history/resources/single/ACT`:
+For example, considering the history provider being `sensiNactHistory` and the REST gateway endpoint listening on port 8080, the following payload can be sent with a POST request on `http://localhost:8080/sensinact/providers/sensiNactHistory/services/history/resources/single/ACT` with an application/json content-type header:
 
 ```json
 {
-    "provider": "sensorA",
-    "service": "weather",
-    "resource": "temperature",
-    "time": "2023-06-20T10:23:45+0200"
+    "parameters": [
+        {
+            "name": "provider",
+            "type": "string",
+            "value": "sensorA"
+        },
+        {
+            "name": "service",
+            "type": "string",
+            "value": "weather"
+        },
+        {
+            "name": "resource",
+            "type": "string",
+            "value": "temperature"
+        },
+        {
+            "name": "time",
+            "type": "string",
+            "value": "2024-08-20T10:23:45+02:00"
+        }
+    ]
 }
 ```
 
 The result will be in the following format:
 ```json
 {
-    "uri": "sensorA/weather/temperature",
-    "statusCode": 200,
     "type": "ACT_RESPONSE",
+    "uri": "sensiNactHistory/history/single",
+    "statusCode": 200,
     "response": {
-        "timestamp": "2023-06-20T08:20:00+0000",
+        "timestamp": "2024-08-20T08:20:00.000Z",
         "value": 26
     }
 }
@@ -76,39 +94,61 @@ This action requires the following arguments:
 * `skip`: Number of values to skip in the result set. If `fromTime` is `null` then this will be skipped from the end not the start of the results.
 
 
-For example, considering the history provider being `sensiNactHistory` and the REST gateway endpoint listening on port 8080, the following payload can be sent with a POST request on `http://localhost:8080/sensinact/providers/sensiNactHistory/services/history/resources/range/ACT`:
+For example, considering the history provider being `sensiNactHistory` and the REST gateway endpoint listening on port 8080, the following payload can be sent with a POST request on `http://localhost:8080/sensinact/providers/sensiNactHistory/services/history/resources/range/ACT`  with an application/json content-type header:
 
 ```json
 {
-    "provider": "sensorA",
-    "service": "weather",
-    "resource": "temperature",
-    "fromTime": "2023-06-10T00:00:00+0200",
-    "toTime": "2023-06-20T00:00:00+0200"
+    "parameters": [
+        {
+            "name": "provider",
+            "type": "string",
+            "value": "sensorA"
+        },
+        {
+            "name": "service",
+            "type": "string",
+            "value": "weather"
+        },
+        {
+            "name": "resource",
+            "type": "string",
+            "value": "temperature"
+        },
+        {
+            "name": "fromTime",
+            "type": "string",
+            "value": "2023-06-10T00:00:00.000Z"
+        },
+        {
+            "name": "toTime",
+            "type": "string",
+            "value": "2023-06-20T00:00:00.000Z"
+        }
+    ]
 }
 ```
 
 The result will be in the following format:
 ```json
 {
-    "uri": "sensorA/weather/temperature",
-    "statusCode": 200,
     "type": "ACT_RESPONSE",
+    "uri": "sensiNactHistory/history/range",
+    "statusCode": 200,
     "response": [
         {
-            "timestamp": "2023-06-10T08:20:00+0000",
+            "timestamp": "2023-06-10T08:20:00.000Z",
             "value": 18
         },
         {
-            "timestamp": "2023-06-10T09:22:00+0000",
+            "timestamp": "2023-06-10T09:22:00.000Z",
             "value": 19
         },
         {
-            "timestamp": "2023-06-10T10:30:00+0000",
+            "timestamp": "2023-06-10T10:30:00.000Z",
             "value": 20
         },
         {
-            "timestamp": "2023-06-10T10:12:00+0000",
+            "timestamp": "2023-06-10T10:12:00.000Z",
             "value": 19
         }
     ]
@@ -128,24 +168,46 @@ It requires the following arguments:
 * `toTime`: The zoned date time to finish at. If `null` then there is no finishing time limit.
 
 
-For example, considering the history provider being `sensiNactHistory` and the REST gateway endpoint listening on port 8080, the following payload can be sent with a POST request on `http://localhost:8080/sensinact/providers/sensiNactHistory/services/history/resources/range/ACT`:
+For example, considering the history provider being `sensiNactHistory` and the REST gateway endpoint listening on port 8080, the following payload can be sent with a `POST` request on `http://localhost:8080/sensinact/providers/sensiNactHistory/services/history/resources/count/ACT` with an application/json content-type header:
 
 ```json
 {
-    "provider": "sensorA",
-    "service": "weather",
-    "resource": "temperature",
-    "fromTime": "2023-06-10T00:00:00+0200",
-    "toTime": "2023-06-20T00:00:00+0200"
+    "parameters": [
+        {
+            "name": "provider",
+            "type": "string",
+            "value": "sensorA"
+        },
+        {
+            "name": "service",
+            "type": "string",
+            "value": "weather"
+        },
+        {
+            "name": "resource",
+            "type": "string",
+            "value": "temperature"
+        },
+        {
+            "name": "fromTime",
+            "type": "string",
+            "value": "2023-06-10T00:00:00.000Z"
+        },
+        {
+            "name": "toTime",
+            "type": "string",
+            "value": "2023-06-20T00:00:00.000Z"
+        }
+    ]
 }
 ```
 
 The result will be in the following format:
 ```json
 {
-    "uri": "sensorA/weather/temperature",
-    "statusCode": 200,
     "type": "ACT_RESPONSE",
+    "uri": "sensiNactHistory/history/count",
+    "statusCode": 200,
     "response": 4
 }
 ```
