@@ -561,7 +561,7 @@ public class SensinactWhiteboard {
                     ResourceBuilder<?, Object> builder = null;
                     Resource resource = null;
 
-                    Model model = modelMgr.getModel(key.getModel());
+                    Model model = modelMgr.getModel(key.getModelPackageUri(), key.getModel());
                     if (model == null) {
                         builder = modelMgr.createModel(key.getModelPackageUri(), key.getModel())
                                 .withService(key.getService()).withResource(key.getResource());
