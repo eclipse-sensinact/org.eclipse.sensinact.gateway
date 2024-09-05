@@ -557,40 +557,45 @@ public class SensinactWhiteboard {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
                     PromiseFactory promiseFactory) {
-                ResourceBuilder<?, Object> builder = null;
-                Resource resource = null;
+                try {
+                    ResourceBuilder<?, Object> builder = null;
+                    Resource resource = null;
 
-                Model model = modelMgr.getModel(key.getModel());
-                if (model == null) {
-                    builder = modelMgr.createModel(key.getModelPackageUri(), key.getModel())
-                            .withService(key.getService()).withResource(key.getResource());
-                } else {
-                    Service service = model.getServices().get(key.getService());
-                    if (service == null) {
-                        builder = model.createService(key.getService()).withResource(key.getResource());
+                    Model model = modelMgr.getModel(key.getModelPackageUri(), key.getModel());
+                    if (model == null) {
+                        builder = modelMgr.createModel(key.getModelPackageUri(), key.getModel())
+                                .withService(key.getService()).withResource(key.getResource());
                     } else {
-                        resource = service.getResources().get(key.getResource());
-                        if (resource == null) {
-                            builder = service.createResource(key.getResource());
+                        Service service = model.getServices().get(key.getService());
+                        if (service == null) {
+                            builder = model.createService(key.getService()).withResource(key.getResource());
+                        } else {
+                            resource = service.getResources().get(key.getResource());
+                            if (resource == null) {
+                                builder = service.createResource(key.getResource());
+                            }
                         }
                     }
-                }
 
-                if (builder != null) {
-                    // Construct the resource
-                    builderCaller.accept(builder);
-                } else if (resource != null) {
-                    // Resource exists, check if we can update it
-                    ResourceType type = resource.getResourceType();
-                    if (!validateResourceType.test(type)) {
-                        LOG.error("The resource {} in service {} already exists for the model {} as type {}",
-                                key.getResource(), key.getService(), key.getModel(), type);
-                        return promiseFactory.failed(
-                                new IllegalStateException("Updating resource of type " + type + " is not allowed"));
+                    if (builder != null) {
+                        // Construct the resource
+                        builderCaller.accept(builder);
+                    } else if (resource != null) {
+                        // Resource exists, check if we can update it
+                        ResourceType type = resource.getResourceType();
+                        if (!validateResourceType.test(type)) {
+                            LOG.error("The resource {} in service {} already exists for the model {} as type {}",
+                                    key.getResource(), key.getService(), key.getModel(), type);
+                            return promiseFactory.failed(
+                                    new IllegalStateException("Updating resource of type " + type + " is not allowed"));
+                        }
                     }
-                }
 
-                return promiseFactory.resolved(null);
+                    return promiseFactory.resolved(null);
+                } catch (Exception e) {
+                    LOG.error("Error creating resource {}", key, e);
+                    return promiseFactory.failed(e);
+                }
             }
         });
     }
