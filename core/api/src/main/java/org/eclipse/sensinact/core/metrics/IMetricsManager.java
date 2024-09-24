@@ -92,4 +92,13 @@ public interface IMetricsManager {
      * @return A histogram
      */
     IMetricsHistogram getHistogram(String name);
+
+    /**
+     * Returns a meter. Meters are counters that keep track of the number
+     * and rate of events that occur.
+     *
+     * @param name Metric name
+     * @return A meter
+     */
+    IMetricMeter getMeter(String name);
 }

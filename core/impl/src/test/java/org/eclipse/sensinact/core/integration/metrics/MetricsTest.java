@@ -166,6 +166,7 @@ public class MetricsTest {
     @WithConfiguration(pid = "sensinact.metrics", location = "?", properties = {
             @Property(key = "enabled", value = "true"), @Property(key = "metrics.rate", value = "1") })
     void testEnabled(@InjectService(filter = "(enabled=true)") IMetricsManager metrics) throws Exception {
+        metrics.getMeter("dorothy").mark(7);
         metrics.getCounter("toto").inc();
 
         // Wait for a bit
@@ -188,6 +189,16 @@ public class MetricsTest {
         assertEquals(dto.service, "metrics");
         assertEquals(dto.type, Long.class);
         assertEquals(dto.value, 1L);
+
+        // Meter
+        dto = dtos.get("dorothy");
+        assertNotNull(dto, "Resource not found");
+        assertEquals(dto.model, "sensiNact-metrics");
+        assertEquals(dto.provider, "sensiNact-metrics");
+        assertEquals(dto.service, "metrics");
+        assertTrue(Map.class.isAssignableFrom(dto.type));
+        assertTrue(((Map<?,?>)dto.value).containsKey("rate"));
+        assertEquals(7L, ((Map<?,?>)dto.value).get("count"));
 
         // Gauge: test.gauge becomes service=test, resource=gauge
         dto = dtos.get("gauge");
