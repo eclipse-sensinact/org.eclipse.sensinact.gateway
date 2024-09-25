@@ -12,7 +12,7 @@
     { "id": "com.fasterxml.jackson.core:jackson-core:2.16.1" },
     { "id": "com.fasterxml.jackson.core:jackson-databind:2.16.1" },
     { "id": "org.osgi:org.osgi.service.typedevent:1.0.0" },
-    { "id": "org.osgi:org.osgi.util.pushstream:1.0.2" },
+    { "id": "org.osgi:org.osgi.util.pushstream:1.1.0" },
     { "id": "org.eclipse.emf:org.eclipse.emf.common:2.29.0" },
     { "id": "org.eclipse.emf:org.eclipse.emf.ecore:2.35.0" },
     { "id": "org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.36.0" },
