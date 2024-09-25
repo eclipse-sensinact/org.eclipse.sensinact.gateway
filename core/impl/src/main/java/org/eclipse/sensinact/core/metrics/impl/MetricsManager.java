@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.core.metrics.IMetricCounter;
+import org.eclipse.sensinact.core.metrics.IMetricMeter;
 import org.eclipse.sensinact.core.metrics.IMetricTimer;
 import org.eclipse.sensinact.core.metrics.IMetricsGauge;
 import org.eclipse.sensinact.core.metrics.IMetricsHistogram;
@@ -427,5 +428,10 @@ public class MetricsManager implements IMetricsManager {
     @Override
     public IMetricsHistogram getHistogram(String name) {
         return new Histogram(name, registry, this::isEnabled);
+    }
+
+    @Override
+    public IMetricMeter getMeter(String name) {
+        return new Meter(name, registry, this::isEnabled);
     }
 }

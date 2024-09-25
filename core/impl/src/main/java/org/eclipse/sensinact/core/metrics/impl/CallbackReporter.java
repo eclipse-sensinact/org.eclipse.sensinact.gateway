@@ -228,6 +228,7 @@ public class CallbackReporter extends ScheduledReporter {
             final List<GenericDto> meterDtos = new ArrayList<>();
             meterDtos.addAll(makeMeteredDtos(updateTime, name, entry.getValue()));
             addGlobalStats(updateTime, name, meterDtos);
+            dtos.addAll(meterDtos);
         }
 
         for (Entry<String, Histogram> entry : histograms.entrySet()) {

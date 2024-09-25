@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
+import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
@@ -61,6 +62,7 @@ public class RecordHandlingTest {
     void start() throws InterruptedException {
         deviceMapper = new FactoryParserHandler();
         deviceMapper.dataUpdate = Mockito.mock(DataUpdate.class);
+        deviceMapper.metrics = Mockito.mock(IMetricsManager.class);
 
         Mockito.when(deviceMapper.dataUpdate.pushUpdate(Mockito.any())).thenAnswer(i -> {
             final BulkGenericDto dto = i.getArgument(0, BulkGenericDto.class);

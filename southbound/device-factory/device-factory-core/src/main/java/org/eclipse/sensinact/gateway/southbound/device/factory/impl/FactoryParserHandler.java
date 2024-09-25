@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
+import org.eclipse.sensinact.core.metrics.IMetricTimer;
+import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.push.FailedUpdatesException;
@@ -131,6 +133,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     DataUpdate dataUpdate;
 
     /**
+     * SensiNact metrics gathering
+     */
+    @Reference
+    IMetricsManager metrics;
+
+    /**
      * JSON mapper
      */
     private final ObjectMapper mapper = new ObjectMapper();
@@ -181,7 +189,10 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         }
 
         // Extract mapping information
-        final RecordState globalState = computeInitialState(configuration, context);
+        final RecordState globalState;
+        try (IMetricTimer timer = metrics.withTimer("device.factory.mapping.setup.time")) {
+            globalState = computeInitialState(configuration, context);
+        }
 
         // Check if a provider is set
         if (globalState.placeholders.get(KEY_PROVIDER) == null) {
@@ -195,15 +206,20 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         final IDeviceMappingParser parser = cso.getService();
         try {
             // Use it
-            final List<? extends IDeviceMappingRecord> records = parser.parseRecords(payload,
-                    configuration.parserOptions, context);
+            final List<? extends IDeviceMappingRecord> records;
+            try (IMetricTimer timer = metrics.withTimer("device.factory.parse." + parserId + ".time")) {
+                records = parser.parseRecords(payload, configuration.parserOptions, context);
+            }
+
             if (records != null) {
                 final BulkGenericDto bulk = new BulkGenericDto();
                 bulk.dtos = new ArrayList<>();
 
                 for (final IDeviceMappingRecord record : records) {
                     try {
-                        bulk.dtos.addAll(handleRecord(configuration, globalState, record));
+                        try (IMetricTimer timer = metrics.withTimer("device.factory.record.mapping.time")) {
+                            bulk.dtos.addAll(handleRecord(configuration, globalState, record));
+                        }
                     } catch (InvalidResourcePathException | ParserException | VariableNotFoundException e) {
                         if (logErrors) {
                             logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
