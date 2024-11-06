@@ -18,5 +18,5 @@ public interface ILdapCriterion extends ICriterion {
     /**
      * Negate the current criterion
      */
-    void negate();
+    ILdapCriterion negate();
 }

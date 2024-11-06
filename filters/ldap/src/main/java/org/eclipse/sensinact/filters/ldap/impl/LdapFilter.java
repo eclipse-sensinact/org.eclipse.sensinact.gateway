@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.ldap.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -32,7 +31,7 @@ public class LdapFilter extends AbstractCriterion {
     /**
      * List of sub-filters
      */
-    private final List<ILdapCriterion> subCriteria = new ArrayList<>();
+    private final List<ILdapCriterion> subCriteria;
 
     /**
      * Combinator operator (AND or OR)
@@ -44,26 +43,32 @@ public class LdapFilter extends AbstractCriterion {
      * @param criteria List of sub-filters
      */
     public LdapFilter(final LdapOperator operator, final List<ILdapCriterion> criteria) {
+        this(operator, List.copyOf(criteria), false);
+    }
+
+    private LdapFilter(final LdapOperator operator, final List<ILdapCriterion> criteria, boolean isNegative) {
+        super(false);
         this.operator = operator;
-        this.subCriteria.addAll(criteria);
+        this.subCriteria = criteria;
     }
 
     @Override
-    public void negate() {
-        switch (operator) {
+    public ILdapCriterion negate() {
+        LdapOperator negatedOperator;
+        switch (this.operator) {
         case AND:
-            operator = LdapOperator.OR;
-            subCriteria.forEach(ILdapCriterion::negate);
+            negatedOperator = LdapOperator.OR;
             break;
 
         case OR:
-            operator = LdapOperator.AND;
-            subCriteria.forEach(ILdapCriterion::negate);
+            negatedOperator = LdapOperator.AND;
             break;
 
         default:
-            break;
+            throw new IllegalArgumentException("Unknown operator " + this.operator);
         }
+        return new LdapFilter(negatedOperator, subCriteria.stream()
+                .map(ILdapCriterion::negate).collect(Collectors.toList()), false);
     }
 
     @Override

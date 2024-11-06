@@ -83,8 +83,7 @@ public class FilterVisitor extends LdapFilterParserBaseVisitor<ILdapCriterion> {
     @Override
     public ILdapCriterion visitNotFilter(NotFilterContext ctx) {
         ILdapCriterion criterion = visitFilter(ctx.filter());
-        criterion.negate();
-        return criterion;
+        return criterion.negate();
     }
 
     /**

@@ -20,11 +20,20 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 public class CriterionProviderName extends AbstractProviderCriterion {
 
     public CriterionProviderName(final IStringValue providerName, final LdapComparator comparator) {
-        super("PROVIDER", providerName, comparator);
+        this(providerName, comparator, false);
+    }
+
+    private CriterionProviderName(final IStringValue providerName, final LdapComparator comparator, boolean isNegative) {
+        super("PROVIDER", providerName, comparator, isNegative);
     }
 
     @Override
     protected String getProviderFieldValue(final ProviderSnapshot provider) {
         return provider.getName();
+    }
+
+    @Override
+    public ILdapCriterion negate() {
+        return new CriterionProviderName(expectedValue, comparator, !isNegative());
     }
 }

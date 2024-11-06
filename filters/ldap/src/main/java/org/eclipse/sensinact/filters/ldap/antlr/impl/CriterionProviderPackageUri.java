@@ -20,11 +20,20 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 public class CriterionProviderPackageUri extends AbstractProviderCriterion {
 
     public CriterionProviderPackageUri(final IStringValue pkgUri, final LdapComparator comparator) {
-        super("PACKAGE", pkgUri, comparator);
+        this(pkgUri, comparator, false);
+    }
+
+    private CriterionProviderPackageUri(final IStringValue pkgUri, final LdapComparator comparator, boolean isNegative) {
+        super("PACKAGE", pkgUri, comparator, isNegative);
     }
 
     @Override
     protected String getProviderFieldValue(final ProviderSnapshot provider) {
         return provider.getModelPackageUri();
+    }
+
+    @Override
+    public ILdapCriterion negate() {
+        return new CriterionProviderPackageUri(expectedValue, comparator, !isNegative());
     }
 }
