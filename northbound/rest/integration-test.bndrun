@@ -7,7 +7,7 @@
 	bnd.identity;id='org.glassfish.jersey.core.jersey-common',\
 	bnd.identity;id='org.eclipse.osgitech.rest.jetty',\
 	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
-	bnd.identity;id='org.eclipse.sensinact.gateway.northbound.filters.ldap',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.filters.ldap',\
 	bnd.identity;id='ch.qos.logback.classic',\
 	bnd.identity;id='jul.to.slf4j'
 
@@ -73,8 +73,8 @@
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.northbound.filters.filters.core;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.northbound.filters.ldap;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.filters.core;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.ldap;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.rest;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.rest-tests;version='[0.0.2,0.0.3)',\

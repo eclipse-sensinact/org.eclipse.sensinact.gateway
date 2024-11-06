@@ -33,7 +33,6 @@
 
   <modules>
     <module>session</module>
-    <module>filters</module>
     <module>query-handler</module>
     <module>rest</module>
     <module>websocket</module>

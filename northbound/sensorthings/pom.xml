@@ -51,7 +51,7 @@
         <version>${sensinact.core.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+        <groupId>org.eclipse.sensinact.gateway.filters</groupId>
         <artifactId>filters.core</artifactId>
         <version>${sensinact.core.version}</version>
       </dependency>
