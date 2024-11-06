@@ -22,7 +22,7 @@
       <version>${rest.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>filters.core</artifactId>
       <version>${rest.version}</version>
     </dependency>
@@ -32,7 +32,7 @@
       <version>${antlr.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>ldap</artifactId>
       <version>${rest.version}</version>
     </dependency>

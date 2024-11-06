@@ -34,7 +34,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.northbound.filters.api.FilterParserException;
+import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;

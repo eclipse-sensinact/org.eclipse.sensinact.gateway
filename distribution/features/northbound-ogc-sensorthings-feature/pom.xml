@@ -29,7 +29,7 @@
       <version>${spatial4j.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>filters.core</artifactId>
       <version>${filters.version}</version>
     </dependency>

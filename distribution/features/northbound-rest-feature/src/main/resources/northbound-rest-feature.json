@@ -2,9 +2,9 @@
   "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-rest-feature:osgifeature:${project.version}",
   "bundles":[
     { "id": "org.eclipse.sensinact.gateway.northbound:rest:${gateway.version}" },
-    { "id": "org.eclipse.sensinact.gateway.northbound.filters:filters.core:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.filters:filters.core:${gateway.version}" },
     { "id": "org.antlr:antlr4-runtime:4.12.0" },
-    { "id": "org.eclipse.sensinact.gateway.northbound.filters:ldap:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.filters:ldap:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound:query-handler:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.security:security-api:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.session:session-api:${gateway.version}" },

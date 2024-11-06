@@ -76,7 +76,7 @@
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.northbound.filters.filters.core;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.filters.core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.security-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.sensorthings.dto;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.sensorthings.filter;version='[0.0.2,0.0.3)',\

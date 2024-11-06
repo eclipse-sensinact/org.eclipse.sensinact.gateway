@@ -48,7 +48,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sensinact.gateway.northbound.filters</groupId>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>ldap</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
