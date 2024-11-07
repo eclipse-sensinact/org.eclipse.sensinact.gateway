@@ -412,7 +412,7 @@ public class ModelNexus {
         // Allow an update if the resource didn't exist or if the update timestamp is
         // equal to or after the one of the current value
         if (metadata == null || metadata.getTimestamp() == null
-                || !metadata.getTimestamp().isAfter(timestamp.plusMillis(1))) {
+                || !metadata.getTimestamp().isAfter(metaTimestamp.plusMillis(1))) {
             EClassifier resourceType = resourceFeature.getEType();
 
             if (metadata == null) {
@@ -429,18 +429,16 @@ public class ModelNexus {
             } else {
                 service.eSet(resourceFeature, EMFUtil.convertToTargetType(resourceType, data));
             }
+
+            Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata, resourceFeature);
+
             accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
-                    resourceType.getInstanceClass(), oldValue, data, timestamp);
+                    resourceType.getInstanceClass(), oldValue, data, newMetaData, metaTimestamp);
+            accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
+                    oldMetaData, newMetaData, timestamp);
         } else {
             return;
         }
-
-        metadata.setTimestamp(timestamp);
-
-        Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata, resourceFeature);
-
-        accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
-                oldMetaData, newMetaData, timestamp);
     }
 
     /**

@@ -297,10 +297,10 @@ public class EMFCompareUtil {
 
             originalService.eSet(resource, newValue);
 
-            accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
-                    resource.getEType().getInstanceClass(), oldValue, newValue, newTimestamp);
-
             Map<String, Object> newMetaData = extractMetadataMap(newValue, updatedMetadata, resource);
+
+            accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
+                    resource.getEType().getInstanceClass(), oldValue, newValue, newMetaData, newTimestamp);
 
             accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
                     oldMetaData, newMetaData, newTimestamp);
@@ -388,12 +388,11 @@ public class EMFCompareUtil {
             checkMetadata(service, ea);
             Metadata metadata = service.getMetadata().get(ea);
             accumulator.addResource(packageUri, model, providerName, serviceName, ea.getName());
-            accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
-                    ea.getEAttributeType().getInstanceClass(), null, service.eGet(ea), metadata.getTimestamp());
             Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true,
                     MetadataPackage.Literals.NEXUS_METADATA.getEStructuralFeatures(), null, null);
             newMetaData.put("value", service.eGet(ea));
-
+            accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
+                    ea.getEAttributeType().getInstanceClass(), null, service.eGet(ea), newMetaData, metadata.getTimestamp());
             accumulator.metadataValueUpdate(packageUri, model, providerName, serviceName, ea.getName(), null,
                     newMetaData, metadata.getTimestamp());
         });
@@ -407,7 +406,7 @@ public class EMFCompareUtil {
 
         EMFUtil.streamAttributes(value.eClass()).filter(ea -> value.eIsSet(ea)).forEach(ea -> {
             accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
-                    ea.getEAttributeType().getInstanceClass(), null, null, Instant.now());
+                    ea.getEAttributeType().getInstanceClass(), null, null, null, Instant.now());
             accumulator.removeResource(packageUri, model, providerName, serviceName, ea.getName());
         });
         accumulator.removeService(packageUri, model, providerName, serviceName);

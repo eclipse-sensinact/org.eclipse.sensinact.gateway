@@ -98,7 +98,8 @@ public class DataUpdateImpl implements DataUpdate {
         }
 
         if (o instanceof List) {
-            List<Object> objects = (List) o;
+            @SuppressWarnings("unchecked")
+            List<Object> objects = (List<Object>) o;
             return objects.stream().flatMap(item -> toStreamOfCommands(item));
         }
 

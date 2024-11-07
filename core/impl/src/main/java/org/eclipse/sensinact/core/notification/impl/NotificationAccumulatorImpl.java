@@ -260,7 +260,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      */
     @Override
     public void resourceValueUpdate(String modelPackageUri, String model, String provider, String service, String resource, Class<?> type,
-            Object oldValue, Object newValue, Instant timestamp) {
+            Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
         check();
         Objects.requireNonNull(timestamp);
         notifications.compute(new NotificationKey(provider, service, resource, ResourceDataNotification.class),
@@ -276,7 +276,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                         oldValueToUse = oldValue;
                     }
                     return List.of(createResourceDataNotification(modelPackageUri, model, provider, service, resource, type,
-                            oldValueToUse, newValue, timestamp));
+                            oldValueToUse, newValue, metadata, timestamp));
                 });
     }
 

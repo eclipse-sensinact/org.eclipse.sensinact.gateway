@@ -12,9 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.snapshot;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 /**
@@ -218,6 +221,27 @@ public interface ICriterion {
             public Predicate<GeoJsonObject> getLocationFilter() {
                 return this_.getLocationFilter().negate();
             }
+        };
+    }
+
+    default List<String> dataTopics() {
+        return List.of("DATA/*");
+    }
+
+    default Predicate<ResourceDataNotification> dataEventFilter() {
+        return rdn -> {
+            ResourceDataBackedProviderSnapshot ps = new ResourceDataBackedProviderSnapshot(rdn);
+
+            boolean initial;
+            if(Objects.equals("admin", rdn.service) && Objects.equals("location", rdn.resource)) {
+                initial = getLocationFilter().test((GeoJsonObject) rdn.newValue);
+            } else {
+                initial = true;
+            }
+
+            return initial && getProviderFilter().test(ps) && getServiceFilter().test(ps.service)
+                    && getResourceFilter().test(ps.service.resource)
+                    && getResourceValueFilter().test(ps, List.of(ps.service.resource));
         };
     }
 }
