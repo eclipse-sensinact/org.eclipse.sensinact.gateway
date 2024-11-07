@@ -70,7 +70,7 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
     }
 
     protected ResourceDataNotification createResourceDataNotification(String modelPackageUri, String model, String provider, String service,
-            String resource, Class<?> type, Object oldValue, Object newValue, Instant timestamp) {
+            String resource, Class<?> type, Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
         ResourceDataNotification rn = new ResourceDataNotification();
         rn.modelPackageUri = modelPackageUri;
         rn.model = model;
@@ -80,6 +80,7 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         rn.type = type;
         rn.oldValue = oldValue;
         rn.newValue = newValue;
+        rn.metadata = metadata;
         rn.timestamp = timestamp;
         return rn;
     }

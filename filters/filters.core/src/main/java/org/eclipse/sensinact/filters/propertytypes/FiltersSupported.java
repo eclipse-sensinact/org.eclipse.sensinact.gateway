@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2024 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,20 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.filters.ldap.antlr.impl;
+package org.eclipse.sensinact.filters.propertytypes;
 
-import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.osgi.service.component.annotations.ComponentPropertyType;
 
-public interface ILdapCriterion extends ICriterion {
+/**
+ * Specification of a filter parser
+ */
+@ComponentPropertyType
+public @interface FiltersSupported {
+
     /**
-     * Negate the current criterion
+     * Set the full property name sensinact.filters.supported
      */
-    ILdapCriterion negate();
+    String PREFIX_ = "sensinact.";
+
+    String[] value();
 }

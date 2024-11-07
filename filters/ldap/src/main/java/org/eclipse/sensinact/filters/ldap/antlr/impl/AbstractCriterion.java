@@ -12,12 +12,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.ldap.antlr.impl;
 
+import java.util.List;
 import java.util.function.Predicate;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.filters.ldap.impl.LdapFilter;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 /**
@@ -28,13 +31,10 @@ public abstract class AbstractCriterion implements ILdapCriterion {
     /**
      * Flag that indicates this criterion must negate its result
      */
-    private boolean negative = false;
+    private final boolean negative;
 
-    /**
-     * Invert the result of this criterion
-     */
-    public void negate() {
-        negative = !negative;
+    protected AbstractCriterion(boolean isNegative) {
+        this.negative = isNegative;
     }
 
     /**
@@ -67,5 +67,21 @@ public abstract class AbstractCriterion implements ILdapCriterion {
     @Override
     public ResourceValueFilter getResourceValueFilter() {
         return null;
+    }
+
+    @Override
+    public ICriterion and(ICriterion criterion) {
+        if(criterion instanceof ILdapCriterion) {
+            return new LdapFilter(LdapOperator.AND, List.of(this, (ILdapCriterion) criterion));
+        }
+        return ILdapCriterion.super.and(criterion);
+    }
+
+    @Override
+    public ICriterion or(ICriterion criterion) {
+        if(criterion instanceof ILdapCriterion) {
+            return new LdapFilter(LdapOperator.OR, List.of(this, (ILdapCriterion) criterion));
+        }
+        return ILdapCriterion.super.or(criterion);
     }
 }

@@ -33,6 +33,11 @@ public class CriterionResourcePresence extends AbstractCriterion {
      * @param rcPath Resource path
      */
     public CriterionResourcePresence(final SensiNactPath rcPath) {
+        this(rcPath, false);
+    }
+
+    private CriterionResourcePresence(final SensiNactPath rcPath, boolean isNegative) {
+        super(isNegative);
         this.rcPath = rcPath;
     }
 
@@ -73,5 +78,10 @@ public class CriterionResourcePresence extends AbstractCriterion {
         } else {
             return (p, rs) -> rs.stream().anyMatch(r -> rcPath.accept(r) && isSet.test(r));
         }
+    }
+
+    @Override
+    public ILdapCriterion negate() {
+        return new CriterionResourcePresence(rcPath, !isNegative());
     }
 }

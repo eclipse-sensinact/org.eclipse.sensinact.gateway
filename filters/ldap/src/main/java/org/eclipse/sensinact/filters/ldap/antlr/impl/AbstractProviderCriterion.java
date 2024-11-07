@@ -25,17 +25,17 @@ public abstract class AbstractProviderCriterion extends AbstractCriterion {
     /**
      * Constant name used in LDAP queries
      */
-    private final String ldapConstantName;
+    protected final String ldapConstantName;
 
     /**
      * Tested value
      */
-    private final IStringValue expectedValue;
+    protected final IStringValue expectedValue;
 
     /**
      * LDAP comparator to use
      */
-    private final LdapComparator comparator;
+    protected final LdapComparator comparator;
 
     /**
      * Sets up the criterion
@@ -43,10 +43,11 @@ public abstract class AbstractProviderCriterion extends AbstractCriterion {
      * @param ldapConstantName Constant name used in LDAP queries
      * @param expectedValue    Tested value
      * @param comparator       LDAP comparator to use
+     * @param isNegated        whether this criterion is negated
      */
     public AbstractProviderCriterion(final String ldapConstantName, final IStringValue expectedValue,
-            final LdapComparator comparator) {
-        super();
+            final LdapComparator comparator, boolean isNegative) {
+        super(isNegative);
         this.ldapConstantName = ldapConstantName;
         this.expectedValue = expectedValue;
         this.comparator = comparator;

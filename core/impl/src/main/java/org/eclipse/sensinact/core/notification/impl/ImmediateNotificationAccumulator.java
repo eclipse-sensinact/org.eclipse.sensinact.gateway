@@ -165,11 +165,11 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      */
     @Override
     public void resourceValueUpdate(String modelPackageUri, String model, String provider, String service, String resource, Class<?> type,
-            Object oldValue, Object newValue, Instant timestamp) {
+            Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
         Objects.requireNonNull(timestamp);
 
         ResourceDataNotification rdn = createResourceDataNotification(modelPackageUri, model, provider, service, resource, type,
-                oldValue, newValue, timestamp);
+                oldValue, newValue, metadata, timestamp);
         eventBus.deliver(rdn.getTopic(), rdn);
     }
 

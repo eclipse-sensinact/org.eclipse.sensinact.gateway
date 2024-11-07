@@ -146,6 +146,7 @@ public interface NotificationAccumulator {
      * @param type      the resource type
      * @param oldValue  the value before the update
      * @param newValue  the value after the update
+     * @param metadata  the metadata for the resource
      * @param timestamp the latest timestamp of the value after the update
      *
      * @throws IllegalArgumentException if the timestamp is older than the latest
@@ -154,7 +155,7 @@ public interface NotificationAccumulator {
      *                                  {@link #completeAndSend()}
      */
     void resourceValueUpdate(String modelPackageUri, String model, String provider, String service, String resource, Class<?> type,
-            Object oldValue, Object newValue, Instant timestamp);
+            Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp);
 
     /**
      * Called to notify of a resource action - if multiple actions occur they will
@@ -165,9 +166,7 @@ public interface NotificationAccumulator {
      * @param provider  the provider name
      * @param service   the service name
      * @param resource  the resource name
-     * @param oldValue  the value before the update
-     * @param newValue  the value after the update
-     * @param timestamp the latest timestamp of the value after the update
+     * @param timestamp the time at which the action was triggered
      *
      * @throws IllegalStateException if this accumulator has been completed with
      *                               {@link #completeAndSend()}

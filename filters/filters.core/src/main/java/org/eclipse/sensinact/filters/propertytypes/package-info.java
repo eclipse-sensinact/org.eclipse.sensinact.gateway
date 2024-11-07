@@ -10,13 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.filters.ldap.antlr.impl;
 
-import org.eclipse.sensinact.core.snapshot.ICriterion;
-
-public interface ILdapCriterion extends ICriterion {
-    /**
-     * Negate the current criterion
-     */
-    ILdapCriterion negate();
-}
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("0.0.1")
+package org.eclipse.sensinact.filters.propertytypes;

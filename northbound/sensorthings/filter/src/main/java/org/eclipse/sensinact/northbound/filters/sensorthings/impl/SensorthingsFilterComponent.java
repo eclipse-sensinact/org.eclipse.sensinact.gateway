@@ -12,14 +12,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.impl;
 
+import static org.eclipse.sensinact.northbound.filters.sensorthings.ISensorThingsFilterConstants.OGC_FILTER;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.ISensorThingsFilterConstants.SENSORTHINGS_FILTER;
+
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.filters.api.IFilterParser;
+import org.eclipse.sensinact.filters.propertytypes.FiltersSupported;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorThingsFilterConstants;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
@@ -30,9 +35,8 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolComm
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.osgi.service.component.annotations.Component;
 
-@Component(immediate = true, service = { IFilterParser.class, ISensorthingsFilterParser.class }, property = {
-        IFilterParser.SUPPORTED_FILTER_LANGUAGE + "={" + ISensorThingsFilterConstants.OGC_FILTER + ","
-                + ISensorThingsFilterConstants.SENSORTHINGS_FILTER + "}" })
+@Component
+@FiltersSupported({OGC_FILTER, SENSORTHINGS_FILTER})
 public class SensorthingsFilterComponent implements IFilterParser, ISensorthingsFilterParser {
 
     @Override
@@ -61,7 +65,7 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
 
         // Parse the filter
         try {
-            final ANTLRInputStream inStream = new ANTLRInputStream(query);
+            final CharStream inStream = CharStreams.fromString(query);
             final ODataFilterLexer markupLexer = new ODataFilterLexer(inStream);
             final CommonTokenStream commonTokenStream = new CommonTokenStream(markupLexer);
             final ODataFilterParser parser = new ODataFilterParser(commonTokenStream);

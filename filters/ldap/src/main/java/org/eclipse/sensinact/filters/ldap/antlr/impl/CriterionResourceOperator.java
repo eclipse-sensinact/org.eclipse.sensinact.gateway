@@ -64,6 +64,12 @@ public class CriterionResourceOperator extends AbstractCriterion {
      * @param operator LDAP comparison operator
      */
     public CriterionResourceOperator(final SensiNactPath rcPath, final Object value, final LdapComparator operator) {
+        this(rcPath, value, operator, false);
+    }
+
+    private CriterionResourceOperator(final SensiNactPath rcPath, final Object value, final LdapComparator operator,
+            boolean isNegative) {
+        super(isNegative);
         this.rcPath = rcPath;
         this.expected = value;
         this.operator = operator;
@@ -259,5 +265,10 @@ public class CriterionResourceOperator extends AbstractCriterion {
             }
             return test;
         });
+    }
+
+    @Override
+    public ILdapCriterion negate() {
+        return new CriterionResourceOperator(rcPath, expected, operator, !isNegative());
     }
 }

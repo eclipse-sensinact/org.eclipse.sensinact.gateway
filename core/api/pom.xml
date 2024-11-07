@@ -20,11 +20,6 @@
   <artifactId>api</artifactId>
   <name>SensiNact core API</name>
   <description>The API of the sensinact gateway core</description>
-  <!-- No integration tests -->
-  <properties>
-    <bnd-tests.skip>true</bnd-tests.skip>
-  </properties>
-
 
   <dependencies>
     <dependency>

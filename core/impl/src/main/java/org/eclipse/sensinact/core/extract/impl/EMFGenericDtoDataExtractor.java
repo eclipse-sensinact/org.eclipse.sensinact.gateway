@@ -60,6 +60,13 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
         }
 
         List<AbstractUpdateDto> list = new ArrayList<>();
+        // Include metadata updates first so that any data changes publish up to date metadata
+        if (dto.metadata != null) {
+            MetadataUpdateDto dud = copyCommonFields(dto, instant, new MetadataUpdateDto());
+            dud.metadata = dto.metadata;
+            dud.removeNullValues = true;
+            list.add(dud);
+        }
 
         // Accept a null value if this is not a metadata update
         if (dto.value != null || dto.nullAction != NullAction.IGNORE) {
@@ -68,13 +75,6 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
                 dud.type = dto.type;
             dud.data = dto.value;
             dud.modelEClass = dto.modelEClass;
-            list.add(dud);
-        }
-
-        if (dto.metadata != null) {
-            MetadataUpdateDto dud = copyCommonFields(dto, instant, new MetadataUpdateDto());
-            dud.metadata = dto.metadata;
-            dud.removeNullValues = true;
             list.add(dud);
         }
 

@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.notification;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,6 +32,8 @@ public class ResourceDataNotification extends AbstractResourceNotification {
     public Instant timestamp;
 
     public Class<?> type;
+
+    public Map<String, Object> metadata;
 
     @Override
     public String getTopic() {
