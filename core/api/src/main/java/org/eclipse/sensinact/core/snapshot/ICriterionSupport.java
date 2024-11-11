@@ -16,11 +16,14 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 class ResourceDataBackedProviderSnapshot implements ProviderSnapshot {
     final ResourceDataNotification rdn;
@@ -172,4 +175,134 @@ class ResourceDataBackedResourceSnapshot implements ResourceSnapshot {
         return ValueType.UPDATABLE;
     }
 
+}
+
+abstract class CombinationCriterion implements ICriterion {
+
+    protected final ICriterion a;
+    protected final ICriterion b;
+
+    public CombinationCriterion(ICriterion a, ICriterion b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    protected <T> Predicate<T> and(Function<ICriterion, Predicate<T>> f) {
+        Predicate<T> thisFilter = f.apply(a);
+        if(thisFilter == null) {
+            return f.apply(b);
+        } else {
+            Predicate<T> thatFilter = f.apply(b);
+            if(thatFilter == null) {
+                return thisFilter;
+            } else {
+                return thisFilter.and(thatFilter);
+            }
+        }
+    }
+
+    protected <T> Predicate<T> or(Function<ICriterion, Predicate<T>> f) {
+        Predicate<T> thisFilter = f.apply(a);
+        if(thisFilter == null) {
+            return null;
+        } else {
+            Predicate<T> thatFilter = f.apply(b);
+            if(thatFilter == null) {
+                return null;
+            } else {
+                return thisFilter.or(thatFilter);
+            }
+        }
+    }
+
+}
+
+class AndCriterion extends CombinationCriterion {
+
+    public AndCriterion(ICriterion a, ICriterion b) {
+        super(a, b);
+    }
+
+    @Override
+    public ResourceValueFilter getResourceValueFilter() {
+        ResourceValueFilter thisFilter = a.getResourceValueFilter();
+        if(thisFilter == null) {
+            return b.getResourceValueFilter();
+        } else {
+            ResourceValueFilter thatFilter = b.getResourceValueFilter();
+            if(thatFilter == null) {
+                return thisFilter;
+            } else {
+                return (a,b) -> thisFilter.test(a, b) && thatFilter.test(a, b);
+            }
+        }
+    }
+
+    @Override
+    public Predicate<ProviderSnapshot> getProviderFilter() {
+        return and(ICriterion::getProviderFilter);
+    }
+
+    @Override
+    public Predicate<ServiceSnapshot> getServiceFilter() {
+        // Note that we *must* use an OR here to avoid
+        // losing services that we need in one (but not
+        // both) parts of the filter
+        return or(ICriterion::getServiceFilter);
+    }
+
+    @Override
+    public Predicate<ResourceSnapshot> getResourceFilter() {
+        // Note that we *must* use an OR here to avoid
+        // losing resources that we need in one (but not
+        // both) parts of the filter
+        return or(ICriterion::getResourceFilter);
+    }
+
+    @Override
+    public Predicate<GeoJsonObject> getLocationFilter() {
+        return and(ICriterion::getLocationFilter);
+    }
+}
+
+class OrCriterion extends CombinationCriterion {
+
+    public OrCriterion(ICriterion a, ICriterion b) {
+        super(a, b);
+    }
+
+    @Override
+    public ResourceValueFilter getResourceValueFilter() {
+        ResourceValueFilter thisFilter = a.getResourceValueFilter();
+        if(thisFilter == null) {
+            return null;
+        } else {
+            ResourceValueFilter thatFilter = b.getResourceValueFilter();
+            if(thatFilter == null) {
+                return null;
+            } else {
+                return (a,b) -> thisFilter.test(a, b) || thatFilter.test(a, b);
+            }
+        }
+    }
+
+    @Override
+    public Predicate<ProviderSnapshot> getProviderFilter() {
+        return or(ICriterion::getProviderFilter);
+    }
+
+    @Override
+    public Predicate<ServiceSnapshot> getServiceFilter() {
+        return or(ICriterion::getServiceFilter);
+    }
+
+    @Override
+    public Predicate<ResourceSnapshot> getResourceFilter() {
+        return or(ICriterion::getResourceFilter);
+    }
+
+    @Override
+    public Predicate<GeoJsonObject> getLocationFilter() {
+        return or(ICriterion::getLocationFilter);
+    }
 }
