@@ -14,7 +14,6 @@ package org.eclipse.sensinact.core.snapshot;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -69,62 +68,17 @@ public interface ICriterion {
 
     /**
      * Combine this filter with another filter as a logical AND
+     *
+     * <p>
+     * Note that the included services and resources will still
+     * use an OR semantic so that their values are available
+     * for the {@link ResourceValueFilter}
+     *
      * @param criterion
      * @return
      */
     default ICriterion and(ICriterion criterion) {
-        final ICriterion this_ = this;
-        return new ICriterion() {
-
-            @Override
-            public Predicate<ServiceSnapshot> getServiceFilter() {
-                return and(ICriterion::getServiceFilter);
-            }
-
-            private <T> Predicate<T> and(Function<ICriterion, Predicate<T>> f) {
-                Predicate<T> thisFilter = f.apply(this_);
-                if(thisFilter == null) {
-                    return f.apply(criterion);
-                } else {
-                    Predicate<T> thatFilter = f.apply(criterion);
-                    if(thatFilter == null) {
-                        return thisFilter;
-                    } else {
-                        return thisFilter.and(thatFilter);
-                    }
-                }
-            }
-
-            @Override
-            public ResourceValueFilter getResourceValueFilter() {
-                ResourceValueFilter thisFilter = this_.getResourceValueFilter();
-                if(thisFilter == null) {
-                    return criterion.getResourceValueFilter();
-                } else {
-                    ResourceValueFilter thatFilter = criterion.getResourceValueFilter();
-                    if(thatFilter == null) {
-                        return thisFilter;
-                    } else {
-                        return (a,b) -> thisFilter.test(a, b) && thatFilter.test(a, b);
-                    }
-                }
-            }
-
-            @Override
-            public Predicate<ResourceSnapshot> getResourceFilter() {
-                return and(ICriterion::getResourceFilter);
-            }
-
-            @Override
-            public Predicate<ProviderSnapshot> getProviderFilter() {
-                return and(ICriterion::getProviderFilter);
-            }
-
-            @Override
-            public Predicate<GeoJsonObject> getLocationFilter() {
-                return and(ICriterion::getLocationFilter);
-            }
-        };
+        return new AndCriterion(this, criterion);
     }
 
     /**
@@ -133,58 +87,7 @@ public interface ICriterion {
      * @return
      */
     default ICriterion or(ICriterion criterion) {
-        final ICriterion this_ = this;
-        return new ICriterion() {
-
-            @Override
-            public Predicate<ServiceSnapshot> getServiceFilter() {
-                return or(ICriterion::getServiceFilter);
-            }
-
-            private <T> Predicate<T> or(Function<ICriterion, Predicate<T>> f) {
-                Predicate<T> thisFilter = f.apply(this_);
-                if(thisFilter == null) {
-                    return null;
-                } else {
-                    Predicate<T> thatFilter = f.apply(criterion);
-                    if(thatFilter == null) {
-                        return null;
-                    } else {
-                        return thisFilter.or(thatFilter);
-                    }
-                }
-            }
-
-            @Override
-            public ResourceValueFilter getResourceValueFilter() {
-                ResourceValueFilter thisFilter = this_.getResourceValueFilter();
-                if(thisFilter == null) {
-                    return null;
-                } else {
-                    ResourceValueFilter thatFilter = criterion.getResourceValueFilter();
-                    if(thatFilter == null) {
-                        return null;
-                    } else {
-                        return (a,b) -> thisFilter.test(a, b) || thatFilter.test(a, b);
-                    }
-                }
-            }
-
-            @Override
-            public Predicate<ResourceSnapshot> getResourceFilter() {
-                return or(ICriterion::getResourceFilter);
-            }
-
-            @Override
-            public Predicate<ProviderSnapshot> getProviderFilter() {
-                return or(ICriterion::getProviderFilter);
-            }
-
-            @Override
-            public Predicate<GeoJsonObject> getLocationFilter() {
-                return or(ICriterion::getLocationFilter);
-            }
-        };
+        return new OrCriterion(this, criterion);
     }
 
     /**
@@ -196,30 +99,34 @@ public interface ICriterion {
         final ICriterion this_ = this;
         return new ICriterion() {
 
+            private <T> Predicate<T> negate(Predicate<T> p) {
+                return p == null ? null : p.negate();
+            }
+
             @Override
             public Predicate<ServiceSnapshot> getServiceFilter() {
-                return this_.getServiceFilter().negate();
+                return negate(this_.getServiceFilter());
             }
 
             @Override
             public ResourceValueFilter getResourceValueFilter() {
                 ResourceValueFilter thisFilter = this_.getResourceValueFilter();
-                return (a,b) -> !thisFilter.test(a, b);
+                return thisFilter == null ? null : (a,b) -> !thisFilter.test(a, b);
             }
 
             @Override
             public Predicate<ResourceSnapshot> getResourceFilter() {
-                return this_.getResourceFilter().negate();
+                return negate(this_.getResourceFilter());
             }
 
             @Override
             public Predicate<ProviderSnapshot> getProviderFilter() {
-                return this_.getProviderFilter().negate();
+                return negate(this_.getProviderFilter());
             }
 
             @Override
             public Predicate<GeoJsonObject> getLocationFilter() {
-                return this_.getLocationFilter().negate();
+                return negate(this_.getLocationFilter());
             }
         };
     }

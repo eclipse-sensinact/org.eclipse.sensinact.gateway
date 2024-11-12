@@ -33,6 +33,11 @@
       <artifactId>geo-json</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>resource.selector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
       <artifactId>history-api</artifactId>
       <version>${project.version}</version>
@@ -72,6 +77,12 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>impl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>resource.selector.impl</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

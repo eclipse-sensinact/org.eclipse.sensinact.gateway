@@ -24,6 +24,8 @@
   <modules>
     <module>filters.core</module>
     <module>ldap</module>
+    <module>resource.selector</module>
+    <module>resource.selector.impl</module>
   </modules>
   <properties>
     <sensinact.core.version>${project.version}</sensinact.core.version>

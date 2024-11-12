@@ -23,6 +23,16 @@
       <version>${revision}${changelist}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>resource.selector</artifactId>
+      <version>${revision}${changelist}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>resource.selector.impl</artifactId>
+      <version>${revision}${changelist}</version>
+    </dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jdbc</artifactId>
       <version>1.0.0</version>

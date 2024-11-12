@@ -242,10 +242,10 @@ public class ICriterionTest {
             ICriterion criterionAB = criterionA.and(criterionB);
             ICriterion criterionBA = criterionB.and(criterionA);
 
-            assertEquals(expected, andNull.getServiceFilter().test(ss));
-            assertEquals(expected, nullAnd.getServiceFilter().test(ss));
-            assertFalse(criterionAB.getServiceFilter().test(ss));
-            assertFalse(criterionBA.getServiceFilter().test(ss));
+            assertNull(andNull.getServiceFilter());
+            assertNull(nullAnd.getServiceFilter());
+            assertTrue(criterionAB.getServiceFilter().test(ss));
+            assertTrue(criterionBA.getServiceFilter().test(ss));
         }
 
         @ParameterizedTest
@@ -264,10 +264,10 @@ public class ICriterionTest {
             ICriterion criterionAB = criterionA.and(criterionB);
             ICriterion criterionBA = criterionB.and(criterionA);
 
-            assertEquals(expected, andNull.getResourceFilter().test(rs));
-            assertEquals(expected, nullAnd.getResourceFilter().test(rs));
-            assertFalse(criterionAB.getResourceFilter().test(rs));
-            assertFalse(criterionBA.getResourceFilter().test(rs));
+            assertNull(andNull.getResourceFilter());
+            assertNull(nullAnd.getResourceFilter());
+            assertTrue(criterionAB.getResourceFilter().test(rs));
+            assertTrue(criterionBA.getResourceFilter().test(rs));
         }
 
         @SuppressWarnings({"rawtypes", "unchecked"})
