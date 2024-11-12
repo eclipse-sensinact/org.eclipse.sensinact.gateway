@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -355,9 +356,11 @@ public class ResourceSelectorCriterion implements ICriterion {
                 rs.provider, rs.service, rs.resource);
         Predicate<String> isMultiWildcard = "*"::equals;
 
+        final AtomicBoolean stopStream = new AtomicBoolean(false);
+
         String topic = topicSegments.map(this::getTopicSegment)
-            .takeWhile(isMultiWildcard.negate())
-            .collect(Collectors.joining("/", "DATA", ""));
+            .takeWhile(s -> stopStream.compareAndSet(false, isMultiWildcard.test(s)))
+            .collect(Collectors.joining("/", "DATA/", ""));
 
         return List.of(topic);
     }
