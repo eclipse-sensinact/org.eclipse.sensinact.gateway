@@ -16,6 +16,7 @@ import static org.osgi.service.typedevent.TypedEventConstants.TYPED_EVENT_TOPICS
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -44,6 +48,9 @@ import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Component(service = {}, immediate = true, configurationPid = "sensinact.history.timescale", configurationPolicy = ConfigurationPolicy.REQUIRE)
 @RequireTypedEvent
 public class TimescaleHistoricalStore {
@@ -61,6 +68,20 @@ public class TimescaleHistoricalStore {
         String _password() default NOT_SET;
 
         String provider() default "timescale-history";
+
+        /**
+         * @return A list of JSON encoded {@link ResourceSelector} instances
+         *         used to select the resources for which history should be
+         *         stored
+         */
+        String[] include_resources() default "{}";
+
+        /**
+         * @return A list of JSON encoded {@link ResourceSelector} instances
+         *         used to exclude resources from history storage. Applies
+         *         after the <code>include.resources</code> selection.
+         */
+        String[] exclude_resources() default {};
     }
 
     @Reference
@@ -72,7 +93,16 @@ public class TimescaleHistoricalStore {
     @Reference
     GatewayThread gatewayThread;
 
+    @Reference
+    ResourceSelectorFilterFactory filterFactory;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
     private Config config;
+
+    private ICriterion include;
+
+    private ICriterion exclude;
 
     private JDBCConnectionProvider provider;
 
@@ -85,10 +115,37 @@ public class TimescaleHistoricalStore {
         if (logger.isDebugEnabled()) {
             logger.debug("Starting the TimescaleDB history store");
         }
+
+        String[] resources = config.include_resources();
+        if(resources.length == 0) {
+            throw new IllegalArgumentException("At least one include resource selector must be set");
+        }
+
+        ICriterion includeFilter = filterFactory.parseResourceSelector(Arrays.stream(resources).map(this::fromString));
+
+        ICriterion excludeFilter;
+        resources = config.exclude_resources();
+        if(resources.length == 0) {
+            excludeFilter = null;
+        } else {
+            excludeFilter = filterFactory.parseResourceSelector(Arrays.stream(resources).map(this::fromString));
+        }
+
         synchronized (this) {
             this.config = config;
+            this.include = includeFilter;
+            this.exclude = excludeFilter;
         }
+
         doStart(ctx);
+    }
+
+    private ResourceSelector fromString(String s) {
+        try {
+            return mapper.readValue(s, ResourceSelector.class);
+        } catch (JsonProcessingException j) {
+            throw new IllegalArgumentException("Unable to read Resource Selector " + s);
+        }
     }
 
     void doStart(BundleContext ctx) {
@@ -214,16 +271,20 @@ public class TimescaleHistoricalStore {
 
     private void registerListener(BundleContext ctx) {
         ServiceRegistration<?> reg;
+        ICriterion include;
+        ICriterion exclude;
         synchronized (this) {
             reg = this.reg;
             this.reg = null;
+            include = this.include;
+            exclude = this.exclude;
         }
         if (reg == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Registering listener for data update events");
             }
-            reg = ctx.registerService(TypedEventHandler.class, new TimescaleDatabaseWorker(txControl, connection::get),
-                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, "DATA/*", "sensiNact.whiteboard.resource", true,
+            reg = ctx.registerService(TypedEventHandler.class, new TimescaleDatabaseWorker(txControl, connection::get, include, exclude),
+                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, include.dataTopics(), "sensiNact.whiteboard.resource", true,
                             "sensiNact.provider.name", config.provider())));
             synchronized (this) {
                 if (this.reg == null) {

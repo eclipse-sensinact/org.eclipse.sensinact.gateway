@@ -45,6 +45,8 @@
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.metadata;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.resource.selector;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.resource.selector.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider-tests;version='[0.0.2,0.0.3)',\

@@ -23,9 +23,11 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.southbound.history.api.HistoricalQueries;
@@ -122,17 +124,37 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public TimescaleDatabaseWorker(TransactionControl txControl, Supplier<Connection> connectionSupplier) {
+    private final Predicate<ResourceDataNotification> include;
+
+    private final Predicate<ResourceDataNotification> exclude;
+
+    public TimescaleDatabaseWorker(TransactionControl txControl, Supplier<Connection> connectionSupplier, ICriterion include, ICriterion exclude) {
         super();
         this.txControl = txControl;
         this.connectionSupplier = connectionSupplier;
+        this.include = include.dataEventFilter();
+        this.exclude = exclude == null ? x -> Boolean.FALSE : exclude.dataEventFilter();
     }
 
     @Override
     public void notify(String topic, ResourceDataNotification event) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Update received for topic {} and the data will be stored", topic);
+            logger.debug("Update received for topic {}", topic);
+        }
+
+        if(include.test(event)) {
+            if(exclude.test(event)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Excluded data update received on topic {}", topic);
+                }
+                return;
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Ignoring data update on topic {}", topic);
+            }
+            return;
         }
 
         String command;

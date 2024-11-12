@@ -98,7 +98,8 @@ public class TimescaleHistoryTest {
             throws Exception {
         historyProviderConfig = cm;
         cm.update(new Hashtable<>(Map.of("url", container.getJdbcUrl(), "user", container.getUsername(), ".password",
-                container.getPassword())));
+                container.getPassword(), "exclude.resources",
+                List.of("{\"provider\":{\"value\": \"ignoredProvider\",\"type\":\"EXACT\"},\"value\":{\"value\": \"42\",\"operation\":\"GREATER_THAN\"}}"))));
         waitForStart();
     }
 
@@ -193,6 +194,12 @@ public class TimescaleHistoryTest {
         dto.value = BigDecimal.valueOf(value);
         dto.type = BigDecimal.class;
         dto.timestamp = timestamp;
+        return dto;
+    }
+
+    private GenericDto getIgnorableDto(Double value, Instant timestamp) {
+        GenericDto dto = getDto(value, timestamp);
+        dto.provider = "ignoredProvider";
         return dto;
     }
 
@@ -330,9 +337,33 @@ public class TimescaleHistoryTest {
             }
         }
 
+        @Test
+        void basicIgnoredData() throws Exception {
+            push.pushUpdate(getIgnorableDto(12.3d, TS_2012)).getValue();
+            push.pushUpdate(getIgnorableDto(45.6d, TS_2013)).getValue();
+            push.pushUpdate(getIgnorableDto(6.78d, TS_2014)).getValue();
+
+            waitForRowCount("sensinact.numeric_data", 2);
+
+            try (Connection connection = getDataSource().getConnection();
+                    ResultSet result = connection.createStatement().executeQuery(
+                            "SELECT * FROM sensinact.numeric_data WHERE provider = 'ignoredProvider' ORDER BY time;")) {
+
+                assertTrue(result.next());
+                checkResult(result, "ignoredProvider", 12.3d, TS_2012);
+                assertTrue(result.next());
+                checkResult(result, "ignoredProvider", 6.78d, TS_2014);
+                assertFalse(result.next());
+            }
+        }
+
         private void checkResult(ResultSet result, Double data, Instant timestamp) throws SQLException {
+            checkResult(result, "Bobbidi", data, timestamp);
+        }
+
+        private void checkResult(ResultSet result, String provider, Double data, Instant timestamp) throws SQLException {
             assertEquals("Bibbidi", result.getString("model"));
-            assertEquals("Bobbidi", result.getString("provider"));
+            assertEquals(provider, result.getString("provider"));
             assertEquals("Boo", result.getString("service"));
             assertEquals("Magic", result.getString("resource"));
             assertEquals(data, result.getBigDecimal("data").doubleValue());
