@@ -1,0 +1,7 @@
+-includepackage: \
+    org.jeasy.rules.annotation,\
+    org.jeasy.rules.api,\
+    org.jeasy.rules.core
+
+-exportcontents: \
+    org.jeasy.rules.*;version=4.1

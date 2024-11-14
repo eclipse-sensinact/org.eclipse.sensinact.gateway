@@ -58,6 +58,7 @@ header:
     - 'docs/make.bat'
     - 'docs/Makefile'
     - 'docs/requirements.txt'
+    - 'southbound/rules/easy-rules/osgi/src/main/resources/META-INF/license/easy-rules-license.txt'
     - 'webclient/dist'
     - 'webclient/node_modules'
     - 'webclient/openapi'
