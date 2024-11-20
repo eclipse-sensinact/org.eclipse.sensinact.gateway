@@ -10,14 +10,16 @@ If you're still having problems then search the [issue tracker](https://github.c
 
 ## Contributing code
 
-If you want to contribute fixes or enhancements to Eclipse sensiNact then you can do so using a *triangular workflow*.
+We are always happy to welcome new contributors ❤️. If you want to contribute fixes or enhancements to Eclipse sensiNact then you can do so using a *triangular workflow*.
 
+* To make things easier for everyone, please start by checking if you have already signed the [ECA](#contributor-license)
 * Fork the repository in GitHub and make changes in your fork.
   - Make sure that your changes are small and easy to understand. Separate changes into multiple commits where that makes sense
   - Commit messages should be detailed and descriptive
-  - Include automated tests for any bug fixes and new code
+  - Include automated tests for any bug fixes and new code. Contributions submitted without tests may not be accepted.
   - Each commit should try to do one thing, and the code should build cleanly with each commit
 * Submit a pull request to the Eclipse sensiNact repository
+  - Relate the pull request to an existing issue or discussion. This will give reviewers context for your changes and make the review process faster 🚀.
   - Make sure that the pull request passes all of the CI checks
 
 
