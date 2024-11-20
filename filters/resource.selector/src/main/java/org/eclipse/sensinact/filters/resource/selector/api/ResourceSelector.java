@@ -14,6 +14,8 @@ package org.eclipse.sensinact.filters.resource.selector.api;
 
 import java.util.List;
 
+import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 
@@ -22,7 +24,19 @@ import com.fasterxml.jackson.annotation.JsonFormat.Feature;
  * or name. Members can be null (any). Selections set in a single
  * {@link ResourceSelector} are combined with an AND semantic.
  * If you want to set up an OR semantic then you can do this by creating multiple
- * {@link ResourceSelector} instances
+ * {@link ResourceSelector} instances and passing them to a {@link ResourceSelectorFilterFactory}
+ * <p>
+ * Note that the primary goal of a Resource Selector is to select a *single* resource
+ * across one or more providers. They are most efficient when used with 
+ * {@link MatchType#EXACT} {@link Selection}s, particularly when subscribing to data
+ * notifications. Common use cases include:
+ * 
+ * <ul>
+ *   <li>Setting exact matches for the model, service and resource, selecting resource
+ *   value data across certain types of provider</li>
+ *   <li>Gathering all resources for a specific provider</li>
+ *   <li>Gathering all providers where the value of a particular resource has a certain value</li>
+ * </ul>
  */
 public class ResourceSelector {
 
