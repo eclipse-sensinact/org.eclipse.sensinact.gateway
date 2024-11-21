@@ -27,6 +27,12 @@ Eclipse sensiNact represents its data using the following model:
 
 The model is described more in detail in the [Data Model](./core/CoreModel.md){.clear-right} section.
 
+## Filtering
+
+Filters provide an efficient way to locate and access data stored in the gateway. For clients subscribing to data changes they also provide a mechanism to restrict the data events that you receive.
+
+Filtering is described in more detail in the [Filtering](./filters/Filters.md) section.
+
 ## Getting Started
 
 The following examples will help you to quickly get started with the sensiNact gateway

@@ -91,8 +91,9 @@ public class ResourceSelectorCriterion implements ICriterion {
 
     private static <T> Predicate<T> fromSelection(Function<T,String> nameExtractor, Selection s) {
 
+        MatchType type = s.type == null ? MatchType.EXACT : s.type;
         Predicate<String> test;
-        switch(s.type) {
+        switch(type) {
         case EXACT:
             test = s.value::equals;
             break;
@@ -241,6 +242,8 @@ public class ResourceSelectorCriterion implements ICriterion {
             Object o = t.getValue();
 
             if(o == null) {
+                return false;
+            } else if ("".equals(o)) {
                 return false;
             } else if (o instanceof Collection) {
                 return !((Collection<?>)o).isEmpty();

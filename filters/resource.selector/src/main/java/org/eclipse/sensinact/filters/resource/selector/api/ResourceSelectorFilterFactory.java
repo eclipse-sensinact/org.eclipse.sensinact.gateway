@@ -16,6 +16,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 
+/**
+ * A factory for creating {@link ICriterion} instances based on
+ * {@link ResourceSelector} definitions
+ */
 public interface ResourceSelectorFilterFactory {
 
     /**

@@ -11,6 +11,10 @@
 *   Kentyou - initial implementation
 **********************************************************************/
 
+/**
+ * Resource Selectors are a simple and efficient way to select resource(s)
+ * from the sensiNact gateway
+ */
 @org.osgi.annotation.bundle.Export
 @org.osgi.annotation.versioning.Version("0.0.1")
 package org.eclipse.sensinact.filters.resource.selector.api;
