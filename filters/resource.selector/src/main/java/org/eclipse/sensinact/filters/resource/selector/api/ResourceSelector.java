@@ -27,10 +27,10 @@ import com.fasterxml.jackson.annotation.JsonFormat.Feature;
  * {@link ResourceSelector} instances and passing them to a {@link ResourceSelectorFilterFactory}
  * <p>
  * Note that the primary goal of a Resource Selector is to select a *single* resource
- * across one or more providers. They are most efficient when used with 
+ * across one or more providers. They are most efficient when used with
  * {@link MatchType#EXACT} {@link Selection}s, particularly when subscribing to data
  * notifications. Common use cases include:
- * 
+ *
  * <ul>
  *   <li>Setting exact matches for the model, service and resource, selecting resource
  *   value data across certain types of provider</li>

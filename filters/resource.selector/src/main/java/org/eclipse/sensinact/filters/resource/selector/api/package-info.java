@@ -12,7 +12,7 @@
 **********************************************************************/
 
 /**
- * Resource Selectors are a simple and efficient way to select resource(s) 
+ * Resource Selectors are a simple and efficient way to select resource(s)
  * from the sensiNact gateway
  */
 @org.osgi.annotation.bundle.Export

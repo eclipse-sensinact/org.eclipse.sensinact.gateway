@@ -20,7 +20,7 @@ A filter can easily be created from a Resource Selector using the `ResourceSelec
 
 ### Limitations of Resource Selectors
 
-Resource selectors are designed to efficiently select and subscribe to single resource values, and are not well suited to more complex `AND` scenarios, particularly when subscribing. 
+Resource selectors are designed to efficiently select and subscribe to single resource values, and are not well suited to more complex `AND` scenarios, particularly when subscribing.
 
 If you need your selection tests to be based on the values of multiple resources simultaneously then you are probably best using a different filter type, or rethinking your filter so that it can be expressed more simply.
 
@@ -87,7 +87,7 @@ Value Selections have the following form:
 
 ### Operation Types
 
-The `operation` of a value selection is one of: `EQUALS`, `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUAL`, `GREATER_THAN_OR_EQUAL`, `REGEX`, `REGEX_REGION`, or `IS_SET`. 
+The `operation` of a value selection is one of: `EQUALS`, `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUAL`, `GREATER_THAN_OR_EQUAL`, `REGEX`, `REGEX_REGION`, or `IS_SET`.
 
 Mathematical operators apply by converting `value` into the same type as the resource value being tested, and then either using `equals` or by treating the resource value as being `Comparable`. If the resource value *is not* `Comparable` then the operation returns `false`.
 
@@ -173,7 +173,7 @@ The `value` property of the Location Selection is a GeoJSON object representing 
 
 ### Operation Types
 
-The `operation` of a value selection is one of: 
+The `operation` of a value selection is one of:
 
 * `CONTAINS` - The location of the provider is *fully contained* within the region defined by this Location Selection
 * `INTERSECTS` - The location of the provider is at least partially contained within the region defined by this Location selection

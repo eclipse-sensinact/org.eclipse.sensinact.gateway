@@ -6,7 +6,7 @@ Filtering is the generic process of requesting devices based on their structure 
 
 1. The core API allows the creation of a *snapshot*, containing the state of zero or more providers, services and resources at a given point in time. When provided with a filter the core gateway will restrict the list of data in the snapshot reducing the overhead of snapshot generation, and the amount of data the caller has to process.
 
-2. The core API generates *notification events* when data in the digital twin changes. A filter can be used to restrict the set of events that are delivered to the listener. 
+2. The core API generates *notification events* when data in the digital twin changes. A filter can be used to restrict the set of events that are delivered to the listener.
 
 ## Filtering example
 
@@ -84,7 +84,7 @@ Only one data event matches the filter provided by the client (`climate-bedroom/
 
 Filters are obtained in different ways depending on the filter language being used, and the object that you have to start with. Usually you can look up a service which will generate an `ICriterion` from your raw filter.
 
-### The Filter Parser service 
+### The Filter Parser service
 
 One such service is the `IFilterHandler`, which is actually a parser collection. You pass a raw filter expression String, the filter language, and optionally some parser configuration parameters. These will delegate to a real `IFilterParser` instance which does the actual parsing.
 

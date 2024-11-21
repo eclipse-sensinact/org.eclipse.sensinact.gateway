@@ -48,7 +48,7 @@ public class EasyRulesComponent implements RuleDefinition {
 
     public @interface Config {
 
-        String name() default "";
+        String sensinact_rule_name() default "";
 
         String[] resource_selectors();
 
@@ -114,9 +114,9 @@ public class EasyRulesComponent implements RuleDefinition {
 
     private Rule toRule(RuleDTO dto) {
         Objects.requireNonNull(dto.name, () -> "There is an unnamed rule in config "
-                + config.name());
+                + config.sensinact_rule_name());
         Objects.requireNonNull(dto.condition, () -> "The rule " + dto.name + " in config "
-                + config.name() + " must specify a condition");
+                + config.sensinact_rule_name() + " must specify a condition");
         JexlExpression condition = jexl.createExpression(dto.condition);
         List<JexlScript> actions = dto.action == null ? List.of() :
             dto.action.stream().map(jexl::createScript).collect(toList());

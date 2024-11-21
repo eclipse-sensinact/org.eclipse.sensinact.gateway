@@ -30,6 +30,7 @@ Writing your own [custom southbound connector](./custom/custom.md) is very easy,
 device-factory/_index
 http/_index
 mqtt/_index
+rules/_index
 history/_index
 custom/*
 ```
