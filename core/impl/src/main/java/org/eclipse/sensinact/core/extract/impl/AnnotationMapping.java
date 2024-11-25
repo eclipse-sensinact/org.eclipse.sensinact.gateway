@@ -99,6 +99,7 @@ public class AnnotationMapping {
                     String.format("The mapping for class %s is not properly defined", clazz.getName()), t);
             return o -> {
                 FailedMappingDto fmd = new FailedMappingDto();
+                fmd.originalDto = o;
                 fmd.mappingFailure = fail;
                 return List.of(fmd);
             };
