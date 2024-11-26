@@ -111,11 +111,44 @@ public class RulesWhiteboardIntegrationTest {
         // Called once and not again
         Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
         Mockito.verifyNoMoreInteractions(rule);
+        Mockito.clearInvocations(rule);
 
         push.pushUpdate(makeRc("temperature", "Temp1", "sensor", "temperature", 12)).getValue();
 
         // Called once and not again
         Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
+
+        push.pushUpdate(makeRc("temperature", "Temp2", "sensor", "temperature", 42)).getValue();
+
+        // Not called for other updates
+        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.anyList(), Mockito.any());
+    }
+
+    @Test
+    void testWhiteboardNoPreExisting(@InjectBundleContext BundleContext bc) throws Exception {
+
+        RuleDefinition rule = Mockito.mock(RuleDefinition.class);
+
+        ICriterion criterion = Mockito.mock(ICriterion.class, Mockito.CALLS_REAL_METHODS);
+
+        Mockito.when(rule.getInputFilter()).thenReturn(criterion);
+
+        Mockito.when(criterion.getProviderFilter()).thenReturn(p -> "Temp5".equals(p.getName()));
+
+        bc.registerService(RuleDefinition.class, rule, new Hashtable<>(Map.of(Constants.SERVICE_ID, 5,
+                RuleDefinition.RULE_NAME_PROPERTY, "test")));
+
+        Mockito.verify(rule).getInputFilter();
+
+        // Called once and not again
+        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.eq(List.of()), Mockito.notNull());
+        Mockito.verifyNoMoreInteractions(rule);
+        Mockito.clearInvocations(rule);
+
+        push.pushUpdate(makeRc("temperature", "Temp5", "sensor", "temperature", 12)).getValue();
+
+        // Called once and not again
+        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp5")), Mockito.notNull());
 
         push.pushUpdate(makeRc("temperature", "Temp2", "sensor", "temperature", 42)).getValue();
 
