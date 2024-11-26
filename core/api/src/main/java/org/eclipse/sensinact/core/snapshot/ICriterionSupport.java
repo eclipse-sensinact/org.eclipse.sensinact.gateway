@@ -306,3 +306,37 @@ class OrCriterion extends CombinationCriterion {
         return or(ICriterion::getLocationFilter);
     }
 }
+
+class ResourceDataFilter implements Predicate<ResourceDataNotification> {
+
+    private final ICriterion criterion;
+
+    public ResourceDataFilter(ICriterion criterion) {
+        this.criterion = criterion;
+    }
+
+    private <T> boolean nullSafePredicate(Predicate<T> test, T value) {
+        return test == null ? true : test.test(value);
+    }
+
+    private boolean nullSafeFilter(ResourceValueFilter rvf, ProviderSnapshot p, List<ResourceSnapshot> rs) {
+        return rvf == null ? true : rvf.test(p, rs);
+    }
+
+    @Override
+    public boolean test(ResourceDataNotification rdn) {
+        ResourceDataBackedProviderSnapshot ps = new ResourceDataBackedProviderSnapshot(rdn);
+
+        boolean initial;
+        if(Objects.equals("admin", rdn.service) && Objects.equals("location", rdn.resource)) {
+            initial = nullSafePredicate(criterion.getLocationFilter(), (GeoJsonObject) rdn.newValue);
+        } else {
+            initial = true;
+        }
+
+        return initial && nullSafePredicate(criterion.getProviderFilter(), ps)
+                && nullSafePredicate(criterion.getServiceFilter(), ps.service)
+                && nullSafePredicate(criterion.getResourceFilter(), ps.service.resource)
+                && nullSafeFilter(criterion.getResourceValueFilter(), ps, List.of(ps.service.resource));
+    }
+}

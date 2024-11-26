@@ -21,9 +21,12 @@ import java.util.Deque;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -100,19 +103,23 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
 
     @Override
     public void notify(String topic, ResourceDataNotification event) {
-        eventDelivery.mark();
-        if(filter.test(event)) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Rule {} received data event on topic {}", ruleName, topic);
-            }
-            if(checkEventAgainstSnapshot(event)) {
+        try {
+            eventDelivery.mark();
+            if(filter.test(event)) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Updating snapshot data for rule", ruleName);
+                    LOG.debug("Rule {} received data event on topic {}", ruleName, topic);
                 }
-                updateSnapshot(1);
+                if(checkEventAgainstSnapshot(event)) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Updating snapshot data for rule", ruleName);
+                    }
+                    updateSnapshot(1);
+                }
+            } else {
+                eventRejection.mark();
             }
-        } else {
-            eventRejection.mark();
+        } catch (Exception e) {
+            LOG.error("An error occurred processing an event on topic {}", topic, e);
         }
     }
 
@@ -143,7 +150,9 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
                         update = false;
                     } else if (snapshot.equals(event.timestamp) && Objects.equals(tv.getValue(), event.newValue)) {
                         // Check the metadata
-                        if(r.getMetadata().equals(event.metadata)) {
+                        Map<String, Object> snapshotMeta = cleanMetadataMap(r.getMetadata());
+                        Map<String, Object> eventMeta = cleanMetadataMap(event.metadata);
+                        if(snapshotMeta.equals(eventMeta)) {
                             if(LOG.isDebugEnabled()) {
                                 LOG.debug("Existing snapshot for data {}/{}/{} is up to date",
                                         event.provider, event.service, event.resource);
@@ -159,6 +168,13 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
             }
         }
         return update;
+    }
+
+    private Map<String, Object> cleanMetadataMap(Map<String, Object> map) {
+        Set<String> forbidden = Set.of("timestamp", "value");
+        return map.entrySet().stream()
+                .filter(e -> !forbidden.contains(e.getKey()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     private void updateSnapshot(int attempt) {

@@ -18,10 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.LineString;
@@ -166,6 +169,29 @@ public class ICriterionTest {
             assertFalse(criterion.getLocationFilter().test(polygon));
             assertTrue(criterion.negate().getLocationFilter().test(polygon));
         }
+
+        @ParameterizedTest
+        @CsvSource(value = {"e,true", "f,false"})
+        public void dataEventTest(String value, boolean expected) {
+            ResourceDataNotification rdn = getNotification(value);
+
+            ICriterion criterion = getTestCriterion(null, null, null, "e", null);
+
+            assertEquals(expected, criterion.dataEventFilter().test(rdn));
+            assertEquals(!expected, criterion.negate().dataEventFilter().test(rdn));
+        }
+    }
+
+    private ResourceDataNotification getNotification(String value) {
+        ResourceDataNotification rdn = new ResourceDataNotification();
+        rdn.model = "a";
+        rdn.provider = "b";
+        rdn.service = "c";
+        rdn.resource = "d";
+        rdn.newValue = value;
+        rdn.timestamp = Instant.now();
+        rdn.metadata = Map.of("foo", "bar");
+        return rdn;
     }
 
     @Nested
@@ -320,6 +346,27 @@ public class ICriterionTest {
             assertFalse(criterionAB.getLocationFilter().test(polygon));
             assertFalse(criterionBA.getLocationFilter().test(polygon));
         }
+
+        @ParameterizedTest
+        @CsvSource(value = {"e,true", "f,false"})
+        public void dataEventTest(String value, boolean expected) {
+            ResourceDataNotification rdn = getNotification(value);
+
+            ICriterion criterionE = getTestCriterion(null, null, null, "e", null);
+            ICriterion nullCriterion = getTestCriterion(null, null, null, null, null);
+            ICriterion criterionF = getTestCriterion(null, null, null, "f", null);
+
+            ICriterion andNull = criterionE.and(nullCriterion);
+            ICriterion nullAnd = nullCriterion.and(criterionE);
+
+            ICriterion criterionEF = criterionE.and(criterionF);
+            ICriterion criterionFE = criterionF.and(criterionE);
+
+            assertEquals(expected, andNull.dataEventFilter().test(rdn));
+            assertEquals(expected, nullAnd.dataEventFilter().test(rdn));
+            assertFalse(criterionEF.dataEventFilter().test(rdn));
+            assertFalse(criterionFE.dataEventFilter().test(rdn));
+        }
     }
 
     @Nested
@@ -445,6 +492,21 @@ public class ICriterionTest {
 
             assertFalse(criterionAB.getLocationFilter().test(linestring));
             assertFalse(criterionBA.getLocationFilter().test(linestring));
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = {"e,true", "f,false"})
+        public void dataEventTest(String value, boolean expected) {
+            ResourceDataNotification rdn = getNotification(value);
+
+            ICriterion criterionE = getTestCriterion(null, null, null, "e", null);
+            ICriterion criterionF = getTestCriterion(null, null, null, "f", null);
+
+            ICriterion criterionEF = criterionE.and(criterionF);
+            ICriterion criterionFE = criterionF.and(criterionE);
+
+            assertFalse(criterionEF.dataEventFilter().test(rdn));
+            assertFalse(criterionFE.dataEventFilter().test(rdn));
         }
     }
 }

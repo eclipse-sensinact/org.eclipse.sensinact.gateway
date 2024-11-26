@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.core.snapshot;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -136,19 +135,6 @@ public interface ICriterion {
     }
 
     default Predicate<ResourceDataNotification> dataEventFilter() {
-        return rdn -> {
-            ResourceDataBackedProviderSnapshot ps = new ResourceDataBackedProviderSnapshot(rdn);
-
-            boolean initial;
-            if(Objects.equals("admin", rdn.service) && Objects.equals("location", rdn.resource)) {
-                initial = getLocationFilter().test((GeoJsonObject) rdn.newValue);
-            } else {
-                initial = true;
-            }
-
-            return initial && getProviderFilter().test(ps) && getServiceFilter().test(ps.service)
-                    && getResourceFilter().test(ps.service.resource)
-                    && getResourceValueFilter().test(ps, List.of(ps.service.resource));
-        };
+        return new ResourceDataFilter(this);
     }
 }
