@@ -167,7 +167,7 @@ public class PEMUtils {
         }
 
         // Extract the Base64 key and remove the spaces/new lines
-        final String b64key = pemContent.replaceAll("-----[\\-]+-----", "").replaceAll("[\r\n ]", "");
+        final String b64key = pemContent.replaceAll("-----[^-]+-----", "").replaceAll("[\r\n ]", "");
         final byte[] rawKey = Base64.getDecoder().decode(b64key);
         return loadPrivateKey(rawKey, algorithm);
     }
