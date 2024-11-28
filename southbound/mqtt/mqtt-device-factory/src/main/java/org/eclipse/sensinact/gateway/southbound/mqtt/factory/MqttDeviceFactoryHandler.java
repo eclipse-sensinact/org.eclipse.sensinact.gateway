@@ -111,6 +111,7 @@ public class MqttDeviceFactoryHandler implements IMqttMessageListener {
         if (topics != null) {
             properties.put(MQTT_TOPICS_FILTERS, topics);
         }
+        properties.put("name", configuration.name());
         svcReg = context.registerService(IMqttMessageListener.class, this, properties);
     }
 
