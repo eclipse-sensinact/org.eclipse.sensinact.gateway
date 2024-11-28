@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.mqtt.factory;
 
+import org.eclipse.sensinact.gateway.southbound.mqtt.api.IMqttMessageListener;
+
 /**
  * Configuration of an MQTT device factory
  */
@@ -31,4 +33,9 @@ public @interface MqttDeviceFactoryConfiguration {
      * Device mapping configuration
      */
     String mapping();
+
+    /**
+     * Name for the {@link IMqttMessageListener} service
+     */
+    String name() default "Unnamed";
 }
