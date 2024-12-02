@@ -11,7 +11,7 @@
  * Contributors:
  *     Data In Motion - initial API and implementation
  */
-package src.test.java.org.eclipse.sensinact.gateway.southbound.mqtt.test;
+package org.eclipse.sensinact.gateway.southbound.mqtt.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
