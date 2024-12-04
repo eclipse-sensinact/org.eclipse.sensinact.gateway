@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.impl;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,7 +91,8 @@ public class ResourceSelectorComponent implements ResourceSelectorFilterFactory 
 
     @Override
     public ICriterion parseResourceSelector(Stream<ResourceSelector> selectors) {
-        return new OrResourceSelectorCriterion(selectors, config.single_level_wildcard_enabled());
+        Optional<ICriterion> or = selectors.map(this::parseResourceSelector).reduce(ICriterion::or);
+        return or.orElseThrow(() -> new IllegalArgumentException("No selectors defined"));
     }
 
 }
