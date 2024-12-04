@@ -40,7 +40,7 @@ public class OrResourceSelectorCriterion implements ICriterion {
         this(selectors.map(rs -> new ResourceSelectorCriterion(rs, allowSingleLevelWildcards)));
     }
 
-    private OrResourceSelectorCriterion(OrResourceSelectorCriterion orsc, ResourceSelectorCriterion rsc) {
+    OrResourceSelectorCriterion(OrResourceSelectorCriterion orsc, ResourceSelectorCriterion rsc) {
         this(Stream.concat(Stream.of(rsc), orsc.criteria.stream()));
     }
 
@@ -48,7 +48,7 @@ public class OrResourceSelectorCriterion implements ICriterion {
         this(Stream.concat(orsc.criteria.stream(), orsc2.criteria.stream()));
     }
 
-    private OrResourceSelectorCriterion(Stream<ResourceSelectorCriterion> criteria) {
+    OrResourceSelectorCriterion(Stream<ResourceSelectorCriterion> criteria) {
         this.criteria = criteria.collect(toList());
     }
 

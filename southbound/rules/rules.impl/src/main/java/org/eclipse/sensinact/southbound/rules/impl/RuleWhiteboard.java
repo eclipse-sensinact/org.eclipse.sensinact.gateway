@@ -23,6 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -46,6 +47,18 @@ public class RuleWhiteboard {
     }
 
     private final Map<String, RuleProcessor> processors = new ConcurrentHashMap<>();
+
+    @Deactivate
+    void stop() {
+        for(String k : processors.keySet()) {
+            try {
+                Optional.ofNullable(processors.remove(k))
+                    .ifPresent(RuleProcessor::close);
+            } catch (Exception e) {
+                // Swallow this
+            }
+        }
+    }
 
     private String getKey(Map<String, Object> params) {
         return String.valueOf(params.get(Constants.SERVICE_ID));
