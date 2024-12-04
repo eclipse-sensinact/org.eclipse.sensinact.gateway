@@ -161,4 +161,28 @@ public class EasyRulesConfigIntegrationTest {
         Mockito.verify(updater.updateBatch()).updateResource("Temp3", "alert", "temperature", "high");
         Mockito.verify(updater.updateBatch()).completeBatch();
     }
+
+    @Test
+    @WithFactoryConfiguration(factoryPid = "sensinact.rules.easyrules",
+    properties = {
+            @Property(key = "name", value = "test"),
+            @Property(key = "resource.selectors", value = "{"
+                    + "\"service\": { \"value\":\"sensor\",\"type\":\"EXACT\" },"
+                    + "\"resource\": { \"value\":\"O3\",\"type\":\"EXACT\" }}"),
+            @Property(key = "rule.definitions", value = "{"
+                    + "\"name\":\"test\","
+                    + "\"description\":\"Test Rule\","
+                    + "\"condition\":\"true\","
+                    + "\"action\":\"let sum = 0.0d; for(p : $providers) { var v = $data[p].get('sensor').get('O3').get('$value'); sum = sum + v; } if ( size($providers) > 0 ) { sum = sum / size($providers); } $updater.updateResource('test-stats', 'avg', 'O3', sum);\""
+                    + "}")
+    })
+    void testAveraging(@InjectService(filter = "(name=test)") RuleDefinition def) throws Exception {
+
+        List<ProviderSnapshot> snapshots = applyFilter(def.getInputFilter());
+        assertFindProviders(snapshots, "Detect1", "Detect2", "test");
+
+        def.evaluate(snapshots, updater);
+
+        Mockito.verify(updater).updateResource("test-stats", "avg", "O3", 10.5d / 3);
+    }
 }
