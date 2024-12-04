@@ -354,17 +354,6 @@ public class ResourceSelectorCriterion implements ICriterion {
     }
 
     @Override
-    public ICriterion or(ICriterion other) {
-        if(other instanceof ResourceSelectorCriterion) {
-            return new OrResourceSelectorCriterion(Stream.of(this, (ResourceSelectorCriterion) other));
-        } if (other instanceof OrResourceSelectorCriterion) {
-            return new OrResourceSelectorCriterion((OrResourceSelectorCriterion) other, this);
-        } else {
-            return ICriterion.super.or(other);
-        }
-    }
-
-    @Override
     public List<String> dataTopics() {
         Stream<Selection> topicSegments = Stream.of(rs.model,
                 rs.provider, rs.service, rs.resource);

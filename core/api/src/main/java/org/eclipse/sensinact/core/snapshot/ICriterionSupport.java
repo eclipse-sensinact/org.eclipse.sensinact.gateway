@@ -12,12 +12,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.snapshot;
 
+import static java.util.stream.Collectors.toList;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -263,6 +266,15 @@ class AndCriterion extends CombinationCriterion {
     public Predicate<GeoJsonObject> getLocationFilter() {
         return and(ICriterion::getLocationFilter);
     }
+
+    @Override
+    public List<String> dataTopics() {
+        // TODO deduplicate further using wildcard matching and model/provider overlap
+        return Stream
+                .concat(a.dataTopics().stream(), b.dataTopics().stream())
+                .distinct()
+                .collect(toList());
+    }
 }
 
 class OrCriterion extends CombinationCriterion {
@@ -304,6 +316,15 @@ class OrCriterion extends CombinationCriterion {
     @Override
     public Predicate<GeoJsonObject> getLocationFilter() {
         return or(ICriterion::getLocationFilter);
+    }
+
+    @Override
+    public List<String> dataTopics() {
+        // TODO deduplicate further using wildcard matching
+        return Stream
+                .concat(a.dataTopics().stream(), b.dataTopics().stream())
+                .distinct()
+                .collect(toList());
     }
 }
 
