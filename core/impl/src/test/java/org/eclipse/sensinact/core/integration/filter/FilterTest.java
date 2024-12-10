@@ -79,11 +79,10 @@ public class FilterTest {
         final ProviderSnapshot provider = providers.iterator().next();
         assertEquals("model_1", provider.getModelName());
         assertEquals("provider_1", provider.getName());
-        // We should have all 4 services + admin
-        assertEquals(5, provider.getServices().size());
+        // We should have only the service we asked for
+        assertEquals(1, provider.getServices().size());
 
-        final ServiceSnapshot service = provider.getServices().stream().filter(s -> "service_1".equals(s.getName()))
-                .findFirst().get();
+        final ServiceSnapshot service = provider.getService("service_1");
         assertEquals(1, service.getResources().size());
 
         final ResourceSnapshot resource = service.getResources().get(0);

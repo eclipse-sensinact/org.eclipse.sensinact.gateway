@@ -101,14 +101,4 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     public Provider getModelProvider() {
         return modelProvider;
     }
-
-    public void filterEmptyServices() {
-        Iterator<Entry<String, ServiceSnapshotImpl>> iter = services.entrySet().iterator();
-        while (iter.hasNext()) {
-            Entry<String, ServiceSnapshotImpl> entry = iter.next();
-            if (entry.getValue().getResources().isEmpty()) {
-                iter.remove();
-            }
-        }
-    }
 }
