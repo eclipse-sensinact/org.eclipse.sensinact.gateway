@@ -346,38 +346,37 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Filter providers according to their services
         providersStream = providersStream.map(p -> {
-            final Provider modelProvider = p.getModelProvider();
-            nexusImpl.getServiceInstancesForProvider(modelProvider)
-                    .forEach((k, v) -> p.add(new ServiceSnapshotImpl(p, k, v, snapshotTime)));
+            snapshotServicesAndResources(svcFilter, rcFilter, snapshotTime, p);
             return p;
-        });
-        if (svcFilter != null) {
-            providersStream = providersStream.filter(p -> p.getServices().stream().anyMatch(svcFilter));
-        }
-
-        // Filter providers according to their resources
-        providersStream = providersStream.map(p -> {
-            p.getServices().stream().forEach(s -> {
-                nexusImpl.getResourcesForService(s.getModelEClass())
-                        .forEach(f -> s.add(new ResourceSnapshotImpl(s, f, snapshotTime)));
-            });
-            return p;
-        });
-        if (rcFilter != null) {
-            providersStream = providersStream
-                    .filter(p -> p.getServices().stream().anyMatch(s -> s.getResources().stream().anyMatch(rcFilter)));
-        }
-
-        // Add resource value
-        providersStream = providersStream.map(p -> {
-            p.getServices().stream().forEach(s -> {
-                s.getResources().stream().forEach(this::fillInResource);
-            });
-            p.filterEmptyServices();
-            return p;
-        });
+        }).filter(p -> !p.getServices().isEmpty());
 
         return providersStream.collect(Collectors.toList());
+    }
+
+    private void snapshotServicesAndResources(Predicate<ServiceSnapshot> svcFilter,
+            Predicate<ResourceSnapshot> rcFilter, final Instant snapshotTime, ProviderSnapshotImpl p) {
+        final Provider modelProvider = p.getModelProvider();
+        nexusImpl.getServiceInstancesForProvider(modelProvider).entrySet().stream()
+                .map(e -> new ServiceSnapshotImpl(p, e.getKey(), e.getValue(), snapshotTime))
+                .filter(svcFilter != null ? svcFilter : x -> Boolean.TRUE)
+                // Filter services according to their resources
+                .map(s -> {
+                    snapshotResources(rcFilter, snapshotTime, s);
+                    return s;
+                })
+                .filter(s -> !s.getResources().isEmpty())
+                .forEach(p::add);
+    }
+
+    private void snapshotResources(Predicate<ResourceSnapshot> rcFilter, final Instant snapshotTime,
+            ServiceSnapshotImpl s) {
+        nexusImpl.getResourcesForService(s.getModelEClass())
+                .map(f -> new ResourceSnapshotImpl(s, f, snapshotTime))
+                .filter(rcFilter != null ? rcFilter : x -> Boolean.TRUE)
+                .forEach(r -> {
+                    fillInResource(r);
+                    s.add(r);
+                });
     }
 
     @Override
@@ -394,22 +393,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                 nexusImpl.getProviderPackageUri(nexusProvider.getId()),
                 nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
 
-        // Add all services
-        nexusImpl.getServiceInstancesForProvider(nexusProvider).forEach((serviceName, service) -> {
-            // Get the service
-            final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName,
-                    service, snapshotTime);
-
-            // Get the resources
-            nexusImpl.getResourcesForService(service.getKey()).forEach(rcFeature -> {
-                final ResourceSnapshotImpl rcSnapshot = new ResourceSnapshotImpl(svcSnapshot, rcFeature, snapshotTime);
-                fillInResource(rcSnapshot);
-                svcSnapshot.add(rcSnapshot);
-            });
-
-            providerSnapshot.add(svcSnapshot);
-        });
-        providerSnapshot.filterEmptyServices();
+        snapshotServicesAndResources(null, null, snapshotTime, providerSnapshot);
         return providerSnapshot;
     }
 
@@ -441,12 +425,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         providerSnapshot.add(svcSnapshot);
 
         // Get the resources
-        nexusImpl.getResourcesForService(service.getKey()).forEach(rcFeature -> {
-            final ResourceSnapshotImpl rcSnapshot = new ResourceSnapshotImpl(svcSnapshot, rcFeature, snapshotTime);
-            fillInResource(rcSnapshot);
-            svcSnapshot.add(rcSnapshot);
-        });
-
+        snapshotResources(null, snapshotTime, svcSnapshot);
         return svcSnapshot;
     }
 

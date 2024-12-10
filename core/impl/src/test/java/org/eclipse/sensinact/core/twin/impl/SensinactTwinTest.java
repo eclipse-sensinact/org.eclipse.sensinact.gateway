@@ -313,6 +313,14 @@ public class SensinactTwinTest {
             twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
             list = twinImpl.filteredSnapshot(null, null, null, null);
             assertEquals(2, list.size());
+            ProviderSnapshot ps = list.stream().filter(p -> TEST_PROVIDER.equals(p.getName())).findFirst().get();
+
+            assertEquals(2, ps.getServices().size());
+            ServiceSnapshot ss = ps.getService(TEST_SERVICE);
+            assertNotNull(ss);
+            assertEquals(2, ss.getResources().size());
+            assertNotNull(ss.getResource(TEST_RESOURCE));
+            assertNotNull(ss.getResource(TEST_ACTION_RESOURCE));
         }
 
         @Test
@@ -365,9 +373,9 @@ public class SensinactTwinTest {
 
             List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, null, null, p);
             assertEquals(1, list.size());
-            assertEquals(2, list.get(0).getServices().size());
-            ServiceSnapshot serviceSnapshot = list.get(0).getServices().stream()
-                    .filter(s -> TEST_SERVICE.equals(s.getName())).findFirst().get();
+            assertEquals(1, list.get(0).getServices().size());
+            ServiceSnapshot serviceSnapshot = list.get(0).getService(TEST_SERVICE);
+            assertNotNull(serviceSnapshot);
             assertEquals(5, serviceSnapshot.getResources().get(0).getValue().getValue());
         }
 
@@ -398,10 +406,14 @@ public class SensinactTwinTest {
 
             List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, null, null, p);
             assertEquals(1, list.size());
-            assertEquals(4, list.get(0).getServices().size());
-            ServiceSnapshot serviceSnapshot = list.get(0).getServices().stream()
-                    .filter(s -> TEST_SERVICE.equals(s.getName())).findFirst().get();
+            assertEquals(2, list.get(0).getServices().size());
+            ServiceSnapshot serviceSnapshot = list.get(0).getService(TEST_SERVICE);
+            assertNotNull(serviceSnapshot);
             assertEquals("fizz", serviceSnapshot.getResources().get(0).getValue().getValue());
+
+            serviceSnapshot = list.get(0).getService("testService1");
+            assertNotNull(serviceSnapshot);
+            assertEquals("foo", serviceSnapshot.getResources().get(0).getValue().getValue());
         }
     }
 }
