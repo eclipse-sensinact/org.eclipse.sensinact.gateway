@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.southbound.mqtt.impl.PEMUtils;
 import org.junit.jupiter.api.Test;
 
 /**
- * Text the PEM util class
+ * Test the PEM utils class
  */
 class PEMUtilsTest {
 
