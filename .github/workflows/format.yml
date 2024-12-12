@@ -17,8 +17,9 @@ jobs:
       with:
         fetch-depth: 0
     - name: Editor Config Validation against PR base commit
-      uses: github/super-linter/slim@962a6409c1b303d0e53a9d34ada577a0362f4fae # v5.2.1
+      uses: github/super-linter/slim@e1cb86b6e8d119f789513668b4b30bf17fe1efe4 # v7.2.0
       env:
         VALIDATE_ALL_CODEBASE: false
         VALIDATE_EDITORCONFIG: true
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BRANCH: ${{ github.event.pull_request.base.sha }}
