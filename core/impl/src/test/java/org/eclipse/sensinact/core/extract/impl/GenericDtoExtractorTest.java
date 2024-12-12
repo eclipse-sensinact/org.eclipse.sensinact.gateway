@@ -301,6 +301,11 @@ public class GenericDtoExtractorTest {
             AbstractUpdateDto extracted = updates.get(0);
 
             checkCommonFields(extracted);
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+            assertEquals(NullAction.UPDATE, extracted.actionOnNull);
+
+            extracted = updates.get(1);
+            checkCommonFields(extracted);
             assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
 
             MetadataUpdateDto dud = (MetadataUpdateDto) extracted;
@@ -310,12 +315,6 @@ public class GenericDtoExtractorTest {
             assertFalse(dud.removeMissingValues, "Missing values should be kept");
             assertEquals(NullAction.UPDATE, dud.actionOnNull);
             assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
-
-            extracted = updates.get(1);
-
-            checkCommonFields(extracted);
-            assertTrue(extracted instanceof DataUpdateDto, "Not a metadata update dto " + extracted.getClass());
-            assertEquals(NullAction.UPDATE, extracted.actionOnNull);
         }
 
         @Test

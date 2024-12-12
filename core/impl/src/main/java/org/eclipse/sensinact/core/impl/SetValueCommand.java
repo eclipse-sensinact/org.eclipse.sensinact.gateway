@@ -101,8 +101,10 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
 
             Resource r = service.getResources().get(res);
             if (!model.isFrozen() && r == null) {
+                Class<?> type = dataUpdateDto.type != null ? dataUpdateDto.type :
+                    dataUpdateDto.data != null ? dataUpdateDto.data.getClass() : null;
                 r = service.createResource(res).withValueType(ValueType.UPDATABLE)
-                        .withType((Class<?>) dataUpdateDto.type).build();
+                        .withType(type).build();
             }
             if (svcEClass == null) {
                 svcEClass = service.getServiceEClass();

@@ -99,11 +99,19 @@ public class DataUpdateServiceTest {
     }
 
     private Object getResourceMetadataValue() throws Exception {
-        return getResourceMetadataTimedValue().getValue();
+        return getResourceMetadataValue(PROVIDER);
+    }
+
+    private Object getResourceMetadataValue(final String provider) throws Exception {
+        return getResourceMetadataTimedValue(provider).getValue();
     }
 
     private TimedValue<Object> getResourceMetadataTimedValue() throws Exception {
-        return gt.execute(new ResourceCommand<TimedValue<Object>>(PROVIDER, SERVICE, RESOURCE) {
+        return getResourceMetadataTimedValue(PROVIDER);
+    }
+
+    private TimedValue<Object> getResourceMetadataTimedValue(final String provider) throws Exception {
+        return gt.execute(new ResourceCommand<TimedValue<Object>>(provider, SERVICE, RESOURCE) {
 
             @Override
             protected Promise<TimedValue<Object>> call(SensinactResource resource, PromiseFactory pf) {
@@ -377,6 +385,23 @@ public class DataUpdateServiceTest {
         }
 
         @Test
+        void testSimplePushDataAndMetadataWithNoPreexisting() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER + "_3";
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = 42;
+            dto.timestamp = timestamp;
+            dto.metadata = Map.of("foo", "bar");
+            push.pushUpdate(dto).getValue();
+
+            assertEquals("bar", getResourceMetadataValue(dto.provider));
+        }
+
+        @Test
         void testSimplePushUpdate() throws Exception {
             final Instant timestamp = Instant.now();
 
@@ -607,6 +632,35 @@ public class DataUpdateServiceTest {
             assertEquals(SERVICE, due.getService());
             assertEquals(RESOURCE, due.getResource());
         }
+
+        @Test
+        void testSimplePushWithNoPreexisting() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER + "_2";
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.metadata = Map.of("foo", "bar");
+            Throwable t = push.pushUpdate(dto).getFailure();
+
+            assertNotNull(t);
+            assertInstanceOf(FailedUpdatesException.class, t);
+            FailedUpdatesException fue = (FailedUpdatesException) t;
+            List<DataUpdateException> failedUpdates = fue.getFailedUpdates();
+            assertNotNull(failedUpdates);
+            assertEquals(1, failedUpdates.size());
+            DataUpdateException due = failedUpdates.get(0);
+            assertNotNull(due);
+            assertSame(dto, due.getOriginalDto());
+            assertEquals(dto.provider, due.getProvider());
+            assertEquals(SERVICE, due.getService());
+            assertEquals(RESOURCE, due.getResource());
+        }
+
     }
 
     @Nested
