@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -235,6 +236,9 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                         newValuesToUse = nonNullNewValues;
                         timestampToUse = timestamp;
                     }
+                    Optional.ofNullable(notifications.get(
+                            new NotificationKey(provider, service, resource, ResourceDataNotification.class)))
+                            .ifPresent(rdn -> ((ResourceDataNotification)rdn.get(0)).metadata = newValuesToUse);
                     return List.of(createResourceMetaDataNotification(modelPackageUri, model, provider, service, resource,
                             oldValuesToUse, newValuesToUse, timestampToUse));
                 });

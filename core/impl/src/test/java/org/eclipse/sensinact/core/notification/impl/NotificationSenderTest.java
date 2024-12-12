@@ -510,6 +510,25 @@ class NotificationSenderTest {
         }
 
         @Test
+        void testUpdateValueThenMetadata() {
+            Instant now = Instant.now();
+
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+                    Map.of(METADATA_KEY, METADATA_VALUE), now);
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
+                    Map.of(METADATA_KEY, METADATA_VALUE), Map.of(METADATA_KEY, METADATA_VALUE_2), now);
+            accumulator.completeAndSend();
+
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+                    isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+                            Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, Map.of(METADATA_KEY, METADATA_VALUE),
+                            Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
+
+        @Test
         void testMultipleUpdate() {
             Instant now = Instant.now();
 

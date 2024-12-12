@@ -59,15 +59,14 @@ public class AnnotationMapping {
 
             List<Function<Object, ? extends AbstractUpdateDto>> list = new ArrayList<>();
 
-            // Include metadata updates first so that any data changes publish up to date metadata
-            for (Entry<Field, Metadata> e : metadataFields.entrySet()) {
-                list.add(createMetaDataMapping(clazz, e.getKey(), e.getValue()));
-            }
-
             for (Entry<Field, Data> e : dataFields.entrySet()) {
                 list.add(createDataMapping(clazz, e.getKey(), e.getValue()));
             }
 
+            // Include metadata updates second so that any new resources are created first
+            for (Entry<Field, Metadata> e : metadataFields.entrySet()) {
+                list.add(createMetaDataMapping(clazz, e.getKey(), e.getValue()));
+            }
 
             return o -> {
                 Instant t = null;

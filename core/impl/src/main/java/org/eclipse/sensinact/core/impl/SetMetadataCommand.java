@@ -72,38 +72,44 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
     private Promise<Void> updateMetdataValue(SensinactResource resource, String key, Object value, MetadataUpdateDto metadataUpdateDto,
             PromiseFactory promiseFactory) {
 
-        Function<TimedValue<Object>, Promise<Void>> cachedValueAction = null;
-        if(value == null && metadataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
-            cachedValueAction = v -> v.getTimestamp() == null ? promiseFactory.resolved(null) :
-                resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
-        } else if(metadataUpdateDto.actionOnDuplicate == DuplicateAction.UPDATE_IF_DIFFERENT) {
-            cachedValueAction = v -> {
-                if(v.getValue() == null) {
-                    return value == null ? promiseFactory.resolved(null) :
-                        resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
-                } else {
-                    return v.getValue().equals(value) ? promiseFactory.resolved(null) :
-                        resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
-                }
-            };
-        }
-
-        if(cachedValueAction != null) {
-            Promise<TimedValue<Object>> p = resource.getMetadataValue(key).timeout(0);
-            try {
-                Throwable t = p.getFailure();
-                if(t != null) {
-                    LOG.error("Unable to retrieve cached value for {}/{}/{}", metadataUpdateDto.provider,
-                            metadataUpdateDto.service, metadataUpdateDto.resource, t);
-                    return promiseFactory.failed(t);
-                } else {
-                    return cachedValueAction.apply(p.getValue());
-                }
-            } catch (Exception e) {
-                return promiseFactory.failed(e);
+        try {
+            Function<TimedValue<Object>, Promise<Void>> cachedValueAction = null;
+            if(value == null && metadataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
+                cachedValueAction = v -> v.getTimestamp() == null ? promiseFactory.resolved(null) :
+                    resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
+            } else if(metadataUpdateDto.actionOnDuplicate == DuplicateAction.UPDATE_IF_DIFFERENT) {
+                cachedValueAction = v -> {
+                    if(v.getValue() == null) {
+                        return value == null ? promiseFactory.resolved(null) :
+                            resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
+                    } else {
+                        return v.getValue().equals(value) ? promiseFactory.resolved(null) :
+                            resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
+                    }
+                };
             }
-        } else {
-            return resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
+
+            if(cachedValueAction != null) {
+                Promise<TimedValue<Object>> p = resource.getMetadataValue(key).timeout(0);
+                try {
+                    Throwable t = p.getFailure();
+                    if(t != null) {
+                        LOG.error("Unable to retrieve cached value for {}/{}/{}", metadataUpdateDto.provider,
+                                metadataUpdateDto.service, metadataUpdateDto.resource, t);
+                        return promiseFactory.failed(t);
+                    } else {
+                        return cachedValueAction.apply(p.getValue());
+                    }
+                } catch (Exception e) {
+                    return promiseFactory.failed(e);
+                }
+            } else {
+                return resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
+            }
+        } catch (Exception e) {
+            LOG.error("An unexpected error ocurred setting metadata for {}/{}/{}", metadataUpdateDto.provider,
+                    metadataUpdateDto.service, metadataUpdateDto.resource, e);
+            return promiseFactory.failed(e);
         }
     }
 
