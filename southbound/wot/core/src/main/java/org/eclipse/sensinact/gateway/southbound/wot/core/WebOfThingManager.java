@@ -314,39 +314,45 @@ public class WebOfThingManager implements ThingManager {
                         }
 
                         // Add metadata to resources
-                        for (final Entry<String, ActionAffordance> entry : thing.actions.entrySet()) {
-                            try {
-                                final SensinactResource rc = snaWotService.getResources().get(entry.getKey());
-                                if (rc != null) {
-                                    addActionMetadata(pf, rc, entry.getValue(), timestamp);
+                        if (thing.actions != null) {
+                            for (final Entry<String, ActionAffordance> entry : thing.actions.entrySet()) {
+                                try {
+                                    final SensinactResource rc = snaWotService.getResources().get(entry.getKey());
+                                    if (rc != null) {
+                                        addActionMetadata(pf, rc, entry.getValue(), timestamp);
+                                    }
+                                } catch (final Exception e) {
+                                    logger.error("Error adding metadata to {}/{}/{}", providerName,
+                                            WoTConstants.WOT_SERVICE, entry.getKey(), e);
                                 }
-                            } catch (final Exception e) {
-                                logger.error("Error adding metadata to {}/{}/{}", providerName,
-                                        WoTConstants.WOT_SERVICE, entry.getKey(), e);
                             }
                         }
 
-                        for (final Entry<String, PropertyAffordance> entry : thing.properties.entrySet()) {
-                            try {
-                                final SensinactResource rc = snaWotService.getResources().get(entry.getKey());
-                                if (rc != null) {
-                                    addPropertyMetadata(pf, rc, entry.getValue(), timestamp);
+                        if (thing.properties != null) {
+                            for (final Entry<String, PropertyAffordance> entry : thing.properties.entrySet()) {
+                                try {
+                                    final SensinactResource rc = snaWotService.getResources().get(entry.getKey());
+                                    if (rc != null) {
+                                        addPropertyMetadata(pf, rc, entry.getValue(), timestamp);
+                                    }
+                                } catch (final Exception e) {
+                                    logger.error("Error adding metadata to {}/{}/{}", providerName,
+                                            WoTConstants.WOT_SERVICE, entry.getKey(), e);
                                 }
-                            } catch (final Exception e) {
-                                logger.error("Error adding metadata to {}/{}/{}", providerName,
-                                        WoTConstants.WOT_SERVICE, entry.getKey(), e);
                             }
                         }
 
-                        for (final Entry<String, EventAffordance> entry : thing.events.entrySet()) {
-                            try {
-                                final SensinactResource rc = snaWotEventService.getResources().get(entry.getKey());
-                                if (rc != null) {
-                                    addEventMetadata(pf, rc, entry.getValue(), timestamp);
+                        if (thing.events != null) {
+                            for (final Entry<String, EventAffordance> entry : thing.events.entrySet()) {
+                                try {
+                                    final SensinactResource rc = snaWotEventService.getResources().get(entry.getKey());
+                                    if (rc != null) {
+                                        addEventMetadata(pf, rc, entry.getValue(), timestamp);
+                                    }
+                                } catch (final Exception e) {
+                                    logger.error("Error adding metadata to {}/{}/{}", providerName,
+                                            WoTConstants.EVENT_SERVICE, entry.getKey(), e);
                                 }
-                            } catch (final Exception e) {
-                                logger.error("Error adding metadata to {}/{}/{}", providerName,
-                                        WoTConstants.EVENT_SERVICE, entry.getKey(), e);
                             }
                         }
 
