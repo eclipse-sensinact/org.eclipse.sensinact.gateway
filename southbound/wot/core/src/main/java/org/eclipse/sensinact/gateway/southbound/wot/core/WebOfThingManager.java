@@ -183,15 +183,27 @@ public class WebOfThingManager implements ThingManager {
 
         // At this point, we can consider we manage this description
         managedThings.put(descriptor.providerId, descriptor);
+
+        // Notify listeners
+        listeners.stream().forEach(l -> {
+            try {
+                l.thingRegistered(descriptor);
+            } catch (Exception e) {
+                logger.error("Error notifying listener {}", l, e);
+            }
+        });
+
         return descriptor.providerId;
     }
 
     @Override
     public boolean unregisterThing(final String providerName) throws InterruptedException, InvocationTargetException {
-        if (managedThings.remove(providerName) != null) {
+        final SensinactThingDescriptor descriptor = managedThings.remove(providerName);
+        if (descriptor != null) {
+            final boolean removed;
             try {
                 // Known provider
-                return gatewayThread.execute(new AbstractTwinCommand<Boolean>() {
+                removed = gatewayThread.execute(new AbstractTwinCommand<Boolean>() {
                     @Override
                     protected Promise<Boolean> call(final SensinactDigitalTwin twin, final PromiseFactory pf) {
                         try {
@@ -211,6 +223,19 @@ public class WebOfThingManager implements ThingManager {
                 logger.error("Error unregistering thing {}", providerName, e);
                 throw e;
             }
+
+            if (removed) {
+                // Notify listeners
+                listeners.stream().forEach(l -> {
+                    try {
+                        l.thingUnregistered(descriptor);
+                    } catch (Exception e) {
+                        logger.error("Error notifying listener {}", l, e);
+                    }
+                });
+
+            }
+            return removed;
         } else {
             logger.debug("Trying to remove unmanaged thing {}", providerName);
             return false;

@@ -1,0 +1,62 @@
+{
+    "@context": "https://www.w3.org/2022/wot/td/v1.1",
+    "id": "urn:name:httptest",
+    "title": "HttpTest",
+    "securityDefinitions": {
+        "nosec_sc": {
+            "scheme": "nosec"
+        }
+    },
+    "security": "nosec_sc",
+    "properties": {
+        "status": {
+            "type": "string",
+            "forms": [
+                {
+                    "href": "{{HTTP}}/status"
+                }
+            ]
+        }
+    },
+    "actions": {
+        "echo": {
+            "forms": [
+                {
+                    "href": "{{HTTP}}/echo"
+                }
+            ],
+            "input": {
+                "type": "string"
+            },
+            "output": {
+                "type": "string"
+            }
+        },
+        "add": {
+            "forms": [
+                {
+                    "href": "{{HTTP}}/add"
+                }
+            ],
+            "input": {
+                "type": "object",
+                "properties": {
+                    "a": {
+                        "type": "integer"
+                    },
+                    "b": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "output": {
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -30,8 +30,6 @@
 	junit-platform-commons;version='[1.10.1,1.10.2)',\
 	junit-platform-engine;version='[1.10.1,1.10.2)',\
 	junit-platform-launcher;version='[1.10.1,1.10.2)',\
-	net.bytebuddy.byte-buddy;version='[1.14.11,1.14.12)',\
-	net.bytebuddy.byte-buddy-agent;version='[1.14.11,1.14.12)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
 	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.7,1.3.8)',\
 	org.apache.aries.typedevent.bus;version='[0.0.2,0.0.3)',\
@@ -40,6 +38,13 @@
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
 	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
+	org.eclipse.jetty.alpn.client;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.client;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet-api;version='[5.0.2,5.0.3)',\
+	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.emf-api;version='[0.0.2,0.0.3)',\
@@ -49,10 +54,9 @@
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.wot.wot-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.wot.wot-core;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.southbound.wot.wot-core-tests;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.southbound.wot.wot-http;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.southbound.wot.wot-http-tests;version='[0.0.2,0.0.3)',\
 	org.gecko.emf.osgi.component.minimal;version='[6.1.0,6.1.1)',\
-	org.mockito.mockito-core;version='[5.10.0,5.10.1)',\
-	org.objenesis;version='[3.3.0,3.3.1)',\
 	org.opentest4j;version='[1.3.0,1.3.1)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.service.typedevent;version='[1.0.0,1.0.1)',\

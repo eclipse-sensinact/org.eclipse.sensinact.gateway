@@ -18,9 +18,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
@@ -47,7 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, WhiteboardAct<Object> {
@@ -74,26 +75,47 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
         this.client = client;
     }
 
+    /**
+     * Looks for the first matching form
+     *
+     * @param forms      List of forms
+     * @param operation  Operation to look for
+     * @param allowEmpty Consider forms without explicit operations as matching
+     * @return
+     */
+    private Form findForm(final List<Form> forms, final String operation, final boolean allowEmpty) {
+        if (forms == null || forms.isEmpty()) {
+            return null;
+        }
+
+        final List<Form> httpForms = forms.stream().filter(f -> f.href.toLowerCase().startsWith("http"))
+                .collect(Collectors.toList());
+        if (httpForms.isEmpty()) {
+            return null;
+        } else {
+            return httpForms.stream().filter(
+                    f -> (allowEmpty && f.op == null || f.op.isEmpty()) || (f.op != null && f.op.contains(operation)))
+                    .findFirst().orElse(null);
+        }
+    }
+
     @Override
     public Promise<Object> act(PromiseFactory pf, String modelPackageUri, String model, String provider, String service,
             String resource, Map<String, Object> arguments) {
 
-        ActionAffordance action = thing.actions.get(resource);
+        final ActionAffordance action = thing.actions.get(resource);
         if (action == null) {
             logger.error("Action {} not found for thing {}", resource, thing.id);
             return pf.failed(new IllegalArgumentException("Action not found"));
         }
 
         // Find the URL to invoke the action
-        Optional<Form> opt = action.forms.stream()
-                .filter(f -> f.op.contains(Operations.INVOKE_ACTION) && f.href.toLowerCase().startsWith("http"))
-                .findFirst();
-        if (opt.isEmpty()) {
+        final Form form = findForm(action.forms, Operations.INVOKE_ACTION, true);
+        if (form == null) {
             logger.error("No form found to invoke action {} on thing {}", resource, thing.id);
             return pf.failed(new IllegalArgumentException("No form found to invoke action"));
         }
 
-        final Form form = opt.get();
         final URI uri;
         try {
             uri = new URI(form.href);
@@ -140,18 +162,16 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
                     return;
                 }
 
-                try {
-                    final Map<String, Object> response = mapper.readValue(getContent(),
-                            new TypeReference<Map<String, Object>>() {
-                            });
+                final int status = result.getResponse().getStatus();
+                if (status >= 300) {
+                    logger.error("Error querying HTTP endpoint for {}/{}/{}: {} ({})", provider, service, resource,
+                            status, uri);
+                    promise.fail(new IOException("HTTP error " + status));
+                    return;
+                }
 
-                    if (response.containsKey("result")) {
-                        promise.resolve(mapper.convertValue(response.get("result"), resultClass));
-                    } else if (response.containsKey("error")) {
-                        promise.fail(new Exception("Error invoking action: " + response.get("error")));
-                    } else {
-                        promise.fail(new Exception("Unsupported result format"));
-                    }
+                try {
+                    promise.resolve(findValue(action.output, resultClass, getContentAsString()));
                 } catch (IOException e) {
                     logger.error("Failed to parse response from action {} on thing {}", resource, thing.id, e);
                     promise.fail(e);
@@ -209,19 +229,10 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
             String provider, String service, String resource, Class<Object> resourceType,
             TimedValue<Object> cachedValue, TimedValue<Object> newValue) {
 
-        PropertyAffordance property = thing.properties.get(resource);
+        final PropertyAffordance property = thing.properties.get(resource);
         if (property == null) {
             logger.error("Property {} not found for thing {}", resource, thing.id);
             return pf.failed(new IllegalArgumentException("Property not found"));
-        }
-
-        // Find the URL to invoke the property
-        Optional<Form> opt = property.forms.stream()
-                .filter(f -> f.op.contains(Operations.WRITE_PROPERTY) && f.href.toLowerCase().startsWith("http"))
-                .findFirst();
-        if (opt.isEmpty()) {
-            logger.error("No form found to read property {} on thing {}", resource, thing.id);
-            return pf.failed(new IllegalArgumentException("No form found to read property"));
         }
 
         final Class<?> resultClass = Utils.classFromType(property.schema.type);
@@ -231,7 +242,13 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
                     new ClassCastException("Expected " + resultClass + ", got " + newValue.getValue().getClass()));
         }
 
-        final Form form = opt.get();
+        // Find the URL to invoke the property
+        final Form form = findForm(property.forms, Operations.WRITE_PROPERTY, false);
+        if (form == null) {
+            logger.error("No form found to read property {} on thing {}", resource, thing.id);
+            return pf.failed(new IllegalArgumentException("No form found to read property"));
+        }
+
         final URI uri;
         try {
             uri = new URI(form.href);
@@ -286,22 +303,19 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
             String provider, String service, String resource, Class<Object> resourceType,
             TimedValue<Object> cachedValue) {
 
-        PropertyAffordance property = thing.properties.get(resource);
+        final PropertyAffordance property = thing.properties.get(resource);
         if (property == null) {
             logger.error("Property {} not found for thing {}", resource, thing.id);
             return pf.failed(new IllegalArgumentException("Property not found"));
         }
 
         // Find the URL to invoke the property
-        Optional<Form> opt = property.forms.stream()
-                .filter(f -> f.op.contains(Operations.READ_PROPERTY) && f.href.toLowerCase().startsWith("http"))
-                .findFirst();
-        if (opt.isEmpty()) {
+        final Form form = findForm(property.forms, Operations.READ_PROPERTY, true);
+        if (form == null) {
             logger.error("No form found to read property {} on thing {}", resource, thing.id);
             return pf.failed(new IllegalArgumentException("No form found to read property"));
         }
 
-        final Form form = opt.get();
         final URI uri;
         try {
             uri = new URI(form.href);
@@ -332,28 +346,28 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
                 }
 
                 final String responseContent = getContentAsString();
+                final int status = result.getResponse().getStatus();
+                if (status >= 300) {
+                    logger.error("Error querying HTTP endpoint for {}/{}/{}: {} ({})", provider, service, resource,
+                            status, uri);
+                    promise.fail(new IOException("HTTP error " + status));
+                    return;
+                }
+
                 try {
-                    final Map<String, Object> response = mapper.readValue(responseContent,
-                            new TypeReference<Map<String, Object>>() {
-                            });
+                    final Instant timestamp = Instant.now();
+                    final Object value = findValue(property.schema, resultClass, responseContent);
+                    promise.resolve(new TimedValue<Object>() {
+                        @Override
+                        public Instant getTimestamp() {
+                            return timestamp;
+                        }
 
-                    if (response.containsKey("value")) {
-                        final Instant timestamp = Instant.now();
-                        final Object value = mapper.convertValue(response.get("value"), resultClass);
-                        promise.resolve(new TimedValue<Object>() {
-                            @Override
-                            public Instant getTimestamp() {
-                                return timestamp;
-                            }
-
-                            @Override
-                            public Object getValue() {
-                                return value;
-                            }
-                        });
-                    } else {
-                        promise.fail(new Exception("Unsupported result format"));
-                    }
+                        @Override
+                        public Object getValue() {
+                            return value;
+                        }
+                    });
                 } catch (IOException e) {
                     logger.error("Failed to parse response from property {} on thing {}", resource, thing.id, e);
                     logger.debug("Response content from {}:\n{}", thing.id, responseContent);
@@ -362,5 +376,36 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
             }
         });
         return promise.getPromise();
+    }
+
+    /**
+     * Look for the result value. Check if is it buried in a result map
+     *
+     * @param schema      Output schema
+     * @param resultClass Expected result class
+     * @param strResponse Endpoint response as a string
+     * @return The found value
+     * @throws JsonMappingException    Error parsing response
+     * @throws JsonProcessingException Error parsing response
+     */
+    private Object findValue(final DataSchema schema, final Class<?> resultClass, final String strResponse)
+            throws JsonMappingException, JsonProcessingException {
+        final Object rawResponse = mapper.readValue(strResponse, Object.class);
+        if (rawResponse == null) {
+            return null;
+        }
+
+        if (!schema.type.equals("object") && rawResponse instanceof Map) {
+            // We might have a step
+            Map<?, ?> mapResponse = (Map<?, ?>) rawResponse;
+            for (String key : List.of("value", "result", "answer")) {
+                if (mapResponse.containsKey(key)) {
+                    logger.debug("Found intermediate key {} -> {}", key, mapResponse.get(key));
+                    return mapResponse.get(key);
+                }
+            }
+        }
+        logger.debug("NO intermediate key found/necessary -> {}", rawResponse);
+        return rawResponse;
     }
 }
