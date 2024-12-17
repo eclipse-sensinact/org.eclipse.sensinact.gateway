@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, configurationPid = "sensinact.southbound.wot.http", configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, configurationPid = "sensinact.southbound.wot.loader.http", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ThingHttpLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(ThingHttpLoader.class);
@@ -98,7 +98,11 @@ public class ThingHttpLoader {
     @Deactivate
     void deactivate() {
         if (managedProviderName != null) {
-            manager.unregisterThing(managedProviderName);
+            try {
+                manager.unregisterThing(managedProviderName);
+            } catch (Exception e) {
+                logger.error("Error unregistering provider {}", managedProviderName, e);
+            }
         }
     }
 }

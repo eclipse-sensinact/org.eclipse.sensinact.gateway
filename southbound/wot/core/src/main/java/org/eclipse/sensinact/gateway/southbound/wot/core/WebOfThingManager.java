@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
@@ -67,7 +66,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages the appearance / disappearance of web of thing objects
  */
-@Component(immediate = true, configurationPid = "sensinact.southbound.wot", configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Component(immediate = true, configurationPid = "sensinact.southbound.wot", configurationPolicy = ConfigurationPolicy.OPTIONAL)
 public class WebOfThingManager implements ThingManager {
 
     private static final Logger logger = LoggerFactory.getLogger(WebOfThingManager.class);
@@ -188,27 +187,33 @@ public class WebOfThingManager implements ThingManager {
     }
 
     @Override
-    public void unregisterThing(final String providerName) {
+    public boolean unregisterThing(final String providerName) throws InterruptedException, InvocationTargetException {
         if (managedThings.remove(providerName) != null) {
             try {
                 // Known provider
-                gatewayThread.execute(new AbstractTwinCommand<Void>() {
+                return gatewayThread.execute(new AbstractTwinCommand<Boolean>() {
                     @Override
-                    protected Promise<Void> call(final SensinactDigitalTwin twin, final PromiseFactory pf) {
+                    protected Promise<Boolean> call(final SensinactDigitalTwin twin, final PromiseFactory pf) {
                         try {
-                            Optional.ofNullable(twin.getProvider(providerName)).ifPresent(SensinactProvider::delete);
-                            return pf.resolved(null);
+                            SensinactProvider provider = twin.getProvider(providerName);
+                            if (provider != null) {
+                                provider.delete();
+                                return pf.resolved(true);
+                            }
+                            return pf.resolved(false);
                         } catch (final Exception e) {
                             logger.error("Error deleting provider {}", providerName, e);
                             return pf.failed(e);
                         }
                     }
                 }).getValue();
-            } catch (final Exception e) {
+            } catch (final InterruptedException | InvocationTargetException e) {
                 logger.error("Error unregistering thing {}", providerName, e);
+                throw e;
             }
         } else {
             logger.debug("Trying to remove unmanaged thing {}", providerName);
+            return false;
         }
     }
 

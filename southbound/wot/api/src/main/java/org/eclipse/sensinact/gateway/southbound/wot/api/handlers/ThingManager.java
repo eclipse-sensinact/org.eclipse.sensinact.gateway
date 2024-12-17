@@ -13,6 +13,8 @@
 
 package org.eclipse.sensinact.gateway.southbound.wot.api.handlers;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.sensinact.gateway.southbound.wot.api.Thing;
 
 /**
@@ -33,6 +35,9 @@ public interface ThingManager {
      * Unregister a provider created with {@link #registerThing(Thing)}
      *
      * @param providerName Name of the provider to unregister
+     * @return True if the provider was removed
+     * @throws InterruptedException      Interrupted while removing provider
+     * @throws InvocationTargetException Error removing provider
      */
-    void unregisterThing(final String providerName);
+    boolean unregisterThing(final String providerName) throws InterruptedException, InvocationTargetException;
 }
