@@ -35,6 +35,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 @Component(immediate = true, service = ThingListener.class)
 public class ThingHttpFormHandler implements ThingListener {
 
@@ -62,10 +64,38 @@ public class ThingHttpFormHandler implements ThingListener {
      */
     private final Map<String, ServiceRegistration<WhiteboardHandler>> whiteboardsRegistrations = new HashMap<>();
 
+    /**
+     * Main/default configuration
+     */
+    private WhiteboardHandlerConfiguration mainConfiguration;
+
+    /**
+     * Configuration per form URL prefix
+     */
+    private Map<String, WhiteboardHandlerConfiguration> perUrlConfiguration;
+
     @Activate
-    void activate(final BundleContext ctx) throws Exception {
+    void activate(final FormHandlerConfiguration configuration, final BundleContext ctx) throws Exception {
         this.ctx = ctx;
-        whiteboardsRegistrations.clear();
+
+        mainConfiguration = new WhiteboardHandlerConfiguration();
+        mainConfiguration.argumentsKey = configuration.argumentsKey();
+        mainConfiguration.useArgumentsKeyOnEmptyArgs = configuration.useArgumentsKeyOnEmptyArgs();
+        mainConfiguration.propertyKey = configuration.propertyKey();
+        mainConfiguration.timestampKey = configuration.timestampKey();
+
+        try {
+            if (configuration.url_configuration() != null && !configuration.url_configuration().isBlank()) {
+                perUrlConfiguration = http.mapper.readValue(configuration.url_configuration(),
+                        new TypeReference<Map<String, WhiteboardHandlerConfiguration>>() {
+                        });
+            } else {
+                perUrlConfiguration = Map.of();
+            }
+        } catch (Exception e) {
+            logger.error("Error parsing configuration", e);
+            throw e;
+        }
     }
 
     @Deactivate
@@ -73,6 +103,8 @@ public class ThingHttpFormHandler implements ThingListener {
         whiteboardsRegistrations.values().forEach(ServiceRegistration::unregister);
         whiteboardsRegistrations.clear();
         ctx = null;
+        perUrlConfiguration = null;
+        mainConfiguration = null;
     }
 
     /**
@@ -121,7 +153,8 @@ public class ThingHttpFormHandler implements ThingListener {
 
         // Register the HTTP handler
         logger.debug("Creating HTTP handler for {}", thing.id);
-        ThingHttpWhiteboardHandler handler = new ThingHttpWhiteboardHandler(thing, http.getClient());
+        ThingHttpWhiteboardHandler handler = new ThingHttpWhiteboardHandler(thing, http.getClient(), mainConfiguration,
+                perUrlConfiguration);
         ctx.registerService(WhiteboardHandler.class, handler,
                 new Hashtable<>(Map.of(WhiteboardConstants.PROP_MODEL_PACKAGE_URI, descriptor.modelPackageUri,
                         WhiteboardConstants.PROP_MODEL, descriptor.modelName, WhiteboardConstants.PROP_PROVIDERS,

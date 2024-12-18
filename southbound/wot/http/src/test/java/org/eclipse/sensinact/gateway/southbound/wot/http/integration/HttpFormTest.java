@@ -19,9 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -120,23 +119,30 @@ public class HttpFormTest {
         handler.setHandler("/echo", (t, a) -> {
             if (a == null) {
                 return "No args";
-            } else if (a.size() != 1) {
-                return "Arg size: " + a.size();
+            } else if (!(a instanceof String)) {
+                return "Not a string: " + a;
             }
 
-            return "echo:" + a.values().iterator().next();
+            return "echo:" + a;
         });
 
         handler.setHandler("/add", (t, a) -> {
             if (a == null) {
                 return "No args";
-            } else if (a.size() != 2) {
-                return "Arg size: " + a.size() + " - " + a;
+            } else if (!(a instanceof Map)) {
+                return "No a map as argument";
             }
 
-            final Map<String, Long> typedArgs = a.entrySet().stream()
-                    .collect(Collectors.toMap(Entry::getKey, e -> (Long) e.getValue()));
-            return Map.of("result", typedArgs.get("a") + typedArgs.get("b"));
+            Map<?, ?> map = (Map<?, ?>) a;
+            if (map.size() != 2) {
+                return "Arg size: " + map.size() + " - " + map;
+            }
+
+            if (!map.keySet().equals(Set.of("a", "b"))) {
+                return "Wrong arguments: " + map.keySet();
+            }
+
+            return map.values().stream().mapToLong(o -> ((Number) o).longValue()).sum();
         });
 
         assertEquals("test-status",
@@ -145,7 +151,6 @@ public class HttpFormTest {
         assertEquals("echo:ping", runWoTInThread(providerName, "echo",
                 (rc, pf) -> rc.act(Map.of(WoTConstants.DEFAULT_ARG_NAME, "ping")).map(String.class::cast)));
 
-        assertEquals(42L, (Long) runWoTInThread(providerName, "add",
-                (rc, pf) -> rc.act(Map.of("a", 20, "b", 22))));
+        assertEquals(42, (int) runWoTInThread(providerName, "add", (rc, pf) -> rc.act(Map.of("a", 20, "b", 22))));
     }
 }

@@ -66,13 +66,50 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
     private final HttpClient client;
 
     /**
+     * Handler configuration
+     */
+    private final WhiteboardHandlerConfiguration config;
+
+    /**
+     * Per-URL prefix configuration
+     */
+    private final Map<String, WhiteboardHandlerConfiguration> perUrlConfig;
+
+    /**
      * DTO mapper
      */
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public ThingHttpWhiteboardHandler(final Thing thing, final HttpClient client) {
+    public ThingHttpWhiteboardHandler(final Thing thing, final HttpClient client,
+            final WhiteboardHandlerConfiguration mainConfig,
+            final Map<String, WhiteboardHandlerConfiguration> perUrlConfig) {
         this.thing = thing;
         this.client = client;
+        this.config = mainConfig;
+        this.perUrlConfig = perUrlConfig;
+    }
+
+    /**
+     * Look for the configuration matching the target URI
+     *
+     * @param targetUri Target URI
+     * @return The configuration matching the URI prefix or the main configuration
+     */
+    private WhiteboardHandlerConfiguration findConfiguration(final URI targetUri) {
+        final String strTarget = targetUri.toString();
+
+        String bestMatch = null;
+        WhiteboardHandlerConfiguration bestConfig = this.config;
+        for (Entry<String, WhiteboardHandlerConfiguration> e : perUrlConfig.entrySet()) {
+            final String url = e.getKey();
+            if (strTarget.startsWith(url)) {
+                if (bestMatch == null || url.length() > bestMatch.length()) {
+                    bestMatch = url;
+                    bestConfig = this.config;
+                }
+            }
+        }
+        return bestConfig;
     }
 
     /**
@@ -125,16 +162,10 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
         }
 
         // Fill in arguments with default / const values
-        Map<String, Object> content;
-        if (action.input != null) {
-            content = new HashMap<>();
-            content.put("input", convertArguments(action.input, arguments));
-        } else {
-            content = Map.of();
-        }
+        final Object content = prepareArgumentsPayload(uri, action.input, arguments);
 
         // Prepare the request
-        Request request = client.newRequest(uri);
+        final Request request = client.newRequest(uri);
 
         String method = (String) form.getAdditionalProperties().get("htv:methodName");
         if (method == null) {
@@ -171,7 +202,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
                 }
 
                 try {
-                    promise.resolve(findValue(action.output, resultClass, getContentAsString()));
+                    promise.resolve(findValue(uri, action.output, resultClass, getContentAsString()));
                 } catch (IOException e) {
                     logger.error("Failed to parse response from action {} on thing {}", resource, thing.id, e);
                     promise.fail(e);
@@ -181,8 +212,41 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
         return promise.getPromise();
     }
 
+    /**
+     * Prepare the payload to send to an action
+     *
+     * @param targetUri Target URI
+     * @param schema    Action input schema
+     * @param arguments Action arguments received by sensiNact
+     * @return The payload to send to the server
+     */
+    private Object prepareArgumentsPayload(final URI targetUri, final DataSchema schema,
+            final Map<String, Object> arguments) {
+        if (schema == null) {
+            return null;
+        }
+
+        final WhiteboardHandlerConfiguration config = findConfiguration(targetUri);
+        final Object convertedArgs = convertArguments(schema, arguments);
+        if (config.argumentsKey != null) {
+            // Arguments must be in a map with the given key
+            if (convertedArgs != null) {
+                return Map.of(config.argumentsKey, convertedArgs);
+            } else if (config.useArgumentsKeyOnEmptyArgs) {
+                final Map<String, Object> mapArgs = new HashMap<>();
+                mapArgs.put(config.argumentsKey, null);
+                return mapArgs;
+            } else {
+                return null;
+            }
+        }
+
+        // Return the arguments as is
+        return convertedArgs;
+    }
+
     @SuppressWarnings("unchecked")
-    private Object convertArguments(DataSchema schema, Map<String, Object> arguments) {
+    private Object convertArguments(final DataSchema schema, final Map<String, Object> arguments) {
         if (schema == null) {
             // Not enough information to convert arguments, return them as is
             return arguments;
@@ -258,7 +322,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
         }
 
         // Prepare the request
-        Request request = client.newRequest(uri);
+        final Request request = client.newRequest(uri);
 
         String method = (String) form.getAdditionalProperties().get("htv:methodName");
         if (method == null) {
@@ -266,8 +330,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
         }
         request.method(method);
 
-        final Map<String, Object> body = new HashMap<>();
-        body.put("value", newValue.getValue());
+        final Object body = preparePropertyPayload(uri, newValue);
         try {
             request.body(new StringRequestContent(MimeTypes.Type.APPLICATION_JSON.asString(),
                     mapper.writeValueAsString(body)));
@@ -296,6 +359,29 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
             }
         });
         return promise.getPromise();
+    }
+
+    /**
+     * Prepare the content of a property write payload
+     *
+     * @param targetUri Target URI
+     * @param newValue  New property value
+     * @return The content to send to the server
+     */
+    private Object preparePropertyPayload(final URI targetUri, final TimedValue<?> newValue) {
+        final WhiteboardHandlerConfiguration config = findConfiguration(targetUri);
+        if (config.propertyKey != null) {
+            final Map<String, Object> body = new HashMap<>();
+            body.put(config.propertyKey, newValue.getValue());
+            if (config.timestampKey != null) {
+                // Add a timestamp key
+                body.put(config.timestampKey, newValue.getTimestamp().toString());
+            }
+            return body;
+        } else {
+            // Use the value as is
+            return newValue.getValue();
+        }
     }
 
     @Override
@@ -356,7 +442,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
 
                 try {
                     final Instant timestamp = Instant.now();
-                    final Object value = findValue(property.schema, resultClass, responseContent);
+                    final Object value = findValue(uri, property.schema, resultClass, responseContent);
                     promise.resolve(new TimedValue<Object>() {
                         @Override
                         public Instant getTimestamp() {
@@ -381,6 +467,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
     /**
      * Look for the result value. Check if is it buried in a result map
      *
+     * @param targetUri   Target URI
      * @param schema      Output schema
      * @param resultClass Expected result class
      * @param strResponse Endpoint response as a string
@@ -388,8 +475,8 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
      * @throws JsonMappingException    Error parsing response
      * @throws JsonProcessingException Error parsing response
      */
-    private Object findValue(final DataSchema schema, final Class<?> resultClass, final String strResponse)
-            throws JsonMappingException, JsonProcessingException {
+    private Object findValue(final URI targetUri, final DataSchema schema, final Class<?> resultClass,
+            final String strResponse) throws JsonMappingException, JsonProcessingException {
         final Object rawResponse = mapper.readValue(strResponse, Object.class);
         if (rawResponse == null) {
             return null;
@@ -397,15 +484,20 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
 
         if (!schema.type.equals("object") && rawResponse instanceof Map) {
             // We might have a step
-            Map<?, ?> mapResponse = (Map<?, ?>) rawResponse;
+            final Map<?, ?> mapResponse = (Map<?, ?>) rawResponse;
+
+            final WhiteboardHandlerConfiguration config = findConfiguration(targetUri);
+            if (config.propertyKey != null && mapResponse.containsKey(config.propertyKey)) {
+                return mapResponse.get(config.propertyKey);
+            }
+
             for (String key : List.of("value", "result", "answer")) {
                 if (mapResponse.containsKey(key)) {
-                    logger.debug("Found intermediate key {} -> {}", key, mapResponse.get(key));
+                    logger.debug("Got data through intermediate key {} -> {}", key, mapResponse.get(key));
                     return mapResponse.get(key);
                 }
             }
         }
-        logger.debug("NO intermediate key found/necessary -> {}", rawResponse);
         return rawResponse;
     }
 }

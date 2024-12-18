@@ -24,7 +24,6 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
@@ -38,7 +37,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class RequestHandler extends AbstractHandler {
 
     public static interface CustomHandler {
-        Object handle(String path, Map<String, Object> args) throws Exception;
+        Object handle(String path, Object args) throws Exception;
     }
 
     final ObjectMapper mapper = JsonMapper.builder().build();
@@ -81,12 +80,11 @@ public class RequestHandler extends AbstractHandler {
         if (handler != null) {
             serverVisits.computeIfAbsent(target, (k) -> new AtomicInteger()).incrementAndGet();
             try {
-                Map<String, Object> args = null;
+                Object rawArgs = null;
                 if (baseRequest.getMethod().equals(HttpMethod.POST.asString())) {
-                    args = mapper.readValue(baseRequest.getInputStream(), new TypeReference<Map<String, Object>>() {
-                    });
+                    rawArgs = mapper.readValue(baseRequest.getInputStream(), Object.class);
                 }
-                Object result = handler.handle(target, args);
+                Object result = handler.handle(target, rawArgs);
                 final String strResult = mapper.writeValueAsString(result);
                 response.setStatus(200);
                 response.setContentLength(strResult.length());
