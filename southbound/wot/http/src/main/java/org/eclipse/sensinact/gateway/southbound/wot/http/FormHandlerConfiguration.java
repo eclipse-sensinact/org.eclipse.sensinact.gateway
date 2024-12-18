@@ -24,6 +24,13 @@ public @interface FormHandlerConfiguration {
     boolean useArgumentsKeyOnEmptyArgs() default false;
 
     /**
+     * Name of the action result key
+     *
+     * Useful for Things returning results in a "result" field
+     */
+    String resultKey();
+
+    /**
      * Name of the key holding a property value. Set to null for a direct value.
      */
     String propertyKey();

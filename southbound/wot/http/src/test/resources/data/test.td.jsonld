@@ -16,6 +16,14 @@
                     "href": "{{HTTP}}/status"
                 }
             ]
+        },
+        "status-stepped": {
+            "type": "string",
+            "forms": [
+                {
+                    "href": "{{HTTP}}/status"
+                }
+            ]
         }
     },
     "actions": {
@@ -56,6 +64,19 @@
                         "type": "integer"
                     }
                 }
+            }
+        },
+        "stepped": {
+            "forms": [
+                {
+                    "href": "{{HTTP}}/stepped"
+                }
+            ],
+            "input": {
+                "type": "string"
+            },
+            "output": {
+                "type": "string"
             }
         }
     }

@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -35,6 +36,8 @@ import org.eclipse.sensinact.gateway.southbound.wot.api.handlers.ThingManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -50,6 +53,9 @@ public class HttpFormTest {
 
     @InjectService
     ThingManager manager;
+
+    @InjectService
+    ConfigurationAdmin cm;
 
     @BeforeAll
     static void setup() throws Exception {
@@ -110,7 +116,14 @@ public class HttpFormTest {
 
     @Test
     void testHttpFormHandler() throws Exception {
-        final String rawContent = readFile("test.td.jsonld").replace("{{HTTP}}", "http://localhost:" + httpPort);
+        final String baseUrl = "http://localhost:" + httpPort;
+
+        // Create a configuration
+        final Configuration config = cm.createFactoryConfiguration("sensinact.southbound.wot.http", "?");
+        config.update(new Hashtable<>(
+                Map.of(baseUrl + "/stepped", "{\"argumentsKey\": \"inputTest\", \"resultKey\": \"resultTest\"}")));
+
+        final String rawContent = readFile("test.td.jsonld").replace("{{HTTP}}", baseUrl);
         final Thing thing = handler.mapper.readValue(rawContent, Thing.class);
         final String providerName = manager.registerThing(thing);
 
@@ -130,10 +143,10 @@ public class HttpFormTest {
             if (a == null) {
                 return "No args";
             } else if (!(a instanceof Map)) {
-                return "No a map as argument";
+                return "Not a map as argument";
             }
 
-            Map<?, ?> map = (Map<?, ?>) a;
+            final Map<?, ?> map = (Map<?, ?>) a;
             if (map.size() != 2) {
                 return "Arg size: " + map.size() + " - " + map;
             }
@@ -145,6 +158,30 @@ public class HttpFormTest {
             return map.values().stream().mapToLong(o -> ((Number) o).longValue()).sum();
         });
 
+        handler.setHandler("/stepped", (t, a) -> {
+            if (a == null) {
+                return "No args";
+            } else if (!(a instanceof Map)) {
+                return "Not a map as argument";
+            }
+
+            final Map<?, ?> map = (Map<?, ?>) a;
+            if (!map.keySet().equals(Set.of("inputTest"))) {
+                return "Wrong keys: " + map.keySet();
+            }
+
+            Object arg = map.get("inputTest");
+            if (arg == null) {
+                return "No arg value";
+            } else if (!(arg instanceof String)) {
+                return "Invalid arg: " + arg;
+            }
+
+            return Map.of("result", "echo:" + arg);
+        });
+
+        handler.setHandler("/status-stepped", (t, a) -> Map.of("value", a == null ? "test-status" : "NON-NULL ARGS"));
+
         assertEquals("test-status",
                 runWoTInThread(providerName, "status", (rc, pf) -> rc.getValue(String.class).map(tv -> tv.getValue())));
 
@@ -152,5 +189,8 @@ public class HttpFormTest {
                 (rc, pf) -> rc.act(Map.of(WoTConstants.DEFAULT_ARG_NAME, "ping")).map(String.class::cast)));
 
         assertEquals(42, (int) runWoTInThread(providerName, "add", (rc, pf) -> rc.act(Map.of("a", 20, "b", 22))));
+
+        assertEquals("echo:pong", runWoTInThread(providerName, "echo",
+                (rc, pf) -> rc.act(Map.of(WoTConstants.DEFAULT_ARG_NAME, "pong")).map(String.class::cast)));
     }
 }

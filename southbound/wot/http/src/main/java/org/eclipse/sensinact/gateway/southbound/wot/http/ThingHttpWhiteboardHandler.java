@@ -202,7 +202,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
                 }
 
                 try {
-                    promise.resolve(findValue(uri, action.output, resultClass, getContentAsString()));
+                    promise.resolve(findResultValue(uri, action.output, resultClass, getContentAsString()));
                 } catch (IOException e) {
                     logger.error("Failed to parse response from action {} on thing {}", resource, thing.id, e);
                     promise.fail(e);
@@ -442,7 +442,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
 
                 try {
                     final Instant timestamp = Instant.now();
-                    final Object value = findValue(uri, property.schema, resultClass, responseContent);
+                    final Object value = findPropertyValue(uri, property.schema, resultClass, responseContent);
                     promise.resolve(new TimedValue<Object>() {
                         @Override
                         public Instant getTimestamp() {
@@ -465,7 +465,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
     }
 
     /**
-     * Look for the result value. Check if is it buried in a result map
+     * Look for the property value. Check if is it buried in a result map
      *
      * @param targetUri   Target URI
      * @param schema      Output schema
@@ -475,7 +475,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
      * @throws JsonMappingException    Error parsing response
      * @throws JsonProcessingException Error parsing response
      */
-    private Object findValue(final URI targetUri, final DataSchema schema, final Class<?> resultClass,
+    private Object findPropertyValue(final URI targetUri, final DataSchema schema, final Class<?> resultClass,
             final String strResponse) throws JsonMappingException, JsonProcessingException {
         final Object rawResponse = mapper.readValue(strResponse, Object.class);
         if (rawResponse == null) {
@@ -492,6 +492,47 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
             }
 
             for (String key : List.of("value", "result", "answer")) {
+                if (mapResponse.containsKey(key)) {
+                    logger.debug("Got data through intermediate key {} -> {}", key, mapResponse.get(key));
+                    return mapResponse.get(key);
+                }
+            }
+        }
+        return rawResponse;
+    }
+
+    /**
+     * Look for the action result value. Check if is it buried in a result map
+     *
+     * @param targetUri   Target URI
+     * @param schema      Output schema
+     * @param resultClass Expected result class
+     * @param strResponse Endpoint response as a string
+     * @return The found value
+     * @throws JsonMappingException    Error parsing response
+     * @throws JsonProcessingException Error parsing response
+     */
+    private Object findResultValue(final URI targetUri, final DataSchema schema, final Class<?> resultClass,
+            final String strResponse) throws JsonMappingException, JsonProcessingException {
+        final Object rawResponse = mapper.readValue(strResponse, Object.class);
+        if (rawResponse == null) {
+            return null;
+        }
+
+        if (!schema.type.equals("object") && rawResponse instanceof Map) {
+            // We might have a step
+            final Map<?, ?> mapResponse = (Map<?, ?>) rawResponse;
+
+            final WhiteboardHandlerConfiguration config = findConfiguration(targetUri);
+            if (config.resultKey != null && mapResponse.containsKey(config.resultKey)) {
+                return mapResponse.get(config.resultKey);
+            }
+
+            if (config.propertyKey != null && mapResponse.containsKey(config.propertyKey)) {
+                return mapResponse.get(config.propertyKey);
+            }
+
+            for (String key : List.of("result", "answer", "value")) {
                 if (mapResponse.containsKey(key)) {
                     logger.debug("Got data through intermediate key {} -> {}", key, mapResponse.get(key));
                     return mapResponse.get(key);

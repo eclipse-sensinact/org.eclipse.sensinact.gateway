@@ -30,6 +30,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-@Component(immediate = true, service = ThingListener.class)
+@Component(immediate = true, service = ThingListener.class, configurationPid = "sensinact.southbound.wot.http", configurationPolicy = ConfigurationPolicy.OPTIONAL)
 public class ThingHttpFormHandler implements ThingListener {
 
     private final static Logger logger = LoggerFactory.getLogger(ThingHttpFormHandler.class);
@@ -80,6 +81,7 @@ public class ThingHttpFormHandler implements ThingListener {
 
         mainConfiguration = new WhiteboardHandlerConfiguration();
         mainConfiguration.argumentsKey = configuration.argumentsKey();
+        mainConfiguration.resultKey = configuration.resultKey();
         mainConfiguration.useArgumentsKeyOnEmptyArgs = configuration.useArgumentsKeyOnEmptyArgs();
         mainConfiguration.propertyKey = configuration.propertyKey();
         mainConfiguration.timestampKey = configuration.timestampKey();

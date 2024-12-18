@@ -30,6 +30,13 @@ public class WhiteboardHandlerConfiguration {
     public boolean useArgumentsKeyOnEmptyArgs = false;
 
     /**
+     * Name of the action result key
+     *
+     * Useful for Things returning results in a "result" field
+     */
+    public String resultKey;
+
+    /**
      * Name of the key holding a property value. Set to null for a direct value.
      */
     public String propertyKey;
