@@ -413,35 +413,31 @@ public class QueryHandler implements IQueryHandler {
         for (var filter: query.filter) {
             ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(filter);
             for (var providerSnapshot: executeFilter(criterion)) {
-                if (criterion.getProviderFilter() == null || criterion.getProviderFilter().test(providerSnapshot)) {
-                    for (var serviceSnapshot: providerSnapshot.getServices()) {
-                        if (criterion.getServiceFilter() == null || criterion.getServiceFilter().test(serviceSnapshot)) {
-                            for (var resourceSnapshot: serviceSnapshot.getResources()) {
-                                if ((criterion.getResourceFilter() == null || criterion.getResourceFilter().test(resourceSnapshot)) && resourceSnapshot.getValue() != null) {
-                                    SnapshotProviderDTO providerDTO = result.providers.computeIfAbsent(providerSnapshot.getName(), (name) -> {
-                                        var dto = new SnapshotProviderDTO();
-                                        dto.name = providerSnapshot.getName();
-                                        dto.modelName = providerSnapshot.getModelName();
-                                        dto.services = new HashMap<>();
-                                        return dto;
-                                    });
-                                    SnapshotServiceDTO serviceDTO = providerDTO.services.computeIfAbsent(serviceSnapshot.getName(), (name) -> {
-                                        var dto = new SnapshotServiceDTO();
-                                        dto.name = serviceSnapshot.getName();
-                                        dto.resources = new HashMap<>();
-                                        return dto;
-                                    });
-                                    SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
-                                    resourceDTO.name = resourceSnapshot.getName();
-                                    resourceDTO.type = resourceSnapshot.getType().getName();
-                                    resourceDTO.timestamp = resourceSnapshot.getValue().getTimestamp().toEpochMilli();
-                                    resourceDTO.value = resourceSnapshot.getValue().getValue();
-                                    if (query.includeMetadata) {
-                                        resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
-                                    }
-                                    serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
-                                }
+                for (var serviceSnapshot: providerSnapshot.getServices()) {
+                    for (var resourceSnapshot: serviceSnapshot.getResources()) {
+                        if (resourceSnapshot.getValue() != null) {
+                            SnapshotProviderDTO providerDTO = result.providers.computeIfAbsent(providerSnapshot.getName(), (name) -> {
+                                var dto = new SnapshotProviderDTO();
+                                dto.name = providerSnapshot.getName();
+                                dto.modelName = providerSnapshot.getModelName();
+                                dto.services = new HashMap<>();
+                                return dto;
+                            });
+                            SnapshotServiceDTO serviceDTO = providerDTO.services.computeIfAbsent(serviceSnapshot.getName(), (name) -> {
+                                var dto = new SnapshotServiceDTO();
+                                dto.name = serviceSnapshot.getName();
+                                dto.resources = new HashMap<>();
+                                return dto;
+                            });
+                            SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
+                            resourceDTO.name = resourceSnapshot.getName();
+                            resourceDTO.type = resourceSnapshot.getType().getName();
+                            resourceDTO.timestamp = resourceSnapshot.getValue().getTimestamp().toEpochMilli();
+                            resourceDTO.value = resourceSnapshot.getValue().getValue();
+                            if (query.includeMetadata) {
+                                resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
                             }
+                            serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
                         }
                     }
                 }

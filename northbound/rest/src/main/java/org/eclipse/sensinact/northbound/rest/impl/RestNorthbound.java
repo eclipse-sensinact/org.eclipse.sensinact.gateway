@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
@@ -201,7 +200,7 @@ public class RestNorthbound implements IRestNorthbound {
         final QuerySnapshotDTO query = new QuerySnapshotDTO();
         query.uri = new SensinactPath();
         query.filter = filter;
-        query.includeMetadata = Optional.ofNullable(includeMetadata).orElse(false);
+        query.includeMetadata = includeMetadata;
         return handleQuery(query);
     }
 
