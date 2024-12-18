@@ -42,6 +42,11 @@
       <artifactId>filters.core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>resource.selector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <!-- SL4J -->
     <dependency>
@@ -78,6 +83,12 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
       <artifactId>session-impl</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>resource.selector.impl</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

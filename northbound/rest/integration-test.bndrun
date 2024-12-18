@@ -58,6 +58,7 @@
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
 	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
+	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
@@ -75,6 +76,8 @@
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.filters.core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.ldap;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.resource.selector;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.resource.selector.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.rest;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.rest-tests;version='[0.0.2,0.0.3)',\
