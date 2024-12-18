@@ -16,12 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
@@ -34,6 +36,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
@@ -190,6 +193,15 @@ public class RestNorthbound implements IRestNorthbound {
         final QueryGetDTO query = new QueryGetDTO();
         query.uri = new SensinactPath(providerId, serviceName, rcName);
         query.includeMetadata = includeMetadata;
+        return handleQuery(query);
+    }
+
+    @Override
+    public AbstractResultDTO getSnapshot(final boolean includeMetadata, List<ResourceSelector> filter) {
+        final QuerySnapshotDTO query = new QuerySnapshotDTO();
+        query.uri = new SensinactPath();
+        query.filter = filter;
+        query.includeMetadata = Optional.ofNullable(includeMetadata).orElse(false);
         return handleQuery(query);
     }
 

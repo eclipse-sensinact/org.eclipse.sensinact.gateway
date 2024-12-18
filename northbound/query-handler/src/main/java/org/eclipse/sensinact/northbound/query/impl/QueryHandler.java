@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.query.impl;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,6 +40,7 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterCommandHelper;
 import org.eclipse.sensinact.filters.api.FilterException;
 import org.eclipse.sensinact.filters.api.IFilterHandler;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
@@ -52,6 +54,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodParameterDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
@@ -62,12 +65,16 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourc
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseSetDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseSnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ShortResourceDescriptionDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.SnapshotProviderDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.SnapshotResourceDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.SnapshotServiceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
@@ -102,6 +109,9 @@ public class QueryHandler implements IQueryHandler {
      */
     @Reference
     GatewayThread gatewayThread;
+
+    @Reference
+    ResourceSelectorFilterFactory resourceSelectorFilterFactory;
 
     /**
      * Current filter handler
@@ -145,6 +155,10 @@ public class QueryHandler implements IQueryHandler {
 
             case ACT:
                 result = handleAct(userSession, (QueryActDTO) query);
+                break;
+
+            case GET_SNAPSHOT:
+                result = handleSnapshot(userSession, (QuerySnapshotDTO) query);
                 break;
 
             default:
@@ -362,12 +376,79 @@ public class QueryHandler implements IQueryHandler {
      */
     private Collection<ProviderSnapshot> executeFilter(final String filter, final String filterLanguage)
             throws StatusException {
-        final ICriterion parsedFilter = parseFilter(filter, filterLanguage);
+        return executeFilter(parseFilter(filter, filterLanguage));
+    }
+
+    /**
+     * Executes the given parser
+     *
+     * @param filter         Filter
+     * @return Matching snapshot
+     * @throws StatusException Error parsing or executing filter
+     */
+    private Collection<ProviderSnapshot> executeFilter(final ICriterion filter)
+            throws StatusException {
         try {
-            return FilterCommandHelper.executeFilter(gatewayThread, parsedFilter);
+            return FilterCommandHelper.executeFilter(gatewayThread, filter);
         } catch (FilterException e) {
             throw new StatusException(500, "Error executing filter: " + e.getMessage());
         }
+    }
+
+    /**
+     * Root of snapshot handling
+     *
+     * @param userSession Caller session
+     * @param query         Query description
+     * @return Result DTO
+     */
+    private AbstractResultDTO handleSnapshot(final SensiNactSession userSession, final QuerySnapshotDTO query)
+            throws Exception {
+        final ResponseSnapshotDTO result = new ResponseSnapshotDTO();
+
+        result.providers = new HashMap<>();
+        result.uri = "/";
+        result.statusCode = 200;
+
+        for (var filter: query.filter) {
+            ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(filter);
+            for (var providerSnapshot: executeFilter(criterion)) {
+                if (criterion.getProviderFilter() == null || criterion.getProviderFilter().test(providerSnapshot)) {
+                    for (var serviceSnapshot: providerSnapshot.getServices()) {
+                        if (criterion.getServiceFilter() == null || criterion.getServiceFilter().test(serviceSnapshot)) {
+                            for (var resourceSnapshot: serviceSnapshot.getResources()) {
+                                if ((criterion.getResourceFilter() == null || criterion.getResourceFilter().test(resourceSnapshot)) && resourceSnapshot.getValue() != null) {
+                                    SnapshotProviderDTO providerDTO = result.providers.computeIfAbsent(providerSnapshot.getName(), (name) -> {
+                                        var dto = new SnapshotProviderDTO();
+                                        dto.name = providerSnapshot.getName();
+                                        dto.modelName = providerSnapshot.getModelName();
+                                        dto.services = new HashMap<>();
+                                        return dto;
+                                    });
+                                    SnapshotServiceDTO serviceDTO = providerDTO.services.computeIfAbsent(serviceSnapshot.getName(), (name) -> {
+                                        var dto = new SnapshotServiceDTO();
+                                        dto.name = serviceSnapshot.getName();
+                                        dto.resources = new HashMap<>();
+                                        return dto;
+                                    });
+                                    SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
+                                    resourceDTO.name = resourceSnapshot.getName();
+                                    resourceDTO.type = resourceSnapshot.getType().getName();
+                                    resourceDTO.timestamp = resourceSnapshot.getValue().getTimestamp().toEpochMilli();
+                                    resourceDTO.value = resourceSnapshot.getValue().getValue();
+                                    if (query.includeMetadata) {
+                                        resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
+                                    }
+                                    serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

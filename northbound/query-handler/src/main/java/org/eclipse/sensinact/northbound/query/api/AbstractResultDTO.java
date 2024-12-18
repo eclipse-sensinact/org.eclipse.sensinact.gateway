@@ -14,6 +14,7 @@ package org.eclipse.sensinact.northbound.query.api;
 
 import org.eclipse.sensinact.northbound.query.dto.notification.ResultResourceNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseSnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
         @Type(value = ResultListProvidersDTO.class, name = "PROVIDERS_LIST"),
         @Type(value = ResultListServicesDTO.class, name = "SERVICES_LIST"),
         @Type(value = ResultListResourcesDTO.class, name = "RESOURCES_LIST"),
+        @Type(value = ResponseSnapshotDTO.class, name = "SNAPSHOT_RESPONSE"),
         @Type(value = TypedResponse.class, names = { "DESCRIBE_PROVIDER", "DESCRIBE_SERVICE", "DESCRIBE_RESOURCE",
                 "GET_RESPONSE", "SET_RESPONSE" }),
         @Type(value = ResultActDTO.class, name = "ACT_RESPONSE"),
