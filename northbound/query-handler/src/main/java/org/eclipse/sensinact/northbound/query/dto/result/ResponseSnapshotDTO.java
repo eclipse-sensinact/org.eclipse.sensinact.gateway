@@ -10,26 +10,19 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.query.api;
+package org.eclipse.sensinact.northbound.query.dto.result;
 
-/**
- * List of possible result types
- */
-public enum EResultType {
+import java.util.Map;
 
-    ERROR,
-    COMPLETE_LIST,
-    PROVIDERS_LIST,
-    SERVICES_LIST,
-    RESOURCES_LIST,
-    SNAPSHOT_RESPONSE,
-    DESCRIBE_PROVIDER,
-    DESCRIBE_SERVICE,
-    DESCRIBE_RESOURCE,
-    GET_RESPONSE,
-    SET_RESPONSE,
-    ACT_RESPONSE,
-    SUBSCRIPTION_RESPONSE,
-    SUBSCRIPTION_NOTIFICATION,
-    UNSUBSCRIPTION_RESPONSE,
+import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
+import org.eclipse.sensinact.northbound.query.api.EResultType;
+
+
+public class ResponseSnapshotDTO extends AbstractResultDTO {
+
+    public Map<String, SnapshotProviderDTO> providers;
+
+    public ResponseSnapshotDTO() {
+        super(EResultType.SNAPSHOT_RESPONSE);
+    }
 }

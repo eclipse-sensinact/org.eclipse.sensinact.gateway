@@ -3,6 +3,8 @@
   "bundles":[
     { "id": "org.eclipse.sensinact.gateway.northbound:rest:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:filters.core:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.filters:resource.selector:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.filters:resource.selector.impl:${gateway.version}" },
     { "id": "org.antlr:antlr4-runtime:4.12.0" },
     { "id": "org.eclipse.sensinact.gateway.filters:ldap:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound:query-handler:${gateway.version}" },
