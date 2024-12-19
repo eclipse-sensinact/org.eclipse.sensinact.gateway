@@ -14,6 +14,9 @@ package org.eclipse.sensinact.northbound.rest.api;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.List;
+
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 
@@ -35,6 +38,10 @@ public interface IRestNorthbound {
     @Path("")
     @GET
     AbstractResultDTO describeProviders();
+
+    @Path("snapshot")
+    @POST
+    AbstractResultDTO getSnapshot(@QueryParam("metadata") @DefaultValue("false") boolean includeMetadata, List<ResourceSelector> filter);
 
     @Path("providers")
     @GET

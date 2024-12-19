@@ -39,6 +39,11 @@ public enum EQueryType {
     SET,
 
     /**
+     * Get a snapshot
+     */
+    GET_SNAPSHOT,
+
+    /**
      * Acts on a resource (path must describe a unique resource)
      */
     ACT,

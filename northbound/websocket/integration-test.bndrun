@@ -52,11 +52,15 @@
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
 	org.eclipse.jetty.alpn.client;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.client;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.jndi;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.plus;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.servlet;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet-api;version='[5.0.2,5.0.3)',\
+	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.webapp;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.api;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.client;version='[11.0.13,11.0.14)',\
@@ -77,6 +81,8 @@
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.filters.core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.ldap;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.resource.selector;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.filters.resource.selector.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.security-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.session.session-api;version='[0.0.2,0.0.3)',\
