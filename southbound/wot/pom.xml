@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2024 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.southbound</groupId>
+    <artifactId>southbound</artifactId>
+    <version>${revision}${changelist}</version>
+  </parent>
+  <groupId>org.eclipse.sensinact.gateway.southbound.wot</groupId>
+  <artifactId>wot</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Web of Things Connectors</name>
+  <description>This reactor contains southbound connectors that are used to handle Things</description>
+
+  <properties>
+    <jetty.version>11.0.13</jetty.version>
+  </properties>
+
+  <modules>
+    <module>api</module>
+    <module>core</module>
+    <module>http</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>impl</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

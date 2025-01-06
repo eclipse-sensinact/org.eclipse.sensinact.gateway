@@ -35,6 +35,7 @@ header:
     - '**/*.javajet'
     - '**/*.javajetinc'
     - '**/*.json'
+    - '**/*.jsonld'
     - '**/*.csv'
     - '**/*.properties'
     - '**/*.maven'
