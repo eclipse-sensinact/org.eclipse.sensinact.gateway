@@ -16,11 +16,10 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
-import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 
 /**
  * This class is allows some level of implementation sharing between the
@@ -97,6 +96,7 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
         return rn;
     }
 
+    @Override
     public final void completeAndSend() {
         check();
         complete = true;

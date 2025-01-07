@@ -30,7 +30,7 @@ import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
 import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
 import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
