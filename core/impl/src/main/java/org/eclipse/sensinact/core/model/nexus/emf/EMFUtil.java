@@ -205,7 +205,7 @@ public class EMFUtil {
         ePackage.setEFactoryInstance(new EFactoryImpl() {
             @Override
             protected EObject basicCreate(EClass eClass) {
-                return eClass.getInstanceClassName() == "java.util.Map$Entry"
+                return eClass.getInstanceClassName().equals("java.util.Map$Entry")
                         ? new MinimalEObjectImpl.Container.Dynamic.BasicEMapEntry<String, String>(eClass)
                         : new MinimalEObjectImpl.Container.Dynamic.Permissive(eClass);
             }
