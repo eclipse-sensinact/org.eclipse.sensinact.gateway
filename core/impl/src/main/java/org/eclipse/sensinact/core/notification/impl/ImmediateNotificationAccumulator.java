@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
@@ -192,6 +191,7 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
         eventBus.deliver(ran.getTopic(), ran);
     }
 
+    @Override
     protected void doComplete() {
         // No op by default
     }

@@ -18,39 +18,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 public abstract class AbstractSensinactCommand<T> {
 
-    private NotificationAccumulator accumulator;
-
     private final AtomicBoolean canRun = new AtomicBoolean(true);
 
     protected AbstractSensinactCommand() {
-    }
-
-    protected AbstractSensinactCommand(NotificationAccumulator accumulator) {
-        this.accumulator = accumulator;
     }
 
     public final Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr) throws Exception {
         GatewayThread gateway = getGatewayThread();
         if (canRun.getAndSet(false)) {
             PromiseFactory promiseFactory = gateway.getPromiseFactory();
-            return safeCall(this, twin, modelMgr, promiseFactory).onResolve(getAccumulator()::completeAndSend);
+            return safeCall(this, twin, modelMgr, promiseFactory);
         } else {
             throw new IllegalStateException("Commands can only be executed once");
         }
-    }
-
-    public NotificationAccumulator getAccumulator() {
-        if (accumulator == null) {
-            accumulator = getGatewayThread().createAccumulator();
-        }
-        return accumulator;
     }
 
     protected abstract Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,

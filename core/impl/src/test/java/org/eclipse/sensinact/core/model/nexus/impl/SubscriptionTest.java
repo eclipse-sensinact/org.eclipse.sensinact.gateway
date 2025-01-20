@@ -54,7 +54,7 @@ import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;

@@ -58,7 +58,7 @@ import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.model.nexus.emf.NamingUtils;
 import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;

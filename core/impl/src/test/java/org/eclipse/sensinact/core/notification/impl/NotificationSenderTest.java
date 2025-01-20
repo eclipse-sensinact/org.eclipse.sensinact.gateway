@@ -31,11 +31,10 @@ import java.util.Map;
 
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
-import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

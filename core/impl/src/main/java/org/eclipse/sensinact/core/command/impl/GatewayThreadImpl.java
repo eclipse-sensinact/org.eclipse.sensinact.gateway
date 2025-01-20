@@ -35,8 +35,8 @@ import org.eclipse.sensinact.core.metrics.IMetricTimer;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.notification.impl.ImmediateNotificationAccumulator;
+import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulatorImpl;
 import org.eclipse.sensinact.core.twin.impl.SensinactDigitalTwinImpl;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardHandler;
@@ -73,7 +73,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
             newSingleThreadExecutor(r -> new Thread(r, "Eclipse sensiNact Gateway Worker")),
             newSingleThreadScheduledExecutor(r -> new Thread(r, "Eclipse sensiNact Scheduler")));
 
-    private final AtomicReference<WorkItem<?>> currentItem = new AtomicReference<>();
+    private final AtomicReference<NotificationAccumulator> currentAccumulator = new AtomicReference<>();
 
     private IMetricsManager metrics;
 
@@ -156,9 +156,8 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
     }
 
     private NotificationAccumulator getCurrentAccumulator() {
-        WorkItem<?> workItem = currentItem.get();
-        return workItem == null ? new ImmediateNotificationAccumulator(typedEventBus)
-                : workItem.command.getAccumulator();
+        NotificationAccumulator accumulator = currentAccumulator.get();
+        return accumulator == null ? new ImmediateNotificationAccumulator(typedEventBus) : accumulator;
     }
 
     @Override
@@ -166,8 +165,7 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
         return promiseFactory;
     }
 
-    @Override
-    public NotificationAccumulator createAccumulator() {
+    private NotificationAccumulator createAccumulator() {
         return new NotificationAccumulatorImpl(typedEventBus);
     }
 
@@ -185,8 +183,6 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
         while (run.get()) {
             try {
                 WorkItem<?> item = work.take();
-                currentItem.set(item);
-
                 metrics.getCounter("sensinact.tasks.pending").dec();
                 metrics.getHistogram("sensinact.tasks.pending.hist").update(work.size());
                 try (IMetricTimer timer = metrics.withTimer("sensinact.task.time")) {
@@ -194,8 +190,6 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
                 }
             } catch (InterruptedException e) {
                 continue;
-            } finally {
-                currentItem.set(null);
             }
         }
     }
@@ -213,12 +207,15 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
 
         void doWork() {
             try {
+                final NotificationAccumulator accumulator = createAccumulator();
+                currentAccumulator.set(accumulator);
+
                 SensinactDigitalTwinImpl twinImpl = new SensinactDigitalTwinImpl(nexusImpl,
                         getGatewayThread().getPromiseFactory());
                 SensinactModelManagerImpl mgrImpl = new SensinactModelManagerImpl(nexusImpl);
                 Promise<T> promise;
                 try {
-                    promise = command.call(twinImpl, mgrImpl);
+                    promise = command.call(twinImpl, mgrImpl).onResolve(accumulator::completeAndSend);
                 } finally {
                     twinImpl.invalidate();
                     mgrImpl.invalidate();
@@ -226,6 +223,8 @@ public class GatewayThreadImpl extends Thread implements GatewayThread {
                 d.resolveWith(promise);
             } catch (Exception e) {
                 d.fail(e);
+            } finally {
+                currentAccumulator.set(null);
             }
         }
     }

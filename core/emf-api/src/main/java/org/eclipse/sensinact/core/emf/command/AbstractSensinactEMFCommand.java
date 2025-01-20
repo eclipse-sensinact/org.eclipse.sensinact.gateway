@@ -18,7 +18,6 @@ import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -29,13 +28,10 @@ public abstract class AbstractSensinactEMFCommand<T> extends AbstractSensinactCo
         super();
     }
 
-    protected AbstractSensinactEMFCommand(NotificationAccumulator accumulator) {
-        super(accumulator);
-    }
-
     protected abstract Promise<T> call(SensinactEMFDigitalTwin twin, SensinactEMFModelManager modelMgr,
             PromiseFactory promiseFactory);
 
+    @Override
     protected Promise<T> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
         return call((SensinactEMFDigitalTwin) twin, (SensinactEMFModelManager) modelMgr, pf);
     }

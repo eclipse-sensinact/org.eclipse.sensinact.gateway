@@ -63,7 +63,7 @@ public abstract class DependentCommand<P, T> extends AbstractSensinactCommand<T>
         private final Promise<P> parentResult;
 
         public ChildCommand(Promise<P> parentResult) {
-            super(DependentCommand.this.getAccumulator());
+            super();
             this.parentResult = parentResult;
         }
 

@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.notification;
+package org.eclipse.sensinact.core.notification.impl;
 
 import java.time.Instant;
 import java.util.Map;

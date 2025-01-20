@@ -32,11 +32,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
-import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.osgi.service.typedevent.TypedEventBus;
 
 /**

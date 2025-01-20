@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.command;
 
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -21,8 +20,6 @@ public interface GatewayThread {
     public PromiseFactory getPromiseFactory();
 
     public <T> Promise<T> execute(AbstractSensinactCommand<T> command);
-
-    public NotificationAccumulator createAccumulator();
 
     public static GatewayThread getGatewayThread() {
         Thread currentThread = Thread.currentThread();

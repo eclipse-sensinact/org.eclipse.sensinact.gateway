@@ -32,7 +32,7 @@ import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
-import org.eclipse.sensinact.core.notification.NotificationAccumulator;
+import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
