@@ -30,6 +30,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
@@ -63,17 +64,7 @@ public class ResourceSelectorTest {
 
             @Override
             public TimedValue<?> getValue() {
-                return new TimedValue<Object>() {
-                    @Override
-                    public Instant getTimestamp() {
-                        return Instant.now();
-                    }
-
-                    @Override
-                    public Object getValue() {
-                        return value;
-                    }
-                };
+                return new DefaultTimedValue<>(value);
             }
 
             @Override

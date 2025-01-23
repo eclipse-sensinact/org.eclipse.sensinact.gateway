@@ -6,7 +6,7 @@
 	bnd.identity;id='ch.qos.logback.classic'
 -resolve.effective: active
 
--runee: JavaSE-11
+-runee: JavaSE-17
 -runfw: org.apache.felix.framework
 -runproperties: \
 	org.osgi.framework.bootdelegation=org.mockito.internal.creation.bytebuddy.inject,\

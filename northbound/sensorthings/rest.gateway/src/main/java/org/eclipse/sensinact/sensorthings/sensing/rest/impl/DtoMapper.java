@@ -31,6 +31,7 @@ import java.util.Optional;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
@@ -565,17 +566,7 @@ public class DtoMapper {
             }
         }
 
-        return new TimedValue<GeoJsonObject>() {
-            @Override
-            public Instant getTimestamp() {
-                return time;
-            }
-
-            @Override
-            public GeoJsonObject getValue() {
-                return parsedLocation;
-            }
-        };
+        return new DefaultTimedValue<>(parsedLocation, time);
     }
 
 }

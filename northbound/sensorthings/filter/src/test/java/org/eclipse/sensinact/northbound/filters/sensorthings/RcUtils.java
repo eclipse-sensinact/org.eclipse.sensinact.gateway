@@ -22,6 +22,7 @@ import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 
 /**
@@ -144,22 +145,7 @@ public class RcUtils {
 
             @Override
             public TimedValue<?> getValue() {
-                return new TimedValue<Object>() {
-                    @Override
-                    public Instant getTimestamp() {
-                        return rcTime;
-                    }
-
-                    @Override
-                    public Object getValue() {
-                        return value;
-                    }
-
-                    @Override
-                    public String toString() {
-                        return String.format("%s (%s)", value, rcTime);
-                    }
-                };
+                return new DefaultTimedValue<>(value, rcTime);
             }
 
             @Override

@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
@@ -150,17 +151,7 @@ class ResourceDataBackedResourceSnapshot implements ResourceSnapshot {
 
     @Override
     public TimedValue<?> getValue() {
-        return new TimedValue<Object>() {
-            @Override
-            public Instant getTimestamp() {
-                return service.provider.rdn.timestamp;
-            }
-
-            @Override
-            public Object getValue() {
-                return service.provider.rdn.newValue;
-            }
-        };
+        return new DefaultTimedValue<>(service.provider.rdn.newValue, service.provider.rdn.timestamp);
     }
 
     @Override

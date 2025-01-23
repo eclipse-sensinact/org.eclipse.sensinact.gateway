@@ -59,8 +59,8 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.model.nexus.emf.NamingUtils;
 import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
 import org.eclipse.sensinact.model.core.metadata.Action;
 import org.eclipse.sensinact.model.core.metadata.ActionParameter;
@@ -715,13 +715,13 @@ public class ModelNexus {
         if (metadata != null) {
             for (FeatureCustomMetadata entry : metadata.getExtra()) {
                 if (entry.getName().equals(key)) {
-                    return new TimedValueImpl<Object>(entry.getValue(), entry.getTimestamp());
+                    return new DefaultTimedValue<Object>(entry.getValue(), entry.getTimestamp());
                 }
             }
             // If the resource exists but has no metadata for that key then return an
             // empty timed value indicating that the resource exists but the metadata
             // is not set
-            return new TimedValueImpl<Object>(null, null);
+            return new DefaultTimedValue<Object>(null, null);
         }
         return null;
     }

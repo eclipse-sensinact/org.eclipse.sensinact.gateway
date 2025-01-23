@@ -61,12 +61,12 @@ import org.eclipse.sensinact.core.model.Resource;
 import org.eclipse.sensinact.core.model.ResourceBuilder;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.Service;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveAct;
 import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveReadOnly;
 import org.eclipse.sensinact.core.whiteboard.AbstractDescriptiveReadWrite;
@@ -569,7 +569,7 @@ public class WhiteboardImplTest {
                 break;
             }
 
-            return new TimedValueImpl<String>(value, newValue.getTimestamp());
+            return new DefaultTimedValue<String>(value, newValue.getTimestamp());
         }
     }
 
@@ -644,7 +644,7 @@ public class WhiteboardImplTest {
                 content.oldValue = null;
                 content.newValue = resource;
             }
-            return new TimedValueImpl<Content>(content,
+            return new DefaultTimedValue<Content>(content,
                     cached.getTimestamp() == null ? Instant.now() : cached.getTimestamp());
         }
 
@@ -656,7 +656,7 @@ public class WhiteboardImplTest {
             Content content = new Content();
             content.oldValue = cached.getValue() != null ? cached.getValue().newValue : null;
             content.newValue = newValue.getValue();
-            return new TimedValueImpl<Content>(content, newValue.getTimestamp());
+            return new DefaultTimedValue<Content>(content, newValue.getTimestamp());
         }
     }
 
@@ -771,7 +771,7 @@ public class WhiteboardImplTest {
                 @Override
                 public Promise<TimedValue<Integer>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
                         String provider, String service, String resource, TimedValue<Integer> cachedValue) {
-                    return pf.resolved(new TimedValueImpl<>(42));
+                    return pf.resolved(new DefaultTimedValue<>(42));
                 }
             };
 
@@ -801,7 +801,7 @@ public class WhiteboardImplTest {
                 @Override
                 public Promise<TimedValue<Long>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
                         String provider, String service, String resource, TimedValue<Long> cachedValue) {
-                    return pf.resolved(new TimedValueImpl<Long>(value));
+                    return pf.resolved(new DefaultTimedValue<Long>(value));
                 }
 
                 @Override
@@ -809,7 +809,7 @@ public class WhiteboardImplTest {
                         String provider, String service, String resource, TimedValue<Long> cachedValue,
                         TimedValue<Long> newValue) {
                     this.value = newValue.getValue();
-                    return pf.resolved(new TimedValueImpl<Long>(value));
+                    return pf.resolved(new DefaultTimedValue<Long>(value));
                 }
             };
 
@@ -977,7 +977,7 @@ public class WhiteboardImplTest {
         @Test
         void testReadOnly() throws Throwable {
             WhiteboardGet<Integer> getHandler = (pf, modelPackageUri, model, provider, service, resource, resourceType,
-                    cachedValue) -> pf.resolved(new TimedValueImpl<>(42));
+                    cachedValue) -> pf.resolved(new DefaultTimedValue<>(42));
 
             final String modelName = "wbHandlerROTest";
             final String svcName = "svc";
@@ -1011,7 +1011,7 @@ public class WhiteboardImplTest {
                 public Promise<TimedValue<Long>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
                         String provider, String service, String resource, Class<Long> resourceType,
                         TimedValue<Long> cachedValue) {
-                    return pf.resolved(new TimedValueImpl<Long>(value));
+                    return pf.resolved(new DefaultTimedValue<Long>(value));
                 }
 
                 @Override
@@ -1019,7 +1019,7 @@ public class WhiteboardImplTest {
                         String provider, String service, String resource, Class<Long> resourceType,
                         TimedValue<Long> cachedValue, TimedValue<Long> newValue) {
                     this.value = newValue.getValue();
-                    return pf.resolved(new TimedValueImpl<Long>(value));
+                    return pf.resolved(new DefaultTimedValue<Long>(value));
                 }
             };
 
@@ -1177,9 +1177,9 @@ public class WhiteboardImplTest {
         @Test
         void testHandlersProviderFilter() throws Throwable {
             WhiteboardGet<Integer> h1 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
-                    cachedValue) -> pf.resolved(new TimedValueImpl<>(1));
+                    cachedValue) -> pf.resolved(new DefaultTimedValue<>(1));
             WhiteboardGet<Integer> h2 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
-                    cachedValue) -> pf.resolved(new TimedValueImpl<>(2));
+                    cachedValue) -> pf.resolved(new DefaultTimedValue<>(2));
 
             final String modelName = "wbHandlerPriority";
             final String svcName = "svc";
@@ -1242,11 +1242,11 @@ public class WhiteboardImplTest {
         @Test
         void testHandlersWildcardFilter() throws Throwable {
             WhiteboardGet<Integer> h1 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
-                    cachedValue) -> pf.resolved(new TimedValueImpl<>(1));
+                    cachedValue) -> pf.resolved(new DefaultTimedValue<>(1));
             WhiteboardGet<Integer> h2 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
-                    cachedValue) -> pf.resolved(new TimedValueImpl<>(2));
+                    cachedValue) -> pf.resolved(new DefaultTimedValue<>(2));
             WhiteboardGet<Integer> h3 = (pf, modelPackageUri, model, provider, service, resource, resourceType,
-                    cachedValue) -> pf.resolved(new TimedValueImpl<>(3));
+                    cachedValue) -> pf.resolved(new DefaultTimedValue<>(3));
 
             final String modelName = "wbHandlerPriority";
             final String svcName1 = "svc1";

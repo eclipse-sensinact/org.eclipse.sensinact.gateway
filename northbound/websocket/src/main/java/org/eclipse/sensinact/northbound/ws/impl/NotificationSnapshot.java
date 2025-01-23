@@ -24,6 +24,7 @@ import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 
 /**
@@ -170,17 +171,7 @@ class NotificationSnapshot {
         private final TimedValue<?> value;
 
         public ResourceSnapshotImpl(final Object value) {
-            this.value = new TimedValue<Object>() {
-                @Override
-                public Instant getTimestamp() {
-                    return timestamp;
-                }
-
-                @Override
-                public Object getValue() {
-                    return value;
-                }
-            };
+            this.value = new DefaultTimedValue<>(value, timestamp);
         }
 
         @Override

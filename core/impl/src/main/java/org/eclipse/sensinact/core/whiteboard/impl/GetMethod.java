@@ -20,8 +20,8 @@ import java.util.Set;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.verb.GetParam;
 import org.eclipse.sensinact.core.annotation.verb.GetParam.GetSegment;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardGet;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -64,14 +64,14 @@ class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> 
                     return pf.resolved(null);
                 case UPDATE_IF_PRESENT:
                     return pf.resolved(cachedValue == null || cachedValue.getTimestamp() == null ? null
-                            : new TimedValueImpl<Object>(null));
+                            : new DefaultTimedValue<Object>(null));
                 case UPDATE:
-                    return pf.resolved(new TimedValueImpl<Object>(null));
+                    return pf.resolved(new DefaultTimedValue<Object>(null));
                 default:
                     return pf.failed(new IllegalArgumentException("Unknown null action: " + nullAction));
                 }
             } else if (resourceType.isAssignableFrom(result.getClass())) {
-                return pf.resolved(new TimedValueImpl<Object>(resourceType.cast(result)));
+                return pf.resolved(new DefaultTimedValue<Object>(resourceType.cast(result)));
             } else {
                 return pf.failed(new Exception("Invalid result type: " + result.getClass()));
             }
