@@ -1,6 +1,6 @@
 -runrequires: bnd.identity;id='${project.groupId}.${project.artifactId}'
 -runfw: org.apache.felix.framework
--runee: JavaSE-11
+-runee: JavaSE-17
 
 # These packages are also provided by the gecko.emf.osgi.component project
 # so we blacklist the API for resolve consistency

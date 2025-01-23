@@ -37,6 +37,7 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -267,12 +268,12 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         // Check value type
         final Object rawValue = svc.eGet(rcFeature);
         if (rawValue == null) {
-            return new TimedValueImpl<T>(null, timestamp);
+            return new DefaultTimedValue<T>(null, timestamp);
         } else if (!type.isAssignableFrom(rawValue.getClass())) {
             throw new IllegalArgumentException(
                     "Expected a " + type.getName() + " but resource is a " + rawValue.getClass().getName());
         } else {
-            return new TimedValueImpl<T>(type.cast(rawValue), timestamp);
+            return new DefaultTimedValue<T>(type.cast(rawValue), timestamp);
         }
     }
 
@@ -319,7 +320,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
 
         rcSnapshot.setValue(
-                new TimedValueImpl<Object>(svc == null ? null : svc.eGet((EStructuralFeature) rcFeature), timestamp));
+                new DefaultTimedValue<Object>(svc == null ? null : svc.eGet((EStructuralFeature) rcFeature), timestamp));
     }
 
     @Override

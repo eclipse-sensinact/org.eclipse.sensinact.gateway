@@ -1,4 +1,4 @@
--runee: JavaSE-11
+-runee: JavaSE-17
 -runrequires: \
 	bnd.identity;id='org.eclipse.sensinact.gateway.distribution.launcher',\
 	bnd.identity;id='org.apache.aries.spifly.dynamic.framework.extension',\

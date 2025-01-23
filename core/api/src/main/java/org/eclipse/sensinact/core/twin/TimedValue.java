@@ -14,9 +14,20 @@ package org.eclipse.sensinact.core.twin;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(as = DefaultTimedValue.class)
 public interface TimedValue<T> {
 
     Instant getTimestamp();
 
     T getValue();
+
+    /**
+     * @return true if this {@link TimedValue} has no timestamp
+     * and is therefore an empty marker value
+     */
+    default boolean isEmpty() {
+        return getTimestamp() == null;
+    }
 }

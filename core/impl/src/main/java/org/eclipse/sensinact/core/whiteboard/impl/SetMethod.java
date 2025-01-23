@@ -19,8 +19,8 @@ import java.util.Set;
 
 import org.eclipse.sensinact.core.annotation.verb.SetParam;
 import org.eclipse.sensinact.core.annotation.verb.SetParam.SetSegment;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.core.twin.impl.TimedValueImpl;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardSet;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -51,7 +51,7 @@ class SetMethod extends AbstractResourceMethod implements WhiteboardSet<Object> 
             } else if (o == null) {
                 return pf.resolved(null);
             } else if (resourceType.isAssignableFrom(o.getClass())) {
-                return pf.resolved(new TimedValueImpl<Object>(resourceType.cast(o)));
+                return pf.resolved(new DefaultTimedValue<Object>(resourceType.cast(o)));
             } else {
                 return pf.failed(new Exception("Invalid result type: " + o.getClass()));
             }

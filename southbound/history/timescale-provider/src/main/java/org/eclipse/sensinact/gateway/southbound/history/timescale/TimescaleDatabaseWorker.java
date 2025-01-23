@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.southbound.history.api.HistoricalQueries;
@@ -254,7 +255,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                 if (rs.next()) {
                     result = toTimedValue(rs);
                 } else {
-                    result = new TimedValueImpl<>(null, null);
+                    result = new DefaultTimedValue<>();
                 }
                 return result;
             });
@@ -296,7 +297,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                 }
             }
         }
-        return new TimedValueImpl<>(value, dataTime);
+        return new DefaultTimedValue<>(value, dataTime);
     }
 
     @Override
@@ -344,7 +345,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                     }
                 }
                 if (rs.next()) {
-                    list.add(new TimedValueImpl<>(null, null));
+                    list.add(DefaultTimedValue.EMPTY);
                 }
 
                 return list;
@@ -398,35 +399,4 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
         }
     }
 
-}
-
-class TimedValueImpl<T> implements TimedValue<T> {
-
-    private final Instant timestamp;
-
-    private final T value;
-
-    public TimedValueImpl(final T value) {
-        this(value, Instant.now());
-    }
-
-    public TimedValueImpl(final T value, Instant instant) {
-        this.value = value;
-        this.timestamp = instant;
-    }
-
-    @Override
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    @Override
-    public T getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("TimedValue(%s, %s)", getValue(), getTimestamp());
-    }
 }

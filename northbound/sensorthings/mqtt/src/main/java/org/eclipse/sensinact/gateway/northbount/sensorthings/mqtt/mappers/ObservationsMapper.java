@@ -12,11 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 
-import java.time.Instant;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -31,19 +31,7 @@ public class ObservationsMapper extends SensorthingsMapper<Observation> {
     }
 
     public Promise<Stream<Observation>> toPayload(ResourceDataNotification notification) {
-        TimedValue<Object> tv = new TimedValue<Object>() {
-
-            @Override
-            public Instant getTimestamp() {
-                return notification.timestamp;
-            }
-
-            @Override
-            public Object getValue() {
-                return notification.newValue;
-            }
-
-        };
+        TimedValue<Object> tv = new DefaultTimedValue<>(notification.newValue, notification.timestamp);
         return wrap(DtoMapper.toObservation(notification.provider, notification.service, notification.resource, tv));
     }
 

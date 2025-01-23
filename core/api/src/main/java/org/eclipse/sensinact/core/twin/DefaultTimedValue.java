@@ -10,25 +10,28 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.twin.impl;
+package org.eclipse.sensinact.core.twin;
 
 import java.time.Instant;
 
-import org.eclipse.sensinact.core.twin.TimedValue;
+public record DefaultTimedValue<T> (T value, Instant timestamp) implements TimedValue<T> {
 
-public class TimedValueImpl<T> implements TimedValue<T> {
+    public static final DefaultTimedValue<?> EMPTY = new DefaultTimedValue<>();
 
-    private final Instant timestamp;
-
-    private final T value;
-
-    public TimedValueImpl(final T value) {
-        this(value, Instant.now());
+    /**
+     * A shortcut for creating an empty TimedValue with no value or timestamp
+     * @param value
+     */
+    public DefaultTimedValue() {
+        this(null, null);
     }
 
-    public TimedValueImpl(final T value, Instant instant) {
-        this.value = value;
-        this.timestamp = instant;
+    /**
+     * A shortcut for creating a value with the current time
+     * @param value
+     */
+    public DefaultTimedValue(T value) {
+        this(value, Instant.now());
     }
 
     @Override
@@ -39,10 +42,5 @@ public class TimedValueImpl<T> implements TimedValue<T> {
     @Override
     public T getValue() {
         return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("TimedValue(%s, %s)", getValue(), getTimestamp());
     }
 }

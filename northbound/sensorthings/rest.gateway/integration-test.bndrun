@@ -12,7 +12,7 @@
 
 -resolve.effective: active
 
--runee: JavaSE-11
+-runee: JavaSE-17
 -runfw: org.apache.felix.framework
 -runproperties: logback.configurationFile=${project.build.testOutputDirectory}/logback-test.xml
 

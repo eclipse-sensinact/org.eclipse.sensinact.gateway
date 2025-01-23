@@ -28,6 +28,7 @@ import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.model.impl.ResourceImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -126,7 +127,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             currentTimestamp = null;
         }
 
-        return new TimedValueImpl<T>(currentValue, currentTimestamp);
+        return new DefaultTimedValue<T>(currentValue, currentTimestamp);
     }
 
     @SuppressWarnings("unchecked")
@@ -152,7 +153,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             if (hasExternalSetter) {
                 // Check new value type
                 final TimedValue<?> cachedValue = getValueFromTwin(type);
-                final TimedValue<T> newValue = new TimedValueImpl<T>(value, timestamp);
+                final TimedValue<T> newValue = new DefaultTimedValue<T>(value, timestamp);
                 return modelNexus.pushValue(provider, serviceName, resource, (Class<T>) type,
                         (TimedValue<T>) cachedValue, newValue).map(x -> null);
             } else {
