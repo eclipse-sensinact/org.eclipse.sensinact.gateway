@@ -40,6 +40,13 @@
       <artifactId>geo-json</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>${jackson.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
