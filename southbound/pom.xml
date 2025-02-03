@@ -31,5 +31,6 @@
     <module>virtual</module>
     <module>rules</module>
     <module>history</module>
+    <module>wot</module>
   </modules>
 </project>
