@@ -75,7 +75,7 @@ public class MqttClientHandler implements MqttCallback {
      */
     private Timer reconnectTimer;
 
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     /**
      * Listener -&gt; Topic handling predicate
