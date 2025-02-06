@@ -12,10 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.mqtt.test;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -76,8 +76,8 @@ public class MqttDelayedStartTest {
         IConfig config = new MemoryConfig(new Properties());
         config.setProperty(IConfig.HOST_PROPERTY_NAME, "127.0.0.1");
         config.setProperty(IConfig.PORT_PROPERTY_NAME, "2183");
+        config.setProperty(IConfig.PERSISTENCE_ENABLED_PROPERTY_NAME, "false");
         server.startServer(config);
-
         client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
@@ -119,13 +119,13 @@ public class MqttDelayedStartTest {
         IMqttMessage msg = null;
         // Try a few times waiting for a reconnect
         for (int i = 0; i < 5 && msg == null; i++) {
-            client.publish(topic, content.getBytes(StandardCharsets.UTF_8), 1, false);
+            client.publish(topic, content.getBytes(UTF_8), 1, false);
             // Wait a bit
             msg = receiveQueue.poll(1, TimeUnit.SECONDS);
         }
         assertNotNull(msg);
         assertEquals(topic, msg.getTopic());
-        assertEquals(content, new String(msg.getPayload(), StandardCharsets.UTF_8));
+        assertEquals(content, new String(msg.getPayload(), UTF_8));
     }
 
     @Test
@@ -204,5 +204,29 @@ public class MqttDelayedStartTest {
                 new String[] { "sensinact/mqtt/test1/foo", "sensinact/mqtt/test1/bar" }));
 
         doTest(messages1);
+    }
+
+    @Test
+    void testRetainedMessage() throws Exception {
+
+        // Start the server
+        startServerAndLocalClient();
+
+        client.publish("sensinact/mqtt/test1/fizz", "RetainedFizz".getBytes(UTF_8), 1, true);
+        client.publish("sensinact/mqtt/test1/fizz", "NotRetained".getBytes(UTF_8), 1, false);
+        client.publish("sensinact/mqtt/test1/buzz", "RetainedBuzz".getBytes(UTF_8), 1, true);
+
+        // Activate the handler after some retained messages have been published
+        handler.activate(getConfig());
+        final BlockingQueue<IMqttMessage> messages1 = new ArrayBlockingQueue<>(32);
+        final IMqttMessageListener listener1 = (handler, topic, msg) -> messages1.add(msg);
+        handler.addListener(listener1, Map.of(IMqttMessageListener.MQTT_TOPICS_FILTERS,
+                new String[] { "sensinact/mqtt/test1/fizz" }));
+
+        IMqttMessage msg = messages1.poll(1000, TimeUnit.MILLISECONDS);
+        assertEquals("RetainedFizz", new String(msg.getPayload(), UTF_8));
+
+        msg = messages1.poll(1000, TimeUnit.MILLISECONDS);
+        assertEquals(null, msg);
     }
 }

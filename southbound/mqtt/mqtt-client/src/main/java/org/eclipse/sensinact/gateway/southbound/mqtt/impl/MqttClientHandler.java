@@ -16,7 +16,7 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,6 +32,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
+import org.eclipse.sensinact.gateway.southbound.mqtt.api.IMqttMessage;
 import org.eclipse.sensinact.gateway.southbound.mqtt.api.IMqttMessageListener;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -74,11 +75,14 @@ public class MqttClientHandler implements MqttCallback {
      */
     private Timer reconnectTimer;
 
+    private final Object lock = new Object();
+
     /**
      * Listener -&gt; Topic handling predicate
      */
-    private Map<IMqttMessageListener, Predicate<String>> listeners = Collections
-            .synchronizedMap(new IdentityHashMap<>());
+    private Map<IMqttMessageListener, Predicate<String>> listeners = new IdentityHashMap<>();
+
+    private Map<String, IMqttMessage> topic2last = new HashMap<>();
 
     private String[] topics;
 
@@ -92,14 +96,28 @@ public class MqttClientHandler implements MqttCallback {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addListener(IMqttMessageListener listener, Map<String, Object> svcProps) {
         final String[] filters = getArrayProperty(svcProps.get(IMqttMessageListener.MQTT_TOPICS_FILTERS));
-        listeners.put(listener, (str) -> serviceMatchesTopic(str, filters));
+        Predicate<String> predicate = (str) -> serviceMatchesTopic(str, filters);
+        Map<String, IMqttMessage> topic2lastCopy;
+        synchronized(lock) {
+            listeners.put(listener, predicate);
+            topic2lastCopy = new HashMap<>(topic2last);
+        }
+        for (var lastEntry: topic2lastCopy.entrySet()) {
+            String topic = lastEntry.getKey();
+            IMqttMessage message = lastEntry.getValue();
+            if (predicate.test(topic) && message.getPayload().length > 0) {
+                listener.onMqttMessage(message.getHandlerId(), topic, message);
+            }
+        }
     }
 
     /**
      * MQTT listener unregistered
      */
     public void removeListener(IMqttMessageListener listener) {
-        listeners.remove(listener);
+        synchronized(lock) {
+            listeners.remove(listener);
+        }
     }
 
     /**
@@ -307,13 +325,14 @@ public class MqttClientHandler implements MqttCallback {
         final SensiNactMqttMessage snMessage = new SensiNactMqttMessage(handlerId, topic, message);
         client.messageArrivedComplete(message.getId(), message.getQos());
 
-        // Notify matching listeners
-        Map<IMqttMessageListener, Predicate<String>> workListeners;
-        synchronized (listeners) {
-            workListeners = new IdentityHashMap<>(listeners);
+        Map<IMqttMessageListener, Predicate<String>> listenersCopy;
+        synchronized(lock) {
+            listenersCopy = new IdentityHashMap<>(listeners);
+            topic2last.put(snMessage.getTopic(), snMessage);
         }
 
-        for (Entry<IMqttMessageListener, Predicate<String>> entry : workListeners.entrySet()) {
+        // Notify matching listeners
+        for (Entry<IMqttMessageListener, Predicate<String>> entry : listenersCopy.entrySet()) {
             if (entry.getValue().test(topic)) {
                 try {
                     entry.getKey().onMqttMessage(handlerId, topic, snMessage);
