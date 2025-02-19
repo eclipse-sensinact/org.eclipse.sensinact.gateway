@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.sensinact.gateway.southbound.wot.api.ActionAffordance;
 import org.eclipse.sensinact.gateway.southbound.wot.api.EventAffordance;
+import org.eclipse.sensinact.gateway.southbound.wot.api.Namespaces;
 import org.eclipse.sensinact.gateway.southbound.wot.api.PropertyAffordance;
 import org.eclipse.sensinact.gateway.southbound.wot.api.Thing;
 import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.ArraySchema;
@@ -339,5 +340,23 @@ public class ParserTest {
         final UnknownDataTypeSchema reloadedUnknown = (UnknownDataTypeSchema) reloadedOneOfDs.oneOf.get(1);
         assertEquals("uuid", reloadedUnknown.type);
         assertEquals(Map.of("extra", 123), reloadedUnknown.extraProperties);
+    }
+
+    @Test
+    void testContext() throws Exception {
+        final Namespaces ns = mapper.readValue(readFile("context.jsonld"), Namespaces.class);
+        assertEquals("https://www.w3.org/2019/wot/td/v1", ns.defaultNs);
+        assertEquals(Map.of("adp", "https://auroral.iot.linkeddata.es/def/adapters#", "om",
+                "http://www.ontology-of-units-of-measure.org/resource/om-2/", "geo",
+                "http://www.w3.org/2003/01/geo/wgs84_pos#"), ns.prefixes);
+        assertEquals(List.of("https://w3c.github.io/wot-discovery/context/discovery-core.jsonld"), ns.contexts);
+
+        final String out = mapper.writeValueAsString(ns);
+        final Namespaces ns2 = mapper.readValue(out, Namespaces.class);
+        assertEquals("https://www.w3.org/2019/wot/td/v1", ns2.defaultNs);
+        assertEquals(Map.of("adp", "https://auroral.iot.linkeddata.es/def/adapters#", "om",
+                "http://www.ontology-of-units-of-measure.org/resource/om-2/", "geo",
+                "http://www.w3.org/2003/01/geo/wgs84_pos#"), ns2.prefixes);
+        assertEquals(List.of("https://w3c.github.io/wot-discovery/context/discovery-core.jsonld"), ns2.contexts);
     }
 }

@@ -14,6 +14,10 @@
 package org.eclipse.sensinact.gateway.southbound.wot.api;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Spliterators;
@@ -36,7 +40,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 public class Namespaces {
 
     /**
-     * Default namespace
+     * Default namespace (first string entry)
      */
     public String defaultNs;
 
@@ -44,6 +48,11 @@ public class Namespaces {
      * Prefixes definitions
      */
     public Map<String, String> prefixes;
+
+    /**
+     * Other contexts definition
+     */
+    public List<String> contexts;
 
     /**
      * Counts the number of declared namespaces (default + prefixes)
@@ -55,7 +64,7 @@ public class Namespaces {
 
     @Override
     public String toString() {
-        return String.format("Namespaces(defaultNs=%s, prefixes=%s)", defaultNs, prefixes);
+        return String.format("Namespaces(defaultNs=%s, prefixes=%s, contexts=%s)", defaultNs, prefixes, contexts);
     }
 
     @SuppressWarnings("serial")
@@ -76,32 +85,42 @@ public class Namespaces {
             if (root.isTextual()) {
                 ns.defaultNs = root.textValue();
                 ns.prefixes = Map.of();
+                ns.contexts = List.of();
             } else if (root.isObject()) {
                 ns.defaultNs = null;
                 ns.prefixes = StreamSupport.stream(Spliterators.spliteratorUnknownSize(root.fields(), 0), false)
                         .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().textValue()));
+                ns.contexts = List.of();
             } else if (root.isArray()) {
+                ns.defaultNs = null;
+                final Map<String, String> prefixes = new HashMap<>();
+                final List<String> contexts = new ArrayList<>();
+
                 var iter = root.iterator();
+                int idx = 0;
                 while (iter.hasNext()) {
                     var node = iter.next();
                     if (node.isTextual()) {
-                        if (ns.defaultNs != null) {
-                            throw new JsonParseException("Multiple default namespaces");
-                        } else {
+                        if (idx == 0) {
+                            // First entry is a URI: use it as default
                             ns.defaultNs = node.textValue();
+                        } else {
+                            // Other entries are context
+                            contexts.add(node.textValue());
                         }
                     } else if (node.isObject()) {
-                        if (!ns.prefixes.isEmpty()) {
-                            throw new JsonParseException("Multiple prefix definitions");
-                        } else {
-                            ns.prefixes = StreamSupport
-                                    .stream(Spliterators.spliteratorUnknownSize(node.fields(), 0), false)
-                                    .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().textValue()));
-                        }
+                        prefixes.putAll(
+                                StreamSupport.stream(Spliterators.spliteratorUnknownSize(node.fields(), 0), false)
+                                        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().textValue())));
                     } else {
                         throw new JsonParseException("Invalid namespaces: " + root);
                     }
+                    idx++;
                 }
+
+                // Convert to unmodifiable list
+                ns.prefixes = Collections.unmodifiableMap(prefixes);
+                ns.contexts = Collections.unmodifiableList(contexts);
             } else {
                 throw new JsonParseException("Invalid namespaces: " + root);
             }
@@ -117,24 +136,34 @@ public class Namespaces {
 
         @Override
         public void serialize(Namespaces value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            if (value == null || (value.prefixes == null && value.defaultNs == null)) {
+            if (value == null) {
                 gen.writeNull();
                 return;
             }
 
-            if (value.prefixes == null || value.prefixes.isEmpty()) {
+            final boolean hasPrefixes = value.prefixes != null && !value.prefixes.isEmpty();
+            final boolean hasContexts = value.contexts != null && !value.contexts.isEmpty();
+
+            if (!hasPrefixes && !hasContexts) {
                 gen.writeString(value.defaultNs);
                 return;
             }
 
-            if (value.defaultNs == null) {
+            if (value.defaultNs == null && !hasContexts) {
                 gen.writeObject(value.prefixes);
                 return;
             }
 
             gen.writeStartArray();
             gen.writeString(value.defaultNs);
-            gen.writeObject(value.prefixes);
+            if (value.prefixes != null && !value.prefixes.isEmpty()) {
+                gen.writeObject(value.prefixes);
+            }
+            if (value.contexts != null && !value.contexts.isEmpty()) {
+                for (String ns : value.contexts) {
+                    gen.writeString(ns);
+                }
+            }
             gen.writeEndArray();
         }
     }
