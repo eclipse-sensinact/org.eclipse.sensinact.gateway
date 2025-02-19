@@ -14,6 +14,7 @@
 package org.eclipse.sensinact.gateway.southbound.wot.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -23,6 +24,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.eclipse.sensinact.gateway.southbound.wot.api.ActionAffordance;
 import org.eclipse.sensinact.gateway.southbound.wot.api.EventAffordance;
@@ -33,7 +36,9 @@ import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.BooleanSchema
 import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.DataSchema;
 import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.IntegerSchema;
 import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.ObjectSchema;
+import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.OneOfDataSchema;
 import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.StringSchema;
+import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.UnknownDataTypeSchema;
 import org.eclipse.sensinact.gateway.southbound.wot.api.security.BasicSecurityScheme;
 import org.eclipse.sensinact.gateway.southbound.wot.api.security.NoSecurityScheme;
 import org.eclipse.sensinact.gateway.southbound.wot.api.security.SecurityScheme;
@@ -285,5 +290,54 @@ public class ParserTest {
                 "Out of resource event. Emitted when the available resource level is not sufficient for a desired drink.",
                 event.description);
         assertNull(event.forms);
+    }
+
+    @Test
+    void testDataSchemaResolution() throws Exception {
+        // Deserialization
+        final DataSchema ds = mapper.readValue(readFile("dataschema-test.jsonld"), DataSchema.class);
+        assertInstanceOf(ObjectSchema.class, ds);
+        final ObjectSchema objDs = (ObjectSchema) ds;
+        assertNotNull(objDs.properties);
+        assertEquals(4, objDs.properties.size());
+        assertInstanceOf(IntegerSchema.class, objDs.properties.get("month"));
+        assertInstanceOf(IntegerSchema.class, objDs.properties.get("year"));
+        assertInstanceOf(StringSchema.class, objDs.properties.get("route_type"));
+
+        assertInstanceOf(OneOfDataSchema.class, objDs.properties.get("realm_id"));
+        final OneOfDataSchema oneOfDs = (OneOfDataSchema) objDs.properties.get("realm_id");
+        assertNull(oneOfDs.type);
+        assertNotNull(oneOfDs.oneOf);
+        assertEquals(2, oneOfDs.oneOf.size());
+        assertInstanceOf(StringSchema.class, oneOfDs.oneOf.get(0));
+        assertInstanceOf(UnknownDataTypeSchema.class, oneOfDs.oneOf.get(1));
+        final UnknownDataTypeSchema unknown = (UnknownDataTypeSchema) oneOfDs.oneOf.get(1);
+        assertEquals("uuid", unknown.type);
+        assertEquals(Map.of("extra", 123), unknown.extraProperties);
+
+        // Serialization
+        final String out = mapper.writeValueAsString(ds);
+        assertEquals(6, Pattern.compile("(\"type\":)").matcher(out).results().count());
+        assertFalse(out.toLowerCase().contains("jsonschema:"));
+
+        // Round back
+        final DataSchema reloaded = mapper.readValue(out, DataSchema.class);
+        final ObjectSchema reloadedObjDs = (ObjectSchema) reloaded;
+        assertNotNull(reloadedObjDs.properties);
+        assertEquals(4, reloadedObjDs.properties.size());
+        assertInstanceOf(IntegerSchema.class, reloadedObjDs.properties.get("month"));
+        assertInstanceOf(IntegerSchema.class, reloadedObjDs.properties.get("year"));
+        assertInstanceOf(StringSchema.class, reloadedObjDs.properties.get("route_type"));
+
+        assertInstanceOf(OneOfDataSchema.class, reloadedObjDs.properties.get("realm_id"));
+        final OneOfDataSchema reloadedOneOfDs = (OneOfDataSchema) reloadedObjDs.properties.get("realm_id");
+        assertNull(reloadedOneOfDs.type);
+        assertNotNull(reloadedOneOfDs.oneOf);
+        assertEquals(2, reloadedOneOfDs.oneOf.size());
+        assertInstanceOf(StringSchema.class, reloadedOneOfDs.oneOf.get(0));
+        assertInstanceOf(UnknownDataTypeSchema.class, reloadedOneOfDs.oneOf.get(1));
+        final UnknownDataTypeSchema reloadedUnknown = (UnknownDataTypeSchema) reloadedOneOfDs.oneOf.get(1);
+        assertEquals("uuid", reloadedUnknown.type);
+        assertEquals(Map.of("extra", 123), reloadedUnknown.extraProperties);
     }
 }
