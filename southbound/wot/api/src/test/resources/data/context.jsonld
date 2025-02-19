@@ -1,0 +1,9 @@
+[
+    "https://www.w3.org/2019/wot/td/v1",
+    {
+        "adp": "https://auroral.iot.linkeddata.es/def/adapters#",
+        "om": "http://www.ontology-of-units-of-measure.org/resource/om-2/",
+        "geo": "http://www.w3.org/2003/01/geo/wgs84_pos#"
+    },
+    "https://w3c.github.io/wot-discovery/context/discovery-core.jsonld"
+]
