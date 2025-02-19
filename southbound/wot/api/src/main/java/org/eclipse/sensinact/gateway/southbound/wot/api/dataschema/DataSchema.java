@@ -13,24 +13,20 @@
 
 package org.eclipse.sensinact.gateway.southbound.wot.api.dataschema;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 
-@JsonSubTypes({ @Type(value = ArraySchema.class, name = "array"), @Type(value = BooleanSchema.class, name = "boolean"),
-        @Type(value = NumberSchema.class, name = "number"), @Type(value = IntegerSchema.class, name = "integer"),
-        @Type(value = ObjectSchema.class, name = "object"), @Type(value = StringSchema.class, name = "string"),
-        @Type(value = NullSchema.class, name = "null"), })
-@JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type")
+@JsonTypeInfo(use = Id.CUSTOM, include = As.EXISTING_PROPERTY, property = "type", visible = true, defaultImpl = OneOfDataSchema.class)
+@JsonTypeIdResolver(DataSchemaTypeResolver.class)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DataSchema {
@@ -50,7 +46,7 @@ public abstract class DataSchema {
 
     public String unit;
 
-    public List<DataSchema> oneOf = new ArrayList<>();
+    public List<DataSchema> oneOf;
 
     @JsonProperty("enum")
     public List<Object> enumOfAllowedValues;
@@ -65,10 +61,15 @@ public abstract class DataSchema {
      * also defines the type of the object, and is used to map into a Java type when
      * deserializing
      */
-    @JsonIgnoreProperties(allowGetters = true)
+    @JsonIgnore
     public final String type;
 
-    public DataSchema(String type) {
+    protected DataSchema(String type) {
         this.type = type;
+    }
+
+    @JsonProperty("type")
+    private String getType() {
+        return type;
     }
 }

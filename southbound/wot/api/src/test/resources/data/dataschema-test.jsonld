@@ -1,0 +1,26 @@
+{
+    "type": "jsonschema:ObjectSchema",
+    "properties": {
+        "month": {
+            "type": "jsonschema:IntegerSchema"
+        },
+        "year": {
+            "type": "integer"
+        },
+        "realm_id": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "maxLength": 42
+                },
+                {
+                    "type": "uuid",
+                    "extra": 123
+                }
+            ]
+        },
+        "route_type": {
+            "type": "string"
+        }
+    }
+}
