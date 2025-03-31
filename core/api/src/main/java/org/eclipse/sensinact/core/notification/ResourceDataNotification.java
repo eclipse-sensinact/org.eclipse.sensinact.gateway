@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,17 +23,9 @@ import java.util.Objects;
  *
  * DATA/&lt;model&gt;/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
-public class ResourceDataNotification extends AbstractResourceNotification {
-
-    public Object oldValue;
-
-    public Object newValue;
-
-    public Instant timestamp;
-
-    public Class<?> type;
-
-    public Map<String, Object> metadata;
+public record ResourceDataNotification(String modelPackageUri, String model, String provider,
+        String service, String resource, Object oldValue, Object newValue,
+        Instant timestamp, Class<?> type, Map<String, Object> metadata) implements AbstractResourceNotification {
 
     @Override
     public String getTopic() {

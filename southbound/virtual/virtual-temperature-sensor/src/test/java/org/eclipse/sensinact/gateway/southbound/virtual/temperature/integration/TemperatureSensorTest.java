@@ -76,68 +76,68 @@ public class TemperatureSensorTest {
         ResourceDataNotification notification = queue.poll(5, TimeUnit.SECONDS);
 
         assertNotNull(notification);
-        assertEquals("temp1", notification.provider);
-        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), notification.resource);
+        assertEquals("temp1", notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), notification.resource());
 
         notification = queue.poll(5, TimeUnit.SECONDS);
 
         assertNotNull(notification);
-        assertEquals("temp1", notification.provider);
-        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), notification.resource);
-        assertNull(notification.oldValue);
-        assertInstanceOf(Point.class, notification.newValue);
-        Point p = (Point) notification.newValue;
+        assertEquals("temp1", notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), notification.resource());
+        assertNull(notification.oldValue());
+        assertInstanceOf(Point.class, notification.newValue());
+        Point p = (Point) notification.newValue();
         assertEquals(1.0d, p.coordinates.latitude);
         assertEquals(2.0d, p.coordinates.longitude);
 
         notification = queue.poll(5, TimeUnit.SECONDS);
 
         assertNotNull(notification);
-        assertEquals("temp1", notification.provider);
-        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), notification.resource);
+        assertEquals("temp1", notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), notification.resource());
 
         notification = queue.poll(5, TimeUnit.SECONDS);
 
         assertNotNull(notification);
-        assertEquals("temp1", notification.provider);
-        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), notification.resource);
+        assertEquals("temp1", notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), notification.resource());
 
         notification = queue.poll(100, TimeUnit.MILLISECONDS);
         assertNotNull(notification);
-        assertEquals("temp1", notification.provider);
-        assertEquals("sensor", notification.service);
-        assertEquals("temperature", notification.resource);
+        assertEquals("temp1", notification.provider());
+        assertEquals("sensor", notification.service());
+        assertEquals("temperature", notification.resource());
 
 //      TODO this should be null, not 0.0
 //      assertNull(notification.oldValue);
 
-        Double value = (Double) notification.newValue;
+        Double value = (Double) notification.newValue();
         assertEquals(15.0d, value, 15.0d);
 
         assertTrue(queue.isEmpty());
 
         notification = queue.poll(1100, TimeUnit.MILLISECONDS);
         assertNotNull(notification);
-        assertEquals("temp1", notification.provider);
-        assertEquals("sensor", notification.service);
-        assertEquals("temperature", notification.resource);
-        assertEquals(value, notification.oldValue);
-        value = (Double) notification.newValue;
+        assertEquals("temp1", notification.provider());
+        assertEquals("sensor", notification.service());
+        assertEquals("temperature", notification.resource());
+        assertEquals(value, notification.oldValue());
+        value = (Double) notification.newValue();
         assertEquals(15.0d, value, 15.0d);
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
         notification = queue.poll(600, TimeUnit.MILLISECONDS);
         assertNotNull(notification);
-        assertEquals("temp1", notification.provider);
-        assertEquals("sensor", notification.service);
-        assertEquals("temperature", notification.resource);
-        assertEquals(value, notification.oldValue);
-        value = (Double) notification.newValue;
+        assertEquals("temp1", notification.provider());
+        assertEquals("sensor", notification.service());
+        assertEquals("temperature", notification.resource());
+        assertEquals(value, notification.oldValue());
+        value = (Double) notification.newValue();
         assertEquals(15.0d, value, 15.0d);
 
     }

@@ -136,26 +136,26 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
                 return false;
             }
 
-            ProviderSnapshot p = map.get(event.provider);
+            ProviderSnapshot p = map.get(event.provider());
             if(p != null) {
-                ResourceSnapshot r = p.getResource(event.service, event.resource);
+                ResourceSnapshot r = p.getResource(event.service(), event.resource());
                 if(r != null && r.isSet()) {
                     TimedValue<?> tv = r.getValue();
                     Instant snapshot = tv.getTimestamp();
-                    if(snapshot.isAfter(event.timestamp)) {
+                    if(snapshot.isAfter(event.timestamp())) {
                         if(LOG.isDebugEnabled()) {
                             LOG.debug("Existing snapshot for data {}/{}/{} is newer than event {}",
-                                    event.provider, event.service, event.resource, event.timestamp);
+                                    event.provider(), event.service(), event.resource(), event.timestamp());
                         }
                         update = false;
-                    } else if (snapshot.equals(event.timestamp) && Objects.equals(tv.getValue(), event.newValue)) {
+                    } else if (snapshot.equals(event.timestamp()) && Objects.equals(tv.getValue(), event.newValue())) {
                         // Check the metadata
                         Map<String, Object> snapshotMeta = cleanMetadataMap(r.getMetadata());
-                        Map<String, Object> eventMeta = cleanMetadataMap(event.metadata);
+                        Map<String, Object> eventMeta = cleanMetadataMap(event.metadata());
                         if(snapshotMeta.equals(eventMeta)) {
                             if(LOG.isDebugEnabled()) {
                                 LOG.debug("Existing snapshot for data {}/{}/{} is up to date",
-                                        event.provider, event.service, event.resource);
+                                        event.provider(), event.service(), event.resource());
                             }
                             update = false;
                         }

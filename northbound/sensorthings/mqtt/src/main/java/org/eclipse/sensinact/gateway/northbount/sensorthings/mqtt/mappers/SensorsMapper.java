@@ -33,16 +33,16 @@ public class SensorsMapper extends SensorthingsMapper<Sensor> {
 
     @Override
     public Promise<Stream<Sensor>> toPayload(LifecycleNotification notification) {
-        if (notification.resource != null && notification.status != Status.RESOURCE_DELETED) {
+        if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
             // This is a resource appearing
-            return getSensor(getResource(notification.provider, notification.service, notification.resource));
+            return getSensor(getResource(notification.provider(), notification.service(), notification.resource()));
         }
         return emptyStream();
     }
 
     @Override
     public Promise<Stream<Sensor>> toPayload(ResourceMetaDataNotification notification) {
-        return getSensor(getResource(notification.provider, notification.service, notification.resource));
+        return getSensor(getResource(notification.provider(), notification.service(), notification.resource()));
     }
 
     protected Promise<Stream<Sensor>> getSensor(Promise<ResourceSnapshot> resourceSnapshot) {

@@ -372,7 +372,7 @@ public abstract class SensorthingsMapper<T> {
             return new DatastreamsMapper(topicFilter, mapper, thread) {
                 @Override
                 public Promise<Stream<Datastream>> toPayload(AbstractResourceNotification notification) {
-                    return parentId.equals(notification.provider) ? super.toPayload(notification) : emptyStream();
+                    return parentId.equals(notification.provider()) ? super.toPayload(notification) : emptyStream();
                 }
             };
         } else if ("Sensors".equals(parentType) || "ObservedProperties".equals(parentType)) {

@@ -46,20 +46,20 @@ public class DatastreamMapper extends DatastreamsMapper {
 
     @Override
     public Promise<Stream<Datastream>> toPayload(AbstractResourceNotification notification) {
-        if (provider.equals(notification.provider)) {
+        if (provider.equals(notification.provider())) {
             return super.toPayload(notification);
         }
         return emptyStream();
     }
 
     private boolean isOurResource(AbstractResourceNotification notification) {
-        return service.equals(notification.service) && resource.equals(notification.resource);
+        return service.equals(notification.service()) && resource.equals(notification.resource());
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(LifecycleNotification notification) {
         // Force the required datastream when it appears
-        return isOurResource(notification) && notification.status == Status.RESOURCE_CREATED
+        return isOurResource(notification) && notification.status() == Status.RESOURCE_CREATED
                 ? getDatastream(getResource(provider, service, resource))
                 : emptyStream();
     }

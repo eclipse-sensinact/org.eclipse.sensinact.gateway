@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -286,14 +286,14 @@ public class WebSocketEndpoint {
         final Predicate<GeoJsonObject> locationFilter = parsedFilter.getLocationFilter();
         if (locationFilter != null) {
             Predicate<AbstractResourceNotification> locationPredicate = notif -> {
-                if ("admin".equals(notif.service) && "location".equals(notif.resource)) {
+                if ("admin".equals(notif.service()) && "location".equals(notif.resource())) {
                     if (notif.getClass() == LifecycleNotification.class) {
                         final LifecycleNotification lifecycleNotif = (LifecycleNotification) notif;
-                        return lifecycleNotif.initialValue != null
-                                && locationFilter.test((GeoJsonObject) lifecycleNotif.initialValue);
+                        return lifecycleNotif.initialValue() != null
+                                && locationFilter.test((GeoJsonObject) lifecycleNotif.initialValue());
                     } else if (notif.getClass() == ResourceDataNotification.class) {
                         final ResourceDataNotification dataNotif = (ResourceDataNotification) notif;
-                        return dataNotif.newValue != null && locationFilter.test((GeoJsonObject) dataNotif.newValue);
+                        return dataNotif.newValue() != null && locationFilter.test((GeoJsonObject) dataNotif.newValue());
                     }
                 }
                 return true;
@@ -330,8 +330,8 @@ public class WebSocketEndpoint {
             result.uri = path.toUri();
             // TODO replace this with single level wildcard
             topics = List.of("*");
-            eventPredicate = n -> query.uri.provider.equals(n.provider) && query.uri.service.equals(n.service)
-                    && query.uri.resource.equals(n.resource);
+            eventPredicate = n -> query.uri.provider.equals(n.provider()) && query.uri.service.equals(n.service())
+                    && query.uri.resource.equals(n.resource());
         } else {
             result.uri = "/";
             topics = List.of("*");

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -41,22 +41,22 @@ class ResourceDataBackedProviderSnapshot implements ProviderSnapshot {
 
     @Override
     public String getName() {
-        return rdn.provider;
+        return rdn.provider();
     }
 
     @Override
     public Instant getSnapshotTime() {
-        return rdn.timestamp;
+        return rdn.timestamp();
     }
 
     @Override
     public String getModelPackageUri() {
-        return rdn.modelPackageUri;
+        return rdn.modelPackageUri();
     }
 
     @Override
     public String getModelName() {
-        return rdn.model;
+        return rdn.model();
     }
 
     @SuppressWarnings("unchecked")
@@ -68,12 +68,12 @@ class ResourceDataBackedProviderSnapshot implements ProviderSnapshot {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ServiceSnapshot> T getService(String name) {
-        return Objects.equals(name, rdn.service) ? (T) service : null;
+        return Objects.equals(name, rdn.service()) ? (T) service : null;
     }
 
     @Override
     public <T extends ResourceSnapshot> T getResource(String service, String resource) {
-        return Objects.equals(service, rdn.service) ? this.service.getResource(resource) :
+        return Objects.equals(service, rdn.service()) ? this.service.getResource(resource) :
                 null;
     }
 }
@@ -90,12 +90,12 @@ class ResourceDataBackedServiceSnapshot implements ServiceSnapshot {
 
     @Override
     public String getName() {
-        return provider.rdn.service;
+        return provider.rdn.service();
     }
 
     @Override
     public Instant getSnapshotTime() {
-        return provider.rdn.timestamp;
+        return provider.rdn.timestamp();
     }
 
     @Override
@@ -112,7 +112,7 @@ class ResourceDataBackedServiceSnapshot implements ServiceSnapshot {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ResourceSnapshot> T getResource(String name) {
-        return Objects.equals(name, provider.rdn.resource) ? (T) resource : null;
+        return Objects.equals(name, provider.rdn.resource()) ? (T) resource : null;
     }
 
 }
@@ -126,12 +126,12 @@ class ResourceDataBackedResourceSnapshot implements ResourceSnapshot {
 
     @Override
     public String getName() {
-        return service.provider.rdn.resource;
+        return service.provider.rdn.resource();
     }
 
     @Override
     public Instant getSnapshotTime() {
-        return service.provider.rdn.timestamp;
+        return service.provider.rdn.timestamp();
     }
 
     @Override
@@ -141,22 +141,22 @@ class ResourceDataBackedResourceSnapshot implements ResourceSnapshot {
 
     @Override
     public boolean isSet() {
-        return service.provider.rdn.timestamp != null;
+        return service.provider.rdn.timestamp() != null;
     }
 
     @Override
     public Class<?> getType() {
-        return service.provider.rdn.type;
+        return service.provider.rdn.type();
     }
 
     @Override
     public TimedValue<?> getValue() {
-        return new DefaultTimedValue<>(service.provider.rdn.newValue, service.provider.rdn.timestamp);
+        return new DefaultTimedValue<>(service.provider.rdn.newValue(), service.provider.rdn.timestamp());
     }
 
     @Override
     public Map<String, Object> getMetadata() {
-        return service.provider.rdn.metadata;
+        return service.provider.rdn.metadata();
     }
 
     @Override
@@ -340,8 +340,8 @@ class ResourceDataFilter implements Predicate<ResourceDataNotification> {
         ResourceDataBackedProviderSnapshot ps = new ResourceDataBackedProviderSnapshot(rdn);
 
         boolean initial;
-        if(Objects.equals("admin", rdn.service) && Objects.equals("location", rdn.resource)) {
-            initial = nullSafePredicate(criterion.getLocationFilter(), (GeoJsonObject) rdn.newValue);
+        if(Objects.equals("admin", rdn.service()) && Objects.equals("location", rdn.resource())) {
+            initial = nullSafePredicate(criterion.getLocationFilter(), (GeoJsonObject) rdn.newValue());
         } else {
             initial = true;
         }

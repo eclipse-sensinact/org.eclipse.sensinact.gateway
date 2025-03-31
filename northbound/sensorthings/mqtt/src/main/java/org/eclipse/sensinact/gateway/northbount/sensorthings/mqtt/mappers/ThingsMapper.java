@@ -32,18 +32,18 @@ public class ThingsMapper extends SensorthingsMapper<Thing> {
 
     @Override
     public Promise<Stream<Thing>> toPayload(LifecycleNotification notification) {
-        if (notification.service == null && notification.status != Status.PROVIDER_DELETED) {
+        if (notification.service() == null && notification.status() != Status.PROVIDER_DELETED) {
             // This is a provider appearing
-            return getThing(notification.provider);
+            return getThing(notification.provider());
         }
         return emptyStream();
     }
 
     public Promise<Stream<Thing>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service)) {
-            if ("friendlyName".equals(notification.resource) || "description".equals(notification.resource)) {
+        if ("admin".equals(notification.service())) {
+            if ("friendlyName".equals(notification.resource()) || "description".equals(notification.resource())) {
                 // These data values are used in the Thing
-                return getThing(notification.provider);
+                return getThing(notification.provider());
             }
         }
         return emptyStream();

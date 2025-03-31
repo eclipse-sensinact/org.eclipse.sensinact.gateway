@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -261,8 +261,8 @@ public class ResourceAccessTest {
         session.addListener(List.of(provider + "/*"), (t, e) -> queue.offer(e), null, null, null);
         ResourceDataNotification notification = queue.poll(500, TimeUnit.MILLISECONDS);
         assertNull(notification, () -> String.format("notification was for %s/%s/%s with old: %s and new: %s",
-                notification.provider, notification.service, notification.resource, notification.oldValue,
-                notification.newValue));
+                notification.provider(), notification.service(), notification.resource(),
+                notification.oldValue(), notification.newValue()));
 
         Point p = new Point();
         p.coordinates = new Coordinates();

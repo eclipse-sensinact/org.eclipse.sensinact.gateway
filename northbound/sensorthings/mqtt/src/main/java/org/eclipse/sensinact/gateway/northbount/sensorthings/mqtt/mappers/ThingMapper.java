@@ -32,7 +32,7 @@ public class ThingMapper extends ThingsMapper {
 
     @Override
     public Promise<Stream<Thing>> toPayload(AbstractResourceNotification notification) {
-        if (provider.equals(notification.provider)) {
+        if (provider.equals(notification.provider())) {
             return super.toPayload(notification);
         }
         return emptyStream();

@@ -158,13 +158,13 @@ public class HttpDeviceFactoryTest {
             if (!got1) {
                 ResourceDataNotification notif = queue.poll(1, TimeUnit.SECONDS);
                 if (notif != null) {
-                    got1 = Objects.equals(providerValue1, notif.newValue);
+                    got1 = Objects.equals(providerValue1, notif.newValue());
                 }
             }
             if (!got2) {
                 ResourceDataNotification notif = queue2.poll(1, TimeUnit.SECONDS);
                 if (notif != null) {
-                    got2 = Objects.equals(providerValue2, notif.newValue);
+                    got2 = Objects.equals(providerValue2, notif.newValue());
                 }
             }
         }
@@ -340,7 +340,7 @@ public class HttpDeviceFactoryTest {
             while (!gotLocation || !gotValue) {
                 final ResourceDataNotification notif = queue.poll(1, TimeUnit.SECONDS);
                 assertNotNull(notif);
-                switch (notif.resource) {
+                switch (notif.resource()) {
                 case "value":
                     gotValue = true;
                     break;

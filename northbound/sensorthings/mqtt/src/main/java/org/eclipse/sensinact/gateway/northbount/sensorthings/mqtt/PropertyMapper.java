@@ -43,8 +43,8 @@ public class PropertyMapper extends SensorthingsMapper<JsonNode> {
 
     @Override
     public Promise<Stream<JsonNode>> toPayload(AbstractResourceNotification notification) {
-        if (match(provider, notification.provider) && match(service, notification.service)
-                && match(resource, notification.resource)) {
+        if (match(provider, notification.provider()) && match(service, notification.service())
+                && match(resource, notification.resource())) {
             return mapper.toPayload(notification)
                     .map(s -> s.map(o -> jsonMapper.convertValue(o, ObjectNode.class).retain(property)));
         }

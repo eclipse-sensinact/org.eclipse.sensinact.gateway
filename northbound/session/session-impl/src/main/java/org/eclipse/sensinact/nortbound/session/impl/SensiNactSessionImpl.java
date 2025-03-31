@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -759,27 +759,27 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
             LifecycleNotification ln = (LifecycleNotification) notification;
 
-            switch(ln.status) {
+            switch(ln.status()) {
                 case PROVIDER_CREATED:
                 case PROVIDER_DELETED:
-                    if(!authorizer.hasProviderPermission(DESCRIBE, ln.modelPackageUri, ln.model, ln.provider)) {
+                    if(!authorizer.hasProviderPermission(DESCRIBE, ln.modelPackageUri(), ln.model(), ln.provider())) {
                         return;
                     }
                     break;
                 case RESOURCE_CREATED:
                 case RESOURCE_DELETED:
-                    if(!authorizer.hasResourcePermission(DESCRIBE, ln.modelPackageUri, ln.model, ln.provider, ln.service, ln.resource)) {
+                    if(!authorizer.hasResourcePermission(DESCRIBE, ln.modelPackageUri(), ln.model(), ln.provider(), ln.service(), ln.resource())) {
                         return;
                     }
                     break;
                 case SERVICE_CREATED:
                 case SERVICE_DELETED:
-                    if(!authorizer.hasServicePermission(DESCRIBE, ln.modelPackageUri, ln.model, ln.provider, ln.service)) {
+                    if(!authorizer.hasServicePermission(DESCRIBE, ln.modelPackageUri(), ln.model(), ln.provider(), ln.service())) {
                         return;
                     }
                     break;
                 default:
-                    LOG.warn("Unrecognised lifecycle status {}. Denying access to the notification", ln.status);
+                    LOG.warn("Unrecognised lifecycle status {}. Denying access to the notification", ln.status());
                     return;
             }
             listener.notify(topic, ln);
@@ -797,7 +797,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
         @Override
         public void notify(String topic, AbstractResourceNotification notification) {
-            if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri, notification.model, notification.provider, notification.service, notification.resource)) {
+            if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
                 return;
             }
 
@@ -816,7 +816,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
         @Override
         public void notify(String topic, AbstractResourceNotification notification) {
-            if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri, notification.model, notification.provider, notification.service, notification.resource)) {
+            if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
                 return;
             }
 
@@ -835,7 +835,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
         @Override
         public void notify(String topic, AbstractResourceNotification notification) {
-            if(!authorizer.hasResourcePermission(ACT, notification.modelPackageUri, notification.model, notification.provider, notification.service, notification.resource)) {
+            if(!authorizer.hasResourcePermission(ACT, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
                 return;
             }
             listener.notify(topic, (ResourceActionNotification) notification);

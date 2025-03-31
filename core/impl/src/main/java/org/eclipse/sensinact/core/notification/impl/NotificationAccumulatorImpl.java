@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -174,7 +173,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     initialValue, initialMetadata);
             if (b != null) {
                 // Check the status of the last entry
-                Status s = ((LifecycleNotification) b.get(b.size() - 1)).status;
+                Status s = ((LifecycleNotification) b.get(b.size() - 1)).status();
                 if (s == status) {
                     // Simply replace the final entry with the update
                     return b.size() == 2 ? List.of(b.get(0), ln) : List.of(ln);
@@ -223,8 +222,8 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     Instant timestampToUse;
                     if (b != null) {
                         ResourceMetaDataNotification previous = (ResourceMetaDataNotification) b.get(0);
-                        oldValuesToUse = previous.oldValues;
-                        if (previous.timestamp.isAfter(timestamp)) {
+                        oldValuesToUse = previous.oldValues();
+                        if (previous.timestamp().isAfter(timestamp)) {
                             throw new IllegalArgumentException("Received metadata updates out of temporal order");
                         } else {
                             newValuesToUse = nonNullNewValues;
@@ -235,9 +234,21 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                         newValuesToUse = nonNullNewValues;
                         timestampToUse = timestamp;
                     }
-                    Optional.ofNullable(notifications.get(
-                            new NotificationKey(provider, service, resource, ResourceDataNotification.class)))
-                            .ifPresent(rdn -> ((ResourceDataNotification)rdn.get(0)).metadata = newValuesToUse);
+                    notifications.computeIfPresent(
+                            new NotificationKey(provider, service, resource, ResourceDataNotification.class),
+                            (k,l) -> {
+                                List<AbstractResourceNotification> result;
+                                if(l.isEmpty()) {
+                                    result = List.of();
+                                } else {
+                                    ResourceDataNotification rdn = (ResourceDataNotification) l.get(0);
+                                    result = List.of(createResourceDataNotification(rdn.modelPackageUri(),
+                                            rdn.model(), provider, service, resource, rdn.type(), rdn.oldValue(),
+                                            rdn.newValue(), newValuesToUse, rdn.timestamp()));
+                                }
+                                return result;
+                            });
+
                     return List.of(createResourceMetaDataNotification(modelPackageUri, model, provider, service, resource,
                             oldValuesToUse, newValuesToUse, timestampToUse));
                 });
@@ -271,10 +282,10 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     Object oldValueToUse;
                     if (b != null) {
                         ResourceDataNotification previous = (ResourceDataNotification) b.get(0);
-                        if (previous.timestamp.isAfter(timestamp)) {
+                        if (previous.timestamp().isAfter(timestamp)) {
                             throw new IllegalArgumentException("Received resource value updates out of temporal order");
                         }
-                        oldValueToUse = previous.oldValue;
+                        oldValueToUse = previous.oldValue();
                     } else {
                         oldValueToUse = oldValue;
                     }
@@ -308,7 +319,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                             resource, timestamp);
                     if (b != null) {
                         return Stream.concat(b.stream(), Stream.of(ran)).map(ResourceActionNotification.class::cast)
-                                .sorted((i, j) -> i.timestamp.compareTo(j.timestamp)).collect(Collectors.toList());
+                                .sorted((i, j) -> i.timestamp().compareTo(j.timestamp())).collect(Collectors.toList());
                     }
                     return List.of(ran);
                 });

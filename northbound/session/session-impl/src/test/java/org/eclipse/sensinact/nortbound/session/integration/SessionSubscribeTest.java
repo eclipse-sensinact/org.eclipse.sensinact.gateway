@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -112,35 +112,35 @@ public class SessionSubscribeTest {
 
         assertNotNull(notification);
 
-        assertEquals(PROVIDER, notification.provider);
-        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), notification.resource);
-        assertEquals(null, notification.oldValue);
-        assertEquals(PROVIDER, notification.newValue);
+        assertEquals(PROVIDER, notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), notification.resource());
+        assertEquals(null, notification.oldValue());
+        assertEquals(PROVIDER, notification.newValue());
 
         notification = queue.poll(1, TimeUnit.SECONDS);
 
-        assertEquals(PROVIDER, notification.provider);
-        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), notification.resource);
-        assertEquals(null, notification.oldValue);
+        assertEquals(PROVIDER, notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), notification.resource());
+        assertEquals(null, notification.oldValue());
 
         notification = queue.poll(1, TimeUnit.SECONDS);
 
-        assertEquals(PROVIDER, notification.provider);
-        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service);
-        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), notification.resource);
-        assertEquals(null, notification.oldValue);
+        assertEquals(PROVIDER, notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), notification.resource());
+        assertEquals(null, notification.oldValue());
 
         notification = queue.poll(1, TimeUnit.SECONDS);
 
         assertNotNull(notification);
 
-        assertEquals(PROVIDER, notification.provider);
-        assertEquals(SERVICE, notification.service);
-        assertEquals(RESOURCE, notification.resource);
-        assertEquals(null, notification.oldValue);
-        assertEquals(VALUE, notification.newValue);
+        assertEquals(PROVIDER, notification.provider());
+        assertEquals(SERVICE, notification.service());
+        assertEquals(RESOURCE, notification.resource());
+        assertEquals(null, notification.oldValue());
+        assertEquals(VALUE, notification.newValue());
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
@@ -152,11 +152,11 @@ public class SessionSubscribeTest {
 
         assertNotNull(notification);
 
-        assertEquals(PROVIDER, notification.provider);
-        assertEquals(SERVICE, notification.service);
-        assertEquals(RESOURCE, notification.resource);
-        assertEquals(VALUE, notification.oldValue);
-        assertEquals(VALUE_2, notification.newValue);
+        assertEquals(PROVIDER, notification.provider());
+        assertEquals(SERVICE, notification.service());
+        assertEquals(RESOURCE, notification.resource());
+        assertEquals(VALUE, notification.oldValue());
+        assertEquals(VALUE_2, notification.newValue());
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 

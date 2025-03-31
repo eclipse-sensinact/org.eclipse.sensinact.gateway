@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,13 +23,9 @@ import java.util.Objects;
  *
  * LIFECYCLE/&lt;model&gt;/&lt;provider&gt;[/&lt;service&gt;[/&lt;resource&gt;]]
  */
-public class LifecycleNotification extends AbstractResourceNotification {
-
-    public Status status;
-
-    public Object initialValue;
-
-    public Map<String, Object> initialMetadata;
+public record LifecycleNotification(String modelPackageUri, String model, String provider,
+        String service, String resource, Status status, Object initialValue,
+        Map<String, Object> initialMetadata) implements AbstractResourceNotification {
 
     @Override
     public String getTopic() {

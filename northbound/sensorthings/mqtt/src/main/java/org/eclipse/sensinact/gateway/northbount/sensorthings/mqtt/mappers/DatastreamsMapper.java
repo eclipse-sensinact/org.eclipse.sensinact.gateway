@@ -35,23 +35,23 @@ public class DatastreamsMapper extends SensorthingsMapper<Datastream> {
 
     @Override
     public Promise<Stream<Datastream>> toPayload(LifecycleNotification notification) {
-        if (notification.resource != null && notification.status != Status.RESOURCE_DELETED) {
+        if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
             // This is a resource appearing
-            return getDatastream(getResource(notification.provider, notification.service, notification.resource));
+            return getDatastream(getResource(notification.provider(), notification.service(), notification.resource()));
         }
         return emptyStream();
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(ResourceMetaDataNotification notification) {
-        return getDatastream(getResource(notification.provider, notification.service, notification.resource));
+        return getDatastream(getResource(notification.provider(), notification.service(), notification.resource()));
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(ResourceDataNotification notification) {
         if (isRelevantAdminResource(notification)) {
             // These are used in all Datastreams for this provider so all have been updated
-            return mapProvider(getProvider(notification.provider), this::getDatastream);
+            return mapProvider(getProvider(notification.provider()), this::getDatastream);
         }
         return emptyStream();
     }
@@ -66,6 +66,6 @@ public class DatastreamsMapper extends SensorthingsMapper<Datastream> {
     }
 
     protected boolean isRelevantAdminResource(AbstractResourceNotification notification) {
-        return "admin".equals(notification.service) && "location".equals(notification.resource);
+        return "admin".equals(notification.service()) && "location".equals(notification.resource());
     }
 }

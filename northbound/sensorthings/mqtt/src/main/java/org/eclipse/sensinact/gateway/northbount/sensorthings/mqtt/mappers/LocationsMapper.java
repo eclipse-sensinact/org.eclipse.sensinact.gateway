@@ -30,8 +30,8 @@ public class LocationsMapper extends SensorthingsMapper<Location> {
 
     @Override
     public Promise<Stream<Location>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service) && "location".equals(notification.resource)) {
-            return decorate(getProvider(notification.provider).map(p -> DtoMapper.toLocation(jsonMapper, p)));
+        if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
+            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toLocation(jsonMapper, p)));
         }
         return emptyStream();
     }

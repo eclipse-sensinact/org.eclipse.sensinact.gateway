@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,13 +24,9 @@ import java.util.Objects;
  *
  * METADATA/&lt;model&gt;/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
-public class ResourceMetaDataNotification extends AbstractResourceNotification {
-
-    public Map<String, Object> oldValues;
-
-    public Map<String, Object> newValues;
-
-    public Instant timestamp;
+public record ResourceMetaDataNotification(String modelPackageUri, String model, String provider,
+        String service, String resource, Map<String, Object> oldValues,
+        Map<String, Object> newValues, Instant timestamp) implements AbstractResourceNotification {
 
     @Override
     public String getTopic() {

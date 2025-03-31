@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -41,59 +41,27 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
 
     protected LifecycleNotification createLifecycleNotification(Status status, String modelPackageUri, String model, String provider,
             String service, String resource, Object initialValue, Map<String, Object> initialMetadata) {
-        LifecycleNotification ln = new LifecycleNotification();
-        ln.modelPackageUri = modelPackageUri;
-        ln.model = model;
-        ln.provider = provider;
-        ln.service = service;
-        ln.resource = resource;
-        ln.status = status;
-        ln.initialValue = initialValue;
-        ln.initialMetadata = initialMetadata;
-        return ln;
+        return new LifecycleNotification(modelPackageUri, model, provider, service,
+                resource, status, initialValue, initialMetadata);
     }
 
     protected ResourceMetaDataNotification createResourceMetaDataNotification(String modelPackageUri, String model, String provider,
             String service, String resource, Map<String, Object> oldValues, Map<String, Object> newValues,
             Instant timestamp) {
-        ResourceMetaDataNotification rn = new ResourceMetaDataNotification();
-        rn.modelPackageUri = modelPackageUri;
-        rn.model = model;
-        rn.provider = provider;
-        rn.service = service;
-        rn.resource = resource;
-        rn.oldValues = oldValues;
-        rn.newValues = newValues;
-        rn.timestamp = timestamp;
-        return rn;
+        return new ResourceMetaDataNotification(modelPackageUri, model, provider, service,
+                resource, oldValues, newValues, timestamp);
     }
 
     protected ResourceDataNotification createResourceDataNotification(String modelPackageUri, String model, String provider, String service,
             String resource, Class<?> type, Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
-        ResourceDataNotification rn = new ResourceDataNotification();
-        rn.modelPackageUri = modelPackageUri;
-        rn.model = model;
-        rn.provider = provider;
-        rn.service = service;
-        rn.resource = resource;
-        rn.type = type;
-        rn.oldValue = oldValue;
-        rn.newValue = newValue;
-        rn.metadata = metadata;
-        rn.timestamp = timestamp;
-        return rn;
+        return new ResourceDataNotification(modelPackageUri, model, provider, service,
+                resource, oldValue, newValue, timestamp, type, metadata);
     }
 
     protected ResourceActionNotification createResourceActionNotification(String modelPackageUri, String model, String provider, String service,
             String resource, Instant timestamp) {
-        ResourceActionNotification rn = new ResourceActionNotification();
-        rn.modelPackageUri = modelPackageUri;
-        rn.model = model;
-        rn.provider = provider;
-        rn.service = service;
-        rn.resource = resource;
-        rn.timestamp = timestamp;
-        return rn;
+        return new ResourceActionNotification(modelPackageUri, model, provider, service,
+                resource, timestamp);
     }
 
     @Override

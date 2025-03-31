@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -34,11 +34,11 @@ public class ResourceDataNotificationDTO extends AbstractResourceNotificationDTO
     }
 
     public ResourceDataNotificationDTO(ResourceDataNotification notif) {
-        this.provider = notif.provider;
-        this.service = notif.service;
-        this.resource = notif.resource;
-        this.timestamp = notif.timestamp.toEpochMilli();
-        this.oldValue = notif.oldValue;
-        this.newValue = notif.newValue;
+        this.provider = notif.provider();
+        this.service = notif.service();
+        this.resource = notif.resource();
+        this.timestamp = notif.timestamp().toEpochMilli();
+        this.oldValue = notif.oldValue();
+        this.newValue = notif.newValue();
     }
 }

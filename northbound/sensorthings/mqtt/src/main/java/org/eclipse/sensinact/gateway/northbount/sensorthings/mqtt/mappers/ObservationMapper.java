@@ -42,8 +42,8 @@ public class ObservationMapper extends ObservationsMapper {
     }
 
     public Promise<Stream<Observation>> toPayload(AbstractResourceNotification notification) {
-        if (provider.equals(notification.provider) && service.equals(notification.service)
-                && resource.equals(notification.resource)) {
+        if (provider.equals(notification.provider()) && service.equals(notification.service())
+                && resource.equals(notification.resource())) {
             return super.toPayload(notification);
         }
         return emptyStream();
