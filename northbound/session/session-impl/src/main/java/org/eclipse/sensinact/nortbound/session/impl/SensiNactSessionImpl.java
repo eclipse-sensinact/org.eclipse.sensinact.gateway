@@ -43,7 +43,7 @@ import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
@@ -663,7 +663,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 ss.getName(), sr.getName());
     }
 
-    public void notify(String topic, AbstractResourceNotification event) {
+    public void notify(String topic, ResourceNotification event) {
         List<SessionListenerRegistration> toNotify;
         synchronized (lock) {
             if (!isExpired()) {
@@ -741,7 +741,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             this.authorizer = authorizer;
         }
 
-        public abstract void notify(String topic, AbstractResourceNotification notification);
+        public abstract void notify(String topic, ResourceNotification notification);
 
     }
 
@@ -755,7 +755,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
 
         @Override
-        public void notify(String topic, AbstractResourceNotification notification) {
+        public void notify(String topic, ResourceNotification notification) {
 
             LifecycleNotification ln = (LifecycleNotification) notification;
 
@@ -796,7 +796,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
 
         @Override
-        public void notify(String topic, AbstractResourceNotification notification) {
+        public void notify(String topic, ResourceNotification notification) {
             if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
                 return;
             }
@@ -815,7 +815,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
 
         @Override
-        public void notify(String topic, AbstractResourceNotification notification) {
+        public void notify(String topic, ResourceNotification notification) {
             if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
                 return;
             }
@@ -834,7 +834,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
 
         @Override
-        public void notify(String topic, AbstractResourceNotification notification) {
+        public void notify(String topic, ResourceNotification notification) {
             if(!authorizer.hasResourcePermission(ACT, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
                 return;
             }

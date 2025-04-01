@@ -29,7 +29,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
@@ -51,7 +51,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
 
     private final TypedEventBus eventBus;
 
-    private final SortedMap<NotificationKey, List<AbstractResourceNotification>> notifications = new TreeMap<>();
+    private final SortedMap<NotificationKey, List<ResourceNotification>> notifications = new TreeMap<>();
 
     public NotificationAccumulatorImpl(TypedEventBus eventBus) {
         this.eventBus = eventBus;
@@ -237,7 +237,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     notifications.computeIfPresent(
                             new NotificationKey(provider, service, resource, ResourceDataNotification.class),
                             (k,l) -> {
-                                List<AbstractResourceNotification> result;
+                                List<ResourceNotification> result;
                                 if(l.isEmpty()) {
                                     result = List.of();
                                 } else {

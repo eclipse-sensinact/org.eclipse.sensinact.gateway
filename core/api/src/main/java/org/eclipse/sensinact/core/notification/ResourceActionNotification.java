@@ -23,10 +23,11 @@ import java.util.Objects;
  * ACTION/&lt;model&gt;/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
 public record ResourceActionNotification(String modelPackageUri, String model, String provider,
-        String service, String resource, Instant timestamp) implements AbstractResourceNotification {
+        String service, String resource, Instant timestamp) implements ResourceNotification {
 
     @Override
     public String getTopic() {
+        Objects.requireNonNull(model);
         Objects.requireNonNull(provider);
         Objects.requireNonNull(service);
         Objects.requireNonNull(resource);

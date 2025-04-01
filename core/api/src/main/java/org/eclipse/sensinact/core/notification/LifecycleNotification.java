@@ -25,11 +25,12 @@ import java.util.Objects;
  */
 public record LifecycleNotification(String modelPackageUri, String model, String provider,
         String service, String resource, Status status, Object initialValue,
-        Map<String, Object> initialMetadata) implements AbstractResourceNotification {
+        Map<String, Object> initialMetadata) implements ResourceNotification {
 
     @Override
     public String getTopic() {
         Objects.requireNonNull(status);
+        Objects.requireNonNull(model);
         Objects.requireNonNull(provider);
         int ordinal = status.ordinal();
         if (ordinal >= Status.SERVICE_CREATED.ordinal()) {

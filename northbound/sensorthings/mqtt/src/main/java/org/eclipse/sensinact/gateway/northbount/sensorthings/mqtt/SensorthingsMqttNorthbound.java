@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -67,7 +67,7 @@ import io.netty.handler.codec.mqtt.MqttPublishMessage;
 @Component(service = TypedEventHandler.class, configurationPid = "sensiNact.northbound.sensorthings.mqtt", configurationPolicy = ConfigurationPolicy.REQUIRE)
 @EventTopics({ "DATA/*", "LIFECYCLE/*", "METADATA/*" })
 public class SensorthingsMqttNorthbound extends AbstractInterceptHandler
-        implements TypedEventHandler<AbstractResourceNotification> {
+        implements TypedEventHandler<ResourceNotification> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorthingsMqttNorthbound.class);
 
@@ -199,7 +199,7 @@ public class SensorthingsMqttNorthbound extends AbstractInterceptHandler
     }
 
     @Override
-    public void notify(String topic, AbstractResourceNotification event) {
+    public void notify(String topic, ResourceNotification event) {
         final List<SensorthingsMapper<?>> listeners;
         synchronized (lock) {
             listeners = List.copyOf(subscriptions.values());

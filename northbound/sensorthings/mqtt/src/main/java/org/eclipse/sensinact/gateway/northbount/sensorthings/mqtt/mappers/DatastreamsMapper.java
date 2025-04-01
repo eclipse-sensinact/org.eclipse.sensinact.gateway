@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -65,7 +65,7 @@ public class DatastreamsMapper extends SensorthingsMapper<Datastream> {
         return Datastream.class;
     }
 
-    protected boolean isRelevantAdminResource(AbstractResourceNotification notification) {
+    protected boolean isRelevantAdminResource(ResourceNotification notification) {
         return "admin".equals(notification.service()) && "location".equals(notification.resource());
     }
 }

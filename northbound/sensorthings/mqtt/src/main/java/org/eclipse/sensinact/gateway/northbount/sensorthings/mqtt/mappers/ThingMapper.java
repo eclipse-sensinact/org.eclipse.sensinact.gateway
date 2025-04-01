@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.osgi.util.promise.Promise;
 
@@ -31,7 +31,7 @@ public class ThingMapper extends ThingsMapper {
     }
 
     @Override
-    public Promise<Stream<Thing>> toPayload(AbstractResourceNotification notification) {
+    public Promise<Stream<Thing>> toPayload(ResourceNotification notification) {
         if (provider.equals(notification.provider())) {
             return super.toPayload(notification);
         }

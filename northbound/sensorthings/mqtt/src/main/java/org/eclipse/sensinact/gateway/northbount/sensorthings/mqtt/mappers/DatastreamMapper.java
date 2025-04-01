@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -45,14 +45,14 @@ public class DatastreamMapper extends DatastreamsMapper {
     }
 
     @Override
-    public Promise<Stream<Datastream>> toPayload(AbstractResourceNotification notification) {
+    public Promise<Stream<Datastream>> toPayload(ResourceNotification notification) {
         if (provider.equals(notification.provider())) {
             return super.toPayload(notification);
         }
         return emptyStream();
     }
 
-    private boolean isOurResource(AbstractResourceNotification notification) {
+    private boolean isOurResource(ResourceNotification notification) {
         return service.equals(notification.service()) && resource.equals(notification.resource());
     }
 

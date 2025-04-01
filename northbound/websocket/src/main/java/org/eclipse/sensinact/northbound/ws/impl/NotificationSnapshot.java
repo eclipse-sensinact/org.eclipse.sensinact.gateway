@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -54,7 +54,7 @@ class NotificationSnapshot {
     /**
      * Parent notification
      */
-    private final AbstractResourceNotification notification;
+    private final ResourceNotification notification;
 
     /**
      * Creates a snapshot from the given life cycle notification

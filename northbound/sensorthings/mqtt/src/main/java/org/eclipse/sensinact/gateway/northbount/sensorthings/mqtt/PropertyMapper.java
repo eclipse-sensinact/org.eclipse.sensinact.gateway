@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -42,7 +42,7 @@ public class PropertyMapper extends SensorthingsMapper<JsonNode> {
     }
 
     @Override
-    public Promise<Stream<JsonNode>> toPayload(AbstractResourceNotification notification) {
+    public Promise<Stream<JsonNode>> toPayload(ResourceNotification notification) {
         if (match(provider, notification.provider()) && match(service, notification.service())
                 && match(resource, notification.resource())) {
             return mapper.toPayload(notification)

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,7 +38,7 @@ public class SelectMapper extends SensorthingsMapper<JsonNode> {
     }
 
     @Override
-    public Promise<Stream<JsonNode>> toPayload(AbstractResourceNotification notification) {
+    public Promise<Stream<JsonNode>> toPayload(ResourceNotification notification) {
         return mapper.toPayload(notification)
                 .map(s -> s.map(o -> jsonMapper.convertValue(o, ObjectNode.class).retain(selected)));
     }

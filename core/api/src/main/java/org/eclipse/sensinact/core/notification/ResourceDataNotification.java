@@ -25,10 +25,11 @@ import java.util.Objects;
  */
 public record ResourceDataNotification(String modelPackageUri, String model, String provider,
         String service, String resource, Object oldValue, Object newValue,
-        Instant timestamp, Class<?> type, Map<String, Object> metadata) implements AbstractResourceNotification {
+        Instant timestamp, Class<?> type, Map<String, Object> metadata) implements ResourceNotification {
 
     @Override
     public String getTopic() {
+        Objects.requireNonNull(model);
         Objects.requireNonNull(provider);
         Objects.requireNonNull(service);
         Objects.requireNonNull(resource);
