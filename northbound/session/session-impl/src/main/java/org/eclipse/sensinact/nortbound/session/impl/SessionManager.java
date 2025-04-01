@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.metrics.IMetricsGauge;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @Component(configurationPid = "sensinact.session.manager", property = IMetricsGauge.NAME + "=sensinact.sessions")
 @EventTopics({ "LIFECYCLE/*", "METADATA/*", "DATA/*", "ACTION/*" })
 public class SessionManager
-        implements SensiNactSessionManager, TypedEventHandler<AbstractResourceNotification>, IMetricsGauge {
+        implements SensiNactSessionManager, TypedEventHandler<ResourceNotification>, IMetricsGauge {
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
 
@@ -355,7 +355,7 @@ public class SessionManager
     }
 
     @Override
-    public void notify(String topic, AbstractResourceNotification event) {
+    public void notify(String topic, ResourceNotification event) {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Session Manager received a notification on topic {}");
         }

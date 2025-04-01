@@ -168,11 +168,11 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
             command = String.format(INSERT_TEMPLATE, "sensinact.geo_data",
                     "(SELECT ST_GeomFromGeoJSON( ? )::geography)");
             String tmpValue;
-            if (event.newValue == null) {
+            if (event.newValue() == null) {
                 tmpValue = "{\"type\":\"Point\", \"coordinates\":[]}";
-            } else if (event.newValue instanceof GeoJsonObject) {
+            } else if (event.newValue() instanceof GeoJsonObject) {
                 try {
-                    tmpValue = mapper.writeValueAsString(event.newValue);
+                    tmpValue = mapper.writeValueAsString(event.newValue());
                 } catch (JsonProcessingException e) {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Unable to serialize geographic data for {}", topic, e);
@@ -180,21 +180,21 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                     return;
                 }
             } else {
-                tmpValue = event.newValue.toString();
+                tmpValue = event.newValue().toString();
             }
             value = tmpValue;
-        } else if (isNumber(event.type)) {
+        } else if (isNumber(event.type())) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Event is numeric");
             }
             command = String.format(INSERT_TEMPLATE, "sensinact.numeric_data", "?");
-            value = event.newValue;
+            value = event.newValue();
         } else {
             if (logger.isDebugEnabled()) {
                 logger.debug("Event is being treated as text");
             }
             command = String.format(INSERT_TEMPLATE, "sensinact.text_data", "?");
-            value = event.newValue == null ? null : event.newValue.toString();
+            value = event.newValue() == null ? null : event.newValue().toString();
         }
         Connection conn = connectionSupplier.get();
 
@@ -202,12 +202,12 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
             txControl.required(() -> {
 
                 PreparedStatement ps = conn.prepareStatement(command);
-                ps.setTimestamp(1, Timestamp.from(event.timestamp));
-                ps.setString(2, event.modelPackageUri);
-                ps.setString(3, event.model);
-                ps.setString(4, event.provider);
-                ps.setString(5, event.service);
-                ps.setString(6, event.resource);
+                ps.setTimestamp(1, Timestamp.from(event.timestamp()));
+                ps.setString(2, event.modelPackageUri());
+                ps.setString(3, event.model());
+                ps.setString(4, event.provider());
+                ps.setString(5, event.service());
+                ps.setString(6, event.resource());
                 ps.setObject(7, value);
 
                 return ps.execute();
@@ -221,7 +221,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
     }
 
     private boolean isGeographic(ResourceDataNotification event) {
-        return GeoJsonObject.class.isAssignableFrom(event.type);
+        return GeoJsonObject.class.isAssignableFrom(event.type());
     }
 
     private static final Set<Class<?>> primitiveNumbers = Set.of(byte.class, short.class, int.class, long.class,

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -62,10 +62,10 @@ public class TestUtils {
      */
     public void assertNotification(final GenericDto expected, final ResourceDataNotification notification) {
         assertNotNull(notification);
-        assertEquals(expected.provider, notification.provider);
-        assertEquals(expected.service, notification.service);
-        assertEquals(expected.resource, notification.resource);
-        assertEquals(expected.value, notification.newValue);
+        assertEquals(expected.provider, notification.provider());
+        assertEquals(expected.service, notification.service());
+        assertEquals(expected.resource, notification.resource());
+        assertEquals(expected.value, notification.newValue());
     }
 
     /**

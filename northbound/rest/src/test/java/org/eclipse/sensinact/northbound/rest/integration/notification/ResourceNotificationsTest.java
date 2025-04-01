@@ -157,7 +157,7 @@ public class ResourceNotificationsTest {
             // First will be admin friendlyName
             ResourceDataNotification friendlyName = queue.poll(1, TimeUnit.SECONDS);
             assertNotNull(friendlyName);
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), friendlyName.resource,
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), friendlyName.resource(),
                     "First event was not FriendlyName, so the Provider already exists. It is likely that the data folder wasn't cleared and this is a remnant of a previous testrun.");
             // second will be will be admin model
             assertNotNull(queue.poll(1, TimeUnit.SECONDS));
@@ -176,7 +176,7 @@ public class ResourceNotificationsTest {
             assertEquals(dto.service, lifeCycleNotif.service);
             assertEquals(dto.resource, lifeCycleNotif.resource);
             assertEquals(LifecycleNotification.Status.RESOURCE_CREATED, lifeCycleNotif.status);
-            assertFalse(localNotif.timestamp.isAfter(Instant.ofEpochMilli(lifeCycleNotif.timestamp)),
+            assertFalse(localNotif.timestamp().isAfter(Instant.ofEpochMilli(lifeCycleNotif.timestamp)),
                     "Lifecycle timestamp is too early");
 
             // Check data event
@@ -187,7 +187,7 @@ public class ResourceNotificationsTest {
             assertEquals(dto.resource, dataNotif.resource);
             assertNull(dataNotif.oldValue, "Old value is not null");
             assertEquals(dto.value, dataNotif.newValue);
-            assertEquals(localNotif.timestamp.toEpochMilli(), dataNotif.timestamp);
+            assertEquals(localNotif.timestamp().toEpochMilli(), dataNotif.timestamp);
 
             // Update value
             dto.value = initialValue + 10;
@@ -205,7 +205,7 @@ public class ResourceNotificationsTest {
             assertEquals(dto.resource, dataNotif.resource);
             assertEquals(initialValue, dataNotif.oldValue);
             assertEquals(dto.value, dataNotif.newValue);
-            assertEquals(localNotif.timestamp.toEpochMilli(), dataNotif.timestamp);
+            assertEquals(localNotif.timestamp().toEpochMilli(), dataNotif.timestamp);
 
             // We shouldn't have any lifecycle event here
             assertNull(lifeCycleEvents.poll());

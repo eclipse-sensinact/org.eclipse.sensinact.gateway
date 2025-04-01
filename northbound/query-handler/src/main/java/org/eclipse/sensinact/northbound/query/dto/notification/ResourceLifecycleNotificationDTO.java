@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -37,11 +37,11 @@ public class ResourceLifecycleNotificationDTO extends AbstractResourceNotificati
     }
 
     public ResourceLifecycleNotificationDTO(LifecycleNotification notif) {
-        this.provider = notif.provider;
-        this.service = notif.service;
-        this.resource = notif.resource;
+        this.provider = notif.provider();
+        this.service = notif.service();
+        this.resource = notif.resource();
         this.timestamp = Instant.now().toEpochMilli();
-        this.status = notif.status;
-        this.initialValue = notif.initialValue;
+        this.status = notif.status();
+        this.initialValue = notif.initialValue();
     }
 }

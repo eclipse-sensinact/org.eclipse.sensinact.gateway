@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -742,11 +742,11 @@ class NotificationSenderTest {
             String resource) {
         return i -> {
             try {
-                assertEquals(MODEL, i.model);
-                assertEquals(status, i.status);
-                assertEquals(provider, i.provider);
-                assertEquals(service, i.service);
-                assertEquals(resource, i.resource);
+                assertEquals(MODEL, i.model());
+                assertEquals(status, i.status());
+                assertEquals(provider, i.provider());
+                assertEquals(service, i.service());
+                assertEquals(resource, i.resource());
             } catch (AssertionFailedError e) {
                 return false;
             }
@@ -758,13 +758,13 @@ class NotificationSenderTest {
             String resource, Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
         return i -> {
             try {
-                assertEquals(MODEL, i.model);
-                assertEquals(provider, i.provider);
-                assertEquals(service, i.service);
-                assertEquals(resource, i.resource);
-                assertEquals(oldValues, i.oldValues);
-                assertEquals(newValues, i.newValues);
-                assertEquals(timestamp, i.timestamp);
+                assertEquals(MODEL, i.model());
+                assertEquals(provider, i.provider());
+                assertEquals(service, i.service());
+                assertEquals(resource, i.resource());
+                assertEquals(oldValues, i.oldValues());
+                assertEquals(newValues, i.newValues());
+                assertEquals(timestamp, i.timestamp());
             } catch (AssertionFailedError e) {
                 return false;
             }
@@ -776,15 +776,15 @@ class NotificationSenderTest {
             Class<?> type, Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
         return i -> {
             try {
-                assertEquals(MODEL, i.model);
-                assertEquals(provider, i.provider);
-                assertEquals(service, i.service);
-                assertEquals(resource, i.resource);
-                assertEquals(type, i.type);
-                assertEquals(oldValue, i.oldValue);
-                assertEquals(newValue, i.newValue);
-                assertEquals(metadata, i.metadata);
-                assertEquals(timestamp, i.timestamp);
+                assertEquals(MODEL, i.model());
+                assertEquals(provider, i.provider());
+                assertEquals(service, i.service());
+                assertEquals(resource, i.resource());
+                assertEquals(type, i.type());
+                assertEquals(oldValue, i.oldValue());
+                assertEquals(newValue, i.newValue());
+                assertEquals(metadata, i.metadata());
+                assertEquals(timestamp, i.timestamp());
             } catch (AssertionFailedError e) {
                 return false;
             }
@@ -796,11 +796,11 @@ class NotificationSenderTest {
             String resource, Instant timestamp) {
         return i -> {
             try {
-                assertEquals(MODEL, i.model);
-                assertEquals(provider, i.provider);
-                assertEquals(service, i.service);
-                assertEquals(resource, i.resource);
-                assertEquals(timestamp, i.timestamp);
+                assertEquals(MODEL, i.model());
+                assertEquals(provider, i.provider());
+                assertEquals(service, i.service());
+                assertEquals(resource, i.resource());
+                assertEquals(timestamp, i.timestamp());
             } catch (AssertionFailedError e) {
                 return false;
             }

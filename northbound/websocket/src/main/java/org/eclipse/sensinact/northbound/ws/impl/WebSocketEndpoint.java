@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
@@ -217,7 +217,7 @@ public class WebSocketEndpoint {
      * @param notif Received notification
      * @return
      */
-    private NotificationSnapshot convertToSnapshot(final AbstractResourceNotification notif) {
+    private NotificationSnapshot convertToSnapshot(final ResourceNotification notif) {
         if (notif.getClass() == LifecycleNotification.class) {
             return new NotificationSnapshot((LifecycleNotification) notif);
         } else if (notif.getClass() == ResourceDataNotification.class) {
@@ -235,14 +235,14 @@ public class WebSocketEndpoint {
      * @return The filter to apply on all notifications
      * @throws StatusException Error creating the filter
      */
-    private Predicate<AbstractResourceNotification> prepareFilter(QuerySubscribeDTO query) throws StatusException {
+    private Predicate<ResourceNotification> prepareFilter(QuerySubscribeDTO query) throws StatusException {
         // Parse filter
         final ICriterion parsedFilter = queryHandler.parseFilter(query.filter, query.filterLanguage);
         if (parsedFilter == null) {
             return null;
         }
 
-        Predicate<AbstractResourceNotification> predicate = null;
+        Predicate<ResourceNotification> predicate = null;
 
         // Basic filters
         final Predicate<ProviderSnapshot> providerFilter = parsedFilter.getProviderFilter();
@@ -285,15 +285,15 @@ public class WebSocketEndpoint {
         // Combine with location filter
         final Predicate<GeoJsonObject> locationFilter = parsedFilter.getLocationFilter();
         if (locationFilter != null) {
-            Predicate<AbstractResourceNotification> locationPredicate = notif -> {
-                if ("admin".equals(notif.service) && "location".equals(notif.resource)) {
+            Predicate<ResourceNotification> locationPredicate = notif -> {
+                if ("admin".equals(notif.service()) && "location".equals(notif.resource())) {
                     if (notif.getClass() == LifecycleNotification.class) {
                         final LifecycleNotification lifecycleNotif = (LifecycleNotification) notif;
-                        return lifecycleNotif.initialValue != null
-                                && locationFilter.test((GeoJsonObject) lifecycleNotif.initialValue);
+                        return lifecycleNotif.initialValue() != null
+                                && locationFilter.test((GeoJsonObject) lifecycleNotif.initialValue());
                     } else if (notif.getClass() == ResourceDataNotification.class) {
                         final ResourceDataNotification dataNotif = (ResourceDataNotification) notif;
-                        return dataNotif.newValue != null && locationFilter.test((GeoJsonObject) dataNotif.newValue);
+                        return dataNotif.newValue() != null && locationFilter.test((GeoJsonObject) dataNotif.newValue());
                     }
                 }
                 return true;
@@ -325,22 +325,22 @@ public class WebSocketEndpoint {
 
         final ResultSubscribeDTO result = new ResultSubscribeDTO();
         List<String> topics;
-        final Predicate<AbstractResourceNotification> eventPredicate;
+        final Predicate<ResourceNotification> eventPredicate;
         if (path.targetsSpecificResource()) {
             result.uri = path.toUri();
             // TODO replace this with single level wildcard
             topics = List.of("*");
-            eventPredicate = n -> query.uri.provider.equals(n.provider) && query.uri.service.equals(n.service)
-                    && query.uri.resource.equals(n.resource);
+            eventPredicate = n -> query.uri.provider.equals(n.provider()) && query.uri.service.equals(n.service())
+                    && query.uri.resource.equals(n.resource());
         } else {
             result.uri = "/";
             topics = List.of("*");
             eventPredicate = n -> true;
         }
 
-        final Predicate<AbstractResourceNotification> p;
+        final Predicate<ResourceNotification> p;
         if (query.filter != null && !query.filter.isBlank()) {
-            Predicate<AbstractResourceNotification> queryFilter = prepareFilter(query);
+            Predicate<ResourceNotification> queryFilter = prepareFilter(query);
             if (queryFilter != null) {
                 p = eventPredicate.and(queryFilter);
             } else {

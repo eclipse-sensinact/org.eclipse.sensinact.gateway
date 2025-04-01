@@ -30,8 +30,8 @@ public class HistoricalLocationsMapper extends SensorthingsMapper<HistoricalLoca
 
     @Override
     public Promise<Stream<HistoricalLocation>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service) && "location".equals(notification.resource)) {
-            return decorate(getProvider(notification.provider).map(p -> DtoMapper.toHistoricalLocation(jsonMapper, p)));
+        if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
+            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toHistoricalLocation(jsonMapper, p)));
         }
         return emptyStream();
     }

@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.osgi.util.promise.Promise;
 
@@ -36,10 +36,10 @@ public class FeatureOfInterestMapper extends FeaturesOfInterestMapper {
     }
 
     @Override
-    public Promise<Stream<FeatureOfInterest>> toPayload(AbstractResourceNotification notification) {
+    public Promise<Stream<FeatureOfInterest>> toPayload(ResourceNotification notification) {
         // TODO what do we do about the timestamp? Do we have the wrong id mapping in
         // sensinact?
-        if (provider.equals(notification.provider)) {
+        if (provider.equals(notification.provider())) {
             return super.toPayload(notification);
         }
         return emptyStream();

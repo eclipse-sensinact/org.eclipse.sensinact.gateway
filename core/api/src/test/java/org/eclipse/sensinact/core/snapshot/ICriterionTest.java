@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -183,15 +183,8 @@ public class ICriterionTest {
     }
 
     private ResourceDataNotification getNotification(String value) {
-        ResourceDataNotification rdn = new ResourceDataNotification();
-        rdn.model = "a";
-        rdn.provider = "b";
-        rdn.service = "c";
-        rdn.resource = "d";
-        rdn.newValue = value;
-        rdn.timestamp = Instant.now();
-        rdn.metadata = Map.of("foo", "bar");
-        return rdn;
+        return new ResourceDataNotification(null,
+                "a", "b", "c", "d", null, value, Instant.now(), null, Map.of("foo", "bar"));
     }
 
     @Nested

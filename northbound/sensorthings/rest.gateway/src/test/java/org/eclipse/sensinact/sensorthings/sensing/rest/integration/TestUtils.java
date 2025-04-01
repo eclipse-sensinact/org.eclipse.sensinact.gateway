@@ -128,10 +128,10 @@ public class TestUtils {
      */
     public void assertNotification(final GenericDto expected, final ResourceDataNotification notification) {
         assertNotNull(notification);
-        assertEquals(expected.provider, notification.provider);
-        assertEquals(expected.service, notification.service);
-        assertEquals(expected.resource, notification.resource);
-        assertEquals(expected.value, notification.newValue);
+        assertEquals(expected.provider, notification.provider());
+        assertEquals(expected.service, notification.service());
+        assertEquals(expected.resource, notification.resource());
+        assertEquals(expected.value, notification.newValue());
     }
 
     /**

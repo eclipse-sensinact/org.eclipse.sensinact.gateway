@@ -31,8 +31,8 @@ public class ObservationsMapper extends SensorthingsMapper<Observation> {
     }
 
     public Promise<Stream<Observation>> toPayload(ResourceDataNotification notification) {
-        TimedValue<Object> tv = new DefaultTimedValue<>(notification.newValue, notification.timestamp);
-        return wrap(DtoMapper.toObservation(notification.provider, notification.service, notification.resource, tv));
+        TimedValue<Object> tv = new DefaultTimedValue<>(notification.newValue(), notification.timestamp());
+        return wrap(DtoMapper.toObservation(notification.provider(), notification.service(), notification.resource(), tv));
     }
 
     @Override

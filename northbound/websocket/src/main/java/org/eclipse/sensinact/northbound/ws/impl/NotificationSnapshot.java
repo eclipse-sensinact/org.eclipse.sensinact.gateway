@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -54,7 +54,7 @@ class NotificationSnapshot {
     /**
      * Parent notification
      */
-    private final AbstractResourceNotification notification;
+    private final ResourceNotification notification;
 
     /**
      * Creates a snapshot from the given life cycle notification
@@ -66,7 +66,7 @@ class NotificationSnapshot {
         timestamp = Instant.now();
         provider = new ProviderSnapshotImpl();
         service = new ServiceSnapshotImpl();
-        resource = new ResourceSnapshotImpl(notif.initialValue);
+        resource = new ResourceSnapshotImpl(notif.initialValue());
     }
 
     /**
@@ -76,10 +76,10 @@ class NotificationSnapshot {
      */
     public NotificationSnapshot(final ResourceDataNotification notif) {
         notification = notif;
-        timestamp = notif.timestamp;
+        timestamp = notif.timestamp();
         provider = new ProviderSnapshotImpl();
         service = new ServiceSnapshotImpl();
-        resource = new ResourceSnapshotImpl(notif.newValue);
+        resource = new ResourceSnapshotImpl(notif.newValue());
     }
 
     @Override
@@ -91,7 +91,7 @@ class NotificationSnapshot {
 
         @Override
         public String getName() {
-            return notification.provider;
+            return notification.provider();
         }
 
         @Override
@@ -106,7 +106,7 @@ class NotificationSnapshot {
 
         @Override
         public String getModelName() {
-            return notification.model;
+            return notification.model();
         }
 
         @Override
@@ -138,7 +138,7 @@ class NotificationSnapshot {
 
         @Override
         public String getName() {
-            return notification.service;
+            return notification.service();
         }
 
         @Override
@@ -176,13 +176,13 @@ class NotificationSnapshot {
 
         @Override
         public String toString() {
-            return String.format("ResourceNotif(%s/%s/%s=%s @ %s)", notification.provider, notification.service,
-                    notification.resource, value.getValue(), timestamp);
+            return String.format("ResourceNotif(%s/%s/%s=%s @ %s)", notification.provider(), notification.service(),
+                    notification.resource(), value.getValue(), timestamp);
         }
 
         @Override
         public String getName() {
-            return notification.resource;
+            return notification.resource();
         }
 
         @Override

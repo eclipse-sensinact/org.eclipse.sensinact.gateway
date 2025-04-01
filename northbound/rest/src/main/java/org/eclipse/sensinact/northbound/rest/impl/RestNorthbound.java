@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
@@ -317,8 +317,8 @@ public class RestNorthbound implements IRestNorthbound {
         final AtomicReference<String> listenerId = new AtomicReference<>();
 
         // TODO replace this with a single-level wildcard when typed events permits it
-        Predicate<AbstractResourceNotification> filter = e -> providerId.equals(e.provider) &&
-                serviceName.equals(e.service) && rcName.equals(e.resource);
+        Predicate<ResourceNotification> filter = e -> providerId.equals(e.provider()) &&
+                serviceName.equals(e.service()) && rcName.equals(e.resource());
 
         final ClientDataListener cdl = (t, e) -> {
             if (eventSink.isClosed()) {

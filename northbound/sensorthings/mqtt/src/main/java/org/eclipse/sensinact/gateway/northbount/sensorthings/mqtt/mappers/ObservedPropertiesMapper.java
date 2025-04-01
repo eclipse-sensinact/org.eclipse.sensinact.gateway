@@ -33,16 +33,16 @@ public class ObservedPropertiesMapper extends SensorthingsMapper<ObservedPropert
 
     @Override
     public Promise<Stream<ObservedProperty>> toPayload(LifecycleNotification notification) {
-        if (notification.resource != null && notification.status != Status.RESOURCE_DELETED) {
+        if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
             // This is a resource appearing
-            return getObservedProperty(getResource(notification.provider, notification.service, notification.resource));
+            return getObservedProperty(getResource(notification.provider(), notification.service(), notification.resource()));
         }
         return emptyStream();
     }
 
     @Override
     public Promise<Stream<ObservedProperty>> toPayload(ResourceMetaDataNotification notification) {
-        return getObservedProperty(getResource(notification.provider, notification.service, notification.resource));
+        return getObservedProperty(getResource(notification.provider(), notification.service(), notification.resource()));
     }
 
     protected Promise<Stream<ObservedProperty>> getObservedProperty(Promise<ResourceSnapshot> resourceSnapshot) {

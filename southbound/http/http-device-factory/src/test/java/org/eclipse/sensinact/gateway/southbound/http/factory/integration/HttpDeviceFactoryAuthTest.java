@@ -186,7 +186,7 @@ public class HttpDeviceFactoryAuthTest {
             while (!gotLocation || !gotValue) {
                 final ResourceDataNotification notif = queue.poll(2, TimeUnit.SECONDS);
                 assertNotNull(notif);
-                switch (notif.resource) {
+                switch (notif.resource()) {
                 case "value":
                     gotValue = true;
                     break;

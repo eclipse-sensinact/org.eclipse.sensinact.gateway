@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
@@ -87,7 +87,7 @@ public abstract class SensorthingsMapper<T> {
         this.thread = gateway;
     }
 
-    public Promise<Stream<T>> toPayload(AbstractResourceNotification notification) {
+    public Promise<Stream<T>> toPayload(ResourceNotification notification) {
         if (notification instanceof ResourceDataNotification) {
             return toPayload((ResourceDataNotification) notification).filter(Objects::nonNull);
         } else if (notification instanceof LifecycleNotification) {
@@ -371,8 +371,8 @@ public abstract class SensorthingsMapper<T> {
         if ("Things".equals(parentType)) {
             return new DatastreamsMapper(topicFilter, mapper, thread) {
                 @Override
-                public Promise<Stream<Datastream>> toPayload(AbstractResourceNotification notification) {
-                    return parentId.equals(notification.provider) ? super.toPayload(notification) : emptyStream();
+                public Promise<Stream<Datastream>> toPayload(ResourceNotification notification) {
+                    return parentId.equals(notification.provider()) ? super.toPayload(notification) : emptyStream();
                 }
             };
         } else if ("Sensors".equals(parentType) || "ObservedProperties".equals(parentType)) {

@@ -30,8 +30,8 @@ public class FeaturesOfInterestMapper extends SensorthingsMapper<FeatureOfIntere
 
     @Override
     public Promise<Stream<FeatureOfInterest>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service) && "location".equals(notification.resource)) {
-            return decorate(getProvider(notification.provider).map(p -> DtoMapper.toFeatureOfInterest(jsonMapper, p)));
+        if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
+            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toFeatureOfInterest(jsonMapper, p)));
         }
         return emptyStream();
     }

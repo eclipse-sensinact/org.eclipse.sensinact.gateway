@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,17 +12,18 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.notification;
 
-public abstract class AbstractResourceNotification {
+public sealed interface ResourceNotification permits LifecycleNotification,
+    ResourceActionNotification, ResourceDataNotification, ResourceMetaDataNotification {
 
-    public String modelPackageUri;
+    public String modelPackageUri();
 
-    public String model;
+    public String model();
 
-    public String provider;
+    public String provider();
 
-    public String service;
+    public String service();
 
-    public String resource;
+    public String resource();
 
-    public abstract String getTopic();
+    public String getTopic();
 }

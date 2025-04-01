@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.notification.impl;
 
-import org.eclipse.sensinact.core.notification.AbstractResourceNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -24,10 +24,10 @@ class NotificationKey implements Comparable<NotificationKey> {
     private final String service;
     private final String resource;
 
-    private final Class<? extends AbstractResourceNotification> type;
+    private final Class<? extends ResourceNotification> type;
 
     public NotificationKey(String provider, String service, String resource,
-            Class<? extends AbstractResourceNotification> type) {
+            Class<? extends ResourceNotification> type) {
         this.provider = provider;
         this.service = service;
         this.resource = resource;
@@ -53,12 +53,12 @@ class NotificationKey implements Comparable<NotificationKey> {
         return value;
     }
 
-    private int compareType(Class<? extends AbstractResourceNotification> a,
-            Class<? extends AbstractResourceNotification> b) {
+    private int compareType(Class<? extends ResourceNotification> a,
+            Class<? extends ResourceNotification> b) {
         return mapTypeToInt(a) - mapTypeToInt(b);
     }
 
-    private int mapTypeToInt(Class<? extends AbstractResourceNotification> clazz) {
+    private int mapTypeToInt(Class<? extends ResourceNotification> clazz) {
         if (LifecycleNotification.class == clazz) {
             return 1;
         }
