@@ -134,7 +134,7 @@ public class ResourceSelectorCriterion implements ICriterion {
             OperationType ot = vs.operation == null ? OperationType.EQUALS : vs.operation;
             switch(ot) {
                 case EQUALS:
-                    p = check(getterFunction, vs.value, Objects::equals);
+                    p = check(getterFunction, vs.value, Objects::equals, true);
                     break;
                 case GREATER_THAN:
                     p = compare(getterFunction, vs.value, i -> i > 0);
@@ -171,7 +171,7 @@ public class ResourceSelectorCriterion implements ICriterion {
             Number n = (Number) v;
             double d = n.doubleValue();
             // If we're equal to our rounded self then we're a natural number
-            if(((double)Math.round(d)) == d) {
+            if((Math.round(d)) == d) {
                 return Math.abs(n.longValue());
             } else {
                 return Math.abs(d);
@@ -185,19 +185,29 @@ public class ResourceSelectorCriterion implements ICriterion {
         return null;
     }
 
-    private static Predicate<TimedValue<?>> check(Function<TimedValue<?>,Object> getterFunction,
-            String value, BiPredicate<Object, Object> check) {
+    private static Predicate<TimedValue<?>> check(Function<TimedValue<?>, Object> getterFunction, String value,
+            BiPredicate<Object, Object> check, boolean allowNull) {
         Converter conv = Converters.standardConverter();
 
-        Map<Class<?>,Object> conversionCache = new WeakHashMap<>();
+        Map<Class<?>, Object> conversionCache = new WeakHashMap<>();
 
         return t -> {
-            if(t == null) return false;
+            if (t == null) {
+                // Return false if the value is not set
+                return false;
+            }
 
-            Object v  = getterFunction.apply(t);
-            if(v == null) return false;
+            Object v = getterFunction.apply(t);
+            if (v == null && !allowNull) {
+                // Return false if null values are not allowed
+                return false;
+            }
 
             Predicate<Object> test = o -> {
+                if (o == null) {
+                    return check.test(null, null);
+                }
+
                 Object valueObj = conversionCache.computeIfAbsent(o.getClass(), k -> {
                     try {
                         return conv.convert(value).to(k);
@@ -211,14 +221,14 @@ public class ResourceSelectorCriterion implements ICriterion {
             };
 
             boolean result;
-            if(v instanceof Collection<?>) {
-                result = ((Collection<?>)v).stream().anyMatch(test);
-            } else if (v instanceof Map<?,?>) {
-                result = ((Map<?,?>)v).values().stream().anyMatch(test);
-            } else if (v.getClass().isArray()) {
+            if (v instanceof Collection<?>) {
+                result = ((Collection<?>) v).stream().anyMatch(test);
+            } else if (v instanceof Map<?, ?>) {
+                result = ((Map<?, ?>) v).values().stream().anyMatch(test);
+            } else if (v != null && v.getClass().isArray()) {
                 int length = Array.getLength(v);
                 result = false;
-                for(int i = 0; i < length && !result; i++) {
+                for (int i = 0; i < length && !result; i++) {
                     result = test.test(Array.get(v, i));
                 }
             } else {
@@ -232,7 +242,7 @@ public class ResourceSelectorCriterion implements ICriterion {
     private static <T> Predicate<TimedValue<?>> compare(Function<TimedValue<?>,Object> getterFunction,
             String value, IntPredicate check) {
         return check(getterFunction, value, (a,b) -> Comparable.class.isInstance(a) && Comparable.class.isInstance(b) &&
-                check.test(((Comparable<Object>)a).compareTo(b)));
+                check.test(((Comparable<Object>)a).compareTo(b)), false);
     }
 
     private static boolean isSet(TimedValue<?> t) {
