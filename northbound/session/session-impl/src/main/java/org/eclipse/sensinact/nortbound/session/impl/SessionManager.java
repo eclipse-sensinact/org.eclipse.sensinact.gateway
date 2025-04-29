@@ -357,7 +357,7 @@ public class SessionManager
     @Override
     public void notify(String topic, ResourceNotification event) {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Session Manager received a notification on topic {}");
+            LOG.debug("Session Manager received a notification on topic {}", topic);
         }
         List<SensiNactSessionImpl> sessions;
         synchronized (lock) {
