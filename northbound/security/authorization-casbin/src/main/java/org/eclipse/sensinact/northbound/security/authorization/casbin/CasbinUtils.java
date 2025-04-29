@@ -73,9 +73,9 @@ public class CasbinUtils {
             // Soft access to users
             policies.add(new Policy("role:user", null, null, null, null, null, null, PolicyEffect.allow, 10000));
         } else {
-            // Strong denial for anonymous
-            policies.add(new Policy(Constants.ROLE_ANONYMOUS, null, null, null, null, null, null, PolicyEffect.deny,
-                    -100000));
+            // Stronger denial for anonymous (models can't enable it)
+            policies.add(
+                    new Policy(Constants.ROLE_ANONYMOUS, null, null, null, null, null, null, PolicyEffect.deny, 1));
 
             // Soft denial for users. Allow to describe resources
             policies.add(new Policy("role:user", null, null, null, null, null, null, PolicyEffect.deny, 10001));

@@ -45,7 +45,7 @@ import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(immediate = true, configurationPid = Constants.CONFIGURATION_PID, configurationPolicy = ConfigurationPolicy.OPTIONAL)
+@Component(immediate = true, configurationPid = Constants.CONFIGURATION_PID, configurationPolicy = ConfigurationPolicy.REQUIRE)
 @EventTopics({ "LIFECYCLE/*" })
 public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEventHandler<LifecycleNotification> {
 
@@ -85,13 +85,14 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
                 @Override
                 protected Promise<Void> call(final SensinactDigitalTwin twin, final SensinactModelManager modelMgr,
                         final PromiseFactory pf) {
-                    for (Model model : modelMgr.getModels().values()) {
-                        try {
-                            loadPolicies(model);
-                        } catch (Exception e) {
-                            logger.error("Error loading policies from {}", makeModelUri(model));
-                        }
-                    }
+                    twin.getProviders().stream().map(p -> modelMgr.getModel(p.getModelPackageUri(), p.getModelName()))
+                            .filter(Objects::nonNull).distinct().forEach(model -> {
+                                try {
+                                    loadPolicies(model);
+                                } catch (Exception e) {
+                                    logger.error("Error loading policies from {}", makeModelUri(model));
+                                }
+                            });
                     return pf.resolved(null);
                 }
             }).getValue();
