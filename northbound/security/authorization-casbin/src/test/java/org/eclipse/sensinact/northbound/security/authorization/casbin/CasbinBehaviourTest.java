@@ -102,7 +102,7 @@ public class CasbinBehaviourTest {
                 policy.toList());
 
         // Wildcard policy
-        policy = engine.parsePolicy("*, *, *, *, *, *, DESCRIBE, allow, 1000");
+        policy = engine.parsePolicy("*, *, *, *, *, *, describe, allow, 1000");
         assertEquals("*", policy.subject());
         assertEquals("*", policy.modelPackageUri());
         assertEquals("*", policy.model());
