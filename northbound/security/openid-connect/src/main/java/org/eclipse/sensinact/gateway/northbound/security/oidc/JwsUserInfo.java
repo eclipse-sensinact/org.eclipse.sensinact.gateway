@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbound.security.oidc;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -28,7 +30,7 @@ public class JwsUserInfo implements UserInfo {
 
     public JwsUserInfo(Jws<Claims> jws, Function<Jws<Claims>, Set<String>> groupMapper) {
         this.subject = jws.getBody().getSubject();
-        this.groups = groupMapper.apply(jws);
+        this.groups = Collections.unmodifiableSet(groupMapper.apply(jws));
     }
 
     @Override
@@ -37,8 +39,23 @@ public class JwsUserInfo implements UserInfo {
     }
 
     @Override
+    public Collection<String> getGroups() {
+        return groups;
+    }
+
+    @Override
     public boolean isMemberOfGroup(String group) {
         return groups.contains(group);
+    }
+
+    @Override
+    public boolean isMemberOfAllGroups(Collection<String> groups) {
+        return groups.stream().allMatch(this.groups::contains);
+    }
+
+    @Override
+    public boolean isMemberOfAnyGroup(Collection<String> groups) {
+        return groups.stream().anyMatch(this.groups::contains);
     }
 
     @Override
@@ -50,5 +67,4 @@ public class JwsUserInfo implements UserInfo {
     public boolean isAuthenticated() {
         return true;
     }
-
 }

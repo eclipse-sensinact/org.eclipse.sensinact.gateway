@@ -1,0 +1,1 @@
+-includeresource: @jcasbin-${jcasbin.version}.jar;lib:=true,@aviator-*.jar;lib:=true

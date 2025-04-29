@@ -27,5 +27,6 @@
   <modules>
       <module>openid-connect</module>
       <module>security-api</module>
+      <module>authorization-casbin</module>
   </modules>
 </project>
