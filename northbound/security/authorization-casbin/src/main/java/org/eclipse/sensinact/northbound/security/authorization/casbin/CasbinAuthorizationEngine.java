@@ -12,25 +12,40 @@
 
 package org.eclipse.sensinact.northbound.security.authorization.casbin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.casbin.jcasbin.main.Enforcer;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.model.Model;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
-import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.typedevent.TypedEventHandler;
+import org.osgi.service.typedevent.propertytypes.EventTopics;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, configurationPid = Constants.CONFIGURATION_PID, configurationPolicy = ConfigurationPolicy.OPTIONAL)
-public class CasbinAuthorizationEngine implements AuthorizationEngine {
+@EventTopics({ "LIFECYCLE/*" })
+public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEventHandler<LifecycleNotification> {
 
     private static final Logger logger = LoggerFactory.getLogger(CasbinAuthorizationEngine.class);
 
@@ -43,31 +58,228 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine {
     /**
      * Flag to allow or deny unspecified authorizations
      */
-    boolean allowByDefault;
+    private boolean allowByDefault;
 
+    /**
+     * Model authorization policies
+     */
+    private final Map<String, List<Policy>> modelsPolicies = new HashMap<>();
+
+    /**
+     * Policies enforcer
+     */
+    private Enforcer enforcer;
+
+    /**
+     * Component activated
+     */
     @Activate
-    void activate(CasbinAuthorizationConfiguration configuration) {
+    void activate(final CasbinAuthorizationConfiguration configuration) throws Exception {
         this.allowByDefault = configuration.allowByDefault();
+
+        try {
+            // Load policies of existing models
+            gateway.execute(new AbstractSensinactCommand<Void>() {
+                @Override
+                protected Promise<Void> call(final SensinactDigitalTwin twin, final SensinactModelManager modelMgr,
+                        final PromiseFactory pf) {
+                    for (Model model : modelMgr.getModels().values()) {
+                        try {
+                            loadPolicies(model);
+                        } catch (Exception e) {
+                            logger.error("Error loading policies from {}", makeModelUri(model));
+                        }
+                    }
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        } catch (Exception e) {
+            logger.error("Error loading policies of existing models", e);
+            throw e;
+        }
+
+        // Create the enforcer
+        enforcer = new Enforcer(CasbinUtils.makeModel());
+
+        // Add default policies
+        enforcer.addPolicies(CasbinUtils.defaultPolicies(allowByDefault));
+
+        // Add configured policies
+        enforcer.addPolicies(parsePolicies(configuration.policies()).stream().map(Policy::toList).toList());
+
+        // Add models policies
+        modelsPolicies.values().stream().flatMap(l -> l.stream()).forEach(p -> enforcer.addPolicy(p.toList()));
+    }
+
+    /**
+     * Component deactivated
+     */
+    @Deactivate
+    void deactivate() {
+        enforcer = null;
+    }
+
+    /**
+     * Parses the policies provided in the configuration
+     *
+     * @param strPolicies
+     * @return
+     */
+    private List<Policy> parsePolicies(String[] strPolicies) {
+        if (strPolicies == null || strPolicies.length == 0) {
+            return List.of();
+        }
+
+        final int expectedFields = 9;
+
+        return Arrays.stream(strPolicies).map(row -> {
+            // Normalize parts
+            final String[] parts = Arrays.stream(row.split(",")).map(String::trim).map(p -> {
+                switch (p) {
+                case "":
+                case "null":
+                    return null;
+
+                default:
+                    return p;
+                }
+            }).toArray(String[]::new);
+
+            // Check length
+            if (parts.length != expectedFields) {
+                logger.warn("Invalid row: {} (got {} fields, expected {}", row, parts.length, expectedFields);
+                return null;
+            }
+
+            // Parse effect
+            final PolicyEffect effect;
+            try {
+                effect = PolicyEffect.valueOf(parts[7].toLowerCase());
+            } catch (Exception e) {
+                logger.warn("Invalid policy effect in row: {}", row);
+                return null;
+            }
+
+            // Parse priority
+            final int priority;
+            try {
+                priority = Integer.parseInt(parts[8]);
+            } catch (Exception e) {
+                logger.warn("Invalid priority in row: {} ({})", row, e.getMessage());
+                return null;
+            }
+
+            return new Policy(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], effect, priority);
+        }).filter(Objects::nonNull).toList();
     }
 
     @Override
     public PreAuthorizer createAuthorizer(final UserInfo user) {
-        return new CasbinPreAuthorizer(user, this::extractAuthFromModel, allowByDefault);
+        // Ensure we don't have previous roles definitions
+        final String userName = user.getUserId();
+        enforcer.deleteRolesForUser(userName);
+        if (user.isAnonymous()) {
+            enforcer.addRoleForUser(userName, Constants.ROLE_ANONYMOUS);
+        } else {
+            user.getGroups().forEach(g -> enforcer.addRoleForUser(userName, String.format("role:%s", g)));
+        }
+
+        return new CasbinPreAuthorizer(userName, enforcer, allowByDefault);
     }
 
-    private PreAuth extractAuthFromModel(final UserInfo user, final SensinactAccess rcPath) {
+    /**
+     * Prepares a long model URI based on its package URI and its name
+     *
+     * @param packageUri Model package URI
+     * @param name       Model name
+     * @return A long model URI
+     */
+    private String makeModelUri(final String packageUri, final String name) {
+        return packageUri + name;
+    }
+
+    /**
+     * Prepares a long model URI
+     *
+     * @param model sensiNact model
+     * @return A long model URI
+     */
+    private String makeModelUri(final Model model) {
+        return makeModelUri(model.getPackageUri(), model.getName());
+    }
+
+    /**
+     * Prepares a long model URI
+     *
+     * @param event Provider life cycle event
+     * @return A long model URI
+     */
+    private String makeModelUri(final LifecycleNotification event) {
+        return makeModelUri(event.modelPackageUri(), event.model());
+    }
+
+    @Override
+    public void notify(final String topic, final LifecycleNotification event) {
+        if (event.status() != Status.PROVIDER_CREATED) {
+            // No new model expected
+            return;
+        }
+
+        final String modelUri = makeModelUri(event);
+        if (modelsPolicies.containsKey(modelUri)) {
+            // Model is already known
+            return;
+        }
+
+        // New model: look its content
         try {
-            return gateway.execute(new AbstractSensinactCommand<PreAuth>() {
+            gateway.execute(new AbstractSensinactCommand<Void>() {
                 @Override
-                protected Promise<PreAuth> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                        PromiseFactory pf) {
-                    // TODO load from model
-                    return pf.resolved(PreAuth.UNKNOWN);
+                protected Promise<Void> call(final SensinactDigitalTwin twin, final SensinactModelManager modelMgr,
+                        final PromiseFactory pf) {
+                    final Model model = modelMgr.getModel(event.modelPackageUri(), event.model());
+                    if (model == null) {
+                        logger.error("Incoherent state: model manager doesn't know {}", modelUri);
+                        return pf.resolved(null);
+                    }
+
+                    // Load authentication policies from model
+                    loadPolicies(model);
+
+                    return pf.resolved(null);
                 }
             }).getValue();
-        } catch (Exception e) {
-            logger.error("Error extracting authorization from model", e);
-            return PreAuth.DENY;
+        } catch (Exception ex) {
+            logger.error("Error loading authentication policies from model {}", modelUri, ex);
+        }
+    }
+
+    /**
+     * Loads policies from the given model into the {@link #modelsPolicies} map
+     *
+     * @param model Model to load
+     */
+    private void loadPolicies(final Model model) {
+        // TODO load from model
+        final List<Policy> loadedPolicies = new ArrayList<>();
+
+        // Filter them
+        // TODO: filer while loading policies
+        final Iterator<Policy> iterator = loadedPolicies.iterator();
+        while (iterator.hasNext()) {
+            final Policy policy = iterator.next();
+            if (policy.priority() < Constants.MIN_MODEL_PRIORITY) {
+                logger.warn("Ignoring model policy {}: priority is too low");
+                iterator.remove();
+            }
+        }
+
+        // Store in cache
+        modelsPolicies.put(makeModelUri(model), loadedPolicies);
+
+        if (!loadedPolicies.isEmpty()) {
+            // Update the enforcer
+            enforcer.addPolicies(loadedPolicies.stream().map(Policy::toList).toList());
         }
     }
 }

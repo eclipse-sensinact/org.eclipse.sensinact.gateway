@@ -12,13 +12,6 @@
 
 package org.eclipse.sensinact.northbound.security.authorization.casbin;
 
-public interface Constants {
-
-    String CONFIGURATION_PID = "sensinact.authorization.casbin";
-
-    String AUTH_FROM_MODEL = "authorizationFromModel";
-
-    String ROLE_ANONYMOUS = "anonymous";
-
-    int MIN_MODEL_PRIORITY = 5000;
+public enum PolicyEffect {
+    allow, deny
 }
