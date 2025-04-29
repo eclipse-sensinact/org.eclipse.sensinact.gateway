@@ -19,8 +19,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.casbin.jcasbin.main.Enforcer;
+import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.Model;
@@ -145,6 +147,25 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
             return null;
         }
 
+        // Parse level(s)
+        String level = parts[6];
+        if (level != null && !"*".equals(level)) {
+            final List<PermissionLevel> levels = Arrays.stream(level.toUpperCase().split("\\|")).map(String::trim)
+                    .map(s -> {
+                        try {
+                            return PermissionLevel.valueOf(s);
+                        } catch (IllegalArgumentException e) {
+                            logger.error("Invalid permission level '{}' in {}", s, row);
+                            return null;
+                        }
+                    }).toList();
+            if (levels.stream().anyMatch(Objects::isNull)) {
+                return null;
+            }
+
+            level = levels.stream().map(Enum::name).collect(Collectors.joining("|"));
+        }
+
         // Parse effect
         final PolicyEffect effect;
         try {
@@ -163,7 +184,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
             return null;
         }
 
-        return new Policy(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], effect, priority);
+        return new Policy(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], level, effect, priority);
     }
 
     /**
