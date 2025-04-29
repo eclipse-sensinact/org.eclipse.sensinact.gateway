@@ -13,12 +13,12 @@
 package org.eclipse.sensinact.northbound.session.impl;
 
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.DENY;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.UNKNOWN;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.ACT;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.DESCRIBE;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.READ;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.UPDATE;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.ACT;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.UPDATE;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.UNKNOWN;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
@@ -37,13 +37,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.sensinact.core.authorization.Authorizer;
+import org.eclipse.sensinact.core.authorization.NotPermittedException;
+import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
@@ -52,6 +54,7 @@ import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -62,10 +65,8 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.NotPermittedException;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
@@ -98,9 +99,9 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final UserInfo user;
 
-    private final Authorizer authorizer;
+    private final PreAuthorizer authorizer;
 
-    public SensiNactSessionImpl(final UserInfo user, final Authorizer authorizer, final GatewayThread thread) {
+    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer authorizer, final GatewayThread thread) {
         this.user = user;
         this.authorizer = authorizer;
         this.thread = thread;

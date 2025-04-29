@@ -12,15 +12,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.session.impl;
 
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.DENY;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel;
+import org.eclipse.sensinact.core.authorization.PermissionLevel;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 
-class DenyAllAuthorizer implements Authorizer {
+class DenyAllAuthorizer implements PreAuthorizer {
 
     @Override
     public PreAuth preAuthProvider(PermissionLevel level, String provider) {
@@ -38,32 +38,29 @@ class DenyAllAuthorizer implements Authorizer {
     }
 
     @Override
-    public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model,
-            String provider) {
+    public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model, String provider) {
         return false;
     }
 
     @Override
-    public boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model,
-            String provider, String service) {
+    public boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
+            String service) {
         return false;
     }
 
     @Override
-    public boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model,
-            String provider, String service, String resource) {
+    public boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
+            String service, String resource) {
         return false;
     }
 
-    @Override
     public Collection<String> visibleServices(String modelPackageUri, String model, String provider,
             Collection<String> services) {
         return List.of();
     }
 
-    @Override
-    public Collection<String> visibleResources(String modelPackageUri, String model, String provider,
-            String service, Collection<String> services) {
+    public Collection<String> visibleResources(String modelPackageUri, String model, String provider, String service,
+            Collection<String> services) {
         return List.of();
     }
 
