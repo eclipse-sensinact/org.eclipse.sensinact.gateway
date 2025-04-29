@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.session.impl;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
 public class TestUserInfo implements UserInfo {
@@ -47,5 +50,10 @@ public class TestUserInfo implements UserInfo {
     @Override
     public String toString() {
         return "TestUserInfo [user=" + user + ", authenticated=" + authenticated + "]";
+    }
+
+    @Override
+    public Collection<String> getGroups() {
+        return List.of();
     }
 }

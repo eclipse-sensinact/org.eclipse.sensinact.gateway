@@ -568,12 +568,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
             }
             return ss;
         }, (snSvc) -> {
-            SensinactProvider sp = snSvc.getProvider();
             final ServiceDescription description = new ServiceDescription();
             description.service = snSvc.getName();
             description.provider = snSvc.getProvider().getName();
-            description.resources = List.copyOf(authorizer.visibleResources(sp.getModelPackageUri(), sp.getModelName(), provider, service,
-                    snSvc.getResources().keySet()));
+            description.resources = List.copyOf(snSvc.getResources().keySet());
             return description;
         });
     }
@@ -605,8 +603,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             }, (snProvider) -> {
                 final ProviderDescription description = new ProviderDescription();
                 description.provider = snProvider.getName();
-                description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(),
-                        snProvider.getModelName(), provider, snProvider.getServices().keySet()));
+                description.services = List.copyOf(snProvider.getServices().keySet());
                 return description;
             });
     }
@@ -619,8 +616,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 .map((snProvider) -> {
                     final ProviderDescription description = new ProviderDescription();
                     description.provider = snProvider.getName();
-                    description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(),
-                            snProvider.getModelName(), snProvider.getName(), snProvider.getServices().keySet()));
+                    description.services = List.copyOf(snProvider.getServices().keySet());
                     return description;
                 }).collect(Collectors.toList()), List.of());
     }
