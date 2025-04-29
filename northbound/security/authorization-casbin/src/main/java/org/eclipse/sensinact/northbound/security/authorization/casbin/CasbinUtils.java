@@ -1,10 +1,14 @@
-/*
- * Copyright 2025 Kentyou
- * Proprietary and confidential
+/*********************************************************************
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
  *
- * All Rights Reserved.
- * Unauthorized copying of this file is strictly prohibited
- */
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors: Kentyou - initial implementation
+ **********************************************************************/
 
 package org.eclipse.sensinact.northbound.security.authorization.casbin;
 
@@ -17,6 +21,9 @@ import org.casbin.jcasbin.model.Model;
 
 public class CasbinUtils {
 
+    /**
+     * Sets up the Casbin model to use
+     */
     public static Model makeModel() {
         final List<String> snaFields = List.of("modelPackageUri", "model", "provider", "service", "resource", "level");
         final List<String> commonArgs = Stream.concat(Stream.of("sub"), snaFields.stream()).toList();
@@ -40,7 +47,13 @@ public class CasbinUtils {
         return model;
     }
 
-    public static List<List<String>> defaultPolicies(final boolean allowByDefault) {
+    /**
+     * Generates the default policies
+     *
+     * @param allowByDefault Flag to allow all access to users by default
+     * @return The default policies
+     */
+    public static List<Policy> defaultPolicies(final boolean allowByDefault) {
         final List<Policy> policies = new ArrayList<>();
         // Nobody can write to sensiNact
         policies.add(new Policy("*", null, null, "sensiNact", null, null, null, PolicyEffect.deny, -10000));
@@ -66,6 +79,6 @@ public class CasbinUtils {
             policies.add(new Policy("role:user", null, null, null, null, null, "describe", PolicyEffect.allow, 10000));
         }
 
-        return policies.stream().map(Policy::toList).toList();
+        return policies;
     }
 }
