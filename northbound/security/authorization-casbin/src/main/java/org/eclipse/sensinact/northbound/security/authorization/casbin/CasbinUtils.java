@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.casbin.jcasbin.model.Model;
+import org.eclipse.sensinact.core.authorization.PermissionLevel;
 
 public class CasbinUtils {
 
@@ -57,7 +58,9 @@ public class CasbinUtils {
         final List<Policy> policies = new ArrayList<>();
         // Nobody can write to sensiNact
         policies.add(new Policy("*", null, null, "sensiNact", null, null, null, PolicyEffect.deny, -10000));
-        policies.add(new Policy("*", null, null, "sensiNact", null, null, "describe|read", PolicyEffect.allow, -10001));
+        policies.add(new Policy("*", null, null, "sensiNact", null, null, Stream
+                .of(PermissionLevel.DESCRIBE, PermissionLevel.READ).map(Enum::name).collect(Collectors.joining("|")),
+                PolicyEffect.allow, -10001));
 
         // Admin has access to everything
         policies.add(new Policy("role:admin", null, null, null, null, null, null, PolicyEffect.allow, -1000));
@@ -76,7 +79,8 @@ public class CasbinUtils {
 
             // Soft denial for users. Allow to describe resources
             policies.add(new Policy("role:user", null, null, null, null, null, null, PolicyEffect.deny, 10001));
-            policies.add(new Policy("role:user", null, null, null, null, null, "describe", PolicyEffect.allow, 10000));
+            policies.add(new Policy("role:user", null, null, null, null, null, PermissionLevel.DESCRIBE.name(),
+                    PolicyEffect.allow, 10000));
         }
 
         return policies;
