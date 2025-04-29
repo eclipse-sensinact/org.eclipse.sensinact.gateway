@@ -107,7 +107,7 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
 
     @Override
     public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model, String provider) {
-        return normalize(authorize(modelPackageUri, model, provider, modelPackageUri, model, level));
+        return normalize(authorize(modelPackageUri, model, provider, "", "", level));
     }
 
     @Override
@@ -119,7 +119,7 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
     @Override
     public boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
             String service, String resource) {
-        return normalize(authorize(modelPackageUri, model, provider, "", "", level));
+        return normalize(authorize(modelPackageUri, model, provider, service, resource, level));
     }
 
     @Override

@@ -22,6 +22,11 @@ public record Policy(String subject, String modelPackageUri, String model, Strin
         String resource, String level, PolicyEffect eft, int priority) {
 
     /**
+     * Number of fields expected for a policy
+     */
+    public static final int EXPECTED_POLICY_FIELDS = 9;
+
+    /**
      * Converts this policy to a a list of strings to give to
      * {@link Enforcer#addPolicy(List)}
      *
@@ -41,10 +46,11 @@ public record Policy(String subject, String modelPackageUri, String model, Strin
      * @return Normalized string
      */
     private String normalize(final String str) {
-        if (str == null || str.isBlank() || str.equalsIgnoreCase("*")) {
+        final String value = Optional.ofNullable(str).map(String::trim).orElse("");
+        if (value.isEmpty() || value.equals("*")) {
             return ".*";
         }
 
-        return str.trim();
+        return value;
     }
 }

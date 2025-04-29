@@ -120,57 +120,64 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
     }
 
     /**
+     * Parses the policy row string
+     *
+     * @param row Casbin policy row
+     * @return The parsed policy or null if it has issues
+     */
+    Policy parsePolicy(String row) {
+        // Normalize parts
+        final String[] parts = Arrays.stream(row.split(",")).map(String::trim).map(p -> {
+            switch (p) {
+            case "":
+            case "null":
+                return null;
+
+            default:
+                return p;
+            }
+        }).toArray(String[]::new);
+
+        // Check length
+        if (parts.length != Policy.EXPECTED_POLICY_FIELDS) {
+            logger.warn("Invalid row: {} (got {} fields, expected {}", row, parts.length,
+                    Policy.EXPECTED_POLICY_FIELDS);
+            return null;
+        }
+
+        // Parse effect
+        final PolicyEffect effect;
+        try {
+            effect = PolicyEffect.valueOf(parts[7].toLowerCase());
+        } catch (Exception e) {
+            logger.warn("Invalid policy effect in row: {}", row);
+            return null;
+        }
+
+        // Parse priority
+        final int priority;
+        try {
+            priority = Integer.parseInt(parts[8]);
+        } catch (Exception e) {
+            logger.warn("Invalid priority in row: {} ({})", row, e.getMessage());
+            return null;
+        }
+
+        return new Policy(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], effect, priority);
+    }
+
+    /**
      * Parses the policies provided in the configuration
      *
      * @param strPolicies
      * @return
      */
-    private List<Policy> parsePolicies(String[] strPolicies) {
+    List<Policy> parsePolicies(String[] strPolicies) {
         if (strPolicies == null || strPolicies.length == 0) {
             return List.of();
         }
 
-        final int expectedFields = 9;
-
-        return Arrays.stream(strPolicies).map(row -> {
-            // Normalize parts
-            final String[] parts = Arrays.stream(row.split(",")).map(String::trim).map(p -> {
-                switch (p) {
-                case "":
-                case "null":
-                    return null;
-
-                default:
-                    return p;
-                }
-            }).toArray(String[]::new);
-
-            // Check length
-            if (parts.length != expectedFields) {
-                logger.warn("Invalid row: {} (got {} fields, expected {}", row, parts.length, expectedFields);
-                return null;
-            }
-
-            // Parse effect
-            final PolicyEffect effect;
-            try {
-                effect = PolicyEffect.valueOf(parts[7].toLowerCase());
-            } catch (Exception e) {
-                logger.warn("Invalid policy effect in row: {}", row);
-                return null;
-            }
-
-            // Parse priority
-            final int priority;
-            try {
-                priority = Integer.parseInt(parts[8]);
-            } catch (Exception e) {
-                logger.warn("Invalid priority in row: {} ({})", row, e.getMessage());
-                return null;
-            }
-
-            return new Policy(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], effect, priority);
-        }).filter(Objects::nonNull).toList();
+        return Arrays.stream(strPolicies).map(this::parsePolicy).filter(Objects::nonNull).toList();
     }
 
     @Override
@@ -194,7 +201,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
      * @param name       Model name
      * @return A long model URI
      */
-    private String makeModelUri(final String packageUri, final String name) {
+    String makeModelUri(final String packageUri, final String name) {
         return packageUri + name;
     }
 
@@ -204,7 +211,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
      * @param model sensiNact model
      * @return A long model URI
      */
-    private String makeModelUri(final Model model) {
+    String makeModelUri(final Model model) {
         return makeModelUri(model.getPackageUri(), model.getName());
     }
 
@@ -214,7 +221,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
      * @param event Provider life cycle event
      * @return A long model URI
      */
-    private String makeModelUri(final LifecycleNotification event) {
+    String makeModelUri(final LifecycleNotification event) {
         return makeModelUri(event.modelPackageUri(), event.model());
     }
 
