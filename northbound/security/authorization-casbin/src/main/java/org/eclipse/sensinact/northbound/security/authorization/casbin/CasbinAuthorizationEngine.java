@@ -102,7 +102,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
         enforcer = new Enforcer(CasbinUtils.makeModel());
 
         // Add default policies
-        enforcer.addPolicies(CasbinUtils.defaultPolicies(allowByDefault));
+        enforcer.addPolicies(CasbinUtils.defaultPolicies(allowByDefault).stream().map(Policy::toList).toList());
 
         // Add configured policies
         enforcer.addPolicies(parsePolicies(configuration.policies()).stream().map(Policy::toList).toList());
