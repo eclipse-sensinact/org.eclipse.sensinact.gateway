@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
@@ -197,6 +199,11 @@ public class SecureAccessTest {
         @Override
         public boolean isAuthenticated() {
             return true;
+        }
+
+        @Override
+        public Collection<String> getGroups() {
+            return List.of();
         }
 
     }
