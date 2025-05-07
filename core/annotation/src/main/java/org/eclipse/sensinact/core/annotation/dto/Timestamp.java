@@ -30,7 +30,7 @@ import java.time.temporal.Temporal;
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.RECORD_COMPONENT})
 public @interface Timestamp {
     /**
      * The unit of time this represents since the epoch, either

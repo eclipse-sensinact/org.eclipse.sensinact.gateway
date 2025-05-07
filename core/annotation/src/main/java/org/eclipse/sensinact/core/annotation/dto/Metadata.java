@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD })
+@Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
 public @interface Metadata {
     /**
      * The name of the metadata field, if not set then the dto field name is used

@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD })
+@Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
 public @interface Data {
     /**
      * The type of the resource data. If not set then the type of the DTO field is

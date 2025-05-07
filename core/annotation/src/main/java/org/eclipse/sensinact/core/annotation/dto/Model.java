@@ -45,7 +45,7 @@ import java.lang.annotation.Target;
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD })
+@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.RECORD_COMPONENT })
 public @interface Model {
     /**
      * The name of the provider

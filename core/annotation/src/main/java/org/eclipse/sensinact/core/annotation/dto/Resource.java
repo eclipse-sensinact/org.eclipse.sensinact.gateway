@@ -47,7 +47,7 @@ import java.lang.annotation.Target;
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD })
+@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.RECORD_COMPONENT })
 @Inherited
 public @interface Resource {
     String value() default AnnotationConstants.NOT_SET;
