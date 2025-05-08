@@ -94,10 +94,10 @@ public class AnnotationBasedDtoExtractorTest {
     }
 
     public static abstract class ProviderAndServiceFields {
-        @Provider(PROVIDER)
+        @Provider
         public String provider;
 
-        @Service(SERVICE)
+        @Service
         public String service;
 
         @Timestamp
@@ -683,6 +683,408 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(
                     "No service or service EReference is defined for the field v1 in " + EMFTestDynamicFailDto.class,
                     extracted.mappingFailure.getMessage());
+        }
+    }
+
+    @Provider
+    @Service(SERVICE)
+    @Resource(RESOURCE)
+    public record BasicRecordClassLevelError(@Data Integer foo) {
+    }
+
+    @Provider(PROVIDER)
+    @Service
+    @Resource(RESOURCE)
+    public record BasicRecordClassLevelError2(@Data Integer foo) {
+    }
+
+    @ModelPackageUri(MODEL_PACKAGE_URI)
+    @Model(MODEL)
+    @Provider(PROVIDER)
+    @Service(SERVICE)
+    @Resource(RESOURCE)
+    public record BasicRecordClassLevel(@Data Integer foo, @Metadata String units,
+            @Metadata(value = METADATA_KEY, onNull = NullAction.UPDATE, onDuplicate = DuplicateAction.UPDATE_ALWAYS) String fizzbuzz) {
+    }
+
+    public record BasicRecordFieldAnnotated(@Provider String provider, @Service String service, @Timestamp Long time,
+            @Resource(RESOURCE) @Data Integer foo,
+            @Resource(RESOURCE_2) @Data(onDuplicate = DuplicateAction.UPDATE_IF_DIFFERENT) String bar,
+            @Resource(RESOURCE) @Metadata String units,
+            @Resource(RESOURCE_2) @Metadata(value = METADATA_KEY, onDuplicate = DuplicateAction.UPDATE_ALWAYS) String fizzbuzz) {
+    }
+
+    public record BasicRecordFieldNames(@Provider String provider, @Service String service, @Timestamp Long time,
+            @Data Integer foo, @Data(onDuplicate = DuplicateAction.UPDATE_IF_DIFFERENT) String bar) {
+    }
+
+    @ModelPackageUri(MODEL_PACKAGE_URI)
+    @Model(MODEL)
+    @Provider(PROVIDER)
+    @Service(SERVICE)
+    public record RecordMixedDefaultAndOverridden(@Data Integer foo, @Resource(RESOURCE) @Metadata String units,
+            @Data String resource, @Service("override") @Data String resource2) {
+    }
+
+    /**
+     * Tests for class level annotations for provider/service/resource
+     */
+    @Nested
+    public class RecordLevelAnnotations {
+
+        @Test
+        void missingProviderName() {
+
+            DataExtractor extractor = extractor(BasicRecordClassLevelError.class);
+            List<? extends AbstractUpdateDto> updates = extractor.getUpdates(new BasicRecordClassLevelError(1));
+
+            assertNotNull(updates);
+            assertEquals(1, updates.size());
+            AbstractUpdateDto aud = updates.get(0);
+            assertNotNull(aud);
+            assertInstanceOf(FailedMappingDto.class, aud);
+            FailedMappingDto fmd = (FailedMappingDto) aud;
+            assertNotNull(fmd.mappingFailure);
+
+            assertTrue(fmd.mappingFailure.getMessage().contains("not properly defined"),
+                    "Wrong message: " + fmd.mappingFailure.getMessage());
+            assertTrue(
+                    fmd.mappingFailure.getCause().getMessage()
+                            .contains("annotated with Provider but that annotation has no value"),
+                    "Wrong message: " + fmd.mappingFailure.getCause().getMessage());
+        }
+
+        @Test
+        void missingServiceName() {
+
+            DataExtractor extractor = extractor(BasicRecordClassLevelError2.class);
+            List<? extends AbstractUpdateDto> updates = extractor.getUpdates(new BasicRecordClassLevelError2(1));
+
+            assertNotNull(updates);
+            assertEquals(1, updates.size());
+            AbstractUpdateDto aud = updates.get(0);
+            assertNotNull(aud);
+            assertInstanceOf(FailedMappingDto.class, aud);
+            FailedMappingDto fmd = (FailedMappingDto) aud;
+            assertNotNull(fmd.mappingFailure);
+
+            assertTrue(fmd.mappingFailure.getMessage().contains("not properly defined"),
+                    "Wrong message: " + fmd.mappingFailure.getMessage());
+            assertTrue(
+                    fmd.mappingFailure.getCause().getMessage()
+                            .contains("annotated with Service but that annotation has no value"),
+                    "Wrong message: " + fmd.mappingFailure.getCause().getMessage());
+        }
+
+        @Test
+        void basicRecordNullMetadata() {
+            BasicRecordClassLevel dto = new BasicRecordClassLevel(VALUE, null, null);
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicRecordClassLevel.class).getUpdates(dto);
+
+            assertEquals(2, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted);
+
+            assertEquals(MODEL_PACKAGE_URI, extracted.modelPackageUri);
+            assertEquals(MODEL, extracted.model);
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap(METADATA_KEY, null), dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
+        }
+
+        @Test
+        void basicRecordWithMetadataValues() {
+            BasicRecordClassLevel dto = new BasicRecordClassLevel(VALUE, METADATA_VALUE_2, METADATA_VALUE);
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicRecordClassLevel.class).getUpdates(dto);
+
+            assertEquals(3, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey(METADATA_KEY)).findFirst().get();
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey("units")).findFirst().get();
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap("units", METADATA_VALUE_2), dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
+        }
+    }
+
+    /**
+     * Tests for class level annotations for provider/service/resource
+     */
+    @Nested
+    public class RecordComponentLevelAnnotations {
+
+        @Test
+        void basicRecordOneValueNullMetadata() {
+            Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
+
+            BasicRecordFieldAnnotated dto = new BasicRecordFieldAnnotated(PROVIDER, SERVICE, time.toEpochMilli(), VALUE, null, null, null);
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicRecordFieldAnnotated.class).getUpdates(dto);
+
+            assertEquals(1, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted, time);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+        }
+
+        @Test
+        void basicRecordWithBothValuesAndMetadataValues() {
+            Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
+
+            BasicRecordFieldAnnotated dto = new BasicRecordFieldAnnotated(PROVIDER, SERVICE, time.toEpochMilli(), VALUE, VALUE_2,
+                    METADATA_VALUE_2, METADATA_VALUE);
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicRecordFieldAnnotated.class).getUpdates(dto);
+
+            assertEquals(4, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
+
+            checkCommonFields(extracted, time);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE_2.equals(d.resource)).findFirst().get();
+
+            checkCommonFields(extracted, false, time);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE_2, dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey(METADATA_KEY)).findFirst().get();
+
+            checkCommonFields(extracted, false, time);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey("units")).findFirst().get();
+
+            checkCommonFields(extracted, time);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap("units", METADATA_VALUE_2), dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
+        }
+    }
+
+    /**
+     * Tests for resource name defaulting based on field name
+     */
+    @Nested
+    public class RecordFieldNameDefaulting {
+
+        @Test
+        void basicRecordOneValueNullMetadata() {
+            Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
+
+            BasicRecordFieldNames dto = new BasicRecordFieldNames(PROVIDER, SERVICE, time.toEpochMilli(), VALUE, null);
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicRecordFieldNames.class).getUpdates(dto);
+
+            assertEquals(1, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted, "foo", time);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+        }
+
+        @Test
+        void basicRecordWithBothValuesAndMetadataValues() {
+            Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
+
+            BasicRecordFieldNames dto = new BasicRecordFieldNames(PROVIDER, SERVICE, time.toEpochMilli(), VALUE, VALUE_2);
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicRecordFieldNames.class).getUpdates(dto);
+
+            assertEquals(2, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> "foo".equals(d.resource)).findFirst().get();
+
+            checkCommonFields(extracted, "foo", time);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> "bar".equals(d.resource))
+                    .findFirst().get();
+
+            checkCommonFields(extracted, "bar", time);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE_2, dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud.actionOnDuplicate);
+        }
+
+        @Test
+        void mixedLevelAnnotationsAndOverrides() {
+
+            RecordMixedDefaultAndOverridden dto = new RecordMixedDefaultAndOverridden(VALUE, METADATA_VALUE, Integer.toBinaryString(VALUE), VALUE_2);
+
+            List<? extends AbstractUpdateDto> updates = extractor(RecordMixedDefaultAndOverridden.class).getUpdates(dto);
+
+            assertEquals(4, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> "foo".equals(d.resource)).findFirst().get();
+
+            // Foo uses class level service and default resource
+            checkCommonFields(extracted, "foo", null);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
+                    .findFirst().get();
+
+            // RESOURCE uses class level service and default resource
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertEquals("101", dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE_2.equals(d.resource))
+                    .findFirst().get();
+
+            // RESOURCE_2 uses field level service and default resource
+            assertEquals("override", extracted.service);
+            extracted.service = SERVICE;
+
+            checkCommonFields(extracted, false);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE_2, dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
+                    .findFirst().get();
+
+            // Units uses class level service and field level resource
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto mud = (MetadataUpdateDto) extracted;
+
+            assertEquals(Map.of("units", METADATA_VALUE), mud.metadata);
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, mud.actionOnDuplicate);
         }
     }
 
