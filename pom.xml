@@ -849,6 +849,50 @@
       </build>
     </profile>
     <profile>
+      <id>generate-dependencies-file</id>
+      <activation>
+        <property>
+          <name>generate-depends</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>dash-licenses-snapshots</id>
+          <url>
+            https://repo.eclipse.org/content/repositories/dash-licenses/</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+      <build>
+        <plugins>
+          <!--
+          https://github.com/eclipse/dash-licenses/blob/master/README.md#maven-plugin-options -->
+          <plugin>
+            <groupId>org.eclipse.dash</groupId>
+            <artifactId>license-tool-plugin</artifactId>
+            <version>1.1.0</version>
+            <executions>
+              <execution>
+                <id>license-check</id>
+                <goals>
+                  <goal>license-check</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <inherited>false</inherited>
+                <configuration>
+                  <summary>${project.basedir}/DEPENDENCIES</summary>
+                  <excludeGroupIds>org.eclipse.sensinact.gateway</excludeGroupIds>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>dim-nexus</id>
       <distributionManagement>
         <repository>

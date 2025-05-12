@@ -20,6 +20,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -B org.eclipse.dash:license-tool-plugin:license-check -Dlicenses-check -Ddash.fail=true -Ddash.summary=DEPENDENCIES -DexcludeArtifactIds=$EXCLUDED_ARTIFACTS -P eclipse-licenses-check --file pom.xml
+      run: mvn -B org.eclipse.dash:license-tool-plugin:license-check -Dlicenses-check -Ddash.fail=true -Ddash.summary=CI-DEPENDENCIES -DexcludeArtifactIds=$EXCLUDED_ARTIFACTS -DexcludeGroupIds=$EXCLUDED_GROUPS -P eclipse-licenses-check --file pom.xml
       env:
-        EXCLUDED_ARTIFACTS: 'bugsnag'
+        EXCLUDED_ARTIFACTS: ''
+        EXCLUDED_GROUPS: 'org.eclipse.sensinact.gateway'
+    - name: Check DEPENDENCIES file is up to date
+      run: diff DEPENDENCIES CI-DEPENDENCIES
