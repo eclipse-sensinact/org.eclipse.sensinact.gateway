@@ -34,7 +34,15 @@ public class ValueSelection {
     public OperationType operation = OperationType.EQUALS;
 
     /**
-     * If true then the result of the test will be negated
+     * If true then the result of the test will be negated, except that:
+     *
+     * <ul>
+     *   <li>Checks that require a non null value (i.e. all except {@link OperationType#IS_SET}
+     *   and {@link OperationType#IS_NOT_NULL}) will still require a non-null value, continuing
+     *   to return false in this case</li>
+     *   <li>Checks that require a set value (i.e. all except {@link OperationType#IS_SET} will
+     *   still require a set resource, continuing to return false in this case
+     * </ul>
      */
     public boolean negate;
 
@@ -91,10 +99,16 @@ public class ValueSelection {
          */
         REGEX_REGION,
         /**
-         * The value and check type will be ignored, and only the presence of the value will be
-         * checked, i.e. the value is non-null and not empty
+         * The value and check type will be ignored, and only the presence of a value will be
+         * checked, i.e. the resource has a timestamp. N.B. the value <em>may</em> be <code>null</code>
          */
         IS_SET,
+        /**
+         * The value and check type will be ignored, and the value will be compared with
+         * <code>null</code>. N.B. the resource <em>must</em> be set to null. If it is
+         * unset then this check will return <code>false</code>
+         */
+        IS_NOT_NULL,
     }
 
     public static enum CheckType {

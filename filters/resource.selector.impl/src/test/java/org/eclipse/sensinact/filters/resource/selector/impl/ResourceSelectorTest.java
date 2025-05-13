@@ -46,6 +46,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class ResourceSelectorTest {
 
     ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value) {
+        return makeResource(svcName, rcName, value, false);
+    }
+
+    ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, boolean unset) {
         return new ResourceSnapshot() {
             @Override
             public String getName() {
@@ -64,7 +68,7 @@ public class ResourceSelectorTest {
 
             @Override
             public TimedValue<?> getValue() {
-                return new DefaultTimedValue<>(value);
+                return unset ? new DefaultTimedValue<>() : new DefaultTimedValue<>(value);
             }
 
             @Override
@@ -224,40 +228,106 @@ public class ResourceSelectorTest {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ResourceSelector rsNeg = makeBasicResourceSelector(null, null, "test", "hello");
+        rsNeg.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rsNeg.value.get(0).negate = true;
+        ICriterion filterNeg = new ResourceSelectorCriterion(rsNeg, false);
 
         // ... value level
         ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
+        ResourceValueFilter rcPredicateNeg = filterNeg.getResourceValueFilter();
         assertNotNull(rcPredicate);
+        assertNotNull(rcPredicateNeg);
         assertTrue(rcPredicate.test(rc.getService().getProvider(), List.of(rc)));
+        assertFalse(rcPredicateNeg.test(rc.getService().getProvider(), List.of(rc)));
 
         // Invalid resource
         ResourceSnapshot invalid = makeResource("test", "bye", value);
-        rcPredicate = filter.getResourceValueFilter();
         assertFalse(rcPredicate.test(invalid.getService().getProvider(), List.of(invalid)));
+        assertFalse(rcPredicateNeg.test(invalid.getService().getProvider(), List.of(invalid)));
+
+        // Unset resource
+        ResourceSnapshot unset = makeResource("test", "hello", null, true);
+        assertFalse(rcPredicate.test(unset.getService().getProvider(), List.of(unset)));
+        assertTrue(rcPredicateNeg.test(unset.getService().getProvider(), List.of(unset)));
     }
 
-    @Test
-    void testIsNull() throws Exception {
-        ResourceSnapshot rc = makeResource("test", "hello", null);
+    @ParameterizedTest
+    @MethodSource("testValues")
+    void testEquals(Object value) throws Exception {
+        ResourceSnapshot rc = makeResource("test", "hello", value);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
-        // Test for null value (should always be false)
-        rs.value = List.of(makeValueSelection(null, null, OperationType.EQUALS));
+        // Test for value
+        rs.value = List.of(makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for wrong value
+        rsWrong.value = List.of(makeValueSelection("wrong", null, OperationType.EQUALS));
+        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
 
         // ... value level
         ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
         assertNotNull(rcPredicate);
+        ResourceValueFilter rcPredicateWrong = filterWrong.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        assertNotNull(rcPredicateWrong);
         assertTrue(rcPredicate.test(rc.getService().getProvider(), List.of(rc)));
+        assertFalse(rcPredicateWrong.test(rc.getService().getProvider(), List.of(rc)));
 
         // Invalid resource
         ResourceSnapshot invalid = makeResource("test", "bye", null);
-        rcPredicate = filter.getResourceValueFilter();
         assertFalse(rcPredicate.test(invalid.getService().getProvider(), List.of(invalid)));
+        assertFalse(rcPredicateWrong.test(invalid.getService().getProvider(), List.of(invalid)));
 
-        // ... non-null values
-        for (Object value : testValues().toList()) {
-            assertFalse(rcPredicate.test(rc.getService().getProvider(), List.of(makeResource("test", "hello", value))));
-        }
+        // Unset resource
+        ResourceSnapshot unset = makeResource("test", "hello", null, true);
+        assertFalse(rcPredicate.test(unset.getService().getProvider(), List.of(unset)));
+        assertFalse(rcPredicateWrong.test(unset.getService().getProvider(), List.of(unset)));
+
+        // Null resource
+        ResourceSnapshot nil = makeResource("test", "hello", null, false);
+        assertFalse(rcPredicate.test(nil.getService().getProvider(), List.of(nil)));
+        assertFalse(rcPredicateWrong.test(nil.getService().getProvider(), List.of(nil)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("testValues")
+    void testEqualsNegated(Object value) throws Exception {
+        ResourceSnapshot rc = makeResource("test", "hello", value);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for value
+        rs.value = List.of(makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
+        rs.value.get(0).negate = true;
+        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for wrong value
+        rsWrong.value = List.of(makeValueSelection("wrong", null, OperationType.EQUALS));
+        rsWrong.value.get(0).negate = true;
+        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
+
+        // ... value level
+        ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        ResourceValueFilter rcPredicateWrong = filterWrong.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        assertNotNull(rcPredicateWrong);
+        assertFalse(rcPredicate.test(rc.getService().getProvider(), List.of(rc)));
+        assertTrue(rcPredicateWrong.test(rc.getService().getProvider(), List.of(rc)));
+
+        // Invalid resource
+        ResourceSnapshot invalid = makeResource("test", "bye", null);
+        assertFalse(rcPredicate.test(invalid.getService().getProvider(), List.of(invalid)));
+        assertFalse(rcPredicateWrong.test(invalid.getService().getProvider(), List.of(invalid)));
+
+        // Unset resource
+        ResourceSnapshot unset = makeResource("test", "hello", null, true);
+        assertFalse(rcPredicate.test(unset.getService().getProvider(), List.of(unset)));
+        assertFalse(rcPredicateWrong.test(unset.getService().getProvider(), List.of(unset)));
+
+        // Null resource
+        ResourceSnapshot nil = makeResource("test", "hello", null, false);
+        assertFalse(rcPredicate.test(nil.getService().getProvider(), List.of(nil)));
+        assertFalse(rcPredicateWrong.test(nil.getService().getProvider(), List.of(nil)));
     }
 
     @Test
@@ -265,8 +335,7 @@ public class ResourceSelectorTest {
         ResourceSnapshot rc = makeResource("test", "hello", null);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for null value (should always be false)
-        ValueSelection vs = makeValueSelection(null, null, OperationType.EQUALS);
-        vs.negate = true;
+        ValueSelection vs = makeValueSelection(null, null, OperationType.IS_NOT_NULL);
         rs.value = List.of(vs);
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
 
@@ -286,20 +355,10 @@ public class ResourceSelectorTest {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("testValues")
-    void testEquality(Object value) throws Exception {
-        ResourceSnapshot rc = makeResource("svc", "value", value);
+    void testEquality() throws Exception {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "svc", "value");
-        rs.value = List.of(makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
-        assertQueryTrue(rs, rc);
-
-        // Invalid resource
-        final ResourceSnapshot invalid = makeResource("test", "bye", value);
-        assertQueryFalse(rs, invalid);
-
         // Check case comparison (we are case sensitive)
-        rc = makeResource("svc", "value", "TeSt");
+        ResourceSnapshot rc = makeResource("svc", "value", "TeSt");
         rs.value = List.of(makeValueSelection("TeSt", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.EQUALS));
@@ -369,6 +428,20 @@ public class ResourceSelectorTest {
         assertQueryFalse(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -409,6 +482,20 @@ public class ResourceSelectorTest {
         assertQueryFalse(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryTrue(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -445,6 +532,20 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -481,6 +582,20 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryTrue(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -503,6 +618,20 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION));
         assertQueryTrue(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Nested
