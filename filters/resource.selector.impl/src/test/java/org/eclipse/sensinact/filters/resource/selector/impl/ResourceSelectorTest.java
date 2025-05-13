@@ -46,6 +46,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class ResourceSelectorTest {
 
     ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value) {
+        return makeResource(svcName, rcName, value, false);
+    }
+
+    ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, boolean unset) {
         return new ResourceSnapshot() {
             @Override
             public String getName() {
@@ -64,7 +68,7 @@ public class ResourceSelectorTest {
 
             @Override
             public TimedValue<?> getValue() {
-                return new DefaultTimedValue<>(value);
+                return unset ? new DefaultTimedValue<>() : new DefaultTimedValue<>(value);
             }
 
             @Override
@@ -192,7 +196,7 @@ public class ResourceSelectorTest {
     private ResourceSelector makeBasicResourceSelector(String model, String provider, String service, String resource) {
         ResourceSelector rs = new ResourceSelector();
         rs.model = model == null ? null : makeExactSelection(model);
-        rs.provider = provider == null ? null :makeExactSelection(provider);
+        rs.provider = provider == null ? null : makeExactSelection(provider);
         rs.service = service == null ? null : makeExactSelection(service);
         rs.resource = resource == null ? null : makeExactSelection(resource);
         return rs;
@@ -224,32 +228,137 @@ public class ResourceSelectorTest {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ResourceSelector rsNeg = makeBasicResourceSelector(null, null, "test", "hello");
+        rsNeg.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rsNeg.value.get(0).negate = true;
+        ICriterion filterNeg = new ResourceSelectorCriterion(rsNeg, false);
 
         // ... value level
         ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
+        ResourceValueFilter rcPredicateNeg = filterNeg.getResourceValueFilter();
         assertNotNull(rcPredicate);
+        assertNotNull(rcPredicateNeg);
         assertTrue(rcPredicate.test(rc.getService().getProvider(), List.of(rc)));
+        assertFalse(rcPredicateNeg.test(rc.getService().getProvider(), List.of(rc)));
 
         // Invalid resource
         ResourceSnapshot invalid = makeResource("test", "bye", value);
-        rcPredicate = filter.getResourceValueFilter();
         assertFalse(rcPredicate.test(invalid.getService().getProvider(), List.of(invalid)));
+        assertFalse(rcPredicateNeg.test(invalid.getService().getProvider(), List.of(invalid)));
+
+        // Unset resource
+        ResourceSnapshot unset = makeResource("test", "hello", null, true);
+        assertFalse(rcPredicate.test(unset.getService().getProvider(), List.of(unset)));
+        assertTrue(rcPredicateNeg.test(unset.getService().getProvider(), List.of(unset)));
     }
 
     @ParameterizedTest
     @MethodSource("testValues")
-    void testEquality(Object value) throws Exception {
-        ResourceSnapshot rc = makeResource("svc", "value", value);
-        ResourceSelector rs = makeBasicResourceSelector(null, null, "svc", "value");
+    void testEquals(Object value) throws Exception {
+        ResourceSnapshot rc = makeResource("test", "hello", value);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for value
         rs.value = List.of(makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
-        assertQueryTrue(rs, rc);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for wrong value
+        rsWrong.value = List.of(makeValueSelection("wrong", null, OperationType.EQUALS));
+        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
+
+        // ... value level
+        ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        ResourceValueFilter rcPredicateWrong = filterWrong.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        assertNotNull(rcPredicateWrong);
+        assertTrue(rcPredicate.test(rc.getService().getProvider(), List.of(rc)));
+        assertFalse(rcPredicateWrong.test(rc.getService().getProvider(), List.of(rc)));
 
         // Invalid resource
-        final ResourceSnapshot invalid = makeResource("test", "bye", value);
-        assertQueryFalse(rs, invalid);
+        ResourceSnapshot invalid = makeResource("test", "bye", null);
+        assertFalse(rcPredicate.test(invalid.getService().getProvider(), List.of(invalid)));
+        assertFalse(rcPredicateWrong.test(invalid.getService().getProvider(), List.of(invalid)));
 
+        // Unset resource
+        ResourceSnapshot unset = makeResource("test", "hello", null, true);
+        assertFalse(rcPredicate.test(unset.getService().getProvider(), List.of(unset)));
+        assertFalse(rcPredicateWrong.test(unset.getService().getProvider(), List.of(unset)));
+
+        // Null resource
+        ResourceSnapshot nil = makeResource("test", "hello", null, false);
+        assertFalse(rcPredicate.test(nil.getService().getProvider(), List.of(nil)));
+        assertFalse(rcPredicateWrong.test(nil.getService().getProvider(), List.of(nil)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("testValues")
+    void testEqualsNegated(Object value) throws Exception {
+        ResourceSnapshot rc = makeResource("test", "hello", value);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for value
+        rs.value = List.of(makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
+        rs.value.get(0).negate = true;
+        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for wrong value
+        rsWrong.value = List.of(makeValueSelection("wrong", null, OperationType.EQUALS));
+        rsWrong.value.get(0).negate = true;
+        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
+
+        // ... value level
+        ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        ResourceValueFilter rcPredicateWrong = filterWrong.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        assertNotNull(rcPredicateWrong);
+        assertFalse(rcPredicate.test(rc.getService().getProvider(), List.of(rc)));
+        assertTrue(rcPredicateWrong.test(rc.getService().getProvider(), List.of(rc)));
+
+        // Invalid resource
+        ResourceSnapshot invalid = makeResource("test", "bye", null);
+        assertFalse(rcPredicate.test(invalid.getService().getProvider(), List.of(invalid)));
+        assertFalse(rcPredicateWrong.test(invalid.getService().getProvider(), List.of(invalid)));
+
+        // Unset resource
+        ResourceSnapshot unset = makeResource("test", "hello", null, true);
+        assertFalse(rcPredicate.test(unset.getService().getProvider(), List.of(unset)));
+        assertFalse(rcPredicateWrong.test(unset.getService().getProvider(), List.of(unset)));
+
+        // Null resource
+        ResourceSnapshot nil = makeResource("test", "hello", null, false);
+        assertFalse(rcPredicate.test(nil.getService().getProvider(), List.of(nil)));
+        assertFalse(rcPredicateWrong.test(nil.getService().getProvider(), List.of(nil)));
+    }
+
+    @Test
+    void testIsNotNull() throws Exception {
+        ResourceSnapshot rc = makeResource("test", "hello", null);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
+        // Test for null value (should always be false)
+        ValueSelection vs = makeValueSelection(null, null, OperationType.IS_NOT_NULL);
+        rs.value = List.of(vs);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+
+        // ... value level
+        ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
+        assertNotNull(rcPredicate);
+        assertFalse(rcPredicate.test(rc.getService().getProvider(), List.of(rc)));
+
+        // Invalid resource
+        ResourceSnapshot invalid = makeResource("test", "bye", null);
+        rcPredicate = filter.getResourceValueFilter();
+        assertFalse(rcPredicate.test(invalid.getService().getProvider(), List.of(invalid)));
+
+        // ... non-null values
+        for (Object value : testValues().toList()) {
+            assertTrue(rcPredicate.test(rc.getService().getProvider(), List.of(makeResource("test", "hello", value))));
+        }
+    }
+
+    void testEquality() throws Exception {
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "svc", "value");
         // Check case comparison (we are case sensitive)
-        rc = makeResource("svc", "value", "TeSt");
+        ResourceSnapshot rc = makeResource("svc", "value", "TeSt");
         rs.value = List.of(makeValueSelection("TeSt", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.EQUALS));
@@ -319,6 +428,20 @@ public class ResourceSelectorTest {
         assertQueryFalse(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -359,6 +482,20 @@ public class ResourceSelectorTest {
         assertQueryFalse(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryTrue(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -395,6 +532,20 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -431,6 +582,20 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryTrue(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Test
@@ -453,6 +618,20 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rc);
         rs.value = List.of(makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION));
         assertQueryTrue(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
+
+        // Null is always false
+        rc = makeResource("test", "value", null);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = false;
+        assertQueryFalse(rs, rc);
+
+        // Unset is always false
+        rc = makeResource("test", "value", null, true);
+        assertQueryFalse(rs, rc);
+        rs.value.get(0).negate = true;
+        assertQueryFalse(rs, rc);
     }
 
     @Nested
@@ -464,96 +643,158 @@ public class ResourceSelectorTest {
 
         @Test
         void testNoSingleLevel() {
-            assertEquals(List.of("DATA/a/b/c/d"), makeCriterion(makeBasicResourceSelector("a", "b", "c", "d"), false).dataTopics());
+            assertEquals(List.of("DATA/a/b/c/d"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", "c", "d"), false).dataTopics());
         }
 
         @Test
         void testSingleLevel() {
-            assertEquals(List.of("DATA/a/b/c/d"), makeCriterion(makeBasicResourceSelector("a", "b", "c", "d"), true).dataTopics());
+            assertEquals(List.of("DATA/a/b/c/d"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", "c", "d"), true).dataTopics());
         }
 
         @Test
         void testNoSingleLevelNoModel() {
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, "b", null, null), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, "b", "c", null), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, "b", "c", "d"), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", null, null), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", "c", null), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", "c", "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, "d"), false).dataTopics());
         }
+
         @Test
         void testSingleLevelNoModel() {
-            assertEquals(List.of("DATA/+/+/+/+"), makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
-            assertEquals(List.of("DATA/+/b/+/+"), makeCriterion(makeBasicResourceSelector(null, "b", null, null), true).dataTopics());
-            assertEquals(List.of("DATA/+/b/c/+"), makeCriterion(makeBasicResourceSelector(null, "b", "c", null), true).dataTopics());
-            assertEquals(List.of("DATA/+/b/c/d"), makeCriterion(makeBasicResourceSelector(null, "b", "c", "d"), true).dataTopics());
-            assertEquals(List.of("DATA/+/b/+/d"), makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), true).dataTopics());
-            assertEquals(List.of("DATA/+/+/c/d"), makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), true).dataTopics());
-            assertEquals(List.of("DATA/+/+/+/d"), makeCriterion(makeBasicResourceSelector(null, null, null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/+/+"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
+            assertEquals(List.of("DATA/+/b/+/+"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", null, null), true).dataTopics());
+            assertEquals(List.of("DATA/+/b/c/+"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", "c", null), true).dataTopics());
+            assertEquals(List.of("DATA/+/b/c/d"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", "c", "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/b/+/d"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/c/d"),
+                    makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/+/d"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, "d"), true).dataTopics());
         }
 
         @Test
         void testNoSingleLevelNoProvider() {
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, "c", null), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, "c", "d"), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, null, "d"), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, "c", null), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, "c", "d"), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, "d"), false).dataTopics());
         }
+
         @Test
         void testSingleLevelNoProvider() {
-            assertEquals(List.of("DATA/+/+/+/+"), makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/+/+"), makeCriterion(makeBasicResourceSelector("a", null, null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/c/+"), makeCriterion(makeBasicResourceSelector("a", null, "c", null), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/c/d"), makeCriterion(makeBasicResourceSelector("a", null, "c", "d"), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/+/d"), makeCriterion(makeBasicResourceSelector("a", null, null, "d"), true).dataTopics());
-            assertEquals(List.of("DATA/+/+/c/d"), makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), true).dataTopics());
-            assertEquals(List.of("DATA/+/+/+/d"), makeCriterion(makeBasicResourceSelector(null, null, null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/+/+"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/+/+"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/c/+"),
+                    makeCriterion(makeBasicResourceSelector("a", null, "c", null), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/c/d"),
+                    makeCriterion(makeBasicResourceSelector("a", null, "c", "d"), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/+/d"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/c/d"),
+                    makeCriterion(makeBasicResourceSelector(null, null, "c", "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/+/d"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, "d"), true).dataTopics());
         }
 
         @Test
         void testNoSingleLevelNoService() {
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/b/*"), makeCriterion(makeBasicResourceSelector("a", "b", null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/b/*"), makeCriterion(makeBasicResourceSelector("a", "b", null, "d"), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, null, "d"), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/b/*"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/b/*"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, "d"), false).dataTopics());
         }
+
         @Test
         void testSingleLevelNoService() {
-            assertEquals(List.of("DATA/+/+/+/+"), makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/+/+"), makeCriterion(makeBasicResourceSelector("a", null, null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/b/+/+"), makeCriterion(makeBasicResourceSelector("a", "b", null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/b/+/d"), makeCriterion(makeBasicResourceSelector("a", "b", null, "d"), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/+/d"), makeCriterion(makeBasicResourceSelector("a", null, null, "d"), true).dataTopics());
-            assertEquals(List.of("DATA/+/b/+/d"), makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), true).dataTopics());
-            assertEquals(List.of("DATA/+/+/+/d"), makeCriterion(makeBasicResourceSelector(null, null, null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/+/+"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/+/+"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/b/+/+"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/b/+/d"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/+/d"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/b/+/d"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", null, "d"), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/+/d"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, "d"), true).dataTopics());
         }
 
         @Test
         void testNoSingleLevelNoResource() {
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/b/*"), makeCriterion(makeBasicResourceSelector("a", "b", null, null), false).dataTopics());
-            assertEquals(List.of("DATA/a/b/c/*"), makeCriterion(makeBasicResourceSelector("a", "b", "c", null), false).dataTopics());
-            assertEquals(List.of("DATA/a/*"), makeCriterion(makeBasicResourceSelector("a", null, "c", null), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, "b", "c", null), false).dataTopics());
-            assertEquals(List.of("DATA/*"), makeCriterion(makeBasicResourceSelector(null, null, "c", null), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/b/*"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", null, null), false).dataTopics());
+            assertEquals(List.of("DATA/a/b/c/*"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", "c", null), false).dataTopics());
+            assertEquals(List.of("DATA/a/*"),
+                    makeCriterion(makeBasicResourceSelector("a", null, "c", null), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", "c", null), false).dataTopics());
+            assertEquals(List.of("DATA/*"),
+                    makeCriterion(makeBasicResourceSelector(null, null, "c", null), false).dataTopics());
         }
+
         @Test
         void testSingleLevelNoResource() {
-            assertEquals(List.of("DATA/+/+/+/+"), makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/+/+"), makeCriterion(makeBasicResourceSelector("a", null, null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/b/+/+"), makeCriterion(makeBasicResourceSelector("a", "b", null, null), true).dataTopics());
-            assertEquals(List.of("DATA/a/b/c/+"), makeCriterion(makeBasicResourceSelector("a", "b", "c", null), true).dataTopics());
-            assertEquals(List.of("DATA/a/+/c/+"), makeCriterion(makeBasicResourceSelector("a", null, "c", null), true).dataTopics());
-            assertEquals(List.of("DATA/+/b/c/+"), makeCriterion(makeBasicResourceSelector(null, "b", "c", null), true).dataTopics());
-            assertEquals(List.of("DATA/+/+/c/+"), makeCriterion(makeBasicResourceSelector(null, null, "c", null), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/+/+"),
+                    makeCriterion(makeBasicResourceSelector(null, null, null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/+/+"),
+                    makeCriterion(makeBasicResourceSelector("a", null, null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/b/+/+"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", null, null), true).dataTopics());
+            assertEquals(List.of("DATA/a/b/c/+"),
+                    makeCriterion(makeBasicResourceSelector("a", "b", "c", null), true).dataTopics());
+            assertEquals(List.of("DATA/a/+/c/+"),
+                    makeCriterion(makeBasicResourceSelector("a", null, "c", null), true).dataTopics());
+            assertEquals(List.of("DATA/+/b/c/+"),
+                    makeCriterion(makeBasicResourceSelector(null, "b", "c", null), true).dataTopics());
+            assertEquals(List.of("DATA/+/+/c/+"),
+                    makeCriterion(makeBasicResourceSelector(null, null, "c", null), true).dataTopics());
         }
     }
 }

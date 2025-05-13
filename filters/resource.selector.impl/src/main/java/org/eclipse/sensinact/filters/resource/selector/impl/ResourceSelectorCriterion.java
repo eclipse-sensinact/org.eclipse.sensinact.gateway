@@ -52,6 +52,8 @@ public class ResourceSelectorCriterion implements ICriterion {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceSelectorCriterion.class);
 
+    private static final Predicate<TimedValue<?>> CHECK_IS_SET = t -> t != null && !t.isEmpty();
+
     private final ResourceSelector rs;
 
     private final boolean allowSingleLevelWildcards;
@@ -116,53 +118,31 @@ public class ResourceSelectorCriterion implements ICriterion {
         if(vs == null) {
             p = x -> true;
         } else {
-            Function<TimedValue<?>,Object> getterFunction;
             CheckType ct = vs.checkType == null ? CheckType.VALUE : vs.checkType;
-            switch(ct) {
-            case SIZE:
-                getterFunction = ResourceSelectorCriterion::toSize;
-                break;
-            case TIMESTAMP:
-                getterFunction = TimedValue::getTimestamp;
-                break;
-            case VALUE:
-                getterFunction = TimedValue::getValue;
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown value selection check type " + vs.checkType);
-            }
+            Function<TimedValue<?>,Object> getterFunction = switch(ct) {
+                case SIZE: yield ResourceSelectorCriterion::toSize;
+                case TIMESTAMP: yield TimedValue::getTimestamp;
+                case VALUE: yield TimedValue::getValue;
+                default:
+                    throw new UnsupportedOperationException("Unknown value selection check type " + vs.checkType);
+            };
             OperationType ot = vs.operation == null ? OperationType.EQUALS : vs.operation;
-            switch(ot) {
-                case EQUALS:
-                    p = check(getterFunction, vs.value, Objects::equals);
-                    break;
-                case GREATER_THAN:
-                    p = compare(getterFunction, vs.value, i -> i > 0);
-                    break;
-                case GREATER_THAN_OR_EQUAL:
-                    p = compare(getterFunction, vs.value, i -> i >= 0);
-                    break;
-                case IS_SET:
-                    p = ResourceSelectorCriterion::isSet;
-                    break;
-                case LESS_THAN:
-                    p = compare(getterFunction, vs.value, i -> i < 0);
-                    break;
-                case LESS_THAN_OR_EQUAL:
-                    p = compare(getterFunction, vs.value, i -> i <= 0);
-                    break;
-                case REGEX:
-                    p = checkString(getterFunction, Pattern.compile(vs.value).asMatchPredicate());
-                    break;
-                case REGEX_REGION:
-                    p = checkString(getterFunction, Pattern.compile(vs.value).asPredicate());
-                    break;
+            p = switch(ot) {
+                case EQUALS: yield check(getterFunction, vs.value, Objects::equals, vs.negate);
+                case GREATER_THAN: yield compare(getterFunction, vs.value, i -> i > 0, vs.negate);
+                case GREATER_THAN_OR_EQUAL: yield compare(getterFunction, vs.value, i -> i >= 0, vs.negate);
+                case IS_SET: yield vs.negate ? CHECK_IS_SET.negate() : CHECK_IS_SET;
+                case LESS_THAN: yield compare(getterFunction, vs.value, i -> i < 0, vs.negate);
+                case LESS_THAN_OR_EQUAL: yield compare(getterFunction, vs.value, i -> i <= 0, vs.negate);
+                case REGEX: yield checkString(getterFunction, Pattern.compile(vs.value).asMatchPredicate(), vs.negate);
+                case REGEX_REGION: yield checkString(getterFunction, Pattern.compile(vs.value).asPredicate(), vs.negate);
+                case IS_NOT_NULL: yield CHECK_IS_SET.and(t -> vs.negate ^ getterFunction.apply(t) != null);
                 default:
                     throw new UnsupportedOperationException("Unknown value selection operation " + vs.operation);
-            }
+            };
         }
 
-        return vs.negate ? p.negate() : p;
+        return p;
     }
 
     private static Number toSize(TimedValue<?> t) {
@@ -171,7 +151,7 @@ public class ResourceSelectorCriterion implements ICriterion {
             Number n = (Number) v;
             double d = n.doubleValue();
             // If we're equal to our rounded self then we're a natural number
-            if(((double)Math.round(d)) == d) {
+            if((Math.round(d)) == d) {
                 return Math.abs(n.longValue());
             } else {
                 return Math.abs(d);
@@ -185,17 +165,22 @@ public class ResourceSelectorCriterion implements ICriterion {
         return null;
     }
 
-    private static Predicate<TimedValue<?>> check(Function<TimedValue<?>,Object> getterFunction,
-            String value, BiPredicate<Object, Object> check) {
+    private static Predicate<TimedValue<?>> check(Function<TimedValue<?>, Object> getterFunction, String value,
+            BiPredicate<Object, Object> check, boolean negate) {
         Converter conv = Converters.standardConverter();
 
-        Map<Class<?>,Object> conversionCache = new WeakHashMap<>();
+        Map<Class<?>, Object> conversionCache = new WeakHashMap<>();
 
         return t -> {
-            if(t == null) return false;
+            if(!CHECK_IS_SET.test(t)) {
+                return false;
+            }
 
-            Object v  = getterFunction.apply(t);
-            if(v == null) return false;
+            Object v = getterFunction.apply(t);
+            if (v == null) {
+                // Return false as null values are not allowed
+                return false;
+            }
 
             Predicate<Object> test = o -> {
                 Object valueObj = conversionCache.computeIfAbsent(o.getClass(), k -> {
@@ -211,56 +196,42 @@ public class ResourceSelectorCriterion implements ICriterion {
             };
 
             boolean result;
-            if(v instanceof Collection<?>) {
-                result = ((Collection<?>)v).stream().anyMatch(test);
-            } else if (v instanceof Map<?,?>) {
-                result = ((Map<?,?>)v).values().stream().anyMatch(test);
+            if (v instanceof Collection<?>) {
+                result = ((Collection<?>) v).stream().anyMatch(test);
+            } else if (v instanceof Map<?, ?>) {
+                result = ((Map<?, ?>) v).values().stream().anyMatch(test);
             } else if (v.getClass().isArray()) {
                 int length = Array.getLength(v);
                 result = false;
-                for(int i = 0; i < length && !result; i++) {
+                for (int i = 0; i < length && !result; i++) {
                     result = test.test(Array.get(v, i));
                 }
             } else {
                 result = test.test(v);
             }
-            return result;
+            return negate ^ result;
         };
     }
 
     @SuppressWarnings("unchecked")
     private static <T> Predicate<TimedValue<?>> compare(Function<TimedValue<?>,Object> getterFunction,
-            String value, IntPredicate check) {
+            String value, IntPredicate check, boolean negate) {
         return check(getterFunction, value, (a,b) -> Comparable.class.isInstance(a) && Comparable.class.isInstance(b) &&
-                check.test(((Comparable<Object>)a).compareTo(b)));
-    }
-
-    private static boolean isSet(TimedValue<?> t) {
-        if(t == null) {
-            return false;
-        } else {
-            Object o = t.getValue();
-
-            if(o == null) {
-                return false;
-            } else if ("".equals(o)) {
-                return false;
-            } else if (o instanceof Collection) {
-                return !((Collection<?>)o).isEmpty();
-            } else if(o instanceof Map) {
-                return !((Map<?,?>)o).isEmpty();
-            }
-        }
-        return true;
+                check.test(((Comparable<Object>)a).compareTo(b)), negate);
     }
 
     private static Predicate<TimedValue<?>> checkString(Function<TimedValue<?>,Object> getterFunction,
-            Predicate<String> check) {
+            Predicate<String> check, boolean negate) {
         return t -> {
-            if(t == null) return false;
+            if(!CHECK_IS_SET.test(t)) {
+                return false;
+            }
 
-            Object v  = getterFunction.apply(t);
-            if(v == null) return false;
+            Object v = getterFunction.apply(t);
+            if (v == null) {
+                // Return false as null values are not allowed
+                return false;
+            }
 
             boolean result;
             if(v instanceof Collection<?>) {
@@ -272,7 +243,7 @@ public class ResourceSelectorCriterion implements ICriterion {
             } else {
                 result = check.test(v.toString());
             }
-            return result;
+            return negate ^ result;
         };
     }
 
