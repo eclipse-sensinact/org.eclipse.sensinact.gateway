@@ -1,0 +1,115 @@
+{
+  "name": "Living Room",
+  "description": "My Living Room",
+  "properties": {
+    "style": "Cozy",
+    "balcony": true
+  },
+  "Locations": [
+    {
+      "name": "My Living Room",
+      "description": "The living room of Fraunhoferstr. 1",
+      "encodingType": "application/vnd.geo+json",
+      "location": {
+        "type": "Point",
+        "coordinates": [8.4259727, 49.015308]
+      }
+    }
+  ],
+  "Datastreams": [
+    {
+      "name": "Temperature Living Room",
+      "description": "The temperature in my living room",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+      "unitOfMeasurement": {
+        "name": "Centigrade",
+        "symbol": "C",
+        "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeCentigrade"
+      },
+      "Sensor": {
+        "name": "DHT22/Temperature",
+        "description": "Temperature sensor of a DHT22",
+        "encodingType": "application/pdf",
+        "metadata": "https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf"
+      },
+      "ObservedProperty": {
+        "name": "Temperature",
+        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#ThermodynamicTemperature",
+        "description": "The temperature."
+      },
+      "Observations": [
+        {
+          "phenomenonTime": "2019-03-14T10:00:00Z",
+          "result": 21.0
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:01:00Z",
+          "result": 21.1
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:02:00Z",
+          "result": 19.0
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:03:00Z",
+          "result": 19.1
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:04:00Z",
+          "result": 19.2
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:05:00Z",
+          "result": 20.0
+        }
+      ]
+    },
+    {
+      "name": "Humidity Living Room",
+      "description": "The humidity in my living room",
+      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+      "unitOfMeasurement": {
+        "name": "percentage",
+        "symbol": "%",
+        "definition": "https://en.wikipedia.org/wiki/Percentage"
+      },
+      "Sensor": {
+        "name": "DHT22/Humidity",
+        "description": "Relative humidity sensor of a DHT22",
+        "encodingType": "application/pdf",
+        "metadata": "https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf"
+      },
+      "ObservedProperty": {
+        "name": "Relative Humidity",
+        "definition": "https://en.wikipedia.org/wiki/Relative_humidity",
+        "description": "The relative humidity"
+      },
+      "Observations": [
+        {
+          "phenomenonTime": "2019-03-14T10:00:00Z",
+          "result": 40.0
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:01:00Z",
+          "result": 39.1
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:02:00Z",
+          "result": 42.0
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:03:00Z",
+          "result": 41.9
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:04:00Z",
+          "result": 41.8
+        },
+        {
+          "phenomenonTime": "2019-03-14T10:05:00Z",
+          "result": 41.0
+        }
+      ]
+    }
+  ]
+}

@@ -61,6 +61,8 @@ header:
     - 'docs/Makefile'
     - 'docs/requirements.txt'
     - 'southbound/rules/easy-rules/osgi/src/main/resources/META-INF/license/easy-rules-license.txt'
+    - 'southbound/sensorthings/sensing.rest/src/test/resources/NOTICE.txt'
+    - 'southbound/sensorthings/sensing.rest/src/test/resources/frost-compose.yaml'
     - 'webclient/dist'
     - 'webclient/node_modules'
     - 'webclient/openapi'
