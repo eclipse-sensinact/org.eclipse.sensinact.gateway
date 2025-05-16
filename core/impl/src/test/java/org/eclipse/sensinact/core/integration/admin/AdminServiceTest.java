@@ -55,7 +55,8 @@ public class AdminServiceTest {
         }).getValue();
     }
 
-    private void setValue(String provider, String service, String resource, Object value, Instant timestamp) throws Exception {
+    private void setValue(String provider, String service, String resource, Object value, Instant timestamp)
+            throws Exception {
         gt.execute(new ResourceCommand<Void>(provider, service, resource) {
             @Override
             protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
@@ -105,8 +106,8 @@ public class AdminServiceTest {
         assertEquals(timestamp, descr.getTimestamp());
 
         // Reject earlier values
-        setValue(PROVIDER, "admin", "location",
-                "{\"type\":\"Point\",\"coordinates\":[-0.119700, 51.503300]}", timestamp.minusSeconds(1));
+        setValue(PROVIDER, "admin", "location", "{\"type\":\"Point\",\"coordinates\":[-0.119700, 51.503300]}",
+                timestamp.minusSeconds(1));
         descr = getValue(PROVIDER, "admin", "location");
         assertNull(descr.getValue());
         assertEquals(timestamp, descr.getTimestamp());
@@ -117,8 +118,8 @@ public class AdminServiceTest {
         assertEquals("foo", descr.getValue());
         assertEquals(timestamp, descr.getTimestamp());
 
-        setValue(PROVIDER, "admin", "location",
-                "{\"type\":\"Point\",\"coordinates\":[-0.119700, 51.503300]}", timestamp);
+        setValue(PROVIDER, "admin", "location", "{\"type\":\"Point\",\"coordinates\":[-0.119700, 51.503300]}",
+                timestamp);
         descr = getValue(PROVIDER, "admin", "location");
         assertEquals(Map.of("type", "Point", "coordinates", List.of(-0.119700d, 51.503300d)),
                 new ObjectMapper().convertValue(descr.getValue(), Map.class));
@@ -130,8 +131,7 @@ public class AdminServiceTest {
         descr = getValue(PROVIDER, "admin", "friendlyName");
         assertEquals("eclipse", descr.getValue());
         assertEquals(future, descr.getTimestamp());
-        setValue(PROVIDER, "admin", "location",
-                "{\"type\":\"Point\",\"coordinates\":[2.295049, 48.873785]}", future);
+        setValue(PROVIDER, "admin", "location", "{\"type\":\"Point\",\"coordinates\":[2.295049, 48.873785]}", future);
         descr = getValue(PROVIDER, "admin", "location");
         assertEquals(Map.of("type", "Point", "coordinates", List.of(2.295049d, 48.873785d)),
                 new ObjectMapper().convertValue(descr.getValue(), Map.class));

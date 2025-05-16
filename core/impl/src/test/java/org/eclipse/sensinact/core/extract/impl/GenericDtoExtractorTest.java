@@ -61,7 +61,8 @@ public class GenericDtoExtractorTest {
     class MissingIdentity {
         @Test
         void missingProvider() {
-            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(makeTestDto(null, SERVICE, RESOURCE, VALUE, null, null));
+            List<? extends AbstractUpdateDto> updates = extractor()
+                    .getUpdates(makeTestDto(null, SERVICE, RESOURCE, VALUE, null, null));
             assertEquals(1, updates.size());
             AbstractUpdateDto aud = updates.get(0);
             assertNull(aud.provider);
@@ -71,12 +72,14 @@ public class GenericDtoExtractorTest {
             assertInstanceOf(FailedMappingDto.class, aud);
             FailedMappingDto fmd = (FailedMappingDto) aud;
             assertNotNull(fmd.mappingFailure);
-            assertTrue(fmd.mappingFailure.getMessage().contains("provider"), "Wrong message: " + fmd.mappingFailure.getMessage());
+            assertTrue(fmd.mappingFailure.getMessage().contains("provider"),
+                    "Wrong message: " + fmd.mappingFailure.getMessage());
         }
 
         @Test
         void missingService() {
-            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(makeTestDto(PROVIDER, null, RESOURCE, VALUE, null, null));
+            List<? extends AbstractUpdateDto> updates = extractor()
+                    .getUpdates(makeTestDto(PROVIDER, null, RESOURCE, VALUE, null, null));
             assertEquals(1, updates.size());
             AbstractUpdateDto aud = updates.get(0);
             assertEquals(PROVIDER, aud.provider);
@@ -86,12 +89,14 @@ public class GenericDtoExtractorTest {
             assertInstanceOf(FailedMappingDto.class, aud);
             FailedMappingDto fmd = (FailedMappingDto) aud;
             assertNotNull(fmd.mappingFailure);
-            assertTrue(fmd.mappingFailure.getMessage().contains("service"), "Wrong message: " + fmd.mappingFailure.getMessage());
+            assertTrue(fmd.mappingFailure.getMessage().contains("service"),
+                    "Wrong message: " + fmd.mappingFailure.getMessage());
         }
 
         @Test
         void missingResource() {
-            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(makeTestDto(PROVIDER, SERVICE, null, VALUE, null, null));
+            List<? extends AbstractUpdateDto> updates = extractor()
+                    .getUpdates(makeTestDto(PROVIDER, SERVICE, null, VALUE, null, null));
             assertEquals(1, updates.size());
             AbstractUpdateDto aud = updates.get(0);
             assertEquals(PROVIDER, aud.provider);
@@ -101,7 +106,8 @@ public class GenericDtoExtractorTest {
             assertInstanceOf(FailedMappingDto.class, aud);
             FailedMappingDto fmd = (FailedMappingDto) aud;
             assertNotNull(fmd.mappingFailure);
-            assertTrue(fmd.mappingFailure.getMessage().contains("resource"), "Wrong message: " + fmd.mappingFailure.getMessage());
+            assertTrue(fmd.mappingFailure.getMessage().contains("resource"),
+                    "Wrong message: " + fmd.mappingFailure.getMessage());
         }
     }
 
@@ -200,8 +206,7 @@ public class GenericDtoExtractorTest {
         void nullAction() {
             GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, VALUE_2, null, null);
             testDto.nullAction = NullAction.UPDATE;
-            List<? extends AbstractUpdateDto> updates = extractor()
-                    .getUpdates(testDto);
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(testDto);
 
             assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
 
@@ -223,8 +228,7 @@ public class GenericDtoExtractorTest {
         void duplicateAction() {
             GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, VALUE_2, null, null);
             testDto.duplicateDataAction = DuplicateAction.UPDATE_IF_DIFFERENT;
-            List<? extends AbstractUpdateDto> updates = extractor()
-                    .getUpdates(testDto);
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(testDto);
 
             assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
 
@@ -291,7 +295,8 @@ public class GenericDtoExtractorTest {
 
         @Test
         void nullAction() {
-            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, null, null, singletonMap(METADATA_KEY, METADATA_VALUE));
+            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, null, null,
+                    singletonMap(METADATA_KEY, METADATA_VALUE));
             testDto.nullAction = NullAction.UPDATE;
 
             List<? extends AbstractUpdateDto> updates = extractor().getUpdates(testDto);
@@ -319,11 +324,11 @@ public class GenericDtoExtractorTest {
 
         @Test
         void duplicateValue() {
-            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, null, null, singletonMap(METADATA_KEY, METADATA_VALUE));
+            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, null, null,
+                    singletonMap(METADATA_KEY, METADATA_VALUE));
             testDto.duplicateMetadataAction = DuplicateAction.UPDATE_ALWAYS;
 
-            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(
-                    testDto);
+            List<? extends AbstractUpdateDto> updates = extractor().getUpdates(testDto);
 
             assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
 

@@ -55,7 +55,6 @@ import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
-import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
@@ -63,6 +62,7 @@ import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.ResourceValueMetadata;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -183,12 +183,11 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(),
-                    Map.of("value", TEST_MODEL_PKG, "timestamp", now), now);
+                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", now), now);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model),
-                    Map.of("value", TEST_MODEL, "timestamp", now), now);
+                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", now),
+                    now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
@@ -203,8 +202,7 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, String.class, null, TEST_VALUE,
-                    Map.of("value", TEST_VALUE, "timestamp", now), now);
+                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", now), now);
             // TODO - the value is in here, which is surprising, as is the timestamp being a
             // date
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
@@ -259,12 +257,11 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(),
-                    Map.of("value", TEST_MODEL_PKG, "timestamp", before), before);
+                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", before), before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model),
-                    Map.of("value", TEST_MODEL, "timestamp", before), before);
+                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", before),
+                    before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
@@ -279,11 +276,11 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, String.class, null, TEST_VALUE,
-                    Map.of("value", TEST_VALUE, "timestamp", before), before);
+                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", before),
+                    before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE_2, String.class, null, TEST_VALUE,
-                    Map.of("value", TEST_VALUE, "timestamp", now), now);
+                    TEST_RESOURCE_2, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", now),
+                    now);
 
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE, null, Map.of("value", TEST_VALUE, "timestamp", before), before);
@@ -340,12 +337,11 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(),
-                    Map.of("value", TEST_MODEL_PKG, "timestamp", before), before);
+                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", before), before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model),
-                    Map.of("value", TEST_MODEL, "timestamp", before), before);
+                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", before),
+                    before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
@@ -361,11 +357,11 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2,
                     TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, String.class, null, TEST_VALUE,
-                    Map.of("value", TEST_VALUE, "timestamp", before), before);
+                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", before),
+                    before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2,
-                    TEST_RESOURCE_2, String.class, null, TEST_VALUE_2,
-                    Map.of("value", TEST_VALUE_2, "timestamp", now), now);
+                    TEST_RESOURCE_2, String.class, null, TEST_VALUE_2, Map.of("value", TEST_VALUE_2, "timestamp", now),
+                    now);
 
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE, null, Map.of("value", TEST_VALUE, "timestamp", before), before);
@@ -421,12 +417,11 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(),
-                    Map.of("value", TEST_MODEL_PKG, "timestamp", now), now);
+                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", now), now);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model),
-                    Map.of("value", TEST_MODEL, "timestamp", now), now);
+                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", now),
+                    now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
@@ -446,26 +441,23 @@ public class SubscriptionTest {
             // date
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE, new HashMap<String, Object>() {
-                            {
-                                put("timestamp", null);
-                            }
-                        },
-                    new HashMap<String, Object>() {
-                            {
-                                put(METADATA_KEY, METADATA_VALUE);
-                                put("timestamp", null);
-                            }
-                        },
-                    now);
+                        {
+                            put("timestamp", null);
+                        }
+                    }, new HashMap<String, Object>() {
+                        {
+                            put(METADATA_KEY, METADATA_VALUE);
+                            put("timestamp", null);
+                        }
+                    }, now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE, new HashMap<String, Object>() {
-                            {
-                                put(METADATA_KEY, METADATA_VALUE);
-                                put("value", null);
-                                put("timestamp", null);
-                            }
-                        },
-                    Map.of(METADATA_KEY, METADATA_VALUE, "value", TEST_VALUE, "timestamp", now), now);
+                        {
+                            put(METADATA_KEY, METADATA_VALUE);
+                            put("value", null);
+                            put("timestamp", null);
+                        }
+                    }, Map.of(METADATA_KEY, METADATA_VALUE, "value", TEST_VALUE, "timestamp", now), now);
 
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -651,7 +643,7 @@ public class SubscriptionTest {
 
             ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1")))
                     .eSet(testService1.eClass().getEStructuralFeature("foo2"), "somethingElse");
-            Metadata newMetadata = ProviderFactory.eINSTANCE.createMetadata();
+            ResourceValueMetadata newMetadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             newMetadata.setTimestamp(Instant.now());
             ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1"))).getMetadata()
                     .put(testService1.eClass().getEStructuralFeature("foo2"), newMetadata);
@@ -736,8 +728,7 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo", String.class, "foo", "foo2",
-                    Map.of("value", "foo2", "timestamp", curMetadata.getTimestamp()),
-                    curMetadata.getTimestamp());
+                    Map.of("value", "foo2", "timestamp", curMetadata.getTimestamp()), curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo", Map.of("value", "foo", "timestamp", oldMetadata.getTimestamp()),
                     Map.of("value", "foo2", "timestamp", curMetadata.getTimestamp()), curMetadata.getTimestamp());
@@ -765,7 +756,7 @@ public class SubscriptionTest {
             testService1.eSet(testService1.eClass().getEStructuralFeature("foo"), "foo");
             testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
 
-            Metadata initialMetadata = ProviderFactory.eINSTANCE.createMetadata();
+            ResourceValueMetadata initialMetadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             initialMetadata.setTimestamp(Instant.now());
             testService1.getMetadata().put(testService1.eClass().getEStructuralFeature("foo"), initialMetadata);
 
@@ -774,19 +765,18 @@ public class SubscriptionTest {
 
             Provider saved = nexus.save(provider);
 
-            Metadata initialMetadataToCheck = ((Service) saved
+            ResourceValueMetadata initialMetadataToCheck = ((Service) saved
                     .eGet(provider.eClass().getEStructuralFeature("testService1"))).getMetadata()
                     .get(testService1.eClass().getEStructuralFeature("foo"));
 
             assertNotNull(initialMetadataToCheck);
-            assertTrue(initialMetadataToCheck instanceof ResourceMetadata);
 
             Mockito.clearInvocations(accumulator);
             Mockito.verifyNoMoreInteractions(accumulator);
 
             ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1")))
                     .eSet(testService1.eClass().getEStructuralFeature("foo2"), "somethingElse");
-            Metadata newMetadata = ProviderFactory.eINSTANCE.createMetadata();
+            ResourceValueMetadata newMetadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             newMetadata.setTimestamp(Instant.now());
             FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
             fcm.setName("test.meta.1");
@@ -808,16 +798,14 @@ public class SubscriptionTest {
 
             assertNotNull(curMetadata);
             assertFalse(curMetadata.getTimestamp().isAfter(mark));
-            assertTrue(curMetadata instanceof ResourceMetadata);
 
             String modelName = EMFUtil.getModelName(provider.eClass());
 
             Mockito.verify(accumulator).addResource(ePackage.getNsURI(), modelName, provider.getId(), "testService1",
                     "foo2");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService1", "foo2", String.class, null, "somethingElse",
-                    Map.of("test.meta.1", "some Test", "value", "somethingElse",
-                            "timestamp", newMetadata.getTimestamp()),
+                    "testService1", "foo2", String.class, null, "somethingElse", Map.of("test.meta.1", "some Test",
+                            "value", "somethingElse", "timestamp", newMetadata.getTimestamp()),
                     newMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo2", null, Map.of("test.meta.1", "some Test", "value", "somethingElse",
@@ -898,9 +886,8 @@ public class SubscriptionTest {
             String modelName = EMFUtil.getModelName(provider.eClass());
 
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService1", "foo", String.class, "foo", "foo2",
-                    Map.of("test.meta.1", "some Test", "test.meta.2", 2, "value", "foo2",
-                            "timestamp", curMetadata.getTimestamp()),
+                    "testService1", "foo", String.class, "foo", "foo2", Map.of("test.meta.1", "some Test",
+                            "test.meta.2", 2, "value", "foo2", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(
                     ePackage.getNsURI(), modelName, provider.getId(), "testService1", "foo",
@@ -963,8 +950,8 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addResource(ePackage.getNsURI(), modelName, provider.getId(), "testService2",
                     "annotated");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService2", "annotated", String.class, null, "avalue", Map.of("test", "testMetadata", "test2", "testMetadata2", "value",
-                            "avalue", "timestamp", curMetadata.getTimestamp()),
+                    "testService2", "annotated", String.class, null, "avalue", Map.of("test", "testMetadata", "test2",
+                            "testMetadata2", "value", "avalue", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService2", "annotated", null, Map.of("test", "testMetadata", "test2", "testMetadata2", "value",
@@ -1006,12 +993,13 @@ public class SubscriptionTest {
             ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2")))
                     .eSet(testService2.eClass().getEStructuralFeature("annotated"), "avalue");
 
-            Metadata overwrite = ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2")))
-                    .getMetadata().get(testService2.eClass().getEStructuralFeature("annotated"));
+            ResourceValueMetadata overwrite = ((Service) saved
+                    .eGet(provider.eClass().getEStructuralFeature("testService2"))).getMetadata()
+                    .get(testService2.eClass().getEStructuralFeature("annotated"));
 
             assertNull(overwrite);
 
-            overwrite = ProviderFactory.eINSTANCE.createMetadata();
+            overwrite = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
             fcm.setName("test");
             fcm.setValue("Something different");
@@ -1026,8 +1014,9 @@ public class SubscriptionTest {
 
             Provider toTest = nexus.save(saved);
 
-            Metadata curMetadata = ((Service) toTest.eGet(provider.eClass().getEStructuralFeature("testService2")))
-                    .getMetadata().get(testService2.eClass().getEStructuralFeature("annotated"));
+            ResourceValueMetadata curMetadata = ((Service) toTest
+                    .eGet(provider.eClass().getEStructuralFeature("testService2"))).getMetadata()
+                    .get(testService2.eClass().getEStructuralFeature("annotated"));
 
             System.err.println(mark);
             System.err.println(curMetadata.getTimestamp());
@@ -1044,9 +1033,8 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addResource(ePackage.getNsURI(), modelName, provider.getId(), "testService2",
                     "annotated");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService2", "annotated", String.class, null, "avalue",
-                    Map.of("test", fcm.getValue(), "test2", "testMetadata2", "value",
-                            "avalue", "timestamp", curMetadata.getTimestamp()),
+                    "testService2", "annotated", String.class, null, "avalue", Map.of("test", fcm.getValue(), "test2",
+                            "testMetadata2", "value", "avalue", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService2", "annotated", null, Map.of("test", fcm.getValue(), "test2", "testMetadata2", "value",
@@ -1079,7 +1067,8 @@ public class SubscriptionTest {
             testAdmin.setFriendlyName(provider.getId());
             testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
 
-            Metadata metadata = ProviderFactory.eINSTANCE.createMetadata();
+            ResourceValueMetadata metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
+            metadata.setTimestamp(Instant.now());
             testService1.getMetadata().put(testService1.eClass().getEStructuralFeature("foo"), metadata);
             FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
             fcm.setName("test.meta.1");
@@ -1333,7 +1322,7 @@ public class SubscriptionTest {
             Provider saved = nexus.save(provider);
 
             verifyNewProviderNotification(accumulator, saved);
-            Metadata resourceMetadata = saved.getAdmin().getMetadata()
+            ResourceValueMetadata resourceMetadata = saved.getAdmin().getMetadata()
                     .get(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME);
             stripMetadata(saved);
 
@@ -1540,8 +1529,8 @@ public class SubscriptionTest {
                 provider.getId(), serviceName, attribute.getName(), attribute.getEType().getInstanceClass(), null,
                 value, Map.of("value", value, "timestamp", time), time);
         Mockito.verify(accumulator).metadataValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
-                provider.getId(), serviceName, attribute.getName(), null,
-                Map.of("value", value, "timestamp", time), time);
+                provider.getId(), serviceName, attribute.getName(), null, Map.of("value", value, "timestamp", time),
+                time);
     }
 
     private static void verifyServiceAttributeRemoveNotification(NotificationAccumulator accumulator, Provider provider,
@@ -1549,7 +1538,8 @@ public class SubscriptionTest {
         String modelName = EMFUtil.getModelName(provider.eClass());
         Mockito.verify(accumulator).resourceValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
                 provider.getId(), oldService.eContainingFeature().getName(), attribute.getName(),
-                attribute.getEType().getInstanceClass(), oldService.eGet(attribute), null, Mockito.any(), Mockito.any());
+                attribute.getEType().getInstanceClass(), oldService.eGet(attribute), null, Mockito.any(),
+                Mockito.any());
         Mockito.verify(accumulator).metadataValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
                 provider.getId(), oldService.eContainingFeature().getName(), attribute.getName(),
                 Map.of("value", oldService.eGet(attribute), "timestamp", getTimestampForService(oldService, attribute)),

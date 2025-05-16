@@ -151,6 +151,7 @@ public class AnnotationBasedDtoExtractorTest {
         public String resource2;
 
     }
+
     /**
      * Tests for class level annotations for provider/service/resource
      */
@@ -501,8 +502,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(Integer.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
 
             // RESOURCE uses class level service and default resource
             checkCommonFields(extracted);
@@ -515,8 +516,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(String.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE_2.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE_2.equals(d.resource)).findFirst().get();
 
             // RESOURCE_2 uses field level service and default resource
             assertEquals("override", extracted.service);
@@ -532,8 +533,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(String.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
 
             // Units uses class level service and field level resource
             checkCommonFields(extracted);

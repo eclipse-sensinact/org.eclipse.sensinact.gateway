@@ -26,14 +26,18 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EDataType;
+import org.eclipse.emf.ecore.EModelElement;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EParameter;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
@@ -45,16 +49,16 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.sensinact.model.core.metadata.Action;
-import org.eclipse.sensinact.model.core.metadata.ActionParameter;
-import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
-import org.eclipse.sensinact.model.core.metadata.MetadataPackage;
-import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
-import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
-import org.eclipse.sensinact.model.core.metadata.ServiceReference;
+import org.eclipse.sensinact.model.core.provider.ActionMetadata;
+import org.eclipse.sensinact.model.core.provider.ActionParameterMetadata;
 import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.ModelMetadata;
+import org.eclipse.sensinact.model.core.provider.NexusMetadata;
+import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.ResourceMetadata;
+import org.eclipse.sensinact.model.core.provider.ServiceReferenceMetadata;
 import org.osgi.util.converter.ConversionException;
 import org.osgi.util.converter.Converter;
 import org.osgi.util.converter.ConverterFunction;
@@ -73,6 +77,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  */
 public class EMFUtil {
 
+    /** METADATA2 */
+    public static final String METADATA_ANNOTATION_SOURCE = "Metadata";
+
     private static final Logger LOG = LoggerFactory.getLogger(EMFUtil.class);
 
     private static final Converter converter;
@@ -82,7 +89,6 @@ public class EMFUtil {
         converter = Converters.newConverterBuilder().errorHandler(EMFUtil::fallbackConversion).build();
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
         ProviderPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
-        MetadataPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
     }
 
     // TODO: what to use as good default?
@@ -98,21 +104,98 @@ public class EMFUtil {
         }
     }
 
-    public static Map<String, Object> toMetadataAttributesToMap(Metadata metadata, ETypedElement attribute) {
-        Map<String, Object> attributes = new HashMap<>(toEObjectAttributesToMap(metadata, false,
-                MetadataPackage.Literals.NEXUS_METADATA.getEStructuralFeatures(), null, null));
-        for (FeatureCustomMetadata entry : metadata.getExtra()) {
-            attributes.put(entry.getName(), entry.getValue());
+    public static Map<String, Object> toMetadataAttributesToMap(ETypedElement attribute) {
+        return toMetadataAttributesToMap(null, attribute);
+    }
+
+    public static Map<String, Object> toMetadataAttributesToMap(Metadata metadata, EModelElement element) {
+        Map<String, Object> attributes = new HashMap<>();
+        NexusMetadata nexusMetadata = getModelMetadata(element);
+        if (nexusMetadata != null) {
+            attributes.put("timestamp", nexusMetadata.getTimestamp());
+            nexusMetadata.getExtra().forEach(fcm -> attributes.put(fcm.getName(), fcm.getValue()));
         }
-        EAnnotation metadataAnnotation = attribute.getEAnnotation("Metadata");
-        if (metadataAnnotation == null) {
-            metadataAnnotation = attribute.getEAnnotation("metadata");
-        }
-        if (metadataAnnotation != null) {
-            metadataAnnotation.getDetails().stream().filter(fcm -> !attributes.containsKey(fcm.getKey()))
-                    .forEach(fcm -> attributes.put(fcm.getKey(), fcm.getValue()));
+        if (metadata != null) {
+            attributes.putAll(toEObjectAttributesToMap(metadata, false, List.of(), null, null));
+            for (FeatureCustomMetadata entry : metadata.getExtra()) {
+                attributes.put(entry.getName(), entry.getValue());
+            }
         }
         return attributes;
+    }
+
+    /**
+     * This method will look if the element has an {@link EAnnotation} with the
+     * source {@link EMFUtil#METADATA_ANNOTATION_SOURCE}. If one is found it will
+     * first look if the content list contains a {@link NexusMetadata} object. It
+     * will also look in the Details, as for convenience we also support setting
+     * metadata via simple key value pairs. If it has Details and ModelNexus
+     * metadata the Details will be applied to the {@link NexusMetadata} and may
+     * overwrite existing attributes. If no {@link NexusMetadata} Object was
+     * present, one will be created, that might not be attached to the given
+     * ModelElement.
+     *
+     * @param element the Feature to look
+     * @return
+     */
+    public static NexusMetadata getModelMetadata(EModelElement element) {
+        NexusMetadata result = null;
+        EAnnotation eAnnotation = element.getEAnnotation(METADATA_ANNOTATION_SOURCE);
+        if (eAnnotation != null) {
+            result = eAnnotation.getContents().stream().filter(meta -> meta instanceof NexusMetadata)
+                    .map(NexusMetadata.class::cast).findFirst().orElseGet(() -> null);
+            if (!eAnnotation.getDetails().isEmpty()) {
+                if (result == null) {
+                    result = createCorrectNexusMetadata(element);
+                }
+                fillMetadataFromAnnotationDetails(eAnnotation.getDetails(), result);
+            }
+        }
+        return result;
+    }
+
+    public static FeatureCustomMetadata createFeatureCustomMetadata(String metadataKey, Instant timestamp,
+            Object value) {
+        return handleFeatureCustomMetadata(ProviderFactory.eINSTANCE.createFeatureCustomMetadata(), metadataKey,
+                timestamp, value);
+    }
+
+    public static FeatureCustomMetadata handleFeatureCustomMetadata(FeatureCustomMetadata customMetadata,
+            String metadataKey, Instant timestamp, Object value) {
+        customMetadata.setName(metadataKey);
+        customMetadata.setTimestamp(timestamp);
+        customMetadata.setValue(value);
+        return customMetadata;
+    }
+
+    private static void fillMetadataFromAnnotationDetails(EMap<String, String> details, NexusMetadata metadata) {
+        for (Entry<String, String> entry : details.entrySet()) {
+            EStructuralFeature eStructuralFeature = metadata.eClass().getEStructuralFeature(entry.getKey());
+            if (eStructuralFeature != null && eStructuralFeature instanceof EAttribute) {
+                metadata.eSet(eStructuralFeature, EcoreUtil
+                        .createFromString(((EAttribute) eStructuralFeature).getEAttributeType(), entry.getValue()));
+            } else {
+                metadata.getExtra().add(createFeatureCustomMetadata(entry.getKey(), null, entry.getValue()));
+            }
+        }
+
+    }
+
+    private static NexusMetadata createCorrectNexusMetadata(EModelElement element) {
+
+        if (element instanceof EAttribute) {
+            return ProviderFactory.eINSTANCE.createResourceMetadata();
+        } else if (element instanceof EReference) {
+            return ProviderFactory.eINSTANCE.createServiceReferenceMetadata();
+        } else if (element instanceof EOperation) {
+            return ProviderFactory.eINSTANCE.createActionMetadata();
+        } else if (element instanceof EParameter) {
+            return ProviderFactory.eINSTANCE.createActionParameterMetadata();
+        } else if (element instanceof EClass) {
+            return ProviderFactory.eINSTANCE.createModelMetadata();
+        }
+        throw new UnsupportedOperationException(
+                element.eClass().getName() + " is unsupported and we can't create fitting Metadata for it.");
     }
 
     public static Map<String, Object> toEObjectAttributesToMap(EObject eObject) {
@@ -147,12 +230,21 @@ public class EMFUtil {
                 .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE);
     }
 
-    public static ActionParameter createActionParameter(Entry<String, Class<?>> entry) {
-        ActionParameter parameter = MetadataFactory.eINSTANCE.createActionParameter();
+    public static EParameter createActionParameter(Entry<String, Class<?>> entry) {
+        ActionParameterMetadata metaData = ProviderFactory.eINSTANCE.createActionParameterMetadata();
+        metaData.setTimestamp(Instant.now());
+        EParameter parameter = EcoreFactory.eINSTANCE.createEParameter();
         parameter.setName(entry.getKey());
-        parameter.setTimestamp(Instant.now());
         parameter.setEType(convertClass(entry.getValue()));
+        addMetaDataAnnnotation(parameter, metaData);
         return parameter;
+    }
+
+    public static void addMetaDataAnnnotation(EModelElement model, EObject metaData) {
+        EAnnotation annotation = EcoreFactory.eINSTANCE.createEAnnotation();
+        annotation.getContents().add(metaData);
+        annotation.setSource(METADATA_ANNOTATION_SOURCE);
+        model.getEAnnotations().add(annotation);
     }
 
     private static EClassifier convertClass(Class<?> clazz) {
@@ -205,7 +297,7 @@ public class EMFUtil {
         ePackage.setEFactoryInstance(new EFactoryImpl() {
             @Override
             protected EObject basicCreate(EClass eClass) {
-                return eClass.getInstanceClassName().equals("java.util.Map$Entry")
+                return eClass.getInstanceClassName() == "java.util.Map$Entry"
                         ? new MinimalEObjectImpl.Container.Dynamic.BasicEMapEntry<String, String>(eClass)
                         : new MinimalEObjectImpl.Container.Dynamic.Permissive(eClass);
             }
@@ -242,19 +334,16 @@ public class EMFUtil {
         return feature;
     }
 
-    public static ServiceReference createServiceReference(EClass parent, String refName, EClass type,
-            boolean containment) {
-        ServiceReference feature = MetadataFactory.eINSTANCE.createServiceReference();
-        feature.setName(refName);
-        feature.setEType(type);
-        feature.setContainment(containment);
-        parent.getEStructuralFeatures().add(feature);
-
+    public static EReference createServiceReference(EClass parent, String refName, EClass type, boolean containment) {
+        EReference feature = createEReference(parent, refName, type, containment, null);
+        ServiceReferenceMetadata metaData = ProviderFactory.eINSTANCE.createServiceReferenceMetadata();
+        addMetaDataAnnnotation(feature, metaData);
         return feature;
     }
 
-    public static EAttribute createEAttribute(EClass service, String resource, Class<?> type, Object defaultValue,
-            Function<EStructuralFeature, List<EAnnotation>> annotationCreator) {
+    public static ResourceMetadata createResourceAttribute(EClass service, String resource, Class<?> type,
+            Object defaultValue) {
+        ResourceMetadata metaData = ProviderFactory.eINSTANCE.createResourceMetadata();
         EAttribute attribute = EcoreFactory.eINSTANCE.createEAttribute();
         attribute.setName(resource);
         attribute.setEType(convertClass(type));
@@ -262,22 +351,8 @@ public class EMFUtil {
             attribute.setDefaultValue(defaultValue);
         }
         service.getEStructuralFeatures().add(attribute);
-        if (annotationCreator != null) {
-            attribute.getEAnnotations().addAll(annotationCreator.apply(attribute));
-        }
-        return attribute;
-    }
-
-    public static ResourceAttribute createResourceAttribute(EClass service, String resource, Class<?> type,
-            Object defaultValue) {
-        ResourceAttribute attribute = MetadataFactory.eINSTANCE.createResourceAttribute();
-        attribute.setName(resource);
-        attribute.setEType(convertClass(type));
-        if (defaultValue != null) {
-            attribute.setDefaultValue(defaultValue);
-        }
-        service.getEStructuralFeatures().add(attribute);
-        return attribute;
+        addMetaDataAnnnotation(attribute, metaData);
+        return metaData;
     }
 
     public static Object convertToTargetType(EClassifier targetType, Object o) {
@@ -325,12 +400,14 @@ public class EMFUtil {
 
     }
 
-    public static Action createAction(EClass serviceEClass, String name, Class<?> type, List<ActionParameter> params) {
-        Action operation = MetadataFactory.eINSTANCE.createAction();
+    public static EOperation createAction(EClass serviceEClass, String name, Class<?> type, List<EParameter> params) {
+        ActionMetadata metaData = ProviderFactory.eINSTANCE.createActionMetadata();
+        EOperation operation = EcoreFactory.eINSTANCE.createEOperation();
         operation.setName(name);
         operation.setEType(convertClass(type));
         operation.getEParameters().addAll(params);
         serviceEClass.getEOperations().add(operation);
+        addMetaDataAnnnotation(operation, metaData);
         return operation;
     }
 
@@ -350,9 +427,9 @@ public class EMFUtil {
     }
 
     public static String getModelName(EClass model) {
-        EAnnotation modelAnnotation = model.getEAnnotation("model");
-        if (modelAnnotation != null) {
-            return model.getEAnnotation("model").getDetails().get("name");
+        ModelMetadata metadata = (ModelMetadata) getModelMetadata(model);
+        if (metadata != null) {
+            return metadata.getOriginalName();
         } else {
             return model.getName();
         }

@@ -113,12 +113,11 @@ public class SensinactTwinTest {
                 .withAction(List.of(new SimpleEntry<>("foo", String.class), new SimpleEntry<>("bar", Instant.class)))
                 .buildAll();
 
-        manager.createModel(TEST_MODEL_WITH_METADATA).withService(TEST_SERVICE)
-                    .withResource(TEST_RESOURCE).withType(Integer.class).withDefaultMetadata(Map.of("foo", "bar")).build()
-                    .withResource(TEST_ACTION_RESOURCE).withType(Double.class)
-                        .withAction(List.of(new SimpleEntry<>("foo", String.class), new SimpleEntry<>("bar", Instant.class)))
-                        .withDefaultMetadata(Map.of("fizz", "buzz"))
-                .buildAll();
+        manager.createModel(TEST_MODEL_WITH_METADATA).withService(TEST_SERVICE).withResource(TEST_RESOURCE)
+                .withType(Integer.class).withDefaultMetadata(Map.of("foo", "bar")).build()
+                .withResource(TEST_ACTION_RESOURCE).withType(Double.class)
+                .withAction(List.of(new SimpleEntry<>("foo", String.class), new SimpleEntry<>("bar", Instant.class)))
+                .withDefaultMetadata(Map.of("fizz", "buzz")).buildAll();
 
         URI ProviderPackageURI = URI.createURI(ProviderPackage.eNS_URI);
 
@@ -292,7 +291,8 @@ public class SensinactTwinTest {
 
             Map<String, Object> arguments = Map.of("foo", "bar", "foobar", Instant.now());
 
-            Mockito.when(actionHandler.act(EMFUtil.constructPackageUri(TEST_MODEL), TEST_MODEL, TEST_PROVIDER, TEST_SERVICE, TEST_ACTION_RESOURCE, arguments))
+            Mockito.when(actionHandler.act(EMFUtil.constructPackageUri(TEST_MODEL), TEST_MODEL, TEST_PROVIDER,
+                    TEST_SERVICE, TEST_ACTION_RESOURCE, arguments))
                     .thenReturn(promiseFactory.<Object>resolved(4.2D).delay(1000));
 
             Promise<Object> act = resource.act(arguments);
@@ -338,24 +338,21 @@ public class SensinactTwinTest {
         void testSnapshotProviderDefaultMetadata() throws InvocationTargetException, InterruptedException {
             twinImpl.createProvider(TEST_MODEL_WITH_METADATA, TEST_PROVIDER);
 
-            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, p -> TEST_PROVIDER.equals(p.getName()), null, null);
+            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, p -> TEST_PROVIDER.equals(p.getName()), null,
+                    null);
             assertEquals(1, list.size());
 
-            ResourceSnapshot rs = list.get(0).getServices().stream()
-                .filter(s -> TEST_SERVICE.equals(s.getName()))
-                .flatMap(s -> s.getResources().stream())
-                .filter(r -> TEST_RESOURCE.equals(r.getName()))
-                .findFirst().get();
+            ResourceSnapshot rs = list.get(0).getServices().stream().filter(s -> TEST_SERVICE.equals(s.getName()))
+                    .flatMap(s -> s.getResources().stream()).filter(r -> TEST_RESOURCE.equals(r.getName())).findFirst()
+                    .get();
 
             Map<String, Object> metadata = rs.getMetadata();
             assertEquals(Set.of("foo", "timestamp"), metadata.keySet());
             assertEquals("bar", metadata.get("foo"));
             assertNull(metadata.get("timestamp"));
 
-            rs = list.get(0).getServices().stream()
-                    .filter(s -> TEST_SERVICE.equals(s.getName()))
-                    .flatMap(s -> s.getResources().stream())
-                    .filter(r -> TEST_ACTION_RESOURCE.equals(r.getName()))
+            rs = list.get(0).getServices().stream().filter(s -> TEST_SERVICE.equals(s.getName()))
+                    .flatMap(s -> s.getResources().stream()).filter(r -> TEST_ACTION_RESOURCE.equals(r.getName()))
                     .findFirst().get();
 
             metadata = rs.getMetadata();

@@ -10,19 +10,17 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <relativePath>../pom.xml</relativePath>
     <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
     <artifactId>models</artifactId>
     <version>${revision}${changelist}</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>metadata</artifactId>
-  <name>SensiNact internal Metadata Model</name>
-  <description>The model for sensinact gateway core metadata.</description>
+  <artifactId>provider</artifactId>
+  <name>SensiNact Provider Model</name>
+  <description>The model for sensinact gateway core.</description>
   <!-- No integration tests -->
   <properties>
     <bnd-tests.skip>true</bnd-tests.skip>
@@ -30,13 +28,34 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
-      <artifactId>provider</artifactId>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>annotation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>geo-json</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geckoprojects.emf</groupId>
       <artifactId>org.gecko.emf.osgi.api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
     </dependency>
   </dependencies>
 
@@ -59,12 +78,12 @@
           </externalPlugins>
           <steps>
             <step>
-              <trigger>src/main/resources/model/metadata.genmodel</trigger>
+              <trigger>src/main/resources/model/sensinact.genmodel</trigger>
               <generateCommand>geckoEMF</generateCommand>
               <output>src/main/java</output>
               <clear>false</clear>
               <properties>
-                <genmodel>src/main/resources/model/metadata.genmodel</genmodel>
+                <genmodel>src/main/resources/model/sensinact.genmodel</genmodel>
               </properties>
             </step>
           </steps>

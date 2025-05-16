@@ -171,7 +171,8 @@ public class ModelBuildingTest {
         @Test
         void resourceWithDefaultMetadata() {
             Model model = manager.createModel(TEST_MODEL).withService(TEST_SERVICE).withResource(TEST_RESOURCE)
-                    .withType(Integer.class).withDefaultMetadata(Map.of("foo", "bar", "foobar", 42)).build().build().build();
+                    .withType(Integer.class).withDefaultMetadata(Map.of("foo", "bar", "foobar", 42)).build().build()
+                    .build();
 
             Resource resource = model.getServices().get(TEST_SERVICE).getResources().get(TEST_RESOURCE);
 
