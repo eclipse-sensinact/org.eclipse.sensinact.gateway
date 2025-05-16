@@ -28,13 +28,14 @@ import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.model.impl.ResourceImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
-import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
+import org.eclipse.sensinact.model.core.provider.ResourceMetadata;
+import org.eclipse.sensinact.model.core.provider.ResourceValueMetadata;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -115,7 +116,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
                 currentValue = null;
             }
             // Get the resource metadata
-            final ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(resource);
+            final ResourceValueMetadata metadata = svc.getMetadata().get(resource);
             if (metadata != null) {
                 currentTimestamp = metadata.getTimestamp();
             } else {
@@ -141,10 +142,10 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
         try {
             final boolean hasExternalSetter;
-            if (resource instanceof ResourceAttribute) {
+            ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getModelMetadata(resource);
+            if (metadata != null) {
                 // Resource created by ResourceBuilder
-                final ResourceAttribute rc = (ResourceAttribute) resource;
-                hasExternalSetter = rc.isExternalSet();
+                hasExternalSetter = metadata.isExternalSet();
             } else {
                 // Predefined resource (admin service)
                 hasExternalSetter = false;
@@ -178,11 +179,11 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         // Check if the resource is pull based
         final boolean hasExternalGetter;
         final Duration cacheThreshold;
-        if (resource instanceof ResourceAttribute) {
+        ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getModelMetadata(resource);
+        if (metadata != null) {
             // Resource created by ResourceBuilder
-            final ResourceAttribute rc = (ResourceAttribute) resource;
-            hasExternalGetter = rc.isExternalGet();
-            cacheThreshold = Duration.of(rc.getExternalGetCacheMs(), ChronoUnit.MILLIS);
+            hasExternalGetter = metadata.isExternalGet();
+            cacheThreshold = Duration.of(metadata.getExternalGetCacheMs(), ChronoUnit.MILLIS);
         } else {
             // Predefined resource (admin service)
             hasExternalGetter = false;
@@ -231,7 +232,6 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     public Promise<TimedValue<Object>> getMetadataValue(String name) {
         checkValid();
 
-//        final Map<String, Object> resourceMetadata = modelNexus.getResourceMetadata(provider, serviceName, resource);
         final TimedValue<Object> resourceMetadata = modelNexus.getResourceMetadataValue(provider, serviceName, resource,
                 name);
         if (resourceMetadata == null) {

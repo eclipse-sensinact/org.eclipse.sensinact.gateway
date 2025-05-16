@@ -197,8 +197,8 @@ public class MetricsTest {
         assertEquals(dto.provider, "sensiNact-metrics");
         assertEquals(dto.service, "metrics");
         assertTrue(Map.class.isAssignableFrom(dto.type));
-        assertTrue(((Map<?,?>)dto.value).containsKey("rate"));
-        assertEquals(7L, ((Map<?,?>)dto.value).get("count"));
+        assertTrue(((Map<?, ?>) dto.value).containsKey("rate"));
+        assertEquals(7L, ((Map<?, ?>) dto.value).get("count"));
 
         // Gauge: test.gauge becomes service=test, resource=gauge
         dto = dtos.get("gauge");

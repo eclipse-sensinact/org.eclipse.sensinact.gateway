@@ -863,7 +863,6 @@ public class DataUpdateServiceTest {
         }
     }
 
-
     @Nested
     class ListPushes {
         @Test
@@ -907,7 +906,8 @@ public class DataUpdateServiceTest {
             dto2.service = SERVICE;
             dto2.resource = RESOURCE;
             dto2.data = "43";
-            // adds 1second to avoid out of order update on the same resource using a truncated timestamp
+            // adds 1second to avoid out of order update on the same resource using a
+            // truncated timestamp
             dto2.time = String.valueOf(timestamp.toEpochMilli() + 1000);
 
             push.pushUpdate(List.of(dto, dto2)).getValue();

@@ -16,7 +16,6 @@ package org.eclipse.sensinact.core.model.nexus;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -37,13 +36,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.ENamedElement;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EParameter;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.ETypedElement;
@@ -54,7 +53,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.core.command.impl.ActionHandler;
 import org.eclipse.sensinact.core.command.impl.ResourcePullHandler;
 import org.eclipse.sensinact.core.command.impl.ResourcePushHandler;
-import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.model.nexus.emf.NamingUtils;
 import org.eclipse.sensinact.core.model.nexus.emf.compare.EMFCompareUtil;
@@ -62,20 +60,16 @@ import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
-import org.eclipse.sensinact.model.core.metadata.Action;
-import org.eclipse.sensinact.model.core.metadata.ActionParameter;
-import org.eclipse.sensinact.model.core.metadata.AnnotationMetadata;
-import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
-import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
-import org.eclipse.sensinact.model.core.metadata.ResourceMetadata;
-import org.eclipse.sensinact.model.core.metadata.ServiceReference;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.ModelMetadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.model.core.provider.ResourceMetadata;
+import org.eclipse.sensinact.model.core.provider.ResourceValueMetadata;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.Promises;
@@ -160,13 +154,13 @@ public class ModelNexus {
         this.notificationAccumulator = accumulator;
         this.whiteboard = whiteboard;
         // TODO we need a general Working Directory for such data
-        loadEPackages(Paths.get(BASIC_EPACKAGES));
+//		loadEPackages(Paths.get(BASIC_EPACKAGES));
 
         if (!resourceSet.getPackageRegistry().containsKey(EMFUtil.DEFAULT_SENSINACT_PACKAGE_URI)) {
             EMFUtil.createPackage("base", EMFUtil.DEFAULT_SENSINACT_PACKAGE_URI, "sensinactBase", this.resourceSet);
         }
 
-        loadInstances(Paths.get(BASIC_PROVIDERS));
+//		loadInstances(Paths.get(BASIC_PROVIDERS));
         setupSensinactProvider();
 
     }
@@ -398,7 +392,7 @@ public class ModelNexus {
 
         Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
 
-        ResourceMetadata metadata = (ResourceMetadata) service.getMetadata().get(resourceFeature);
+        ResourceValueMetadata metadata = service.getMetadata().get(resourceFeature);
 
         Map<String, Object> oldMetaData = null;
         Object oldValue = service.eGet(resourceFeature);
@@ -416,9 +410,9 @@ public class ModelNexus {
             EClassifier resourceType = resourceFeature.getEType();
 
             if (metadata == null) {
-                metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-                if(resourceFeature instanceof Metadata) {
-                    metadata.getExtra().addAll(((Metadata)resourceFeature).getExtra());
+                metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
+                if (resourceFeature instanceof Metadata) {
+                    metadata.getExtra().addAll(((Metadata) resourceFeature).getExtra());
                 }
                 service.getMetadata().put(resourceFeature, metadata);
             }
@@ -482,9 +476,8 @@ public class ModelNexus {
             if (resourceFeature == ProviderPackage.Literals.ADMIN__FRIENDLY_NAME
                     || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI
                     || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL) {
-                ResourceMetadata metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
+                ResourceValueMetadata metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
                 // N.B. We currently don't copy default metadata for the admin resources
-                metadata.setOriginalName(resourceFeature.getName());
                 metadata.setTimestamp(timestamp);
                 adminSvc.getMetadata().put(resourceFeature, metadata);
             }
@@ -569,8 +562,7 @@ public class ModelNexus {
 
     private List<Provider> getProviders(EClass model) {
         // Don't use isInstance as subtypes have a different model
-        return providers.values().stream().filter(p -> p.eClass().equals(model))
-                .collect(Collectors.toList());
+        return providers.values().stream().filter(p -> p.eClass().equals(model)).collect(Collectors.toList());
     }
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
@@ -579,38 +571,32 @@ public class ModelNexus {
     }
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
-            Object defaultValue, Map<String, Object> defaultMetadata, boolean hasGetter,
-            long getterCacheMs, boolean hasSetter) {
-        // FIXME: WIP
-        FeatureCustomMetadata resourceType = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
-        resourceType.setName("resourceType");
-        resourceType.setValue(ResourceType.SENSOR);
-        resourceType.setTimestamp(Instant.EPOCH);
+            Object defaultValue, Map<String, Object> defaultMetadata, boolean hasGetter, long getterCacheMs,
+            boolean hasSetter) {
 
-        return doCreateResource(service, resource, type, timestamp, defaultValue, defaultMetadata,
-                List.of(resourceType), hasGetter, getterCacheMs, hasSetter);
+        return doCreateResource(service, resource, type, timestamp, defaultValue, defaultMetadata, List.of(), hasGetter,
+                getterCacheMs, hasSetter);
     }
 
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, Map<String, Object> defaultMetadata, List<FeatureCustomMetadata> metadata,
             boolean hasGetter, long getterCacheMs, boolean hasSetter) {
         assertResourceNotExist(service, resource);
-        ResourceAttribute feature = EMFUtil.createResourceAttribute(service, resource, type, defaultValue);
-        feature.setExternalGet(hasGetter);
-        feature.setExternalSet(hasSetter);
+        ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue);
+        resourceMetaData.setExternalGet(hasGetter);
+        resourceMetaData.setExternalSet(hasSetter);
         if (getterCacheMs > 0) {
-            feature.setExternalGetCacheMs(getterCacheMs);
+            resourceMetaData.setExternalGetCacheMs(getterCacheMs);
         }
-        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ?
-                List.of() : toDefaultFeatureCustomMetadata(defaultMetadata);
-        EMFUtil.fillMetadata(feature, timestamp, false, resource, defaultFeatureMetadata);
-        return feature;
+        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ? List.of()
+                : toDefaultFeatureCustomMetadata(defaultMetadata);
+        EMFUtil.fillMetadata(resourceMetaData, timestamp, false, resource, defaultFeatureMetadata);
+        return (EAttribute) resourceMetaData.eContainer().eContainer();
     }
 
     private List<FeatureCustomMetadata> toDefaultFeatureCustomMetadata(Map<String, Object> defaultMetadata) {
         List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata.entrySet().stream()
-                .map(e -> handleFeatureCustomMetadata(
-                        ProviderFactory.eINSTANCE.createFeatureCustomMetadata(), e.getKey(), null, e.getValue()))
+                .map(e -> EMFUtil.createFeatureCustomMetadata(e.getKey(), null, e.getValue()))
                 .collect(Collectors.toList());
         return defaultFeatureMetadata;
     }
@@ -643,49 +629,37 @@ public class ModelNexus {
             ePackage = EMFUtil.createPackage(modelName, theModelPackageUri, modelName, resourceSet);
 
         }
-        EClass model = EMFUtil.createEClass(modelClassName, ePackage,
-                (ec) -> createEClassAnnotations(modelName, timestamp), ProviderPackage.Literals.PROVIDER);
+        EClass model = EMFUtil.createEClass(modelClassName, ePackage, null, ProviderPackage.Literals.PROVIDER);
+        ModelMetadata metadata = ProviderFactory.eINSTANCE.createModelMetadata();
+        EMFUtil.addMetaDataAnnnotation(model, metadata);
+        EMFUtil.fillMetadata(metadata, timestamp, false, modelName, List.of());
         return model;
     }
 
     private EReference doCreateService(EClass model, String name, Instant timestamp) {
         EPackage ePackage = model.getEPackage();
-        EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(name, false), ePackage,
-                (ec) -> createEClassAnnotations(timestamp), ProviderPackage.Literals.SERVICE);
-        ServiceReference ref = EMFUtil.createServiceReference(model, name, service, true);
-        EMFUtil.fillMetadata(ref, timestamp, false, name, List.of());
+        EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(name, false), ePackage, null,
+                ProviderPackage.Literals.SERVICE);
+        EReference ref = EMFUtil.createServiceReference(model, name, service, true);
+        EMFUtil.fillMetadata(EMFUtil.getModelMetadata(ref), timestamp, false, name, List.of());
         return ref;
     }
 
-    private List<EAnnotation> createEClassAnnotations(Instant timestamp) {
-        AnnotationMetadata meta = MetadataFactory.eINSTANCE.createAnnotationMetadata();
-        meta.setTimestamp(timestamp);
-        EAnnotation annotation = EMFUtil.createEAnnotation("metadata", Collections.singletonList(meta));
-        return Collections.singletonList(annotation);
-    }
-
-    private List<EAnnotation> createEClassAnnotations(String model, Instant timestamp) {
-        // TODO make this part of the ModelMetadata?
-        return List.of(createEClassAnnotations(timestamp).get(0),
-                EMFUtil.createEAnnotation("model", Map.of("name", model)));
-    }
-
-    private Map<String, Object> getResourceMetadata(Provider provider, Service svc,
-            String serviceName, final ETypedElement rcFeature) {
+    private Map<String, Object> getResourceMetadata(Provider provider, Service svc, String serviceName,
+            final ETypedElement rcFeature) {
         if (svc == null) {
             svc = createServiceInstance(provider, serviceName, null, null);
         }
-
-        ResourceMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
-        return toMetadataMap(rcFeature, metadata);
+        ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
+        return EMFUtil.toMetadataAttributesToMap(metadata, rcFeature);
     }
 
-    private ResourceMetadata getOrInitializeResourceMetadata(Service svc, final ETypedElement rcFeature) {
-        ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(rcFeature);
+    private ResourceValueMetadata getOrInitializeResourceMetadata(Service svc, final ETypedElement rcFeature) {
+        ResourceValueMetadata metadata = svc.getMetadata().get(rcFeature);
         if (metadata == null) {
-            metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-            if(rcFeature instanceof Metadata) {
-                metadata.getExtra().addAll(((Metadata)rcFeature).getExtra());
+            metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
+            if (EMFUtil.getModelMetadata(rcFeature) != null) {
+                metadata.getExtra().addAll(EMFUtil.getModelMetadata(rcFeature).getExtra());
             }
             svc.getMetadata().put(rcFeature, metadata);
         }
@@ -698,12 +672,6 @@ public class ModelNexus {
         return getResourceMetadata(provider, svc, serviceName, rcFeature);
     }
 
-    private Map<String, Object> toMetadataMap(final ETypedElement rcFeature, final ResourceMetadata metadata) {
-        final Map<String, Object> rcMeta = new HashMap<>();
-        rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(metadata, rcFeature));
-        return rcMeta;
-    }
-
     public TimedValue<Object> getResourceMetadataValue(Provider provider, String serviceName,
             final ETypedElement rcFeature, String key) {
         final Service svc = provider.getService(serviceName);
@@ -711,7 +679,7 @@ public class ModelNexus {
             return null;
         }
 
-        final ResourceMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
+        final ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
         if (metadata != null) {
             for (FeatureCustomMetadata entry : metadata.getExtra()) {
                 if (entry.getName().equals(key)) {
@@ -759,39 +727,20 @@ public class ModelNexus {
             throw new IllegalArgumentException("Invalid timestamp");
         }
 
-        ResourceMetadata metadata = (ResourceMetadata) svc.getMetadata().get(resource);
-        if (metadata == null) {
-            metadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-            if(resource instanceof Metadata) {
-                metadata.getExtra().addAll(((Metadata)resource).getExtra());
-            }
-            svc.getMetadata().put(resource, metadata);
-        }
+        final ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, resource);
 
-        Map<String, Object> oldMetadata = toMetadataMap(resource, metadata);
+        Map<String, Object> oldMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
-        final ResourceMetadata metadataFixed = metadata;
-        metadata.getExtra().stream().filter(fcm -> fcm.getName().equals(metadataKey)).findFirst()
-                .ifPresentOrElse(fcm -> handleFeatureCustomMetadata(fcm, metadataKey, timestamp, value),
-                        () -> metadataFixed.getExtra()
-                                .add(handleFeatureCustomMetadata(
-                                        ProviderFactory.eINSTANCE.createFeatureCustomMetadata(), metadataKey, timestamp,
-                                        value)));
+        metadata.getExtra().stream().filter(fcm -> fcm.getName().equals(metadataKey)).findFirst().ifPresentOrElse(
+                fcm -> EMFUtil.handleFeatureCustomMetadata(fcm, metadataKey, timestamp, value),
+                () -> metadata.getExtra().add(EMFUtil.createFeatureCustomMetadata(metadataKey, timestamp, value)));
 
-        Map<String, Object> newMetadata = toMetadataMap(resource, metadata);
+        Map<String, Object> newMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
         notificationAccumulator.get().metadataValueUpdate(provider.eClass().getEPackage().getNsURI(),
                 EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(), oldMetadata,
                 newMetadata, timestamp);
 
-    }
-
-    private FeatureCustomMetadata handleFeatureCustomMetadata(FeatureCustomMetadata customMetadata, String metadataKey,
-            Instant timestamp, Object value) {
-        customMetadata.setName(metadataKey);
-        customMetadata.setTimestamp(timestamp);
-        customMetadata.setValue(value);
-        return customMetadata;
     }
 
     public Set<String> getModelNames() {
@@ -873,12 +822,11 @@ public class ModelNexus {
         return Collections.unmodifiableMap(result);
     }
 
-    public Map<String, Entry<EClass,Service>> getServiceInstancesForProvider(Provider provider) {
-        Map<String, Entry<EClass,Service>> result = new LinkedHashMap<>();
+    public Map<String, Entry<EClass, Service>> getServiceInstancesForProvider(Provider provider) {
+        Map<String, Entry<EClass, Service>> result = new LinkedHashMap<>();
         getServiceReferencesForModel(provider.eClass()).forEach((feature) -> {
-            result.put(feature.getName(),
-                    new AbstractMap.SimpleImmutableEntry<>((EClass) feature.getEType(),
-                            provider.eIsSet(feature) ? (Service) provider.eGet(feature) : null));
+            result.put(feature.getName(), new AbstractMap.SimpleImmutableEntry<>((EClass) feature.getEType(),
+                    provider.eIsSet(feature) ? (Service) provider.eGet(feature) : null));
         });
 
         if (provider instanceof DynamicProvider) {
@@ -918,14 +866,14 @@ public class ModelNexus {
 
         assertResourceNotExist(serviceEClass, name);
 
-        List<ActionParameter> params = namedParameterTypes.stream().map(EMFUtil::createActionParameter)
+        List<EParameter> params = namedParameterTypes.stream().map(EMFUtil::createActionParameter)
                 .collect(Collectors.toList());
 
-        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ?
-                List.of() : toDefaultFeatureCustomMetadata(defaultMetadata);
+        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ? List.of()
+                : toDefaultFeatureCustomMetadata(defaultMetadata);
 
-        Action action = EMFUtil.createAction(serviceEClass, name, type, params);
-        EMFUtil.fillMetadata(action, null, false, name, defaultFeatureMetadata);
+        EOperation action = EMFUtil.createAction(serviceEClass, name, type, params);
+        EMFUtil.fillMetadata(EMFUtil.getModelMetadata(action), null, false, name, defaultFeatureMetadata);
 
         return action;
     }
@@ -1240,15 +1188,14 @@ public class ModelNexus {
     }
 
     public void deleteModel(String packageUri, String model) {
-        getModel(packageUri, model)
-            .ifPresent(e -> {
-                // Clear any providers using the model
-                getProviders(e).forEach(p -> doDeleteProvider(packageUri, model, p.getId()));
-                EPackage ePackage = e.getEPackage();
-                ePackage.getEClassifiers().remove(e);
-                if(ePackage.getEClassifiers().isEmpty()) {
-                    removeEPackageInternal(ePackage);
-                }
-            });
+        getModel(packageUri, model).ifPresent(e -> {
+            // Clear any providers using the model
+            getProviders(e).forEach(p -> doDeleteProvider(packageUri, model, p.getId()));
+            EPackage ePackage = e.getEPackage();
+            ePackage.getEClassifiers().remove(e);
+            if (ePackage.getEClassifiers().isEmpty()) {
+                removeEPackageInternal(ePackage);
+            }
+        });
     }
 }

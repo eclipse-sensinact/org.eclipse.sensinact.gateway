@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
@@ -26,9 +27,7 @@ import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.Service;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
-import org.eclipse.sensinact.model.core.metadata.NexusMetadata;
-import org.eclipse.sensinact.model.core.metadata.ResourceAttribute;
-import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.ResourceMetadata;
 
 public class ResourceImpl extends CommandScopedImpl implements Resource {
 
@@ -87,8 +86,11 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         // Check the metadata, Sensor if no info
         if (feature instanceof EOperation) {
             return ResourceType.ACTION;
-        } else if (feature instanceof ResourceAttribute) {
-            return ResourceType.valueOf(((ResourceAttribute) feature).getResourceType().getName());
+        } else if (feature instanceof EAttribute) {
+            ResourceMetadata metadata = ((ResourceMetadata) EMFUtil.getModelMetadata(feature));
+            if (metadata != null) {
+                return ResourceType.valueOf(metadata.getResourceType().getName());
+            }
         }
         return ResourceType.PROPERTY;
     }
@@ -118,16 +120,16 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
 
     public static ValueType findValueType(ETypedElement feature) {
         // Check the metadata, Sensor if no info
-        if (feature instanceof ResourceAttribute) {
-            return ValueType.valueOf(((ResourceAttribute) feature).getValueType().getName());
+        if (feature instanceof EAttribute) {
+            return ValueType.valueOf(((ResourceMetadata) EMFUtil.getModelMetadata(feature)).getValueType().getName());
         }
         throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
     }
 
     @Override
     public Map<String, Object> getDefaultMetadata() {
-        if(feature instanceof Metadata) {
-            return EMFUtil.toMetadataAttributesToMap((Metadata) feature, feature);
+        if (feature instanceof EAttribute || feature instanceof EOperation) {
+            return EMFUtil.toMetadataAttributesToMap(feature);
         }
         throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
     }

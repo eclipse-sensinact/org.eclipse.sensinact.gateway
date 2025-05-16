@@ -6,7 +6,6 @@
     { "id": "org.eclipse.sensinact.gateway.core:emf-api:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.core:impl:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.core.models:provider:${gateway.version}" },
-    { "id": "org.eclipse.sensinact.gateway.core.models:metadata:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.core:geo-json:${gateway.version}" },
     { "id": "com.fasterxml.jackson.core:jackson-annotations:2.16.1" },
     { "id": "com.fasterxml.jackson.core:jackson-core:2.16.1" },

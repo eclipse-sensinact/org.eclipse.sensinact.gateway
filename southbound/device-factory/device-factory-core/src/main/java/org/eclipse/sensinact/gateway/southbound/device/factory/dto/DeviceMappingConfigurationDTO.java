@@ -27,6 +27,11 @@ public class DeviceMappingConfigurationDTO {
     public String parser;
 
     /**
+     * A List of filters, where at least on should match if any is set
+     */
+    public Map<String, String> filter = Map.of();
+
+    /**
      * Options to give to the payload parser
      */
     @JsonProperty("parser.options")
