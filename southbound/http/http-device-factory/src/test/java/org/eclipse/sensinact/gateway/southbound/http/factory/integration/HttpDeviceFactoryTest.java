@@ -27,14 +27,17 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -63,6 +66,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Tests the HTTP device factory
@@ -75,6 +81,7 @@ public class HttpDeviceFactoryTest {
     static RequestHandler handler;
     static int httpPort;
 
+    static List<String> requestBodyList;
     final ObjectMapper mapper = new ObjectMapper();
 
     @InjectService
@@ -89,7 +96,18 @@ public class HttpDeviceFactoryTest {
     static void setup() throws Exception {
         threadPool = new QueuedThreadPool();
         threadPool.setName("server");
-        handler = new RequestHandler();
+        handler = new RequestHandler() {
+            @Override
+            public void handle(String target, Request baseRequest, HttpServletRequest request,
+                    HttpServletResponse response) throws IOException, ServletException {
+                Scanner scanner = new Scanner(request.getInputStream()).useDelimiter("\\A");
+                if (scanner.hasNext()) {
+                    requestBodyList.add(scanner.next());
+                }
+                scanner.close();
+                super.handle(target, baseRequest, request, response);
+            }
+        };
         server = new Server(threadPool);
         ServerConnector conn = new ServerConnector(server);
         conn.setPort(0);
@@ -110,6 +128,7 @@ public class HttpDeviceFactoryTest {
     @BeforeEach
     void start() throws InterruptedException {
         session = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
+        requestBodyList = new ArrayList<>();
         queue = new ArrayBlockingQueue<>(32);
         queue2 = new ArrayBlockingQueue<>(32);
     }
@@ -184,11 +203,10 @@ public class HttpDeviceFactoryTest {
         final String inputFileName = "csv-header-typed";
         final String mappingConfig = new String(readFile(inputFileName + "-mapping.json"));
         handler.setData("/data", readFile(inputFileName + ".csv"));
-
         Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
         try {
             config.update(new Hashtable<>(Map.of("tasks.oneshot",
-                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + mappingConfig + "}]")));
+                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + mappingConfig + ", \"body\": [{\"A\": 1}]}]")));
             // Wait for the providers to appear
             assertNotNull(queue.poll(1, TimeUnit.SECONDS));
             assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
@@ -221,6 +239,9 @@ public class HttpDeviceFactoryTest {
             assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
             assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
 
+            // assert json body was sent
+            assertEquals(1, requestBodyList.size());
+            assertEquals("[{\"A\":1}]", requestBodyList.get(0));
             // Only 1 call should have been made
             assertEquals(1, handler.nbVisitedPaths());
             assertEquals(1, handler.nbVisits("/data"));
@@ -295,6 +316,9 @@ public class HttpDeviceFactoryTest {
             // Ensure resource value
             assertEquals(10, session.getResourceValue(provider1, "data", "value", Integer.class));
             assertEquals(20, session.getResourceValue(provider2, "data", "value", Integer.class));
+
+            // assert no body was sent
+            assertEquals(0, requestBodyList.size());
 
             // 2 calls should have been made
             assertEquals(1, handler.nbVisitedPaths());
