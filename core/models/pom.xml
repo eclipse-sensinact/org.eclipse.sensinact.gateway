@@ -24,7 +24,6 @@
 
   <modules>
     <module>provider</module>
-    <module>metadata</module>
     <module>testdata</module>
   </modules>
 

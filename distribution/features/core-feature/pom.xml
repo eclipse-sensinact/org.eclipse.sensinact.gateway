@@ -49,11 +49,6 @@
       <version>${gateway.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
-      <artifactId>metadata</artifactId>
-      <version>${gateway.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>geo-json</artifactId>
       <version>${gateway.version}</version>

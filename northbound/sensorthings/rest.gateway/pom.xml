@@ -59,6 +59,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
+      <artifactId>provider</artifactId>
+      <version>${sensinact.core.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
       <artifactId>session-impl</artifactId>
       <version>${project.version}</version>
