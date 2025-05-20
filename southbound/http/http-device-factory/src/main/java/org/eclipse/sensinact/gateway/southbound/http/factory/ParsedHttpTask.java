@@ -23,6 +23,7 @@ import org.eclipse.sensinact.gateway.southbound.http.factory.config.HttpDeviceFa
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Parsed HTTP task configuration
@@ -76,6 +77,11 @@ public class ParsedHttpTask {
     public final String url;
 
     /**
+     * Content body
+     */
+    public final String body;
+
+    /**
      * SSL options
      */
     public final boolean ignoreSslErrors;
@@ -112,6 +118,12 @@ public class ParsedHttpTask {
         this.url = task.url;
         if (this.url == null || this.url.isBlank()) {
             throw new IllegalArgumentException("No URL given");
+        }
+        if (task.body != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            this.body = mapper.writeValueAsString(task.body);
+        } else {
+            this.body = null;
         }
 
         this.followHttpRedirect = task.httpFollowRedirect;

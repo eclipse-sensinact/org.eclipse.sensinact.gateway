@@ -53,6 +53,11 @@ public class HttpDeviceFactoryConfigurationTaskDTO {
     public JsonNode headers;
 
     /**
+     * Http body
+     */
+    public JsonNode body;
+
+    /**
      * Ignore SSL errors
      */
     @JsonProperty("ssl.ignoreErrors")

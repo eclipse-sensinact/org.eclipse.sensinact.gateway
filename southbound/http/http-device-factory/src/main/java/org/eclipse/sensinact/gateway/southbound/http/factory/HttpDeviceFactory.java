@@ -28,6 +28,7 @@ import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.api.Result;
 import org.eclipse.jetty.client.util.BasicAuthentication;
 import org.eclipse.jetty.client.util.BufferingResponseListener;
+import org.eclipse.jetty.client.util.StringRequestContent;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.sensinact.gateway.southbound.device.factory.DeviceFactoryException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingHandler;
@@ -163,6 +164,9 @@ public class HttpDeviceFactory {
                     headers.add(header.key(), header.value());
                 }
             });
+            if (task.body != null) {
+                request.body(new StringRequestContent(task.body));
+            }
 
             if (task.authUser != null) {
                 Authentication.Result authn = new BasicAuthentication.BasicResult(null, task.authUser,
