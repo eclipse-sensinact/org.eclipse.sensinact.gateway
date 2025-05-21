@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
+import org.eclipse.sensinact.core.annotation.dto.MapAction;
 import org.eclipse.sensinact.core.annotation.dto.Metadata;
 import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
@@ -1085,6 +1087,98 @@ public class AnnotationBasedDtoExtractorTest {
 
             assertEquals(Map.of("units", METADATA_VALUE), mud.metadata);
             assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, mud.actionOnDuplicate);
+        }
+    }
+
+    @Nested
+    class OtherTests {
+
+        @ModelPackageUri(MODEL_PACKAGE_URI)
+        @Model(MODEL)
+        @Provider(PROVIDER)
+        @Service(SERVICE)
+        @Resource(RESOURCE)
+        public static class BasicDtoMetadataMap {
+            @Data
+            public Integer foo;
+
+            @Metadata(onMap = MapAction.USE_KEYS_AS_FIELDS, onNull = NullAction.UPDATE, onDuplicate = DuplicateAction.UPDATE_ALWAYS)
+            public Map<String,String> fizzbuzz;
+        }
+
+        @Test
+        void nullMetadataValues() {
+            BasicDtoClassLevel dto = new BasicDtoClassLevel();
+            dto.foo = VALUE;
+            dto.fizzbuzz = null;
+            dto.units = null;
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicDtoClassLevel.class).getUpdates(dto);
+
+            assertEquals(2, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey(METADATA_KEY)).findFirst().get();
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap(METADATA_KEY, null), dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
+        }
+
+        @Test
+        void nullMetadataMapValues() {
+            BasicDtoMetadataMap dto = new BasicDtoMetadataMap();
+            dto.foo = 5;
+            dto.fizzbuzz = new HashMap<>();
+            dto.fizzbuzz.put(METADATA_KEY, null);
+            dto.fizzbuzz.put("bar", "foobar");
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicDtoMetadataMap.class).getUpdates(dto);
+
+            assertEquals(2, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE, dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey(METADATA_KEY)).findFirst().get();
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(dto.fizzbuzz, dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud2.actionOnDuplicate);
         }
     }
 
