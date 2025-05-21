@@ -36,7 +36,7 @@ public class Observation extends Id {
 
     @JsonInclude(NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    public Instant validTime;
+    public TimeInterval validTime;
 
     @JsonInclude(NON_NULL)
     public Map<String, Object> parameters;
