@@ -26,8 +26,10 @@ import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
@@ -388,8 +390,10 @@ public class AnnotationMapping {
                         dto.removeNullValues = true;
                         break;
                     case USE_KEYS_AS_FIELDS:
-                        processedMd = ((Map<?, ?>) md).entrySet().stream()
-                                .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), Entry::getValue));
+                        Map<?, ?> mdMap = (Map<?, ?>) md;
+                        Map<String, Object> tmp = new HashMap<>(mdMap.size() * 2);
+                        mdMap.entrySet().stream().forEach(e -> tmp.put(Objects.toString(e.getKey()), e.getValue()));
+                        processedMd = Collections.unmodifiableMap(tmp);
                         break;
                     default:
                         firstFailure = new IllegalArgumentException("Unrecognised Map Action " + ma + " for field "
