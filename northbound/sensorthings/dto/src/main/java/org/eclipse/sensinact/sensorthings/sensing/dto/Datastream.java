@@ -14,10 +14,9 @@ package org.eclipse.sensinact.sensorthings.sensing.dto;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import java.time.Instant;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.geojson.Polygon;
+import org.eclipse.sensinact.gateway.geojson.Geometry;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -30,15 +29,15 @@ public class Datastream extends NameDescription {
     public UnitOfMeasurement unitOfMeasurement;
 
     @JsonInclude(NON_NULL)
-    public Polygon observedArea;
+    public Geometry observedArea;
 
     @JsonInclude(NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    public Instant phenomenonTime;
+    public TimeInterval phenomenonTime;
 
     @JsonInclude(NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    public Instant resultTime;
+    public TimeInterval resultTime;
 
     @JsonInclude(NON_NULL)
     public Map<String, Object> properties;
