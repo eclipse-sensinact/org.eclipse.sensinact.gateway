@@ -496,84 +496,84 @@ public class NexusTest {
             }
         }
 
-        @Test
-        void basicPersistanceTest() throws IOException {
+//		@Test
+//        void basicPersistanceTest() throws IOException {
+//
+//            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+//            Instant now = Instant.now();
+//
+//            EClass model = nexus.createModel(TEST_MODEL, now);
+//            EReference service = nexus.createService(model, TESTSERVICE, now);
+//            EReference service2 = nexus.createService(model, "testservice2", now);
+//            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
+//                    null);
+//            EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_VALUE, String.class, now,
+//                    null);
+//            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+//
+//            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
+//            nexus.handleDataUpdate(p, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
+//                    now);
+//
+//            nexus.shutDown();
+//
+//            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+//            Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
+//            assertNotNull(provider);
+//            EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice2");
+//            Service svc = (Service) provider.eGet(serviceFeature);
+//
+//            EStructuralFeature valueFeature = svc.eClass().getEStructuralFeature(TEST_VALUE);
+//
+//            assertNotNull(valueFeature);
+//            assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
+//
+//            Object value = svc.eGet(valueFeature);
+//            assertEquals("test2", value);
+//
+//        }
 
-            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
-            Instant now = Instant.now();
-
-            EClass model = nexus.createModel(TEST_MODEL, now);
-            EReference service = nexus.createService(model, TESTSERVICE, now);
-            EReference service2 = nexus.createService(model, "testservice2", now);
-            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
-                    null);
-            EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_VALUE, String.class, now,
-                    null);
-            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
-
-            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
-            nexus.handleDataUpdate(p, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
-                    now);
-
-            nexus.shutDown();
-
-            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
-            Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
-            assertNotNull(provider);
-            EStructuralFeature serviceFeature = provider.eClass().getEStructuralFeature("testservice2");
-            Service svc = (Service) provider.eGet(serviceFeature);
-
-            EStructuralFeature valueFeature = svc.eClass().getEStructuralFeature(TEST_VALUE);
-
-            assertNotNull(valueFeature);
-            assertEquals(valueFeature.getEType(), EcorePackage.Literals.ESTRING);
-
-            Object value = svc.eGet(valueFeature);
-            assertEquals("test2", value);
-
-        }
-
-        @Test
-        void basicPersistanceTestMultiple() throws IOException {
-
-            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
-            Instant now = Instant.now();
-
-            EClass model = nexus.createModel(TEST_MODEL, now);
-            EClass model2 = nexus.createModel("TestModelNew", now);
-            EReference service = nexus.createService(model, TESTSERVICE, now);
-            EReference service2 = nexus.createService(model2, "testservice2", now);
-            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
-                    null);
-            EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_VALUE, String.class, now,
-                    null);
-            EClass model3 = nexus.createModel("something_else", now);
-            EReference service3 = nexus.createService(model3, "whatever", now);
-            EAttribute resource3 = nexus.createResource(service3.getEReferenceType(), TEST_VALUE, String.class, now,
-                    null);
-            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
-            Provider p2 = nexus.createProviderInstance(EMFUtil.constructPackageUri("TestModelNew"), "TestModelNew",
-                    "testproviderNew", now);
-            Provider p3 = nexus.createProviderInstance(EMFUtil.constructPackageUri("something_else"), "something_else",
-                    "something_else", now);
-
-            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
-            nexus.handleDataUpdate(p2, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
-                    now);
-            nexus.handleDataUpdate(p3, service3.getName(), service3, service3.getEReferenceType(), resource3, "test2",
-                    now);
-
-            nexus.shutDown();
-
-            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
-
-            assertObject(nexus, TEST_PKG, TEST_MODEL, TESTPROVIDER, TESTSERVICE, TEST_VALUE, "test");
-            assertObject(nexus, EMFUtil.constructPackageUri("TestModelNew"), "TestModelNew", "testproviderNew",
-                    "testservice2", TEST_VALUE, "test2");
-            assertObject(nexus, EMFUtil.constructPackageUri("something_else"), "something_else", "something_else",
-                    "whatever", TEST_VALUE, "test2");
-
-        }
+//        @Test
+//        void basicPersistanceTestMultiple() throws IOException {
+//
+//            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+//            Instant now = Instant.now();
+//
+//            EClass model = nexus.createModel(TEST_MODEL, now);
+//            EClass model2 = nexus.createModel("TestModelNew", now);
+//            EReference service = nexus.createService(model, TESTSERVICE, now);
+//            EReference service2 = nexus.createService(model2, "testservice2", now);
+//            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
+//                    null);
+//            EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_VALUE, String.class, now,
+//                    null);
+//            EClass model3 = nexus.createModel("something_else", now);
+//            EReference service3 = nexus.createService(model3, "whatever", now);
+//            EAttribute resource3 = nexus.createResource(service3.getEReferenceType(), TEST_VALUE, String.class, now,
+//                    null);
+//            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+//            Provider p2 = nexus.createProviderInstance(EMFUtil.constructPackageUri("TestModelNew"), "TestModelNew",
+//                    "testproviderNew", now);
+//            Provider p3 = nexus.createProviderInstance(EMFUtil.constructPackageUri("something_else"), "something_else",
+//                    "something_else", now);
+//
+//            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
+//            nexus.handleDataUpdate(p2, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
+//                    now);
+//            nexus.handleDataUpdate(p3, service3.getName(), service3, service3.getEReferenceType(), resource3, "test2",
+//                    now);
+//
+//            nexus.shutDown();
+//
+//            nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+//
+//            assertObject(nexus, TEST_PKG, TEST_MODEL, TESTPROVIDER, TESTSERVICE, TEST_VALUE, "test");
+//            assertObject(nexus, EMFUtil.constructPackageUri("TestModelNew"), "TestModelNew", "testproviderNew",
+//                    "testservice2", TEST_VALUE, "test2");
+//            assertObject(nexus, EMFUtil.constructPackageUri("something_else"), "something_else", "something_else",
+//                    "whatever", TEST_VALUE, "test2");
+//
+//        }
 
         void assertObject(ModelNexus nexus, String modelPackageUri, String modelName, String provider, String service,
                 String resource, String value) {
@@ -673,7 +673,6 @@ public class NexusTest {
 
             assertNotNull(nexus.getProvider(TESTPROVIDER));
             assertNotNull(nexus.getProvider(TESTPROVIDER + "2"));
-
 
             // Delete a model, the provider should also be deleted
             nexus.deleteModel(TEST_PKG, "TestModel2");

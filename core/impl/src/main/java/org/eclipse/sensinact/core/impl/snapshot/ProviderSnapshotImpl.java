@@ -14,11 +14,9 @@
 package org.eclipse.sensinact.core.impl.snapshot;
 
 import java.time.Instant;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.model.core.provider.Provider;

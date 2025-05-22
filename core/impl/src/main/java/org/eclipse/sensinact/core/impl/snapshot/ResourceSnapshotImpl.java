@@ -25,7 +25,6 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.model.core.metadata.MetadataFactory;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.Service;
 
@@ -79,16 +78,10 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
 
         Service modelService = parent.getModelService();
         Metadata rcMetadata = modelService == null ? null : modelService.getMetadata().get(rcFeature);
-        if (rcMetadata == null) {
-            rcMetadata = MetadataFactory.eINSTANCE.createResourceMetadata();
-            if(rcFeature instanceof Metadata) {
-                rcMetadata.getExtra().addAll(((Metadata)rcFeature).getExtra());
-            }
-        }
         final Map<String, Object> rcMeta = new HashMap<>();
         rcMeta.putAll(EMFUtil.toMetadataAttributesToMap(rcMetadata, rcFeature));
         this.metadata = rcMeta;
-}
+    }
 
     @Override
     public String toString() {

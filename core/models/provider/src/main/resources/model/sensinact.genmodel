@@ -4,7 +4,8 @@
     modelDirectory="/org.eclipse.sensinact.core.model/src" modelPluginID="org.eclipse.sensinact.core.model"
     modelName="sensinact" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container$Dynamic$Permissive"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="11.0" suppressGenModelAnnotations="false"
-    copyrightFields="false" operationReflection="true" importOrganizing="true" oSGiCompatible="true">
+    copyrightFields="false" usedGenPackages="../../../../../org.eclipse.emf.ecore/model/Ecore.genmodel#//ecore"
+    operationReflection="true" importOrganizing="true" oSGiCompatible="true">
   <foreignModel>sensinact.ecore</foreignModel>
   <genPackages prefix="Provider" basePackage="org.eclipse.sensinact.model.core" resource="XMI"
       disposableProviderFactory="true" ecorePackage="sensinact.ecore#/">
@@ -61,8 +62,8 @@
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//FeatureCustomMetadata">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/value"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/timestamp"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/value"/>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//ServiceMap">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//ServiceMap/value"/>
@@ -82,5 +83,23 @@
         <genParameters ecoreParameter="sensinact.ecore#//DynamicProvider/getServiceEClass/serviceName"/>
       </genOperations>
     </genClasses>
+    <genClasses image="false" ecoreClass="sensinact.ecore#//NexusMetadata">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//NexusMetadata/locked"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//NexusMetadata/originalName"/>
+    </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//ModelMetadata"/>
+    <genClasses ecoreClass="sensinact.ecore#//ResourceMetadata">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceMetadata/resourceType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceMetadata/valueType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceMetadata/externalGet"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceMetadata/externalGetCacheMs"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceMetadata/externalSet"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceMetadata/stale"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//ResourceMetadata/type"/>
+    </genClasses>
+    <genClasses ecoreClass="sensinact.ecore#//ServiceReferenceMetadata"/>
+    <genClasses ecoreClass="sensinact.ecore#//ActionParameterMetadata"/>
+    <genClasses ecoreClass="sensinact.ecore#//ActionMetadata"/>
+    <genClasses ecoreClass="sensinact.ecore#//ResourceValueMetadata"/>
   </genPackages>
 </genmodel:GenModel>

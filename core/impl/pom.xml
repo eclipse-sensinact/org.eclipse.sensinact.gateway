@@ -34,11 +34,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}.models</groupId>
-      <artifactId>metadata</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}.models</groupId>
       <artifactId>testdata</artifactId>
       <version>${project.version}</version>
     </dependency>
