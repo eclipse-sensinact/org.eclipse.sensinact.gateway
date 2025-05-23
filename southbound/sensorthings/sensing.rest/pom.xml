@@ -85,52 +85,6 @@
       </plugin>
       <!-- Generating model classes -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-model</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}/src/main/resources</directory>
-                </resource>
-              </resources>
-              <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.8.0</version>
-        <executions>
-          <execution>
-            <id>get-sensinact-model</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
-                  <artifactId>provider</artifactId>
-                  <version>${project.version}</version>
-                  <includes>model/sensinact.*</includes>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-generate-maven-plugin</artifactId>
         <version>${bnd.version}</version>
@@ -143,12 +97,12 @@
           </externalPlugins>
           <steps>
             <step>
-              <trigger>target/generated-resources/model/sensorthings.genmodel</trigger>
+              <trigger>src/main/resources/model/sensorthings.genmodel</trigger>
               <generateCommand>geckoEMF</generateCommand>
               <output>src/main/java</output>
               <clear>false</clear>
               <properties>
-                <genmodel>target/generated-resources/model/sensorthings.genmodel</genmodel>
+                <genmodel>src/main/resources/model/sensorthings.genmodel</genmodel>
               </properties>
             </step>
           </steps>

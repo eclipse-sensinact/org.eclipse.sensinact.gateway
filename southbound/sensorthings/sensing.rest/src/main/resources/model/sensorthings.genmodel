@@ -5,7 +5,7 @@
     modelPluginID="org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest"
     modelName="SensorThings" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="17.0" copyrightFields="false"
-    usedGenPackages="sensinact.genmodel#//provider ../../../../../org.eclipse.emf.ecore/model/Ecore.genmodel#//ecore"
+    usedGenPackages="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.genmodel#//provider ../../../../../org.eclipse.emf.ecore/model/Ecore.genmodel#//ecore"
     operationReflection="true" importOrganizing="true" oSGiCompatible="true">
   <foreignModel>sensorthings.ecore</foreignModel>
   <genPackages prefix="Sensorthings" basePackage="org.eclipse.sensinact.southbound.sensorthings.model"

@@ -5,14 +5,14 @@
   <eAnnotations source="http://www.eclipse.org/OCL/Import">
     <details key="ecore" value="http://www.eclipse.org/emf/2002/Ecore"/>
   </eAnnotations>
-  <eClassifiers xsi:type="ecore:EClass" name="SensorThingsDevice" eSuperTypes="sensinact.ecore#//DynamicProvider">
+  <eClassifiers xsi:type="ecore:EClass" name="SensorThingsDevice" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//DynamicProvider">
     <eStructuralFeatures xsi:type="ecore:EReference" name="thing" eType="#//SensorThingsService"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="SensorThingsService" eSuperTypes="sensinact.ecore#//Service">
+  <eClassifiers xsi:type="ecore:EClass" name="SensorThingsService" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="DataStreamService" eSuperTypes="sensinact.ecore#//Service">
+  <eClassifiers xsi:type="ecore:EClass" name="DataStreamService" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Service">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="sensorThingsId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
