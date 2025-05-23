@@ -1,0 +1,6 @@
+The test examples used in this module are based on the FROST server demo instructions found at https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html
+
+This includes:
+
+* The demo FROST compose file from https://github.com/FraunhoferIOSB/FROST-Server/blob/v2.5.6/scripts/docker-compose.yaml
+* A gist containing some basic test data found at https://gist.github.com/hylkevds/4ffba774fe0128305047b7bcbcd2672e
