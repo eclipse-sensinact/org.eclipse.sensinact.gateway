@@ -44,6 +44,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>query-handler-impl</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
       <artifactId>security-api</artifactId>
       <version>${project.version}</version>
