@@ -43,8 +43,9 @@
 	org.eclipse.sensinact.gateway.filters.filters.core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.resource.selector;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.resource.selector.impl;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.northbound.query-handler;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.northbound.query-handler-tests;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.query-handler-api;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.query-handler-impl;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.northbound.query-handler-impl-tests;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.security.security-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.session.session-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
