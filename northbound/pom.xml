@@ -33,7 +33,8 @@
 
   <modules>
     <module>session</module>
-    <module>query-handler</module>
+    <module>query-handler-api</module>
+    <module>query-handler-impl</module>
     <module>rest</module>
     <module>websocket</module>
     <module>sensorthings</module>

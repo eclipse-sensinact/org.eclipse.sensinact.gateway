@@ -17,20 +17,24 @@
     <artifactId>northbound</artifactId>
     <version>${revision}${changelist}</version>
   </parent>
-  <artifactId>websocket</artifactId>
-  <name>SensiNact Northbound WebSocket</name>
-  <description>Northbound WebSocket access to sensiNact</description>
-
-  <properties>
-    <jakarta.ws.version>2.1.0</jakarta.ws.version>
-    <jetty.version>11.0.13</jetty.version>
-    <felix.http.version>5.0.4</felix.http.version>
-  </properties>
+  <artifactId>query-handler-impl</artifactId>
+  <name>SensiNact Northbound Query Handler Implementation</name>
+  <description>Northbound Query Handler Implementation</description>
 
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>query-handler-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+      <artifactId>session-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -39,26 +43,14 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>query-handler-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>query-handler-impl</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.sensinact.gateway.northbound.security</groupId>
-      <artifactId>security-api</artifactId>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>filters.core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>
-      <artifactId>ldap</artifactId>
+      <artifactId>resource.selector</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- SL4J -->
@@ -105,25 +97,16 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.test.junit5.cm</artifactId>
-      <scope>test</scope>
-    </dependency>
 
     <!-- OSGi -->
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
       <artifactId>osgi.cmpn</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -141,71 +124,11 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- SPI fly / Service loader -->
-    <dependency>
-      <groupId>org.apache.aries.spifly</groupId>
-      <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Jakarta RS -->
-    <dependency>
-      <groupId>jakarta.websocket</groupId>
-      <artifactId>jakarta.websocket-api</artifactId>
-      <version>${jakarta.ws.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.websocket</groupId>
-      <artifactId>jakarta.websocket-client-api</artifactId>
-      <version>${jakarta.ws.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>jakarta.annotation</groupId>
-      <artifactId>jakarta.annotation-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-
     <!-- JSON provider -->
     <dependency>
       <groupId>org.eclipse.parsson</groupId>
       <artifactId>jakarta.json</artifactId>
       <scope>test</scope>
-    </dependency>
-
-    <!-- Websockets -->
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.http.jetty</artifactId>
-      <version>${felix.http.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.http.servlet-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.enterprise</groupId>
-      <artifactId>jakarta.enterprise.cdi-api</artifactId>
-      <version>3.0.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-jetty-server</artifactId>
-      <version>${jetty.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-jetty-client</artifactId>
-      <version>${jetty.version}</version>
     </dependency>
   </dependencies>
 

@@ -17,9 +17,9 @@
     <artifactId>northbound</artifactId>
     <version>${revision}${changelist}</version>
   </parent>
-  <artifactId>query-handler</artifactId>
-  <name>SensiNact Northbound Query Handler</name>
-  <description>Northbound Query Handler</description>
+  <artifactId>query-handler-api</artifactId>
+  <name>SensiNact Northbound Query Handler API</name>
+  <description>Northbound Query Handler API</description>
 
   <dependencies>
     <dependency>
@@ -137,11 +137,7 @@
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-testing-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-resolver-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
+      <!--<plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-run-maven-plugin</artifactId>
         <version>${bnd.version}</version>
@@ -149,7 +145,7 @@
           <includeDependencyManagement>true</includeDependencyManagement>
           <bndrun>integration-test.bndrun</bndrun>
         </configuration>
-      </plugin>
+      </plugin>-->
     </plugins>
   </build>
 </project>
