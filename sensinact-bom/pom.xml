@@ -65,7 +65,7 @@
       </dependency>
       <dependency>
         <groupId>org.eclipse.sensinact.gateway.northbound</groupId>
-        <artifactId>query-handler</artifactId>
+        <artifactId>query-handler-api</artifactId>
         <version>${sensinact.version}</version>
       </dependency>
       <dependency>
