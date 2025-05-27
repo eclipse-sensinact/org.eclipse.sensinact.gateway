@@ -111,7 +111,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueType" eType="#//ValueType"
         defaultValueLiteral="MODIFIABLE"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGetCacheMs" eType="ecore:EDataType ../../../../../org.eclipse.emf.ecore/model/Ecore.ecore#//ELong"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalGetCacheMs" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
         defaultValueLiteral="0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="externalSet" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="stale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt">
