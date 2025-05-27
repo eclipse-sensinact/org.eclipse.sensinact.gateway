@@ -30,11 +30,11 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -339,7 +339,7 @@ public class WebSocketEndpoint {
         }
 
         final Predicate<ResourceNotification> p;
-        if (query.filter != null && !query.filter.isBlank()) {
+        if (query.filter != null) {
             Predicate<ResourceNotification> queryFilter = prepareFilter(query);
             if (queryFilter != null) {
                 p = eventPredicate.and(queryFilter);
@@ -356,7 +356,7 @@ public class WebSocketEndpoint {
                 if (ws == null || !ws.isOpen()) {
                     logger.warn("Detected closed WebSocket. Stop listening");
                     userSession.removeListener(listenerId.get());
-                } else if (p.test(evt) && checkLatch(latch)) {
+                } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
                     sendNotification(ws, listenerId.get(), new ResourceDataNotificationDTO(evt));
                 }
             } catch (Throwable e) {

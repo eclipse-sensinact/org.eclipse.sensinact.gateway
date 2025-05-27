@@ -26,7 +26,7 @@ public class QuerySubscribeDTO extends AbstractQueryDTO {
     /**
      * Resource filter
      */
-    public String filter;
+    public Object filter;
 
     /**
      * Filter language

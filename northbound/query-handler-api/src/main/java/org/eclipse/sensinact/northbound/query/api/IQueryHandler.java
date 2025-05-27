@@ -35,11 +35,11 @@ public interface IQueryHandler {
     /**
      * Parses the given filter
      *
-     * @param filter         Filter string
+     * @param filter         Filter content (must not be null)
      * @param filterLanguage Filter language
      * @return Parsed filter, null if empty filter
      * @throws StatusException Error parsing filter: 501 for missing filter parser,
      *                         500 for parser exception
      */
-    ICriterion parseFilter(String filter, String filterLanguage) throws StatusException;
+    ICriterion parseFilter(Object filter, String filterLanguage) throws StatusException;
 }

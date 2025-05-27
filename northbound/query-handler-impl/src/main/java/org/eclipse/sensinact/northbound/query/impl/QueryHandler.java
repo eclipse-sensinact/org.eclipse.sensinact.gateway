@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -40,6 +41,7 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterCommandHelper;
 import org.eclipse.sensinact.filters.api.FilterException;
 import org.eclipse.sensinact.filters.api.IFilterHandler;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
@@ -91,6 +93,10 @@ import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 /**
  * Implementation of the query handler
  */
@@ -103,6 +109,8 @@ public class QueryHandler implements IQueryHandler {
      * Default language to use for filter parsers
      */
     private static final String DEFAULT_FILTER_LANGUAGE = "ldap";
+
+    private final ObjectMapper mapper = JsonMapper.builder().build();
 
     /**
      * SensiNact gateway thread
@@ -186,18 +194,47 @@ public class QueryHandler implements IQueryHandler {
     }
 
     @Override
-    public ICriterion parseFilter(final String filter, final String filterLanguage) throws StatusException {
+    public ICriterion parseFilter(final Object filter, final String filterLanguage) throws StatusException {
         synchronized (filterHandlerRef) {
-            IFilterHandler filterHandler = filterHandlerRef.get();
-            if (filterHandler == null) {
-                throw new StatusException(501, "No filter implementation available");
-            }
+            if ("resource.selector".equals(filterLanguage)) {
+                // Parse a resource selector
+                final Stream<ResourceSelector> selectorsStream;
+                if (filter instanceof Map single) {
+                    final ResourceSelector parsed = mapper.convertValue(single, ResourceSelector.class);
+                    if (parsed == null) {
+                        throw new StatusException(400, "Invalid resource selector");
+                    }
+                    selectorsStream = Stream.of(parsed);
+                } else if (filter instanceof List filters) {
+                    final List<ResourceSelector> parsed = mapper.convertValue(filters,
+                            new TypeReference<List<ResourceSelector>>() {
+                            });
+                    if (parsed == null || parsed.isEmpty()) {
+                        throw new StatusException(400, "Invalid resource selectors");
+                    }
+                    selectorsStream = parsed.stream();
+                } else {
+                    throw new StatusException(400, "Invalid resource selector format");
+                }
+                return resourceSelectorFilterFactory.parseResourceSelector(selectorsStream);
+            } else if (filter instanceof String filterString) {
+                if(filterString.isEmpty()) {
+                    return null;
+                }
 
-            try {
-                return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
-                        filter);
-            } catch (Throwable t) {
-                throw new StatusException(500, "Error parsing filter: " + t.getMessage());
+                IFilterHandler filterHandler = filterHandlerRef.get();
+                if (filterHandler == null) {
+                    throw new StatusException(501, "No filter implementation available");
+                }
+
+                try {
+                    return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
+                            filterString);
+                } catch (Throwable t) {
+                    throw new StatusException(500, "Error parsing filter: " + t.getMessage());
+                }
+            } else {
+                throw new StatusException(501, "Unsupported filter format");
             }
         }
     }
@@ -382,12 +419,11 @@ public class QueryHandler implements IQueryHandler {
     /**
      * Executes the given parser
      *
-     * @param filter         Filter
+     * @param filter Filter
      * @return Matching snapshot
      * @throws StatusException Error parsing or executing filter
      */
-    private Collection<ProviderSnapshot> executeFilter(final ICriterion filter)
-            throws StatusException {
+    private Collection<ProviderSnapshot> executeFilter(final ICriterion filter) throws StatusException {
         try {
             return FilterCommandHelper.executeFilter(gatewayThread, filter);
         } catch (FilterException e) {
@@ -399,7 +435,7 @@ public class QueryHandler implements IQueryHandler {
      * Root of snapshot handling
      *
      * @param userSession Caller session
-     * @param query         Query description
+     * @param query       Query description
      * @return Result DTO
      */
     private AbstractResultDTO handleSnapshot(final SensiNactSession userSession, final QuerySnapshotDTO query)
@@ -410,25 +446,27 @@ public class QueryHandler implements IQueryHandler {
         result.uri = "/";
         result.statusCode = 200;
 
-        for (var filter: query.filter) {
+        for (var filter : query.filter) {
             ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(filter);
-            for (var providerSnapshot: executeFilter(criterion)) {
-                for (var serviceSnapshot: providerSnapshot.getServices()) {
-                    for (var resourceSnapshot: serviceSnapshot.getResources()) {
+            for (var providerSnapshot : executeFilter(criterion)) {
+                for (var serviceSnapshot : providerSnapshot.getServices()) {
+                    for (var resourceSnapshot : serviceSnapshot.getResources()) {
                         if (resourceSnapshot.getValue() != null) {
-                            SnapshotProviderDTO providerDTO = result.providers.computeIfAbsent(providerSnapshot.getName(), (name) -> {
-                                var dto = new SnapshotProviderDTO();
-                                dto.name = providerSnapshot.getName();
-                                dto.modelName = providerSnapshot.getModelName();
-                                dto.services = new HashMap<>();
-                                return dto;
-                            });
-                            SnapshotServiceDTO serviceDTO = providerDTO.services.computeIfAbsent(serviceSnapshot.getName(), (name) -> {
-                                var dto = new SnapshotServiceDTO();
-                                dto.name = serviceSnapshot.getName();
-                                dto.resources = new HashMap<>();
-                                return dto;
-                            });
+                            SnapshotProviderDTO providerDTO = result.providers
+                                    .computeIfAbsent(providerSnapshot.getName(), (name) -> {
+                                        var dto = new SnapshotProviderDTO();
+                                        dto.name = providerSnapshot.getName();
+                                        dto.modelName = providerSnapshot.getModelName();
+                                        dto.services = new HashMap<>();
+                                        return dto;
+                                    });
+                            SnapshotServiceDTO serviceDTO = providerDTO.services
+                                    .computeIfAbsent(serviceSnapshot.getName(), (name) -> {
+                                        var dto = new SnapshotServiceDTO();
+                                        dto.name = serviceSnapshot.getName();
+                                        dto.resources = new HashMap<>();
+                                        return dto;
+                                    });
                             SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
                             resourceDTO.name = resourceSnapshot.getName();
                             resourceDTO.type = resourceSnapshot.getType().getName();
