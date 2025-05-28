@@ -41,5 +41,5 @@ public interface IQueryHandler {
      * @throws StatusException Error parsing filter: 501 for missing filter parser,
      *                         500 for parser exception
      */
-    ICriterion parseFilter(Object filter, String filterLanguage) throws StatusException;
+    ICriterion parseFilter(String filter, String filterLanguage) throws StatusException;
 }

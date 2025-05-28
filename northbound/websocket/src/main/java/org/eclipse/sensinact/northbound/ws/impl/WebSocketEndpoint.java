@@ -242,6 +242,11 @@ public class WebSocketEndpoint {
             return null;
         }
 
+        // TODO this could be replaced with:
+        //
+        // parsedFilter.dataEventFilter();
+        // parsedFilter.dataTopics();
+        
         Predicate<ResourceNotification> predicate = null;
 
         // Basic filters
