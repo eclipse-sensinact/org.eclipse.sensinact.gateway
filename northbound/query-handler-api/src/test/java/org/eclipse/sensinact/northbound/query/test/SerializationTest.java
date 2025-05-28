@@ -14,6 +14,8 @@ package org.eclipse.sensinact.northbound.query.test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
@@ -34,6 +36,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodParameterDTO;
@@ -532,5 +535,100 @@ public class SerializationTest {
         assertEquals(original.statusCode, abstractParsed.statusCode);
         assertEquals(original.uri, abstractParsed.uri);
         assertEquals(original.providers, ((ResultListProvidersDTO) abstractParsed).providers);
+    }
+
+    @Test
+    void testSubscribeRequestNoFilter() throws JsonProcessingException {
+        String request =
+                """
+                {
+                  "operation": "SUBSCRIBE",
+                  "requestId": "1234",
+                  "uri": "/fizz/buzz/fizzbuzz/meta"
+                }
+                """;
+        QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
+        
+        assertEquals(EQueryType.SUBSCRIBE, query.operation);
+        assertEquals("1234", query.requestId);
+        assertNull(query.filter);
+        assertNotNull(query.uri);
+        assertEquals("fizz", query.uri.provider);
+        assertEquals("buzz", query.uri.service);
+        assertEquals("fizzbuzz", query.uri.resource);
+        assertEquals("meta", query.uri.metadata);
+    }
+    
+    @Test
+    void testSubscribeRequestLDAP() throws JsonProcessingException {
+        String request =
+                """
+                {
+                  "operation": "SUBSCRIBE",
+                  "requestId": "1234",
+                  "filter": "(foo.bar=foobar)"
+                }
+                """;
+        QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
+        
+        assertEquals(EQueryType.SUBSCRIBE, query.operation);
+        assertEquals("1234", query.requestId);
+        assertEquals("(foo.bar=foobar)", query.filter);
+        assertNull(query.uri);
+    }
+
+    @Test
+    void testSubscribeRequestResourceSelector() throws JsonProcessingException {
+        String request =
+                """
+                {
+                  "operation": "SUBSCRIBE",
+                  "requestId": "1234",
+                  "filterLanguage": "sensinact.resource.selector",
+                  "filter": {
+                    "provider": {
+                      "value": "foo"
+                    }
+                  }
+                }
+                """;
+        QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
+        
+        assertEquals(EQueryType.SUBSCRIBE, query.operation);
+        assertEquals("1234", query.requestId);
+        assertEquals("""
+                {"provider":{"value":"foo"}}""", query.filter);
+        assertNull(query.uri);
+    }
+
+    @Test
+    void testSubscribeRequestMultipleResourceSelector() throws JsonProcessingException {
+        String request =
+                """
+                {
+                  "operation": "SUBSCRIBE",
+                  "requestId": "1234",
+                  "filterLanguage": "sensinact.resource.selector",
+                  "filter": [
+                    {
+                      "provider": {
+                        "value": "foo"
+                      }
+                    },
+                    {
+                      "provider": {
+                        "value": "bar"
+                      }
+                    }
+                  ]
+                }
+                """;
+        QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
+        
+        assertEquals(EQueryType.SUBSCRIBE, query.operation);
+        assertEquals("1234", query.requestId);
+        assertEquals("""
+                [{"provider":{"value":"foo"}},{"provider":{"value":"bar"}}]""", query.filter);
+        assertNull(query.uri);
     }
 }

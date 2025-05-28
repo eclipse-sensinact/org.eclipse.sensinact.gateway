@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,6 +34,7 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.filters.api.IFilterParser;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
@@ -303,5 +305,78 @@ public class ResourceSelectorIntegrationTest {
         results = applyFilter(rs);
         assertEquals(1, results.size());
         assertFindProviders(results, "naming2");
+    }
+    
+    
+    /**
+     * Test the resource selector as a Filter parser
+     * @param parser
+     * @throws Exception
+     */
+    @Test
+    void testResourceValueFromJsonString(
+            @InjectService(filter = "(" + IFilterParser.SUPPORTED_FILTER_LANGUAGE + "=" + ResourceSelectorFilterFactory.RESOURCE_SELECTOR_FILTER + ")")
+            IFilterParser parser) throws Exception {
+
+        String json = """
+                { "service": {
+                    "type": "EXACT",
+                    "value": "sensor"
+                  },
+                  "resource": {
+                    "type": "EXACT",
+                    "value": "temperature"
+                  },
+                  "value": {
+                    "value": "10",
+                    "operation": "EQUALS"
+                  }
+                }
+                """;
+        
+        
+        ICriterion filter = parser.parseFilter(json);
+        List<ProviderSnapshot> results = applyFilter(filter);
+        assertEquals(1, results.size());
+        assertEquals("Temp1", results.get(0).getName());
+        
+        json = """
+                [
+                  {   
+                    "service": {
+                      "type": "EXACT",
+                      "value": "sensor"
+                    },
+                    "resource": {
+                     "type": "EXACT",
+                      "value": "temperature"
+                    },
+                    "value": {
+                      "value": "10",
+                      "operation": "EQUALS"
+                    }
+                  },
+                  {   
+                    "service": {
+                      "type": "EXACT",
+                      "value": "sensor"
+                    },
+                    "resource": {
+                     "type": "EXACT",
+                      "value": "temperature"
+                    },
+                    "value": {
+                      "value": "20",
+                      "operation": "EQUALS"
+                    }
+                  }
+                ]
+                """;
+        
+        filter = parser.parseFilter(json);
+        results = applyFilter(filter).stream().sorted(Comparator.comparing(ProviderSnapshot::getName)).toList();
+        assertEquals(2, results.size());
+        assertEquals("Temp1", results.get(0).getName());
+        assertEquals("Temp3", results.get(1).getName());
     }
 }

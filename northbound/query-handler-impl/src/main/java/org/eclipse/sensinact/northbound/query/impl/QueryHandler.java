@@ -187,18 +187,21 @@ public class QueryHandler implements IQueryHandler {
 
     @Override
     public ICriterion parseFilter(final String filter, final String filterLanguage) throws StatusException {
+        if(filter == null || filter.isEmpty()) {
+            return null;
+        }
         synchronized (filterHandlerRef) {
-            IFilterHandler filterHandler = filterHandlerRef.get();
-            if (filterHandler == null) {
-                throw new StatusException(501, "No filter implementation available");
-            }
+                IFilterHandler filterHandler = filterHandlerRef.get();
+                if (filterHandler == null) {
+                    throw new StatusException(501, "No filter implementation available");
+                }
 
-            try {
-                return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
-                        filter);
-            } catch (Throwable t) {
-                throw new StatusException(500, "Error parsing filter: " + t.getMessage());
-            }
+                try {
+                    return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
+                            filter);
+                } catch (Throwable t) {
+                    throw new StatusException(500, "Error parsing filter: " + t.getMessage());
+                }
         }
     }
 
@@ -382,12 +385,11 @@ public class QueryHandler implements IQueryHandler {
     /**
      * Executes the given parser
      *
-     * @param filter         Filter
+     * @param filter Filter
      * @return Matching snapshot
      * @throws StatusException Error parsing or executing filter
      */
-    private Collection<ProviderSnapshot> executeFilter(final ICriterion filter)
-            throws StatusException {
+    private Collection<ProviderSnapshot> executeFilter(final ICriterion filter) throws StatusException {
         try {
             return FilterCommandHelper.executeFilter(gatewayThread, filter);
         } catch (FilterException e) {
@@ -399,7 +401,7 @@ public class QueryHandler implements IQueryHandler {
      * Root of snapshot handling
      *
      * @param userSession Caller session
-     * @param query         Query description
+     * @param query       Query description
      * @return Result DTO
      */
     private AbstractResultDTO handleSnapshot(final SensiNactSession userSession, final QuerySnapshotDTO query)
@@ -410,25 +412,27 @@ public class QueryHandler implements IQueryHandler {
         result.uri = "/";
         result.statusCode = 200;
 
-        for (var filter: query.filter) {
+        for (var filter : query.filter) {
             ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(filter);
-            for (var providerSnapshot: executeFilter(criterion)) {
-                for (var serviceSnapshot: providerSnapshot.getServices()) {
-                    for (var resourceSnapshot: serviceSnapshot.getResources()) {
+            for (var providerSnapshot : executeFilter(criterion)) {
+                for (var serviceSnapshot : providerSnapshot.getServices()) {
+                    for (var resourceSnapshot : serviceSnapshot.getResources()) {
                         if (resourceSnapshot.getValue() != null) {
-                            SnapshotProviderDTO providerDTO = result.providers.computeIfAbsent(providerSnapshot.getName(), (name) -> {
-                                var dto = new SnapshotProviderDTO();
-                                dto.name = providerSnapshot.getName();
-                                dto.modelName = providerSnapshot.getModelName();
-                                dto.services = new HashMap<>();
-                                return dto;
-                            });
-                            SnapshotServiceDTO serviceDTO = providerDTO.services.computeIfAbsent(serviceSnapshot.getName(), (name) -> {
-                                var dto = new SnapshotServiceDTO();
-                                dto.name = serviceSnapshot.getName();
-                                dto.resources = new HashMap<>();
-                                return dto;
-                            });
+                            SnapshotProviderDTO providerDTO = result.providers
+                                    .computeIfAbsent(providerSnapshot.getName(), (name) -> {
+                                        var dto = new SnapshotProviderDTO();
+                                        dto.name = providerSnapshot.getName();
+                                        dto.modelName = providerSnapshot.getModelName();
+                                        dto.services = new HashMap<>();
+                                        return dto;
+                                    });
+                            SnapshotServiceDTO serviceDTO = providerDTO.services
+                                    .computeIfAbsent(serviceSnapshot.getName(), (name) -> {
+                                        var dto = new SnapshotServiceDTO();
+                                        dto.name = serviceSnapshot.getName();
+                                        dto.resources = new HashMap<>();
+                                        return dto;
+                                    });
                             SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
                             resourceDTO.name = resourceSnapshot.getName();
                             resourceDTO.type = resourceSnapshot.getType().getName();

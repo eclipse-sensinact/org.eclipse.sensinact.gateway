@@ -22,6 +22,8 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
  */
 public interface ResourceSelectorFilterFactory {
 
+    public static final String RESOURCE_SELECTOR_FILTER = "resource.selector";
+    
     /**
      * Create a filter based on the supplied resource selector
      * @param selector
