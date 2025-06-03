@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.nortbound.session.impl;
+package org.eclipse.sensinact.northbound.session.impl;
 
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;

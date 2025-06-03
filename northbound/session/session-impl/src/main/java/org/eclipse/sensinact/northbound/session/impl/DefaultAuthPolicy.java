@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.nortbound.session.impl;
+package org.eclipse.sensinact.northbound.session.impl;
 
 public enum DefaultAuthPolicy {
     ALLOW_ALL, AUTHENTICATED_ONLY, DENY_ALL;
