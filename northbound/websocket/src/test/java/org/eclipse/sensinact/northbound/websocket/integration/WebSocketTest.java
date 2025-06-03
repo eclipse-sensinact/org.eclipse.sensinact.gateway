@@ -293,11 +293,29 @@ public class WebSocketTest {
         }
     }
 
+    private static final String SUBSCRIBE_PROVIDER_1 = "wsTestProviderSubFilter1";
+    private static final String SUBSCRIBE_PROVIDER_2 = "wsTestProviderSubFilter2";
+
     @Test
-    void testSubscriptionWithFilter() throws Exception {
+    void subscriptionWithLDAPFilter() throws Exception {
+        doSubscriptionTestWithFilter("(PROVIDER=" + SUBSCRIBE_PROVIDER_1 + ")", "ldap");
+    }
+
+    @Test
+    void subscriptionWithResourceSelector() throws Exception {
+        doSubscriptionTestWithFilter("""
+                {
+                    "provider": {
+                        "value": \"%s\"
+                    }
+                }
+                """.formatted(SUBSCRIBE_PROVIDER_1), "resource.selector");
+    }
+
+    void doSubscriptionTestWithFilter(String filter, String filterLanguage) throws Exception {
         // Push 2 providers
-        final GenericDto dto1 = makeDto("wsTestProviderSubFilter1", "svc", "data", 42, Integer.class);
-        final GenericDto dto2 = makeDto("wsTestProviderSubFilter2", "svc", "data", 21, Integer.class);
+        final GenericDto dto1 = makeDto(SUBSCRIBE_PROVIDER_1, "svc", "data", 42, Integer.class);
+        final GenericDto dto2 = makeDto(SUBSCRIBE_PROVIDER_2, "svc", "data", 21, Integer.class);
         final BulkGenericDto bulk = new BulkGenericDto();
         bulk.dtos = List.of(dto1, dto2);
         push.pushUpdate(bulk).getValue();
@@ -338,8 +356,8 @@ public class WebSocketTest {
             final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
             querySub.uri = new SensinactPath();
             querySub.requestId = String.valueOf(new Random().nextInt());
-            querySub.filter = "(PROVIDER=" + dto1.provider + ")";
-            querySub.filterLanguage = "ldap";
+            querySub.filter = filter;
+            querySub.filterLanguage = filterLanguage;
             sendDTO(session, querySub);
 
             // Result must be the subscription result
