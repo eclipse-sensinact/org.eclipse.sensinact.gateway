@@ -540,9 +540,9 @@ public class SerializationTest {
     void testSubscribeRequestNoFilter() throws JsonProcessingException {
         String request = """
                 {
-                  "operation": "SUBSCRIBE",
-                  "requestId": "1234",
-                  "uri": "/fizz/buzz/fizzbuzz/meta"
+                    "operation": "SUBSCRIBE",
+                    "requestId": "1234",
+                    "uri": "/fizz/buzz/fizzbuzz/meta"
                 }
                 """;
         QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
