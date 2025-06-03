@@ -50,7 +50,7 @@ public class ResourceSelectorComponent implements ResourceSelectorFilterFactory,
     }
 
     private final JsonMapper mapper = JsonMapper.builder().build();
-    
+
     @Activate
     Config config;
 
@@ -65,17 +65,17 @@ public class ResourceSelectorComponent implements ResourceSelectorFilterFactory,
         copy.provider = negateSelection(rs.provider);
         copy.service = negateSelection(rs.service);
         copy.resource = negateSelection(rs.resource);
-        copy.value =  rs.value == null ? null :
-            rs.value.stream().map(this::negateValueSelection)
-                .collect(Collectors.toList());
-        copy.location =  rs.location == null ? null :
-            rs.location.stream().map(this::negateLocationSelection)
-            .collect(Collectors.toList());
+        copy.value = rs.value == null ? null
+                : rs.value.stream().map(this::negateValueSelection).collect(Collectors.toList());
+        copy.location = rs.location == null ? null
+                : rs.location.stream().map(this::negateLocationSelection).collect(Collectors.toList());
         return copy;
     }
 
     private Selection negateSelection(Selection s) {
-        if(s == null) return null;
+        if (s == null) {
+            return null;
+        }
         Selection neg = new Selection();
         neg.type = s.type;
         neg.value = s.value;
@@ -110,16 +110,16 @@ public class ResourceSelectorComponent implements ResourceSelectorFilterFactory,
     @Override
     public ICriterion parseFilter(String query, String queryLanguage, Map<String, Object> parameters)
             throws FilterParserException {
-        try(JsonParser parser = mapper.createParser(query)) {
-            if(parser.nextToken() == JsonToken.START_ARRAY) {
+        try (JsonParser parser = mapper.createParser(query)) {
+            if (parser.nextToken() == JsonToken.START_ARRAY) {
                 List<ResourceSelector> list = new ArrayList<>();
-                while(parser.nextToken() == JsonToken.START_OBJECT) {
+                while (parser.nextToken() == JsonToken.START_OBJECT) {
                     list.add(parser.readValueAs(ResourceSelector.class));
                 }
-                if(parser.currentToken() != JsonToken.END_ARRAY) {
+                if (parser.currentToken() != JsonToken.END_ARRAY) {
                     throw new JsonParseException(parser, "Expected a complete array of Resource Selector objects");
                 }
-                if(parser.nextToken() != null) {
+                if (parser.nextToken() != null) {
                     throw new JsonParseException(parser, "Unexpected additional content after the array");
                 }
                 return parseResourceSelector(list.stream());

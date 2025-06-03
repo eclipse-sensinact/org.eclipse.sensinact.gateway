@@ -65,8 +65,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 public class SerializationTest {
 
     private final ObjectMapper mapper = JsonMapper.builder()
-            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true)
-            .build();
+            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true).build();
 
     /**
      * Tests Act DTOs (de-)serialization
@@ -176,7 +175,7 @@ public class SerializationTest {
         method.parameters = List.of(param);
         rcDescribe.response.accessMethods = List.of(method);
 
-        final TypedResponse<ResponseDescribeResourceDTO> parsedResult = (TypedResponse<ResponseDescribeResourceDTO>) mapper
+        final TypedResponse<ResponseDescribeResourceDTO> parsedResult = mapper
                 .readValue(mapper.writeValueAsString(rcDescribe), TypedResponse.class);
         assertEquals(rcDescribe.type, parsedResult.type);
         assertEquals(rcDescribe.statusCode, parsedResult.statusCode);
@@ -235,7 +234,7 @@ public class SerializationTest {
         rcDesc.type = ResourceType.PROPERTY;
         svcDescribe.response.resources = List.of(rcDesc);
 
-        final TypedResponse<ResponseDescribeServiceDTO> parsedResult = (TypedResponse<ResponseDescribeServiceDTO>) mapper
+        final TypedResponse<ResponseDescribeServiceDTO> parsedResult = mapper
                 .readValue(mapper.writeValueAsString(svcDescribe), TypedResponse.class);
         assertEquals(svcDescribe.type, parsedResult.type);
         assertEquals(svcDescribe.statusCode, parsedResult.statusCode);
@@ -278,7 +277,7 @@ public class SerializationTest {
         provDescribe.response.name = "provider";
         provDescribe.response.services = List.of("admin", "svc");
 
-        final TypedResponse<ResponseDescribeProviderDTO> parsedResult = (TypedResponse<ResponseDescribeProviderDTO>) mapper
+        final TypedResponse<ResponseDescribeProviderDTO> parsedResult = mapper
                 .readValue(mapper.writeValueAsString(provDescribe), TypedResponse.class);
         assertEquals(provDescribe.type, parsedResult.type);
         assertEquals(provDescribe.statusCode, parsedResult.statusCode);
@@ -392,7 +391,7 @@ public class SerializationTest {
         getRc.response.type = Integer.class.getName();
         getRc.response.value = 42;
 
-        final TypedResponse<ResponseGetDTO> parsedResult = (TypedResponse<ResponseGetDTO>) mapper
+        final TypedResponse<ResponseGetDTO> parsedResult = mapper
                 .readValue(mapper.writeValueAsString(getRc), TypedResponse.class);
         assertEquals(getRc.type, parsedResult.type);
         assertEquals(getRc.statusCode, parsedResult.statusCode);
@@ -440,7 +439,7 @@ public class SerializationTest {
         setRc.response.type = Integer.class.getName();
         setRc.response.value = 42;
 
-        final TypedResponse<ResponseGetDTO> parsedResult = (TypedResponse<ResponseGetDTO>) mapper
+        final TypedResponse<ResponseGetDTO> parsedResult = mapper
                 .readValue(mapper.writeValueAsString(setRc), TypedResponse.class);
         assertEquals(setRc.type, parsedResult.type);
         assertEquals(setRc.statusCode, parsedResult.statusCode);
@@ -539,8 +538,7 @@ public class SerializationTest {
 
     @Test
     void testSubscribeRequestNoFilter() throws JsonProcessingException {
-        String request =
-                """
+        String request = """
                 {
                   "operation": "SUBSCRIBE",
                   "requestId": "1234",
@@ -548,7 +546,7 @@ public class SerializationTest {
                 }
                 """;
         QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
-        
+
         assertEquals(EQueryType.SUBSCRIBE, query.operation);
         assertEquals("1234", query.requestId);
         assertNull(query.filter);
@@ -558,19 +556,18 @@ public class SerializationTest {
         assertEquals("fizzbuzz", query.uri.resource);
         assertEquals("meta", query.uri.metadata);
     }
-    
+
     @Test
     void testSubscribeRequestLDAP() throws JsonProcessingException {
-        String request =
-                """
+        String request = """
                 {
-                  "operation": "SUBSCRIBE",
-                  "requestId": "1234",
-                  "filter": "(foo.bar=foobar)"
+                    "operation": "SUBSCRIBE",
+                    "requestId": "1234",
+                    "filter": "(foo.bar=foobar)"
                 }
                 """;
         QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
-        
+
         assertEquals(EQueryType.SUBSCRIBE, query.operation);
         assertEquals("1234", query.requestId);
         assertEquals("(foo.bar=foobar)", query.filter);
@@ -579,21 +576,20 @@ public class SerializationTest {
 
     @Test
     void testSubscribeRequestResourceSelector() throws JsonProcessingException {
-        String request =
-                """
+        String request = """
                 {
-                  "operation": "SUBSCRIBE",
-                  "requestId": "1234",
-                  "filterLanguage": "sensinact.resource.selector",
-                  "filter": {
-                    "provider": {
-                      "value": "foo"
+                    "operation": "SUBSCRIBE",
+                    "requestId": "1234",
+                    "filterLanguage": "sensinact.resource.selector",
+                    "filter": {
+                        "provider": {
+                            "value": "foo"
+                        }
                     }
-                  }
                 }
                 """;
         QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
-        
+
         assertEquals(EQueryType.SUBSCRIBE, query.operation);
         assertEquals("1234", query.requestId);
         assertEquals("""
@@ -603,28 +599,27 @@ public class SerializationTest {
 
     @Test
     void testSubscribeRequestMultipleResourceSelector() throws JsonProcessingException {
-        String request =
-                """
+        String request = """
                 {
-                  "operation": "SUBSCRIBE",
-                  "requestId": "1234",
-                  "filterLanguage": "sensinact.resource.selector",
-                  "filter": [
-                    {
-                      "provider": {
-                        "value": "foo"
-                      }
-                    },
-                    {
-                      "provider": {
-                        "value": "bar"
-                      }
-                    }
-                  ]
+                    "operation": "SUBSCRIBE",
+                    "requestId": "1234",
+                    "filterLanguage": "sensinact.resource.selector",
+                    "filter": [
+                        {
+                            "provider": {
+                                "value": "foo"
+                            }
+                        },
+                        {
+                            "provider": {
+                                "value": "bar"
+                            }
+                        }
+                    ]
                 }
                 """;
         QuerySubscribeDTO query = mapper.readValue(request, QuerySubscribeDTO.class);
-        
+
         assertEquals(EQueryType.SUBSCRIBE, query.operation);
         assertEquals("1234", query.requestId);
         assertEquals("""

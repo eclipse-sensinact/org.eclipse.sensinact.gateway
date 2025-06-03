@@ -246,7 +246,7 @@ public class WebSocketEndpoint {
         //
         // parsedFilter.dataEventFilter();
         // parsedFilter.dataTopics();
-        
+
         Predicate<ResourceNotification> predicate = null;
 
         // Basic filters

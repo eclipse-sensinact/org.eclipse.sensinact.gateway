@@ -43,18 +43,19 @@ public class QueryHandlerTest {
     @Test
     void testResourceSelector() throws Exception {
         ICriterion filter = handler.parseFilter("""
-                { "service": {
-                    "type": "EXACT",
-                    "value": "sensor"
-                  },
-                  "resource": {
-                    "type": "EXACT",
-                    "value": "temperature"
-                  },
-                  "value": {
-                    "value": "10",
-                    "operation": "EQUALS"
-                  }
+                {
+                    "service": {
+                        "type": "EXACT",
+                        "value": "sensor"
+                    },
+                    "resource": {
+                        "type": "EXACT",
+                        "value": "temperature"
+                    },
+                    "value": {
+                        "value": "10",
+                        "operation": "EQUALS"
+                    }
                 }""", "resource.selector");
         assertNotNull(filter);
         assertNotNull(filter.getResourceValueFilter());

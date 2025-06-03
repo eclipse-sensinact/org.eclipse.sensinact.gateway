@@ -295,7 +295,7 @@ public class WebSocketTest {
 
     private static final String SUBSCRIBE_PROVIDER_1 = "wsTestProviderSubFilter1";
     private static final String SUBSCRIBE_PROVIDER_2 = "wsTestProviderSubFilter2";
-    
+
     @Test
     void subscriptionWithLDAPFilter() throws Exception {
         doSubscriptionTestWithFilter("(PROVIDER=" + SUBSCRIBE_PROVIDER_1 + ")", "ldap");
@@ -305,12 +305,11 @@ public class WebSocketTest {
     void subscriptionWithResourceSelector() throws Exception {
         doSubscriptionTestWithFilter("""
                 {
-                  "provider": {
-                    "value": \"""" + SUBSCRIBE_PROVIDER_1 + "\"" +
-                """
-                  }
+                    "provider": {
+                        "value": \"%s\"
+                    }
                 }
-                """, "resource.selector");
+                """.formatted(SUBSCRIBE_PROVIDER_1), "resource.selector");
     }
 
     void doSubscriptionTestWithFilter(String filter, String filterLanguage) throws Exception {
