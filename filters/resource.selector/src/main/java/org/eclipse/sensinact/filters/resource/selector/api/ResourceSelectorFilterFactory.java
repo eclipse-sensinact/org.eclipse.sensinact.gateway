@@ -22,17 +22,21 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
  */
 public interface ResourceSelectorFilterFactory {
 
+    public static final String RESOURCE_SELECTOR_FILTER = "resource.selector";
+
     /**
      * Create a filter based on the supplied resource selector
+     *
      * @param selector
      * @return
      */
     public ICriterion parseResourceSelector(ResourceSelector selector);
 
     /**
-     * Create an aggregate filter based on multiple resource selectors.
-     * The aggregate filter will be the logical OR of the supplied
-     * selectors, selecting all resources which match the {@link ResourceSelector}
+     * Create an aggregate filter based on multiple resource selectors. The
+     * aggregate filter will be the logical OR of the supplied selectors, selecting
+     * all resources which match the {@link ResourceSelector}
+     *
      * @param selectors
      * @return
      */

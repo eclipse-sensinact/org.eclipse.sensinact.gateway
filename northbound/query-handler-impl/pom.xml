@@ -97,6 +97,12 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>ldap</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <!-- OSGi -->
     <dependency>
