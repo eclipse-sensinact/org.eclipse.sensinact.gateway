@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.nortbound.session.impl;
+package org.eclipse.sensinact.northbound.session.impl;
 
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
@@ -356,9 +356,6 @@ public class SessionManager
 
     @Override
     public void notify(String topic, ResourceNotification event) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Session Manager received a notification on topic {}");
-        }
         List<SensiNactSessionImpl> sessions;
         synchronized (lock) {
             sessions = new ArrayList<>(this.sessions.values());
@@ -368,7 +365,7 @@ public class SessionManager
                 try {
                     session.notify(topic, event);
                 } catch (Exception e) {
-                    // TODO log this
+                    LOG.error("Error notifiying session {} on topic {}", session.getSessionId(), topic);
                 }
             } else {
                 removeSession(session.getUserInfo().getUserId(), session.getSessionId());

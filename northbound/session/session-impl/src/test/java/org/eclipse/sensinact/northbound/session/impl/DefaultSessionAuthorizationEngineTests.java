@@ -10,14 +10,14 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.nortbound.session.impl;
+package org.eclipse.sensinact.northbound.session.impl;
 
-import static org.eclipse.sensinact.nortbound.session.impl.DefaultAuthPolicy.ALLOW_ALL;
-import static org.eclipse.sensinact.nortbound.session.impl.DefaultAuthPolicy.AUTHENTICATED_ONLY;
-import static org.eclipse.sensinact.nortbound.session.impl.DefaultAuthPolicy.DENY_ALL;
 import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.ALLOW;
 import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.DENY;
 import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.DESCRIBE;
+import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.ALLOW_ALL;
+import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.AUTHENTICATED_ONLY;
+import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.DENY_ALL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
