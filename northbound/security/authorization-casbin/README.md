@@ -28,7 +28,7 @@ The configuration is done through the `sensinact.authorization.casbin` PID, with
             "role:user, *, *, *, *, *, *, deny, 1000",
             "role:user, *, *, *, *, *, DESCRIBE|READ, allow, 100",
             "foobar, *, *, *, input, comment, *, allow, 0",
-            "externalSensor, https://example.org/sensor, *, *, sensor, *, WRITE, allow, 0",
+            "externalSensor, https://example.org/sensor, *, *, sensor, *, UPDATE, allow, 0",
             "role:admin, *, *, *, *, *, *, allow, -1",
             "role:anonymous, *, *, *, *, *, *, deny, -1000",
         ]
