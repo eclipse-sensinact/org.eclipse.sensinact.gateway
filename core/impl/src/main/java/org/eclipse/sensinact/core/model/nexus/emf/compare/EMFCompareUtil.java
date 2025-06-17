@@ -291,7 +291,7 @@ public class EMFCompareUtil {
                 oldMetaData = extractMetadataMap(oldValue, originalMetadata, resource);
             }
 
-            Metadata updatedMetadata = updateMetadata(resource, serviceName, newService, originalService, newTimestamp);
+            Metadata updatedMetadata = updateMetadata(resource, newService, originalService, newTimestamp);
 
             originalService.eSet(resource, newValue);
 
@@ -317,8 +317,8 @@ public class EMFCompareUtil {
         return newMetaData;
     }
 
-    private static ResourceValueMetadata updateMetadata(EStructuralFeature resource, String serviceName,
-            Service newService, Service originalService, Instant newTimestamp) {
+    private static ResourceValueMetadata updateMetadata(EStructuralFeature resource, Service newService,
+            Service originalService, Instant newTimestamp) {
         ResourceValueMetadata resourceMetadata = checkMetadata(originalService, resource);
         resourceMetadata.setTimestamp(newTimestamp);
         Metadata update = newService.getMetadata().get(resource);
@@ -366,12 +366,7 @@ public class EMFCompareUtil {
 
     private static Instant getNewTimestampFromMetadata(EStructuralFeature resource, Service service) {
         Metadata metadata = service.getMetadata().get(resource);
-        if (metadata != null) {
-            if (metadata.getTimestamp() != null) {
-                return metadata.getTimestamp();
-            }
-        }
-        return null;
+        return metadata != null ? metadata.getTimestamp() : null;
     }
 
     private static void notifyServiceAdd(Provider container, Service service, String serviceName,
@@ -410,18 +405,14 @@ public class EMFCompareUtil {
         accumulator.removeService(packageUri, model, providerName, serviceName);
     }
 
-//    private static void checkMetadataRemove(Notification msg) {
-//        Service service = (Service) msg.getNotifier();
-//        EAttribute resource = (EAttribute) msg.getFeature();
-//        service.getMetadata().removeKey(resource);
-//    }
-
     protected static ResourceValueMetadata checkMetadata(Service service, EStructuralFeature attribute) {
         ResourceValueMetadata result = service.getMetadata().get(attribute);
         if (result == null) {
             result = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             result.setTimestamp(Instant.now());
             service.getMetadata().put(attribute, result);
+        } else if (result.getTimestamp() == null) {
+            result.setTimestamp(Instant.now());
         }
         return result;
     }
