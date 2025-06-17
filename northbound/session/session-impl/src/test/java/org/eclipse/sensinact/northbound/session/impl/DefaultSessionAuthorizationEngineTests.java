@@ -12,9 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.session.impl;
 
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.ALLOW;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.DENY;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.DESCRIBE;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.ALLOW;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
 import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.ALLOW_ALL;
 import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.AUTHENTICATED_ONLY;
 import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.DENY_ALL;
