@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
@@ -39,6 +41,8 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.model.core.provider.ProviderFactory;
+import org.eclipse.sensinact.model.core.provider.ResourceValueMetadata;
 import org.eclipse.sensinact.model.core.testdata.DynamicTestSensor;
 import org.eclipse.sensinact.model.core.testdata.TestAdmin;
 import org.eclipse.sensinact.model.core.testdata.TestResource;
@@ -119,6 +123,62 @@ public class EMFUpdateServiceTest {
             update = push.pushUpdate(temp2);
             assertNull(update.getFailure());
             assertEquals("14 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
+        }
+
+        @Test
+        void serviceWithMetadataWithTimestamp() throws Exception {
+            TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
+            TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
+            temp.setV1("14 °C");
+            sensor.setTemp(temp);
+            sensor.setId(PROVIDER);
+
+            Instant oneMinuteAgo = Instant.now().minusSeconds(60);
+            EMap<ETypedElement, ResourceValueMetadata> metadata = temp.getMetadata();
+            ResourceValueMetadata md = ProviderFactory.eINSTANCE.createResourceValueMetadata();
+            md.setTimestamp(oneMinuteAgo);
+            metadata.put(TestdataPackage.eINSTANCE.getTestTemperatur_V1(), md);
+
+            Promise<?> update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            assertEquals("14 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
+            Instant current = getResourceTimestamp("TestSensor", PROVIDER, SERVICE, RESOURCE);
+            assertNotNull(current);
+            assertEquals(oneMinuteAgo, current);
+        }
+
+        @Test
+        void serviceWithMetadataWithoutTimestamp() throws Exception {
+            TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
+            TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
+            temp.setV1("14 °C");
+            sensor.setTemp(temp);
+            sensor.setId(PROVIDER);
+
+            EMap<ETypedElement, ResourceValueMetadata> metadata = temp.getMetadata();
+            ResourceValueMetadata md = ProviderFactory.eINSTANCE.createResourceValueMetadata();
+            metadata.put(TestdataPackage.eINSTANCE.getTestTemperatur_V1(), md);
+
+            Instant before = Instant.now();
+            Promise<?> update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            assertEquals("14 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
+            Instant current = getResourceTimestamp("TestSensor", PROVIDER, SERVICE, RESOURCE);
+            assertNotNull(current);
+            Instant after = Instant.now();
+            assertTrue(before.isBefore(current));
+            assertTrue(after.isAfter(current));
+
+            temp.setV1("13 °C");
+            before = Instant.now();
+            update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            assertEquals("13 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
+            current = getResourceTimestamp("TestSensor", PROVIDER, SERVICE, RESOURCE);
+            assertNotNull(current);
+            after = Instant.now();
+            assertTrue(before.isBefore(current));
+            assertTrue(after.isAfter(current));
         }
 
         @Test
@@ -382,7 +442,7 @@ public class EMFUpdateServiceTest {
 
     private Object getResourceValue(String model, String provider, String service, String resource)
             throws InvocationTargetException, InterruptedException {
-        Object value = gt
+        return gt
                 .execute(new ResourceCommand<Object>(TestdataPackage.eNS_URI, model, provider, service, resource) {
 
                     @Override
@@ -390,6 +450,16 @@ public class EMFUpdateServiceTest {
                         return resource.getValue().map(t -> t.getValue());
                     }
                 }).getValue();
-        return value;
+    }
+    private Instant getResourceTimestamp(String model, String provider, String service, String resource)
+            throws InvocationTargetException, InterruptedException {
+        return gt
+                .execute(new ResourceCommand<Instant>(TestdataPackage.eNS_URI, model, provider, service, resource) {
+
+                    @Override
+                    protected Promise<Instant> call(SensinactResource resource, PromiseFactory pf) {
+                        return resource.getValue().map(t -> t.getTimestamp());
+                    }
+                }).getValue();
     }
 }
