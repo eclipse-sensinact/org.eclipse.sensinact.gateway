@@ -19,6 +19,7 @@ The REST interface provides resources relative to the root context of the config
   The following `GET` resources are available:
 
   * `/sensinact` - The root of the REST interface returns rich details of all available providers in the system
+  * `/sensinact/runtime/bundles` - Returns the list of all registered OSGI bundles
   * `/sensinact/providers/` - Returns an array containing the names of all providers in the system
   * `/sensinact/providers/{id}` - Returns rich details of the provider with id `id`
   * `/sensinact/providers/{id}/services` - Returns an array containing the names of all services for the provider with id `id`
