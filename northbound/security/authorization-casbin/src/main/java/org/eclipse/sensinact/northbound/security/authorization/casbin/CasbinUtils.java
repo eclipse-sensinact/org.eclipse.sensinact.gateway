@@ -42,7 +42,9 @@ public class CasbinUtils {
         model.addDef("e", "e", "priority(p.eft) || deny");
 
         // Matchers
-        final String fieldsMatch = snaFields.stream().map(f -> "((e == allow && r.{field} == '<unknown>') || regexMatch(r.{field}, p.{field}))".replace("{field}", f))
+        final String fieldsMatch = snaFields.stream()
+                .map(f -> ("((e == allow && r.{field} == '" + Constants.UNKNOWN_FIELD
+                        + "') || regexMatch(r.{field}, p.{field}))").replace("{field}", f))
                 .collect(Collectors.joining(" && "));
         model.addDef("m", "m", String.join(" && ", "(p.sub == '*' || g(r.sub, p.sub))", fieldsMatch));
         return model;

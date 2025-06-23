@@ -20,5 +20,7 @@ public interface Constants {
 
     String ROLE_ANONYMOUS = "anonymous";
 
+    String UNKNOWN_FIELD = "<unknown>";
+
     int MIN_MODEL_PRIORITY = 5000;
 }

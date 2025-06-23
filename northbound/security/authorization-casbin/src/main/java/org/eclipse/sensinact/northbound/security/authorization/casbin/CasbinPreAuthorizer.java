@@ -107,13 +107,14 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
 
     @Override
     public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model, String provider) {
-        return normalize(authorize(modelPackageUri, model, provider, "<unknown>", "<unknown>", level));
+        return normalize(
+                authorize(modelPackageUri, model, provider, Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, level));
     }
 
     @Override
     public boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
             String service) {
-        return normalize(authorize(modelPackageUri, model, provider, service, "<unknown>", level));
+        return normalize(authorize(modelPackageUri, model, provider, service, Constants.UNKNOWN_FIELD, level));
     }
 
     @Override
@@ -124,16 +125,18 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
 
     @Override
     public PreAuth preAuthProvider(PermissionLevel level, String provider) {
-        return authorize("<unknown>", "<unknown>", provider, "<unknown>", "<unknown>", level);
+        return authorize(Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, provider, Constants.UNKNOWN_FIELD,
+                Constants.UNKNOWN_FIELD, level);
     }
 
     @Override
     public PreAuth preAuthService(PermissionLevel level, String provider, String service) {
-        return authorize("<unknown>", "<unknown>", provider, service, "<unknown>", level);
+        return authorize(Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, provider, service, Constants.UNKNOWN_FIELD,
+                level);
     }
 
     @Override
     public PreAuth preAuthResource(PermissionLevel level, String provider, String service, String resource) {
-        return authorize("<unknown>", "<unknown>", provider, service, resource, level);
+        return authorize(Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, provider, service, resource, level);
     }
 }
