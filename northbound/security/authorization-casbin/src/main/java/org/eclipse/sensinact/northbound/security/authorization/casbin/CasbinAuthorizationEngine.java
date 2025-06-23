@@ -12,25 +12,17 @@
 
 package org.eclipse.sensinact.northbound.security.authorization.casbin;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.casbin.jcasbin.main.Enforcer;
 import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.Model;
-import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
-import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
-import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
@@ -39,16 +31,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.typedevent.TypedEventHandler;
-import org.osgi.service.typedevent.propertytypes.EventTopics;
-import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, configurationPid = Constants.CONFIGURATION_PID, configurationPolicy = ConfigurationPolicy.REQUIRE)
-@EventTopics({ "LIFECYCLE/*" })
-public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEventHandler<LifecycleNotification> {
+public class CasbinAuthorizationEngine implements AuthorizationEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CasbinAuthorizationEngine.class);
 
@@ -57,11 +44,6 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
      */
     @Reference
     GatewayThread gateway;
-
-    /**
-     * Model authorization policies
-     */
-    private final Map<String, List<Policy>> modelsPolicies = new HashMap<>();
 
     /**
      * Policies enforcer
@@ -80,28 +62,6 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
     void activate(final CasbinAuthorizationConfiguration configuration) throws Exception {
         allowByDefault = configuration.allowByDefault();
 
-        try {
-            // Load policies of existing models
-            gateway.execute(new AbstractSensinactCommand<Void>() {
-                @Override
-                protected Promise<Void> call(final SensinactDigitalTwin twin, final SensinactModelManager modelMgr,
-                        final PromiseFactory pf) {
-                    twin.getProviders().stream().map(p -> modelMgr.getModel(p.getModelPackageUri(), p.getModelName()))
-                            .filter(Objects::nonNull).distinct().forEach(model -> {
-                                try {
-                                    loadPolicies(model);
-                                } catch (Exception e) {
-                                    logger.error("Error loading policies from {}", makeModelUri(model));
-                                }
-                            });
-                    return pf.resolved(null);
-                }
-            }).getValue();
-        } catch (Exception e) {
-            logger.error("Error loading policies of existing models", e);
-            throw e;
-        }
-
         // Create the enforcer
         enforcer = new Enforcer(CasbinUtils.makeModel());
 
@@ -110,9 +70,6 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
 
         // Add configured policies
         enforcer.addPolicies(parsePolicies(configuration.policies()).stream().map(Policy::toList).toList());
-
-        // Add models policies
-        modelsPolicies.values().stream().flatMap(l -> l.stream()).forEach(p -> enforcer.addPolicy(p.toList()));
     }
 
     /**
@@ -262,70 +219,5 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
      */
     String makeModelUri(final LifecycleNotification event) {
         return makeModelUri(event.modelPackageUri(), event.model());
-    }
-
-    @Override
-    public void notify(final String topic, final LifecycleNotification event) {
-        if (event.status() != Status.PROVIDER_CREATED) {
-            // No new model expected
-            return;
-        }
-
-        final String modelUri = makeModelUri(event);
-        if (modelsPolicies.containsKey(modelUri)) {
-            // Model is already known
-            return;
-        }
-
-        // New model: look its content
-        try {
-            gateway.execute(new AbstractSensinactCommand<Void>() {
-                @Override
-                protected Promise<Void> call(final SensinactDigitalTwin twin, final SensinactModelManager modelMgr,
-                        final PromiseFactory pf) {
-                    final Model model = modelMgr.getModel(event.modelPackageUri(), event.model());
-                    if (model == null) {
-                        logger.error("Incoherent state: model manager doesn't know {}", modelUri);
-                        return pf.resolved(null);
-                    }
-
-                    // Load authentication policies from model
-                    loadPolicies(model);
-
-                    return pf.resolved(null);
-                }
-            }).getValue();
-        } catch (Exception ex) {
-            logger.error("Error loading authentication policies from model {}", modelUri, ex);
-        }
-    }
-
-    /**
-     * Loads policies from the given model into the {@link #modelsPolicies} map
-     *
-     * @param model Model to load
-     */
-    private void loadPolicies(final Model model) {
-        // TODO load from model
-        final List<Policy> loadedPolicies = new ArrayList<>();
-
-        // Filter them
-        // TODO: filer while loading policies
-        final Iterator<Policy> iterator = loadedPolicies.iterator();
-        while (iterator.hasNext()) {
-            final Policy policy = iterator.next();
-            if (policy.priority() < Constants.MIN_MODEL_PRIORITY) {
-                logger.warn("Ignoring model policy {}: priority is too low");
-                iterator.remove();
-            }
-        }
-
-        // Store in cache
-        modelsPolicies.put(makeModelUri(model), loadedPolicies);
-
-        if (!loadedPolicies.isEmpty()) {
-            // Update the enforcer
-            enforcer.addPolicies(loadedPolicies.stream().map(Policy::toList).toList());
-        }
     }
 }
