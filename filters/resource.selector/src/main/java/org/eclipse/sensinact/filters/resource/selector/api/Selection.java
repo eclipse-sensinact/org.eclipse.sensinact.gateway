@@ -12,25 +12,33 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.api;
 
+import org.eclipse.sensinact.filters.resource.selector.jackson.SelectionDeserializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Defines a selection for the name of a token in the URI
  */
-public class Selection {
+@JsonDeserialize(using = SelectionDeserializer.class)
+public record Selection(
+        /**
+         * The value to match
+         */
+        String value,
+        /**
+         * The type of matching to use
+         */
+        MatchType type, 
+        /**
+         * If true then the result of the test will be negated
+         */
+        boolean negate) {
 
-    /**
-     * The value to match
-     */
-    public String value;
-
-    /**
-     * The type of matching to use
-     */
-    public MatchType type = MatchType.EXACT;
-
-    /**
-     * If true then the result of the test will be negated
-     */
-    public boolean negate;
+    public Selection {
+        if(type == null) {
+            type = MatchType.EXACT;
+        }
+    }
 
     public static enum MatchType {
         /**
@@ -47,10 +55,5 @@ public class Selection {
          * which must match some part of the name of the selected item
          */
         REGEX_REGION;
-    }
-
-    @Override
-    public String toString() {
-        return "Selection [value=" + value + ", type=" + type + ", negate=" + negate + "]";
     }
 }

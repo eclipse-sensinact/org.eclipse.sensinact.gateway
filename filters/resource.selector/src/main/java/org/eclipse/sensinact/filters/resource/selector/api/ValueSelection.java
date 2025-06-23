@@ -15,41 +15,52 @@ package org.eclipse.sensinact.filters.resource.selector.api;
 import java.util.Collection;
 import java.util.Map;
 
+import org.eclipse.sensinact.filters.resource.selector.jackson.ValueSelectionDeserializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Defines a selection based on a resource value
  *
  * Note that this is not suitable for location matching, where a
  * {@link LocationSelection} should be used instead
  */
-public class ValueSelection {
+@JsonDeserialize(using  = ValueSelectionDeserializer.class)
+public record ValueSelection(
+        /**
+         * The value to test against
+         */
+        String value,
+        /**
+         * The type of test to use
+         */
+        OperationType operation,
+        /**
+         * If true then the result of the test will be negated, except that:
+         *
+         * <ul>
+         *   <li>Checks that require a non null value (i.e. all except {@link OperationType#IS_SET}
+         *   and {@link OperationType#IS_NOT_NULL}) will still require a non-null value, continuing
+         *   to return false in this case</li>
+         *   <li>Checks that require a set value (i.e. all except {@link OperationType#IS_SET} will
+         *   still require a set resource, continuing to return false in this case
+         * </ul>
+         */
+        boolean negate,
+        /**
+         * The type of the check, defaults to {@link CheckType#VALUE}
+         */
+        CheckType checkType
+        ) {
+    public ValueSelection {
+        if(operation == null) {
+            operation = OperationType.EQUALS;
+        }
+        if(checkType == null) {
+            checkType = CheckType.VALUE;
+        }
+    }
 
-    /**
-     * The value to test against
-     */
-    public String value;
-
-    /**
-     * The type of test to use
-     */
-    public OperationType operation = OperationType.EQUALS;
-
-    /**
-     * If true then the result of the test will be negated, except that:
-     *
-     * <ul>
-     *   <li>Checks that require a non null value (i.e. all except {@link OperationType#IS_SET}
-     *   and {@link OperationType#IS_NOT_NULL}) will still require a non-null value, continuing
-     *   to return false in this case</li>
-     *   <li>Checks that require a set value (i.e. all except {@link OperationType#IS_SET} will
-     *   still require a set resource, continuing to return false in this case
-     * </ul>
-     */
-    public boolean negate;
-
-    /**
-     * The type of the check, defaults to {@link CheckType#VALUE}
-     */
-    public CheckType checkType = CheckType.VALUE;
 
     /**
      * Test operation types.
@@ -131,11 +142,5 @@ public class ValueSelection {
          * of the resource value.
          */
         TIMESTAMP;
-    }
-
-    @Override
-    public String toString() {
-        return "ValueSelection [value=" + value + ", operation=" + operation + ", negate=" + negate + ", checkType="
-                + checkType + "]";
     }
 }

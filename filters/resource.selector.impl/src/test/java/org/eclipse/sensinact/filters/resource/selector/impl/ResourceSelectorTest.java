@@ -33,6 +33,8 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
@@ -194,27 +196,33 @@ public class ResourceSelectorTest {
     }
 
     private ResourceSelector makeBasicResourceSelector(String model, String provider, String service, String resource) {
-        ResourceSelector rs = new ResourceSelector();
-        rs.model = model == null ? null : makeExactSelection(model);
-        rs.provider = provider == null ? null : makeExactSelection(provider);
-        rs.service = service == null ? null : makeExactSelection(service);
-        rs.resource = resource == null ? null : makeExactSelection(resource);
-        return rs;
+        List<ResourceSelection> resources = List.of(new ResourceSelection(service == null ? null : makeExactSelection(service),
+                resource == null ? null : makeExactSelection(resource), List.of()));
+        ProviderSelection ps = new ProviderSelection(null,
+                model == null ? null : makeExactSelection(model),
+                provider == null ? null : makeExactSelection(provider),
+                resources, List.of());
+        return new ResourceSelector(List.of(ps), List.of());
     }
 
     private Selection makeExactSelection(String name) {
-        Selection s = new Selection();
-        s.type = MatchType.EXACT;
-        s.value = name;
-        return s;
+        return new Selection(name, MatchType.EXACT, false);
     }
 
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation) {
-        ValueSelection s = new ValueSelection();
-        s.value = value;
-        s.operation = operation;
-        s.checkType = check;
-        return s;
+        return makeValueSelection(value, check, operation, false);
+    }
+    
+    private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation, boolean negate) {
+        return new ValueSelection(value, operation, negate, check);
+    }
+    
+    private ResourceSelector updateValueTest(ResourceSelector rs, ValueSelection vs) {
+        ProviderSelection existingP = rs.providers().get(0);
+        ResourceSelection exisitingR = existingP.resources().get(0);
+        ProviderSelection newer = new ProviderSelection(existingP.modelUri(), existingP.model(), existingP.provider(),
+                List.of(new ResourceSelection(exisitingR.service(), exisitingR.resource(), List.of(vs))), existingP.location());
+        return new ResourceSelector(List.of(newer), rs.resources());
     }
 
     static Stream<Object> testValues() {
@@ -226,11 +234,10 @@ public class ResourceSelectorTest {
     void testPresence(Object value) throws Exception {
         ResourceSnapshot rc = makeResource("test", "hello", value);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
-        rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
         ResourceSelector rsNeg = makeBasicResourceSelector(null, null, "test", "hello");
-        rsNeg.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
-        rsNeg.value.get(0).negate = true;
+        rsNeg = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET, true));
         ICriterion filterNeg = new ResourceSelectorCriterion(rsNeg, false);
 
         // ... value level
@@ -258,11 +265,11 @@ public class ResourceSelectorTest {
         ResourceSnapshot rc = makeResource("test", "hello", value);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for value
-        rs.value = List.of(makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
         ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for wrong value
-        rsWrong.value = List.of(makeValueSelection("wrong", null, OperationType.EQUALS));
+        rsWrong = updateValueTest(rs, makeValueSelection("wrong", null, OperationType.EQUALS));
         ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
 
         // ... value level
@@ -296,13 +303,11 @@ public class ResourceSelectorTest {
         ResourceSnapshot rc = makeResource("test", "hello", value);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for value
-        rs.value = List.of(makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection(String.valueOf(value), null, OperationType.EQUALS, true));
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
         ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for wrong value
-        rsWrong.value = List.of(makeValueSelection("wrong", null, OperationType.EQUALS));
-        rsWrong.value.get(0).negate = true;
+        rsWrong = updateValueTest(rs, makeValueSelection("wrong", null, OperationType.EQUALS, true));
         ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
 
         // ... value level
@@ -335,8 +340,7 @@ public class ResourceSelectorTest {
         ResourceSnapshot rc = makeResource("test", "hello", null);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for null value (should always be false)
-        ValueSelection vs = makeValueSelection(null, null, OperationType.IS_NOT_NULL);
-        rs.value = List.of(vs);
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_NOT_NULL));
         ICriterion filter = new ResourceSelectorCriterion(rs, false);
 
         // ... value level
@@ -359,34 +363,34 @@ public class ResourceSelectorTest {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "svc", "value");
         // Check case comparison (we are case sensitive)
         ResourceSnapshot rc = makeResource("svc", "value", "TeSt");
-        rs.value = List.of(makeValueSelection("TeSt", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("TeSt", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.EQUALS));
         assertQueryFalse(rs, rc);
 
         // Check resource in array
         rc = makeResource("svc", "value", List.of("foo", "bar"));
-        rs.value = List.of(makeValueSelection("foobar", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("foobar", null, OperationType.EQUALS));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("foo", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("foo", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("bar", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("bar", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
 
         rc = makeResource("svc", "value", new String[] { "foo", "bar" });
-        rs.value = List.of(makeValueSelection("foobar", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("foobar", null, OperationType.EQUALS));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("foo", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("foo", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("bar", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("bar", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
 
         rc = makeResource("svc", "value", new int[] { 4, 2 });
-        rs.value = List.of(makeValueSelection("42", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("42", null, OperationType.EQUALS));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("4", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("4", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("2", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("2", null, OperationType.EQUALS));
         assertQueryTrue(rs, rc);
     }
 
@@ -394,53 +398,53 @@ public class ResourceSelectorTest {
     void testLessEq() throws Exception {
         ResourceSnapshot rc = makeResource("test", "value", 42);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
-        rs.value = List.of(makeValueSelection("42", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("42", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("50", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("50", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("41", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("41", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
 
         rc = makeResource("test", "value", "Test");
-        rs.value = List.of(makeValueSelection("y", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("y", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Y", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Y", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Abc", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Abc", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("abc", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("abc", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
 
         rc = makeResource("test", "value", "test");
-        rs.value = List.of(makeValueSelection("y", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("y", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Y", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Y", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Abc", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Abc", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("abc", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("abc", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL, true));
         assertQueryFalse(rs, rc);
 
         // Null is always false
         rc = makeResource("test", "value", null);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = false;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
 
         // Unset is always false
         rc = makeResource("test", "value", null, true);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN_OR_EQUAL, true));
         assertQueryFalse(rs, rc);
     }
 
@@ -448,53 +452,53 @@ public class ResourceSelectorTest {
     void testLess() throws Exception {
         ResourceSnapshot rc = makeResource("test", "value", 42);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
-        rs.value = List.of(makeValueSelection("42", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("42", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("50", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("50", null, OperationType.LESS_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("41", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("41", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
 
         rc = makeResource("test", "value", "Test");
-        rs.value = List.of(makeValueSelection("y", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("y", null, OperationType.LESS_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Y", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Y", null, OperationType.LESS_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Abc", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Abc", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("abc", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("abc", null, OperationType.LESS_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN));
         assertQueryTrue(rs, rc);
 
         rc = makeResource("test", "value", "test");
-        rs.value = List.of(makeValueSelection("y", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("y", null, OperationType.LESS_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Y", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Y", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Abc", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Abc", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("abc", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("abc", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.LESS_THAN));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN, true));
         assertQueryTrue(rs, rc);
 
         // Null is always false
         rc = makeResource("test", "value", null);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = false;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN));
         assertQueryFalse(rs, rc);
 
         // Unset is always false
         rc = makeResource("test", "value", null, true);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.LESS_THAN, true));
         assertQueryFalse(rs, rc);
     }
 
@@ -502,49 +506,49 @@ public class ResourceSelectorTest {
     void testGreaterEq() throws Exception {
         ResourceSnapshot rc = makeResource("test", "value", 42);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
-        rs.value = List.of(makeValueSelection("42", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("42", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("41", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("41", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("50", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("50", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
 
         rc = makeResource("test", "value", "Test");
-        rs.value = List.of(makeValueSelection("A", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("A", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Y", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Y", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("t", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("t", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
 
         rc = makeResource("test", "value", "test");
-        rs.value = List.of(makeValueSelection("a", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("a", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("y", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("y", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Abc", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Abc", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryTrue(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL, true));
         assertQueryFalse(rs, rc);
 
         // Null is always false
         rc = makeResource("test", "value", null);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = false;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL));
         assertQueryFalse(rs, rc);
 
         // Unset is always false
         rc = makeResource("test", "value", null, true);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN_OR_EQUAL, true));
         assertQueryFalse(rs, rc);
     }
 
@@ -552,49 +556,49 @@ public class ResourceSelectorTest {
     void testGreater() throws Exception {
         ResourceSnapshot rc = makeResource("test", "value", 42);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
-        rs.value = List.of(makeValueSelection("42", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("42", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("41", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("41", null, OperationType.GREATER_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("50", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("50", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
 
         rc = makeResource("test", "value", "Test");
-        rs.value = List.of(makeValueSelection("A", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("A", null, OperationType.GREATER_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Y", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Y", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("t", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("t", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
 
         rc = makeResource("test", "value", "test");
-        rs.value = List.of(makeValueSelection("a", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("a", null, OperationType.GREATER_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("y", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("y", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("Abc", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Abc", null, OperationType.GREATER_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("Test", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("Test", null, OperationType.GREATER_THAN));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("test", null, OperationType.GREATER_THAN));
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN, true));
         assertQueryTrue(rs, rc);
 
         // Null is always false
         rc = makeResource("test", "value", null);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = false;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rc);
 
         // Unset is always false
         rc = makeResource("test", "value", null, true);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("test", null, OperationType.GREATER_THAN, true));
         assertQueryFalse(rs, rc);
     }
 
@@ -602,35 +606,35 @@ public class ResourceSelectorTest {
     void testRegex() throws Exception {
         ResourceSnapshot rc = makeResource("svc", "value", "bb");
         ResourceSelector rs = makeBasicResourceSelector(null, null, "svc", "value");
-        rs.value = List.of(makeValueSelection("a?b+", null, OperationType.REGEX));
+        rs = updateValueTest(rs, makeValueSelection("a?b+", null, OperationType.REGEX));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("a+b+", null, OperationType.REGEX));
+        rs = updateValueTest(rs, makeValueSelection("a+b+", null, OperationType.REGEX));
         assertQueryFalse(rs, rc);
 
         rc = makeResource("svc", "value", "aabbaabbb");
-        rs.value = List.of(makeValueSelection("a?b+", null, OperationType.REGEX));
+        rs = updateValueTest(rs, makeValueSelection("a?b+", null, OperationType.REGEX));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("a+b+", null, OperationType.REGEX));
+        rs = updateValueTest(rs, makeValueSelection("a+b+", null, OperationType.REGEX));
         assertQueryFalse(rs, rc);
-        rs.value = List.of(makeValueSelection("a?b+", null, OperationType.REGEX_REGION));
+        rs = updateValueTest(rs, makeValueSelection("a?b+", null, OperationType.REGEX_REGION));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("a+b+", null, OperationType.REGEX_REGION));
+        rs = updateValueTest(rs, makeValueSelection("a+b+", null, OperationType.REGEX_REGION));
         assertQueryTrue(rs, rc);
-        rs.value = List.of(makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION));
+        rs = updateValueTest(rs, makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION));
         assertQueryTrue(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION, true));
         assertQueryFalse(rs, rc);
 
         // Null is always false
         rc = makeResource("test", "value", null);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = false;
+        rs = updateValueTest(rs, makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION));
         assertQueryFalse(rs, rc);
 
         // Unset is always false
         rc = makeResource("test", "value", null, true);
         assertQueryFalse(rs, rc);
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION, true));
         assertQueryFalse(rs, rc);
     }
 
