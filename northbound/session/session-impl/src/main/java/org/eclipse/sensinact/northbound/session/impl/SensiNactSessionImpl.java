@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Function;
@@ -99,11 +100,14 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final UserInfo user;
 
-    private final PreAuthorizer authorizer;
+    private final Authorizer authorizer;
 
-    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer authorizer, final GatewayThread thread) {
+    private final PreAuthorizer preAuthorizer;
+
+    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer, final GatewayThread thread) {
         this.user = user;
-        this.authorizer = authorizer;
+        this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
+        this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
         expiry = Instant.now().plusSeconds(600);
     }
@@ -314,7 +318,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private <T> T doResourceWork(String provider, String service, String resource, Function<SensinactResource, Promise<T>> work,
             PermissionLevel permissionLevel, Supplier<String> authFailureMessage) {
 
-        final PreAuth preAuth = authorizer.preAuthResource(permissionLevel, provider, service, resource);
+        final PreAuth preAuth = preAuthorizer.preAuthResource(permissionLevel, provider, service, resource);
         if(preAuth == DENY) {
             throw new NotPermittedException(authFailureMessage.get());
         }
@@ -411,7 +415,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ResourceDescription describeResource(String provider, String service, String resource) {
-        final PreAuth preAuth = authorizer.preAuthResource(DESCRIBE, provider, service, resource);
+        final PreAuth preAuth = preAuthorizer.preAuthResource(DESCRIBE, provider, service, resource);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
@@ -488,7 +492,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
 
-        final PreAuth preAuth = authorizer.preAuthResource(DESCRIBE, provider, service, resource);
+        final PreAuth preAuth = preAuthorizer.preAuthResource(DESCRIBE, provider, service, resource);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
@@ -536,7 +540,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ServiceDescription describeService(String provider, String service) {
-        final PreAuth preAuth = authorizer.preAuthService(DESCRIBE, provider, service);
+        final PreAuth preAuth = preAuthorizer.preAuthService(DESCRIBE, provider, service);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                     user.getUserId(), String.format("%s/%s", provider, service)));
@@ -578,7 +582,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ProviderDescription describeProvider(String provider) {
-        final PreAuth preAuth = authorizer.preAuthProvider(DESCRIBE, provider);
+        final PreAuth preAuth = preAuthorizer.preAuthProvider(DESCRIBE, provider);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                     user.getUserId(), String.format("%s", provider)));

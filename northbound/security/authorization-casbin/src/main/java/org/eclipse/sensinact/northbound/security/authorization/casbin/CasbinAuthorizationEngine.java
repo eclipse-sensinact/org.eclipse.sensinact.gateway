@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.casbin.jcasbin.main.Enforcer;
+import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -58,11 +59,6 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
     GatewayThread gateway;
 
     /**
-     * Flag to allow or deny unspecified authorizations
-     */
-    private boolean allowByDefault;
-
-    /**
      * Model authorization policies
      */
     private final Map<String, List<Policy>> modelsPolicies = new HashMap<>();
@@ -77,8 +73,6 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
      */
     @Activate
     void activate(final CasbinAuthorizationConfiguration configuration) throws Exception {
-        this.allowByDefault = configuration.allowByDefault();
-
         try {
             // Load policies of existing models
             gateway.execute(new AbstractSensinactCommand<Void>() {
@@ -105,7 +99,8 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
         enforcer = new Enforcer(CasbinUtils.makeModel());
 
         // Add default policies
-        enforcer.addPolicies(CasbinUtils.defaultPolicies(allowByDefault).stream().map(Policy::toList).toList());
+        enforcer.addPolicies(
+                CasbinUtils.defaultPolicies(configuration.allowByDefault()).stream().map(Policy::toList).toList());
 
         // Add configured policies
         enforcer.addPolicies(parsePolicies(configuration.policies()).stream().map(Policy::toList).toList());
@@ -141,15 +136,20 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
             }
         }).toArray(String[]::new);
 
+        // Keep track of indexes in case of a change in the number of entry fields
+        final int levelIdx = 4;
+        final int effectIdx = levelIdx + 1;
+        final int priorityIdx = effectIdx + 1;
+
         // Check length
         if (parts.length != Policy.EXPECTED_POLICY_FIELDS) {
-            logger.warn("Invalid row: {} (got {} fields, expected {}", row, parts.length,
+            logger.warn("Invalid row: {} (got {} fields, expected {})", row, parts.length,
                     Policy.EXPECTED_POLICY_FIELDS);
             return null;
         }
 
         // Parse level(s)
-        String level = parts[6];
+        String level = parts[levelIdx];
         if (level != null && !"*".equals(level)) {
             final List<PermissionLevel> levels = Arrays.stream(level.toUpperCase().split("\\|")).map(String::trim)
                     .map(s -> {
@@ -170,22 +170,28 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
         // Parse effect
         final PolicyEffect effect;
         try {
-            effect = PolicyEffect.valueOf(parts[7].toLowerCase());
+            effect = PolicyEffect.valueOf(parts[effectIdx].toLowerCase());
+        } catch (ArrayIndexOutOfBoundsException e) {
+            logger.error("No policy effect in row: {}", row);
+            return null;
         } catch (Exception e) {
-            logger.warn("Invalid policy effect in row: {}", row);
+            logger.warn("Invalid policy effect '{}' in row: {}", parts[effectIdx], row);
             return null;
         }
 
         // Parse priority
         final int priority;
         try {
-            priority = Integer.parseInt(parts[8]);
+            priority = Integer.parseInt(parts[priorityIdx]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            logger.error("No priority in row: {}", row);
+            return null;
         } catch (Exception e) {
-            logger.warn("Invalid priority in row: {} ({})", row, e.getMessage());
+            logger.warn("Invalid priority '{}' in row: {} ({})", parts[priorityIdx], row, e.getMessage());
             return null;
         }
 
-        return new Policy(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], level, effect, priority);
+        return new Policy(parts[0], parts[1], parts[2], parts[3], level, effect, priority);
     }
 
     /**
@@ -203,7 +209,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
     }
 
     @Override
-    public PreAuthorizer createAuthorizer(final UserInfo user) {
+    public PreAuthorizer createPreAuthorizer(final UserInfo user) {
         // Ensure we don't have previous roles definitions
         final String userName = user.getUserId();
         enforcer.deleteRolesForUser(userName);
@@ -213,7 +219,12 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
             user.getGroups().forEach(g -> enforcer.addRoleForUser(userName, String.format("role:%s", g)));
         }
 
-        return new CasbinPreAuthorizer(userName, enforcer, allowByDefault);
+        return new CasbinPreAuthorizer(userName, enforcer);
+    }
+
+    @Override
+    public Authorizer createAuthorizer(UserInfo user) {
+        return null;
     }
 
     /**

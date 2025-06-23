@@ -12,6 +12,9 @@
 
 package org.eclipse.sensinact.northbound.security.authorization.casbin;
 
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
 import org.casbin.jcasbin.main.Enforcer;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
@@ -33,50 +36,38 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
     private final Enforcer enforcer;
 
     /**
-     * Flag to allow operations if something went wrong checking it
-     */
-    private final boolean allowByDefault;
-
-    /**
      * Prepares the pre-authorizer for a user session
      *
      * @param subject  User ID
      * @param enforcer Enforcer to use to authorize operations
      */
     public CasbinPreAuthorizer(final String subject, final Enforcer enforcer) {
-        this(subject, enforcer, false);
-    }
-
-    /**
-     * Prepares the pre-authorizer for a user session
-     *
-     * @param subject        User ID
-     * @param enforcer       Enforcer to use to authorize operations
-     * @param allowByDefault Allow operations if something went wrong checking it
-     */
-    public CasbinPreAuthorizer(final String subject, final Enforcer enforcer, final boolean allowByDefault) {
         this.subject = subject;
         this.enforcer = enforcer;
-        this.allowByDefault = allowByDefault;
     }
 
     /**
      * Check if the operation is allowed
      *
-     * @param modelPackageUri Target provider model package URI
-     * @param model           Target provider model name
-     * @param provider        Target provider name
-     * @param service         Target service
-     * @param resource        Target resource
-     * @param level           Requested access level
+     * @param provider Target provider name
+     * @param service  Target service
+     * @param resource Target resource
+     * @param level    Requested access level
      * @return True if allowed, else false
      */
-    public PreAuth authorize(final String modelPackageUri, final String model, final String provider,
-            final String service, final String resource, final PermissionLevel level) {
+    public PreAuth authorize(final String provider, final String service, final String resource,
+            final PermissionLevel level) {
         try {
-            final boolean allowed = enforcer.enforce(subject, modelPackageUri, model, provider, service, resource,
-                    level.name());
-            return allowed ? PreAuth.ALLOW : PreAuth.DENY;
+            if (enforcer.enforce(subject, provider, service, resource, level.name())) {
+                // Explicit allow
+                return PreAuth.ALLOW;
+            } else if (hasExplicitPolicy(provider, service, resource, level)) {
+                // Explicit denial
+                return PreAuth.DENY;
+            } else {
+                // No explicit rule
+                return PreAuth.UNKNOWN;
+            }
         } catch (Exception e) {
             logger.error("Error checking authorization of {} on {}", subject,
                     String.join("/", provider, service, resource), e);
@@ -85,58 +76,47 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
     }
 
     /**
-     * Converts a pre-authorization result to a boolean
+     * Checks if an explicit policy exists for the given permission
      *
-     * @param preAuth {@link PreAuth} result of
-     *                {@link #authorize(String, String, String, String, String, PermissionLevel)}
-     * @return True if allowed, else false
+     * @param provider Target provider
+     * @param service  Target service
+     * @param resource Target resource
+     * @param level    Target permission level
+     * @return True if an explicit rule exists, else false
      */
-    private boolean normalize(final PreAuth preAuth) {
-        switch (preAuth) {
-        case ALLOW:
-            return true;
-
-        case DENY:
-            return false;
-
-        case UNKNOWN:
-        default:
-            return allowByDefault;
-        }
+    boolean hasExplicitPolicy(final String provider, final String service, final String resource,
+            final PermissionLevel level) {
+        return Stream
+                .concat(enforcer.getNamedImplicitPermissionsForUser("p", subject, new String[0]).stream(),
+                        enforcer.getNamedImplicitPermissionsForUser("p", "*", new String[0]).stream())
+                .anyMatch(fields -> policyMatchField(fields.get(1), provider)
+                        && policyMatchField(fields.get(2), service) && policyMatchField(fields.get(3), resource)
+                        && policyMatchField(fields.get(4), level.name()));
     }
 
-    @Override
-    public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model, String provider) {
-        return normalize(
-                authorize(modelPackageUri, model, provider, Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, level));
-    }
-
-    @Override
-    public boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
-            String service) {
-        return normalize(authorize(modelPackageUri, model, provider, service, Constants.UNKNOWN_FIELD, level));
-    }
-
-    @Override
-    public boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
-            String service, String resource) {
-        return normalize(authorize(modelPackageUri, model, provider, service, resource, level));
+    /**
+     * Checks if the given tested field matches its policy field
+     *
+     * @param policyField Field value in policy definition
+     * @param testedField Tested field value
+     * @return True if the tested field matches the policy definition
+     */
+    boolean policyMatchField(final String policyField, final String testedField) {
+        return policyField.equals("*") || policyField.equals(testedField) || Pattern.matches(policyField, testedField);
     }
 
     @Override
     public PreAuth preAuthProvider(PermissionLevel level, String provider) {
-        return authorize(Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, provider, Constants.UNKNOWN_FIELD,
-                Constants.UNKNOWN_FIELD, level);
+        return authorize(provider, Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, level);
     }
 
     @Override
     public PreAuth preAuthService(PermissionLevel level, String provider, String service) {
-        return authorize(Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, provider, service, Constants.UNKNOWN_FIELD,
-                level);
+        return authorize(provider, service, Constants.UNKNOWN_FIELD, level);
     }
 
     @Override
     public PreAuth preAuthResource(PermissionLevel level, String provider, String service, String resource) {
-        return authorize(Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, provider, service, resource, level);
+        return authorize(provider, service, resource, level);
     }
 }

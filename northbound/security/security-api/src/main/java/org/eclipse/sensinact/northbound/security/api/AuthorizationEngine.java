@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.security.api;
 
+import org.eclipse.sensinact.core.authorization.Authorizer;
+
 /**
  * The {@link AuthorizationEngine} is responsible for checking whether a given
  * user has access to the defined resources
@@ -24,6 +26,13 @@ public interface AuthorizationEngine {
      * @param user User description
      * @return A pre-authorizer for the given user
      */
-    PreAuthorizer createAuthorizer(UserInfo user);
+    PreAuthorizer createPreAuthorizer(UserInfo user);
 
+    /**
+     * Create a {@link Authorizer} for the supplied user.
+     *
+     * @param user User description
+     * @return A authorizer for the given user
+     */
+    Authorizer createAuthorizer(UserInfo user);
 }

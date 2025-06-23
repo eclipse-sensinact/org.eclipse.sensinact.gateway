@@ -112,8 +112,8 @@ public class CasbinAuthConfigTest {
     @WithConfiguration(pid = Constants.CONFIGURATION_PID, location = "?", properties = {
             @Property(key = "allowByDefault", value = "true"),
             @Property(key = "policies", type = Type.Array, value = {
-                    "role:user, *, *, *, *, *, describe|read, allow, 1000", "role:user, *, *, nope, *, *, *, deny, 0",
-                    "role:user, *, *, *, *, *, *, allow, 1000", }) })
+                    "role:user, *, *, *, describe|read, allow, 1000", "role:user, nope, *, *, *, deny, 0",
+                    "role:user, *, *, *, *, allow, 1000", }) })
     void userTest(@InjectService AuthorizationEngine engine) throws Exception {
         final SensiNactSession session = sessionManager.createNewSession(makeUser("foo", "user"));
 
@@ -142,8 +142,8 @@ public class CasbinAuthConfigTest {
     @Test
     @WithConfiguration(pid = Constants.CONFIGURATION_PID, location = "?", properties = {
             @Property(key = "allowByDefault", value = "false"),
-            @Property(key = "policies", type = Type.Array, value = { "anonymous, *, *, public, data, *, read, allow, 0",
-                    "anonymous, *, *, public, action, comment, describe|act, allow, 0", }) })
+            @Property(key = "policies", type = Type.Array, value = { "anonymous, public, data, *, read, allow, 0",
+                    "anonymous, public, action, comment, describe|act, allow, 0", }) })
     void anonymousTest(@InjectService AuthorizationEngine engine) throws Exception {
         final SensiNactSession session = sessionManager.createNewAnonymousSession();
         // Access the sensiNact provider

@@ -12,13 +12,13 @@
 
 package org.eclipse.sensinact.northbound.security.api;
 
-import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 
 /**
- * The Authorizer is designed to be cacheable and Thread safe.
+ * The PreAuthorizer is designed to be called by the Northbound providers before
+ * moving on to the Authorizer.
  */
-public interface PreAuthorizer extends Authorizer {
+public interface PreAuthorizer {
 
     public enum PreAuth {
         /** Auth is known and failed - deny access */

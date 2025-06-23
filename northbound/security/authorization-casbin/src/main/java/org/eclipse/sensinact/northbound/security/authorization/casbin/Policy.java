@@ -18,13 +18,13 @@ import java.util.Optional;
 
 import org.casbin.jcasbin.main.Enforcer;
 
-public record Policy(String subject, String modelPackageUri, String model, String provider, String service,
-        String resource, String level, PolicyEffect eft, int priority) {
+public record Policy(String subject, String provider, String service, String resource, String level, PolicyEffect eft,
+        int priority) {
 
     /**
      * Number of fields expected for a policy
      */
-    public static final int EXPECTED_POLICY_FIELDS = 9;
+    public static final int EXPECTED_POLICY_FIELDS = 7;
 
     /**
      * Converts this policy to a a list of strings to give to
@@ -33,8 +33,8 @@ public record Policy(String subject, String modelPackageUri, String model, Strin
      * @return A list of strings
      */
     public List<String> toList() {
-        return List.of(Optional.ofNullable(subject).map(String::trim).orElse("*"), normalize(modelPackageUri),
-                normalize(model), normalize(provider), normalize(service), normalize(resource), normalize(level),
+        return List.of(Optional.ofNullable(subject).map(String::trim).orElse("*"), normalize(provider),
+                normalize(service), normalize(resource), normalize(level),
                 Optional.ofNullable(eft).map(PolicyEffect::name).orElse(PolicyEffect.deny.name()),
                 Integer.toString(priority));
     }

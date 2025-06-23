@@ -17,10 +17,11 @@ import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAut
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 
-class DenyAllAuthorizer implements PreAuthorizer {
+class DenyAllAuthorizer implements PreAuthorizer, Authorizer {
 
     @Override
     public PreAuth preAuthProvider(PermissionLevel level, String provider) {

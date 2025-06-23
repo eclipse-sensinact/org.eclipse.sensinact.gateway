@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
@@ -48,12 +49,13 @@ public class DefaultSessionAuthorizationEngineTests {
     void testAuthorizer(DefaultAuthPolicy policy, UserInfo user, PreAuth preAuth, boolean permission,
             Function<Collection<String>, Collection<String>> transform) {
         DefaultSessionAuthorizationEngine engine = new DefaultSessionAuthorizationEngine(policy);
-        PreAuthorizer authorizer = engine.createAuthorizer(user);
+        PreAuthorizer preAuthorizer = engine.createPreAuthorizer(user);
 
-        assertEquals(preAuth, authorizer.preAuthProvider(DESCRIBE, PROVIDER));
-        assertEquals(preAuth, authorizer.preAuthService(DESCRIBE, PROVIDER, SERVICE));
-        assertEquals(preAuth, authorizer.preAuthResource(DESCRIBE, PROVIDER, SERVICE, RESOURCE));
+        assertEquals(preAuth, preAuthorizer.preAuthProvider(DESCRIBE, PROVIDER));
+        assertEquals(preAuth, preAuthorizer.preAuthService(DESCRIBE, PROVIDER, SERVICE));
+        assertEquals(preAuth, preAuthorizer.preAuthResource(DESCRIBE, PROVIDER, SERVICE, RESOURCE));
 
+        Authorizer authorizer = engine.createAuthorizer(user);
         assertEquals(permission, authorizer.hasProviderPermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER));
         assertEquals(permission, authorizer.hasServicePermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER, SERVICE));
         assertEquals(permission, authorizer.hasResourcePermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER, SERVICE, RESOURCE));
