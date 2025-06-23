@@ -16,12 +16,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.casbin.jcasbin.main.Enforcer;
+import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CasbinPreAuthorizer implements PreAuthorizer {
+public class CasbinPreAuthorizer implements PreAuthorizer, Authorizer {
 
     private static final Logger logger = LoggerFactory.getLogger(CasbinPreAuthorizer.class);
 
@@ -35,15 +36,19 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
      */
     private final Enforcer enforcer;
 
+    private final boolean allowByDefault;
+
     /**
      * Prepares the pre-authorizer for a user session
      *
-     * @param subject  User ID
-     * @param enforcer Enforcer to use to authorize operations
+     * @param subject        User ID
+     * @param enforcer       Enforcer to use to authorize operations
+     * @param allowByDefault Allow actions without explicit rules
      */
-    public CasbinPreAuthorizer(final String subject, final Enforcer enforcer) {
+    public CasbinPreAuthorizer(final String subject, final Enforcer enforcer, final boolean allowByDefault) {
         this.subject = subject;
         this.enforcer = enforcer;
+        this.allowByDefault = allowByDefault;
     }
 
     /**
@@ -118,5 +123,26 @@ public class CasbinPreAuthorizer implements PreAuthorizer {
     @Override
     public PreAuth preAuthResource(PermissionLevel level, String provider, String service, String resource) {
         return authorize(provider, service, resource, level);
+    }
+
+    boolean normalize(final PreAuth preAuth) {
+        return preAuth == PreAuth.ALLOW || (preAuth == PreAuth.UNKNOWN && allowByDefault);
+    }
+
+    @Override
+    public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model, String provider) {
+        return normalize(preAuthProvider(level, provider));
+    }
+
+    @Override
+    public boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
+            String service) {
+        return normalize(preAuthService(level, provider, service));
+    }
+
+    @Override
+    public boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
+            String service, String resource) {
+        return normalize(preAuthResource(level, provider, service, resource));
     }
 }

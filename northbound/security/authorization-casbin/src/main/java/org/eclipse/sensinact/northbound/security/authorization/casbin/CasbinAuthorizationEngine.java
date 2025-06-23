@@ -69,10 +69,17 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
     private Enforcer enforcer;
 
     /**
+     * Allow access without explicit rule
+     */
+    private boolean allowByDefault;
+
+    /**
      * Component activated
      */
     @Activate
     void activate(final CasbinAuthorizationConfiguration configuration) throws Exception {
+        allowByDefault = configuration.allowByDefault();
+
         try {
             // Load policies of existing models
             gateway.execute(new AbstractSensinactCommand<Void>() {
@@ -99,8 +106,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
         enforcer = new Enforcer(CasbinUtils.makeModel());
 
         // Add default policies
-        enforcer.addPolicies(
-                CasbinUtils.defaultPolicies(configuration.allowByDefault()).stream().map(Policy::toList).toList());
+        enforcer.addPolicies(CasbinUtils.defaultPolicies(allowByDefault).stream().map(Policy::toList).toList());
 
         // Add configured policies
         enforcer.addPolicies(parsePolicies(configuration.policies()).stream().map(Policy::toList).toList());
@@ -219,12 +225,12 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine, TypedEven
             user.getGroups().forEach(g -> enforcer.addRoleForUser(userName, String.format("role:%s", g)));
         }
 
-        return new CasbinPreAuthorizer(userName, enforcer);
+        return new CasbinPreAuthorizer(userName, enforcer, allowByDefault);
     }
 
     @Override
     public Authorizer createAuthorizer(UserInfo user) {
-        return null;
+        return (CasbinPreAuthorizer) createPreAuthorizer(user);
     }
 
     /**
