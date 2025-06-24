@@ -35,6 +35,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.emf.common.util.BasicEMap;
+import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -588,17 +591,18 @@ public class ModelNexus {
         if (getterCacheMs > 0) {
             resourceMetaData.setExternalGetCacheMs(getterCacheMs);
         }
-        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ? List.of()
+        EMap<String, FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ? ECollections.emptyEMap()
                 : toDefaultFeatureCustomMetadata(defaultMetadata);
         EMFUtil.fillMetadata(resourceMetaData, timestamp, false, resource, defaultFeatureMetadata);
         return (EAttribute) resourceMetaData.eContainer().eContainer();
     }
 
-    private List<FeatureCustomMetadata> toDefaultFeatureCustomMetadata(Map<String, Object> defaultMetadata) {
-        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata.entrySet().stream()
-                .map(e -> EMFUtil.createFeatureCustomMetadata(e.getKey(), null, e.getValue()))
-                .collect(Collectors.toList());
-        return defaultFeatureMetadata;
+    private EMap<String, FeatureCustomMetadata> toDefaultFeatureCustomMetadata(Map<String, Object> defaultMetadata) {
+        HashMap<String, FeatureCustomMetadata> m = new HashMap<>();
+        for (Entry<String, Object> entry : defaultMetadata.entrySet()) {
+            m.put(entry.getKey(), EMFUtil.createFeatureCustomMetadata(null, entry.getValue()));
+        }
+        return new BasicEMap<>(m);
     }
 
     private void assertResourceNotExist(EClass service, String resource) {
@@ -632,7 +636,7 @@ public class ModelNexus {
         EClass model = EMFUtil.createEClass(modelClassName, ePackage, null, ProviderPackage.Literals.PROVIDER);
         ModelMetadata metadata = ProviderFactory.eINSTANCE.createModelMetadata();
         EMFUtil.addMetaDataAnnnotation(model, metadata);
-        EMFUtil.fillMetadata(metadata, timestamp, false, modelName, List.of());
+        EMFUtil.fillMetadata(metadata, timestamp, false, modelName, ECollections.emptyEMap());
         return model;
     }
 
@@ -641,7 +645,7 @@ public class ModelNexus {
         EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(name, false), ePackage, null,
                 ProviderPackage.Literals.SERVICE);
         EReference ref = EMFUtil.createServiceReference(model, name, service, true);
-        EMFUtil.fillMetadata(EMFUtil.getModelMetadata(ref), timestamp, false, name, List.of());
+        EMFUtil.fillMetadata(EMFUtil.getModelMetadata(ref), timestamp, false, name, ECollections.emptyEMap());
         return ref;
     }
 
@@ -681,15 +685,15 @@ public class ModelNexus {
 
         final ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
         if (metadata != null) {
-            for (FeatureCustomMetadata entry : metadata.getExtra()) {
-                if (entry.getName().equals(key)) {
-                    return new DefaultTimedValue<Object>(entry.getValue(), entry.getTimestamp());
-                }
-            }
-            // If the resource exists but has no metadata for that key then return an
-            // empty timed value indicating that the resource exists but the metadata
-            // is not set
-            return new DefaultTimedValue<Object>(null, null);
+            EMap<String, FeatureCustomMetadata> extra = metadata.getExtra();
+            FeatureCustomMetadata featureCustomMetadata = extra.get(key);
+            if (featureCustomMetadata != null)
+                return new DefaultTimedValue<>(featureCustomMetadata.getValue(), featureCustomMetadata.getTimestamp());
+            else
+                // If the resource exists but has no metadata for that key then return an
+                // empty timed value indicating that the resource exists but the metadata
+                // is not set
+                return new DefaultTimedValue<>(null, null);
         }
         return null;
     }
@@ -731,10 +735,13 @@ public class ModelNexus {
 
         Map<String, Object> oldMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
-        metadata.getExtra().stream().filter(fcm -> fcm.getName().equals(metadataKey)).findFirst().ifPresentOrElse(
-                fcm -> EMFUtil.handleFeatureCustomMetadata(fcm, metadataKey, timestamp, value),
-                () -> metadata.getExtra().add(EMFUtil.createFeatureCustomMetadata(metadataKey, timestamp, value)));
-
+        EMap<String, FeatureCustomMetadata> extra = metadata.getExtra();
+        FeatureCustomMetadata fcm = extra.get(metadataKey);
+        if(fcm == null) {
+            extra.put(metadataKey, EMFUtil.createFeatureCustomMetadata(timestamp, value));
+        } else {
+            EMFUtil.handleFeatureCustomMetadata(fcm, timestamp, value);
+        }
         Map<String, Object> newMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
         notificationAccumulator.get().metadataValueUpdate(provider.eClass().getEPackage().getNsURI(),
@@ -869,7 +876,7 @@ public class ModelNexus {
         List<EParameter> params = namedParameterTypes.stream().map(EMFUtil::createActionParameter)
                 .collect(Collectors.toList());
 
-        List<FeatureCustomMetadata> defaultFeatureMetadata = defaultMetadata == null ? List.of()
+        EMap<String, FeatureCustomMetadata>  defaultFeatureMetadata = defaultMetadata == null ? new BasicEMap<>()
                 : toDefaultFeatureCustomMetadata(defaultMetadata);
 
         EOperation action = EMFUtil.createAction(serviceEClass, name, type, params);

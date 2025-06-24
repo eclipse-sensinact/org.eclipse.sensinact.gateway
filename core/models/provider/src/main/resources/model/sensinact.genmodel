@@ -60,7 +60,6 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureMetadata/value"/>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//FeatureCustomMetadata">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/timestamp"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/value"/>
     </genClasses>
@@ -100,5 +99,9 @@
     <genClasses ecoreClass="sensinact.ecore#//ActionParameterMetadata"/>
     <genClasses ecoreClass="sensinact.ecore#//ActionMetadata"/>
     <genClasses ecoreClass="sensinact.ecore#//ResourceValueMetadata"/>
+    <genClasses ecoreClass="sensinact.ecore#//FeatureCustomMetadataMap">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadataMap/key"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureCustomMetadataMap/value"/>
+    </genClasses>
   </genPackages>
 </genmodel:GenModel>
