@@ -41,7 +41,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ResourceValueMetadata;
 import org.eclipse.sensinact.model.core.testdata.DynamicTestSensor;
@@ -159,8 +159,8 @@ public class EMFUpdateServiceTest {
             EMap<ETypedElement, ResourceValueMetadata> metadata = temp.getMetadata();
             ResourceValueMetadata md = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             metadata.put(TestdataPackage.eINSTANCE.getTestTemperatur_V1(), md);
-            EMap<String, FeatureCustomMetadata> extra = md.getExtra();
-            FeatureCustomMetadata fcmd = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
+            EMap<String, MetadataValue> extra = md.getExtra();
+            MetadataValue fcmd = ProviderFactory.eINSTANCE.createMetadataValue();
             extra.put("FCMD Name", fcmd);
 
             Instant before = Instant.now();

@@ -50,7 +50,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.provider.ActionMetadata;
 import org.eclipse.sensinact.model.core.provider.ActionParameterMetadata;
-import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.Metadata;
 import org.eclipse.sensinact.model.core.provider.ModelMetadata;
 import org.eclipse.sensinact.model.core.provider.NexusMetadata;
@@ -116,7 +116,7 @@ public class EMFUtil {
         }
         if (metadata != null) {
             attributes.putAll(toEObjectAttributesToMap(metadata, false, List.of(), null, null));
-            for (Entry<String, FeatureCustomMetadata> entry : metadata.getExtra()) {
+            for (Entry<String, MetadataValue> entry : metadata.getExtra()) {
                 attributes.put(entry.getKey(), entry.getValue().getValue());
             }
         }
@@ -153,13 +153,13 @@ public class EMFUtil {
         return result;
     }
 
-    public static FeatureCustomMetadata createFeatureCustomMetadata(Instant timestamp,
+    public static MetadataValue createMetadataValue(Instant timestamp,
             Object value) {
-        return handleFeatureCustomMetadata(ProviderFactory.eINSTANCE.createFeatureCustomMetadata(), timestamp,
+        return handleMetadataValue(ProviderFactory.eINSTANCE.createMetadataValue(), timestamp,
                 value);
     }
 
-    public static FeatureCustomMetadata handleFeatureCustomMetadata(FeatureCustomMetadata customMetadata,
+    public static MetadataValue handleMetadataValue(MetadataValue customMetadata,
             Instant timestamp, Object value) {
         customMetadata.setTimestamp(timestamp);
         customMetadata.setValue(value);
@@ -173,7 +173,7 @@ public class EMFUtil {
                 metadata.eSet(eStructuralFeature, EcoreUtil
                         .createFromString(attribute.getEAttributeType(), entry.getValue()));
             } else {
-                metadata.getExtra().put(entry.getKey(), createFeatureCustomMetadata(null, entry.getValue()));
+                metadata.getExtra().put(entry.getKey(), createMetadataValue(null, entry.getValue()));
             }
         }
 
@@ -390,7 +390,7 @@ public class EMFUtil {
     }
 
     public static void fillMetadata(NexusMetadata meta, Instant timestamp, boolean locked, String name,
-            EMap<String, FeatureCustomMetadata> extra) {
+            EMap<String, MetadataValue> extra) {
         meta.setTimestamp(timestamp);
         meta.setLocked(locked);
         meta.setOriginalName(name);

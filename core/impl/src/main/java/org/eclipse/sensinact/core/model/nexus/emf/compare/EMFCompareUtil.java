@@ -35,8 +35,8 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
-import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -331,25 +331,25 @@ public class EMFCompareUtil {
         return resourceMetadata;
     }
 
-    private static void updateExtraMetadata(EMap<String, FeatureCustomMetadata> extraNew,
-            EMap<String, FeatureCustomMetadata> extraOriginal, Instant newTimestamp) {
+    private static void updateExtraMetadata(EMap<String, MetadataValue> extraNew,
+            EMap<String, MetadataValue> extraOriginal, Instant newTimestamp) {
         if (extraNew.isEmpty() && extraOriginal.isEmpty()) {
             return;
         }
-        Map<String, FeatureCustomMetadata> toRemoveMap = new HashMap<>();
+        Map<String, MetadataValue> toRemoveMap = new HashMap<>();
         extraOriginal.forEach(e -> toRemoveMap.put(e.getKey(), e.getValue()));
         extraNew.forEach(e -> {
-            FeatureCustomMetadata fcm = e.getValue();
-            FeatureCustomMetadata original = toRemoveMap.remove(e.getKey());
-            Instant timestamp = fcm.getTimestamp() == null ? newTimestamp : fcm.getTimestamp();
+            MetadataValue mv = e.getValue();
+            MetadataValue original = toRemoveMap.remove(e.getKey());
+            Instant timestamp = mv.getTimestamp() == null ? newTimestamp : mv.getTimestamp();
             if (original == null) {
-                FeatureCustomMetadata copy = EcoreUtil.copy(fcm);
+                MetadataValue copy = EcoreUtil.copy(mv);
                 if (copy.getTimestamp() == null) {
                     copy.setTimestamp(newTimestamp);
                 }
                 extraOriginal.put(e.getKey(), copy);
             } else if (original.getTimestamp().plusMillis(1).isBefore(timestamp)) {
-                original.setValue(fcm.getValue());
+                original.setValue(mv.getValue());
                 original.setTimestamp(timestamp);
             }
         });
