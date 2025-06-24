@@ -15,13 +15,15 @@ package org.eclipse.sensinact.core.model.nexus.emf.compare;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -33,8 +35,8 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
-import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -329,39 +331,29 @@ public class EMFCompareUtil {
         return resourceMetadata;
     }
 
-    private static void updateExtraMetadata(EList<FeatureCustomMetadata> extraNew,
-            EList<FeatureCustomMetadata> extraOriginal, Instant newTimestamp) {
+    private static void updateExtraMetadata(EMap<String, MetadataValue> extraNew,
+            EMap<String, MetadataValue> extraOriginal, Instant newTimestamp) {
         if (extraNew.isEmpty() && extraOriginal.isEmpty()) {
             return;
         }
-        List<FeatureCustomMetadata> toRemove = new ArrayList<>(extraOriginal);
-
-        extraNew.forEach(fcm -> {
-            FeatureCustomMetadata original = removeByName(fcm.getName(), toRemove);
-            Instant timestamp = fcm.getTimestamp() == null ? newTimestamp : fcm.getTimestamp();
+        Map<String, MetadataValue> toRemoveMap = new HashMap<>();
+        extraOriginal.forEach(e -> toRemoveMap.put(e.getKey(), e.getValue()));
+        extraNew.forEach(e -> {
+            MetadataValue mv = e.getValue();
+            MetadataValue original = toRemoveMap.remove(e.getKey());
+            Instant timestamp = mv.getTimestamp() == null ? newTimestamp : mv.getTimestamp();
             if (original == null) {
-                FeatureCustomMetadata copy = EcoreUtil.copy(fcm);
+                MetadataValue copy = EcoreUtil.copy(mv);
                 if (copy.getTimestamp() == null) {
                     copy.setTimestamp(newTimestamp);
                 }
-                extraOriginal.add(copy);
+                extraOriginal.put(e.getKey(), copy);
             } else if (original.getTimestamp().plusMillis(1).isBefore(timestamp)) {
-                original.setValue(fcm.getValue());
-                original.getTimestamp();
+                original.setValue(mv.getValue());
+                original.setTimestamp(timestamp);
             }
         });
-        extraOriginal.removeAll(toRemove);
-    }
-
-    private static FeatureCustomMetadata removeByName(String name, List<FeatureCustomMetadata> compareList) {
-        for (Iterator<FeatureCustomMetadata> iterator = compareList.iterator(); iterator.hasNext();) {
-            FeatureCustomMetadata featureCustomMetadata = iterator.next();
-            if (name.equals(featureCustomMetadata.getName())) {
-                iterator.remove();
-                return featureCustomMetadata;
-            }
-        }
-        return null;
+        toRemoveMap.keySet().forEach(extraOriginal::removeKey);
     }
 
     private static Instant getNewTimestampFromMetadata(EStructuralFeature resource, Service service) {
@@ -411,9 +403,18 @@ public class EMFCompareUtil {
             result = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             result.setTimestamp(Instant.now());
             service.getMetadata().put(attribute, result);
-        } else if (result.getTimestamp() == null) {
+            return result;
+        }
+
+        if (result.getTimestamp() == null) {
             result.setTimestamp(Instant.now());
         }
+
+        result.getExtra().stream() //
+                .map(Entry::getValue)
+                .filter(fcm -> fcm.getTimestamp() == null) //
+                .forEach(fcm -> fcm.setTimestamp(Instant.now()));
+
         return result;
     }
 

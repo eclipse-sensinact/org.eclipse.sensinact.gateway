@@ -57,8 +57,8 @@ import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
-import org.eclipse.sensinact.model.core.provider.FeatureCustomMetadata;
 import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -778,11 +778,10 @@ public class SubscriptionTest {
                     .eSet(testService1.eClass().getEStructuralFeature("foo2"), "somethingElse");
             ResourceValueMetadata newMetadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             newMetadata.setTimestamp(Instant.now());
-            FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
-            fcm.setName("test.meta.1");
-            fcm.setValue("some Test");
-            fcm.setTimestamp(Instant.now());
-            newMetadata.getExtra().add(fcm);
+            MetadataValue mv = ProviderFactory.eINSTANCE.createMetadataValue();
+            mv.setValue("some Test");
+            mv.setTimestamp(Instant.now());
+            newMetadata.getExtra().put("test.meta.1", mv);
             ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1"))).getMetadata()
                     .put(testService1.eClass().getEStructuralFeature("foo2"), newMetadata);
 
@@ -849,22 +848,20 @@ public class SubscriptionTest {
             Metadata oldMetadata = ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService1")))
                     .getMetadata().get(testService1.eClass().getEStructuralFeature("foo"));
 
-            FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
-            fcm.setName("test.meta.1");
-            fcm.setValue("some Test");
-            fcm.setTimestamp(Instant.now());
+            MetadataValue mv = ProviderFactory.eINSTANCE.createMetadataValue();
+            mv.setValue("some Test");
+            mv.setTimestamp(Instant.now());
 
-            oldMetadata.getExtra().add(fcm);
+            oldMetadata.getExtra().put("test.meta.1", mv);
 
-            fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
-            fcm.setName("test.meta.2");
-            fcm.setValue(2);
-            fcm.setTimestamp(Instant.now());
+            mv = ProviderFactory.eINSTANCE.createMetadataValue();
+            mv.setValue(2);
+            mv.setTimestamp(Instant.now());
 
             Instant mark = Instant.now();
             Thread.sleep(100);
 
-            oldMetadata.getExtra().add(fcm);
+            oldMetadata.getExtra().put("test.meta.2", mv);
 
             Instant oldMetadataTimestampToCompare = oldMetadata.getTimestamp();
 
@@ -1000,11 +997,10 @@ public class SubscriptionTest {
             assertNull(overwrite);
 
             overwrite = ProviderFactory.eINSTANCE.createResourceValueMetadata();
-            FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
-            fcm.setName("test");
-            fcm.setValue("Something different");
-            fcm.setTimestamp(Instant.now());
-            overwrite.getExtra().add(fcm);
+            MetadataValue mv = ProviderFactory.eINSTANCE.createMetadataValue();
+            mv.setValue("Something different");
+            mv.setTimestamp(Instant.now());
+            overwrite.getExtra().put("test", mv);
 
             ((Service) saved.eGet(provider.eClass().getEStructuralFeature("testService2"))).getMetadata()
                     .put(testService2.eClass().getEStructuralFeature("annotated"), overwrite);
@@ -1025,19 +1021,19 @@ public class SubscriptionTest {
             assertTrue(curMetadata.getTimestamp().isAfter(mark));
             assertNotEquals(overwrite, curMetadata);
             assertEquals(1, curMetadata.getExtra().size());
-            assertEquals("test", curMetadata.getExtra().get(0).getName());
-            assertEquals(fcm.getValue(), curMetadata.getExtra().get(0).getValue());
+            assertNotNull(curMetadata.getExtra().get("test"));
+            assertEquals(mv.getValue(), curMetadata.getExtra().get("test").getValue());
 
             String modelName = EMFUtil.getModelName(provider.eClass());
 
             Mockito.verify(accumulator).addResource(ePackage.getNsURI(), modelName, provider.getId(), "testService2",
                     "annotated");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService2", "annotated", String.class, null, "avalue", Map.of("test", fcm.getValue(), "test2",
+                    "testService2", "annotated", String.class, null, "avalue", Map.of("test", mv.getValue(), "test2",
                             "testMetadata2", "value", "avalue", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService2", "annotated", null, Map.of("test", fcm.getValue(), "test2", "testMetadata2", "value",
+                    "testService2", "annotated", null, Map.of("test", mv.getValue(), "test2", "testMetadata2", "value",
                             "avalue", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
@@ -1070,19 +1066,17 @@ public class SubscriptionTest {
             ResourceValueMetadata metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             metadata.setTimestamp(Instant.now());
             testService1.getMetadata().put(testService1.eClass().getEStructuralFeature("foo"), metadata);
-            FeatureCustomMetadata fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
-            fcm.setName("test.meta.1");
+            MetadataValue fcm = ProviderFactory.eINSTANCE.createMetadataValue();
             fcm.setValue("some Test");
             fcm.setTimestamp(Instant.now());
 
-            metadata.getExtra().add(fcm);
+            metadata.getExtra().put("test.meta.1", fcm);
 
-            fcm = ProviderFactory.eINSTANCE.createFeatureCustomMetadata();
-            fcm.setName("test.meta.2");
+            fcm = ProviderFactory.eINSTANCE.createMetadataValue();
             fcm.setValue(2);
             fcm.setTimestamp(Instant.now());
 
-            metadata.getExtra().add(fcm);
+            metadata.getExtra().put("test.meta.2", fcm);
 
             Provider saved = nexus.save(provider);
 

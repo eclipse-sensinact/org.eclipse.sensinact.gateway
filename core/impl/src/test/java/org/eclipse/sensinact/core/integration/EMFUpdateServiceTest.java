@@ -41,6 +41,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ResourceValueMetadata;
 import org.eclipse.sensinact.model.core.testdata.DynamicTestSensor;
@@ -158,21 +159,25 @@ public class EMFUpdateServiceTest {
             EMap<ETypedElement, ResourceValueMetadata> metadata = temp.getMetadata();
             ResourceValueMetadata md = ProviderFactory.eINSTANCE.createResourceValueMetadata();
             metadata.put(TestdataPackage.eINSTANCE.getTestTemperatur_V1(), md);
+            EMap<String, MetadataValue> extra = md.getExtra();
+            MetadataValue fcmd = ProviderFactory.eINSTANCE.createMetadataValue();
+            extra.put("FCMD Name", fcmd);
 
             Instant before = Instant.now();
             Promise<?> update = push.pushUpdate(sensor);
             assertNull(update.getFailure());
+            Instant after = Instant.now();
             assertEquals("14 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
             Instant current = getResourceTimestamp("TestSensor", PROVIDER, SERVICE, RESOURCE);
             assertNotNull(current);
-            Instant after = Instant.now();
             assertTrue(before.isBefore(current));
             assertTrue(after.isAfter(current));
 
             temp.setV1("13 °C");
             before = Instant.now();
             update = push.pushUpdate(sensor);
-            assertNull(update.getFailure());
+            Throwable failure = update.getFailure();
+            assertNull(failure, () -> "Fails with " + failure.getMessage());
             assertEquals("13 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
             current = getResourceTimestamp("TestSensor", PROVIDER, SERVICE, RESOURCE);
             assertNotNull(current);

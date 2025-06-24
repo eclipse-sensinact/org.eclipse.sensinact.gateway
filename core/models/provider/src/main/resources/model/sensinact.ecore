@@ -45,7 +45,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Metadata" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EReference" name="extra" upperBound="-1"
-        eType="#//FeatureCustomMetadata" containment="true"/>
+        eType="#//MetadataValueMap" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="timestamp" eType="#//EInstant"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FeatureMetadata" instanceClassName="java.util.Map$Entry">
@@ -54,8 +54,7 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EDataType" name="EInstant" instanceClassName="java.time.Instant"/>
-  <eClassifiers xsi:type="ecore:EClass" name="FeatureCustomMetadata">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MetadataValue">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="timestamp" eType="#//EInstant"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
   </eClassifiers>
@@ -125,4 +124,9 @@
   <eClassifiers xsi:type="ecore:EClass" name="ActionParameterMetadata" eSuperTypes="#//NexusMetadata"/>
   <eClassifiers xsi:type="ecore:EClass" name="ActionMetadata" eSuperTypes="#//NexusMetadata"/>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceValueMetadata" eSuperTypes="#//Metadata"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MetadataValueMap" instanceClassName="java.util.Map$Entry">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="key" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//MetadataValue"
+        containment="true"/>
+  </eClassifiers>
 </ecore:EPackage>

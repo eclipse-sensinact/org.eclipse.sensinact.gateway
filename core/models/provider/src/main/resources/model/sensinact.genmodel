@@ -59,10 +59,9 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureMetadata/key"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//FeatureMetadata/value"/>
     </genClasses>
-    <genClasses ecoreClass="sensinact.ecore#//FeatureCustomMetadata">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/timestamp"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//FeatureCustomMetadata/value"/>
+    <genClasses ecoreClass="sensinact.ecore#//MetadataValue">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//MetadataValue/timestamp"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//MetadataValue/value"/>
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//ServiceMap">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//ServiceMap/value"/>
@@ -100,5 +99,9 @@
     <genClasses ecoreClass="sensinact.ecore#//ActionParameterMetadata"/>
     <genClasses ecoreClass="sensinact.ecore#//ActionMetadata"/>
     <genClasses ecoreClass="sensinact.ecore#//ResourceValueMetadata"/>
+    <genClasses ecoreClass="sensinact.ecore#//MetadataValueMap">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//MetadataValueMap/key"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensinact.ecore#//MetadataValueMap/value"/>
+    </genClasses>
   </genPackages>
 </genmodel:GenModel>
