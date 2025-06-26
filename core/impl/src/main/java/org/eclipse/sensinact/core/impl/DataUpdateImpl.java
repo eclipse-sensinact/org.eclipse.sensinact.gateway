@@ -96,6 +96,10 @@ public class DataUpdateImpl implements DataUpdate {
         if (o instanceof Provider) {
             return Stream.of(new SaveProviderCommand((Provider) o));
         }
+//        if(o instanceof EObject) {
+        	//prepare mapping
+        	// new UpdateProviderCommand
+//        }
 
         if (o instanceof List) {
             @SuppressWarnings("unchecked")
