@@ -24,6 +24,7 @@ import static org.eclipse.sensinact.gateway.geojson.GeoJsonType.Polygon;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
 import java.util.List;
@@ -32,6 +33,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,8 +43,11 @@ public class GeoJsonTest {
     private ObjectMapper mapper;
 
     @BeforeEach
-    void setUp() throws Exception {
-        mapper = new ObjectMapper();
+    void setUp() {
+        JsonFactory factory = JsonFactory.builder()
+                .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
+                .build();
+        mapper = new ObjectMapper(factory);
     }
 
     private URL getFileResource(String name) {
@@ -148,4 +154,24 @@ public class GeoJsonTest {
                 ((Map<String, Object>) geoObjects.get(1).foreignMembers.get("centerline")).get("type"));
         assertEquals(Map.of("bar", "baz"), geoObjects.get(2).foreignMembers.get("extra"));
     }
+
+    @Test
+    void testNaN() throws Exception {
+        List<Geometry> geometries = mapper.readValue(getFileResource("test-pointNaN.json"),
+                new TypeReference<List<Geometry>>() {
+                });
+
+        assertEquals(2, geometries.size());
+        assertEquals(Point, geometries.get(0).type);
+        Point nan = (Point) geometries.get(0);
+        assertTrue(Double.isNaN(nan.coordinates.latitude));
+        assertTrue(Double.isNaN(nan.coordinates.longitude));
+        assertTrue(Double.isNaN(nan.coordinates.elevation));
+        assertEquals(Point, geometries.get(1).type);
+        Point empty = (Point) geometries.get(1);
+        assertTrue(Double.isNaN(empty.coordinates.latitude));
+        assertTrue(Double.isNaN(empty.coordinates.longitude));
+        assertTrue(Double.isNaN(empty.coordinates.elevation));
+    }
+
 }
