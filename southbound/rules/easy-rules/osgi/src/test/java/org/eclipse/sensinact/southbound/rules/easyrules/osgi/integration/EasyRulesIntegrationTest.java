@@ -28,10 +28,10 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.filters.resource.selector.api.CompactResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
-import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
@@ -137,28 +137,22 @@ public class EasyRulesIntegrationTest {
         }
     }
 
-    private ResourceSelector makeBasicResourceSelector(String model, String provider, String service, String resource) {
-        ResourceSelector rs = new ResourceSelector();
-        rs.model = model == null ? null : makeExactSelection(model);
-        rs.provider = provider == null ? null :makeExactSelection(provider);
-        rs.service = service == null ? null : makeExactSelection(service);
-        rs.resource = resource == null ? null : makeExactSelection(resource);
-        return rs;
+    private ResourceSelector makeBasicResourceSelector(String model, String provider, String service, String resource,
+            ValueSelection vs) {
+        return new CompactResourceSelector(null,
+                model == null ? null : makeExactSelection(model),
+                provider == null ? null :makeExactSelection(provider),
+                service == null ? null : makeExactSelection(service),
+                resource == null ? null : makeExactSelection(resource),
+                        List.of(vs), List.of()).toResourceSelector();
     }
 
     private Selection makeExactSelection(String name) {
-        Selection s = new Selection();
-        s.type = MatchType.EXACT;
-        s.value = name;
-        return s;
+        return new Selection(name, null, false);
     }
 
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation) {
-        ValueSelection s = new ValueSelection();
-        s.value = value;
-        s.operation = operation;
-        s.checkType = check;
-        return s;
+        return new ValueSelection(value, operation, false, check);
     }
 
     @Test
@@ -176,8 +170,8 @@ public class EasyRulesIntegrationTest {
                 })
                 .build());
 
-        ResourceSelector rs = makeBasicResourceSelector(null, null, "sensor", "temperature");
-        rs.value = List.of(makeValueSelection("10", null, OperationType.GREATER_THAN_OR_EQUAL));
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "sensor", "temperature",
+                makeValueSelection("10", null, OperationType.GREATER_THAN_OR_EQUAL));
         // "Temp1", "Temp2", "Temp3"
         re.fire(rules, EasyRulesHelper.toFacts(applyFilter(rs), updater));
 

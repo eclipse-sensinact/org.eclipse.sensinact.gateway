@@ -18,7 +18,6 @@ import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelec
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -54,7 +53,7 @@ public class ProviderSelectionCriterion {
         if(resources.isEmpty()) {
             this.serviceFilter = never();
             this.resourceFilter = never();
-            this.valueFilter = null;
+            this.valueFilter = (x,y) -> Boolean.TRUE;
         } else {
             this.serviceFilter = combineServiceCheck(providerFilter, resources.stream()
                             .map(ResourceSelectionCriterion::serviceFilter)
