@@ -1,0 +1,10 @@
+{
+  "model": { "value": "foo" },
+  "provider": { "value": "test.+", "type": "REGEX"},
+  "service": { "value": "\\d\\d", "type": "REGEX_REGION"},
+  "resource": "look",
+  "value": [
+    {"value": 5, "operation": "GREATER_THAN"},
+    {"value": 17, "operation": "LESS_THAN"}
+  ]
+}

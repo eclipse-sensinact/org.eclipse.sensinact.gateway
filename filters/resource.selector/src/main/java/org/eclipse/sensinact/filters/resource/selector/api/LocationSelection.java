@@ -13,36 +13,31 @@
 package org.eclipse.sensinact.filters.resource.selector.api;
 
 import org.eclipse.sensinact.gateway.geojson.Geometry;
-import org.eclipse.sensinact.gateway.geojson.Point;
 
 /**
  * Defines a selection for the location of provider
  */
-public class LocationSelection {
-
-    /**
-     * The Geometry to match against
-     */
-    public Geometry value;
-
-    /**
-     * The allowable distance around {@link #value}
-     * to still count as a match.
-     * <p>
-     * If value is a {@link Point} then this
-     * can be used to define a circle
-     */
-    public double radius;
-
-    /**
-     * If true then the result of the test will be negated
-     */
-    public boolean negate;
-
-    /**
-     * The type of matching to use
-     */
-    public MatchType type;
+public record LocationSelection(
+        /**
+         * The Geometry to match against
+         */
+        Geometry value,
+        /**
+         * The allowable distance around {@link #value}
+         * to still count as a match.
+         * <p>
+         * If value is a {@link Point} then this
+         * can be used to define a circle
+         */
+        double radius,
+        /**
+         * If true then the result of the test will be negated
+         */
+        boolean negate,
+        /**
+         * The type of matching to use
+         */
+        MatchType type) {
 
     public static enum MatchType {
         /**
@@ -57,11 +52,5 @@ public class LocationSelection {
          * The location must not overlap with the supplied value
          */
         DISJOINT;
-    }
-
-    @Override
-    public String toString() {
-        return "LocationSelection [value=" + value + ", radius=" + radius + ", negate=" + negate + ", type=" + type
-                + "]";
     }
 }

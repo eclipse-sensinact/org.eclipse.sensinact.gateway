@@ -23,6 +23,7 @@ import java.util.concurrent.BlockingQueue;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.filters.resource.selector.api.CompactResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseSnapshotDTO;
@@ -101,11 +102,8 @@ public class ResourceSnapshotTest {
         push.pushUpdate(dto).getValue();
 
         List<ResourceSelector> request = new ArrayList<>();
-        ResourceSelector rs = new ResourceSelector();
-        rs.model = new Selection();
-        rs.model.value = "M1";
-        rs.service = new Selection();
-        rs.service.value = "S1";
+        ResourceSelector rs = new CompactResourceSelector(null, new Selection("M1", null, false),
+                null, new Selection("S1", null, false), null, List.of(), List.of()).toResourceSelector();
         request.add(rs);
         ResponseSnapshotDTO response = utils.queryJson("snapshot", request, ResponseSnapshotDTO.class);
 
