@@ -425,12 +425,15 @@ public class EMFUtil {
     }
 
     public static String getModelName(EClass model) {
+        EAnnotation modelAnnotation = model.getEAnnotation("model");
+        if (modelAnnotation != null) {
+            return model.getEAnnotation("model").getDetails().get("name");
+        }
         ModelMetadata metadata = (ModelMetadata) getModelMetadata(model);
         if (metadata != null) {
             return metadata.getOriginalName();
-        } else {
-            return model.getName();
         }
+        return model.getName();
     }
 
     /**
