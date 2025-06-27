@@ -25,12 +25,12 @@ import com.fasterxml.jackson.annotation.JsonFormat.Feature;
  * Describes the selection of resources based on their model, provider, service
  * or name. Members can be null (any). Selections set in a single
  * {@link CompactResourceSelector} are combined with an AND semantic.
- * 
+ *
  * <p>
  * A {@link CompactResourceSelector} is not used directly for creating filters,
  * and should be converted into a {@link ResourceSelector} using the
  * {@link #toResourceSelector()} method.
- * 
+ *
  * <p>
  * Note that the primary goal of a Compact Resource Selector is to select a *single* resource
  * across one or more providers. They are most efficient when used with
@@ -60,7 +60,7 @@ public record CompactResourceSelector(Selection modelUri, Selection model, Selec
             location = List.copyOf(location);
         }
     }
-    
+
     public ResourceSelector toResourceSelector() {
         ResourceSelection rs = new ResourceSelection(service, resource, value);
         ProviderSelection ps = new ProviderSelection(modelUri, model, provider, value.isEmpty() ? List.of() : List.of(rs), location);

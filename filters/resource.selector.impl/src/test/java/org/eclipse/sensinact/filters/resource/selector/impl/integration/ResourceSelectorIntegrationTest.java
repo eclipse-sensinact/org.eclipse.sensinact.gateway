@@ -160,7 +160,7 @@ public class ResourceSelectorIntegrationTest {
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation) {
         return makeValueSelection(value, check, operation, false);
     }
-    
+
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation, boolean negate) {
         return new ValueSelection(value, operation, negate, check);
     }

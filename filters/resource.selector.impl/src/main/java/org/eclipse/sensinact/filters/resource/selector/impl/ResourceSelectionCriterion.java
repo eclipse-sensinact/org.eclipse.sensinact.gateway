@@ -61,13 +61,13 @@ public class ResourceSelectionCriterion {
         this.resourceFilter = combineServiceCheck(this.serviceFilter,
                 fromSelection(ResourceSnapshot::getName, rs.resource()));
         this.valueFilter = rs.value().isEmpty() ? this.resourceFilter :
-                combineResourceCheck(this.resourceFilter, 
+                combineResourceCheck(this.resourceFilter,
                     rs.value().stream()
                         .map(ResourceSelectionCriterion::toValueFilter)
                         .reduce(Predicate::and)
                         .get());
     }
-    
+
     public Predicate<ServiceSnapshot> serviceFilter() {
         return serviceFilter;
     }
@@ -75,11 +75,11 @@ public class ResourceSelectionCriterion {
     public Predicate<ResourceSnapshot> resourceFilter() {
         return resourceFilter;
     }
-    
+
     public Predicate<ResourceSnapshot> resourceValueFilter() {
         return valueFilter;
     }
-    
+
     public String exactService() {
         return exactSelection(rs.service());
     }
@@ -88,14 +88,13 @@ public class ResourceSelectionCriterion {
         return exactSelection(rs.resource());
     }
 
-    
     static String exactSelection(Selection s) {
         if(s == null || s.type() != MatchType.EXACT) {
             return null;
         }
         return s.value();
     }
-    
+
     private static Predicate<ResourceSnapshot> combineResourceCheck(Predicate<ResourceSnapshot> r, Predicate<TimedValue<?>> v) {
         if(v == ALWAYS) {
             throw new IllegalStateException("There should always be a value check");
@@ -104,7 +103,7 @@ public class ResourceSelectionCriterion {
             return r == ALWAYS ? valueCheck : r.and(valueCheck);
         }
     }
-    
+
     private static Predicate<ResourceSnapshot> combineServiceCheck(Predicate<ServiceSnapshot> s, Predicate<ResourceSnapshot> r) {
         if(s == ALWAYS) {
             return r;
@@ -113,7 +112,7 @@ public class ResourceSelectionCriterion {
             return r == ALWAYS ? svcCheck : svcCheck.and(r);
         }
     }
-    
+
     private static Predicate<TimedValue<?>> toValueFilter(ValueSelection vs) {
         Predicate<TimedValue<?>> p;
 

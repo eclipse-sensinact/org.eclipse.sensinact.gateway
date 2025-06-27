@@ -37,18 +37,18 @@ public class ResourceSelectorDeserializer extends StdNodeBasedDeserializer<Resou
     public ResourceSelectorDeserializer() {
         super(ResourceSelector.class);
     }
-    
+
     private static final Set<Object> FULL_KEYS = Set.of("providers", "resources");
 
     @Override
     public ResourceSelector convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-        
+
         if(root.getNodeType() != JsonNodeType.OBJECT) {
             ctxt.reportBadCoercion(this, ResourceSelector.class, root, "Resource Selector must be a JSON object but was %s", root.getNodeType());
             // Not used as the previous line throws an exception
             return null;
         }
-        
+
         ResourceSelector rs;
         if(root.has("providers")) {
             // This is a full selector
@@ -60,7 +60,6 @@ public class ResourceSelectorDeserializer extends StdNodeBasedDeserializer<Resou
                         ctxt.handleUnknownProperty(jp, this, root, s);
                     }
                 }
-                
             }
             List<ProviderSelection> providers = getSelectionList(ctxt, root, "providers", ProviderSelection.class);
             List<ResourceSelection> resources = getSelectionList(ctxt, root, "resources", ResourceSelection.class);

@@ -43,34 +43,34 @@ class JsonSerializationTests {
 
     private final JsonMapper mapper = JsonMapper.builder().build();
     private final Path selectorsFolder = Paths.get("src/test/resources/selectors");
-    
+
     @Nested
     class CompactTests {
         @Test
         void compact() throws StreamReadException, DatabindException, IOException {
             ResourceSelector selector = mapper.readValue(selectorsFolder.resolve("compact.json").toFile(), ResourceSelector.class);
-            
+
             assertEquals(1, selector.providers().size());
             assertEquals(0, selector.resources().size());
-            
+
             ProviderSelection ps = selector.providers().get(0);
             assertNotNull(ps);
-            
+
             checkSelection(ps.modelUri(), "foo", MatchType.EXACT, false);
             checkSelection(ps.model(), "bar", MatchType.EXACT, false);
             checkSelection(ps.provider(), "test.+", MatchType.REGEX, false);
-            
+
             assertEquals(List.of(), ps.location());
-            
+
             assertEquals(1, ps.resources().size());
-            
+
             ResourceSelection rs = ps.resources().get(0);
             assertNotNull(rs);
-            
+
             checkSelection(rs.service(), "\\d\\d", MatchType.REGEX_REGION, false);
             checkSelection(rs.resource(), "look", MatchType.EXACT, false);
             assertEquals(1, rs.value().size());
-            
+
             ValueSelection vs = rs.value().get(0);
             checkValueSelection(vs, "17", OperationType.EQUALS, false, CheckType.VALUE);
         }
@@ -78,24 +78,23 @@ class JsonSerializationTests {
         @Test
         void minimal() throws StreamReadException, DatabindException, IOException {
             ResourceSelector selector = mapper.readValue(selectorsFolder.resolve("minimal.json").toFile(), ResourceSelector.class);
-            
+
             assertEquals(1, selector.providers().size());
             assertEquals(1, selector.resources().size());
-            
+
             ProviderSelection ps = selector.providers().get(0);
             assertNotNull(ps);
-            
+
             assertNull(ps.modelUri());
             checkSelection(ps.model(), "foo", MatchType.EXACT, false);
             assertNull(ps.provider());
-            
+
             assertEquals(List.of(), ps.location());
             assertEquals(List.of(), ps.resources());
 
-            
             ResourceSelection rs = selector.resources().get(0);
             assertNotNull(rs);
-            
+
             assertNull(rs.service());
             assertNull(rs.resource());
             assertEquals(List.of(), rs.value());
@@ -104,28 +103,28 @@ class JsonSerializationTests {
         @Test
         void compactMulti() throws StreamReadException, DatabindException, IOException {
             ResourceSelector selector = mapper.readValue(selectorsFolder.resolve("compact-multi.json").toFile(), ResourceSelector.class);
-            
+
             assertEquals(1, selector.providers().size());
             assertEquals(0, selector.resources().size());
-            
+
             ProviderSelection ps = selector.providers().get(0);
             assertNotNull(ps);
-            
+
             assertNull(ps.modelUri());
             checkSelection(ps.model(), "foo", MatchType.EXACT, false);
             checkSelection(ps.provider(), "test.+", MatchType.REGEX, false);
-            
+
             assertEquals(List.of(), ps.location());
-            
+
             assertEquals(1, ps.resources().size());
-            
+
             ResourceSelection rs = ps.resources().get(0);
             assertNotNull(rs);
-            
+
             checkSelection(rs.service(), "\\d\\d", MatchType.REGEX_REGION, false);
             checkSelection(rs.resource(), "look", MatchType.EXACT, false);
             assertEquals(2, rs.value().size());
-            
+
             checkValueSelection(rs.value().get(0), "5", OperationType.GREATER_THAN, false, CheckType.VALUE);
             checkValueSelection(rs.value().get(1), "17", OperationType.LESS_THAN, false, CheckType.VALUE);
         }
@@ -134,39 +133,39 @@ class JsonSerializationTests {
 
     @Nested
     class FullTests {
-        
+
         @ParameterizedTest
         @ValueSource(strings = {"full.json", "full-single-elements.json"})
         void full(String file) throws StreamReadException, DatabindException, IOException {
             ResourceSelector selector = mapper.readValue(selectorsFolder.resolve(file).toFile(), ResourceSelector.class);
-            
+
             assertEquals(1, selector.providers().size());
             assertEquals(1, selector.resources().size());
-            
+
             ProviderSelection ps = selector.providers().get(0);
             assertNotNull(ps);
-            
+
             assertNull(ps.modelUri());
             checkSelection(ps.model(), "foo", MatchType.EXACT, false);
             checkSelection(ps.provider(), "test.+", MatchType.REGEX, false);
-            
+
             assertEquals(List.of(), ps.location());
-            
+
             assertEquals(1, ps.resources().size());
-            
+
             ResourceSelection rs = ps.resources().get(0);
             assertNotNull(rs);
-            
+
             checkSelection(rs.service(), "\\d\\d", MatchType.REGEX_REGION, false);
             checkSelection(rs.resource(), "look", MatchType.EXACT, false);
             assertEquals(1, rs.value().size());
-            
+
             ValueSelection vs = rs.value().get(0);
             checkValueSelection(vs, "17", OperationType.EQUALS, false, CheckType.VALUE);
-            
+
             rs = selector.resources().get(0);
             assertNotNull(rs);
-            
+
             checkSelection(rs.service(), "svc", MatchType.EXACT, false);
             checkSelection(rs.resource(), "look", MatchType.EXACT, false);
             assertEquals(0, rs.value().size());
@@ -180,7 +179,7 @@ class JsonSerializationTests {
         assertEquals(type, s.type());
         assertEquals(negate, s.negate());
     }
-    
+
     private void checkValueSelection(ValueSelection vs, String value, OperationType type, boolean negate, CheckType check) {
         assertNotNull(vs);
         assertEquals(value, vs.value());

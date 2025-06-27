@@ -32,7 +32,7 @@ public class SelectionDeserializer extends AbstractSelectionDeserializer<Selecti
     public Selection convert(JsonNode root, DeserializationContext ctxt) throws IOException {
         return switch(root.getNodeType()) {
             case STRING: yield new Selection(root.textValue(), MatchType.EXACT, false);
-            case OBJECT: yield new Selection(toString(root, "value", ctxt), 
+            case OBJECT: yield new Selection(toString(root, "value", ctxt),
                     ctxt.readTreeAsValue(root.get("type"), MatchType.class),
                     toBoolean(root, "negate", ctxt));
             case NULL: yield null;

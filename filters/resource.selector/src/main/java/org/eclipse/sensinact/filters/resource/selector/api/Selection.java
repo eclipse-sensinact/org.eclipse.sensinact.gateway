@@ -28,7 +28,7 @@ public record Selection(
         /**
          * The type of matching to use
          */
-        MatchType type, 
+        MatchType type,
         /**
          * If true then the result of the test will be negated
          */

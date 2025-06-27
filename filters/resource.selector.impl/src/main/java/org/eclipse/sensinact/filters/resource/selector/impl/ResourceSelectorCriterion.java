@@ -43,9 +43,9 @@ public class ResourceSelectorCriterion implements ICriterion {
     private final boolean allowSingleLevelWildcards;
 
     private final List<ProviderSelectionCriterion> providerSelections;
-    
+
     private final List<ResourceSelectionCriterion> additionalResources;
-    
+
     private final Predicate<ProviderSnapshot> providerFilter;
     private final Predicate<ServiceSnapshot> serviceFilter;
     private final Predicate<ResourceSnapshot> resourceFilter;
@@ -55,7 +55,7 @@ public class ResourceSelectorCriterion implements ICriterion {
     public ResourceSelectorCriterion(ResourceSelector rs, boolean allowSingleLevelWildcards) {
         this.rs = rs;
         this.allowSingleLevelWildcards = allowSingleLevelWildcards;
-        
+
         this.providerSelections = rs.providers().stream().map(ProviderSelectionCriterion::new).toList();
         this.additionalResources = rs.resources().stream().map(ResourceSelectionCriterion::new).toList();
 
@@ -63,11 +63,11 @@ public class ResourceSelectorCriterion implements ICriterion {
                 .map(ProviderSelectionCriterion::providerFilter)
                 .reduce(ResourceSelectorCriterion::combineFilters)
                 .orElse(null);
-        
+
         Stream<Predicate<ServiceSnapshot>> services = Stream.concat(
                 providerSelections.stream().map(ProviderSelectionCriterion::serviceFilter),
                 additionalResources.stream().map(ResourceSelectionCriterion::serviceFilter));
-        
+
         this.serviceFilter = services
                 .reduce(ResourceSelectorCriterion::combineFilters)
                 .orElse(null);
@@ -75,18 +75,18 @@ public class ResourceSelectorCriterion implements ICriterion {
         Stream<Predicate<ResourceSnapshot>> resources = Stream.concat(
                 providerSelections.stream().map(ProviderSelectionCriterion::resourceFilter),
                 additionalResources.stream().map(ResourceSelectionCriterion::resourceFilter));
-        
+
         this.resourceFilter = resources
                 .reduce(ResourceSelectorCriterion::combineFilters)
                 .orElse(null);
-        
+
         this.valueFilter = (p, rl) -> providerSelections.stream()
                 .anyMatch(ps -> ps.resourceValueFilter().test(p, rl));
     }
 
     static <T> Predicate<T> fromSelection(Function<T,String> nameExtractor, Selection s) {
         if(s == null) return always();
-        
+
         Predicate<String> test;
         switch(s.type()) {
         case EXACT:
@@ -108,7 +108,7 @@ public class ResourceSelectorCriterion implements ICriterion {
     static <T> Predicate<T> combineFilters(Predicate<T> a, Predicate<T> b) {
         return a == ALWAYS ? a : b == ALWAYS ? b : a.or(b);
     }
-    
+
     @SuppressWarnings("unchecked")
     static <T> Predicate<T> always() {
         return (Predicate<T>) ALWAYS;
@@ -144,11 +144,11 @@ public class ResourceSelectorCriterion implements ICriterion {
 
     @Override
     public ICriterion negate() {
-        
+
         // We used to override this, but I'm not convinced that it is worth
         // optimising further. It can be reinstated if that turns out to be
         // incorrect
-        
+
         return ICriterion.super.negate();
     }
 
@@ -177,7 +177,7 @@ public class ResourceSelectorCriterion implements ICriterion {
                     continue;
                 }
             }
-            
+
             for(ResourceSelectionCriterion rsc : Stream.concat(ps.getResources().stream(), additionalResources.stream()).toList()) {
                 String exactService = rsc.exactService();
                 String exactResource = rsc.exactResource();
@@ -203,8 +203,7 @@ public class ResourceSelectorCriterion implements ICriterion {
             found.addAll(locallyFound);
             locallyFound.clear();
         }
-        
-        
+
         if(found.contains("*")) {
             return List.of("DATA/*");
         } else if(found.contains("+/+/+/+")) {

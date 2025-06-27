@@ -7,13 +7,13 @@ A resource selector is a simple type of filter designed to easily select a sensi
 /* Resource Selector */
 {
   "providers": [
-    /* Provider Selection... */ 
+    /* Provider Selection... */
     ...
   ],
   "resources": [
-    /* Resource Selection... 
+    /* Resource Selection...
        Note that these must not contain any value selections
-    */ 
+    */
     ...
   ]
 }
@@ -25,7 +25,7 @@ A resource selector is a simple type of filter designed to easily select a sensi
   "provider": { /* Selection */ },
   "location": { /* Location Selection */ },
   "resources: [
-    /* Resource Selection... */ 
+    /* Resource Selection... */
   ]
 }
 

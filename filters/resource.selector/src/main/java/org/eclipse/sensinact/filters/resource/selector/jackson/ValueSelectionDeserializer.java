@@ -34,7 +34,7 @@ public class ValueSelectionDeserializer extends AbstractSelectionDeserializer<Va
         return switch(root.getNodeType()) {
             case OBJECT: yield new ValueSelection(toString(root, "value", ctxt),
                     root.has("operation") ? ctxt.readTreeAsValue(root.get("operation"), OperationType.class) : null,
-                    toBoolean(root, "negate", ctxt), 
+                    toBoolean(root, "negate", ctxt),
                     root.has("checkType") ? ctxt.readTreeAsValue(root.get("checkType"), CheckType.class) : null);
             case STRING:
             case NUMBER:

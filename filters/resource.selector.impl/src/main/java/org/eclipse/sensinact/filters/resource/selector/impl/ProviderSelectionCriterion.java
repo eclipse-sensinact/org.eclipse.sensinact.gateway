@@ -38,12 +38,11 @@ public class ProviderSelectionCriterion {
 
     private final Predicate<ProviderSnapshot> providerFilter;
     private final List<ResourceSelectionCriterion> resources;
-    
+
     private final Predicate<ServiceSnapshot> serviceFilter;
     private final Predicate<ResourceSnapshot> resourceFilter;
 
     private final ResourceValueFilter valueFilter;
-
 
     public ProviderSelectionCriterion(ProviderSelection ps) {
         this.ps = ps;
@@ -51,7 +50,7 @@ public class ProviderSelectionCriterion {
         this.resources = ps.resources().stream()
                 .map(ResourceSelectionCriterion::new)
                 .toList();
-        
+
         if(resources.isEmpty()) {
             this.serviceFilter = never();
             this.resourceFilter = never();
@@ -61,12 +60,12 @@ public class ProviderSelectionCriterion {
                             .map(ResourceSelectionCriterion::serviceFilter)
                             .reduce(ResourceSelectorCriterion::combineFilters)
                             .orElse(always()));
-            
+
             this.resourceFilter = combineResourceCheck(providerFilter, resources.stream()
                     .map(ResourceSelectionCriterion::resourceFilter)
                     .reduce(ResourceSelectorCriterion::combineFilters)
                     .orElse(always()));
-            
+
             this.valueFilter = this::checkResourceValues;
         }
     }
@@ -82,7 +81,7 @@ public class ProviderSelectionCriterion {
     public Predicate<ResourceSnapshot> resourceFilter() {
         return resourceFilter;
     }
-    
+
     public ResourceValueFilter resourceValueFilter() {
         return valueFilter;
     }
@@ -94,11 +93,11 @@ public class ProviderSelectionCriterion {
     public String exactProvider() {
         return ResourceSelectionCriterion.exactSelection(ps.provider());
     }
-    
+
     public List<ResourceSelectionCriterion> getResources() {
         return resources;
     }
-    
+
     private static Predicate<ProviderSnapshot> toProviderFilter(ProviderSelection ps) {
 
         if(ps.modelUri() == null) {
@@ -112,7 +111,6 @@ public class ProviderSelectionCriterion {
                     return modelCheck.and(fromSelection(ProviderSnapshot::getName, ps.provider()));
                 }
             }
-            
         } else {
             Predicate<ProviderSnapshot> modelUriCheck = fromSelection(ProviderSnapshot::getModelPackageUri, ps.modelUri());
             if(ps.model() == null) {
@@ -128,12 +126,12 @@ public class ProviderSelectionCriterion {
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private static <T> Predicate<T> never() {
         return (Predicate<T>) NEVER;
     }
-    
+
     private static Predicate<ServiceSnapshot> combineServiceCheck(Predicate<ProviderSnapshot> p, Predicate<ServiceSnapshot> s) {
         if(p == ALWAYS) {
             return s;
@@ -142,7 +140,7 @@ public class ProviderSelectionCriterion {
             return s == ALWAYS ? pCheck : pCheck.and(s);
         }
     }
-    
+
     private static Predicate<ResourceSnapshot> combineResourceCheck(Predicate<ProviderSnapshot> p, Predicate<ResourceSnapshot> r) {
         if(p == ALWAYS) {
             return r;
@@ -151,13 +149,13 @@ public class ProviderSelectionCriterion {
             return r == ALWAYS ? pCheck : pCheck.and(r);
         }
     }
-    
+
     private boolean checkResourceValues(ProviderSnapshot p, List<ResourceSnapshot> resources) {
         // It must be for this provider
         if(providerFilter != ALWAYS && !providerFilter.test(p)) {
             return false;
         }
-        
+
         // At least one resource must match every resource requirement
         for(ResourceSelectionCriterion rsc : this.resources) {
             if(!resources.stream().anyMatch(rsc.resourceValueFilter())) {

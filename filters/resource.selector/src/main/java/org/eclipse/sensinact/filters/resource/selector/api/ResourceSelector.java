@@ -24,18 +24,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Describes the selection of resources based on their attributes:
- * 
+ *
  * <ul>
  *   <li>The providers section determines which providers are selected. Any resources
  *   used in this section will be included in the output. The list of providers has an
  *   <emphasis>OR</emphasis> semantic. Providers are selected if they match any of the
  *   supplied {@link ProviderSelection} filters.</li>
- *   <li>The resources section selects additional resource values to include in the 
+ *   <li>The resources section selects additional resource values to include in the
  *   selection. It is not permitted to use a {@link ResourceValueFilter} in the resources.
  *   If a {@link ResourceSelection} in the resources section is not found in a selected
  *   provider then it will be silently ignored for that provider.</li>
  * </ul>
- * 
+ *
  * Note that the primary goal of a Resource Selector is to gather a filtered snapshot
  * across one or more providers. They are most efficient when used with a single
  * {@link ProviderSelection} with {@link MatchType#EXACT} {@link Selection}s, particularly
@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  *   <li>Gathering all resources for a specific provider</li>
  *   <li>Gathering all providers where the value of a particular resource has a certain value</li>
  * </ul>
- * 
+ *
  * To gather all resources for a provider add a {@link ResourceSelection} with a <code>null</code>
  * service and resource {@link Selection}.
  */
@@ -57,12 +57,12 @@ public record ResourceSelector(
          * The providers that should be selected by this {@link ResourceSelector}
          */
         List<ProviderSelection> providers,
-        
+
         /**
          * The additional resources that should be selected by this {@link ResourceSelector}
          */
         List<ResourceSelection> resources) {
-    
+
     public ResourceSelector {
         if(providers == null) {
             providers = List.of();
@@ -81,17 +81,17 @@ public record ResourceSelector(
 
     /**
      * A {@link ResourceSelection} represents a filter on a resource and value, and is either used in:
-     * 
+     *
      * <ul>
      *   <li>A {@link ProviderSelection} to select one or more providers for inclusion in the result</li>
      *   <li>A {@link ResourceSelector} to select one or more additional resources. In this case the
      *   list of filters must be empty.</li>
      * </ul>
-     * 
+     *
      * Selections set in a single {@link ResourceSelection} are combined with an AND semantic.
      * If you want to set up an OR semantic then you can do this by creating a
      * {@link ResourceSelector} with multiple {@link ProviderSelection} entries.
-     * 
+     *
      * If either {@link Selection} entry is null then that is treated as a global match.
      */
     public record ResourceSelection(
@@ -108,7 +108,7 @@ public record ResourceSelector(
              * an <emphasis>AND</emphasis> semantic.
              */
             @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<ValueSelection> value) {
-        
+
         public ResourceSelection {
             if(value == null) {
                 value = List.of();
@@ -117,7 +117,7 @@ public record ResourceSelector(
             }
         }
     }
-    
+
     /**
      * A {@link ProviderSelection} represents a filter selecting providers for inclusion in the result.
      * <p>
@@ -137,18 +137,18 @@ public record ResourceSelector(
             /**
              * A selection for the provider. If <code>null</code> then any provider will match
              */
-            Selection provider, 
+            Selection provider,
             /**
              * A selection for the resources. If <code>null</code> or empty then no resources are included
              * with the selection. If set then any matching resources will be included in the snapshot.
              */
-            @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<ResourceSelection> resources, 
+            @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<ResourceSelection> resources,
             /**
              * A selection for the location. If <code>null</code> or empty then no location filtering
              * will occur. If set then the provider location will be included in the snapshot.
              */
             @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<LocationSelection> location) {
-        
+
         public ProviderSelection {
             if(resources == null) {
                 resources = List.of();
