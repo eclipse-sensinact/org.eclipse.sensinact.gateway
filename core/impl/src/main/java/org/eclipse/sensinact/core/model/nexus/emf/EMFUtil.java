@@ -50,8 +50,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 import org.eclipse.sensinact.model.core.provider.ActionMetadata;
 import org.eclipse.sensinact.model.core.provider.ActionParameterMetadata;
-import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.ModelMetadata;
 import org.eclipse.sensinact.model.core.provider.NexusMetadata;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
@@ -153,14 +153,11 @@ public class EMFUtil {
         return result;
     }
 
-    public static MetadataValue createMetadataValue(Instant timestamp,
-            Object value) {
-        return handleMetadataValue(ProviderFactory.eINSTANCE.createMetadataValue(), timestamp,
-                value);
+    public static MetadataValue createMetadataValue(Instant timestamp, Object value) {
+        return handleMetadataValue(ProviderFactory.eINSTANCE.createMetadataValue(), timestamp, value);
     }
 
-    public static MetadataValue handleMetadataValue(MetadataValue customMetadata,
-            Instant timestamp, Object value) {
+    public static MetadataValue handleMetadataValue(MetadataValue customMetadata, Instant timestamp, Object value) {
         customMetadata.setTimestamp(timestamp);
         customMetadata.setValue(value);
         return customMetadata;
@@ -170,8 +167,8 @@ public class EMFUtil {
         for (Entry<String, String> entry : details.entrySet()) {
             EStructuralFeature eStructuralFeature = metadata.eClass().getEStructuralFeature(entry.getKey());
             if (eStructuralFeature instanceof EAttribute attribute) {
-                metadata.eSet(eStructuralFeature, EcoreUtil
-                        .createFromString(attribute.getEAttributeType(), entry.getValue()));
+                metadata.eSet(eStructuralFeature,
+                        EcoreUtil.createFromString(attribute.getEAttributeType(), entry.getValue()));
             } else {
                 metadata.getExtra().put(entry.getKey(), createMetadataValue(null, entry.getValue()));
             }
@@ -424,19 +421,33 @@ public class EMFUtil {
                 .orElseGet(() -> EcoreUtil.getID(eObject));
     }
 
+    /**
+     * Get the name of the model:
+     * <ol>
+     * <li>From the model {@link EAnnotation}</li>
+     * <li>From the {@link ModelMetadata#getOriginalName()}</li>
+     * <li>From the name of the {@link EClass}</li>
+     * </ol>
+     *
+     * @param model EClass of the model
+     * @return model name
+     */
     public static String getModelName(EClass model) {
+        EAnnotation modelAnnotation = model.getEAnnotation("model");
+        if (modelAnnotation != null) {
+            return model.getEAnnotation("model").getDetails().get("name");
+        }
         ModelMetadata metadata = (ModelMetadata) getModelMetadata(model);
         if (metadata != null) {
             return metadata.getOriginalName();
-        } else {
-            return model.getName();
         }
+        return model.getName();
     }
 
     /**
-     * TODO: we have to sanatize the name, so it fits the conventions of EMF
+     * TODO: we have to sanitize the name, so it fits the conventions of EMF
      *
-     * @param modelName the modelname to construct a URI from
+     * @param modelName the model name to construct a URI from
      * @return the constructed uri of the package, using the given basepackage
      */
     public static String constructPackageUri(String baseUri, String modelName) {
