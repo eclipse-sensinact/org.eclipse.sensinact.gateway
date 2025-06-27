@@ -37,7 +37,9 @@ import org.osgi.service.typedevent.TypedEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNotification>, HistoricalQueries {
@@ -123,7 +125,10 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
 
     private final Supplier<Connection> connectionSupplier;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final JsonFactory factory = JsonFactory.builder()
+            .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
+            .build();
+    private final ObjectMapper mapper = new ObjectMapper(factory);
 
     private final Predicate<ResourceDataNotification> include;
 
@@ -169,7 +174,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                     "(SELECT ST_GeomFromGeoJSON( ? )::geography)");
             String tmpValue;
             if (event.newValue() == null) {
-                tmpValue = "{\"type\":\"Point\", \"coordinates\":[]}";
+                tmpValue = "{\"type\":\"Point\", \"coordinates\":[NaN, NaN]}";
             } else if (event.newValue() instanceof GeoJsonObject) {
                 try {
                     tmpValue = mapper.writeValueAsString(event.newValue());
