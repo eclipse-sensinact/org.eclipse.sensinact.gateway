@@ -31,5 +31,6 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//TestResource/foo"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//TestResource/bar"/>
     </genClasses>
+    <genClasses ecoreClass="testdata.ecore#//TestModelWithAnnotation"/>
   </genPackages>
 </genmodel:GenModel>

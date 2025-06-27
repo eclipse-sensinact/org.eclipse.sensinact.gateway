@@ -17,11 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EcorePackage;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
-import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+import org.eclipse.sensinact.model.core.testdata.TestdataPackage;
 import org.junit.jupiter.api.Test;
 
 public class EMFUtilTest {
@@ -73,4 +74,15 @@ public class EMFUtilTest {
         assertEquals(12, o);
     }
 
+    @Test
+    void testGetModelName() {
+        String modelName = EMFUtil.getModelName(TestdataPackage.Literals.TEST_SENSOR);
+        assertEquals("TestSensor", modelName);
+    }
+
+    @Test
+    void testGetModelNameAnnotation() {
+        String modelName = EMFUtil.getModelName(TestdataPackage.Literals.TEST_MODEL_WITH_ANNOTATION);
+        assertEquals("TestModel", modelName);
+    }
 }
