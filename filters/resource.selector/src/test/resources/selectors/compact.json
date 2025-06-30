@@ -1,0 +1,8 @@
+{
+  "modelUri": { "value": "foo" },
+  "model": { "value": "bar" },
+  "provider": { "value": "test.+", "type": "REGEX"},
+  "service": { "value": "\\d\\d", "type": "REGEX_REGION"},
+  "resource": "look",
+  "value": 17
+}

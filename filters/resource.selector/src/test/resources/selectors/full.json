@@ -1,0 +1,19 @@
+{
+  "providers": [
+    {
+      "model": { "value": "foo" },
+      "provider": { "value": "test.+", "type": "REGEX"},
+      "resources": [
+        {
+          "service": { "value": "\\d\\d", "type": "REGEX_REGION"},
+          "resource": "look",
+          "value": 17
+        }
+      ]
+    }
+  ],
+  "resources": {
+    "service": "svc",
+    "resource": "look"
+  }
+}

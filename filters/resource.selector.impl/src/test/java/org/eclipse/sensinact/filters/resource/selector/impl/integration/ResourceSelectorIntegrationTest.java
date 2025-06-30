@@ -40,6 +40,8 @@ import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilte
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,27 +144,33 @@ public class ResourceSelectorIntegrationTest {
     }
 
     private ResourceSelector makeBasicResourceSelector(String model, String provider, String service, String resource) {
-        ResourceSelector rs = new ResourceSelector();
-        rs.model = model == null ? null : makeExactSelection(model);
-        rs.provider = provider == null ? null : makeExactSelection(provider);
-        rs.service = service == null ? null : makeExactSelection(service);
-        rs.resource = resource == null ? null : makeExactSelection(resource);
-        return rs;
+        List<ResourceSelection> resources = List.of(new ResourceSelection(service == null ? null : makeExactSelection(service),
+                resource == null ? null : makeExactSelection(resource), List.of()));
+        ProviderSelection ps = new ProviderSelection(null,
+                model == null ? null : makeExactSelection(model),
+                provider == null ? null : makeExactSelection(provider),
+                resources, List.of());
+        return new ResourceSelector(List.of(ps), List.of());
     }
 
     private Selection makeExactSelection(String name) {
-        Selection s = new Selection();
-        s.type = MatchType.EXACT;
-        s.value = name;
-        return s;
+        return new Selection(name, MatchType.EXACT, false);
     }
 
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation) {
-        ValueSelection s = new ValueSelection();
-        s.value = value;
-        s.operation = operation;
-        s.checkType = check;
-        return s;
+        return makeValueSelection(value, check, operation, false);
+    }
+
+    private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation, boolean negate) {
+        return new ValueSelection(value, operation, negate, check);
+    }
+
+    private ResourceSelector updateValueTest(ResourceSelector rs, ValueSelection vs) {
+        ProviderSelection existingP = rs.providers().get(0);
+        ResourceSelection exisitingR = existingP.resources().get(0);
+        ProviderSelection newer = new ProviderSelection(existingP.modelUri(), existingP.model(), existingP.provider(),
+                List.of(new ResourceSelection(exisitingR.service(), exisitingR.resource(), List.of(vs))), existingP.location());
+        return new ResourceSelector(List.of(newer), rs.resources());
     }
 
     @Test
@@ -170,19 +178,19 @@ public class ResourceSelectorIntegrationTest {
 
         ResourceSelector rs = makeBasicResourceSelector(null, null, "sensor", "temperature");
         // Exact value
-        rs.value = List.of(makeValueSelection("10", null, OperationType.EQUALS));
+        rs = updateValueTest(rs, makeValueSelection("10", null, OperationType.EQUALS));
         List<ProviderSnapshot> results = applyFilter(rs);
         assertEquals(1, results.size());
         assertEquals("Temp1", results.get(0).getName());
 
         // Greater equal
-        rs.value = List.of(makeValueSelection("10", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("10", null, OperationType.GREATER_THAN_OR_EQUAL));
         results = applyFilter(rs);
         assertEquals(3, results.size());
         assertFindProviders(results, "Temp1", "Temp2", "Temp3");
 
         // Less equal
-        rs.value = List.of(makeValueSelection("15", null, OperationType.LESS_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("15", null, OperationType.LESS_THAN_OR_EQUAL));
         results = applyFilter(rs);
         assertEquals(2, results.size());
         assertFindProviders(results, "Temp1", "test");
@@ -191,19 +199,19 @@ public class ResourceSelectorIntegrationTest {
     @Test
     void testResourcePresence() throws Exception {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "sensor", "O3");
-        rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
         List<ProviderSnapshot> results = applyFilter(rs);
         assertEquals(3, results.size());
         assertFindProviders(results, "Detect1", "Detect2", "test");
 
         rs = makeBasicResourceSelector(null, null, null, "O3");
-        rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
         results = applyFilter(rs);
         assertEquals(3, results.size());
         assertFindProviders(results, "Detect1", "Detect2", "test");
 
         rs = makeBasicResourceSelector(null, null, "sensor", "CO2");
-        rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
         results = applyFilter(rs);
         assertEquals(1, results.size());
         assertEquals("Detect1", results.get(0).getName());
@@ -212,12 +220,12 @@ public class ResourceSelectorIntegrationTest {
     @Test
     void testResourceNotPresent() throws Exception {
         ResourceSelector rs = makeBasicResourceSelector("temperature", null, "sensor", "unit");
-        rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
         List<ProviderSnapshot> results = applyFilter(rs);
         assertEquals(2, results.size());
         assertFindProviders(results, "Temp1", "Temp2");
 
-        rs.value.get(0).negate = true;
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET, true));
         results = applyFilter(rs);
         assertEquals(1, results.size());
         assertEquals("Temp3", results.get(0).getName());
@@ -252,18 +260,17 @@ public class ResourceSelectorIntegrationTest {
     @Test
     void testComplex() throws Exception {
         ResourceSelector rs = makeBasicResourceSelector("gas", null, null, "CO");
-        rs.value = List.of(makeValueSelection("1", null, OperationType.GREATER_THAN_OR_EQUAL));
+        rs = updateValueTest(rs, makeValueSelection("1", null, OperationType.GREATER_THAN_OR_EQUAL));
         List<ProviderSnapshot> results = applyFilter(rs);
         assertEquals(2, results.size());
         assertFindProviders(results, "Detect1", "Detect2");
 
         ResourceSelector unitDegrees = makeBasicResourceSelector(null, null, "sensor", "unit");
-        unitDegrees.value = List.of(makeValueSelection("°C", null, OperationType.EQUALS));
+        unitDegrees = updateValueTest(unitDegrees, makeValueSelection("°C", null, OperationType.EQUALS));
         ResourceSelector unitUnset = makeBasicResourceSelector(null, null, "sensor", "unit");
-        unitUnset.value = List.of(makeValueSelection("°C", null, OperationType.IS_SET));
-        unitUnset.value.get(0).negate = true;
+        unitUnset = updateValueTest(unitUnset, makeValueSelection("°C", null, OperationType.IS_SET, true));
         ResourceSelector tempGreater = makeBasicResourceSelector(null, null, "sensor", "temperature");
-        tempGreater.value = List.of(makeValueSelection("5", null, OperationType.GREATER_THAN_OR_EQUAL));
+        tempGreater = updateValueTest(tempGreater, makeValueSelection("5", null, OperationType.GREATER_THAN_OR_EQUAL));
 
         ICriterion baseFilter = filterFactory.parseResourceSelector(tempGreater)
                 .and(filterFactory.parseResourceSelector(Stream.of(unitUnset, unitDegrees)));
@@ -272,7 +279,7 @@ public class ResourceSelectorIntegrationTest {
         assertFindProviders(results, "Temp1", "Temp3");
 
         ResourceSelector gasCO = makeBasicResourceSelector("gas", null, null, "CO");
-        gasCO.value = List.of(makeValueSelection("1", null, OperationType.GREATER_THAN_OR_EQUAL));
+        gasCO = updateValueTest(gasCO, makeValueSelection("1", null, OperationType.GREATER_THAN_OR_EQUAL));
         ICriterion fullFilter = filterFactory.parseResourceSelector(gasCO).or(baseFilter);
         results = applyFilter(fullFilter);
         assertEquals(4, results.size());
@@ -298,12 +305,13 @@ public class ResourceSelectorIntegrationTest {
     @Test
     void testNaming() throws Exception {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "naming", "sensor-1");
-        rs.value = List.of(makeValueSelection(null, null, OperationType.IS_SET));
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
         List<ProviderSnapshot> results = applyFilter(rs);
         assertEquals(1, results.size());
         assertFindProviders(results, "naming1");
 
-        rs.resource.value = "sensor_2";
+        rs = makeBasicResourceSelector(null, null, "naming", "sensor_2");
+        rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
         results = applyFilter(rs);
         assertEquals(1, results.size());
         assertFindProviders(results, "naming2");
