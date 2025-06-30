@@ -7,12 +7,12 @@ A resource selector is a simple type of filter designed to easily select a sensi
 /* Resource Selector */
 {
   "providers": [
-    /* Provider Selection... */
+    /* One or more Provider Selection entries */
     ...
   ],
   "resources": [
-    /* Resource Selection...
-       Note that these must not contain any value selections
+    /* One or more Resource Selection entries
+       Note that these entries must not contain any "value" selections
     */
     ...
   ]
@@ -25,7 +25,7 @@ A resource selector is a simple type of filter designed to easily select a sensi
   "provider": { /* Selection */ },
   "location": { /* Location Selection */ },
   "resources: [
-    /* Resource Selection... */
+    /* One or more Resource Selection entries */
   ]
 }
 
@@ -34,7 +34,7 @@ A resource selector is a simple type of filter designed to easily select a sensi
   "service": { /* Selection */ },
   "resource": { /* Selection */ },
   "value": [
-    /* Value Selection... */
+    /* One or more Value Selection entries */
   ],
 }
 
@@ -61,6 +61,12 @@ A filter can easily be created from a Resource Selector using the `ResourceSelec
 
 The `ResourceSelectorFilterFactory` service also integrates with the sensiNact Filter parser runtime, allowing JSON serialized resource selectors to be handled natively. The filter name used for this parser is `resource.selector`
 
+## Resource Selections
+
+Resource Selections provide the ability to identify a resource that should be returned, and optionally to restrict the set of returned providers based on the value of the resource. The `service` and `resource` properties are used to select the resource(s) that should be included with the selected provider, while the `value` property defines zero or more [Value Selections](#value-selections) that can be used to exclude providers from the set selected by the Resource Selector.
+
+In general it is best to have a one to one mapping between resource selections and selected resources, however this is not required, and if a Resource Selection matches multiple resources in a provider then they will all be selected.
+
 ## Provider Selections
 
 The `providers` property of a Resource Selector contains one or more Provider Selections which determine the providers that will be selected. If multiple selections are provided then these are combined using an `OR` semantic. Each provider selection may restrict the `modelUri`, `model`, `provider`, and `location` of the provider, as well as defining zero or more Resource Selections to identify the resources that should be used to further filter the provider list, and then returned for each selected provider.
@@ -68,10 +74,6 @@ The `providers` property of a Resource Selector contains one or more Provider Se
 ## Additional Resources
 
 The `resources` property of a Resource Selector contains zero or more Resource Selections which are used to define additional resources that should be included in any selected providers. These do not form part of any filtering, and so must not contain any Value Selections, and are purely additive when selecting data to return for already selected providers.
-
-## Resource Selections
-
-Resource Selections provide the ability to identify resources that should be returned, and optionally to restrict the set of returned providers based on the value of the resource. The `service` and `resource` properties are used to select the resource(s) that should be included with the selected provider, while the `value` property defines zero or more Value Selections that can be used to exclude providers from the set selected by the Resource Selector.
 
 
 ## Selections
@@ -131,7 +133,55 @@ In general it is best to use `EXACT` matches which have `"negate": false` when l
 
 ### Multiple Selections
 
-Each selection is a single object, and does not support multiple selections. If you need to select multiple resources then this is achieved using multiple resource selections.
+Each selection is a single object, and does not support multiple selections. If you need to select multiple resources then this is best achieved using multiple resource selections.
+
+## Simple Example
+
+The following example shows how a resource selector can be used to gather information from multiple providers. In this example there are two different models:
+
+* `TempSensor` - a temperature sensor which has a `temperature/reading` resource
+* `WindSensor` - a wind speed sensor which has `wind/speed` and `wind/direction` resources
+
+The following selector will gather the name, location and readings from all of the sensors which have names starting with `public`.
+
+```json
+{
+  "providers": [
+    {
+      "model": "TempSensor",
+      "provider": { "value": "public.+", "type": "REGEX" },
+      "resources": {
+        "service": "temperature",
+        "resource": "reading"
+      }
+    },
+    {
+      "model": "WindSensor",
+      "provider": { "value": "public.+", "type": "REGEX" },
+      "resources": [
+        {
+          "service": "wind",
+          "resource": "speed"
+        },
+        {
+          "service": "wind",
+          "resource": "direction"
+        },
+      ]
+  ],
+  "resources": [
+    {
+      "service": "admin",
+      "resource": "friendlyName"
+    },
+    {
+      "service": "admin",
+      "resource": "location"
+    },
+  ]
+}
+```
+
 
 ## Value Selections
 

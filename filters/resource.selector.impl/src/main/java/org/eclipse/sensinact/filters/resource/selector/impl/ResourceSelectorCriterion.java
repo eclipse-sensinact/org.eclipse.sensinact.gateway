@@ -37,6 +37,7 @@ public class ResourceSelectorCriterion implements ICriterion {
     private static final Logger LOG = LoggerFactory.getLogger(ResourceSelectorCriterion.class);
 
     static final Predicate<?> ALWAYS = x -> Boolean.TRUE;
+    static final Predicate<?> NEVER = x -> Boolean.FALSE;
 
     private final ResourceSelector rs;
 
@@ -112,6 +113,11 @@ public class ResourceSelectorCriterion implements ICriterion {
     @SuppressWarnings("unchecked")
     static <T> Predicate<T> always() {
         return (Predicate<T>) ALWAYS;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> Predicate<T> never() {
+        return (Predicate<T>) NEVER;
     }
 
     @Override

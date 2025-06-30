@@ -15,6 +15,7 @@ package org.eclipse.sensinact.filters.resource.selector.impl;
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.ALWAYS;
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.always;
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.fromSelection;
+import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.never;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -30,8 +31,6 @@ import org.slf4j.LoggerFactory;
 public class ProviderSelectionCriterion {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProviderSelectionCriterion.class);
-
-    private static final Predicate<?> NEVER = x -> Boolean.FALSE;
 
     private final ProviderSelection ps;
 
@@ -124,11 +123,6 @@ public class ProviderSelectionCriterion {
                 }
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> Predicate<T> never() {
-        return (Predicate<T>) NEVER;
     }
 
     private static Predicate<ServiceSnapshot> combineServiceCheck(Predicate<ProviderSnapshot> p, Predicate<ServiceSnapshot> s) {
