@@ -13,10 +13,13 @@ The gateway currently includes the following northbound providers:
 * A [REST interface](SensorthingsRestAccess.md) for [OGC Sensorthings 1.1](https://docs.ogc.org/is/18-088/18-088.html#sensorthings-serviceinterface) using Jakarta RESTful Web Services
 * An [MQTT interface](SensorthingsMqttAccess.md) for [OGC Sensorthings 1.1](https://docs.ogc.org/is/18-088/18-088.html#receive-mqtt-subscribe) using [Moquette](https://github.com/moquette-io/moquette)
 
+The gateway also support [authorizations](Authorization.md).
+
 
 ```{toctree}
 :hidden:
 
+Authorization
 RestDataAccess
 WebsocketDataAccess
 SensorthingsRestAccess
