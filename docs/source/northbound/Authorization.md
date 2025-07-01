@@ -21,9 +21,11 @@ It is configured using the `sensinact.authorization.casbin` PID, with the follow
 ### Policies
 
 The Casbin policies format used byu Eclipse sensiNact is as follows:
-`role, provider, service, resource, operations, effect, priority`
+`role, modelPackageUri, model, provider, service, resource, operations, effect, priority`
 
 - `role`: either a user name (`foobar`, `admin`) or a role name prefixed by `role:` (`role:user`, `role:admin`) or `anonymous`
+- `modelPackageUri`: the package URI of a target provider model. It can be `*` for any or a regular expression (`http://example\.org/.*`)
+- `model`: the name of a model of providers. It can be `*` for any or a regular expression (`model-sensor-[0-9a-fA-F]+`)
 - `provider`: the name of a target provider. It can be `*` for any or a regular expression (`provider-\d+`)
 - `service`: the name of a target service. It can be `*` for any or a regular expression (`sensor-.*-\d+`)
 - `resource`: the name of a target resource. It can be `*` for any or a regular expression (`.*_value`)
@@ -42,19 +44,19 @@ Here is a sample authorization configuration:
         "allowByDefault": false,
         "policies": [
             // Anonymous sessions can't do anything
-            "anonymous, *, *, *, *, deny, -10000",
+            "anonymous, *, *, *, *, *, *, deny, -10000",
             // User can read anything but the resources in a "private" service of any provider
             // Note that user won't be able to update nor act or resources.
             // Having different priorities ensures the rules will be applied as expected
-            "role:user, *, *, *, DESCRIBE|READ, 1000",
-            "role:user, *, private, *, *, deny, 999",
+            "role:user, *, *, *, *, *, DESCRIBE|READ, 1000",
+            "role:user, *, *, *, private, *, *, deny, 999",
             // Users in the manager group can act on action resources named "apply"
             // of any service in providers which name ends with "-management"
-            "role:manager, .*-management, *, apply, ACT, allow, 0",
+            "role:manager, *, *, .*-management, *, apply, ACT, allow, 0",
             // All users can describe and read all resources of the sensiNact provider.
             // Note the priority 0 being higher than -10000,
             // it doesn't override the denial rule for anonymous sessions
-            "*, sensiNact, *, *, *, DESCRIBE|READ, allow, 0"
+            "*, *, *, sensiNact, *, *, *, DESCRIBE|READ, allow, 0"
         ]
     }
 }
