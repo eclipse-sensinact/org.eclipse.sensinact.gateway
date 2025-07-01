@@ -174,6 +174,16 @@ public class FineAuthorizationTest {
         dto.value = 27;
         dto.type = Integer.class;
         push.pushUpdate(dto).getValue();
+
+        // Similar to external sensor, with a different model
+        dto.modelPackageUri = "https://eclipse.org/sensor#";
+        dto.model = "temperature-sensor";
+        dto.provider = "sensor-unrelated";
+        dto.service = "sensor";
+        dto.resource = "temperature";
+        dto.value = 38;
+        dto.type = Integer.class;
+        push.pushUpdate(dto).getValue();
     }
 
     @AfterAll
@@ -205,9 +215,9 @@ public class FineAuthorizationTest {
             @Property(key = "allowByDefault", value = "false"),
             @Property(key = "policies", type = Type.Array, value = { "role:user, *, *, *, *, *, *, deny, 1000",
                     "role:user, *, *, *, *, *, DESCRIBE|READ, allow, 100",
-                    "foobar, *, *, *, input, comment, *, allow, 0", "externalSensor, *, *, *, *, deny, 10",
-                    "externalSensor, *, *, *, sensor, *, UPDATE, allow, 0", "role:admin, *, *, *, *, *, *, allow, -1",
-                    "role:anonymous, *, *, *, *, *, *, deny, -1000", }) })
+                    "foobar, *, *, *, input, comment, *, allow, 0", "externalSensor, *, *, *, *, *, *, deny, 10",
+                    "externalSensor, https://example.org/sensor#, *, *, sensor, *, UPDATE, allow, 0",
+                    "role:admin, *, *, *, *, *, *, allow, -1", "role:anonymous, *, *, *, *, *, *, deny, -1000", }) })
     void testSessionsDenyByDefault(@InjectBundleContext BundleContext ctx) throws Exception {
         final AtomicReference<SensiNactSession> sessionRef = new AtomicReference<>();
 
@@ -251,10 +261,11 @@ public class FineAuthorizationTest {
         assertFalse(session.getUserInfo().isAnonymous());
         assertTrue(session.getUserInfo().isAuthenticated());
         assertEquals(List.of("user"), session.getUserInfo().getGroups());
-        assertEquals(Set.of("sensiNact", "basic", "sensor-related"), snapshotProviders(session));
+        assertEquals(Set.of("sensiNact", "basic", "sensor-related", "sensor-unrelated"), snapshotProviders(session));
         assertEquals(42, session.getResourceValue("basic", "sensor", "temperature", Integer.class));
         assertEquals("hello", session.getResourceValue("basic", "foo", "bar", String.class));
         assertEquals(27, session.getResourceValue("sensor-related", "sensor", "temperature", Integer.class));
+        assertEquals(38, session.getResourceValue("sensor-unrelated", "sensor", "temperature", Integer.class));
 
         assertNull(session.getResourceValue("basic", "input", "comment", String.class));
         final String comment = "Hello World!";
@@ -271,10 +282,11 @@ public class FineAuthorizationTest {
         assertFalse(session.getUserInfo().isAnonymous());
         assertTrue(session.getUserInfo().isAuthenticated());
         assertEquals(List.of("user"), session.getUserInfo().getGroups());
-        assertEquals(Set.of("sensiNact", "basic", "sensor-related"), snapshotProviders(session));
+        assertEquals(Set.of("sensiNact", "basic", "sensor-related", "sensor-unrelated"), snapshotProviders(session));
         assertEquals(42, session.getResourceValue("basic", "sensor", "temperature", Integer.class));
         assertEquals("hello", session.getResourceValue("basic", "foo", "bar", String.class));
         assertEquals(27, session.getResourceValue("sensor-related", "sensor", "temperature", Integer.class));
+        assertEquals(38, session.getResourceValue("sensor-unrelated", "sensor", "temperature", Integer.class));
 
         // TODO: make it read and write a comment
         assertNull(session.getResourceValue("basic", "input", "comment", String.class));
@@ -298,11 +310,17 @@ public class FineAuthorizationTest {
                 () -> sessionRef.get().getResourceValue("basic", "foo", "bar", String.class));
         assertThrows(NotPermittedException.class,
                 () -> sessionRef.get().getResourceValue("sensor-related", "sensor", "temperature", Integer.class));
+        assertThrows(NotPermittedException.class,
+                () -> sessionRef.get().getResourceValue("sensor-unrelated", "sensor", "temperature", Integer.class));
 
         // ... set the value but don't read it
         session.setResourceValue("sensor-related", "sensor", "temperature", 38);
         assertThrows(NotPermittedException.class,
                 () -> sessionRef.get().getResourceValue("sensor-related", "sensor", "temperature", Integer.class));
+
+        // ... and we shouldn't be able to work on the other sensor
+        assertThrows(NotPermittedException.class,
+                () -> sessionRef.get().setResourceValue("sensor-unrelated", "sensor", "temperature", 42));
 
         // Admin
         session = sessionManager.createNewSession(authenticator.authenticate("admin", null));
@@ -313,11 +331,13 @@ public class FineAuthorizationTest {
         assertFalse(session.getUserInfo().isAnonymous());
         assertTrue(session.getUserInfo().isAuthenticated());
         assertEquals(List.of("admin"), session.getUserInfo().getGroups());
-        assertEquals(Set.of("sensiNact", "basic", "sensor-related"), snapshotProviders(session));
+        assertEquals(Set.of("sensiNact", "basic", "sensor-related", "sensor-unrelated"), snapshotProviders(session));
         assertEquals(42, session.getResourceValue("basic", "sensor", "temperature", Integer.class));
         assertEquals("hello", session.getResourceValue("basic", "foo", "bar", String.class));
-        // ... value must have been updated
+        // ... sensor value must have been updated
         assertEquals(38, session.getResourceValue("sensor-related", "sensor", "temperature", Integer.class));
+        // ... but not in the unrelated one
+        assertEquals(38, session.getResourceValue("sensor-unrelated", "sensor", "temperature", Integer.class));
     }
 
     Set<String> listProviders(SensiNactSession session) {
