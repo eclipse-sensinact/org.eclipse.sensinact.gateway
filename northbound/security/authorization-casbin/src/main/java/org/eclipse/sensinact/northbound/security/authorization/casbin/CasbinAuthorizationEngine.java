@@ -46,6 +46,12 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine {
     GatewayThread gateway;
 
     /**
+     * Providers model cache
+     */
+    @Reference
+    ProvidersModelCache cache;
+
+    /**
      * Policies enforcer
      */
     private Enforcer enforcer;
@@ -100,7 +106,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine {
         }).toArray(String[]::new);
 
         // Keep track of indexes in case of a change in the number of entry fields
-        final int levelIdx = 4;
+        final int levelIdx = 6;
         final int effectIdx = levelIdx + 1;
         final int priorityIdx = effectIdx + 1;
 
@@ -154,7 +160,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine {
             return null;
         }
 
-        return new Policy(parts[0], parts[1], parts[2], parts[3], level, effect, priority);
+        return new Policy(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], level, effect, priority);
     }
 
     /**
@@ -182,7 +188,7 @@ public class CasbinAuthorizationEngine implements AuthorizationEngine {
             user.getGroups().forEach(g -> enforcer.addRoleForUser(userName, String.format("role:%s", g)));
         }
 
-        return new CasbinPreAuthorizer(userName, enforcer, allowByDefault);
+        return new CasbinPreAuthorizer(userName, cache, enforcer, allowByDefault);
     }
 
     @Override

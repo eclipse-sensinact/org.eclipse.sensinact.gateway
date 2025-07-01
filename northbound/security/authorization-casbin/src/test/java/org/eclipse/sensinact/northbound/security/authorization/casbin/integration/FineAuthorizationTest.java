@@ -203,11 +203,11 @@ public class FineAuthorizationTest {
     @Test
     @WithConfiguration(pid = Constants.CONFIGURATION_PID, location = "?", properties = {
             @Property(key = "allowByDefault", value = "false"),
-            @Property(key = "policies", type = Type.Array, value = { "role:user, *, *, *, *, deny, 1000",
-                    "role:user, *, *, *, DESCRIBE|READ, allow, 100",
-                    "foobar, *, input, comment, *, allow, 0", "externalSensor, *, *, deny, 10",
-                    "externalSensor, *, sensor, *, UPDATE, allow, 0",
-                    "role:admin, *, *, *, *, allow, -1", "role:anonymous, *, *, *, *, deny, -1000", }) })
+            @Property(key = "policies", type = Type.Array, value = { "role:user, *, *, *, *, *, *, deny, 1000",
+                    "role:user, *, *, *, *, *, DESCRIBE|READ, allow, 100",
+                    "foobar, *, *, *, input, comment, *, allow, 0", "externalSensor, *, *, *, *, deny, 10",
+                    "externalSensor, *, *, *, sensor, *, UPDATE, allow, 0", "role:admin, *, *, *, *, *, *, allow, -1",
+                    "role:anonymous, *, *, *, *, *, *, deny, -1000", }) })
     void testSessionsDenyByDefault(@InjectBundleContext BundleContext ctx) throws Exception {
         final AtomicReference<SensiNactSession> sessionRef = new AtomicReference<>();
 

@@ -19,6 +19,7 @@ import org.casbin.jcasbin.main.Enforcer;
 import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
+import org.eclipse.sensinact.northbound.security.authorization.casbin.ProvidersModelCache.ModelDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,17 +37,28 @@ public class CasbinPreAuthorizer implements PreAuthorizer, Authorizer {
      */
     private final Enforcer enforcer;
 
+    /**
+     * Allow actions by default
+     */
     private final boolean allowByDefault;
+
+    /**
+     * Providers model cache
+     */
+    private final ProvidersModelCache cache;
 
     /**
      * Prepares the pre-authorizer for a user session
      *
      * @param subject        User ID
+     * @param cache          Providers model cache
      * @param enforcer       Enforcer to use to authorize operations
      * @param allowByDefault Allow actions without explicit rules
      */
-    public CasbinPreAuthorizer(final String subject, final Enforcer enforcer, final boolean allowByDefault) {
+    public CasbinPreAuthorizer(final String subject, final ProvidersModelCache cache, final Enforcer enforcer,
+            final boolean allowByDefault) {
         this.subject = subject;
+        this.cache = cache;
         this.enforcer = enforcer;
         this.allowByDefault = allowByDefault;
     }
@@ -54,19 +66,40 @@ public class CasbinPreAuthorizer implements PreAuthorizer, Authorizer {
     /**
      * Check if the operation is allowed
      *
-     * @param provider Target provider name
-     * @param service  Target service
-     * @param resource Target resource
-     * @param level    Requested access level
+     * @param modelPackageUri Model Package URI
+     * @param model           Model name
+     * @param provider        Target provider name
+     * @param service         Target service
+     * @param resource        Target resource
+     * @param level           Requested access level
      * @return True if allowed, else false
      */
-    public PreAuth authorize(final String provider, final String service, final String resource,
-            final PermissionLevel level) {
+    public PreAuth authorize(final String modelPackageUri, final String model, final String provider,
+            final String service, final String resource, final PermissionLevel level) {
+
+        // Ensure we have a model
+        String foundModelPackageUri;
+        String foundModelName;
+        if (modelPackageUri == null && model == null) {
+            final ModelDetails modelDetails = cache.getModel(provider);
+            if (modelDetails == null) {
+                // Unknown provider: we can't now what is expected afterwards
+                return PreAuth.UNKNOWN;
+            }
+
+            foundModelPackageUri = modelDetails.modelPackageUri();
+            foundModelName = modelDetails.model();
+        } else {
+            foundModelPackageUri = modelPackageUri;
+            foundModelName = model;
+        }
+
         try {
-            if (enforcer.enforce(subject, provider, service, resource, level.name())) {
+            if (enforcer.enforce(subject, foundModelPackageUri, foundModelName, provider, service, resource,
+                    level.name())) {
                 // Explicit allow
                 return PreAuth.ALLOW;
-            } else if (hasExplicitPolicy(provider, service, resource, level)) {
+            } else if (hasExplicitPolicy(foundModelPackageUri, foundModelName, provider, service, resource, level)) {
                 // Explicit denial
                 return PreAuth.DENY;
             } else {
@@ -75,7 +108,7 @@ public class CasbinPreAuthorizer implements PreAuthorizer, Authorizer {
             }
         } catch (Exception e) {
             logger.error("Error checking authorization of {} on {}", subject,
-                    String.join("/", provider, service, resource), e);
+                    String.join("/", model, provider, service, resource), e);
             return PreAuth.UNKNOWN;
         }
     }
@@ -83,20 +116,23 @@ public class CasbinPreAuthorizer implements PreAuthorizer, Authorizer {
     /**
      * Checks if an explicit policy exists for the given permission
      *
-     * @param provider Target provider
-     * @param service  Target service
-     * @param resource Target resource
-     * @param level    Target permission level
+     * @param modelPackageUri Model Package URI
+     * @param model           Model name
+     * @param provider        Target provider
+     * @param service         Target service
+     * @param resource        Target resource
+     * @param level           Target permission level
      * @return True if an explicit rule exists, else false
      */
-    boolean hasExplicitPolicy(final String provider, final String service, final String resource,
-            final PermissionLevel level) {
+    boolean hasExplicitPolicy(final String modelPackageUri, final String model, final String provider,
+            final String service, final String resource, final PermissionLevel level) {
         return Stream
                 .concat(enforcer.getNamedImplicitPermissionsForUser("p", subject, new String[0]).stream(),
                         enforcer.getNamedImplicitPermissionsForUser("p", "*", new String[0]).stream())
-                .anyMatch(fields -> policyMatchField(fields.get(1), provider)
-                        && policyMatchField(fields.get(2), service) && policyMatchField(fields.get(3), resource)
-                        && policyMatchField(fields.get(4), level.name()));
+                .anyMatch(fields -> policyMatchField(fields.get(1), modelPackageUri)
+                        && policyMatchField(fields.get(2), model) && policyMatchField(fields.get(3), provider)
+                        && policyMatchField(fields.get(4), service) && policyMatchField(fields.get(5), resource)
+                        && policyMatchField(fields.get(6), level.name()));
     }
 
     /**
@@ -112,17 +148,17 @@ public class CasbinPreAuthorizer implements PreAuthorizer, Authorizer {
 
     @Override
     public PreAuth preAuthProvider(PermissionLevel level, String provider) {
-        return authorize(provider, Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, level);
+        return authorize(null, null, provider, Constants.UNKNOWN_FIELD, Constants.UNKNOWN_FIELD, level);
     }
 
     @Override
     public PreAuth preAuthService(PermissionLevel level, String provider, String service) {
-        return authorize(provider, service, Constants.UNKNOWN_FIELD, level);
+        return authorize(null, null, provider, service, Constants.UNKNOWN_FIELD, level);
     }
 
     @Override
     public PreAuth preAuthResource(PermissionLevel level, String provider, String service, String resource) {
-        return authorize(provider, service, resource, level);
+        return authorize(null, null, provider, service, resource, level);
     }
 
     boolean normalize(final PreAuth preAuth) {

@@ -27,6 +27,7 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.security.authorization.casbin.ProvidersModelCache.ModelDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -44,6 +45,8 @@ public class CasbinBehaviourTest {
 
         engine = new CasbinAuthorizationEngine();
         engine.gateway = gatewayMock;
+        engine.cache = new ProvidersModelCache();
+        engine.cache.providerModel.put("provider", new ModelDetails("pkgUri", "modelName"));
     }
 
     CasbinAuthorizationConfiguration configure(final boolean allowByDefault, final String[] policies) {
@@ -87,40 +90,45 @@ public class CasbinBehaviourTest {
     @Test
     void parsingTest() throws Exception {
         // Specific target
-        Policy policy = engine.parsePolicy("user, provider, svc, rc, READ, deny, -1000");
+        Policy policy = engine.parsePolicy("user, modelPackageUri, model, provider, svc, rc, READ, deny, -1000");
         assertEquals("user", policy.subject());
+        assertEquals("modelPackageUri", policy.modelPackageUri());
+        assertEquals("model", policy.model());
         assertEquals("provider", policy.provider());
         assertEquals("svc", policy.service());
         assertEquals("rc", policy.resource());
         assertEquals("READ", policy.level());
         assertEquals(PolicyEffect.deny, policy.eft());
         assertEquals(-1000, policy.priority());
-        assertEquals(List.of("user", "provider", "svc", "rc", "READ", "deny", "-1000"), policy.toList());
+        assertEquals(List.of("user", "modelPackageUri", "model", "provider", "svc", "rc", "READ", "deny", "-1000"),
+                policy.toList());
 
         // Wildcard policy
-        policy = engine.parsePolicy("*, *, *, *, describe, allow, 1000");
+        policy = engine.parsePolicy("*, *, *, *, *, *, describe, allow, 1000");
         assertEquals("*", policy.subject());
+        assertEquals("*", policy.modelPackageUri());
+        assertEquals("*", policy.model());
         assertEquals("*", policy.provider());
         assertEquals("*", policy.service());
         assertEquals("*", policy.resource());
         assertEquals(PermissionLevel.DESCRIBE.name(), policy.level());
         assertEquals(PolicyEffect.allow, policy.eft());
         assertEquals(1000, policy.priority());
-        assertEquals(List.of("*", ".*", ".*", ".*", "DESCRIBE", "allow", "1000"), policy.toList());
+        assertEquals(List.of("*", ".*", ".*", ".*", ".*", ".*", "DESCRIBE", "allow", "1000"), policy.toList());
 
         // All levels
-        policy = engine.parsePolicy("*, *, *, *, *, allow, 0");
+        policy = engine.parsePolicy("*, *, *, *, *, *, *, allow, 0");
         assertEquals("*", policy.level());
-        assertEquals(List.of("*", ".*", ".*", ".*", ".*", "allow", "0"), policy.toList());
+        assertEquals(List.of("*", ".*", ".*", ".*", ".*", ".*", ".*", "allow", "0"), policy.toList());
 
         // Invalid priority
-        assertNull(engine.parsePolicy("*, *, *, *, *, allow, xxx"));
+        assertNull(engine.parsePolicy("*, *, *, *, *, *, *, allow, xxx"));
         // Invalid effect
-        assertNull(engine.parsePolicy("*, *, *, *, *, xxx, 1000"));
+        assertNull(engine.parsePolicy("*, *, *, *, *, *, *, xxx, 1000"));
         // Invalid number of fields
-        assertNull(engine.parsePolicy("prefix, *, *, *, *, *, allow, 1000"));
-        assertNull(engine.parsePolicy("*, *, *, *, *, allow, 1000, suffix"));
-        assertNull(engine.parsePolicy("prefix, *, *, *, *, *, allow, 1000, suffix"));
+        assertNull(engine.parsePolicy("prefix, *, *, *, *, *, *, *, allow, 1000"));
+        assertNull(engine.parsePolicy("*, *, *, *, *, *, *, allow, 1000, suffix"));
+        assertNull(engine.parsePolicy("prefix, *, *, *, *, *, *, *, allow, 1000, suffix"));
     }
 
     @Test
@@ -177,16 +185,16 @@ public class CasbinBehaviourTest {
     void basicTest() throws Exception {
         engine.activate(configure(false, new String[] {
                 // Describe for all and everything
-                "*, *, *, *, DESCRIBE, allow, 1000",
+                "*, *, *, *, *, *, DESCRIBE, allow, 1000",
                 // Read svc/rc for all
-                "*, provider, svc, rc, READ, allow, 100",
+                "*, *, *, provider, svc, rc, READ, allow, 100",
                 // Foo explicitly can't update svc/rc
-                "foo, provider, svc, rc, UPDATE, deny, 0",
+                "foo, *, *, provider, svc, rc, UPDATE, deny, 0",
                 // Bar explicitly can update svc/rc
-                "bar, provider, svc, rc, UPDATE, allow, 0",
+                "bar, *, *, provider, svc, rc, UPDATE, allow, 0",
                 // Actors can act everywhere, but can't describe
-                "role:actor, provider, svc, rc, DESCRIBE|READ|UPDATE, deny, 0",
-                "role:actor, provider, svc, rc, ACT, allow, 0", }));
+                "role:actor, *, *, provider, svc, rc, DESCRIBE|READ|UPDATE, deny, 0",
+                "role:actor, *, *, provider, svc, rc, ACT, allow, 0", }));
 
         final PreAuthorizer fooAuth = engine.createPreAuthorizer(makeUser("foo"));
         final PreAuthorizer barAuth = engine.createPreAuthorizer(makeUser("bar"));
