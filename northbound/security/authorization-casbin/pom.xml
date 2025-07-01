@@ -45,7 +45,7 @@
       <artifactId>api</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>impl</artifactId>
