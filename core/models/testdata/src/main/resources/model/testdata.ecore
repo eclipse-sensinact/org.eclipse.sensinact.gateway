@@ -30,4 +30,9 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="foo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="bar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TestModelWithAnnotation">
+    <eAnnotations source="model">
+      <details key="name" value="TestModel"/>
+    </eAnnotations>
+  </eClassifiers>
 </ecore:EPackage>
