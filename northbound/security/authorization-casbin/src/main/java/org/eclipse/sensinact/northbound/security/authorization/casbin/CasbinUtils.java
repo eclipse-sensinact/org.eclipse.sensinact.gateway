@@ -43,10 +43,10 @@ public class CasbinUtils {
 
         // Matchers
         final String fieldsMatch = snaFields.stream()
-                .map(f -> ("((e == allow && r.{field} == '" + Constants.UNKNOWN_FIELD
-                        + "') || regexMatch(r.{field}, p.{field}))").replace("{field}", f))
+                .map(f -> ("(r.{field} == '" + Constants.UNKNOWN_FIELD
+                        + "' || regexMatch(r.{field}, p.{field}))").replace("{field}", f))
                 .collect(Collectors.joining(" && "));
-        model.addDef("m", "m", String.join(" && ", "(p.sub == '*' || g(r.sub, p.sub))", fieldsMatch));
+        model.addDef("m", "m", String.join(" && ", "e == allow", "(p.sub == '*' || g(r.sub, p.sub))", fieldsMatch));
         return model;
     }
 
