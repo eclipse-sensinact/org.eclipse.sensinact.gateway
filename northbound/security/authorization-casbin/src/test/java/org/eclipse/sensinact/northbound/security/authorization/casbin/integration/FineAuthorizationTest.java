@@ -40,6 +40,7 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.security.authorization.casbin.CasbinAuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.authorization.casbin.Constants;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
@@ -224,7 +225,19 @@ public class FineAuthorizationTest {
         Instant end = Instant.now().plusSeconds(5);
         boolean found = false;
         do {
-            found = ctx.getServiceReferences(AuthorizationEngine.class, null).size() == 1;
+            var svcRefs = ctx.getServiceReferences(AuthorizationEngine.class, null);
+            if (svcRefs.size() == 1) {
+                var svcRef = svcRefs.iterator().next();
+                try {
+                    var svc = ctx.getService(svcRef);
+                    if (svc instanceof CasbinAuthorizationEngine) {
+                        found = true;
+                        break;
+                    }
+                } finally {
+                    ctx.ungetService(svcRef);
+                }
+            }
         } while (!found && Instant.now().isBefore(end));
 
         assertTrue(found, "Authorization engine not found");
@@ -238,7 +251,9 @@ public class FineAuthorizationTest {
         assertTrue(session.getUserInfo().isAnonymous());
         assertEquals(List.of(UserInfo.ANONYMOUS_GROUP), session.getUserInfo().getGroups());
         // sensiNact provider is always visible
+        System.out.println("----");
         assertEquals(Set.of("sensiNact"), listProviders(session));
+        System.out.println("----");
         assertNotNull(session.getResourceValue("sensiNact", "system", "version", Object.class));
         assertEquals(Set.of("sensiNact"), snapshotProviders(session));
 
