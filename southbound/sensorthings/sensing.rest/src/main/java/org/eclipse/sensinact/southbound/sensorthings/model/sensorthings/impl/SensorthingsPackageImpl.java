@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
 
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 
@@ -103,6 +104,7 @@ public class SensorthingsPackageImpl extends EPackageImpl implements Sensorthing
 
 		// Initialize simple dependencies
 		ProviderPackage.eINSTANCE.eClass();
+		EcorePackage.eINSTANCE.eClass();
 
 		// Create package meta-data objects
 		theSensorthingsPackage.createPackageContents();

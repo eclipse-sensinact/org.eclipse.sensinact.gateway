@@ -41,7 +41,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @generated
  */
 @ProviderType
-@EPackage(uri = SensorthingsPackage.eNS_URI, genModel = "/sensorthings.genmodel", genModelSourceLocations = {"target/generated-resources/model/sensorthings.genmodel","sensing.rest/target/generated-resources/model/sensorthings.genmodel"}, ecore="/sensorthings.ecore", ecoreSourceLocations="/target/generated-resources/model/sensorthings.ecore")
+@EPackage(uri = SensorthingsPackage.eNS_URI, genModel = "/model/sensorthings.genmodel", genModelSourceLocations = {"src/main/resources/model/sensorthings.genmodel","sensing.rest/src/main/resources/model/sensorthings.genmodel"}, ecore="/model/sensorthings.ecore", ecoreSourceLocations="/src/main/resources/model/sensorthings.ecore")
 public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 	/**
 	 * The package name.
