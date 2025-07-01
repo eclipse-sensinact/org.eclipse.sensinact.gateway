@@ -251,9 +251,7 @@ public class FineAuthorizationTest {
         assertTrue(session.getUserInfo().isAnonymous());
         assertEquals(List.of(UserInfo.ANONYMOUS_GROUP), session.getUserInfo().getGroups());
         // sensiNact provider is always visible
-        System.out.println("----");
         assertEquals(Set.of("sensiNact"), listProviders(session));
-        System.out.println("----");
         assertNotNull(session.getResourceValue("sensiNact", "system", "version", Object.class));
         assertEquals(Set.of("sensiNact"), snapshotProviders(session));
 
