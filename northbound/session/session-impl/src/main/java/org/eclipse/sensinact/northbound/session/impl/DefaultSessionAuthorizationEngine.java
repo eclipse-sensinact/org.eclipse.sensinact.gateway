@@ -12,7 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.session.impl;
 
+import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
 public class DefaultSessionAuthorizationEngine implements AuthorizationEngine {
@@ -25,18 +27,32 @@ public class DefaultSessionAuthorizationEngine implements AuthorizationEngine {
     }
 
     @Override
-    public Authorizer createAuthorizer(UserInfo user) {
+    public PreAuthorizer createPreAuthorizer(UserInfo user) {
         switch (policy) {
-            case ALLOW_ALL:
+        case ALLOW_ALL:
+            return new AllowAllAuthorizer();
+        case AUTHENTICATED_ONLY:
+            if (user.isAuthenticated()) {
                 return new AllowAllAuthorizer();
-            case AUTHENTICATED_ONLY:
-                if(user.isAuthenticated()) {
-                    return new AllowAllAuthorizer();
-                }
-            case DENY_ALL:
-            default:
-                return new DenyAllAuthorizer();
+            }
+        case DENY_ALL:
+        default:
+            return new DenyAllAuthorizer();
         }
     }
 
+    @Override
+    public Authorizer createAuthorizer(UserInfo user) {
+        switch (policy) {
+        case ALLOW_ALL:
+            return new AllowAllAuthorizer();
+        case AUTHENTICATED_ONLY:
+            if (user.isAuthenticated()) {
+                return new AllowAllAuthorizer();
+            }
+        case DENY_ALL:
+        default:
+            return new DenyAllAuthorizer();
+        }
+    }
 }

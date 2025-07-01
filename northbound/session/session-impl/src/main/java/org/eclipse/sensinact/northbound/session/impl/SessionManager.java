@@ -27,10 +27,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.metrics.IMetricsGauge;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
@@ -308,25 +310,39 @@ public class SessionManager
             LOG.debug("Creating a new session for user {}", user.getUserId());
         }
 
-        AuthorizationEngine auth;
-        DefaultAuthPolicy policy;
+        final AuthorizationEngine auth;
+        final DefaultAuthPolicy policy;
         synchronized (lock) {
             doCheck();
             auth = authEngine;
             policy = config.auth_policy();
         }
 
-        SensiNactSessionImpl session;
-        if(auth == null) {
-            if(LOG.isDebugEnabled()) {
+        final AuthorizationEngine defaultAuthEngine = new DefaultSessionAuthorizationEngine(policy);
+        PreAuthorizer preAuthorizer;
+        Authorizer authorizer;
+        if (auth == null) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("No Authorization Engine is set. Using policy {}", policy);
             }
-            session = new SensiNactSessionImpl(user, new DefaultSessionAuthorizationEngine(policy)
-                    .createAuthorizer(user), thread);
+
+            preAuthorizer = defaultAuthEngine.createPreAuthorizer(user);
+            authorizer = defaultAuthEngine.createAuthorizer(user);
         } else {
-            session = new SensiNactSessionImpl(user, auth.createAuthorizer(user), thread);
+            preAuthorizer = auth.createPreAuthorizer(user);
+            if (preAuthorizer == null) {
+                LOG.debug("No PreAuthorizer provided. Using policy {}", policy);
+                preAuthorizer = defaultAuthEngine.createPreAuthorizer(user);
+            }
+
+            authorizer = auth.createAuthorizer(user);
+            if (authorizer == null) {
+                LOG.debug("No Authorizer provided. Using policy {}", policy);
+                authorizer = defaultAuthEngine.createAuthorizer(user);
+            }
         }
 
+        final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread);
         String sessionId = session.getSessionId();
 
         boolean authChanged;
@@ -356,6 +372,9 @@ public class SessionManager
 
     @Override
     public void notify(String topic, ResourceNotification event) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Session Manager received a notification on topic {}", topic);
+        }
         List<SensiNactSessionImpl> sessions;
         synchronized (lock) {
             sessions = new ArrayList<>(this.sessions.values());

@@ -12,9 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.session.impl;
 
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.ALLOW;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.DENY;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.DESCRIBE;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.ALLOW;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
 import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.ALLOW_ALL;
 import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.AUTHENTICATED_ONLY;
 import static org.eclipse.sensinact.northbound.session.impl.DefaultAuthPolicy.DENY_ALL;
@@ -23,10 +23,11 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer;
+import org.eclipse.sensinact.core.authorization.Authorizer;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -45,24 +46,19 @@ public class DefaultSessionAuthorizationEngineTests {
 
     @ParameterizedTest
     @MethodSource("testArgs")
-    void testAuthorizer(DefaultAuthPolicy policy, UserInfo user, Authorizer.PreAuth preAuth, boolean permission,
+    void testAuthorizer(DefaultAuthPolicy policy, UserInfo user, PreAuth preAuth, boolean permission,
             Function<Collection<String>, Collection<String>> transform) {
         DefaultSessionAuthorizationEngine engine = new DefaultSessionAuthorizationEngine(policy);
+        PreAuthorizer preAuthorizer = engine.createPreAuthorizer(user);
+
+        assertEquals(preAuth, preAuthorizer.preAuthProvider(DESCRIBE, PROVIDER));
+        assertEquals(preAuth, preAuthorizer.preAuthService(DESCRIBE, PROVIDER, SERVICE));
+        assertEquals(preAuth, preAuthorizer.preAuthResource(DESCRIBE, PROVIDER, SERVICE, RESOURCE));
+
         Authorizer authorizer = engine.createAuthorizer(user);
-
-        assertEquals(preAuth, authorizer.preAuthProvider(DESCRIBE, PROVIDER));
-        assertEquals(preAuth, authorizer.preAuthService(DESCRIBE, PROVIDER, SERVICE));
-        assertEquals(preAuth, authorizer.preAuthResource(DESCRIBE, PROVIDER, SERVICE, RESOURCE));
-
         assertEquals(permission, authorizer.hasProviderPermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER));
         assertEquals(permission, authorizer.hasServicePermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER, SERVICE));
         assertEquals(permission, authorizer.hasResourcePermission(DESCRIBE, MODEL_URI, MODEL, PROVIDER, SERVICE, RESOURCE));
-
-        Set<String> set = Set.of(SERVICE);
-        assertEquals(transform.apply(set), authorizer.visibleServices(MODEL_URI, MODEL, PROVIDER, set));
-
-        set = Set.of(RESOURCE);
-        assertEquals(transform.apply(set), authorizer.visibleResources(MODEL_URI, MODEL, PROVIDER, SERVICE, set));
     }
 
     static List<Arguments> testArgs () {

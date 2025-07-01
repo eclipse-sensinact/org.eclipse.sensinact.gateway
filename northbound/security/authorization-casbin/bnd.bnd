@@ -1,0 +1,9 @@
+-includeresource: \
+    @jcasbin-${jcasbin.version}.jar;lib:=true, \
+    @aviator-*.jar;lib:=true
+
+Import-Package: \
+    !android.os,\
+    !javax.annotation, \
+    !org.springframework.*, \
+    *

@@ -13,12 +13,12 @@
 package org.eclipse.sensinact.northbound.session.impl;
 
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.DENY;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.UNKNOWN;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.ACT;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.DESCRIBE;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.READ;
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel.UPDATE;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.ACT;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
+import static org.eclipse.sensinact.core.authorization.PermissionLevel.UPDATE;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.UNKNOWN;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Function;
@@ -37,13 +38,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.sensinact.core.authorization.Authorizer;
+import org.eclipse.sensinact.core.authorization.NotPermittedException;
+import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
@@ -52,6 +55,7 @@ import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -62,10 +66,8 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.NotPermittedException;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
@@ -100,9 +102,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final Authorizer authorizer;
 
-    public SensiNactSessionImpl(final UserInfo user, final Authorizer authorizer, final GatewayThread thread) {
+    private final PreAuthorizer preAuthorizer;
+
+    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer, final GatewayThread thread) {
         this.user = user;
-        this.authorizer = authorizer;
+        this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
+        this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
         expiry = Instant.now().plusSeconds(600);
     }
@@ -313,7 +318,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private <T> T doResourceWork(String provider, String service, String resource, Function<SensinactResource, Promise<T>> work,
             PermissionLevel permissionLevel, Supplier<String> authFailureMessage) {
 
-        final PreAuth preAuth = authorizer.preAuthResource(permissionLevel, provider, service, resource);
+        final PreAuth preAuth = preAuthorizer.preAuthResource(permissionLevel, provider, service, resource);
         if(preAuth == DENY) {
             throw new NotPermittedException(authFailureMessage.get());
         }
@@ -410,7 +415,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ResourceDescription describeResource(String provider, String service, String resource) {
-        final PreAuth preAuth = authorizer.preAuthResource(DESCRIBE, provider, service, resource);
+        final PreAuth preAuth = preAuthorizer.preAuthResource(DESCRIBE, provider, service, resource);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
@@ -487,7 +492,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
 
-        final PreAuth preAuth = authorizer.preAuthResource(DESCRIBE, provider, service, resource);
+        final PreAuth preAuth = preAuthorizer.preAuthResource(DESCRIBE, provider, service, resource);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
@@ -535,7 +540,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ServiceDescription describeService(String provider, String service) {
-        final PreAuth preAuth = authorizer.preAuthService(DESCRIBE, provider, service);
+        final PreAuth preAuth = preAuthorizer.preAuthService(DESCRIBE, provider, service);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                     user.getUserId(), String.format("%s/%s", provider, service)));
@@ -567,19 +572,17 @@ public class SensiNactSessionImpl implements SensiNactSession {
             }
             return ss;
         }, (snSvc) -> {
-            SensinactProvider sp = snSvc.getProvider();
             final ServiceDescription description = new ServiceDescription();
             description.service = snSvc.getName();
             description.provider = snSvc.getProvider().getName();
-            description.resources = List.copyOf(authorizer.visibleResources(sp.getModelPackageUri(), sp.getModelName(), provider, service,
-                    snSvc.getResources().keySet()));
+            description.resources = List.copyOf(snSvc.getResources().keySet());
             return description;
         });
     }
 
     @Override
     public ProviderDescription describeProvider(String provider) {
-        final PreAuth preAuth = authorizer.preAuthProvider(DESCRIBE, provider);
+        final PreAuth preAuth = preAuthorizer.preAuthProvider(DESCRIBE, provider);
         if(preAuth == DENY) {
             throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                     user.getUserId(), String.format("%s", provider)));
@@ -604,8 +607,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             }, (snProvider) -> {
                 final ProviderDescription description = new ProviderDescription();
                 description.provider = snProvider.getName();
-                description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(),
-                        snProvider.getModelName(), provider, snProvider.getServices().keySet()));
+                description.services = List.copyOf(snProvider.getServices().keySet());
                 return description;
             });
     }
@@ -618,8 +620,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 .map((snProvider) -> {
                     final ProviderDescription description = new ProviderDescription();
                     description.provider = snProvider.getName();
-                    description.services = List.copyOf(authorizer.visibleServices(snProvider.getModelPackageUri(),
-                            snProvider.getModelName(), snProvider.getName(), snProvider.getServices().keySet()));
+                    description.services = List.copyOf(snProvider.getServices().keySet());
                     return description;
                 }).collect(Collectors.toList()), List.of());
     }

@@ -12,15 +12,16 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.session.impl;
 
-import static org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer.PreAuth.ALLOW;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.ALLOW;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.Authorizer;
-import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine.PermissionLevel;
+import org.eclipse.sensinact.core.authorization.Authorizer;
+import org.eclipse.sensinact.core.authorization.PermissionLevel;
+import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 
-class AllowAllAuthorizer implements Authorizer {
+class AllowAllAuthorizer implements PreAuthorizer, Authorizer {
 
     @Override
     public PreAuth preAuthProvider(PermissionLevel level, String provider) {
@@ -38,33 +39,29 @@ class AllowAllAuthorizer implements Authorizer {
     }
 
     @Override
-    public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model,
-            String provider) {
+    public boolean hasProviderPermission(PermissionLevel level, String modelPackageUri, String model, String provider) {
         return true;
     }
 
     @Override
-    public boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model,
-            String provider, String service) {
+    public boolean hasServicePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
+            String service) {
         return true;
     }
 
     @Override
-    public boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model,
-            String provider, String service, String resource) {
+    public boolean hasResourcePermission(PermissionLevel level, String modelPackageUri, String model, String provider,
+            String service, String resource) {
         return true;
     }
 
-    @Override
     public Collection<String> visibleServices(String modelPackageUri, String model, String provider,
             Collection<String> services) {
         return List.copyOf(services);
     }
 
-    @Override
-    public Collection<String> visibleResources(String modelPackageUri, String model, String provider,
-            String service, Collection<String> resources) {
+    public Collection<String> visibleResources(String modelPackageUri, String model, String provider, String service,
+            Collection<String> resources) {
         return List.copyOf(resources);
     }
-
 }

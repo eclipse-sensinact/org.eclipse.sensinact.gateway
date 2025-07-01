@@ -21,7 +21,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
@@ -281,6 +283,11 @@ public class SecureWebSocketTest {
         private final String credential;
 
         private final UserInfo info = new UserInfo() {
+
+            @Override
+            public Collection<String> getGroups() {
+                return List.of();
+            }
 
             @Override
             public boolean isMemberOfGroup(String group) {
