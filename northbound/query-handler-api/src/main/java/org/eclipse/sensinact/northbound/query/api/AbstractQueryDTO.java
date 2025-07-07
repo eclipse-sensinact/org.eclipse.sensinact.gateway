@@ -18,6 +18,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryUnsubscribeDTO;
 
@@ -33,7 +34,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * Represents a WebSocket query root body
  */
 @JsonSubTypes({ @Type(value = QueryListDTO.class, name = "LIST"),
-        @Type(value = QueryDescribeDTO.class, name = "DESCRIBE"), @Type(value = QueryGetDTO.class, name = "GET"),
+        @Type(value = QueryDescribeDTO.class, name = "DESCRIBE"),
+        @Type(value = QuerySnapshotDTO.class, name = "GET_SNAPSHOT"), @Type(value = QueryGetDTO.class, name = "GET"),
         @Type(value = QuerySetDTO.class, name = "SET"), @Type(value = QueryActDTO.class, name = "ACT"),
         @Type(value = QuerySubscribeDTO.class, name = "SUBSCRIBE"),
         @Type(value = QueryUnsubscribeDTO.class, name = "UNSUBSCRIBE") })
