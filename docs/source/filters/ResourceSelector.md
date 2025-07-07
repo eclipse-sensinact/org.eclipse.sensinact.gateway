@@ -8,13 +8,11 @@ A resource selector is a simple type of filter designed to easily select a sensi
 {
   "providers": [
     /* One or more Provider Selection entries */
-    ...
   ],
   "resources": [
     /* One or more Resource Selection entries
        Note that these entries must not contain any "value" selections
     */
-    ...
   ]
 }
 
@@ -24,7 +22,7 @@ A resource selector is a simple type of filter designed to easily select a sensi
   "model": { /* Selection */ },
   "provider": { /* Selection */ },
   "location": { /* Location Selection */ },
-  "resources: [
+  "resources": [
     /* One or more Resource Selection entries */
   ]
 }
@@ -35,7 +33,7 @@ A resource selector is a simple type of filter designed to easily select a sensi
   "resource": { /* Selection */ },
   "value": [
     /* One or more Value Selection entries */
-  ],
+  ]
 }
 
 /* Selection */
@@ -51,7 +49,7 @@ A resource selector is a simple type of filter designed to easily select a sensi
   "operation": "EQUALS", /* One of EQUALS, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL,
                             GREATER_THAN_OR_EQUAL, REGEX, REGEX_REGION, IS_SET, IS_NOT_NULL */
   "negate": false, /* whether this is a negative test */
-  "checkType": "VALUE", /* One of VALUE, SIZE or TIMESTAMP */
+  "checkType": "VALUE" /* One of VALUE, SIZE or TIMESTAMP */
 }
 ```
 
@@ -116,7 +114,7 @@ If there should be no restriction on the name component then it should be omitte
   "model": { "value": "foo", "type": "EXACT" },
   "provider": null,
   "service": { "value": "bar", "type": "EXACT" },
-  "resource": { "value": "foobar", "type": "EXACT" },
+  "resource": { "value": "foobar", "type": "EXACT" }
 }
 ```
 
@@ -166,8 +164,9 @@ The following selector will gather the name, location and readings from all of t
         {
           "service": "wind",
           "resource": "direction"
-        },
+        }
       ]
+    }
   ],
   "resources": [
     {
@@ -218,8 +217,8 @@ If you want to declare a simple `EQUALS` match then you can do this by using the
 /* Resource Selection for admin/friendlyName */
 {
   "service": "admin",
-  "resource": "friendlyName"
-  "value"
+  "resource": "friendlyName",
+  "value": "sample"
 }
 ```
 
@@ -232,7 +231,7 @@ Value selections may be provided singly, or in an array:
   "model": {
     "value": "testModel"
   },
-  resources: {
+  "resources": {
     "service": {
       "value": "testService"
     },
@@ -241,7 +240,7 @@ Value selections may be provided singly, or in an array:
     },
     "value": {
       "value": "17",
-      "operation": "EQUALS",
+      "operation": "EQUALS"
     }
   }
 }
@@ -254,7 +253,7 @@ or
   "model": {
     "value": "testModel"
   },
-  resources: {
+  "resources": {
     "service": {
       "value": "testService"
     },
@@ -264,11 +263,11 @@ or
     "value": [
       {
         "value": "5",
-        "operation": "GREATER_THAN",
+        "operation": "GREATER_THAN"
       },
       {
         "value": "17",
-        "operation": "LESS_THAN",
+        "operation": "LESS_THAN"
       }
     ]
   }
@@ -291,8 +290,8 @@ Location Selections are used to limit the geographic area within which a Resourc
 
 ```json
 {
-  "value": {  /* A GeoJSON Object */ }
-  "radius": 100.0
+  "value": {  /* A GeoJSON Object */ },
+  "radius": 100.0,
   "type": "CONTAINS"
 }
 ```
@@ -329,5 +328,3 @@ Where only a single resource is required a compact resource selector can be used
   "location": { /* Location Selection */ }
 }
 ```
-
-
