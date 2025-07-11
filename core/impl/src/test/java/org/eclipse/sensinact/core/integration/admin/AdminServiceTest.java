@@ -92,6 +92,12 @@ public class AdminServiceTest {
         assertNull(descr.getValue());
         assertNull(descr.getTimestamp());
 
+        // description set with timestamp
+        setValue(PROVIDER, "admin", "description", "foobar", timestamp);
+        descr = getValue(PROVIDER, "admin", "description");
+        assertEquals("foobar", descr.getValue());
+        assertEquals(timestamp, descr.getTimestamp());
+
         // Ensure we reject setting a value with an earlier timestamp
         setValue(PROVIDER, "admin", "friendlyName", "foo", timestamp.minusSeconds(1));
         descr = getValue(PROVIDER, "admin", "friendlyName");

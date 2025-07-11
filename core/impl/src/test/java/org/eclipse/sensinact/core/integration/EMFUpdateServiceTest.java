@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -198,10 +199,12 @@ public class EMFUpdateServiceTest {
             admin.setTestAdmin("blub");
             Point p = new Point();
             admin.setLocation(p);
+            admin.setDescription("Foobar");
 
             Promise<?> update = push.pushUpdate(sensor);
             assertNull(update.getFailure());
             assertEquals(p, getResourceValue("TestSensor", PROVIDER, "admin", "location"));
+            assertEquals("Foobar", getResourceValue("TestSensor", PROVIDER, "admin", "description"));
             assertEquals("blub", getResourceValue("TestSensor", PROVIDER, "admin", "testAdmin"));
         }
 
@@ -428,20 +431,46 @@ public class EMFUpdateServiceTest {
 
         @Test
         void complexResource() throws Exception {
-            NonDynamicComplexObjectDTO dto = new NonDynamicComplexObjectDTO();
-            TestResource resource = TestdataFactory.eINSTANCE.createTestResource();
-            resource.setFoo("test");
-            resource.setBar("test2");
-            dto.data = resource;
-            dto.timestamp = Instant.now().toEpochMilli();
+            {
+                NonDynamicComplexObjectDTO dto = new NonDynamicComplexObjectDTO();
+                TestResource resource = TestdataFactory.eINSTANCE.createTestResource();
+                resource.setFoo("test1");
+                resource.setBar("test2");
+                dto.data = resource;
+                dto.timestamp = Instant.now().toEpochMilli();
 
-            Promise<?> update = push.pushUpdate(dto);
-            Throwable t = update.getFailure();
-            assertNull(t);
-            Object o = getResourceValue(TestdataPackage.Literals.COMPLEX_TEST_SENSOR.getName(), PROVIDER,
-                    TestdataPackage.Literals.COMPLEX_TEST_SENSOR__TEMP.getName(),
-                    TestdataPackage.Literals.TEST_TEMPERATUR_WITH_COMPLEX__TEST_RESOURCE.getName());
-            assertNotNull(o);
+                Promise<?> update = push.pushUpdate(dto);
+                Throwable t = update.getFailure();
+                assertNull(t);
+                Object o = getResourceValue(TestdataPackage.Literals.COMPLEX_TEST_SENSOR.getName(), PROVIDER,
+                        TestdataPackage.Literals.COMPLEX_TEST_SENSOR__TEMP.getName(),
+                        TestdataPackage.Literals.TEST_TEMPERATUR_WITH_COMPLEX__TEST_RESOURCE.getName());
+                assertNotNull(o);
+                assertInstanceOf(TestResource.class, o);
+                TestResource result = (TestResource) o;
+                assertEquals("test1", result.getFoo());
+                assertEquals("test2", result.getBar());
+            }
+
+            {
+                NonDynamicComplexObjectDTO dto = new NonDynamicComplexObjectDTO();
+                TestResource resource = TestdataFactory.eINSTANCE.createTestResource();
+                resource.setFoo("test3");
+                resource.setBar("test4");
+                dto.data = resource;
+                dto.timestamp = Instant.now().toEpochMilli();
+                Promise<?> update = push.pushUpdate(dto);
+                Throwable t = update.getFailure();
+                assertNull(t);
+                Object o = getResourceValue(TestdataPackage.Literals.COMPLEX_TEST_SENSOR.getName(), PROVIDER,
+                        TestdataPackage.Literals.COMPLEX_TEST_SENSOR__TEMP.getName(),
+                        TestdataPackage.Literals.TEST_TEMPERATUR_WITH_COMPLEX__TEST_RESOURCE.getName());
+                assertNotNull(o);
+                assertInstanceOf(TestResource.class, o);
+                TestResource result = (TestResource) o;
+                assertEquals("test3", result.getFoo());
+                assertEquals("test4", result.getBar());
+            }
         }
     }
 
