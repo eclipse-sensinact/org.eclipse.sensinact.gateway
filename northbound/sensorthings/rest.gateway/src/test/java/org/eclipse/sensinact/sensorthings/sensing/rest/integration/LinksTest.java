@@ -308,6 +308,7 @@ public class LinksTest extends AbstractIntegrationTest {
         // Add a resource
         createResource(PROVIDER, "sensor", "data", 42);
         createResource(PROVIDER, "admin", "location", new Point());
+        createResource(PROVIDER, "admin", "description", "MyDescription");
 
         // Get the new locations
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);

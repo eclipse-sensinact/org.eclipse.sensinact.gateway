@@ -250,7 +250,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         }
         // 1006: 1000 updates + history provider name & model & modelPackageUri + foo
         // provider name & modelUri
-        waitForRowCount("sensinact.text_data", 1006);
+        waitForRowCount("sensinact.text_data", 1008);
         waitForRowCount("sensinact.numeric_data", 4000);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",
@@ -297,7 +297,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         }
         // 16: 10 updates + history provider name & model & modelPackageUri + fizz
         // provider name & modelUri
-        waitForRowCount("sensinact.text_data", 16);
+        waitForRowCount("sensinact.text_data", 18);
 
         String id = String.format("%s~%s~%s~%s", "fizz", "buzz", "fizzbuzz",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -314,7 +314,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 16);
+        waitForRowCount("sensinact.text_data", 18);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });

@@ -154,11 +154,16 @@ public class ResourceNotificationsTest {
             push.pushUpdate(dto);
 
             // Wait for it locally
-            // First will be admin friendlyName
+            // First will be admin description
+            ResourceDataNotification description = queue.poll(1, TimeUnit.SECONDS);
+            assertNotNull(description);
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), description.resource(),
+                    "First event was not Description, so the Provider already exists. It is likely that the data folder wasn't cleared and this is a remnant of a previous testrun.");
+            // second will be admin friendlyName
             ResourceDataNotification friendlyName = queue.poll(1, TimeUnit.SECONDS);
             assertNotNull(friendlyName);
             assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), friendlyName.resource(),
-                    "First event was not FriendlyName, so the Provider already exists. It is likely that the data folder wasn't cleared and this is a remnant of a previous testrun.");
+                    "Second event was not FriendlyName, so the Provider already exists. It is likely that the data folder wasn't cleared and this is a remnant of a previous testrun.");
             // second will be will be admin model
             assertNotNull(queue.poll(1, TimeUnit.SECONDS));
             // third will be will be admin model package uri

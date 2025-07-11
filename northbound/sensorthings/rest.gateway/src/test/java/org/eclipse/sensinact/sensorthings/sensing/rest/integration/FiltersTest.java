@@ -606,7 +606,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             List<?> rawDatastreamsList = (List<?>) rawThing.get("Datastreams");
 
             assertNotNull(rawDatastreamsList);
-            assertEquals(6, rawDatastreamsList.size());
+            assertEquals(7, rawDatastreamsList.size());
 
             // One observation with the value
             Map<?,?>  rawDatastream = (Map<?, ?>) rawDatastreamsList.stream()
