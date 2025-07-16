@@ -55,7 +55,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 public class ObservationHistoryTest extends AbstractIntegrationTest {
 
-    private static final Instant TS_2012 = Instant.parse("2012-01-01T00:00:00.00Z");
+    private static final Instant TS_2012 = Instant.parse("2012-01-01T01:23:45.123456Z");
 
     private static final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<ResultList<Observation>>() {
     };
