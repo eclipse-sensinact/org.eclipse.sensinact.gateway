@@ -51,9 +51,11 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                     String provider = resourceSnapshot.getService().getProvider().getName();
                     String service = resourceSnapshot.getService().getName();
                     String resource = resourceSnapshot.getName();
+                    // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000 (timestamp)
+                    Instant timestampPlusOneMilli = timestamp.plusMillis(1);
                     TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                            Map.of("provider", provider, "service", service, "resource", resource, "time", timestamp));
-                    if (timestamp.equals(t.getTimestamp())) {
+                            Map.of("provider", provider, "service", service, "resource", resource, "time", timestampPlusOneMilli));
+                    if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
                         result = DtoMapper.toObservation(getSession(), application, getMapper(),
                                 uriInfo, getExpansions(), resourceSnapshot, Optional.of(t));
                     }
