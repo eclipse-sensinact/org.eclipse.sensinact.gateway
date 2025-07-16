@@ -40,6 +40,7 @@
     </genClasses>
     <genClasses ecoreClass="sensinact.ecore#//Admin">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/friendlyName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/description"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/location"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/modelPackageUri"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensinact.ecore#//Admin/model"/>

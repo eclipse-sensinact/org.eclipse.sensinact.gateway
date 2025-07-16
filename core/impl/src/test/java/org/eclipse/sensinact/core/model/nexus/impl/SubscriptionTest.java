@@ -174,6 +174,18 @@ public class SubscriptionTest {
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
                     Map.of("value", TEST_PROVIDER, "timestamp", now), now);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("value", null);
+            map.put("timestamp", now);
+            Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), String.class, null, null, map, now);
+            Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), null, map, now);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName());
@@ -248,6 +260,18 @@ public class SubscriptionTest {
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
                     Map.of("value", TEST_PROVIDER, "timestamp", before), before);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("value", null);
+            map.put("timestamp", before);
+            Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), String.class, null, null, map, before);
+            Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), null, map, before);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName());
@@ -328,6 +352,18 @@ public class SubscriptionTest {
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
                     Map.of("value", TEST_PROVIDER, "timestamp", before), before);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("value", null);
+            map.put("timestamp", before);
+            Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), String.class, null, null, map, before);
+            Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), null, map, before);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName());
@@ -408,6 +444,18 @@ public class SubscriptionTest {
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
                     Map.of("value", TEST_PROVIDER, "timestamp", now), now);
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("value", null);
+            map.put("timestamp", now);
+            Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName());
+            Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), String.class, null, null, map, now);
+            Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
+                    ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                    ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), null, map, now);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName());
@@ -533,6 +581,7 @@ public class SubscriptionTest {
             testService2.eSet(testService2.eClass().getEStructuralFeature("bar"), "bar");
 
             testAdmin.setFriendlyName(provider.getId());
+            testAdmin.setDescription("testDescription");
             testAdmin.eSet(testAdmin.eClass().getEStructuralFeature("testAdmin"), new BigInteger("1000"));
 
             Provider saved = nexus.save(provider);

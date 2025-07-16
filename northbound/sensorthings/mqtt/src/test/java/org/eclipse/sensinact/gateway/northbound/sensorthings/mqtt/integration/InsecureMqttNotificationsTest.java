@@ -204,19 +204,22 @@ public class InsecureMqttNotificationsTest {
             // by including other resources
             createResource("data", "bar", "foobar", 17);
 
-            List<Datastream> streams = readMessages(8, Datastream.class);
+            List<Datastream> streams = readMessages(10, Datastream.class);
 
             // Creation in sorted event order (p/s/r uri)
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(0).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(1).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(2).name);
-            assertEquals("foobar", streams.get(3).name);
+            int i=0;
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(i++).name);
+            assertEquals("foobar", streams.get(i++).name);
 
             // metadata update in sorted event order (p/s/r uri)
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(4).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(5).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(6).name);
-            assertEquals("foobar", streams.get(7).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(i++).name);
+            assertEquals("foobar", streams.get(i).name);
 
             Point p = new Point();
             p.coordinates = new Coordinates();
@@ -226,21 +229,23 @@ public class InsecureMqttNotificationsTest {
             createResource("data", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
 
-            streams = readMessages(7, Datastream.class);
+            streams = readMessages(8, Datastream.class);
             streams.forEach(d -> System.err.println(d.name));
 
             // location creation
-            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(0).name);
+            i = 0;
+            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(i++).name);
 
             // location metadata update
-            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(1).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(i++).name);
 
             // location value update
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(2).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(3).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(4).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(5).name);
-            assertEquals("foobar", streams.get(6).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(i++).name);
+            assertEquals("foobar", streams.get(i).name);
         }
 
         @Test
@@ -613,32 +618,35 @@ public class InsecureMqttNotificationsTest {
 
             createResource("foo", "bar", "foobar", 42, testTime);
 
-            List<Observation> obs = readMessages(4, Observation.class);
+            List<Observation> obs = readMessages(5, Observation.class);
 
-            assertEquals("foo", obs.get(0).result);
+            assertNull(obs.get(0).result);
             assertEquals(testTime, obs.get(0).resultTime);
-            assertEquals(
-                    "foo~" + ProviderPackage.Literals.PROVIDER__ADMIN.getName() + "~"
-                            + ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(),
-                    String.valueOf(obs.get(0).id).substring(0, 22));
 
+            assertEquals("foo", obs.get(1).result);
             assertEquals(testTime, obs.get(1).resultTime);
             assertEquals(
                     "foo~" + ProviderPackage.Literals.PROVIDER__ADMIN.getName() + "~"
-                            + ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.valueOf(obs.get(1).id).substring(0, 15));
+                            + ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(),
+                    String.valueOf(obs.get(1).id).substring(0, 22));
 
             assertEquals(testTime, obs.get(2).resultTime);
             assertEquals(
+                    "foo~" + ProviderPackage.Literals.PROVIDER__ADMIN.getName() + "~"
+                            + ProviderPackage.Literals.ADMIN__MODEL.getName(),
+                    String.valueOf(obs.get(2).id).substring(0, 15));
+
+            assertEquals(testTime, obs.get(3).resultTime);
+            assertEquals(
                     "foo~" + ProviderPackage.Literals.PROVIDER__ADMIN
                             .getName() + "~" + ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(),
-                    String.valueOf(obs.get(2).id).substring(0,
+                    String.valueOf(obs.get(3).id).substring(0,
                             ("foo~" + ProviderPackage.Literals.PROVIDER__ADMIN.getName() + "~"
                                     + ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName()).length()));
 
-            assertEquals(42, obs.get(3).result);
-            assertEquals(testTime, obs.get(3).resultTime);
-            assertEquals("foo~bar~foobar", String.valueOf(obs.get(3).id).substring(0, 14));
+            assertEquals(42, obs.get(4).result);
+            assertEquals(testTime, obs.get(4).resultTime);
+            assertEquals("foo~bar~foobar", String.valueOf(obs.get(4).id).substring(0, 14));
         }
 
         @Test
@@ -716,19 +724,22 @@ public class InsecureMqttNotificationsTest {
             // We must use a different model as otherwise the other tests interfere
             createResource("obs", "bar", "foobar", 42, testTime);
 
-            List<ObservedProperty> obs = readMessages(8, ObservedProperty.class);
+            List<ObservedProperty> obs = readMessages(10, ObservedProperty.class);
 
             // Creation
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), obs.get(0).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), obs.get(1).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), obs.get(2).name);
-            assertEquals("foobar", obs.get(3).name);
+            int i = 0;
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), obs.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), obs.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), obs.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), obs.get(i++).name);
+            assertEquals("foobar", obs.get(i++).name);
 
             // metadata update
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), obs.get(4).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), obs.get(5).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), obs.get(6).name);
-            assertEquals("foobar", obs.get(7).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), obs.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), obs.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), obs.get(i++).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), obs.get(i++).name);
+            assertEquals("foobar", obs.get(i++).name);
 
         }
 
@@ -805,19 +816,21 @@ public class InsecureMqttNotificationsTest {
             // by including other resources
             createResource("sens", "bar", "foobar", 42, testTime);
 
-            List<Sensor> sens = readMessages(8, Sensor.class);
+            List<Sensor> sens = readMessages(10, Sensor.class);
 
             // Creation
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), sens.get(0).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), sens.get(1).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), sens.get(2).name);
-            assertEquals("foobar", sens.get(3).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), sens.get(0).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), sens.get(1).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), sens.get(2).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), sens.get(3).name);
+            assertEquals("foobar", sens.get(4).name);
 
             // metadata update
-            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), sens.get(4).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), sens.get(5).name);
-            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), sens.get(6).name);
-            assertEquals("foobar", sens.get(7).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), sens.get(5).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), sens.get(6).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), sens.get(7).name);
+            assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), sens.get(8).name);
+            assertEquals("foobar", sens.get(9).name);
 
         }
 
@@ -892,7 +905,7 @@ public class InsecureMqttNotificationsTest {
 
             createResource("foo", "bar", "foobar", 42, testTime);
 
-            List<Thing> obs = readMessages(2, Thing.class);
+            List<Thing> obs = readMessages(3, Thing.class);
 
             // Creation, value setting, metadata updates x 2
             assertEquals("foo", obs.get(0).name);
@@ -907,7 +920,7 @@ public class InsecureMqttNotificationsTest {
             createResource("fizz", "buzz", "fizzbuzz", 17, testTime);
             createResource("foo", "bar", "foobar", 42, testTime);
 
-            List<Thing> obs = readMessages(2, Thing.class);
+            List<Thing> obs = readMessages(3, Thing.class);
 
             // Creation, value setting, metadata update
             assertEquals("foo", obs.get(0).name);
@@ -924,7 +937,7 @@ public class InsecureMqttNotificationsTest {
             createResource("foo", "bar", "fizzbuzz", 17, testTime);
 
             @SuppressWarnings("rawtypes")
-            List<Map> streams = readMessages(2, Map.class);
+            List<Map> streams = readMessages(3, Map.class);
 
             // Creation, value setting, metadata update
             for (@SuppressWarnings("rawtypes")
