@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.eclipse.sensinact.filters.resource.selector.api.CompactResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
@@ -46,6 +47,18 @@ class JsonSerializationTests {
 
     @Nested
     class CompactTests {
+        @Test
+        void explicitNull() throws Exception {
+            final String value = "{\"provider\":{\"value\":\"foobar\", \"type\": null},\"service\":{\"value\":\"admin\"}}";
+            CompactResourceSelector selector = mapper.readValue(value, CompactResourceSelector.class);
+            assertEquals("foobar", selector.provider().value());
+            assertEquals(MatchType.EXACT, selector.provider().type());
+            assertFalse(selector.provider().negate());
+            assertEquals("admin", selector.service().value());
+            assertEquals(MatchType.EXACT, selector.service().type());
+            assertFalse(selector.service().negate());
+        }
+
         @Test
         void compact() throws StreamReadException, DatabindException, IOException {
             ResourceSelector selector = mapper.readValue(selectorsFolder.resolve("compact.json").toFile(), ResourceSelector.class);
