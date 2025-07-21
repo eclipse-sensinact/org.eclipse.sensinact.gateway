@@ -65,8 +65,8 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.core.whiteboard.impl.SensinactWhiteboard;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
-import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.Metadata;
+import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.ModelMetadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
@@ -421,16 +421,18 @@ public class ModelNexus {
             }
             metadata.setTimestamp(metaTimestamp);
 
+            final Object storedData;
             if (data == null || resourceType.isInstance(data)) {
-                service.eSet(resourceFeature, data);
+                storedData = data;
             } else {
-                service.eSet(resourceFeature, EMFUtil.convertToTargetType(resourceType, data));
+                storedData = EMFUtil.convertToTargetType(resourceType, data);
             }
+            service.eSet(resourceFeature, storedData);
 
-            Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(data, metadata, resourceFeature);
+            Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(storedData, metadata, resourceFeature);
 
             accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
-                    resourceType.getInstanceClass(), oldValue, data, newMetaData, metaTimestamp);
+                    resourceType.getInstanceClass(), oldValue, storedData, newMetaData, metaTimestamp);
             accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
                     oldMetaData, newMetaData, timestamp);
         } else {
