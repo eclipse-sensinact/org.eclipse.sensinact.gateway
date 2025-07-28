@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.filters.resource.selector.jackson;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
@@ -30,16 +31,22 @@ public class SelectionDeserializer extends AbstractSelectionDeserializer<Selecti
 
     @Override
     public Selection convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-        return switch(root.getNodeType()) {
-            case STRING: yield new Selection(root.textValue(), MatchType.EXACT, false);
-            case OBJECT: yield new Selection(toString(root, "value", ctxt),
-                    ctxt.readTreeAsValue(root.get("type"), MatchType.class),
+        return switch (root.getNodeType()) {
+        case STRING:
+            yield new Selection(root.textValue(), MatchType.EXACT, false);
+        case OBJECT:
+            yield new Selection(toString(root, "value", ctxt),
+                    ctxt.readTreeAsValue(
+                            Optional.ofNullable(root.get("type")).map(n -> n.isNull() ? null : n).orElse(null),
+                            MatchType.class),
                     toBoolean(root, "negate", ctxt));
-            case NULL: yield null;
-            default:
-                ctxt.reportBadCoercion(this, Selection.class, root, "Selection must be a String or JSON object but was %s", root.getNodeType());
-                // Never reached
-                yield null;
+        case NULL:
+            yield null;
+        default:
+            ctxt.reportBadCoercion(this, Selection.class, root, "Selection must be a String or JSON object but was %s",
+                    root.getNodeType());
+            // Never reached
+            yield null;
         };
     }
 }
