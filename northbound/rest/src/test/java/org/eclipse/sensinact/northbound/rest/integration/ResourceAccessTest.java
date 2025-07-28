@@ -285,7 +285,7 @@ public class ResourceAccessTest {
         dto.service = ADMIN;
         dto.resource = LOCATION;
         dto.type = Point.class;
-        dto.value = utils.convert(p, Map.class);
+        dto.value = p;
         utils.assertNotification(dto, queue.poll(1, TimeUnit.SECONDS));
 
         // Check access

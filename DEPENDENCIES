@@ -1,7 +1,7 @@
 maven/mavencentral/biz.aQute.bnd/biz.aQute.bnd.annotation/6.4.0, Apache-2.0 OR EPL-2.0, approved, #6710
 maven/mavencentral/biz.aQute.bnd/biz.aQute.bnd.annotation/7.0.0, Apache-2.0 OR EPL-2.0, approved, #10946
 maven/mavencentral/biz.aQute.bnd/biz.aQute.bndlib/3.5.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.bugsnag/bugsnag/3.7.2, MIT, approved, #8921
+maven/mavencentral/com.bugsnag/bugsnag/3.8.0, MIT, approved, #22566
 maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.16.1, Apache-2.0, approved, #11606
 maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.16.1, Apache-2.0 AND MIT, approved, #11602
 maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.16.1, Apache-2.0, approved, #11605
