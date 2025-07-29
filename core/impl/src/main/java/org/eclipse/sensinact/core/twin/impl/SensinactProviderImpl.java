@@ -162,6 +162,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
 
     @Override
     public SensinactResource getResource(String service, String resource) {
+        checkValid();
         Objects.requireNonNull(service, "No service name provided");
         Objects.requireNonNull(resource, "No resource name provided");
 
