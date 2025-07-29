@@ -114,6 +114,13 @@ public class SessionSubscribeTest {
 
         assertEquals(PROVIDER, notification.provider());
         assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), notification.resource());
+        assertEquals(null, notification.oldValue());
+
+        notification = queue.poll(1, TimeUnit.SECONDS);
+
+        assertEquals(PROVIDER, notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
         assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), notification.resource());
         assertEquals(null, notification.oldValue());
         assertEquals(PROVIDER, notification.newValue());

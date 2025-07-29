@@ -479,6 +479,7 @@ public class ModelNexus {
         // Set a timestamp to admin resources to indicate them as valued
         for (EStructuralFeature resourceFeature : provider.getAdmin().eClass().getEStructuralFeatures()) {
             if (resourceFeature == ProviderPackage.Literals.ADMIN__FRIENDLY_NAME
+                    || resourceFeature == ProviderPackage.Literals.ADMIN__DESCRIPTION
                     || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI
                     || resourceFeature == ProviderPackage.Literals.ADMIN__MODEL) {
                 ResourceValueMetadata metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();

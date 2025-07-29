@@ -247,12 +247,15 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 9);
+            waitForRowCount("sensinact.text_data", 11);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement()
                             .executeQuery("SELECT * FROM sensinact.text_data WHERE provider = 'bar' ORDER BY time;")) {
 
+                assertTrue(result.next());
+                checkResult(result, ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                        ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), null, TS_2012);
                 assertTrue(result.next());
                 checkResult(result, ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                         ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), "bar", TS_2012);
@@ -379,7 +382,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 9);
+            waitForRowCount("sensinact.text_data", 11);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "single") {
@@ -503,7 +506,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 9);
+            waitForRowCount("sensinact.text_data", 11);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -630,7 +633,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1006);
+            waitForRowCount("sensinact.text_data", 1008);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -703,7 +706,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1006);
+            waitForRowCount("sensinact.text_data", 1008);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "count") {

@@ -74,6 +74,12 @@ public class TemperatureSensorTest {
                 Map.of("name", "temp1", "latitude", 1.0d, "longitude", 2.0d, "interval", 1000L)));
 
         ResourceDataNotification notification = queue.poll(5, TimeUnit.SECONDS);
+        assertEquals("temp1", notification.provider());
+        assertEquals(ProviderPackage.Literals.PROVIDER__ADMIN.getName(), notification.service());
+        assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), notification.resource());
+        assertEquals(null, notification.oldValue());
+
+        notification = queue.poll(1, TimeUnit.SECONDS);
 
         assertNotNull(notification);
         assertEquals("temp1", notification.provider());
