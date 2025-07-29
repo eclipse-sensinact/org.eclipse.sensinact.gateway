@@ -16,11 +16,13 @@ import static java.time.Duration.ofDays;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -28,9 +30,11 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -361,13 +365,97 @@ public class TimescaleHistoryTest {
             checkResult(result, "Bobbidi", data, timestamp);
         }
 
-        private void checkResult(ResultSet result, String provider, Double data, Instant timestamp) throws SQLException {
+        private void checkResult(ResultSet result, String provider, Double data, Instant timestamp)
+                throws SQLException {
             assertEquals("Bibbidi", result.getString("model"));
             assertEquals(provider, result.getString("provider"));
             assertEquals("Boo", result.getString("service"));
             assertEquals("Magic", result.getString("resource"));
             assertEquals(data, result.getBigDecimal("data").doubleValue());
             assertEquals(Timestamp.from(timestamp), result.getTimestamp("time"));
+        }
+    }
+
+    @Nested
+    class IndexesTests {
+
+        @Test
+        void testIndexesExist() throws Exception {
+            String indexQuery = "SELECT indexname FROM pg_indexes WHERE schemaname = 'sensinact';";
+            try (Connection conn = getDataSource().getConnection();
+                    Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery(indexQuery)) {
+
+                Set<String> expectedIndexes = Set.of(
+                        // Composite indexes for (provider, service, resource, time)
+                        "idx_numeric_data_provider_service_resource_time",
+                        "idx_text_data_provider_service_resource_time", "idx_geo_data_provider_service_resource_time",
+                        // Time-only indexes
+                        "idx_numeric_data_time", "idx_text_data_time", "idx_geo_data_time",
+                        // Covering indexes for count queries
+                        "idx_numeric_data_covering", "idx_text_data_covering", "idx_geo_data_covering");
+
+                Set<String> actualIndexes = new HashSet<>();
+                while (rs.next()) {
+                    String indexName = rs.getString("indexname");
+                    if (indexName.startsWith("idx_")) { // Only collect our indexes
+                        actualIndexes.add(indexName);
+                    }
+                }
+
+                assertEquals(expectedIndexes.size(), actualIndexes.size());
+                // Verify all expected indexes exist
+                for (String expectedIndex : expectedIndexes) {
+                    assertTrue(actualIndexes.contains(expectedIndex),
+                            "Expected index '" + expectedIndex + "' was not found. Found indexes: " + actualIndexes);
+                }
+
+                verifyIndexStructure(conn, "idx_numeric_data_provider_service_resource_time", "sensinact.numeric_data");
+                verifyIndexStructure(conn, "idx_text_data_provider_service_resource_time", "sensinact.text_data");
+                verifyIndexStructure(conn, "idx_geo_data_provider_service_resource_time", "sensinact.geo_data");
+
+                // Verify covering indexes include the time column
+                verifyCoveringIndex(conn, "idx_numeric_data_covering");
+                verifyCoveringIndex(conn, "idx_text_data_covering");
+                verifyCoveringIndex(conn, "idx_geo_data_covering");
+            }
+        }
+
+        private void verifyIndexStructure(Connection conn, String indexName, String tableName) throws SQLException {
+            String indexDefQuery = "SELECT pg_get_indexdef(indexrelid) as definition FROM pg_stat_user_indexes WHERE indexrelname = ?;";
+
+            try (PreparedStatement ps = conn.prepareStatement(indexDefQuery)) {
+                ps.setString(1, indexName);
+                try (ResultSet rs = ps.executeQuery()) {
+                    assertTrue(rs.next(), "Index definition not found for: " + indexName);
+
+                    String definition = rs.getString("definition");
+                    assertNotNull(definition);
+                    assertTrue(definition.contains(tableName));
+                    // Verify columns
+                    assertTrue(definition.contains("provider"));
+                    assertTrue(definition.contains("service"));
+                    assertTrue(definition.contains("resource"));
+                    assertTrue(definition.contains("time"));
+                }
+            }
+        }
+
+        private void verifyCoveringIndex(Connection conn, String indexName) throws SQLException {
+            String indexDefQuery = "SELECT pg_get_indexdef(indexrelid) as definition FROM pg_stat_user_indexes WHERE indexrelname = ?;";
+
+            try (PreparedStatement ps = conn.prepareStatement(indexDefQuery)) {
+                ps.setString(1, indexName);
+                try (ResultSet rs = ps.executeQuery()) {
+                    assertTrue(rs.next(), "Covering index definition not found for: " + indexName);
+
+                    String definition = rs.getString("definition");
+                    assertNotNull(definition);
+                    // Verify it's a covering index with INCLUDE clause
+                    assertTrue(definition.contains("INCLUDE"));
+                    assertTrue(definition.contains("time"));
+                }
+            }
         }
     }
 
@@ -967,3 +1055,4 @@ public class TimescaleHistoryTest {
         }
     }
 }
+
