@@ -75,4 +75,12 @@ public interface SensinactProvider extends CommandScoped {
      * Delete this provider from the Digital Twin
      */
     void delete();
+
+    /**
+     * {@return the requested SensinactResource if it exists, else null}
+     *
+     * @param service  Name of the service holding the resource
+     * @param resource Name of the resource
+     */
+    SensinactResource getResource(String service, String resource);
 }

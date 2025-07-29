@@ -27,6 +27,7 @@ import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.osgi.util.promise.Promise;
@@ -157,5 +158,22 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
         }
 
         return returnType.cast(EcoreUtil.copy(provider));
+    }
+
+    @Override
+    public SensinactResource getResource(String service, String resource) {
+        Objects.requireNonNull(service, "No service name provided");
+        Objects.requireNonNull(resource, "No resource name provided");
+
+        return nexus.getDefinedServiceForProvider(provider).entrySet().stream().filter(e -> service.equals(e.getKey()))
+                .findFirst()
+                .map(e -> nexus.getResourcesForService(e.getValue()).filter(elem -> resource.equals(elem.getName()))
+                        .findFirst()
+                        .map(a -> new SensinactResourceImpl(active,
+                                new SensinactServiceImpl(active, this, provider, e.getKey(), e.getValue(), nexus,
+                                        promiseFactory),
+                                provider, e.getKey(), a, a.getEType().getInstanceClass(), nexus, promiseFactory))
+                        .orElse(null))
+                .orElse(null);
     }
 }
