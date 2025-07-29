@@ -15,10 +15,12 @@ package org.eclipse.sensinact.core.twin.impl;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
@@ -136,5 +138,24 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
             serviceInstance = nexus.createServiceInstance(provider, name, serviceEClass);
         }
         return new SensinactServiceImpl(active, this, provider, name, serviceInstance.eClass(), nexus, promiseFactory);
+    }
+
+    @Override
+    public Provider getEMFProvider() {
+        checkValid();
+        return EcoreUtil.copy(provider);
+    }
+
+    @Override
+    public <T extends Provider> T getEMFProvider(Class<T> returnType) {
+        checkValid();
+        Objects.requireNonNull(returnType, "No EMF type given");
+
+        if (!returnType.isAssignableFrom(provider.getClass())) {
+            throw new ClassCastException(
+                    "EMF provider %s can't be cast to %s".formatted(getName(), returnType.getName()));
+        }
+
+        return returnType.cast(EcoreUtil.copy(provider));
     }
 }
