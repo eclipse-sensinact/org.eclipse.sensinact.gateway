@@ -258,23 +258,6 @@ public class TimescaleHistoricalStore {
                 s.execute(
                         "CREATE TABLE IF NOT EXISTS sensinact.geo_data ( time TIMESTAMPTZ NOT NULL, modelpackageuri VARCHAR(128) NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data geography(POINT,4326) )");
                 s.execute("SELECT create_hypertable('sensinact.geo_data', 'time', if_not_exists => TRUE);");
-                
-                // Create indexes for optimal query performance
-                // Composite indexes for (provider, service, resource, time) - most selective columns first
-                s.execute("CREATE INDEX IF NOT EXISTS idx_numeric_data_provider_service_resource_time ON sensinact.numeric_data (provider, service, resource, time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_text_data_provider_service_resource_time ON sensinact.text_data (provider, service, resource, time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_geo_data_provider_service_resource_time ON sensinact.geo_data (provider, service, resource, time DESC);");
-                
-                // Time-only indexes for time-range queries (TimescaleDB handles these well but explicit indexes help)
-                s.execute("CREATE INDEX IF NOT EXISTS idx_numeric_data_time ON sensinact.numeric_data (time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_text_data_time ON sensinact.text_data (time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_geo_data_time ON sensinact.geo_data (time DESC);");
-                
-                // Covering indexes for count queries - includes all columns needed for filtering
-                s.execute("CREATE INDEX IF NOT EXISTS idx_numeric_data_covering ON sensinact.numeric_data (provider, service, resource) INCLUDE (time);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_text_data_covering ON sensinact.text_data (provider, service, resource) INCLUDE (time);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_geo_data_covering ON sensinact.geo_data (provider, service, resource) INCLUDE (time);");
-                
                 return null;
             });
         } catch (ScopedWorkException e) {
