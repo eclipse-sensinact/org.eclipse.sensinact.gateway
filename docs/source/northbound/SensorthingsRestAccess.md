@@ -33,4 +33,12 @@ The REST interface will run without any configuration, however the `jakarta-rest
 }
 ```
 
+## History configuration
+
+To retrieve historical data from the SensorThings REST interface, the available [History provider](https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/timescale.html) must be configured with the PID `sensinact.sensorthings.northbound.rest`:
+```
+    "sensinact.sensorthings.northbound.rest" : {
+        "history.provider": "history"
+    }
+```
 

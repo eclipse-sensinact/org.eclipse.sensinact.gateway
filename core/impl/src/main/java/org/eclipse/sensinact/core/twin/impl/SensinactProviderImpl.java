@@ -15,16 +15,19 @@ package org.eclipse.sensinact.core.twin.impl;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.core.command.impl.CommandScopedImpl;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.Service;
 import org.osgi.util.promise.Promise;
@@ -136,5 +139,42 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
             serviceInstance = nexus.createServiceInstance(provider, name, serviceEClass);
         }
         return new SensinactServiceImpl(active, this, provider, name, serviceInstance.eClass(), nexus, promiseFactory);
+    }
+
+    @Override
+    public Provider getEMFProvider() {
+        checkValid();
+        return EcoreUtil.copy(provider);
+    }
+
+    @Override
+    public <T extends Provider> T getEMFProvider(Class<T> returnType) {
+        checkValid();
+        Objects.requireNonNull(returnType, "No EMF type given");
+
+        if (!returnType.isAssignableFrom(provider.getClass())) {
+            throw new ClassCastException(
+                    "EMF provider %s can't be cast to %s".formatted(getName(), returnType.getName()));
+        }
+
+        return returnType.cast(EcoreUtil.copy(provider));
+    }
+
+    @Override
+    public SensinactResource getResource(String service, String resource) {
+        checkValid();
+        Objects.requireNonNull(service, "No service name provided");
+        Objects.requireNonNull(resource, "No resource name provided");
+
+        return nexus.getDefinedServiceForProvider(provider).entrySet().stream().filter(e -> service.equals(e.getKey()))
+                .findFirst()
+                .map(e -> nexus.getResourcesForService(e.getValue()).filter(elem -> resource.equals(elem.getName()))
+                        .findFirst()
+                        .map(a -> new SensinactResourceImpl(active,
+                                new SensinactServiceImpl(active, this, provider, e.getKey(), e.getValue(), nexus,
+                                        promiseFactory),
+                                provider, e.getKey(), a, a.getEType().getInstanceClass(), nexus, promiseFactory))
+                        .orElse(null))
+                .orElse(null);
     }
 }

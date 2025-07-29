@@ -48,7 +48,7 @@ Here is a sample authorization configuration:
             // User can read anything but the resources in a "private" service of any provider
             // Note that user won't be able to update nor act or resources.
             // Having different priorities ensures the rules will be applied as expected
-            "role:user, *, *, *, *, *, DESCRIBE|READ, 1000",
+            "role:user, *, *, *, *, *, DESCRIBE|READ, allow, 1000",
             "role:user, *, *, *, private, *, *, deny, 999",
             // Users in the manager group can act on action resources named "apply"
             // of any service in providers which name ends with "-management"

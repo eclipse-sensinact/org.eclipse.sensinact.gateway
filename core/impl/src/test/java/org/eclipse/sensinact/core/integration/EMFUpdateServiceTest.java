@@ -14,9 +14,9 @@ package org.eclipse.sensinact.core.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -171,8 +171,8 @@ public class EMFUpdateServiceTest {
             assertEquals("14 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
             Instant current = getResourceTimestamp("TestSensor", PROVIDER, SERVICE, RESOURCE);
             assertNotNull(current);
-            assertTrue(before.isBefore(current));
-            assertTrue(after.isAfter(current));
+            assertFalse(before.isAfter(current));
+            assertFalse(after.isBefore(current));
 
             temp.setV1("13 °C");
             before = Instant.now();
@@ -183,8 +183,8 @@ public class EMFUpdateServiceTest {
             current = getResourceTimestamp("TestSensor", PROVIDER, SERVICE, RESOURCE);
             assertNotNull(current);
             after = Instant.now();
-            assertTrue(before.isBefore(current));
-            assertTrue(after.isAfter(current));
+            assertFalse(before.isAfter(current));
+            assertFalse(after.isBefore(current));
         }
 
         @Test

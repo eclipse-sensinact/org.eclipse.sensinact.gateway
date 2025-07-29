@@ -30,6 +30,7 @@ public interface SensinactEMFProvider extends SensinactProvider {
      *
      * @return an immutable list of linked providers
      */
+    @Override
     List<? extends SensinactEMFProvider> getLinkedProviders();
 
     /**
@@ -44,6 +45,7 @@ public interface SensinactEMFProvider extends SensinactProvider {
      *
      * @return
      */
+    @Override
     Map<String, ? extends SensinactEMFService> getServices();
 
     /**
@@ -53,4 +55,17 @@ public interface SensinactEMFProvider extends SensinactProvider {
      * @return
      */
     SensinactEMFService getOrCreateService(String name, EClass serviceEClass);
+
+    /**
+     * {@return a copy of the underlying provider}
+     */
+    Provider getEMFProvider();
+
+    /**
+     * {@return a copy of the underlying provider}
+     *
+     * @param returnType Expected result type
+     * @throws ClassCastException Incompatible return type
+     */
+    <T extends Provider> T getEMFProvider(Class<T> returnType);
 }
