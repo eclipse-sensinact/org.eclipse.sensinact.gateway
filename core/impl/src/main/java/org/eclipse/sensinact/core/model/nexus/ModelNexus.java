@@ -585,8 +585,8 @@ public class ModelNexus {
     }
 
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
-            Object defaultValue, Map<String, Object> defaultMetadata, List<MetadataValue> metadata,
-            boolean hasGetter, long getterCacheMs, boolean hasSetter) {
+            Object defaultValue, Map<String, Object> defaultMetadata, List<MetadataValue> metadata, boolean hasGetter,
+            long getterCacheMs, boolean hasSetter) {
         assertResourceNotExist(service, resource);
         ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue);
         resourceMetaData.setExternalGet(hasGetter);
@@ -740,7 +740,7 @@ public class ModelNexus {
 
         EMap<String, MetadataValue> extra = metadata.getExtra();
         MetadataValue fcm = extra.get(metadataKey);
-        if(fcm == null) {
+        if (fcm == null) {
             extra.put(metadataKey, EMFUtil.createMetadataValue(timestamp, value));
         } else {
             EMFUtil.handleMetadataValue(fcm, timestamp, value);
@@ -876,10 +876,10 @@ public class ModelNexus {
 
         assertResourceNotExist(serviceEClass, name);
 
-        List<EParameter> params = namedParameterTypes.stream().map(EMFUtil::createActionParameter)
-                .collect(Collectors.toList());
+        List<EParameter> params = namedParameterTypes.stream()
+                .map(e -> EMFUtil.createActionParameter(e, serviceEClass.getEPackage())).collect(Collectors.toList());
 
-        EMap<String, MetadataValue>  defaultFeatureMetadata = defaultMetadata == null ? new BasicEMap<>()
+        EMap<String, MetadataValue> defaultFeatureMetadata = defaultMetadata == null ? new BasicEMap<>()
                 : toDefaultMetadataValue(defaultMetadata);
 
         EOperation action = EMFUtil.createAction(serviceEClass, name, type, params);
