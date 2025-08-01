@@ -50,7 +50,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
     @Override
     public ResultList<Observation> getDatastreamObservations(String id) {
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), 0);
+                requestContext, validateAndGetResourceSnapshot(id));
     }
 
     @Override

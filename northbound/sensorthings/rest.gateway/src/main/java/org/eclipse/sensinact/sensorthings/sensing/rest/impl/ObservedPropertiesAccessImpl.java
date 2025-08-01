@@ -65,7 +65,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
             throw new NotFoundException();
         }
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), 0);
+                requestContext, validateAndGetResourceSnapshot(id));
     }
 
     @Override

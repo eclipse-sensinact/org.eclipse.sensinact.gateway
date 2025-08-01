@@ -76,7 +76,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         }
 
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id2), 0);
+                requestContext, validateAndGetResourceSnapshot(id2));
     }
 
     @Override

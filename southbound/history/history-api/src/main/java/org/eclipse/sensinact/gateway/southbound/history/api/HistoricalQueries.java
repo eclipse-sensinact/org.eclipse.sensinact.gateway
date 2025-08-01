@@ -73,6 +73,37 @@ public interface HistoricalQueries {
             @ActParam("toTime") ZonedDateTime toTime, @ActParam("skip") Integer skip);
 
     /**
+     * Return a list of values that a resource had between the given times with
+     * SensorThings API query parameter support for efficient database-level filtering.
+     *
+     * This method extends the basic range query with support for:
+     * - $top (limit): Maximum number of results to return
+     * - $orderby: Ordering of results (asc/desc by time)
+     * - Combined with existing fromTime/toTime/skip parameters
+     *
+     * @param provider the provider name
+     * @param service  the service name
+     * @param resource the resource name
+     * @param fromTime the time to start from. If <code>null</code> then the latest
+     *                 values before <code>toTime</code> will be returned
+     * @param toTime   the time to finish at. If <code>null</code> then there is no
+     *                 finishing time limit.
+     * @param skip     the number of values to skip in the result set
+     * @param top      the maximum number of results to return (SensorThings $top)
+     * @param orderBy  the ordering directive, "asc" or "desc" (SensorThings $orderby)
+     * @return A {@link List&lt;TimedValue&gt;} of results ordered according to orderBy parameter
+     */
+    @ACT(model = "sensiNactHistory", service = "history", resource = "rangeFiltered")
+    List<TimedValue<?>> getValueRangeFiltered(@ActParam("provider") String provider,
+            @ActParam("service") String service,
+            @ActParam("resource") String resource,
+            @ActParam("fromTime") ZonedDateTime fromTime,
+            @ActParam("toTime") ZonedDateTime toTime,
+            @ActParam("skip") Integer skip,
+            @ActParam("top") Integer top,
+            @ActParam("orderBy") String orderBy);
+
+    /**
      * Get the number of stored values for a given resource
      *
      * @param provider

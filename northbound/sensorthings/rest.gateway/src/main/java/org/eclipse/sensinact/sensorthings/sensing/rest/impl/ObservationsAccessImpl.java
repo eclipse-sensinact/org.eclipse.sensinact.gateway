@@ -93,7 +93,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     @Override
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), 0);
+                requestContext, validateAndGetResourceSnapshot(id));
     }
 
     @Override

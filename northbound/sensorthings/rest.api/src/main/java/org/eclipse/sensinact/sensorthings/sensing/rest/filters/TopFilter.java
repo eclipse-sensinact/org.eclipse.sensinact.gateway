@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 
 import jakarta.annotation.Priority;
@@ -57,7 +58,7 @@ public class TopFilter implements ContainerRequestFilter, ContainerResponseFilte
             int size = resultList.value.size();
             resultList.value = resultList.value.subList(0, Math.min(top, size));
 
-            Integer skip = (Integer) requestContext.getProperty(SkipFilter.SKIP_PROP);
+            Integer skip = (Integer) requestContext.getProperty(IFilterConstants.SKIP_PROP);
             Integer nextSkip = (skip == null) ? top : top + skip;
             if (top < size) {
                 resultList.nextLink = requestContext.getUriInfo().getRequestUriBuilder()
