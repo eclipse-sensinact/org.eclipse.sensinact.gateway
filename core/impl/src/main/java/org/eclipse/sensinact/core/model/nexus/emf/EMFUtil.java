@@ -225,12 +225,12 @@ public class EMFUtil {
                 .filter(ea -> ea.getEContainingClass().getEPackage() != EcorePackage.eINSTANCE);
     }
 
-    public static EParameter createActionParameter(Entry<String, Class<?>> entry) {
+    public static EParameter createActionParameter(Entry<String, Class<?>> entry, EPackage ePackage) {
         ActionParameterMetadata metaData = ProviderFactory.eINSTANCE.createActionParameterMetadata();
         metaData.setTimestamp(Instant.now());
         EParameter parameter = EcoreFactory.eINSTANCE.createEParameter();
         parameter.setName(entry.getKey());
-        parameter.setEType(convertClass(entry.getValue()));
+        parameter.setEType(convertClass(entry.getValue(), ePackage));
         addMetaDataAnnnotation(parameter, metaData);
         return parameter;
     }
@@ -242,14 +242,31 @@ public class EMFUtil {
         model.getEAnnotations().add(annotation);
     }
 
-    private static EClassifier convertClass(Class<?> clazz) {
+    /**
+     * Tries to find the {@link EDataType} for the given {@link Class}. If it isn't
+     * found, it looks in the given ePackagae as well. If none is found there as
+     * well, one is created and attached to the given EPackage.
+     *
+     * @param clazz    the {@link Class} to find the {@link EDataType} for
+     * @param ePackage the {@link EPackage} to scan or attach the new one to
+     * @return the {@link EDataType}
+     */
+    private static EClassifier convertClass(Class<?> clazz, EPackage ePackage) {
         EClassifier eClassifier = typeMap.get(clazz);
         if (eClassifier == null) {
-            LOG.warn("The class {} has no matching EClassifier. Creating an anonymous EDataType", clazz);
-            EDataType dataType = EcorePackage.eINSTANCE.getEcoreFactory().createEDataType();
-            dataType.setInstanceClass(clazz);
-            dataType.setName("Anonymous EDataType for class " + clazz.getName());
-            eClassifier = dataType;
+            eClassifier = ePackage.getEClassifiers().stream().filter(EDataType.class::isInstance)
+                    .map(EDataType.class::cast).filter(dataType -> dataType.getInstanceClass().equals(clazz))
+                    .findFirst().orElseGet(() -> null);
+            if (eClassifier == null) {
+                LOG.warn(
+                        "The class {} has no matching EClassifier in the Ecore, Provider or give or {} EPackage. Creating an anonymous EDataType",
+                        clazz, ePackage.getName());
+                EDataType dataType = EcorePackage.eINSTANCE.getEcoreFactory().createEDataType();
+                dataType.setInstanceClass(clazz);
+                dataType.setName("Anonymous EDataType for class " + clazz.getName());
+                ePackage.getEClassifiers().add(dataType);
+                eClassifier = dataType;
+            }
         }
         return eClassifier;
     }
@@ -341,7 +358,7 @@ public class EMFUtil {
         ResourceMetadata metaData = ProviderFactory.eINSTANCE.createResourceMetadata();
         EAttribute attribute = EcoreFactory.eINSTANCE.createEAttribute();
         attribute.setName(resource);
-        attribute.setEType(convertClass(type));
+        attribute.setEType(convertClass(type, service.getEPackage()));
         if (defaultValue != null) {
             attribute.setDefaultValue(defaultValue);
         }
@@ -399,7 +416,7 @@ public class EMFUtil {
         ActionMetadata metaData = ProviderFactory.eINSTANCE.createActionMetadata();
         EOperation operation = EcoreFactory.eINSTANCE.createEOperation();
         operation.setName(name);
-        operation.setEType(convertClass(type));
+        operation.setEType(convertClass(type, serviceEClass.getEPackage()));
         operation.getEParameters().addAll(params);
         serviceEClass.getEOperations().add(operation);
         addMetaDataAnnnotation(operation, metaData);
