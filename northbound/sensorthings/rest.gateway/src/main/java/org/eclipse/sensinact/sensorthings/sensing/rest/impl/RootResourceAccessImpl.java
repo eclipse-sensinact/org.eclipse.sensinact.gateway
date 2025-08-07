@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toDatastream;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toFeatureOfInterest;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toHistoricalLocation;
@@ -51,6 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
@@ -221,6 +223,14 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
                 .collect(toList());
 
         return list;
+    }
+
+    static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ResourceSnapshot resourceSnapshot) {
+        ExpansionSettings es = (ExpansionSettings) requestContext
+                .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        requestContext.setProperty(IFilterConstants.SKIP_PROP, null); //deactivate skip filter as skip is handled from history provider
+        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,0);
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,

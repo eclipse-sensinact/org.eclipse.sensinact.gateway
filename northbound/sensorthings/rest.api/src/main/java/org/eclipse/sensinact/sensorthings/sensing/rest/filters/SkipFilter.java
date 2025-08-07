@@ -17,9 +17,15 @@ import static jakarta.ws.rs.Priorities.ENTITY_CODER;
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
+
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -27,9 +33,25 @@ import jakarta.ws.rs.core.Response.Status;
  * This filter implements the $skip query parameter
  */
 @Priority(ENTITY_CODER + 2)
-public class SkipFilter implements ContainerRequestFilter {
+public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    static final String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
+
+    @Override
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
+            throws IOException {
+        Integer skip = (Integer) requestContext.getProperty(IFilterConstants.SKIP_PROP);
+        if (skip == null) {
+            return;
+        }
+
+        Object entity = responseContext.getEntity();
+        if (entity instanceof ResultList) {
+            @SuppressWarnings("unchecked")
+            ResultList<Self> resultList = (ResultList<Self>) entity;
+            int size = resultList.value.size();
+            resultList.value = resultList.value.subList(Math.min(skip, size), size);
+        }
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -58,7 +80,7 @@ public class SkipFilter implements ContainerRequestFilter {
                     .entity("The $skip parameter must be an integer greater than zero").build());
         }
 
-        requestContext.setProperty(SKIP_PROP, skip);
+        requestContext.setProperty(IFilterConstants.SKIP_PROP, skip);
     }
 
 }
