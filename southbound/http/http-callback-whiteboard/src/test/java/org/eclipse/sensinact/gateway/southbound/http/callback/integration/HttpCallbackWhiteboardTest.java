@@ -34,8 +34,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
+
+import jakarta.servlet.Servlet;
 
 @MockitoSettings
 public class HttpCallbackWhiteboardTest {
@@ -46,15 +49,16 @@ public class HttpCallbackWhiteboardTest {
     @WithConfiguration(pid = "org.apache.felix.http", location = "?", properties = {
             @Property(key = "org.osgi.service.http.port", value = "8234"),
             @Property(key = "org.apache.felix.http.host", value = "127.0.0.1") })
-    @WithConfiguration(pid = "sensinact.http.callback.whiteboard", location = "?", properties = {})
+    @WithConfiguration(pid = "sensinact.http.callback.whiteboard", location = "?", properties = {
+            @Property(key = "id", value = "test") })
     @Test
-    void basicWhiteboard(@InjectBundleContext BundleContext context) throws Exception {
-
+    void basicWhiteboard(@InjectBundleContext BundleContext context,
+            @InjectService(timeout = 5000, filter = "(id=test)") Servlet whiteboard) throws Exception {
         context.registerService(HttpCallback.class, callback, null);
 
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
 
-        Mockito.verify(callback, Mockito.timeout(1000)).activate(stringCaptor.capture());
+        Mockito.verify(callback, Mockito.timeout(5000)).activate(stringCaptor.capture());
 
         String uri = stringCaptor.getValue();
 
@@ -83,9 +87,11 @@ public class HttpCallbackWhiteboardTest {
     @WithConfiguration(pid = "org.apache.felix.http", location = "?", properties = {
             @Property(key = "org.osgi.service.http.port", value = "8235"),
             @Property(key = "org.apache.felix.http.host", value = "127.0.0.1") })
-    @WithConfiguration(pid = "sensinact.http.callback.whiteboard", location = "?", properties = @Property(key = "base.uri", value = "http://foo.com/bar"))
+    @WithConfiguration(pid = "sensinact.http.callback.whiteboard", location = "?", properties = {
+            @Property(key = "id", value = "test"), @Property(key = "base.uri", value = "http://foo.com/bar") })
     @Test
-    void customBaseUri(@InjectBundleContext BundleContext context) throws Exception {
+    void customBaseUri(@InjectBundleContext BundleContext context,
+            @InjectService(timeout = 5000, filter = "(id=test)") Servlet whiteboard) throws Exception {
 
         context.registerService(HttpCallback.class, callback, null);
 
