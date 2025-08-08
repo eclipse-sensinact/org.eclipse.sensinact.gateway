@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -34,12 +35,11 @@ import jakarta.ws.rs.core.Response.Status;
 @Priority(ENTITY_CODER + 2)
 public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    static final String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        Integer skip = (Integer) requestContext.getProperty(SKIP_PROP);
+        Integer skip = (Integer) requestContext.getProperty(IFilterConstants.SKIP_PROP);
         if (skip == null) {
             return;
         }
@@ -80,7 +80,7 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
                     .entity("The $skip parameter must be an integer greater than zero").build());
         }
 
-        requestContext.setProperty(SKIP_PROP, skip);
+        requestContext.setProperty(IFilterConstants.SKIP_PROP, skip);
     }
 
 }

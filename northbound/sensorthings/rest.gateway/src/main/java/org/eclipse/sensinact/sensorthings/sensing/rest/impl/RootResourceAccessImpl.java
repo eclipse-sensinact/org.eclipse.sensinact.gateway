@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toDatastream;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toFeatureOfInterest;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toHistoricalLocation;
@@ -22,10 +23,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toO
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toSensor;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toThing;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,7 +31,6 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
@@ -55,6 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
@@ -148,8 +146,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<Location> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
-        list.value = providers.stream()
-                .filter(p -> hasResourceSet(p, "admin", "location"))
+        list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
                 .collect(toList());
 
@@ -161,8 +158,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<HistoricalLocation> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
-        list.value = providers.stream()
-                .filter(p -> hasResourceSet(p, "admin", "location"))
+        list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
                 .collect(toList());
         return list;
@@ -185,8 +181,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<Sensor> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listSetResources(EFilterContext.SENSORS);
-        list.value = resources.stream().
-                map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+        list.value = resources.stream()
+                .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
                 .collect(toList());
 
         return list;
@@ -229,60 +225,25 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         return list;
     }
 
-    @SuppressWarnings("unchecked")
+    static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ResourceSnapshot resourceSnapshot) {
+        ExpansionSettings es = (ExpansionSettings) requestContext
+                .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        requestContext.setProperty(IFilterConstants.SKIP_PROP, null); //deactivate skip filter as skip is handled from history provider
+        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,0);
+    }
+
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
             int localResultLimit) {
 
-        String provider = resourceSnapshot.getService().getProvider().getName();
-        String service = resourceSnapshot.getService().getName();
-        String resource = resourceSnapshot.getName();
+        ResultList<Observation> list = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                mapper, uriInfo, expansions, resourceSnapshot, localResultLimit);
 
-        ResultList<Observation> list = new ResultList<>();
-
-        String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
-        Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
-
-        if(localResultLimit > 0) {
-            maxResults = Math.min(localResultLimit, maxResults);
+        if (list.value.isEmpty() && resourceSnapshot.isSet()) {
+            list.value.add(DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, resourceSnapshot));
         }
-
-        List<Observation> results = new ArrayList<>();
-
-        if (historyProvider != null) {
-            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count",
-                    Map.of("provider", provider, "service", service, "resource", resource));
-
-            list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
-
-            Map<String, Object> params = new HashMap<>(
-                    Map.of("provider", provider, "service", service, "resource", resource));
-            Integer skip = Integer.valueOf(0);
-
-            List<TimedValue<?>> timed;
-            do {
-                params.put("skip", skip);
-
-                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-
-                results.addAll(0, DtoMapper.toObservationList(userSession, application, mapper, uriInfo, expansions, resourceSnapshot, timed));
-
-                if (timed.isEmpty()) {
-                    break;
-                } else if (timed.size() == 500) {
-                    skip = results.size();
-                }
-
-            } while (results.size() < count && results.size() < maxResults);
-        }
-
-        if (results.isEmpty() && resourceSnapshot.isSet()) {
-            results.add(DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, resourceSnapshot));
-        }
-
-        list.value = results;
 
         return list;
     }
-
 }
