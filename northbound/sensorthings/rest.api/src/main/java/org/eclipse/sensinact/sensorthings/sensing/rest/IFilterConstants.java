@@ -23,11 +23,10 @@ public interface IFilterConstants {
      * Request context property holding the expand settings as a string
      */
     String EXPAND_SETTINGS_STRING = "sensinact.sensorthings.expand";
-    
+
     /**
      * Request context property holding the skip value as a Integer
      */
     String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
-
 
 }

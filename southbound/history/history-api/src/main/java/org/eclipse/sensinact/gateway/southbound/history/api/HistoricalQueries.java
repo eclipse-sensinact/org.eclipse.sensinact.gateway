@@ -82,7 +82,7 @@ public interface HistoricalQueries {
      * - Combined with existing fromTime/toTime/skip parameters
      *
      * @param provider the provider name
-     * @param service the service name  
+     * @param service  the service name
      * @param resource the resource name
      * @param fromTime the time to start from. If <code>null</code> then the latest
      *                 values before <code>toTime</code> will be returned
@@ -94,11 +94,11 @@ public interface HistoricalQueries {
      * @return A {@link List&lt;TimedValue&gt;} of results ordered according to orderBy parameter
      */
     @ACT(model = "sensiNactHistory", service = "history", resource = "rangeFiltered")
-    List<TimedValue<?>> getValueRangeFiltered(@ActParam("provider") String provider, 
+    List<TimedValue<?>> getValueRangeFiltered(@ActParam("provider") String provider,
             @ActParam("service") String service,
-            @ActParam("resource") String resource, 
+            @ActParam("resource") String resource,
             @ActParam("fromTime") ZonedDateTime fromTime,
-            @ActParam("toTime") ZonedDateTime toTime, 
+            @ActParam("toTime") ZonedDateTime toTime,
             @ActParam("skip") Integer skip,
             @ActParam("top") Integer top,
             @ActParam("orderBy") String orderBy);

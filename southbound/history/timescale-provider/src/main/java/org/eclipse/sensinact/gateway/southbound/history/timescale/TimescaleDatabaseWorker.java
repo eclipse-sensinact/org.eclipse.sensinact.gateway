@@ -394,13 +394,13 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
     }
 
     @Override
-    public List<TimedValue<?>> getValueRangeFiltered(String provider, String service, String resource, 
+    public List<TimedValue<?>> getValueRangeFiltered(String provider, String service, String resource,
             ZonedDateTime fromTime, ZonedDateTime toTime, Integer skip, Integer top, String orderBy) {
-        
+
         Integer toSkip = skip == null ? Integer.valueOf(0) : skip;
         Integer toLimit = top == null ? Integer.valueOf(500) : Math.min(top, 500);
         String orderDirection = (orderBy != null && "desc".equalsIgnoreCase(orderBy)) ? "DESC" : "ASC";
-        
+
         Connection conn = connectionSupplier.get();
 
         try {
@@ -413,7 +413,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
 
                 if (toTime == null) {
                     if (fromTime == null) {
-                        sqlTemplate = String.format(FILTERED_RANGE_TEMPLATE_WITHOUT_START_OR_LIMIT, 
+                        sqlTemplate = String.format(FILTERED_RANGE_TEMPLATE_WITHOUT_START_OR_LIMIT,
                                 orderDirection, orderDirection, orderDirection, orderDirection);
                         ps = conn.prepareStatement(sqlTemplate);
                         setVariables(ps, provider, service, resource);

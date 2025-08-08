@@ -92,8 +92,8 @@ class HistoryResourceHelperTest {
 
     // Helper method to verify parameter maps contain expected basic parameters
     private Map<String, Object> hasBasicParams() {
-        return argThat(params -> 
-            params != null && 
+        return argThat(params ->
+            params != null &&
             "testProvider".equals(params.get("provider")) &&
             "testService".equals(params.get("service")) &&
             "testResource".equals(params.get("resource"))
@@ -104,14 +104,14 @@ class HistoryResourceHelperTest {
     private Map<String, Object> hasParams(Object... expectedParams) {
         return argThat(params -> {
             if (params == null) return false;
-            
+
             // Check basic parameters
             if (!"testProvider".equals(params.get("provider")) ||
                 !"testService".equals(params.get("service")) ||
                 !"testResource".equals(params.get("resource"))) {
                 return false;
             }
-            
+
             // Check additional expected parameters in pairs (key, value)
             for (int i = 0; i < expectedParams.length; i += 2) {
                 String key = (String) expectedParams[i];
