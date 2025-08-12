@@ -397,8 +397,8 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
     public List<TimedValue<?>> getValueRangeFiltered(String provider, String service, String resource,
             ZonedDateTime fromTime, ZonedDateTime toTime, Integer skip, Integer top, String orderBy) {
 
-        Integer toSkip = skip == null ? Integer.valueOf(0) : skip;
-        Integer toLimit = top == null ? Integer.valueOf(500) : Math.min(top, 500);
+        int toSkip = skip == null ? 0 : skip;
+        int toLimit = top == null ? 500 : Math.min(top, 500);
         String orderDirection = (orderBy != null && "desc".equalsIgnoreCase(orderBy)) ? "DESC" : "ASC";
 
         Connection conn = connectionSupplier.get();
