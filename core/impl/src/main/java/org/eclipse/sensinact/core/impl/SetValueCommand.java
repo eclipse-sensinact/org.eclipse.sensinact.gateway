@@ -62,10 +62,19 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
 
     private Promise<Void> doCall(SensinactEMFDigitalTwin twin, SensinactEMFModelManager modelMgr,
             PromiseFactory promiseFactory) {
-        EClass modelEClass = dataUpdateDto.modelEClass;
+    	EClass modelEClass = dataUpdateDto.modelEClass;
         String packageUri = modelEClass == null ? dataUpdateDto.modelPackageUri : modelEClass.getEPackage().getNsURI();
         String mod = modelEClass != null ? modelEClass.getName()
-                : (dataUpdateDto.model == null ? dataUpdateDto.provider : dataUpdateDto.model);
+                : (dataUpdateDto.model == null ? null : dataUpdateDto.model);
+        if(mod == null && dataUpdateDto.provider != null) {
+        	SensinactEMFProvider provider = twin.getProvider(dataUpdateDto.provider);
+        	if(provider == null) mod = dataUpdateDto.provider;
+        	else {
+        		mod = provider.getModelName();
+        		if(packageUri == null) packageUri = provider.getModelPackageUri();
+        	}
+        	
+        }
         String provider = dataUpdateDto.provider;
         EReference svcReference = dataUpdateDto.serviceReference;
         EClass svcEClass = svcReference != null ? svcReference.getEReferenceType() : dataUpdateDto.serviceEClass;

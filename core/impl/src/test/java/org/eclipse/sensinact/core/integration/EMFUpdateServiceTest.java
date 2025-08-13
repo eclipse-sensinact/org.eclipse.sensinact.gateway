@@ -38,6 +38,7 @@ import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
@@ -103,6 +104,29 @@ public class EMFUpdateServiceTest {
 
             temp.setV1("13 °C");
             update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            assertEquals("13 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
+        }
+        
+        @Test
+        void dtoUpdate() throws Exception {
+            TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
+            TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
+            temp.setV1("12 °C");
+            sensor.setTemp(temp);
+            sensor.setId(PROVIDER);
+
+            Promise<?> update = push.pushUpdate(sensor);
+            assertNull(update.getFailure());
+            assertEquals("12 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
+
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.value = "13 °C";
+            
+            update = push.pushUpdate(dto);
             assertNull(update.getFailure());
             assertEquals("13 °C", getResourceValue("TestSensor", PROVIDER, SERVICE, RESOURCE));
         }
