@@ -211,7 +211,7 @@ public class DataUpdateServiceTest {
             assertNull(tv.getValue());
             assertEquals(timestamp, tv.getTimestamp());
         }
-        
+
         @Test
         void testSimplePushUpdateWithoutModel() throws Exception {
             final Instant timestamp = Instant.now();
