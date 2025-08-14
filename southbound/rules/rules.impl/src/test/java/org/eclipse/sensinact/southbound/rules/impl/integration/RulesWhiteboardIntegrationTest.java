@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.southbound.rules.impl.integration;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -27,6 +31,7 @@ import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.southbound.rules.api.ResourceUpdater;
 import org.eclipse.sensinact.southbound.rules.api.RuleDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,8 +92,8 @@ public class RulesWhiteboardIntegrationTest {
         dtos.dtos.add(makeRc("gas", "Detect2", "sensor", "O3", 4));
         dtos.dtos.add(makeRc("test", "test", "sensor", "temperature", 4));
         dtos.dtos.add(makeRc("test", "test", "sensor", "O3", 4));
-        dtos.dtos.add(makeRc("https://eclipse.org/sensinact/ldap/test", "naming1", "naming", "sensor-1", 0));
-        dtos.dtos.add(makeRc("https://eclipse.org/sensinact/ldap/test", "naming2", "naming", "sensor_2", 0));
+        dtos.dtos.add(makeRc("ldap_test", "naming1", "naming", "sensor-1", 0));
+        dtos.dtos.add(makeRc("ldap_test", "naming2", "naming", "sensor_2", 0));
         push.pushUpdate(dtos).getValue();
     }
 
@@ -154,6 +159,38 @@ public class RulesWhiteboardIntegrationTest {
 
         // Not called for other updates
         Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.anyList(), Mockito.any());
+    }
+
+    @Test
+    void testGettingStuck(@InjectBundleContext BundleContext bc) throws Exception {
+
+        Semaphore s1 = new Semaphore(0);
+        Semaphore s2 = new Semaphore(0);
+
+        RuleDefinition rule = Mockito.mock(RuleDefinition.class);
+
+        ICriterion criterion = Mockito.mock(ICriterion.class, Mockito.CALLS_REAL_METHODS);
+
+        Mockito.when(rule.getInputFilter()).thenReturn(criterion);
+        Mockito.doAnswer(x -> {
+            s1.release();
+            s2.acquire();
+            return null;
+        }).when(rule).evaluate(Mockito.anyList(), Mockito.any(ResourceUpdater.class));
+
+        Mockito.when(criterion.getProviderFilter()).thenReturn(p -> "Temp5".equals(p.getName()));
+
+        bc.registerService(RuleDefinition.class, rule, new Hashtable<>(Map.of(Constants.SERVICE_ID, 5,
+                RuleDefinition.RULE_NAME_PROPERTY, "test")));
+
+        assertTrue(s1.tryAcquire(1000, TimeUnit.MILLISECONDS));
+
+        // Push another update while this rule is blocked
+        push.pushUpdate(makeRc("temperature", "Temp5", "sensor", "temperature", 12)).timeout(1000).getValue();
+
+        // Release the block and we should be called again
+        s2.release();
+        assertTrue(s1.tryAcquire(1000, TimeUnit.MILLISECONDS));
     }
 
     private ArgumentMatcher<List<ProviderSnapshot>> hasProviders(String... names) {
