@@ -213,6 +213,38 @@ public class DataUpdateServiceTest {
         }
 
         @Test
+        void testSimplePushUpdateWithoutModel() throws Exception {
+            final Instant timestamp = Instant.now();
+
+            // Create resource & provider using a push
+            GenericDto dto = new GenericDto();
+            dto.provider = PROVIDER;
+            dto.service = SERVICE;
+            dto.resource = RESOURCE;
+            dto.model = "model";
+            dto.value = null;
+            dto.type = Integer.class;
+            dto.timestamp = timestamp;
+            dto.nullAction = NullAction.UPDATE;
+            push.pushUpdate(dto).getValue();
+
+            TimedValue<Integer> tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+
+            dto.model = null;
+            dto.value = 42;
+            push.pushUpdate(dto).getValue();
+            assertEquals(42, getResourceValue());
+
+            dto.value = null;
+            push.pushUpdate(dto).getValue();
+            tv = getResourceTimedValue();
+            assertNull(tv.getValue());
+            assertEquals(timestamp, tv.getTimestamp());
+        }
+
+        @Test
         void testSimplePushUpdateIgnore() throws Exception {
             final Instant timestamp = Instant.now();
 
