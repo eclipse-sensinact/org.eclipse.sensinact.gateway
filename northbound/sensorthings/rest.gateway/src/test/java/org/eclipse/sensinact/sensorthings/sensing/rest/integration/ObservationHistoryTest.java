@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
 
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -248,8 +249,8 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 4000; i++) {
             createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        // 1006: 1000 updates + history provider name & model & modelPackageUri + foo
-        // provider name & modelUri
+        // 1008: 1000 updates + history provider name & description & model & modelPackageUri + foo
+        // provider name & description &  modelUri
         waitForRowCount("sensinact.text_data", 1008);
         waitForRowCount("sensinact.numeric_data", 4000);
 
@@ -257,7 +258,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                 RESULT_OBSERVATIONS);
 
         assertEquals(1000, observations.count);
-        assertEquals(500, observations.value.size());
+        assertEquals(500, observations.value.size()); //Is this 500 because of https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
         assertNotNull(observations.nextLink);
 
         for (int i = 0; i < 500; i++) {
@@ -278,7 +279,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
             assertEquals(String.valueOf(i + 500), observations.value.get(i).result);
         }
 
-        observations = utils.queryJson("/Datastreams(foo~bar~foobar)/Observations?$count=true", RESULT_OBSERVATIONS);
+        observations = utils.queryJson("/Datastreams(foo~bar~foobar)/Observations?$count=true&$skip=1000", RESULT_OBSERVATIONS);
         assertEquals(4000, observations.count);
         assertEquals(500, observations.value.size());
         assertNotNull(observations.nextLink);
