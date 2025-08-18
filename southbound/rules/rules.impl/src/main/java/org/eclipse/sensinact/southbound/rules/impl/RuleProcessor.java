@@ -221,6 +221,8 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
 
         try(IMetricTimer timer = metrics.withTimer(timerName)) {
             rd.evaluate(list, updater);
+        } catch(Throwable t) {
+            LOG.error("An error occurred executing the rule {}", ruleName, t);
         }
 
         boolean triggerUpdate = false;
