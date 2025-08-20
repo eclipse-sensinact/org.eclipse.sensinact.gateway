@@ -45,8 +45,6 @@ public class CoordinatesDeserializer extends StdNodeBasedDeserializer<Coordinate
                 c.elevation = Double.NaN;
             }
             return c;
-        } else if (root.isArray() && root.isEmpty()) {
-            return null;
         } else {
             throw MismatchedInputException.from(ctxt.getParser(), Coordinates.class,
                     "GeoJSON coordinates must always be a list of at least two elements");

@@ -809,45 +809,6 @@ public class TimescaleHistoryTest {
         }
 
         @Test
-        void basicGeoData() throws Exception {
-            push.pushUpdate(getDto(GeoJsonUtils.point(11.59086, 50.9011833), TS_2012)).getValue();
-            push.pushUpdate(getDto((GeoJsonObject)null, TS_2013)).getValue();
-            push.pushUpdate(getDto(GeoJsonUtils.point(11.59087, 50.9011834), TS_2014)).getValue();
-
-            waitForRowCount("sensinact.geo_data", 3);
-
-            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
-                    "sensiNactHistory", "timescale-history", "history", "range") {
-
-                @SuppressWarnings("unchecked")
-                @Override
-                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
-                    // If equal, return the value
-                    List<TimedValue<?>> result = safeGet(resource
-                            .act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation", "fromTime",
-                                    TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
-                            .map(List.class::cast));
-                    assertEquals(2, result.size());
-                    assertEquals(GeoJsonUtils.point(11.59086, 50.9011833), result.get(0).getValue());
-                    assertEquals(TS_2012, result.get(0).getTimestamp());
-                    assertEquals(null, result.get(1).getValue());
-                    assertEquals(TS_2013, result.get(1).getTimestamp());
-
-                    // No Limit
-                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation",
-                            "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC))).map(List.class::cast));
-                    assertEquals(2, result.size());
-                    assertEquals(null, result.get(0).getValue());
-                    assertEquals(TS_2013, result.get(0).getTimestamp());
-                    assertEquals(GeoJsonUtils.point(11.59087, 50.9011834), result.get(1).getValue());
-                    assertEquals(TS_2014, result.get(1).getTimestamp());
-
-                    return pf.resolved(null);
-                }
-            }).getValue();
-        }
-
-        @Test
         void manyStringData() throws Exception {
             for (int i = 0; i < 1000; i++) {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();

@@ -14,26 +14,11 @@ package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.Objects;
 
-import org.eclipse.sensinact.gateway.geojson.internal.CoordinatesSerializer;
-import org.eclipse.sensinact.gateway.geojson.internal.PointDeserializer;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 /**
  * A GeoJSON point object as defined in
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1">the GeoJSON
  * specification</a>
  */
-@JsonDeserialize(using = PointDeserializer.class)
-<<<<<<< Upstream, based on branch 'geojson-empty-point' of git@github.com:isalvadori/org.eclipse.sensinact.gateway.git
-<<<<<<< Upstream, based on branch 'geojson-empty-point' of git@github.com:isalvadori/org.eclipse.sensinact.gateway.git
-=======
-//@JsonSerialize(using = CoordinatesSerializer.class)
->>>>>>> d20e5f7 First version of PointDeserializer
-=======
-@JsonSerialize(using = CoordinatesSerializer.class)
->>>>>>> f9614eb re-enabled serializer for Point
 public class Point extends Geometry {
 
     public Point() {
