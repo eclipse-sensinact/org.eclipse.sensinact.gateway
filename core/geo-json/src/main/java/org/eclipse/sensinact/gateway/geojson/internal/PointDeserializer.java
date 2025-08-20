@@ -56,8 +56,8 @@ public class PointDeserializer extends StdNodeBasedDeserializer<Point> {
                     "GeoJSON coordinates must always be a list of at least two elements");
             }
         } else {
-             throw MismatchedInputException.from(ctxt.getParser(), Point.class,
-                 "GeoJSON point must always contain a coordinates node");
+            throw MismatchedInputException.from(ctxt.getParser(), Point.class,
+                "GeoJSON point must always contain a coordinates node");
         }
     }
 }
