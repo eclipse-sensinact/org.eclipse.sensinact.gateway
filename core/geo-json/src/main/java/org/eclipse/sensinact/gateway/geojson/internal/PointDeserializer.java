@@ -31,34 +31,33 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 @SuppressWarnings("serial")
 public class PointDeserializer extends StdNodeBasedDeserializer<Point> {
 
-	public PointDeserializer() {
-		super(Point.class);
-	}
+    public PointDeserializer() {
+        super(Point.class);
+    }
 
-	@Override
-	public Point convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-		if(root.get("coordinates") != null) {
-			JsonNode coordNode = root.get("coordinates");
-			if(coordNode.isArray() && coordNode.isEmpty()) {
-				return null;
-			}
-			else if (coordNode.isArray() && coordNode.size() >= 2) {
-				Coordinates c = new Coordinates();
-				c.longitude = coordNode.get(0).asDouble();
-				c.latitude = coordNode.get(1).asDouble();
-				if (coordNode.size() >= 3) {
-					c.elevation = coordNode.get(2).asDouble();
-				} else {
-					c.elevation = Double.NaN;
-				}
-				return GeoJsonUtils.point(c);
-			} else {
-				throw MismatchedInputException.from(ctxt.getParser(), Point.class,
-						"GeoJSON coordinates must always be a list of at least two elements");
-			}
-		} else {
-			throw MismatchedInputException.from(ctxt.getParser(), Point.class,
-					"GeoJSON point must always contain a coordinates node");
-		}
-	}
+    @Override
+    public Point convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+        if (root.get("coordinates") != null) {
+            JsonNode coordNode = root.get("coordinates");
+            if (coordNode.isArray() && coordNode.isEmpty()) {
+                return null;
+            } else if (coordNode.isArray() && coordNode.size() >= 2) {
+                Coordinates c = new Coordinates();
+                c.longitude = coordNode.get(0).asDouble();
+                c.latitude = coordNode.get(1).asDouble();
+                    if (coordNode.size() >= 3) {
+                        c.elevation = coordNode.get(2).asDouble();
+                    } else {
+                        c.elevation = Double.NaN;
+                    }
+                return GeoJsonUtils.point(c);
+            } else {
+                throw MismatchedInputException.from(ctxt.getParser(), Point.class,
+                    "GeoJSON coordinates must always be a list of at least two elements");
+            }
+        } else {
+             throw MismatchedInputException.from(ctxt.getParser(), Point.class,
+                 "GeoJSON point must always contain a coordinates node");
+        }
+    }
 }

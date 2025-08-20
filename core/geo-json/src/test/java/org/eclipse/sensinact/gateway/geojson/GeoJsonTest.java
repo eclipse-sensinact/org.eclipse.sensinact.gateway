@@ -24,6 +24,7 @@ import static org.eclipse.sensinact.gateway.geojson.GeoJsonType.Polygon;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
@@ -167,11 +168,7 @@ public class GeoJsonTest {
         assertTrue(Double.isNaN(nan.coordinates.latitude));
         assertTrue(Double.isNaN(nan.coordinates.longitude));
         assertTrue(Double.isNaN(nan.coordinates.elevation));
-        assertEquals(Point, geometries.get(1).type);
-        Point empty = (Point) geometries.get(1);
-        assertTrue(Double.isNaN(empty.coordinates.latitude));
-        assertTrue(Double.isNaN(empty.coordinates.longitude));
-        assertTrue(Double.isNaN(empty.coordinates.elevation));
+        assertNull(geometries.get(1));
     }
 
 }

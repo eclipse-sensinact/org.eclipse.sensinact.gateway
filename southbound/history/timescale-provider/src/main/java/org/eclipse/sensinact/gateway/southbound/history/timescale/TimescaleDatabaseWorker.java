@@ -174,7 +174,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
                     "(SELECT ST_GeomFromGeoJSON( ? )::geography)");
             String tmpValue;
             if (event.newValue() == null) {
-                //Geometry 'Point empty' 
+                //Geometry 'Point empty'
                 tmpValue = "{\"type\":\"Point\", \"coordinates\":[]}";
             } else if (event.newValue() instanceof GeoJsonObject) {
                 try {
