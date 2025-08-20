@@ -24,6 +24,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * specification</a>
  */
 @JsonDeserialize(using = PointDeserializer.class)
+<<<<<<< Upstream, based on branch 'geojson-empty-point' of git@github.com:isalvadori/org.eclipse.sensinact.gateway.git
+=======
+//@JsonSerialize(using = CoordinatesSerializer.class)
+>>>>>>> d20e5f7 First version of PointDeserializer
 public class Point extends Geometry {
 
     public Point() {
