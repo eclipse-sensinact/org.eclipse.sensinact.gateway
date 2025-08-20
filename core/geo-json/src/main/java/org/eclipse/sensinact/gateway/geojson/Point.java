@@ -14,11 +14,16 @@ package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.Objects;
 
+import org.eclipse.sensinact.gateway.geojson.internal.PointDeserializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * A GeoJSON point object as defined in
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1">the GeoJSON
  * specification</a>
  */
+@JsonDeserialize(using = PointDeserializer.class)
 public class Point extends Geometry {
 
     public Point() {

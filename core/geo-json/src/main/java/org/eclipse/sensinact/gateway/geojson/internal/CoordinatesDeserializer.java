@@ -15,7 +15,6 @@ package org.eclipse.sensinact.gateway.geojson.internal;
 import java.io.IOException;
 
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
-import org.eclipse.sensinact.gateway.geojson.utils.GeoJsonUtils;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,7 +46,7 @@ public class CoordinatesDeserializer extends StdNodeBasedDeserializer<Coordinate
             }
             return c;
         } else if (root.isArray() && root.isEmpty()) {
-            return GeoJsonUtils.coords(Double.NaN, Double.NaN);
+            return null;
         } else {
             throw MismatchedInputException.from(ctxt.getParser(), Coordinates.class,
                     "GeoJSON coordinates must always be a list of at least two elements");
