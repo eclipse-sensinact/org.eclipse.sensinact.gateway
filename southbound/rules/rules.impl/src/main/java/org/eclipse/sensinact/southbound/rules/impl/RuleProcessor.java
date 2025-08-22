@@ -58,6 +58,7 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
 
     private final GatewayThread gateway;
     private final IMetricsManager metrics;
+    private final PromiseFactory promiseFactory;
     private final ResourceUpdater updater;
     private final RuleDefinition rd;
 
@@ -73,16 +74,18 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
 
     private final Object lock = new Object();
 
-    private boolean pending;
+    // We always start in a working state to initialise the snapshot
+    private boolean working = true;
     private boolean closed;
     private Deque<ResourceDataNotification> unchecked = new ArrayDeque<>(128);
     private Map<String, ProviderSnapshot> map = Map.of();
 
     public RuleProcessor(BundleContext context, GatewayThread gateway,
-            IMetricsManager metrics, ResourceUpdater updater,
+            IMetricsManager metrics, PromiseFactory promiseFactory, ResourceUpdater updater,
             RuleDefinition rd, Map<String, Object> properties) {
         this.gateway = gateway;
         this.metrics = metrics;
+        this.promiseFactory = promiseFactory;
         this.updater = updater;
         this.rd = rd;
 
@@ -109,7 +112,23 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Rule {} received data event on topic {}", ruleName, topic);
                 }
-                if(checkEventAgainstSnapshot(event)) {
+                boolean triggerUpdate;
+                synchronized (lock) {
+                    // If we're currently working then add the event to be checked later
+                    if(closed) {
+                        triggerUpdate = false;
+                    } else if(working) {
+                        unchecked.add(event);
+                        triggerUpdate = false;
+                    } else {
+                        working = checkEventAgainstSnapshot(event);
+                        triggerUpdate = working;
+                        if(triggerUpdate) {
+                            unchecked.clear();
+                        }
+                    }
+                }
+                if(triggerUpdate) {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Updating snapshot data for rule", ruleName);
                     }
@@ -123,48 +142,41 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
         }
     }
 
+    /**
+     * Must be called while synchronized on {@link #lock}
+     * @param event
+     * @return
+     */
     private boolean checkEventAgainstSnapshot(ResourceDataNotification event) {
         boolean update = true;
-        synchronized (lock) {
+        if(closed) {
+            return false;
+        }
 
-            if(closed) {
-                return false;
-            }
-
-            if(pending) {
-                unchecked.add(event);
-                return false;
-            }
-
-            ProviderSnapshot p = map.get(event.provider());
-            if(p != null) {
-                ResourceSnapshot r = p.getResource(event.service(), event.resource());
-                if(r != null && r.isSet()) {
-                    TimedValue<?> tv = r.getValue();
-                    Instant snapshot = tv.getTimestamp();
-                    if(snapshot.isAfter(event.timestamp())) {
+        ProviderSnapshot p = map.get(event.provider());
+        if(p != null) {
+            ResourceSnapshot r = p.getResource(event.service(), event.resource());
+            if(r != null && r.isSet()) {
+                TimedValue<?> tv = r.getValue();
+                Instant snapshot = tv.getTimestamp();
+                if(snapshot.isAfter(event.timestamp())) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Existing snapshot for data {}/{}/{} is newer than event {}",
+                                event.provider(), event.service(), event.resource(), event.timestamp());
+                    }
+                    update = false;
+                } else if (snapshot.equals(event.timestamp()) && Objects.equals(tv.getValue(), event.newValue())) {
+                    // Check the metadata
+                    Map<String, Object> snapshotMeta = cleanMetadataMap(r.getMetadata());
+                    Map<String, Object> eventMeta = cleanMetadataMap(event.metadata());
+                    if(snapshotMeta.equals(eventMeta)) {
                         if(LOG.isDebugEnabled()) {
-                            LOG.debug("Existing snapshot for data {}/{}/{} is newer than event {}",
-                                    event.provider(), event.service(), event.resource(), event.timestamp());
+                            LOG.debug("Existing snapshot for data {}/{}/{} is up to date",
+                                    event.provider(), event.service(), event.resource());
                         }
                         update = false;
-                    } else if (snapshot.equals(event.timestamp()) && Objects.equals(tv.getValue(), event.newValue())) {
-                        // Check the metadata
-                        Map<String, Object> snapshotMeta = cleanMetadataMap(r.getMetadata());
-                        Map<String, Object> eventMeta = cleanMetadataMap(event.metadata());
-                        if(snapshotMeta.equals(eventMeta)) {
-                            if(LOG.isDebugEnabled()) {
-                                LOG.debug("Existing snapshot for data {}/{}/{} is up to date",
-                                        event.provider(), event.service(), event.resource());
-                            }
-                            update = false;
-                        }
                     }
                 }
-            }
-            if(update) {
-                pending = true;
-                unchecked.clear();
             }
         }
         return update;
@@ -178,14 +190,15 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
     }
 
     private void updateSnapshot(int attempt) {
-        gateway.execute(new AbstractSensinactCommand<List<ProviderSnapshot>>() {
+        // Always use our workers, don't steal the gateway thread
+        promiseFactory.resolvedWith(gateway.execute(new AbstractSensinactCommand<List<ProviderSnapshot>>() {
             @Override
             protected Promise<List<ProviderSnapshot>> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
                     PromiseFactory promiseFactory) {
                 return promiseFactory.resolved(twin.filteredSnapshot(criterion.getLocationFilter(), criterion.getProviderFilter(),
                         criterion.getServiceFilter(), criterion.getResourceFilter()));
             }
-        }).thenAccept(this::snapshotUpdate)
+        })).thenAccept(this::snapshotUpdate)
         .onFailure(t -> snapshotUpdateFailed(t, attempt));
     }
 
@@ -204,20 +217,30 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
                 return;
             }
             this.map = map;
-            pending = false;
         }
 
         try(IMetricTimer timer = metrics.withTimer(timerName)) {
             rd.evaluate(list, updater);
+        } catch(Throwable t) {
+            LOG.error("An error occurred executing the rule {}", ruleName, t);
         }
 
-        boolean update = false;
+        boolean triggerUpdate = false;
         synchronized (lock) {
-            while(!unchecked.isEmpty() && !update) {
-                update = checkEventAgainstSnapshot(unchecked.pollLast());
+            working = false;
+            while(!unchecked.isEmpty()) {
+                // Check the latest first as its the most likely to trigger an update
+                working = checkEventAgainstSnapshot(unchecked.pollLast());
+                if(working) {
+                    triggerUpdate = true;
+                    unchecked.clear();
+                }
+            }
+            if(closed) {
+                triggerUpdate = false;
             }
         }
-        if(update) {
+        if(triggerUpdate) {
             updateSnapshot(1);
         }
     }

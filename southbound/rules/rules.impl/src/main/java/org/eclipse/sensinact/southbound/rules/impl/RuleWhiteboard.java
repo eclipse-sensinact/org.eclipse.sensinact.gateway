@@ -14,6 +14,10 @@ package org.eclipse.sensinact.southbound.rules.impl;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
@@ -27,6 +31,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.promise.PromiseFactory;
 
 @Component
 public class RuleWhiteboard {
@@ -35,6 +40,9 @@ public class RuleWhiteboard {
     private final GatewayThread gateway;
     private final IMetricsManager metrics;
     private final DataUpdate update;
+    private final ExecutorService workers;
+    private final ScheduledExecutorService scheduler;
+    private final PromiseFactory promiseFactory;
 
     @Activate
     public RuleWhiteboard(BundleContext context, @Reference GatewayThread gateway,
@@ -44,6 +52,12 @@ public class RuleWhiteboard {
         this.gateway = gateway;
         this.metrics = metrics;
         this.update = update;
+
+        ThreadGroup group = new ThreadGroup("Eclipse sensiNact Gateway Rules Whiteboard");
+        this.workers = Executors.newFixedThreadPool(4, r -> new Thread(group, r));
+        this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> new Thread(group, r, "Rules Whiteboard Scheduler"));
+        this.promiseFactory = new PromiseFactory(Executors.unconfigurableExecutorService(workers),
+                Executors.unconfigurableScheduledExecutorService(scheduler));
     }
 
     private final Map<String, RuleProcessor> processors = new ConcurrentHashMap<>();
@@ -58,6 +72,18 @@ public class RuleWhiteboard {
                 // Swallow this
             }
         }
+        scheduler.shutdown();
+        workers.shutdown();
+        try {
+            scheduler.awaitTermination(100, TimeUnit.MILLISECONDS);
+            workers.awaitTermination(100, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            // Maintain the interrupt status
+            Thread.currentThread().interrupt();
+        } finally {
+            scheduler.shutdownNow();
+            workers.shutdownNow();
+        }
     }
 
     private String getKey(Map<String, Object> params) {
@@ -66,7 +92,7 @@ public class RuleWhiteboard {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     void addRuleDefinition(RuleDefinition rd, Map<String, Object> props) {
-        processors.put(getKey(props), new RuleProcessor(context, gateway, metrics,
+        processors.put(getKey(props), new RuleProcessor(context, gateway, metrics, promiseFactory,
                 new RuleResourceUpdater(update), rd, props));
     }
 
