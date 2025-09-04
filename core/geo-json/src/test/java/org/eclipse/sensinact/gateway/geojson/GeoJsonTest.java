@@ -159,15 +159,15 @@ public class GeoJsonTest {
 
     @Test
     void testNaN() throws Exception {
-    	 try {
-             mapper.readValue(getFileResource("test-pointNaN.json"), new TypeReference<List<Geometry>>() {
-             });
-             fail("MismatchedInputException expected");
-         } catch (Exception e) {
-             assertTrue(e instanceof MismatchedInputException);
-             assertEquals("GeoJSON coordinates cannot have NaN as latitude or longitude\n"
-                     + " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 7, column: 9] (through reference chain: java.util.ArrayList[0]->org.eclipse.sensinact.gateway.geojson.Point[\"coordinates\"])", e.getMessage());
-         }
+        try {
+            mapper.readValue(getFileResource("test-pointNaN.json"), new TypeReference<List<Geometry>>() {
+            });
+            fail("MismatchedInputException expected");
+        } catch (Exception e) {
+            assertTrue(e instanceof MismatchedInputException);
+            assertEquals("GeoJSON coordinates cannot have NaN as latitude or longitude\n"
+                    + " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 7, column: 9] (through reference chain: java.util.ArrayList[0]->org.eclipse.sensinact.gateway.geojson.Point[\"coordinates\"])", e.getMessage());
+        }
     }
 
     @Test
