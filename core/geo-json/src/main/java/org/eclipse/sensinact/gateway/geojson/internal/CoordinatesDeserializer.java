@@ -39,6 +39,10 @@ public class CoordinatesDeserializer extends StdNodeBasedDeserializer<Coordinate
             Coordinates c = new Coordinates();
             c.longitude = root.get(0).asDouble();
             c.latitude = root.get(1).asDouble();
+            if(Double.isNaN(c.longitude) || Double.isNaN(c.latitude)) {
+            	throw MismatchedInputException.from(ctxt.getParser(), Coordinates.class,
+                        "GeoJSON coordinates cannot have NaN as latitude or longitude");
+            }
             if (root.size() >= 3) {
                 c.elevation = root.get(2).asDouble();
             } else {
