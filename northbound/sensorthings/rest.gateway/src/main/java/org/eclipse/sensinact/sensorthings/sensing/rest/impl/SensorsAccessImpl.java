@@ -61,7 +61,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
             throw new NotFoundException();
         }
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), 0);
+                requestContext, validateAndGetResourceSnapshot(id));
     }
 
     @Override
