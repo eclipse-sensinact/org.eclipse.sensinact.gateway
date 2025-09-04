@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URL;
 import java.util.List;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 public class GeoJsonTest {
 
@@ -157,21 +159,28 @@ public class GeoJsonTest {
 
     @Test
     void testNaN() throws Exception {
-        List<Geometry> geometries = mapper.readValue(getFileResource("test-pointNaN.json"),
-                new TypeReference<List<Geometry>>() {
-                });
+        try {
+            mapper.readValue(getFileResource("test-pointNaN.json"), new TypeReference<List<Geometry>>() {
+            });
+            fail("MismatchedInputException expected");
+        } catch (Exception e) {
+            assertTrue(e instanceof MismatchedInputException);
+            assertEquals("GeoJSON coordinates cannot have NaN as latitude or longitude\n"
+                    + " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 7, column: 9] (through reference chain: java.util.ArrayList[0]->org.eclipse.sensinact.gateway.geojson.Point[\"coordinates\"])", e.getMessage());
+        }
+    }
 
-        assertEquals(2, geometries.size());
-        assertEquals(Point, geometries.get(0).type);
-        Point nan = (Point) geometries.get(0);
-        assertTrue(Double.isNaN(nan.coordinates.latitude));
-        assertTrue(Double.isNaN(nan.coordinates.longitude));
-        assertTrue(Double.isNaN(nan.coordinates.elevation));
-        assertEquals(Point, geometries.get(1).type);
-        Point empty = (Point) geometries.get(1);
-        assertTrue(Double.isNaN(empty.coordinates.latitude));
-        assertTrue(Double.isNaN(empty.coordinates.longitude));
-        assertTrue(Double.isNaN(empty.coordinates.elevation));
+    @Test
+    void testEmpty() throws Exception {
+        try {
+            mapper.readValue(getFileResource("test-pointEmpty.json"), new TypeReference<List<Geometry>>() {
+            });
+            fail("MismatchedInputException expected");
+        } catch (Exception e) {
+            assertTrue(e instanceof MismatchedInputException);
+            assertEquals("GeoJSON coordinates must always be a list of at least two elements\n"
+                    + " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 5, column: 9] (through reference chain: java.util.ArrayList[0]->org.eclipse.sensinact.gateway.geojson.Point[\"coordinates\"])", e.getMessage());
+        }
     }
 
 }
