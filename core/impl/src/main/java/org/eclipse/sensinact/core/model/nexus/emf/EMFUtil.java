@@ -48,6 +48,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.model.core.provider.ActionMetadata;
 import org.eclipse.sensinact.model.core.provider.ActionParameterMetadata;
 import org.eclipse.sensinact.model.core.provider.Metadata;
@@ -65,6 +66,7 @@ import org.osgi.util.converter.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
@@ -380,24 +382,35 @@ public class EMFUtil {
         if (o == null) {
             converted = o;
         } else {
-            EClassifier type = typeMap.get(o.getClass());
-            if (type == null || targetEType == null) {
+            // Fast path this as we use GeoJSON a lot and the converter isn't able to handle sealed types
+            if(GeoJsonObject.class.isAssignableFrom(targetType)) {
+                // Go via Jackson to use the JSON mapping
                 try {
-                    converted = converter.convert(o).to(targetType);
-                } catch (ConversionException ce) {
-                    if (targetEType != null) {
-                        try {
-                            converted = convertToTargetType(targetEType, targetType, mapper.writeValueAsString(o));
-                        } catch (Exception e) {
-                            throw ce;
-                        }
-                    } else {
-                        throw ce;
-                    }
+                    converted = o instanceof String ? mapper.readValue((String) o, targetType) : mapper.convertValue(o, targetType);
+                } catch (JsonProcessingException e) {
+                    LOG.error("Unable to process location data {} into target type {}", o, targetType);
+                    throw new ConversionException("Unable to convert location data", e);
                 }
             } else {
-                String string = type.getEPackage().getEFactoryInstance().convertToString((EDataType) type, o);
-                converted = targetEType.getEPackage().getEFactoryInstance().createFromString(targetEType, string);
+                EClassifier type = typeMap.get(o.getClass());
+                if (type == null || targetEType == null) {
+                    try {
+                        converted = converter.convert(o).to(targetType);
+                    } catch (ConversionException | IllegalArgumentException e) {
+                        if (targetEType != null) {
+                            try {
+                                converted = convertToTargetType(targetEType, targetType, mapper.writeValueAsString(o));
+                            } catch (Exception e2) {
+                                throw e;
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
+                } else {
+                    String string = type.getEPackage().getEFactoryInstance().convertToString((EDataType) type, o);
+                    converted = targetEType.getEPackage().getEFactoryInstance().createFromString(targetEType, string);
+                }
             }
         }
         return converted;

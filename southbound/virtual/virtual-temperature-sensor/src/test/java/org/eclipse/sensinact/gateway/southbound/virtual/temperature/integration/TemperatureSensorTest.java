@@ -95,8 +95,8 @@ public class TemperatureSensorTest {
         assertNull(notification.oldValue());
         assertInstanceOf(Point.class, notification.newValue());
         Point p = (Point) notification.newValue();
-        assertEquals(1.0d, p.coordinates.latitude);
-        assertEquals(2.0d, p.coordinates.longitude);
+        assertEquals(1.0d, p.coordinates().latitude());
+        assertEquals(2.0d, p.coordinates().longitude());
 
         notification = queue.poll(5, TimeUnit.SECONDS);
 

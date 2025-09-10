@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -230,7 +231,7 @@ public class LinksTest extends AbstractIntegrationTest {
     void testLinksFromThings() throws IOException, InterruptedException {
         // Add a resource
         createResource(PROVIDER, "sensor", "data", 42);
-        createResource(PROVIDER, "admin", "location", new Point());
+        createResource(PROVIDER, "admin", "location", new Point(Coordinates.EMPTY, null, null));
 
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
@@ -307,7 +308,7 @@ public class LinksTest extends AbstractIntegrationTest {
     void testLinksFromLocations() throws IOException, InterruptedException {
         // Add a resource
         createResource(PROVIDER, "sensor", "data", 42);
-        createResource(PROVIDER, "admin", "location", new Point());
+        createResource(PROVIDER, "admin", "location", new Point(Coordinates.EMPTY, null, null));
         createResource(PROVIDER, "admin", "description", "MyDescription");
 
         // Get the new locations

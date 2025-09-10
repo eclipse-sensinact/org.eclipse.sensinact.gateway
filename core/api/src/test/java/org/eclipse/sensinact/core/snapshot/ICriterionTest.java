@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.LineString;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -71,7 +72,7 @@ public class ICriterionTest {
 
             @Override
             public Predicate<GeoJsonObject> getLocationFilter() {
-                return match(g -> g.type.name(), location);
+                return match(g -> g.type().name(), location);
             }
         };
     }
@@ -158,8 +159,8 @@ public class ICriterionTest {
         @Test
         public void locationTest() {
 
-            GeoJsonObject point = new Point();
-            GeoJsonObject polygon = new Polygon();
+            GeoJsonObject point = new Point(Coordinates.EMPTY, null, null);
+            GeoJsonObject polygon = new Polygon(List.of(), null, null);
 
             ICriterion criterion = getTestCriterion(null, null, null, null, "Point");
 
@@ -316,8 +317,8 @@ public class ICriterionTest {
         @Test
         public void locationTest() {
 
-            GeoJsonObject point = new Point();
-            GeoJsonObject polygon = new Polygon();
+            GeoJsonObject point = new Point(Coordinates.EMPTY, null, null);
+            GeoJsonObject polygon = new Polygon(List.of(), null, null);
 
             ICriterion criterionA = getTestCriterion(null, null, null, null, "Point");
             ICriterion nullCriterion = getTestCriterion(null, null, null, null, null);
@@ -467,9 +468,9 @@ public class ICriterionTest {
         @Test
         public void locationTest() {
 
-            GeoJsonObject point = new Point();
-            GeoJsonObject polygon = new Polygon();
-            GeoJsonObject linestring = new LineString();
+            GeoJsonObject point = new Point(Coordinates.EMPTY, null, null);
+            GeoJsonObject polygon = new Polygon(List.of(), null, null);
+            GeoJsonObject linestring = new LineString(List.of(), null, null);
 
             ICriterion criterionA = getTestCriterion(null, null, null, null, "Point");
             ICriterion criterionB = getTestCriterion(null, null, null, null, "Polygon");

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson.internal;
 
@@ -28,14 +29,16 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @SuppressWarnings("serial")
 public class CoordinatesSerializer extends StdSerializer<Coordinates> {
 
+    private static final double[] EMPTY = new double[0];
+
     public CoordinatesSerializer() {
         super(Coordinates.class);
     }
 
     @Override
     public void serialize(Coordinates value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        double[] array = Double.isNaN(value.elevation) ? new double[] { value.longitude, value.latitude }
-                : new double[] { value.longitude, value.latitude, value.elevation };
+        double[] array = value.isEmpty() ? EMPTY : value.hasElevation() ?
+                new double[] { value.longitude(), value.latitude(), value.elevation() } : new double[] { value.longitude(), value.latitude() };
         gen.writeArray(array, 0, array.length);
     }
 }

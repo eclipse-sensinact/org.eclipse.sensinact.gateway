@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Random;
 
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
@@ -196,7 +197,7 @@ public class ValueTest extends AbstractIntegrationTest {
         sensor.setTemp(temp);
         sensor.setId(provider);
         sensor.setAdmin(admin);
-        Point p = new Point();
+        Point p = new Point(Coordinates.EMPTY, null, null);
         admin.setLocation(p);
         admin.setDescription("Foobar");
         try {

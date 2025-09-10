@@ -24,10 +24,10 @@
 -runbundles: \
 	ch.qos.logback.classic;version='[1.4.14,1.4.15)',\
 	ch.qos.logback.core;version='[1.4.14,1.4.15)',\
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.16.1,2.16.2)',\
-	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.18.4,2.18.5)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.18.4,2.18.5)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.18.4,2.18.5)',\
+	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.18.4,2.18.5)',\
 	com.sun.jna;version='[5.13.0,5.13.1)',\
 	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	jul.to.slf4j;version='[2.0.11,2.0.12)',\

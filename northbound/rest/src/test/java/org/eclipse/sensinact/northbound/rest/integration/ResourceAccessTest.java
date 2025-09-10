@@ -264,10 +264,7 @@ public class ResourceAccessTest {
                 notification.provider(), notification.service(), notification.resource(),
                 notification.oldValue(), notification.newValue()));
 
-        Point p = new Point();
-        p.coordinates = new Coordinates();
-        p.coordinates.latitude = 48.5d;
-        p.coordinates.longitude = 4.5d;
+        Point p = new Point(new Coordinates(4.5d, 48.5d), null, null);
 
         AccessMethodCallParameterDTO param = new AccessMethodCallParameterDTO();
         param.name = "value";

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson.internal;
 
@@ -33,25 +34,32 @@ public class CoordinatesDeserializer extends StdNodeBasedDeserializer<Coordinate
         super(Coordinates.class);
     }
 
+    @SuppressWarnings("resource")
     @Override
     public Coordinates convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-        if (root.isArray() && root.size() >= 2) {
-            Coordinates c = new Coordinates();
-            c.longitude = root.get(0).asDouble();
-            c.latitude = root.get(1).asDouble();
-            if(Double.isNaN(c.longitude) || Double.isNaN(c.latitude)) {
-                throw MismatchedInputException.from(ctxt.getParser(), Coordinates.class,
-                        "GeoJSON coordinates cannot have NaN as latitude or longitude");
+        if (root.isArray()) {
+            if(root.isEmpty()) {
+                // GeoJSON specification 3.1 - GeoJSON processors MAY interpret Geometry objects with
+                // empty "coordinates" arrays as null objects.
+                return Coordinates.EMPTY;
+            } else if(root.size() >= 2) {
+                double longitude = root.get(0).asDouble();
+                double latitude = root.get(1).asDouble();
+                if(!Double.isFinite(longitude) || !Double.isFinite(latitude)) {
+                    throw MismatchedInputException.from(ctxt.getParser(), Coordinates.class,
+                            "GeoJSON coordinates must have finite latitude and longitude");
+                }
+                double elevation;
+                if (root.size() >= 3) {
+                    elevation = root.get(2).asDouble();
+                } else {
+                    // We use NaN as a marker indicating "no elevation"
+                    elevation = Double.NaN;
+                }
+                return new Coordinates(longitude, latitude, elevation);
             }
-            if (root.size() >= 3) {
-                c.elevation = root.get(2).asDouble();
-            } else {
-                c.elevation = Double.NaN;
-            }
-            return c;
-        } else {
-            throw MismatchedInputException.from(ctxt.getParser(), Coordinates.class,
-                    "GeoJSON coordinates must always be a list of at least two elements");
         }
+        throw MismatchedInputException.from(ctxt.getParser(), Coordinates.class,
+                "GeoJSON coordinates must always be a list of at least two elements");
     }
 }

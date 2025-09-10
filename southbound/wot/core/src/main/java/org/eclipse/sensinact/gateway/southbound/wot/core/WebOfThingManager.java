@@ -748,11 +748,6 @@ public class WebOfThingManager implements ThingManager {
         // Altitude is optional
         altitude = lookupGeoField(extraProps, GeoNamespaces.W3_GEO_WGS84_ALTITUDE, thing.context);
 
-        final Point point = new Point();
-        point.coordinates = new Coordinates();
-        point.coordinates.latitude = toDouble(latitude);
-        point.coordinates.longitude = toDouble(longitude);
-        point.coordinates.elevation = toDouble(altitude);
-        return point;
+        return new Point(new Coordinates(toDouble(longitude), toDouble(latitude), toDouble(altitude)), null, null);
     }
 }

@@ -476,10 +476,10 @@ public class DtoMapper {
     private static Polygon getObservedArea(GeoJsonObject location) {
         Geometry geometry = null;
         if (location instanceof Feature) {
-            geometry = ((Feature) location).geometry;
+            geometry = ((Feature) location).geometry();
         } else if (location instanceof FeatureCollection) {
             // TODO is there a better mapping?
-            geometry = ((FeatureCollection) location).features.stream().map((f) -> f.geometry)
+            geometry = ((FeatureCollection) location).features().stream().map((f) -> f.geometry())
                     .filter(Polygon.class::isInstance).map(Polygon.class::cast).findFirst().orElse(null);
         }
         return geometry instanceof Polygon ? (Polygon) geometry : null;
@@ -488,10 +488,10 @@ public class DtoMapper {
     private static String getProperty(GeoJsonObject location, String propName) {
         if (location instanceof Feature) {
             Feature f = (Feature) location;
-            return toString(f.properties.get(propName));
+            return toString(Optional.ofNullable(f.properties()).map(m -> m.get(propName)));
         } else if (location instanceof FeatureCollection) {
             FeatureCollection fc = (FeatureCollection) location;
-            return fc.features.stream().map(f -> toString(f.properties.get(propName))).filter(p -> p != null)
+            return fc.features().stream().map(f -> toString(Optional.ofNullable(f.properties()).map(m -> m.get(propName)))).filter(p -> p != null)
                     .findFirst().orElse(null);
         }
         return null;
@@ -545,9 +545,7 @@ public class DtoMapper {
             if (allowNull) {
                 parsedLocation = null;
             } else {
-                Point point = new Point();
-                point.coordinates = new Coordinates();
-                parsedLocation = point;
+                parsedLocation = new Point(Coordinates.EMPTY, null, null);
             }
         } else {
             if (rawValue instanceof GeoJsonObject) {

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,16 +9,17 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.eclipse.sensinact.gateway.geojson.internal.JacksonHelper;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * A GeoJSON object as defined in
@@ -44,76 +46,49 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
         @Type(value = GeometryCollection.class, name = "GeometryCollection"), })
 @JsonTypeInfo(use = Id.NAME, include = As.EXISTING_PROPERTY, property = "type")
 @JsonInclude(Include.NON_NULL)
-public abstract class GeoJsonObject {
+public sealed interface GeoJsonObject permits Geometry, Feature, FeatureCollection {
 
     /**
      * This field is not deserialized, but populated by the constructor This field
      * also defines the type of the object, and is used to map into a Java type when
      * deserializing
      */
-    @JsonIgnoreProperties(allowGetters = true)
-    public final GeoJsonType type;
-
-    protected GeoJsonObject(GeoJsonType type) {
-        this.type = type;
-    }
-
-    @JsonAnySetter
-    public Map<String, Object> foreignMembers = new HashMap<>();
-
-    public List<Double> bbox;
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, bbox);
-    }
+    @JsonGetter
+    public GeoJsonType type();
 
     /**
-     * Checks if the object is a GeoJSON object and shares common members
-     *
-     * @param obj Object to compare to
-     * @return True if the given object matches the GeoJSON type and common members
+     * Additional extension properties for this object
+     * @return A {@link Map} of extension properties. May be empty, but will never be <code>null</code>
      */
-    protected boolean checkParentEquals(Object obj) {
-        if (obj instanceof GeoJsonObject) {
-            final GeoJsonObject other = (GeoJsonObject) obj;
-            return type == other.type && Objects.equals(bbox, other.bbox)
-                    && Objects.equals(foreignMembers, other.foreignMembers);
-        }
-
-        return false;
-    }
+    public Map<String, Object> foreignMembers();
 
     /**
-     * Returns the object description
-     *
-     * @param builder String builder to add description to
-     * @return A content flag: if true, content was added to the builder
+     * The GeoJSON bounding box.
+     * @return A List of bounding box coordinates. May be null according to the specification.
      */
-    protected abstract boolean getObjectDescription(StringBuilder builder);
+    public List<Double> bbox();
 
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder(type.toString()).append("(");
+    /**
+     * Tests whether this GeoJSON object is "empty". For example it may contain no
+     * coordinates.
+     * @return <code>true</code> if the object is empty
+     */
+    @JsonIgnore
+    public boolean isEmpty();
 
-        boolean first = !getObjectDescription(builder);
-
-        if (bbox != null && !bbox.isEmpty()) {
-            if (first) {
-                builder.append(", ");
-                first = false;
-            }
-            builder.append("bbox=[").append(bbox).append("]");
+    public default String toJsonString() {
+        try {
+            return JacksonHelper.MAPPER.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("This object could not be serialized to JSON", e);
         }
+    }
 
-        if (foreignMembers != null && !foreignMembers.isEmpty()) {
-            if (first) {
-                builder.append(", ");
-                first = false;
-            }
-            builder.append("hasForeignMembers=true");
+    public static GeoJsonObject fromJsonString(String s) {
+        try {
+            return JacksonHelper.MAPPER.readValue(s, GeoJsonObject.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("This object could not be deserialized from JSON", e);
         }
-
-        return builder.append(")").toString();
     }
 }

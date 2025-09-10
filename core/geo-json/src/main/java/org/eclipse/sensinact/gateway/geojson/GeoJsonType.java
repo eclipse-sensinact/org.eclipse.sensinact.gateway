@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
@@ -21,8 +22,44 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum GeoJsonType {
 
-    Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection, Feature(false),
-    FeatureCollection(false);
+    Point {
+        public Point cast(GeoJsonObject object) {
+            return Point.class.cast(object);
+        }
+    }, LineString {
+        public LineString cast(GeoJsonObject object) {
+            return LineString.class.cast(object);
+        }
+    }, Polygon {
+        public Polygon cast(GeoJsonObject object) {
+            return Polygon.class.cast(object);
+        }
+    }, MultiPoint {
+        public MultiPoint cast(GeoJsonObject object) {
+            return MultiPoint.class.cast(object);
+        }
+    }, MultiLineString {
+        public MultiLineString cast(GeoJsonObject object) {
+            return MultiLineString.class.cast(object);
+        }
+    }, MultiPolygon {
+        public MultiPolygon cast(GeoJsonObject object) {
+            return MultiPolygon.class.cast(object);
+        }
+    }, GeometryCollection {
+        public GeometryCollection cast(GeoJsonObject object) {
+            return GeometryCollection.class.cast(object);
+        }
+    }, Feature(false) {
+        public Feature cast(GeoJsonObject object) {
+            return Feature.class.cast(object);
+        }
+    },
+    FeatureCollection(false) {
+        public FeatureCollection cast(GeoJsonObject object) {
+            return FeatureCollection.class.cast(object);
+        }
+    };
 
     private final boolean isGeometryType;
 
@@ -37,6 +74,8 @@ public enum GeoJsonType {
     public boolean isGeometryType() {
         return isGeometryType;
     }
+
+    public abstract GeoJsonObject cast(GeoJsonObject object);
 
     /**
      * Get the type value as defined by the GeoJSON specification

@@ -131,7 +131,7 @@
     <emf.ecore.xmi.version>2.36.0</emf.ecore.xmi.version>
     <slf4j.version>2.0.11</slf4j.version>
     <logback.version>1.4.14</logback.version>
-    <jackson.version>2.16.1</jackson.version>
+    <jackson.version>2.18.4</jackson.version>
     <jjwt.version>0.11.5</jjwt.version>
 
     <!-- runtime dependencies -->

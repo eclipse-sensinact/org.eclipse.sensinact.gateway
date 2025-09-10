@@ -141,8 +141,8 @@ class JsonMappingTest {
             assertEquals(name, location.name);
             assertEquals("application/vnd.geo+json", location.encodingType);
             assertInstanceOf(Point.class, location.location);
-            assertEquals(longitude, ((Point)location.location).coordinates.longitude);
-            assertEquals(latitude, ((Point)location.location).coordinates.latitude);
+            assertEquals(longitude, ((Point)location.location).coordinates().longitude());
+            assertEquals(latitude, ((Point)location.location).coordinates().latitude());
             assertEquals(things, location.thingsLink);
             assertEquals(historicalLocations, location.historicalLocationsLink);
         }
@@ -359,8 +359,8 @@ class JsonMappingTest {
             assertEquals(description, featureOfInterest.description);
             assertEquals("application/vnd.geo+json", featureOfInterest.encodingType);
             assertInstanceOf(Point.class, featureOfInterest.feature);
-            assertEquals(longitude, ((Point)featureOfInterest.feature).coordinates.longitude);
-            assertEquals(latitude, ((Point)featureOfInterest.feature).coordinates.latitude);
+            assertEquals(longitude, ((Point)featureOfInterest.feature).coordinates().longitude());
+            assertEquals(latitude, ((Point)featureOfInterest.feature).coordinates().latitude());
             assertEquals(observations, featureOfInterest.observationsLink);
         }
     }
@@ -396,10 +396,7 @@ class JsonMappingTest {
             location.thingsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/Things";
             location.historicalLocationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/HistoricalLocations";
 
-            Point point = new Point();
-            point.coordinates = new Coordinates();
-            point.coordinates.longitude = -79.407224;
-            point.coordinates.latitude = 43.665876;
+            Point point = new Point(new Coordinates(-79.407224, 43.665876), null, null);
 
             location.location = point;
 
@@ -505,10 +502,7 @@ class JsonMappingTest {
             featureOfInterest.encodingType = "application/vnd.geo+json";
             featureOfInterest.observationsLink = "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1514)/Observations";
 
-            Point point = new Point();
-            point.coordinates = new Coordinates();
-            point.coordinates.longitude = -79.424557;
-            point.coordinates.latitude = 43.650978;
+            Point point = new Point(new Coordinates(-79.424557, 43.650978), null, null);
 
             featureOfInterest.feature = point;
 

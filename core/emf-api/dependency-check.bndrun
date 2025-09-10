@@ -11,9 +11,9 @@
 # pulling in large amounts of implementation dependency. This should be
 # investigated.
 -runbundles: \
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.1,2.16.2)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.16.1,2.16.2)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.16.1,2.16.2)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.18.4,2.18.5)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.18.4,2.18.5)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.18.4,2.18.5)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\

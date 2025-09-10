@@ -12,3 +12,18 @@
 *   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson.internal;
+
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
+public final class JacksonHelper {
+
+    /**
+     * A simple mapper used to help serialize and deserialize the GeoJSON types
+     */
+    public static final JsonMapper MAPPER = JsonMapper.builder().build();
+
+    /**
+     * Not instantiable
+     */
+    private JacksonHelper() {}
+}

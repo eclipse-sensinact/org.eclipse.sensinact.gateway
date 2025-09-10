@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
@@ -17,17 +18,5 @@ package org.eclipse.sensinact.gateway.geojson;
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1">the GeoJSON
  * specification</a>
  */
-public abstract class Geometry extends GeoJsonObject {
-
-    protected Geometry(GeoJsonType type) {
-        super(checkGeometryType(type));
-    }
-
-    private static GeoJsonType checkGeometryType(GeoJsonType type) {
-        if (!type.isGeometryType()) {
-            throw new IllegalArgumentException("Not a geometry type " + type);
-        }
-        return type;
-    }
-
-}
+public sealed interface Geometry extends GeoJsonObject permits
+    Point, MultiPoint, LineString, Polygon, MultiLineString, MultiPolygon, GeometryCollection {}

@@ -41,6 +41,7 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
@@ -197,7 +198,7 @@ public class EMFUpdateServiceTest {
             sensor.setId(PROVIDER);
             sensor.setAdmin(admin);
             admin.setTestAdmin("blub");
-            Point p = new Point();
+            Point p = new Point(Coordinates.EMPTY, null, null);
             admin.setLocation(p);
             admin.setDescription("Foobar");
 

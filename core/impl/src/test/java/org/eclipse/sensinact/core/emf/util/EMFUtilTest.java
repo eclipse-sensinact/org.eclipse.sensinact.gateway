@@ -33,15 +33,15 @@ public class EMFUtilTest {
         String point = "{\"type\": \"Point\", \"coordinates\": [12.3,45.6]}";
         Point o = (Point) EMFUtil.convertToTargetType(GeoJsonObject.class, point);
 
-        assertEquals(GeoJsonType.Point, o.type);
-        assertEquals(12.3d, o.coordinates.longitude);
-        assertEquals(45.6d, o.coordinates.latitude);
+        assertEquals(GeoJsonType.Point, o.type());
+        assertEquals(12.3d, o.coordinates().longitude());
+        assertEquals(45.6d, o.coordinates().latitude());
 
         o = (Point) EMFUtil.convertToTargetType(ProviderPackage.eINSTANCE.getEGeoJsonObject(), point);
 
-        assertEquals(GeoJsonType.Point, o.type);
-        assertEquals(12.3d, o.coordinates.longitude);
-        assertEquals(45.6d, o.coordinates.latitude);
+        assertEquals(GeoJsonType.Point, o.type());
+        assertEquals(12.3d, o.coordinates().longitude());
+        assertEquals(45.6d, o.coordinates().latitude());
     }
 
     @Test
@@ -50,15 +50,15 @@ public class EMFUtilTest {
         Map<String, Object> point = Map.of("type", "Point", "coordinates", new double[] { 12.3, 45.6 });
         Point o = (Point) EMFUtil.convertToTargetType(GeoJsonObject.class, point);
 
-        assertEquals(GeoJsonType.Point, o.type);
-        assertEquals(12.3d, o.coordinates.longitude);
-        assertEquals(45.6d, o.coordinates.latitude);
+        assertEquals(GeoJsonType.Point, o.type());
+        assertEquals(12.3d, o.coordinates().longitude());
+        assertEquals(45.6d, o.coordinates().latitude());
 
         o = (Point) EMFUtil.convertToTargetType(ProviderPackage.eINSTANCE.getEGeoJsonObject(), point);
 
-        assertEquals(GeoJsonType.Point, o.type);
-        assertEquals(12.3d, o.coordinates.longitude);
-        assertEquals(45.6d, o.coordinates.latitude);
+        assertEquals(GeoJsonType.Point, o.type());
+        assertEquals(12.3d, o.coordinates().longitude());
+        assertEquals(45.6d, o.coordinates().latitude());
     }
 
     @Test
