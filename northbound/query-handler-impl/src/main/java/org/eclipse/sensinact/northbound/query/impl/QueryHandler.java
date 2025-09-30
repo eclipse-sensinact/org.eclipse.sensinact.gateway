@@ -436,7 +436,8 @@ public class QueryHandler implements IQueryHandler {
                             SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
                             resourceDTO.name = resourceSnapshot.getName();
                             resourceDTO.type = resourceSnapshot.getType().getName();
-                            resourceDTO.timestamp = resourceSnapshot.getValue().getTimestamp().toEpochMilli();
+                            resourceDTO.timestamp = Optional.ofNullable(resourceSnapshot.getValue().getTimestamp())
+                                    .map(Instant::toEpochMilli).orElse(0L);
                             resourceDTO.value = resourceSnapshot.getValue().getValue();
                             if (query.includeMetadata) {
                                 resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
