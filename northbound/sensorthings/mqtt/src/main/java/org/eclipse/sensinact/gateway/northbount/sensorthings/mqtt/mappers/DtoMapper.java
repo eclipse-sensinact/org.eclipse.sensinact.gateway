@@ -67,6 +67,11 @@ public class DtoMapper {
         return o == null ? null : String.valueOf(o);
     }
 
+    private static String toString(Feature f, String propName) {
+        Map<String,Object> properties = f.properties();
+        return properties == null ? null : toString(properties.get(propName));
+    }
+
     public static Thing toThing(ProviderSnapshot provider) {
         final String providerName = provider.getName();
         Thing thing = new Thing();
@@ -79,10 +84,10 @@ public class DtoMapper {
     private static String getProperty(GeoJsonObject location, String propName) {
         if (location instanceof Feature) {
             Feature f = (Feature) location;
-            return toString(f.properties.get(propName));
+            return toString(f, propName);
         } else if (location instanceof FeatureCollection) {
             FeatureCollection fc = (FeatureCollection) location;
-            return fc.features.stream().map(f -> toString(f.properties.get(propName))).filter(p -> p != null)
+            return fc.features().stream().map(f -> toString(f, propName)).filter(p -> p != null)
                     .findFirst().orElse(null);
         }
         return null;
@@ -128,10 +133,10 @@ public class DtoMapper {
     private static Polygon getObservedArea(GeoJsonObject object) {
 
         if (object instanceof Feature) {
-            object = ((Feature) object).geometry;
+            object = ((Feature) object).geometry();
         } else if (object instanceof FeatureCollection) {
             // TODO is there a better mapping?
-            object = ((FeatureCollection) object).features.stream().map((f) -> f.geometry)
+            object = ((FeatureCollection) object).features().stream().map((f) -> f.geometry())
                     .filter(Polygon.class::isInstance).map(Polygon.class::cast).findFirst().orElse(null);
         }
         return object instanceof Polygon ? (Polygon) object : null;
@@ -243,9 +248,7 @@ public class DtoMapper {
             if (allowNull) {
                 parsedLocation = null;
             } else {
-                Point point = new Point();
-                point.coordinates = new Coordinates();
-                parsedLocation = point;
+                parsedLocation = new Point(Coordinates.EMPTY, null, null);
             }
         } else {
             if (rawValue instanceof GeoJsonObject) {

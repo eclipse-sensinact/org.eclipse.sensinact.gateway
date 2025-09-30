@@ -18,7 +18,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -71,10 +72,7 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
     }
 
     private Coordinates makeCoordinates(double lon, double lat) {
-        final Coordinates coordinates = new Coordinates();
-        coordinates.longitude = lon;
-        coordinates.latitude = lat;
-        return coordinates;
+        return new Coordinates(lon, lat);
     }
 
     private List<Double> makeBbox(Shape shape) {
@@ -86,22 +84,14 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
     public Point visitGeographypoint(GeographypointContext ctx) {
         final org.locationtech.spatial4j.shape.Point parsedPoint = (org.locationtech.spatial4j.shape.Point) parseShape(
                 ctx.fullpointliteral());
-
-        final Point point = new Point();
-        point.coordinates = makeCoordinates(parsedPoint);
-        point.foreignMembers = Map.of();
-        return point;
+        return new Point(makeCoordinates(parsedPoint), null, null);
     }
 
     @Override
     public LineString visitGeographylinestring(GeographylinestringContext ctx) {
         final BufferedLineString parsedLine = (BufferedLineString) parseShape(ctx.fulllinestringliteral());
-
-        final LineString line = new LineString();
-        line.bbox = makeBbox(parsedLine);
-        line.coordinates = parsedLine.getPoints().stream().map(this::makeCoordinates).collect(toList());
-        line.foreignMembers = Map.of();
-        return line;
+        List<Coordinates> line = parsedLine.getPoints().stream().map(this::makeCoordinates).collect(toList());
+        return new LineString(line, makeBbox(parsedLine), null);
     }
 
     private boolean checkAllShapes(ShapeCollection<? extends Shape> shapes, Class<? extends Shape> classToTest) {
@@ -111,17 +101,11 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
     @SuppressWarnings("unchecked")
     private Geometry makeGeometry(Shape shape) {
         if (shape instanceof org.locationtech.spatial4j.shape.Point) {
-            final Point point = new Point();
-            point.coordinates = makeCoordinates((org.locationtech.spatial4j.shape.Point) shape);
-            point.foreignMembers = Map.of();
-            return point;
+            return new Point(makeCoordinates((org.locationtech.spatial4j.shape.Point) shape), null, null);
         } else if (shape instanceof BufferedLineString) {
             final BufferedLineString parsedLine = (BufferedLineString) shape;
-            final LineString line = new LineString();
-            line.bbox = makeBbox(parsedLine);
-            line.coordinates = parsedLine.getPoints().stream().map(this::makeCoordinates).collect(toList());
-            line.foreignMembers = Map.of();
-            return line;
+            List<Coordinates> line = parsedLine.getPoints().stream().map(this::makeCoordinates).collect(toList());
+            return new LineString(line, makeBbox(parsedLine), null);
         } else if (shape instanceof Rectangle) {
             return makePolygon((Rectangle) shape);
         } else if (shape instanceof ShapeCollection) {
@@ -139,46 +123,37 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
                 return makeMultiPolygon(shapes);
             } else {
                 // Collection
-                final GeometryCollection collection = new GeometryCollection();
-                collection.bbox = makeBbox(shapes.getBoundingBox());
-                collection.foreignMembers = Map.of();
-                collection.geometries = shapes.getShapes().stream().map(this::makeGeometry).collect(toList());
-                return collection;
+                List<Geometry> geoms = shapes.getShapes().stream().map(this::makeGeometry).collect(toList());
+                return new GeometryCollection(geoms, makeBbox(shapes.getBoundingBox()), null);
             }
         }
 
         throw new ParsingException("Unsupported shape: " + shape);
     }
 
-    private Feature makeFeature(Shape shape) {
-        final Feature feature = new Feature();
-        feature.bbox = makeBbox(shape.getBoundingBox());
-        feature.foreignMembers = Map.of();
-        feature.properties = Map.of();
-        feature.geometry = makeGeometry(shape);
-        return feature;
+    private Feature makeFeature(String id, Shape shape) {
+        return new Feature(id, makeGeometry(shape), null, makeBbox(shape.getBoundingBox()), null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public FeatureCollection visitGeographycollection(GeographycollectionContext ctx) {
+        final int line = ctx.getStart().getLine();
+        final int charPositionInLine = ctx.getStart().getCharPositionInLine();
+        AtomicInteger i = new AtomicInteger();
+        Supplier<String> idGenerator = () -> String.format("feature_collection_%d_%d_%d", line, charPositionInLine, i.incrementAndGet());
+
         final ShapeCollection<Shape> shpCollection = (ShapeCollection<Shape>) parseShape(ctx.fullcollectionliteral());
 
-        final FeatureCollection collection = new FeatureCollection();
-        collection.foreignMembers = Map.of();
-        collection.bbox = makeBbox(shpCollection);
-        collection.features = shpCollection.getShapes().stream().map(this::makeFeature).collect(toList());
-        return collection;
+        List<Feature> features = shpCollection.getShapes().stream().map(s -> makeFeature(idGenerator.get(), s)).collect(toList());
+        return new FeatureCollection(features, makeBbox(shpCollection), null);
     }
 
     private MultiLineString makeMultiLineString(ShapeCollection<BufferedLineString> shpCollection) {
-        final MultiLineString lineStrings = new MultiLineString();
-        lineStrings.foreignMembers = Map.of();
-        lineStrings.bbox = makeBbox(shpCollection.getBoundingBox());
-        lineStrings.coordinates = shpCollection.getShapes().stream()
+        List<List<Coordinates>> lines = shpCollection.getShapes().stream()
                 .map(lineString -> lineString.getPoints().stream().map(this::makeCoordinates).collect(toList()))
                 .collect(toList());
-        return lineStrings;
+        return new MultiLineString(lines, makeBbox(shpCollection.getBoundingBox()), null);
     }
 
     @SuppressWarnings("unchecked")
@@ -190,11 +165,8 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
     }
 
     private MultiPoint makeMultiPoint(ShapeCollection<org.locationtech.spatial4j.shape.Point> shpCollection) {
-        final MultiPoint points = new MultiPoint();
-        points.foreignMembers = Map.of();
-        points.bbox = makeBbox(shpCollection);
-        points.coordinates = shpCollection.getShapes().stream().map(this::makeCoordinates).collect(toList());
-        return points;
+        List<Coordinates> points = shpCollection.getShapes().stream().map(this::makeCoordinates).collect(toList());
+        return new MultiPoint(points, makeBbox(shpCollection), null);
     }
 
     @SuppressWarnings("unchecked")
@@ -206,10 +178,6 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
     }
 
     private Polygon makePolygon(final Shape shape) {
-        final Polygon polygon = new Polygon();
-        polygon.foreignMembers = Map.of();
-        polygon.bbox = makeBbox(shape);
-
         if (shape instanceof Rectangle) {
             final Rectangle rect = (Rectangle) shape;
             final List<Coordinates> rectPoints = new ArrayList<>();
@@ -218,21 +186,16 @@ public class GeoGeographyVisitor extends ODataFilterBaseVisitor<GeoJsonObject> {
             rectPoints.add(makeCoordinates(rect.getMaxX(), rect.getMaxY()));
             rectPoints.add(makeCoordinates(rect.getMaxX(), rect.getMinY()));
             rectPoints.add(makeCoordinates(rect.getMinX(), rect.getMinY()));
-            polygon.coordinates = List.of(rectPoints);
+            return new Polygon(List.of(rectPoints), makeBbox(shape), null);
         } else {
             throw new UnsupportedRuleException("Polygons are not supported");
         }
-
-        return polygon;
     }
 
     private MultiPolygon makeMultiPolygon(final ShapeCollection<? extends Shape> shpCollection) {
-        final MultiPolygon polygons = new MultiPolygon();
-        polygons.foreignMembers = Map.of();
-        polygons.bbox = makeBbox(shpCollection);
-        polygons.coordinates = shpCollection.getShapes().stream().map(this::makePolygon).map(p -> p.coordinates)
+        List<List<List<Coordinates>>> polys = shpCollection.getShapes().stream().map(this::makePolygon).map(p -> p.coordinates())
                 .collect(toList());
-        return polygons;
+        return new MultiPolygon(polys, makeBbox(shpCollection), null);
     }
 
     @SuppressWarnings("unchecked")

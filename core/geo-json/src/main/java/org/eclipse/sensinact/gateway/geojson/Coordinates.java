@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,10 +9,9 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
-
-import java.util.Objects;
 
 import org.eclipse.sensinact.gateway.geojson.internal.CoordinatesDeserializer;
 import org.eclipse.sensinact.gateway.geojson.internal.CoordinatesSerializer;
@@ -28,56 +27,43 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 @JsonDeserialize(using = CoordinatesDeserializer.class)
 @JsonSerialize(using = CoordinatesSerializer.class)
-public class Coordinates {
-
-    public double longitude;
-
-    public double latitude;
+public record Coordinates(double longitude, double latitude, double elevation) {
 
     /**
-     * The elevation will be {@link Double#NaN} if not set
+     * A ready made marker for an empty point using NaN for all coordinate values.
+     * This will (de)serialize to/from an empty array in GeoJSON as described in
+     * Section 3.1 of the GeoJSON specifcation:
+     * <p>
+     * <i>GeoJSON processors MAY interpret Geometry objects with
+     * empty "coordinates" arrays as null objects.</i>
      */
-    public double elevation = Double.NaN;
+    public static final Coordinates EMPTY = new Coordinates();
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(longitude, latitude, elevation);
+    private Coordinates() {
+        this(Double.NaN, Double.NaN, Double.NaN);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj != null && obj.getClass() == Coordinates.class) {
-            // Chosen according to https://xkcd.com/2170/
-            final double epsilon = 0.0000001d;
-            final Coordinates other = (Coordinates) obj;
-            if (Math.abs(other.longitude - longitude) >= epsilon) {
-                return false;
-            }
-
-            if (Math.abs(other.latitude - latitude) >= epsilon) {
-                return false;
-            }
-
-            if (Double.isFinite(other.elevation) && Double.isFinite(elevation)) {
-                // Check elevations if both are finite
-                return Math.abs(other.latitude - latitude) < epsilon;
-            }
-
-            // Equality if both elevations are not finite
-            return !Double.isFinite(other.elevation) && !Double.isFinite(elevation);
-        }
-
-        return false;
+    public Coordinates(double longitude, double latitude) {
+        this(longitude, latitude, Double.NaN);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("(lon=").append(longitude).append(",lat=").append(latitude);
-        if (Double.isFinite(elevation)) {
-            // Add elevation
-            builder.append(",alt=").append(elevation);
+    public Coordinates {
+        if(!isEmpty(longitude, latitude, elevation)) {
+            if(!Double.isFinite(latitude) || !Double.isFinite(longitude)) {
+                throw new IllegalArgumentException("Latitude and Longitude must be finite values");
+            }
         }
-        return builder.append(")").toString();
+    }
+
+    public boolean isEmpty() {
+        return isEmpty(longitude, latitude, elevation);
+    }
+
+    private boolean isEmpty(double longitude, double latitude, double elevation) {
+        return Double.isNaN(longitude) && Double.isNaN(latitude) && Double.isNaN(elevation);
+    }
+
+    public boolean hasElevation() {
+        return Double.isFinite(elevation);
     }
 }

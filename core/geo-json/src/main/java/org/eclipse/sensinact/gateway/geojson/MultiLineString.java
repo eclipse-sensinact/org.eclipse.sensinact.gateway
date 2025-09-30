@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,41 +9,48 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 
 /**
  * A GeoJSON multi line string object as defined in
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1">the GeoJSON
  * specification</a>
  */
-public class MultiLineString extends Geometry {
+public record MultiLineString(List<List<Coordinates>> coordinates, List<Double> bbox, @JsonAnySetter @JsonAnyGetter Map<String,Object> foreignMembers) implements Geometry {
 
-    public MultiLineString() {
-        super(GeoJsonType.MultiLineString);
-    }
-
-    public List<List<Coordinates>> coordinates;
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), coordinates);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (checkParentEquals(obj)) {
-            return Objects.equals(coordinates, ((MultiLineString) obj).coordinates);
+    public MultiLineString {
+        if(coordinates != null) {
+            coordinates = coordinates.stream().map(List::copyOf).toList();
+        } else {
+            // GeoJSON specification 3.1 - GeoJSON processors MAY interpret Geometry objects with
+            // empty "coordinates" arrays as null objects.
+            coordinates = List.of();
         }
-        return false;
+        if(bbox != null) {
+            bbox = List.copyOf(bbox);
+        }
+        if(foreignMembers != null) {
+            foreignMembers = Map.copyOf(foreignMembers);
+        } else {
+            foreignMembers = Map.of();
+        }
     }
 
     @Override
-    protected boolean getObjectDescription(StringBuilder builder) {
-        builder.append("coords=").append(coordinates);
-        return true;
+    public GeoJsonType type() {
+        return GeoJsonType.MultiLineString;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return coordinates.isEmpty();
     }
 }

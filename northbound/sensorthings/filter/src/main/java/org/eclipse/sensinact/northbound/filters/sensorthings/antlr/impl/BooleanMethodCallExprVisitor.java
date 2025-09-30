@@ -154,21 +154,21 @@ public class BooleanMethodCallExprVisitor
 
     private Shape spatialShape(final ShapeFactory factory, final GeoJsonObject object) {
 
-        switch (object.type) {
+        switch (object.type()) {
         case Feature:
-            return spatialShape(factory, ((Feature) object).geometry);
+            return spatialShape(factory, ((Feature) object).geometry());
 
         case FeatureCollection: {
             final FeatureCollection collection = (FeatureCollection) object;
             final MultiShapeBuilder<Shape> builder = factory.multiShape(Shape.class);
-            collection.features.stream().forEachOrdered(f -> builder.add(spatialShape(factory, f)));
+            collection.features().stream().forEachOrdered(f -> builder.add(spatialShape(factory, f)));
             return builder.build();
         }
 
         case GeometryCollection: {
             final GeometryCollection collection = (GeometryCollection) object;
             final MultiShapeBuilder<Shape> builder = factory.multiShape(Shape.class);
-            collection.geometries.stream().forEachOrdered(g -> builder.add(spatialShape(factory, g)));
+            collection.geometries().stream().forEachOrdered(g -> builder.add(spatialShape(factory, g)));
             return builder.build();
         }
 
@@ -190,8 +190,8 @@ public class BooleanMethodCallExprVisitor
         final Set<Double> latitudes = new HashSet<>();
         final Set<Double> longitudes = new HashSet<>();
         for (Coordinates c : linearRing) {
-            latitudes.add(c.latitude);
-            longitudes.add(c.longitude);
+            latitudes.add(c.latitude());
+            longitudes.add(c.longitude());
         }
 
         if (latitudes.size() > 2 || longitudes.size() > 2) {
@@ -207,45 +207,45 @@ public class BooleanMethodCallExprVisitor
     }
 
     private Shape spatialShape(final ShapeFactory factory, final Geometry geometry) {
-        switch (geometry.type) {
+        switch (geometry.type()) {
         case Point: {
-            final Coordinates coords = ((Point) geometry).coordinates;
-            return factory.pointLatLon(coords.latitude, coords.longitude);
+            final Coordinates coords = ((Point) geometry).coordinates();
+            return factory.pointLatLon(coords.latitude(), coords.longitude());
         }
 
         case LineString: {
             final LineString line = (LineString) geometry;
             final LineStringBuilder builder = factory.lineString();
-            line.coordinates.stream().forEachOrdered(c -> builder.pointLatLon(c.latitude, c.longitude));
+            line.coordinates().stream().forEachOrdered(c -> builder.pointLatLon(c.latitude(), c.longitude()));
             return builder.build();
         }
 
         case Polygon: {
             final Polygon polygon = (Polygon) geometry;
-            System.out.println("Polygon coord: " + polygon.coordinates);
-            final Rectangle rect = tryMakeRectangle(factory, polygon.coordinates);
+            System.out.println("Polygon coord: " + polygon.coordinates());
+            final Rectangle rect = tryMakeRectangle(factory, polygon.coordinates());
             if (rect != null) {
                 return rect;
             }
 
             final PolygonBuilder builder = factory.polygon();
-            polygon.coordinates.get(0).stream().forEachOrdered(c -> builder.pointLatLon(c.latitude, c.longitude));
+            polygon.coordinates().get(0).stream().forEachOrdered(c -> builder.pointLatLon(c.latitude(), c.longitude()));
             return builder.buildOrRect();
         }
 
         case MultiPoint: {
             final MultiPoint points = (MultiPoint) geometry;
             final MultiPointBuilder builder = factory.multiPoint();
-            points.coordinates.stream().forEachOrdered(c -> builder.pointLatLon(c.latitude, c.longitude));
+            points.coordinates().stream().forEachOrdered(c -> builder.pointLatLon(c.latitude(), c.longitude()));
             return builder.build();
         }
 
         case MultiLineString: {
             final MultiLineString lines = (MultiLineString) geometry;
             final MultiLineStringBuilder builder = factory.multiLineString();
-            for (List<Coordinates> line : lines.coordinates) {
+            for (List<Coordinates> line : lines.coordinates()) {
                 final LineStringBuilder subBuilder = factory.lineString();
-                line.stream().forEachOrdered(c -> subBuilder.pointLatLon(c.latitude, c.longitude));
+                line.stream().forEachOrdered(c -> subBuilder.pointLatLon(c.latitude(), c.longitude()));
                 builder.add(subBuilder);
             }
             return builder.build();
@@ -254,13 +254,13 @@ public class BooleanMethodCallExprVisitor
         case MultiPolygon: {
             final MultiPolygon polygons = (MultiPolygon) geometry;
             final MultiShapeBuilder<Shape> builder = factory.multiShape(Shape.class);
-            for (List<List<Coordinates>> subPolygon : polygons.coordinates) {
+            for (List<List<Coordinates>> subPolygon : polygons.coordinates()) {
                 final Rectangle rect = tryMakeRectangle(factory, subPolygon);
                 if (rect != null) {
                     builder.add(rect);
                 } else {
                     final PolygonBuilder initBuilder = factory.polygon();
-                    subPolygon.get(0).stream().forEachOrdered(c -> initBuilder.pointLatLon(c.latitude, c.longitude));
+                    subPolygon.get(0).stream().forEachOrdered(c -> initBuilder.pointLatLon(c.latitude(), c.longitude()));
 
                     PolygonBuilder subBuilder = initBuilder;
                     final List<List<Coordinates>> holes = new ArrayList<>(subPolygon);
@@ -268,7 +268,7 @@ public class BooleanMethodCallExprVisitor
                     if (!holes.isEmpty()) {
                         for (List<Coordinates> hole : holes) {
                             final HoleBuilder holeBuilder = subBuilder.hole();
-                            hole.stream().forEachOrdered(c -> holeBuilder.pointLatLon(c.latitude, c.longitude));
+                            hole.stream().forEachOrdered(c -> holeBuilder.pointLatLon(c.latitude(), c.longitude()));
                             subBuilder = holeBuilder.endHole();
                         }
                     }
@@ -279,7 +279,7 @@ public class BooleanMethodCallExprVisitor
         }
 
         default:
-            throw new ParsingException("Unsupported Geometry: " + geometry.type);
+            throw new ParsingException("Unsupported Geometry: " + geometry.type());
         }
     }
 

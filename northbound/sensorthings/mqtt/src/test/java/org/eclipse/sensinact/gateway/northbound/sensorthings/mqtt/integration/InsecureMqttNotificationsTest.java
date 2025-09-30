@@ -42,7 +42,6 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
-import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -221,10 +220,7 @@ public class InsecureMqttNotificationsTest {
             assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(i++).name);
             assertEquals("foobar", streams.get(i).name);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("data", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
@@ -255,10 +251,7 @@ public class InsecureMqttNotificationsTest {
 
             createResource("foo", "bar", "foobar", 17);
             createResource("foo", "bar", "fizzbuzz", 42);
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
@@ -281,10 +274,7 @@ public class InsecureMqttNotificationsTest {
             createResource("foo", "bar", "foobar", 17);
             createResource("foo", "bar", "fizzbuzz", 42);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
@@ -331,10 +321,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/FeaturesOfInterest", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
@@ -350,10 +337,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/FeaturesOfInterest(bar)", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
@@ -372,10 +356,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/FeaturesOfInterest(bar)?$select=@iot.id,name", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
@@ -399,13 +380,8 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/FeaturesOfInterest(bar)/name", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
-            Feature f = new Feature();
-            f.geometry = p;
-            f.properties = Map.of("name", "fizzbuzz");
+            Point p = new Point(34d, 12d);
+            Feature f = new Feature("test", p, Map.of("name", "fizzbuzz"), null, null);
 
             createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
@@ -413,7 +389,7 @@ public class InsecureMqttNotificationsTest {
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(1, Map.class);
 
-            f.properties = Map.of("name", "foobar");
+            f = new Feature(f.id(), f.geometry(), Map.of("name", "foobar"), f.bbox(), f.foreignMembers());
             createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
 
@@ -435,10 +411,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/HistoricalLocations", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
@@ -454,10 +427,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/HistoricalLocations(bar)", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
@@ -476,10 +446,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/HistoricalLocations(bar)?$select=@iot.id,time", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
@@ -510,17 +477,14 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/Locations", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
 
             List<Location> hls = readMessages(1, Location.class);
 
-            assertEquals(GeoJsonType.Point, hls.get(0).location.type);
+            assertEquals(GeoJsonType.Point, hls.get(0).location.type());
             assertEquals("foo~", String.valueOf(hls.get(0).id).substring(0, 4));
         }
 
@@ -529,10 +493,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/Locations(bar)", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
@@ -541,7 +502,7 @@ public class InsecureMqttNotificationsTest {
 
             List<Location> hls = readMessages(1, Location.class);
 
-            assertEquals(GeoJsonType.Point, hls.get(0).location.type);
+            assertEquals(GeoJsonType.Point, hls.get(0).location.type());
             assertEquals("bar~", String.valueOf(hls.get(0).id).substring(0, 4));
 
         }
@@ -552,10 +513,7 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/Locations(bar)?$select=@iot.id,location", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
+            Point p = new Point(34d, 12d);
 
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p, testTime);
@@ -580,13 +538,8 @@ public class InsecureMqttNotificationsTest {
 
             client.subscribe("v1.1/Locations(bar)/name", 0, listener).waitForCompletion(5000);
 
-            Point p = new Point();
-            p.coordinates = new Coordinates();
-            p.coordinates.latitude = 12d;
-            p.coordinates.longitude = 34d;
-            Feature f = new Feature();
-            f.geometry = p;
-            f.properties = Map.of("name", "fizzbuzz");
+            Point p = new Point(34d, 12d);
+            Feature f = new Feature("test", p, Map.of("name", "fizzbuzz"), null, null);
 
             createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
@@ -594,7 +547,7 @@ public class InsecureMqttNotificationsTest {
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(1, Map.class);
 
-            f.properties = Map.of("name", "foobar");
+            f = new Feature(f.id(), f.geometry(), Map.of("name", "foobar"), f.bbox(), f.foreignMembers());
             createResource("bar", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), f);
 

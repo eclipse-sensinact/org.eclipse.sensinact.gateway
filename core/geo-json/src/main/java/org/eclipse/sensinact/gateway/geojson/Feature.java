@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,44 +9,41 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Tim Ward - refactor as records
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-public class Feature extends GeoJsonObject {
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-    public Map<String, Object> properties = new HashMap<>();
+public record Feature(String id, @JsonInclude Geometry geometry, @JsonInclude Map<String, Object> properties, List<Double> bbox,
+        @JsonAnySetter @JsonAnyGetter Map<String,Object> foreignMembers) implements GeoJsonObject {
 
-    public Geometry geometry;
-
-    public String id;
-
-    public Feature() {
-        super(GeoJsonType.Feature);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), id, geometry, properties);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (checkParentEquals(obj)) {
-            final Feature other = (Feature) obj;
-            return Objects.equals(id, other.id) && Objects.equals(geometry, other.geometry)
-                    && Objects.equals(properties, other.properties);
+    public Feature {
+        if(bbox != null) {
+            bbox = List.copyOf(bbox);
         }
-        return false;
+        if(properties != null) {
+            properties = Map.copyOf(properties);
+        }
+        if(foreignMembers != null) {
+            foreignMembers = Map.copyOf(foreignMembers);
+        } else {
+            foreignMembers = Map.of();
+        }
     }
 
     @Override
-    protected boolean getObjectDescription(StringBuilder builder) {
-        builder.append("id=").append(id).append(", geometry=").append(geometry).append("properties=")
-                .append(properties);
-        return true;
+    public GeoJsonType type() {
+        return GeoJsonType.Feature;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return geometry == null || geometry.isEmpty();
     }
 }

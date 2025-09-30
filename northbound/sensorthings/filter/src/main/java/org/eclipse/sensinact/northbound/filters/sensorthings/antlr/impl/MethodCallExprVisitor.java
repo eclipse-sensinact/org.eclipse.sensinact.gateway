@@ -341,13 +341,13 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
             final ShapeFactory shpFactory = spatialContext.getShapeFactory();
             final List<org.locationtech.spatial4j.shape.Point> allPoints = new ArrayList<>();
 
-            if (obj.type == GeoJsonType.LineString) {
-                final List<Coordinates> allCoordinates = ((LineString) obj).coordinates;
+            if (obj.type() == GeoJsonType.LineString) {
+                final List<Coordinates> allCoordinates = ((LineString) obj).coordinates();
                 if (allCoordinates == null) {
                     throw new InvalidResultTypeException("Null coordinates given to geo.length");
                 }
                 for (Coordinates coordinates : allCoordinates) {
-                    allPoints.add(shpFactory.pointLatLon(coordinates.latitude, coordinates.longitude));
+                    allPoints.add(shpFactory.pointLatLon(coordinates.latitude(), coordinates.longitude()));
                 }
             } else {
                 throw new InvalidResultTypeException("Unsupported input for geo.length", "geography linestring", obj);
@@ -373,12 +373,12 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
     }
 
     private org.locationtech.spatial4j.shape.Point spatialPoint(final ShapeFactory shpFactory, final Point geoPoint) {
-        return spatialPoint(shpFactory, geoPoint.coordinates);
+        return spatialPoint(shpFactory, geoPoint.coordinates());
     }
 
     private org.locationtech.spatial4j.shape.Point spatialPoint(final ShapeFactory shpFactory,
             final Coordinates geoCoords) {
-        return shpFactory.pointLatLon(geoCoords.latitude, geoCoords.longitude);
+        return shpFactory.pointLatLon(geoCoords.latitude(), geoCoords.longitude());
     }
 
     private Function<ResourceValueFilterInputHolder, Object> runGeoDistance(ParserRuleContext ctx) {

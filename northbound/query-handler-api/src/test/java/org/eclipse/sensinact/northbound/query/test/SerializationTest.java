@@ -314,10 +314,7 @@ public class SerializationTest {
         provider.name = "provider123";
         provider.icon = "icon123";
 
-        final Point location = new Point();
-        location.coordinates = new Coordinates();
-        location.coordinates.latitude = 45;
-        location.coordinates.longitude = 5;
+        final Point location = new Point(new Coordinates(5, 45), null, null);
         provider.location = location;
 
         final ResponseDescribeServiceDTO admin = new ResponseDescribeServiceDTO();
@@ -344,10 +341,10 @@ public class SerializationTest {
         final CompleteProviderDescriptionDTO parsedProvider = parsedResult.providers.get(0);
         assertEquals(provider.name, parsedProvider.name);
         assertEquals(provider.icon, parsedProvider.icon);
-        assertEquals(GeoJsonType.Point, parsedProvider.location.type);
+        assertEquals(GeoJsonType.Point, parsedProvider.location.type());
         final Point parsedLocation = (Point) parsedProvider.location;
-        assertEquals(location.coordinates.latitude, parsedLocation.coordinates.latitude);
-        assertEquals(location.coordinates.longitude, parsedLocation.coordinates.longitude);
+        assertEquals(location.coordinates().latitude(), parsedLocation.coordinates().latitude());
+        assertEquals(location.coordinates().longitude(), parsedLocation.coordinates().longitude());
 
         assertEquals(provider.services.size(), parsedProvider.services.size());
         final ResponseDescribeServiceDTO parsedService = parsedProvider.services.get(0);

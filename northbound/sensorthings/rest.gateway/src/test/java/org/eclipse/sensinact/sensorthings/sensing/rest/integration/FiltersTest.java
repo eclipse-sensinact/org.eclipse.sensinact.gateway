@@ -36,6 +36,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -69,7 +70,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         int nbProviders = 4;
         for (int i = 0; i < nbProviders; i++) {
             createResource("countTester_" + (i + 1), "sensor", "rc", random.nextInt());
-            createResource("countTester_" + (i + 1), "admin", "location", new Point());
+            createResource("countTester_" + (i + 1), "admin", "location", new Point(Coordinates.EMPTY, null, null));
         }
 
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
@@ -126,7 +127,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             createResource(id, "svcB", "rcA", id + 256);
             createResource(id, "svcA", "rcB", id);
             createResource(id, "svcB", "rcB", id + 256);
-            createResource(id, "admin", "location", new Point());
+            createResource(id, "admin", "location", new Point(Coordinates.EMPTY, null, null));
         });
 
         final Predicate<String> filter = sortedProviderIds::contains;
@@ -326,8 +327,8 @@ public class FiltersTest extends AbstractIntegrationTest {
                 above40.add(String.join("~", provider2, svc, rcName));
             }
 
-            createResource(provider1, "admin", "location", new Point());
-            createResource(provider2, "admin", "location", new Point());
+            createResource(provider1, "admin", "location", new Point(Coordinates.EMPTY, null, null));
+            createResource(provider2, "admin", "location", new Point(Coordinates.EMPTY, null, null));
         }
 
         @AfterEach

@@ -193,8 +193,8 @@ public class RecordHandlingTest {
         assertEquals(provider, dto.model);
         assertEquals(42, getResourceValue(provider, "data", "value", Integer.class));
         Point location = getResourceValue(provider, "admin", "location", Point.class);
-        assertEquals(45f, location.coordinates.latitude);
-        assertEquals(5f, location.coordinates.longitude);
+        assertEquals(45f, location.coordinates().latitude());
+        assertEquals(5f, location.coordinates().longitude());
 
         // Test w/ a model
         bulks.clear();
@@ -290,8 +290,8 @@ public class RecordHandlingTest {
         assertEquals("fizz", dto.model);
         assertEquals(42, getResourceValue("fizz", "data", "value", Integer.class));
         Point location = getResourceValue("fizz", "admin", "location", Point.class);
-        assertEquals(45f, location.coordinates.latitude);
-        assertEquals(5f, location.coordinates.longitude);
+        assertEquals(45f, location.coordinates().latitude());
+        assertEquals(5f, location.coordinates().longitude());
 
         // Test w/ a model
         bulks.clear();

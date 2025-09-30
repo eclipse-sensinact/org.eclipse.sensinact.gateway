@@ -48,7 +48,7 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.gateway.geojson.utils.GeoJsonUtils;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -603,9 +603,9 @@ public class TimescaleHistoryTest {
 
         @Test
         void basicGeoData() throws Exception {
-            push.pushUpdate(getDto(GeoJsonUtils.point(11.59086, 50.9011833), TS_2012)).getValue();
-            push.pushUpdate(getDto(GeoJsonUtils.point(11.59089, 50.9011843), TS_2013)).getValue();
-            push.pushUpdate(getDto(GeoJsonUtils.point(11.59097, 50.9011844), TS_2014)).getValue();
+            push.pushUpdate(getDto(new Point(11.59086, 50.9011833), TS_2012)).getValue();
+            push.pushUpdate(getDto(new Point(11.59089, 50.9011843), TS_2013)).getValue();
+            push.pushUpdate(getDto(new Point(11.59097, 50.9011844), TS_2014)).getValue();
 
             waitForRowCount("sensinact.geo_data", 3);
 
@@ -618,21 +618,21 @@ public class TimescaleHistoryTest {
                     TimedValue<?> result = safeGet(
                             resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation",
                                     "time", TS_2012.atOffset(ZoneOffset.UTC))).map(TimedValue.class::cast));
-                    assertEquals(GeoJsonUtils.point(11.59086, 50.9011833), result.getValue());
+                    assertEquals(new Point(11.59086, 50.9011833), result.getValue());
                     assertEquals(TS_2012, result.getTimestamp());
 
                     // If in between, return the newest that is older
                     result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
                             "GeoLocation", "time", TS_2012.plus(ofDays(500)).atOffset(ZoneOffset.UTC)))
                             .map(TimedValue.class::cast));
-                    assertEquals(GeoJsonUtils.point(11.59089, 50.9011843), result.getValue());
+                    assertEquals(new Point(11.59089, 50.9011843), result.getValue());
                     assertEquals(TS_2013, result.getTimestamp());
 
                     // If null, return the oldest
                     result = safeGet(
                             resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation"))
                                     .map(TimedValue.class::cast));
-                    assertEquals(GeoJsonUtils.point(11.59086, 50.9011833), result.getValue());
+                    assertEquals(new Point(11.59086, 50.9011833), result.getValue());
                     assertEquals(TS_2012, result.getTimestamp());
                     return pf.resolved(null);
                 }
@@ -771,9 +771,9 @@ public class TimescaleHistoryTest {
 
         @Test
         void basicGeoData() throws Exception {
-            push.pushUpdate(getDto(GeoJsonUtils.point(11.59086, 50.9011833), TS_2012)).getValue();
+            push.pushUpdate(getDto(new Point(11.59086, 50.9011833), TS_2012)).getValue();
             push.pushUpdate(getDto((GeoJsonObject)null, TS_2013)).getValue();
-            push.pushUpdate(getDto(GeoJsonUtils.point(11.59087, 50.9011834), TS_2014)).getValue();
+            push.pushUpdate(getDto(new Point(11.59087, 50.9011834), TS_2014)).getValue();
 
             waitForRowCount("sensinact.geo_data", 3);
 
@@ -789,7 +789,7 @@ public class TimescaleHistoryTest {
                                     TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
                             .map(List.class::cast));
                     assertEquals(2, result.size());
-                    assertEquals(GeoJsonUtils.point(11.59086, 50.9011833), result.get(0).getValue());
+                    assertEquals(new Point(11.59086, 50.9011833), result.get(0).getValue());
                     assertEquals(TS_2012, result.get(0).getTimestamp());
                     assertEquals(null, result.get(1).getValue());
                     assertEquals(TS_2013, result.get(1).getTimestamp());
@@ -800,7 +800,7 @@ public class TimescaleHistoryTest {
                     assertEquals(2, result.size());
                     assertEquals(null, result.get(0).getValue());
                     assertEquals(TS_2013, result.get(0).getTimestamp());
-                    assertEquals(GeoJsonUtils.point(11.59087, 50.9011834), result.get(1).getValue());
+                    assertEquals(new Point(11.59087, 50.9011834), result.get(1).getValue());
                     assertEquals(TS_2014, result.get(1).getTimestamp());
 
                     return pf.resolved(null);

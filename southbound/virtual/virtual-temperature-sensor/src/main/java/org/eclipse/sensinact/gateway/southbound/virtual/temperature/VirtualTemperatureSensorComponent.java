@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -58,17 +57,13 @@ public class VirtualTemperatureSensorComponent {
         String namePrefix = config.name();
         for (int i = 0; i < config.sensor_count(); i++) {
 
-            Point point = new Point();
-            point.coordinates = new Coordinates();
-            point.coordinates.latitude = config.latitude();
-            point.coordinates.longitude = config.longitude();
 
             double deltaRange = (i * 0.001d);
             int latRange = (i % 11) - 5;
             int lngRange = ((i + 5) % 11) - 5;
 
-            point.coordinates.latitude += (deltaRange * latRange);
-            point.coordinates.longitude += (deltaRange * lngRange);
+            Point point = new Point(config.longitude() + (deltaRange * lngRange),
+                    config.latitude() + (deltaRange * latRange));
 
             String name = config.sensor_count() == 1 ? namePrefix : String.format("%s_%d", namePrefix, i);
 

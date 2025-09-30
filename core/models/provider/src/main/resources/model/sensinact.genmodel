@@ -19,8 +19,8 @@
       <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ValueType/OBSERVABLE"/>
       <genEnumLiterals ecoreEnumLiteral="sensinact.ecore#//ValueType/MODIFIABLE"/>
     </genEnums>
-    <genDataTypes ecoreDataType="sensinact.ecore#//EGeoJsonObject" create="try { return new com.fasterxml.jackson.databind.ObjectMapper().readValue(it, GeoJsonObject.class); } catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalArgumentException(e); }"
-        convert="try { return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(it); } catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalArgumentException(e); }"/>
+    <genDataTypes ecoreDataType="sensinact.ecore#//EGeoJsonObject" create="return org.eclipse.sensinact.gateway.geojson.GeoJsonObject.fromJsonString(it);"
+        convert="return it.toJsonString();"/>
     <genDataTypes ecoreDataType="sensinact.ecore#//EInstant" create="return Instant.parse(it);"
         convert="return it.toString();"/>
     <genClasses ecoreClass="sensinact.ecore#//Provider">

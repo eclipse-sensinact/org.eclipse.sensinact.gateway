@@ -170,13 +170,13 @@ class GatewayProxyIntegrationTest {
         GeoJsonObject geo = (GeoJsonObject) service.getResource(ProviderPackage.Literals.ADMIN__LOCATION.getName())
                 .getValue().getValue();
         assertNotNull(geo);
-        assertEquals(GeoJsonType.Feature, geo.type);
+        assertEquals(GeoJsonType.Feature, geo.type());
         Feature f = (Feature) geo;
-        assertEquals(GeoJsonType.Point, f.geometry.type);
-        assertEquals(49.015308d, ((Point)f.geometry).coordinates.latitude, 0.000001d);
-        assertEquals(8.4259727d, ((Point)f.geometry).coordinates.longitude, 0.000001d);
-        assertEquals("My Living Room", f.properties.get("sensorthings.location.name"));
-        assertEquals("The living room of Fraunhoferstr. 1", f.properties.get("sensorthings.location.description"));
+        assertEquals(GeoJsonType.Point, f.geometry().type());
+        assertEquals(49.015308d, ((Point)f.geometry()).coordinates().latitude(), 0.000001d);
+        assertEquals(8.4259727d, ((Point)f.geometry()).coordinates().longitude(), 0.000001d);
+        assertEquals("My Living Room", f.properties().get("sensorthings.location.name"));
+        assertEquals("The living room of Fraunhoferstr. 1", f.properties().get("sensorthings.location.description"));
 
         // Thing level data
         service = ps.getService(SensorthingsPackage.Literals.SENSOR_THINGS_DEVICE__THING.getName());

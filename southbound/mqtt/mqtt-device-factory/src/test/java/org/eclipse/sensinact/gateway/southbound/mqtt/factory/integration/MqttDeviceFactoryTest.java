@@ -252,17 +252,17 @@ public class MqttDeviceFactoryTest {
         assertEquals(timestamp1, location1.timestamp);
         assertNotNull(location1.value);
         Point geoPoint = (Point) location1.value;
-        assertEquals(1.2, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(3.4, geoPoint.coordinates.longitude, 0.001);
-        assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+        assertEquals(1.2, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(3.4, geoPoint.coordinates().longitude(), 0.001);
+        assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
         ResourceDescription location2 = session.describeResource(typedProvider2, "admin", "location");
         assertNotNull(location2.value);
         assertEquals(timestamp2, location2.timestamp);
         geoPoint = (Point) location2.value;
-        assertEquals(5.6, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
-        assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+        assertEquals(5.6, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(7.8, geoPoint.coordinates().longitude(), 0.001);
+        assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
         // Ensure resources from context
         assertEquals("test1", session.getResourceValue(typedProvider1, "data", "testName", String.class));

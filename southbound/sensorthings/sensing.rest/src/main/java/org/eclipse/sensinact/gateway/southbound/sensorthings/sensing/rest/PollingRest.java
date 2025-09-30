@@ -175,9 +175,9 @@ public class PollingRest {
             case 0: yield null;
             case 1: yield toFeature(locations.get(0));
             default:
-                FeatureCollection fc = new FeatureCollection();
-                fc.features = locations.stream().map(this::toFeature).toList();
-                yield fc;
+                yield new FeatureCollection(
+                        locations.stream().map(this::toFeature).toList(),
+                        null, null);
         };
     }
 
@@ -185,8 +185,9 @@ public class PollingRest {
         Feature f;
 
         if(location.location != null) {
-            f = switch(location.location.type) {
-            case Feature: yield toFeature((Feature)location.location);
+            String id = sanitizeId(location.id);
+            f = switch(location.location.type()) {
+            case Feature: yield (Feature)location.location;
             case FeatureCollection: yield toFeature((FeatureCollection)location.location);
             case GeometryCollection:
             case LineString:
@@ -195,39 +196,27 @@ public class PollingRest {
             case MultiPolygon:
             case Point:
             case Polygon:
-                Feature fe = new Feature();
-                fe.geometry = (Geometry) location.location;
-                fe.properties.put("sensorthings.location.description", location.description);
-                fe.properties.put("sensorthings.location.name", location.name);
-                yield fe;
+                yield new Feature(id, (Geometry) location.location,
+                        Map.of("sensorthings.location.description", location.description,
+                                "sensorthings.location.name", location.name), null, null);
             default:
-                throw new IllegalArgumentException("Unknown GeoJSON object " + location.location.type);
+                throw new IllegalArgumentException("Unknown GeoJSON object " + location.location.type());
             };
         } else {
-            f = new Feature();
+            f = null;
         }
-        f.id = sanitizeId(location.id);
 
         return f;
     }
 
-    private Feature toFeature(Feature feature) {
-        Feature f = new Feature();
-        f.geometry = feature.geometry;
-        f.properties.putAll(feature.properties);
-        f.bbox = feature.bbox;
-        return f;
-    }
     private Feature toFeature(FeatureCollection fc) {
-        return switch(fc.features.size()) {
-            case 0: yield new Feature();
-            case 1: yield toFeature(fc.features.get(0));
+        return switch(fc.features().size()) {
+            case 0: yield null;
+            case 1: yield fc.features().get(0);
             default:
-                Feature f = new Feature();
-                GeometryCollection gc = new GeometryCollection();
-                f.geometry = gc;
-                gc.geometries = fc.features.stream().map(fe -> fe.geometry).filter(Objects::nonNull).toList();
-                yield f;
+                GeometryCollection gc = new GeometryCollection(
+                        fc.features().stream().map(fe -> fe.geometry()).filter(Objects::nonNull).toList(), null, null);
+                yield new Feature(fc.features().get(0).id() + ".combined", gc, null, null, null);
         };
     }
 

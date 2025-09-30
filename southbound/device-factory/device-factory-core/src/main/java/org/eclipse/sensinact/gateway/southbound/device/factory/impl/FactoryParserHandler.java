@@ -804,14 +804,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             return null;
         }
 
-        final Point location = new Point();
-        location.coordinates = new Coordinates();
-        location.coordinates.longitude = lon;
-        location.coordinates.latitude = lat;
-        if (alt != null) {
-            location.coordinates.elevation = alt;
-        }
-        return location;
+        Coordinates c = alt != null ? new Coordinates(lon, lat, alt) : new Coordinates(lon, lat);
+        return new Point(c, null, null);
     }
 
     /**

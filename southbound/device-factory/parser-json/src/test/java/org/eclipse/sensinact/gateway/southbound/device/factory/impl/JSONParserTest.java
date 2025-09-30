@@ -215,17 +215,17 @@ public class JSONParserTest {
         assertEquals(timestamp1, location1.timestamp);
         assertNotNull(location1.value);
         Point geoPoint = (Point) location1.value;
-        assertEquals(1.2, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(3.4, geoPoint.coordinates.longitude, 0.001);
-        assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+        assertEquals(1.2, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(3.4, geoPoint.coordinates().longitude(), 0.001);
+        assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
         GenericDto location2 = getResourceValue(provider2, "admin", "location");
         assertNotNull(location2.value);
         assertEquals(timestamp2, location2.timestamp);
         geoPoint = (Point) location2.value;
-        assertEquals(5.6, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
-        assertEquals(1.5, geoPoint.coordinates.elevation, 0.001);
+        assertEquals(5.6, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(7.8, geoPoint.coordinates().longitude(), 0.001);
+        assertEquals(1.5, geoPoint.coordinates().elevation(), 0.001);
     }
 
     /**
@@ -263,17 +263,17 @@ public class JSONParserTest {
         assertEquals(timestamp1, location1.timestamp);
         assertNotNull(location1.value);
         Point geoPoint = (Point) location1.value;
-        assertEquals(1.2, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(3.4, geoPoint.coordinates.longitude, 0.001);
-        assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+        assertEquals(1.2, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(3.4, geoPoint.coordinates().longitude(), 0.001);
+        assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
         GenericDto location2 = getResourceValue(provider2, "admin", "location");
         assertNotNull(location2.value);
         assertEquals(timestamp2, location2.timestamp);
         geoPoint = (Point) location2.value;
-        assertEquals(5.6, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(7.8, geoPoint.coordinates.longitude, 0.001);
-        assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+        assertEquals(5.6, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(7.8, geoPoint.coordinates().longitude(), 0.001);
+        assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
         // Ignored provider shoudln't be there
         for (BulkGenericDto bulk : bulks) {
@@ -313,9 +313,9 @@ public class JSONParserTest {
         assertEquals(timestamp, location.timestamp);
         assertNotNull(location.value);
         Point geoPoint = (Point) location.value;
-        assertEquals(45.199, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(5.725, geoPoint.coordinates.longitude, 0.001);
-        assertEquals(476, geoPoint.coordinates.elevation);
+        assertEquals(45.199, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(5.725, geoPoint.coordinates().longitude(), 0.001);
+        assertEquals(476, geoPoint.coordinates().elevation());
     }
 
     @Test
@@ -371,9 +371,9 @@ public class JSONParserTest {
         assertNotNull(location.value);
         System.out.println("Location value: " + location.value + " - " + location.value.getClass());
         Point geoPoint = (Point) location.value;
-        assertEquals(48.849577, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(2.350867, geoPoint.coordinates.longitude, 0.001);
-        assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+        assertEquals(48.849577, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(2.350867, geoPoint.coordinates().longitude(), 0.001);
+        assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
         // Check 2nd provider
         assertEquals(7, getResourceValue(provider2, "data", type2 + "-value", Integer.class));
@@ -387,8 +387,8 @@ public class JSONParserTest {
         assertEquals(timestamp, location.timestamp);
         assertNotNull(location.value);
         geoPoint = (Point) location.value;
-        assertEquals(48.858396, geoPoint.coordinates.latitude, 0.001);
-        assertEquals(2.350484, geoPoint.coordinates.longitude, 0.001);
-        assertTrue(Double.isNaN(geoPoint.coordinates.elevation));
+        assertEquals(48.858396, geoPoint.coordinates().latitude(), 0.001);
+        assertEquals(2.350484, geoPoint.coordinates().longitude(), 0.001);
+        assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
     }
 }

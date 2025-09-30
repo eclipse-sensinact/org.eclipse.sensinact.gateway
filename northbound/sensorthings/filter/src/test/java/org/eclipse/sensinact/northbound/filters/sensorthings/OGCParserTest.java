@@ -23,7 +23,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -43,7 +44,7 @@ public class OGCParserTest {
 
     private void assertQuery(final boolean expected, final String query,
             final ResourceValueFilterInputHolder testProvider) throws Exception {
-        ANTLRInputStream inStream = new ANTLRInputStream(query);
+        CodePointCharStream inStream = CharStreams.fromString(query);
         ODataFilterLexer markupLexer = new ODataFilterLexer(inStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(markupLexer);
         ODataFilterParser parser = new ODataFilterParser(commonTokenStream);
@@ -77,10 +78,7 @@ public class OGCParserTest {
     }
 
     private ResourceSnapshot makeLocatedResource(double[] lonlat) {
-        Point location = new Point();
-        location.coordinates = new Coordinates();
-        location.coordinates.longitude = lonlat[0];
-        location.coordinates.latitude = lonlat[1];
+        Point location = new Point(new Coordinates(lonlat[0], lonlat[1]), null, null);
         return makeLocatedResource(location);
     }
 
@@ -118,19 +116,15 @@ public class OGCParserTest {
     }
 
     private Coordinates makeCoors(double lon, double lat) {
-        Coordinates coords = new Coordinates();
-        coords.latitude = lat;
-        coords.longitude = lon;
-        return coords;
+        return new Coordinates(lon, lat);
     }
 
     @Test
     void testSpatial() throws Exception {
         final String point1 = "geography'POINT (30 10)'";
         final String point2 = "geography'POINT (50 10)'";
-        final Polygon rect1 = new Polygon();
-        rect1.coordinates = List.of(List.of(makeCoors(0, 0), makeCoors(50, 0), makeCoors(50, 50),
-                makeCoors(00, 50), makeCoors(0, 0)));
+        final Polygon rect1 = new Polygon(List.of(List.of(makeCoors(0, 0), makeCoors(50, 0), makeCoors(50, 50),
+                makeCoors(00, 50), makeCoors(0, 0))), null, null);
 
         ResourceSnapshot rc = makeLocatedResource(rect1);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
