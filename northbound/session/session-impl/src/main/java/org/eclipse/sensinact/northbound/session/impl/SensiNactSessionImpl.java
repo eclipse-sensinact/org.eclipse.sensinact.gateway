@@ -32,6 +32,7 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -634,7 +635,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
             return executeGetCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
                     service, resource), Function.identity());
         } else {
-            Predicate<GeoJsonObject> location = filter.getLocationFilter();
+            BiPredicate<ProviderSnapshot, GeoJsonObject> location = filter.getLocationFilter();
             Predicate<ProviderSnapshot> provider = ps -> authorizeProvider(ps, location != null);
             Predicate<ProviderSnapshot> pf = filter.getProviderFilter();
             Predicate<ServiceSnapshot> sf = filter.getServiceFilter();

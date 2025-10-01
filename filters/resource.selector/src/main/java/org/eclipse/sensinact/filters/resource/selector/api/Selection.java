@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.api;
 
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
 import org.eclipse.sensinact.filters.resource.selector.jackson.SelectionDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -38,6 +41,19 @@ public record Selection(
         if(type == null) {
             type = MatchType.EXACT;
         }
+    }
+
+    public Predicate<String> asPredicate() {
+        return switch(type) {
+            case EXACT:
+                yield value::equals;
+            case REGEX:
+                yield Pattern.compile(value).asMatchPredicate();
+            case REGEX_REGION:
+                yield Pattern.compile(value).asPredicate();
+            default:
+                throw new UnsupportedOperationException("Unknown selection type " + type);
+        };
     }
 
     public static enum MatchType {

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -324,7 +325,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     }
 
     @Override
-    public List<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
+    public List<ProviderSnapshot> filteredSnapshot(BiPredicate<ProviderSnapshot, GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter) {
 
@@ -342,7 +343,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         if (geoFilter != null) {
             // Filter the provider location
             providersStream = providersStream
-                    .filter(p -> geoFilter.test(p.getModelProvider().getAdmin().getLocation()));
+                    .filter(p -> geoFilter.test(p, p.getModelProvider().getAdmin().getLocation()));
         }
 
         // Filter providers according to their services

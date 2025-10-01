@@ -60,6 +60,7 @@ header:
     - 'docs/make.bat'
     - 'docs/Makefile'
     - 'docs/requirements.txt'
+    - 'filters/esri.geometry/src/main/java/com/esri/core/geometry/SizeOf.java'
     - 'southbound/rules/easy-rules/osgi/src/main/resources/META-INF/license/easy-rules-license.txt'
     - 'southbound/sensorthings/sensing.rest/src/test/resources/NOTICE.txt'
     - 'southbound/sensorthings/sensing.rest/src/test/resources/frost-compose.yaml'

@@ -24,6 +24,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>esri.geometry</artifactId>
+      <version>${revision}${changelist}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>resource.selector</artifactId>
       <version>${revision}${changelist}</version>
     </dependency>
