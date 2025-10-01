@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -53,7 +54,7 @@ public class SnapshotFilter implements ICriterion {
     }
 
     @Override
-    public Predicate<GeoJsonObject> getLocationFilter() {
+    public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
         return null;
     }
 

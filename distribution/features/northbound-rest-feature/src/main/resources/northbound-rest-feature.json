@@ -2,6 +2,7 @@
   "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-rest-feature:osgifeature:${project.version}",
   "bundles":[
     { "id": "org.eclipse.sensinact.gateway.northbound:rest:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.filters:esri.geometry:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:filters.core:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:resource.selector:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:resource.selector.impl:${gateway.version}" },

@@ -1,0 +1,5 @@
+Multi-Release: true
+
+-includeresource: @esri-geometry-api-${esri.version}.jar
+
+-exportcontents: com.esri.core.geometry.*;version=${esri.version}

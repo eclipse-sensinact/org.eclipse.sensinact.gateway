@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.impl;
 
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -29,7 +30,7 @@ public class UpdatableCriterion implements ICriterion {
     /**
      * Location filter
      */
-    private Predicate<GeoJsonObject> locationFilter;
+    private BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter;
 
     /**
      * Location filter
@@ -58,7 +59,7 @@ public class UpdatableCriterion implements ICriterion {
      * @param resourceFilter      Resource filter
      * @param resourceValueFilter Resource value filter
      */
-    public UpdatableCriterion(final Predicate<GeoJsonObject> locationFilter,
+    public UpdatableCriterion(final BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter,
             final Predicate<ProviderSnapshot> providerFilter, final Predicate<ServiceSnapshot> serviceFilter,
             final Predicate<ResourceSnapshot> resourceFilter, final ResourceValueFilter resourceValueFilter) {
         this.locationFilter = locationFilter;
@@ -69,7 +70,7 @@ public class UpdatableCriterion implements ICriterion {
     }
 
     @Override
-    public Predicate<GeoJsonObject> getLocationFilter() {
+    public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
         return locationFilter;
     }
 
@@ -104,7 +105,7 @@ public class UpdatableCriterion implements ICriterion {
     /**
      * @param locationFilter the new location filter
      */
-    public void setLocationFilter(final Predicate<GeoJsonObject> locationFilter) {
+    public void setLocationFilter(final BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter) {
         this.locationFilter = locationFilter;
     }
 
@@ -139,7 +140,7 @@ public class UpdatableCriterion implements ICriterion {
     /**
      * @param locationFilter the location filter to add (AND operator)
      */
-    public void addLocationFilter(final Predicate<GeoJsonObject> locationFilter) {
+    public void addLocationFilter(final BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter) {
         if (this.locationFilter == null) {
             this.locationFilter = locationFilter;
         } else if (locationFilter != null) {

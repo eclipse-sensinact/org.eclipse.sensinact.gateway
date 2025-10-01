@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -249,11 +250,12 @@ public class WebSocketEndpoint {
 
         Predicate<ResourceNotification> predicate = null;
 
-        // Basic filters
+        // filters
         final Predicate<ProviderSnapshot> providerFilter = parsedFilter.getProviderFilter();
         final Predicate<ServiceSnapshot> serviceFilter = parsedFilter.getServiceFilter();
         final Predicate<ResourceSnapshot> resourceFilter = parsedFilter.getResourceFilter();
         final ResourceValueFilter resourceValueFilter = parsedFilter.getResourceValueFilter();
+        final BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter = parsedFilter.getLocationFilter();
 
         if (providerFilter != null || serviceFilter != null || resourceFilter != null || resourceValueFilter != null) {
             // We have at least one basic filter
@@ -281,36 +283,24 @@ public class WebSocketEndpoint {
                         && !resourceValueFilter.test(snapshot.provider, List.of(snapshot.resource))) {
                     return false;
                 }
+                if(locationFilter != null && "admin".equals(notif.service()) && "location".equals(notif.resource())) {
+                    if (notif.getClass() == LifecycleNotification.class) {
+                        final LifecycleNotification lifecycleNotif = (LifecycleNotification) notif;
+                        if (!locationFilter.test(snapshot.provider, (GeoJsonObject) lifecycleNotif.initialValue())) {
+                            return false;
+                        }
+                    } else if (notif.getClass() == ResourceDataNotification.class) {
+                        final ResourceDataNotification dataNotif = (ResourceDataNotification) notif;
+                        if(!locationFilter.test(snapshot.provider, (GeoJsonObject) dataNotif.newValue())) {
+                            return false;
+                        }
+                    }
+                }
 
                 // Passed all tests
                 return true;
             };
         }
-
-        // Combine with location filter
-        final Predicate<GeoJsonObject> locationFilter = parsedFilter.getLocationFilter();
-        if (locationFilter != null) {
-            Predicate<ResourceNotification> locationPredicate = notif -> {
-                if ("admin".equals(notif.service()) && "location".equals(notif.resource())) {
-                    if (notif.getClass() == LifecycleNotification.class) {
-                        final LifecycleNotification lifecycleNotif = (LifecycleNotification) notif;
-                        return lifecycleNotif.initialValue() != null
-                                && locationFilter.test((GeoJsonObject) lifecycleNotif.initialValue());
-                    } else if (notif.getClass() == ResourceDataNotification.class) {
-                        final ResourceDataNotification dataNotif = (ResourceDataNotification) notif;
-                        return dataNotif.newValue() != null && locationFilter.test((GeoJsonObject) dataNotif.newValue());
-                    }
-                }
-                return true;
-            };
-
-            if (predicate == null) {
-                predicate = locationPredicate;
-            } else {
-                predicate = predicate.and(locationPredicate);
-            }
-        }
-
         return predicate;
     }
 
