@@ -229,58 +229,16 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         return list;
     }
 
-    @SuppressWarnings("unchecked")
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
             int localResultLimit) {
 
-        String provider = resourceSnapshot.getService().getProvider().getName();
-        String service = resourceSnapshot.getService().getName();
-        String resource = resourceSnapshot.getName();
+        ResultList<Observation> list = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                mapper, uriInfo, expansions, resourceSnapshot, localResultLimit);
 
-        ResultList<Observation> list = new ResultList<>();
-
-        String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
-        Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
-
-        if(localResultLimit > 0) {
-            maxResults = Math.min(localResultLimit, maxResults);
+        if (list.value.isEmpty() && resourceSnapshot.isSet()) {
+            list.value.add(DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, resourceSnapshot));
         }
-
-        List<Observation> results = new ArrayList<>();
-
-        if (historyProvider != null) {
-            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count",
-                    Map.of("provider", provider, "service", service, "resource", resource));
-
-            list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
-
-            Map<String, Object> params = new HashMap<>(
-                    Map.of("provider", provider, "service", service, "resource", resource));
-            Integer skip = Integer.valueOf(0);
-
-            List<TimedValue<?>> timed;
-            do {
-                params.put("skip", skip);
-
-                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-
-                results.addAll(0, DtoMapper.toObservationList(userSession, application, mapper, uriInfo, expansions, resourceSnapshot, timed));
-
-                if (timed.isEmpty()) {
-                    break;
-                } else if (timed.size() == 500) {
-                    skip = results.size();
-                }
-
-            } while (results.size() < count && results.size() < maxResults);
-        }
-
-        if (results.isEmpty() && resourceSnapshot.isSet()) {
-            results.add(DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, resourceSnapshot));
-        }
-
-        list.value = results;
 
         return list;
     }
