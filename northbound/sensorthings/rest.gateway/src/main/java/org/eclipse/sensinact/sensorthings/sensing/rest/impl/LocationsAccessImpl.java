@@ -44,9 +44,18 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
 
     @Override
     public ResultList<HistoricalLocation> getLocationHistoricalLocations(String id) {
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(getLocationHistoricalLocation(id, id));
-        return list;
+        String provider = extractFirstIdSegment(id);
+        try {
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
+                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
+            if (list.value.isEmpty())
+                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), providerSnapshot));
+            return list;
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException();
+        }
     }
 
     @Override
@@ -105,18 +114,17 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     @Override
     public ResultList<HistoricalLocation> getLocationThingHistoricalLocations(String id, String id2) {
         String provider = extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), providerSnapshot);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
+                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
+            if (list.value.isEmpty())
+                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), providerSnapshot));
+            return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
-
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(hl);
-        return list;
     }
 
     @Override

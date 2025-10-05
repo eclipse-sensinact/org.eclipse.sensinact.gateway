@@ -13,9 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
 import static java.time.Duration.ofDays;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
@@ -33,8 +31,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -53,19 +52,18 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-public class ObservationHistoryTest extends AbstractIntegrationTest {
+public class HistoricalLocationTest extends AbstractIntegrationTest {
 
     private static final Instant TS_2012 = Instant.parse("2012-01-01T01:23:45.123456Z");
 
-    private static final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<ResultList<Observation>>() {
-    };
+
 
     private static JdbcDatabaseContainer<?> container;
 
     @BeforeAll
     static void startContainer() throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(ObservationHistoryTest.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(HistoricalLocationTest.class.getClassLoader());
         try {
             try {
                 DockerClientFactory.lazyClient().versionCmd().exec();
@@ -241,97 +239,47 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getDataStreamObservations() throws Exception {
-        for (int i = 0; i < 1000; i++) {
-            createResource("foo", "bar", "baz", String.valueOf(i), TS_2012.plus(ofDays(i)));
+    void getThingHistoricalLocationsTest() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            createResource("fizz", "admin", "location", new Point(i,i), TS_2012.plus(ofDays(i)));
         }
-        for (int i = 0; i < 4000; i++) {
-            createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
-        }
-        // 1008: 1000 updates + history provider name & description & model & modelPackageUri + foo
-        // provider name & description &  modelUri
-        waitForRowCount("sensinact.text_data", 1008);
-        waitForRowCount("sensinact.numeric_data", 4000);
+        // 10 updates
+        waitForRowCount("sensinact.geo_data", 10);
 
-        ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",
-                RESULT_OBSERVATIONS);
-
-        assertEquals(1000, observations.count);
-        assertEquals(500, observations.value.size()); //Is this 500 because of https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
-        assertNotNull(observations.nextLink);
-
-        for (int i = 0; i < 500; i++) {
-            Instant ts = TS_2012.plus(ofDays(i));
-            assertEquals(ts, observations.value.get(i).resultTime);
-            assertEquals(String.valueOf(i), observations.value.get(i).result);
-        }
-
-        observations = utils.queryJson(observations.nextLink, RESULT_OBSERVATIONS);
-
-        assertEquals(1000, observations.count);
-        assertEquals(500, observations.value.size());
-        assertNull(observations.nextLink);
-
-        for (int i = 0; i < 500; i++) {
-            Instant ts = TS_2012.plus(ofDays(i + 500));
-            assertEquals(ts, observations.value.get(i).resultTime);
-            assertEquals(String.valueOf(i + 500), observations.value.get(i).result);
-        }
-
-        observations = utils.queryJson("/Datastreams(foo~bar~foobar)/Observations?$count=true", RESULT_OBSERVATIONS);
-        assertEquals(4000, observations.count);
-        assertEquals(500, observations.value.size());
-        assertNotNull(observations.nextLink);
-
-        for (int i = 0; i < 500; i++) {
-            Instant ts = TS_2012.plus(ofDays(i + 1000));
-            assertEquals(ts, observations.value.get(i).resultTime);
-            assertEquals(i + 1000, observations.value.get(i).result);
-        }
+        ResultList<HistoricalLocation> o = utils.queryJson("/Things(fizz)/HistoricalLocations?$count=true", new TypeReference<ResultList<HistoricalLocation>>() {
+        });
+        assertEquals(o.count, 10);
     }
 
     @Test
-    void getHistoricObservationTest() throws Exception {
+    void getThingLocationHistoricalLocationsTest() throws Exception {
         for (int i = 0; i < 10; i++) {
-            createResource("fizz", "buzz", "fizzbuzz", String.valueOf(i), TS_2012.plus(ofDays(i)));
+            createResource("fizz", "admin", "location", new Point(i,i), TS_2012.plus(ofDays(i)));
         }
-        // 16: 10 updates + history provider name & model & modelPackageUri + fizz
-        // provider name & modelUri
-        waitForRowCount("sensinact.text_data", 18);
+        // 10 updates
+        waitForRowCount("sensinact.geo_data", 10);
 
-        String id = String.format("%s~%s~%s~%s", "fizz", "buzz", "fizzbuzz",
-                Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
-
-        Observation o = utils.queryJson("/Observations(" + id + ")", new TypeReference<Observation>() {
+        ResultList<HistoricalLocation> o = utils.queryJson("/Locations(fizz)/HistoricalLocations?$count=true", new TypeReference<ResultList<HistoricalLocation>>() {
         });
-        assertEquals(id, o.id);
-        assertEquals(TS_2012.plus(ofDays(3)), o.resultTime);
-        assertEquals("3", o.result);
+        assertEquals(o.count, 10);
     }
 
     @Test
-    void navigateToObservationTest() throws Exception {
+    void getDataStreamHistoricalLocationsTest() throws Exception {
         for (int i = 0; i < 10; i++) {
-            createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
+            createResource("fizz", "admin", "location", new Point(i, i), TS_2012.plus(ofDays(i)));
+            createResource("fizz", "buzz", "fizzbuzz", "test" + i, TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 18);
+        // 10 updates
+        waitForRowCount("sensinact.geo_data", 10);
 
-        ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
-        });
+        String id = String.format("%s~%s~%s", "fizz", "buzz", "fizzbuzz");
 
-        assertFalse(streams.value.isEmpty());
-        Datastream datastream = streams.value.stream().filter(d -> "ding~dong~bell".equals(d.id)).findFirst().get();
-
-        ResultList<Observation> observations = utils.queryJson(datastream.observationsLink,
-                new TypeReference<ResultList<Observation>>() {
+        ResultList<HistoricalLocation> o = utils.queryJson(
+                "/Datastreams(" + id + ")/Thing/HistoricalLocations?$count=true",
+                new TypeReference<ResultList<HistoricalLocation>>() {
                 });
-
-        assertEquals(10, observations.value.size());
-        Observation observation = observations.value.get(1);
-        String id = String.format("%s~%s~%s~%s", "ding", "dong", "bell",
-                Long.toString(TS_2012.plus(ofDays(1)).toEpochMilli(), 16));
-        assertEquals(id, observation.id);
-        assertEquals(TS_2012.plus(ofDays(1)), observation.resultTime);
-        assertEquals("1", observation.result);
+        assertEquals(o.count, 10);
     }
+
 }
