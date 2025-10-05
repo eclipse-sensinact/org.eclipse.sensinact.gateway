@@ -182,17 +182,30 @@ public class DtoMapper {
         return location;
     }
 
-    public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
-        HistoricalLocation historicalLocation = new HistoricalLocation();
-
-        final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
-        final Instant time;
-        if (location.getTimestamp() == null) {
-            time = Instant.EPOCH;
-        } else {
-            time = location.getTimestamp();
+    public static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ProviderSnapshot provider, List<TimedValue<?>> historicalLocations) {
+        if (provider == null) {
+            throw new NotFoundException();
         }
+
+        List<HistoricalLocation> list = new ArrayList<>(historicalLocations.size());
+        for (TimedValue<?> tv : historicalLocations) {
+            list.add(toHistoricalLocation(userSession, application, mapper, uriInfo, expansions,
+                    provider, Optional.of(tv)));
+        }
+
+        return list;
+    }
+
+    public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ProviderSnapshot provider, Optional<TimedValue<?>> t) {
+        if (provider == null) {
+            throw new NotFoundException();
+        }
+        HistoricalLocation historicalLocation = new HistoricalLocation();
+        final Instant time = t.map(TimedValue::getTimestamp).orElse( Instant.EPOCH);
 
         historicalLocation.id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
         historicalLocation.time = time;
@@ -214,8 +227,13 @@ public class DtoMapper {
                     expansions.getExpansionSettings("Locations"), provider));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
-
         return historicalLocation;
+    }
+
+    public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
+        final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, provider, Optional.of(location));
     }
 
     public static Datastream toDatastream(SensiNactSession userSession, Application application,

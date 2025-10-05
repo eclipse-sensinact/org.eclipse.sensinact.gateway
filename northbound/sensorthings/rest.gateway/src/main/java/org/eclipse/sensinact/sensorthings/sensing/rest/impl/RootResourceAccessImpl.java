@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toDatastream;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toFeatureOfInterest;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toHistoricalLocation;
@@ -22,10 +23,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toO
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toSensor;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toThing;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,7 +31,6 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
@@ -55,6 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
@@ -148,8 +146,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<Location> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
-        list.value = providers.stream()
-                .filter(p -> hasResourceSet(p, "admin", "location"))
+        list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
                 .collect(toList());
 
@@ -161,8 +158,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<HistoricalLocation> list = new ResultList<>();
 
         List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
-        list.value = providers.stream()
-                .filter(p -> hasResourceSet(p, "admin", "location"))
+        list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
                 .collect(toList());
         return list;
@@ -185,8 +181,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<Sensor> list = new ResultList<>();
 
         List<ResourceSnapshot> resources = listSetResources(EFilterContext.SENSORS);
-        list.value = resources.stream().
-                map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+        list.value = resources.stream()
+                .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
                 .collect(toList());
 
         return list;
@@ -230,6 +226,13 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ResourceSnapshot resourceSnapshot) {
+        ExpansionSettings es = (ExpansionSettings) requestContext
+                .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,0);
+    }
+
+    static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
             int localResultLimit) {
 
@@ -242,5 +245,4 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         return list;
     }
-
 }
