@@ -76,7 +76,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         }
 
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id2), 0);
+                requestContext, validateAndGetResourceSnapshot(id2));
     }
 
     @Override
@@ -130,17 +130,17 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
     public ResultList<HistoricalLocation> getThingHistoricalLocations(String id) {
         String provider = extractFirstIdSegment(id);
 
-        HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), validateAndGetProvider(provider));
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
+                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
+            if (list.value.isEmpty())
+                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), providerSnapshot));
+            return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
-
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(hl);
-        return list;
     }
 
     @Override
@@ -236,17 +236,16 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
     @Override
     public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(String id, String id2) {
         String provider = extractFirstIdSegment(id2);
-
-        HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), validateAndGetProvider(provider));
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
+                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
+            if (list.value.isEmpty())
+                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), providerSnapshot));
+            return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
-
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(hl);
-        return list;
     }
 }

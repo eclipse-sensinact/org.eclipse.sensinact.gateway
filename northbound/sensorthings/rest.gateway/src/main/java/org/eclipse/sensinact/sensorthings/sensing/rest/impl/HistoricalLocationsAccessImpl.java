@@ -95,9 +95,19 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(String id, String id2) {
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(getHistoricalLocation(id));
-        return list;
+        String provider = extractFirstIdSegment(id);
+        getTimestampFromId(id);
+        try {
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
+                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
+            if (list.value.isEmpty())
+                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), providerSnapshot));
+            return list;
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException();
+        }
     }
 
     @Override
@@ -130,9 +140,19 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(getHistoricalLocation(id));
-        return list;
+        String provider = extractFirstIdSegment(id);
+        getTimestampFromId(id);
+        try {
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
+                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
+            if (list.value.isEmpty())
+                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), providerSnapshot));
+            return list;
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException();
+        }
     }
 
     @Override
