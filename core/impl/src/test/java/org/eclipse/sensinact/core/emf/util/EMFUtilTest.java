@@ -25,6 +25,10 @@ import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.testdata.TestdataPackage;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 public class EMFUtilTest {
 
     @Test
@@ -84,5 +88,50 @@ public class EMFUtilTest {
     void testGetModelNameAnnotation() {
         String modelName = EMFUtil.getModelName(TestdataPackage.Literals.TEST_MODEL_WITH_ANNOTATION);
         assertEquals("TestModel", modelName);
+    }
+
+    /**
+     * Test record class. Must be public to be accessible by EMFUtil
+     */
+    public record Record(String name, int value) {
+    }
+
+    public class RecordDTO {
+        public String name;
+        public int value;
+    }
+
+    @Test
+    void testRecordConversion() throws Exception {
+        // Prepare input
+        final ObjectMapper mapper = JsonMapper.builder().build();
+        final Record record = new Record("test", 42);
+        final RecordDTO dtoRecord = new RecordDTO();
+        dtoRecord.name = record.name();
+        dtoRecord.value = record.value();
+        final Map<String, Object> mapRecord = mapper.convertValue(record, new TypeReference<Map<String, Object>>() {
+        });
+
+        // Test pass-through
+        Record parsed = (Record) EMFUtil.convertToTargetType(Record.class, record);
+        assertEquals("test", parsed.name);
+        assertEquals(42, parsed.value);
+
+        // Test from DTO
+        parsed = (Record) EMFUtil.convertToTargetType(Record.class, dtoRecord);
+        assertEquals("test", parsed.name);
+        assertEquals(42, parsed.value);
+
+        // Test from Map
+        parsed = (Record) EMFUtil.convertToTargetType(Record.class, mapRecord);
+        assertEquals("test", parsed.name);
+        assertEquals(42, parsed.value);
+
+        // Test to map
+        @SuppressWarnings("unchecked")
+        Map<String, Object> parsedMap = (Map<String, Object>) EMFUtil.convertToTargetType(Map.class, record);
+        assertEquals(2, parsedMap.size());
+        assertEquals("test", parsedMap.get("name"));
+        assertEquals(42, parsedMap.get("value"));
     }
 }
