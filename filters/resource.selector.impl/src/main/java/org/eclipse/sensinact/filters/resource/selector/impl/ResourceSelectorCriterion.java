@@ -15,9 +15,9 @@ package org.eclipse.sensinact.filters.resource.selector.impl;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -87,22 +87,7 @@ public class ResourceSelectorCriterion implements ICriterion {
 
     static <T> Predicate<T> fromSelection(Function<T,String> nameExtractor, Selection s) {
         if(s == null) return always();
-
-        Predicate<String> test;
-        switch(s.type()) {
-        case EXACT:
-            test = s.value()::equals;
-            break;
-        case REGEX:
-            test = Pattern.compile(s.value()).asMatchPredicate();
-            break;
-        case REGEX_REGION:
-            test = Pattern.compile(s.value()).asPredicate();
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown selection type " + s.type());
-        }
-
+        Predicate<String> test = s.asPredicate();
         return t -> test.test(nameExtractor.apply(t));
     }
 
@@ -121,7 +106,7 @@ public class ResourceSelectorCriterion implements ICriterion {
     }
 
     @Override
-    public Predicate<GeoJsonObject> getLocationFilter() {
+    public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
         if(rs.providers().stream().flatMap(p -> p.location().stream()).findAny().isPresent()) {
             LOG.warn("Location filtering is not yet implemented for Resource Selectors.");
         }

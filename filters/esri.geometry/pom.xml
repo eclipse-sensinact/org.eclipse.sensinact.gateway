@@ -1,0 +1,50 @@
+<!--
+/*********************************************************************
+* Copyright (c) 2023 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+    <artifactId>filters</artifactId>
+    <version>${revision}${changelist}</version>
+  </parent>
+  <artifactId>esri.geometry</artifactId>
+  <name>SensiNact Filters :: ESRI Geometry repackaging</name>
+  <description>Repackaging the ESRI Geometry API as an OSGi bundle</description>
+
+  <properties>
+    <esri.version>2.2.4</esri.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.esri.geometry</groupId>
+      <artifactId>esri-geometry-api</artifactId>
+      <version>2.2.4</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <multiReleaseOutput>true</multiReleaseOutput>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

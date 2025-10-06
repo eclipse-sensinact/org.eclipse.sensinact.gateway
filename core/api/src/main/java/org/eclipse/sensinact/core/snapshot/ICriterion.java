@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.snapshot;
 
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -29,7 +30,7 @@ public interface ICriterion {
      * <p>
      * This predicate is executed in the gateway thread.
      */
-    Predicate<GeoJsonObject> getLocationFilter();
+    BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter();
 
     /**
      * Early provider predicate executed during the snapshot. Only the model and
@@ -124,8 +125,10 @@ public interface ICriterion {
             }
 
             @Override
-            public Predicate<GeoJsonObject> getLocationFilter() {
-                return negate(this_.getLocationFilter());
+            public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
+                return this_.getLocationFilter() == null ? null :
+                    this_.getProviderFilter() == null ? this_.getLocationFilter().negate()
+                            : (p,l) -> this_.getProviderFilter().test(p) && !this_.getLocationFilter().test(p, l);
             }
         };
     }

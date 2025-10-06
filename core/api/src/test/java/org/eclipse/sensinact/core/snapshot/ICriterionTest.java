@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -32,7 +33,6 @@ import org.eclipse.sensinact.gateway.geojson.LineString;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.geojson.Polygon;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -71,8 +71,8 @@ public class ICriterionTest {
             }
 
             @Override
-            public Predicate<GeoJsonObject> getLocationFilter() {
-                return match(g -> g.type().name(), location);
+            public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
+                return location == null ? null : (p,l) -> p.getName().equals(provider) && location.equals(l.type().name());
             }
         };
     }
@@ -156,19 +156,21 @@ public class ICriterionTest {
             assertEquals(!expected, criterion.negate().getResourceValueFilter().test(ps, List.of(rs)));
         }
 
-        @Test
-        public void locationTest() {
+        @ParameterizedTest
+        @CsvSource(value = {"a,true", "b,false"})
+        public void locationTest(String provider, boolean expected) {
 
+            Mockito.when(ps.getName()).thenReturn(provider);
             GeoJsonObject point = new Point(Coordinates.EMPTY, null, null);
             GeoJsonObject polygon = new Polygon(List.of(), null, null);
 
-            ICriterion criterion = getTestCriterion(null, null, null, null, "Point");
+            ICriterion criterion = getTestCriterion("a", null, null, null, "Point");
 
-            assertTrue(criterion.getLocationFilter().test(point));
-            assertFalse(criterion.negate().getLocationFilter().test(point));
+            assertEquals(expected, criterion.getLocationFilter().test(ps, point));
+            assertFalse(criterion.negate().getLocationFilter().test(ps, point));
 
-            assertFalse(criterion.getLocationFilter().test(polygon));
-            assertTrue(criterion.negate().getLocationFilter().test(polygon));
+            assertFalse(criterion.getLocationFilter().test(ps, polygon));
+            assertEquals(expected, criterion.negate().getLocationFilter().test(ps, polygon));
         }
 
         @ParameterizedTest
@@ -314,15 +316,17 @@ public class ICriterionTest {
             assertFalse(criterionBA.getResourceValueFilter().test(ps, List.of(rs)));
         }
 
-        @Test
-        public void locationTest() {
+        @ParameterizedTest
+        @CsvSource(value = {"a,true", "b,false"})
+        public void locationTest(String value, boolean expected) {
 
+            Mockito.when(ps.getName()).thenReturn(value);
             GeoJsonObject point = new Point(Coordinates.EMPTY, null, null);
             GeoJsonObject polygon = new Polygon(List.of(), null, null);
 
-            ICriterion criterionA = getTestCriterion(null, null, null, null, "Point");
+            ICriterion criterionA = getTestCriterion("a", null, null, null, "Point");
             ICriterion nullCriterion = getTestCriterion(null, null, null, null, null);
-            ICriterion criterionB = getTestCriterion(null, null, null, null, "Polygon");
+            ICriterion criterionB = getTestCriterion("a", null, null, null, "Polygon");
 
             ICriterion andNull = criterionA.and(nullCriterion);
             ICriterion nullAnd = nullCriterion.and(criterionA);
@@ -330,15 +334,15 @@ public class ICriterionTest {
             ICriterion criterionAB = criterionA.and(criterionB);
             ICriterion criterionBA = criterionB.and(criterionA);
 
-            assertTrue(andNull.getLocationFilter().test(point));
-            assertTrue(nullAnd.getLocationFilter().test(point));
-            assertFalse(criterionAB.getLocationFilter().test(point));
-            assertFalse(criterionBA.getLocationFilter().test(point));
+            assertEquals(expected, andNull.getLocationFilter().test(ps, point));
+            assertEquals(expected, nullAnd.getLocationFilter().test(ps, point));
+            assertFalse(criterionAB.getLocationFilter().test(ps, point));
+            assertFalse(criterionBA.getLocationFilter().test(ps, point));
 
-            assertFalse(andNull.getLocationFilter().test(polygon));
-            assertFalse(nullAnd.getLocationFilter().test(polygon));
-            assertFalse(criterionAB.getLocationFilter().test(polygon));
-            assertFalse(criterionBA.getLocationFilter().test(polygon));
+            assertFalse(andNull.getLocationFilter().test(ps, polygon));
+            assertFalse(nullAnd.getLocationFilter().test(ps, polygon));
+            assertFalse(criterionAB.getLocationFilter().test(ps, polygon));
+            assertFalse(criterionBA.getLocationFilter().test(ps, polygon));
         }
 
         @ParameterizedTest
@@ -465,27 +469,29 @@ public class ICriterionTest {
             assertEquals(expected, criterionBA.getResourceValueFilter().test(ps, List.of(rs)));
         }
 
-        @Test
-        public void locationTest() {
+        @ParameterizedTest
+        @CsvSource(value = {"a,true", "b,false"})
+        public void locationTest(String value, boolean expected) {
 
+            Mockito.when(ps.getName()).thenReturn(value);
             GeoJsonObject point = new Point(Coordinates.EMPTY, null, null);
             GeoJsonObject polygon = new Polygon(List.of(), null, null);
             GeoJsonObject linestring = new LineString(List.of(), null, null);
 
-            ICriterion criterionA = getTestCriterion(null, null, null, null, "Point");
-            ICriterion criterionB = getTestCriterion(null, null, null, null, "Polygon");
+            ICriterion criterionA = getTestCriterion("a", null, null, null, "Point");
+            ICriterion criterionB = getTestCriterion("a", null, null, null, "Polygon");
 
             ICriterion criterionAB = criterionA.or(criterionB);
             ICriterion criterionBA = criterionB.or(criterionA);
 
-            assertTrue(criterionAB.getLocationFilter().test(point));
-            assertTrue(criterionBA.getLocationFilter().test(point));
+            assertEquals(expected, criterionAB.getLocationFilter().test(ps, point));
+            assertEquals(expected, criterionBA.getLocationFilter().test(ps, point));
 
-            assertTrue(criterionAB.getLocationFilter().test(polygon));
-            assertTrue(criterionBA.getLocationFilter().test(polygon));
+            assertEquals(expected, criterionAB.getLocationFilter().test(ps, polygon));
+            assertEquals(expected, criterionBA.getLocationFilter().test(ps, polygon));
 
-            assertFalse(criterionAB.getLocationFilter().test(linestring));
-            assertFalse(criterionBA.getLocationFilter().test(linestring));
+            assertFalse(criterionAB.getLocationFilter().test(ps, linestring));
+            assertFalse(criterionBA.getLocationFilter().test(ps, linestring));
         }
 
         @ParameterizedTest

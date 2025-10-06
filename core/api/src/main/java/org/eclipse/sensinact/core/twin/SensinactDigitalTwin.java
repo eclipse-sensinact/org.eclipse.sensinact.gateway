@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.twin;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.command.CommandScoped;
@@ -191,7 +192,7 @@ public interface SensinactDigitalTwin extends CommandScoped {
      * @param rcFilter       Resource filter (without values)
      * @return The filtered snapshot
      */
-    List<ProviderSnapshot> filteredSnapshot(Predicate<GeoJsonObject> geoFilter,
+    List<ProviderSnapshot> filteredSnapshot(BiPredicate<ProviderSnapshot, GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter);
 

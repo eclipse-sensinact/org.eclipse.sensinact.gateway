@@ -3,6 +3,7 @@
   "bundles":[
     { "id": "org.eclipse.sensinact.gateway.southbound.history:history-api:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.southbound.history:timescale-provider:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.filters:esri.geometry:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:resource.selector:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:resource.selector.impl:${gateway.version}" },
     { "id": "org.osgi:org.osgi.service.jdbc:1.0.0" },

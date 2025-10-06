@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -209,6 +210,34 @@ abstract class CombinationCriterion implements ICriterion {
         }
     }
 
+    protected <T,U> BiPredicate<T,U> andDouble(Function<ICriterion, BiPredicate<T,U>> f) {
+        BiPredicate<T,U> thisFilter = f.apply(a);
+        if(thisFilter == null) {
+            return f.apply(b);
+        } else {
+            BiPredicate<T,U> thatFilter = f.apply(b);
+            if(thatFilter == null) {
+                return thisFilter;
+            } else {
+                return thisFilter.and(thatFilter);
+            }
+        }
+    }
+
+    protected <T,U> BiPredicate<T,U> orDouble(Function<ICriterion, BiPredicate<T,U>> f) {
+        BiPredicate<T,U> thisFilter = f.apply(a);
+        if(thisFilter == null) {
+            return null;
+        } else {
+            BiPredicate<T,U> thatFilter = f.apply(b);
+            if(thatFilter == null) {
+                return null;
+            } else {
+                return thisFilter.or(thatFilter);
+            }
+        }
+    }
+
 }
 
 class AndCriterion extends CombinationCriterion {
@@ -254,8 +283,8 @@ class AndCriterion extends CombinationCriterion {
     }
 
     @Override
-    public Predicate<GeoJsonObject> getLocationFilter() {
-        return and(ICriterion::getLocationFilter);
+    public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
+        return andDouble(ICriterion::getLocationFilter);
     }
 
     @Override
@@ -305,8 +334,8 @@ class OrCriterion extends CombinationCriterion {
     }
 
     @Override
-    public Predicate<GeoJsonObject> getLocationFilter() {
-        return or(ICriterion::getLocationFilter);
+    public BiPredicate<ProviderSnapshot,GeoJsonObject> getLocationFilter() {
+        return orDouble(ICriterion::getLocationFilter);
     }
 
     @Override
@@ -331,6 +360,10 @@ class ResourceDataFilter implements Predicate<ResourceDataNotification> {
         return test == null ? true : test.test(value);
     }
 
+    private <T,U> boolean nullSafeBiPredicate(BiPredicate<T,U> test, T value1, U value2) {
+        return test == null ? true : test.test(value1, value2);
+    }
+
     private boolean nullSafeFilter(ResourceValueFilter rvf, ProviderSnapshot p, List<ResourceSnapshot> rs) {
         return rvf == null ? true : rvf.test(p, rs);
     }
@@ -341,7 +374,7 @@ class ResourceDataFilter implements Predicate<ResourceDataNotification> {
 
         boolean initial;
         if(Objects.equals("admin", rdn.service()) && Objects.equals("location", rdn.resource())) {
-            initial = nullSafePredicate(criterion.getLocationFilter(), (GeoJsonObject) rdn.newValue());
+            initial = nullSafeBiPredicate(criterion.getLocationFilter(), ps, (GeoJsonObject) rdn.newValue());
         } else {
             initial = true;
         }
