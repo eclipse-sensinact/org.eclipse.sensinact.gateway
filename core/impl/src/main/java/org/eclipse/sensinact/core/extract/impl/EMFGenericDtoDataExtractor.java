@@ -74,7 +74,8 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
         if (dto.metadata != null) {
             MetadataUpdateDto dud = copyCommonFields(dto, instant, new MetadataUpdateDto());
             dud.metadata = dto.metadata;
-            dud.removeNullValues = true;dud.actionOnDuplicate = dto.duplicateMetadataAction;
+            dud.removeNullValues = true;
+            dud.actionOnDuplicate = dto.duplicateMetadataAction;
             list.add(dud);
         }
 
