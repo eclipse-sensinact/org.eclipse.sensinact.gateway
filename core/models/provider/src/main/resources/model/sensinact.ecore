@@ -130,4 +130,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//MetadataValue"
         containment="true"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TestAdmin" eSuperTypes="#//Admin">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="friendlyName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
 </ecore:EPackage>

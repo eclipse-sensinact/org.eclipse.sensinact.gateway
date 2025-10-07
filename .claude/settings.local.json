@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(N:\\git\\eclipse\\org.eclipse.sensinact.gateway_3/**)",
+      "Read(N:\\git\\eclipse\\org.eclipse.sensinact.gateway_3/**)",
+      "Bash(mvn:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

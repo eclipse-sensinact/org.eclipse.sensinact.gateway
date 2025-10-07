@@ -113,8 +113,7 @@ public class FiltersTest extends AbstractIntegrationTest {
     @Test
     void testOrderBy() throws IOException, InterruptedException {
         final String prefix = "orderTester_";
-        final List<String> sortedProviderIds =
-                IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id)
+        final List<String> sortedProviderIds = IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id)
                 .sorted(Comparator.naturalOrder()).collect(Collectors.toList());
         final int nbProviders = sortedProviderIds.size();
 
@@ -377,6 +376,49 @@ public class FiltersTest extends AbstractIntegrationTest {
         }
 
         @Test
+        void testFilterPhenomenonTime() throws Exception {
+            final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<>() {
+            };
+
+            // Create two unique providers with different phenomenonTimes
+            String testProvider1 = "phenomenonTimeTestProvider_1";
+            String testProvider2 = "phenomenonTimeTestProvider_2";
+            String svc = "sensor";
+            String rc = "temperature";
+
+            // Create timestamps - one in 2010, one in 2020
+            Instant earlierTime = ZonedDateTime.of(2010, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
+            Instant laterTime = ZonedDateTime.of(2020, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
+
+            // Create resources with different timestamps
+            createResource(testProvider1, svc, rc, 25.5, earlierTime);
+            createResource(testProvider1, "admin", "location", new Point());
+            createResource(testProvider2, svc, rc, 30.2, laterTime);
+            createResource(testProvider2, "admin", "location", new Point());
+
+            // Test phenomenonTime lt filter - should return only the earlier observation
+            ResultList<Observation> observations = utils.queryJson(
+                    String.format(
+                            "/Datastreams(phenomenonTimeTestProvider_1~sensor~temperature)/Observations?$filter=%s",
+                            URLEncoder.encode("phenomenonTime lt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
+                    RESULT_OBSERVATIONS);
+
+            assertEquals(1, observations.value.size(), "Should find exactly one observation for earlier timestamp");
+            String obsId = (String) observations.value.get(0).id;
+            assertTrue(obsId.startsWith(testProvider1 + "~"), "Should be from testProvider1: " + obsId);
+
+            // Test phenomenonTime gt filter - should return only the later observation
+            observations = utils.queryJson(
+                    String.format(
+                            "/Datastreams(phenomenonTimeTestProvider_1~sensor~temperature)/Observations?$filter=%s",
+                            URLEncoder.encode("phenomenonTime gt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
+                    RESULT_OBSERVATIONS);
+
+            assertEquals(0, observations.value.size(), "Should find exactly one observation for later timestamp");
+
+        }
+
+        @Test
         void testFilterLocations() throws Exception {
             final TypeReference<ResultList<Location>> RESULT_LOCATIONS = new TypeReference<>() {
             };
@@ -597,10 +639,8 @@ public class FiltersTest extends AbstractIntegrationTest {
             assertFalse(items.isEmpty());
             assertEquals(1, items.size());
 
-            Map<?,?> rawThing = (Map<?, ?>) items.stream()
-                    .map(Map.class::cast)
-                    .filter(m -> !"sensiNact".equals(m.get("name")))
-                    .findFirst().get();
+            Map<?, ?> rawThing = (Map<?, ?>) items.stream().map(Map.class::cast)
+                    .filter(m -> !"sensiNact".equals(m.get("name"))).findFirst().get();
 
             // Two data streams (one per resource)
             List<?> rawDatastreamsList = (List<?>) rawThing.get("Datastreams");
@@ -609,25 +649,21 @@ public class FiltersTest extends AbstractIntegrationTest {
             assertEquals(7, rawDatastreamsList.size());
 
             // One observation with the value
-            Map<?,?>  rawDatastream = (Map<?, ?>) rawDatastreamsList.stream()
-                    .map(Map.class::cast)
-                    .filter(m -> "expandTester~sensor~rc_1".equals(m.get("@iot.id")))
-                    .findFirst().get();
+            Map<?, ?> rawDatastream = (Map<?, ?>) rawDatastreamsList.stream().map(Map.class::cast)
+                    .filter(m -> "expandTester~sensor~rc_1".equals(m.get("@iot.id"))).findFirst().get();
 
             List<?> rawObservationsList = (List<?>) rawDatastream.get("Observations");
 
             assertNotNull(rawObservationsList);
             assertEquals(1, rawObservationsList.size());
 
-            Map<?,?> rawObservation = (Map<?, ?>) rawObservationsList.get(0);
+            Map<?, ?> rawObservation = (Map<?, ?>) rawObservationsList.get(0);
             assertNotNull(rawObservation);
             assertEquals(42, rawObservation.get("result"));
 
             // Check the second value
-            rawDatastream = (Map<?, ?>) rawDatastreamsList.stream()
-                    .map(Map.class::cast)
-                    .filter(m -> "expandTester~sensor~rc_2".equals(m.get("@iot.id")))
-                    .findFirst().get();
+            rawDatastream = (Map<?, ?>) rawDatastreamsList.stream().map(Map.class::cast)
+                    .filter(m -> "expandTester~sensor~rc_2".equals(m.get("@iot.id"))).findFirst().get();
 
             rawObservationsList = (List<?>) rawDatastream.get("Observations");
 
@@ -647,8 +683,8 @@ public class FiltersTest extends AbstractIntegrationTest {
             createResource(provider, svc, rc + "_1", 42);
 
             Set<String> expandedFields = Set.of("Thing", "Sensor");
-            Map<?, ?> rawDatastream = utils.queryJson("/Datastreams(expandTester~sensor~rc_1)/?$expand=" + String.join(",", expandedFields),
-                    Map.class);
+            Map<?, ?> rawDatastream = utils.queryJson(
+                    "/Datastreams(expandTester~sensor~rc_1)/?$expand=" + String.join(",", expandedFields), Map.class);
 
             Map<?, ?> rawThing = (Map<?, ?>) rawDatastream.get("Thing");
 
