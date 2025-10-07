@@ -13,8 +13,12 @@
 package org.eclipse.sensinact.core.emf.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
@@ -90,25 +94,59 @@ public class EMFUtilTest {
         assertEquals("TestModel", modelName);
     }
 
+    public record SubRecord(String subName, Number subValue) {
+    }
+
+    public static class SubRecordDTO {
+        public String subName;
+        public Number subValue;
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj instanceof SubRecordDTO that) {
+                return Objects.equals(this.subName, that.subName)
+                    && Objects.equals(this.subValue, that.subValue);
+            }
+            return false;
+        }
+    }
+
     /**
      * Test record class. Must be public to be accessible by EMFUtil
      */
-    public record Record(String name, int value) {
+    public record Record(String name, int value, List<SubRecord> subRecords) {
     }
 
-    public class RecordDTO {
+    public static class RecordDTO {
         public String name;
         public int value;
+        public List<SubRecordDTO> subRecords;
+
+        @Override
+        public boolean equals(Object obj) {
+            if(obj instanceof RecordDTO that) {
+                return Objects.equals(this.name, that.name)
+                    && this.value == that.value
+                    && Objects.equals(this.subRecords, that.subRecords);
+            }
+            return false;
+        }
     }
 
     @Test
     void testRecordConversion() throws Exception {
         // Prepare input
         final ObjectMapper mapper = JsonMapper.builder().build();
-        final Record record = new Record("test", 42);
+        final Record record = new Record("test", 42, List.of(new SubRecord("a", 1), new SubRecord("b", 2.5)));
         final RecordDTO dtoRecord = new RecordDTO();
         dtoRecord.name = record.name();
         dtoRecord.value = record.value();
+        dtoRecord.subRecords = record.subRecords().stream().map(sr -> {
+            SubRecordDTO dto = new SubRecordDTO();
+            dto.subName = sr.subName();
+            dto.subValue = sr.subValue();
+            return dto;
+        }).toList();
         final Map<String, Object> mapRecord = mapper.convertValue(record, new TypeReference<Map<String, Object>>() {
         });
 
@@ -116,22 +154,61 @@ public class EMFUtilTest {
         Record parsed = (Record) EMFUtil.convertToTargetType(Record.class, record);
         assertEquals("test", parsed.name);
         assertEquals(42, parsed.value);
+        assertEquals(2, parsed.subRecords.size());
+        assertInstanceOf(SubRecord.class, parsed.subRecords.get(0));
+        assertEquals(record.subRecords.get(0), parsed.subRecords.get(0));
+        assertEquals(record.subRecords.get(1), parsed.subRecords.get(1));
 
         // Test from DTO
         parsed = (Record) EMFUtil.convertToTargetType(Record.class, dtoRecord);
         assertEquals("test", parsed.name);
         assertEquals(42, parsed.value);
+        assertInstanceOf(SubRecord.class, parsed.subRecords.get(0));
+        assertEquals(record.subRecords.get(0), parsed.subRecords.get(0));
+        assertEquals(record.subRecords.get(1), parsed.subRecords.get(1));
 
         // Test from Map
         parsed = (Record) EMFUtil.convertToTargetType(Record.class, mapRecord);
         assertEquals("test", parsed.name);
         assertEquals(42, parsed.value);
+        assertEquals(record.subRecords.get(0), parsed.subRecords.get(0));
+        assertEquals(record.subRecords.get(1), parsed.subRecords.get(1));
+    }
 
-        // Test to map
-        @SuppressWarnings("unchecked")
-        Map<String, Object> parsedMap = (Map<String, Object>) EMFUtil.convertToTargetType(Map.class, record);
-        assertEquals(2, parsedMap.size());
-        assertEquals("test", parsedMap.get("name"));
-        assertEquals(42, parsedMap.get("value"));
+    @Test
+    void testDtoConversion() throws Exception {
+        // Prepare input
+        final ObjectMapper mapper = JsonMapper.builder().build();
+        final RecordDTO dtoRecord = new RecordDTO();
+        dtoRecord.name = "test";
+        dtoRecord.value = 42;
+        dtoRecord.subRecords = new ArrayList<>();
+        SubRecordDTO subRecord = new SubRecordDTO();
+        subRecord.subName = "a";
+        subRecord.subValue = 1;
+        dtoRecord.subRecords.add(subRecord);
+        subRecord = new SubRecordDTO();
+        subRecord.subName = "b";
+        subRecord.subValue = 2.5;
+        dtoRecord.subRecords.add(subRecord);
+        final Map<String, Object> mapRecord = mapper.convertValue(dtoRecord, new TypeReference<Map<String, Object>>() {
+        });
+
+        // Test pass-through
+        RecordDTO parsed = (RecordDTO) EMFUtil.convertToTargetType(RecordDTO.class, dtoRecord);
+        assertEquals("test", parsed.name);
+        assertEquals(42, parsed.value);
+        assertEquals(2, parsed.subRecords.size());
+        assertInstanceOf(SubRecordDTO.class, parsed.subRecords.get(0));
+        assertEquals(dtoRecord.subRecords.get(0), parsed.subRecords.get(0));
+        assertEquals(dtoRecord.subRecords.get(1), parsed.subRecords.get(1));
+
+        // Test from Map
+        parsed = (RecordDTO) EMFUtil.convertToTargetType(RecordDTO.class, mapRecord);
+        assertEquals("test", parsed.name);
+        assertEquals(42, parsed.value);
+        assertInstanceOf(SubRecordDTO.class, parsed.subRecords.get(0));
+        assertEquals(dtoRecord.subRecords.get(0), parsed.subRecords.get(0));
+        assertEquals(dtoRecord.subRecords.get(1), parsed.subRecords.get(1));
     }
 }

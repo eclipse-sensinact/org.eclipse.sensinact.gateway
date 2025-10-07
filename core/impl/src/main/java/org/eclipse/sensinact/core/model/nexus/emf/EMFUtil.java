@@ -461,7 +461,7 @@ public class EMFUtil {
             Constructor<?> recordConstructor = targetClass.getConstructor(
                     Arrays.stream(targetRecordComponents).map(rc -> rc.getType()).toArray(Class[]::new));
             return recordConstructor.newInstance(Arrays.stream(targetRecordComponents)
-                    .map(rc -> converter.convert(recordAsMap.get(rc.getName())).to(rc.getType())).toArray());
+                    .map(rc -> converter.convert(recordAsMap.get(rc.getName())).to(rc.getGenericType())).toArray());
         }
 
         return converter.convert(recordAsMap).to(targetType);
