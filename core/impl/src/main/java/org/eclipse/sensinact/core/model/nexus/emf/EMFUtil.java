@@ -13,6 +13,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.model.nexus.emf;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.Arrays;
@@ -23,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.EMap;
@@ -87,7 +91,8 @@ public class EMFUtil {
     private static final ObjectMapper mapper = JsonMapper.builder().build();
     private static final Map<Class<?>, EClassifier> typeMap = new HashMap<Class<?>, EClassifier>();
     static {
-        converter = Converters.newConverterBuilder().errorHandler(EMFUtil::fallbackConversion).build();
+        converter = Converters.newConverterBuilder().rule(EMFUtil::convertRecords)
+                .errorHandler(EMFUtil::fallbackConversion).build();
         EcorePackage.eINSTANCE.getEClassifiers().forEach(ec -> typeMap.put(ec.getInstanceClass(), ec));
         ProviderPackage.eINSTANCE.getEClassifiers().forEach(ed -> typeMap.put(ed.getInstanceClass(), ed));
     }
@@ -414,6 +419,52 @@ public class EMFUtil {
             }
         }
         return converted;
+    }
+
+    /**
+     * {@link ConverterFunction} that handles record inputs and targets.
+     *
+     * Returns {@link ConverterFunction#CANNOT_HANDLE} if neither input nor target are records.
+     *
+     * @param obj Input object
+     * @param targetType Target type
+     * @return The converted object or {@link ConverterFunction#CANNOT_HANDLE}
+     * @throws ConversionException Error accessing input record value
+     * @throws Exception Error calling target record constructor
+     */
+    private static Object convertRecords(Object obj, Type targetType) throws Exception {
+
+        final Map<String, Object> recordAsMap;
+
+        if (Record.class.isInstance(obj)) {
+            // Input is record
+            RecordComponent[] recordComponents = obj.getClass().getRecordComponents();
+            recordAsMap = Arrays.stream(recordComponents).collect(Collectors.toMap(rc -> rc.getName(), rc -> {
+                try {
+                    return rc.getAccessor().invoke(obj);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    throw new ConversionException("Error accessing " + rc.getName(), e);
+                }
+            }));
+        } else if (targetType instanceof Class targetClass && targetClass.isRecord()) {
+            // Other input with a record target
+            recordAsMap = converter.convert(obj).to(new org.osgi.util.converter.TypeReference<Map<String, Object>>() {
+            });
+        } else {
+            // Neither input nor output are records
+            return ConverterFunction.CANNOT_HANDLE;
+        }
+
+        if (targetType instanceof Class targetClass && targetClass.isRecord()) {
+            RecordComponent[] targetRecordComponents = targetClass.getRecordComponents();
+            @SuppressWarnings("unchecked")
+            Constructor<?> recordConstructor = targetClass.getConstructor(
+                    Arrays.stream(targetRecordComponents).map(rc -> rc.getType()).toArray(Class[]::new));
+            return recordConstructor.newInstance(Arrays.stream(targetRecordComponents)
+                    .map(rc -> converter.convert(recordAsMap.get(rc.getName())).to(rc.getGenericType())).toArray());
+        }
+
+        return converter.convert(recordAsMap).to(targetType);
     }
 
     public static void fillMetadata(NexusMetadata meta, Instant timestamp, boolean locked, String name,
