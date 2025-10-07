@@ -20,6 +20,8 @@ import static org.eclipse.sensinact.core.notification.LifecycleNotification.Stat
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.RESOURCE_DELETED;
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_CREATED;
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_DELETED;
+import static org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action.ADDED;
+import static org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action.REMOVED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,11 +29,14 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
+import org.eclipse.sensinact.core.notification.LinkedProviderNotification;
+import org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
@@ -53,6 +58,7 @@ class NotificationSenderTest {
     private static final String MODEL = "model";
     private static final String PROVIDER = "provider";
     private static final String PROVIDER_2 = "provider2";
+    private static final String PROVIDER_3 = "provider3";
     private static final String SERVICE = "service";
     private static final String SERVICE_2 = "service2";
     private static final String RESOURCE = "resource";
@@ -638,12 +644,99 @@ class NotificationSenderTest {
     }
 
     @Nested
+    class LinkProviderTests {
+
+        @Test
+        void testLink() {
+            Instant now = Instant.now();
+
+            accumulator.link(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2), PROVIDER_2, now);
+            accumulator.completeAndSend();
+
+            Mockito.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_2, ADDED, List.of(PROVIDER_2), now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
+
+        @Test
+        void testMultiLink() {
+            Instant now = Instant.now();
+
+            accumulator.link(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2), PROVIDER_2, now);
+            accumulator.link(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2, PROVIDER_3), PROVIDER_3, now);
+            accumulator.completeAndSend();
+
+            Mockito.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_2, ADDED, List.of(PROVIDER_2, PROVIDER_3), now)));
+            Mockito.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_3, ADDED, List.of(PROVIDER_2, PROVIDER_3), now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
+
+        @Test
+        void testUnlink() {
+            Instant now = Instant.now();
+
+            accumulator.unlink(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2), PROVIDER_3, now);
+            accumulator.completeAndSend();
+
+            Mockito.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_3, REMOVED, List.of(PROVIDER_2), now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
+
+        @Test
+        void testMultiUnlink() {
+            Instant now = Instant.now();
+
+            accumulator.unlink(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_3), PROVIDER_2, now);
+            accumulator.unlink(MODEL_PKG, MODEL, PROVIDER, List.of(), PROVIDER_3, now);
+            accumulator.completeAndSend();
+
+            Mockito.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_2, REMOVED, List.of(), now)));
+            Mockito.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_3, REMOVED, List.of(), now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
+
+        @Test
+        void testLinkUnlink() {
+            Instant now = Instant.now();
+
+            accumulator.link(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2), PROVIDER_2, now);
+            accumulator.unlink(MODEL_PKG, MODEL, PROVIDER, List.of(), PROVIDER_2, now);
+            accumulator.completeAndSend();
+
+            Mockito.verifyNoInteractions(bus);
+        }
+
+        @Test
+        void testUnlinkLink() {
+            Instant now = Instant.now();
+
+            accumulator.unlink(MODEL_PKG, MODEL, PROVIDER, List.of(), PROVIDER_2, now);
+            accumulator.link(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2), PROVIDER_2, now);
+            accumulator.completeAndSend();
+
+            Mockito.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_2, ADDED, List.of(PROVIDER_2), now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
+
+    }
+
+    @Nested
     class NotificationOrderingTests {
 
         @Test
         void testNotificationOrdering() {
             Instant now = Instant.now();
 
+            accumulator.link(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2), PROVIDER_2, now.minusSeconds(50));
+            accumulator.link(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_2, PROVIDER_3), PROVIDER_3, now.minusSeconds(40));
+            accumulator.unlink(MODEL_PKG, MODEL, PROVIDER_2, List.of(), PROVIDER, now.minusSeconds(30));
+            accumulator.unlink(MODEL_PKG, MODEL, PROVIDER, List.of(PROVIDER_3), PROVIDER_2, now.minusSeconds(20));
             accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2, now.minusSeconds(10));
             accumulator.resourceAction(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, now);
             accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2, Integer.class, null, INTEGER_VALUE,
@@ -720,11 +813,18 @@ class NotificationSenderTest {
                     isValueNotificationWith(PROVIDER, SERVICE, RESOURCE_2, Integer.class, null, INTEGER_VALUE,
                             Map.of(METADATA_KEY_2, METADATA_VALUE_2), now)));
 
-            // Finally the actions
+            // Next the actions
             inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE, now)));
             inOrder.verify(bus).deliver(eq("ACTION/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
                     argThat(isActionNotificationWith(PROVIDER, SERVICE, RESOURCE_2, now.minusSeconds(10))));
+
+            // Finally the links
+            inOrder.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER),
+                    argThat(isLinkNotificationWith(PROVIDER, PROVIDER_3, ADDED, List.of(PROVIDER_3), now.minusSeconds(40))));
+            inOrder.verify(bus).deliver(eq("LINKED/" + MODEL + "/" + PROVIDER_2),
+                    argThat(isLinkNotificationWith(PROVIDER_2, PROVIDER, REMOVED, List.of(), now.minusSeconds(30))));
+
             Mockito.verifyNoMoreInteractions(bus);
         }
 
@@ -800,6 +900,23 @@ class NotificationSenderTest {
                 assertEquals(provider, i.provider());
                 assertEquals(service, i.service());
                 assertEquals(resource, i.resource());
+                assertEquals(timestamp, i.timestamp());
+            } catch (AssertionFailedError e) {
+                return false;
+            }
+            return true;
+        };
+    }
+
+    ArgumentMatcher<LinkedProviderNotification> isLinkNotificationWith(String provider, String child,
+            Action action, List<String> links, Instant timestamp) {
+        return i -> {
+            try {
+                assertEquals(MODEL, i.model());
+                assertEquals(provider, i.provider());
+                assertEquals(child, i.child());
+                assertEquals(action, i.action());
+                assertEquals(links, i.linkedProviders());
                 assertEquals(timestamp, i.timestamp());
             } catch (AssertionFailedError e) {
                 return false;

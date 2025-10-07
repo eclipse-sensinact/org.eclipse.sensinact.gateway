@@ -26,7 +26,7 @@ public class ResourceValueFilterInputHolder {
 
     private final EFilterContext context;
     private final ProviderSnapshot provider;
-    private final List<ResourceSnapshot> resources;
+    private final List<? extends ResourceSnapshot> resources;
     private final ResourceSnapshot resource;
 
     /**
@@ -37,7 +37,7 @@ public class ResourceValueFilterInputHolder {
      * @param resources Resources of the provider
      */
     public ResourceValueFilterInputHolder(final EFilterContext context, final ProviderSnapshot provider,
-            final List<ResourceSnapshot> resources) {
+            final List<? extends ResourceSnapshot> resources) {
         this.context = context;
         this.provider = provider;
         this.resources = resources;
@@ -87,7 +87,7 @@ public class ResourceValueFilterInputHolder {
         return provider;
     }
 
-    public List<ResourceSnapshot> getResources() {
+    public List<? extends ResourceSnapshot> getResources() {
         return resources;
     }
 

@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
@@ -168,6 +169,12 @@ public class LdapParserTest {
                             @Override
                             public ResourceSnapshot getResource(String service, String resource) {
                                 return getRc();
+                            }
+
+                            @Override
+                            public List<LinkedProviderSnapshot> getLinkedProviders() {
+                                // No linked provider support
+                                return List.of();
                             }
                         };
                     }

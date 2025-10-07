@@ -65,7 +65,7 @@ public class SensorthingsCriterion implements ICriterion {
         case THINGS:
             return new ResourceValueFilter() {
                 @Override
-                public boolean test(final ProviderSnapshot provider, final List<ResourceSnapshot> resources) {
+                public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
                     return predicate.test(new ResourceValueFilterInputHolder(context, provider, resources));
                 }
             };
@@ -76,7 +76,7 @@ public class SensorthingsCriterion implements ICriterion {
         case SENSORS:
             return new ResourceValueFilter() {
                 @Override
-                public boolean test(final ProviderSnapshot provider, final List<ResourceSnapshot> resources) {
+                public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
                     return resources.stream().map(r -> new ResourceValueFilterInputHolder(context, provider, r))
                             .anyMatch(predicate);
                 }

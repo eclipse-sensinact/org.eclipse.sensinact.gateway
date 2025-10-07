@@ -93,7 +93,7 @@ public class PathUtils {
         }
     }
 
-    public static Object getProviderLevelField(final ProviderSnapshot provider, final List<ResourceSnapshot> resources,
+    public static Object getProviderLevelField(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources,
             final String path) {
         switch (path) {
         case "name":

@@ -15,22 +15,12 @@ package org.eclipse.sensinact.core.snapshot;
 
 import java.util.List;
 
-public interface ProviderSnapshot extends Snapshot {
-
-    /**
-     * Returns the package URI of the model of the provider
-     */
-    String getModelPackageUri();
-
-    /**
-     * Returns the name of the model of the provider
-     */
-    String getModelName();
+public interface ProviderSnapshot extends CommonProviderSnapshot {
 
     /**
      * Returns the list of services of the provider
      */
-    <T extends ServiceSnapshot> List<T> getServices();
+    List<ServiceSnapshot> getServices();
 
     /**
      * Returns the snapshot of the provider service with the given name
@@ -38,7 +28,7 @@ public interface ProviderSnapshot extends Snapshot {
      * @param name Name of the service
      * @return Service snapshot or null if unknown
      */
-    <T extends ServiceSnapshot> T getService(String name);
+    ServiceSnapshot getService(String name);
 
     /**
      * Returns the snapshot of a resource of the given service
@@ -47,5 +37,14 @@ public interface ProviderSnapshot extends Snapshot {
      * @param resource Resource name
      * @return Resource snapshot or null
      */
-    <T extends ResourceSnapshot> T getResource(String service, String resource);
+    ResourceSnapshot getResource(String service, String resource);
+
+    /**
+     * Returns the snapshot of a resource of the given service
+     *
+     * @param service  Service name
+     * @param resource Resource name
+     * @return Resource snapshot or null
+     */
+    List<LinkedProviderSnapshot> getLinkedProviders();
 }

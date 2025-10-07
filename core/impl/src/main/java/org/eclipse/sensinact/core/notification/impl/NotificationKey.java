@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.notification.impl;
 
 import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LinkedProviderNotification;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
@@ -70,6 +71,9 @@ class NotificationKey implements Comparable<NotificationKey> {
         }
         if (ResourceActionNotification.class == clazz) {
             return 4;
+        }
+        if (LinkedProviderNotification.class == clazz) {
+            return 5;
         }
         throw new IllegalArgumentException("Unkown type " + clazz.getName());
     }

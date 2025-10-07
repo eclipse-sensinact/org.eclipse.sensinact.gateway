@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.model.core.provider.Service;
 
@@ -78,13 +79,11 @@ public class ServiceSnapshotImpl extends AbstractSnapshot implements ServiceSnap
         resources.put(rc.getName(), rc);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ResourceSnapshotImpl> getResources() {
+    public List<ResourceSnapshot> getResources() {
         return List.copyOf(resources.values());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ResourceSnapshotImpl getResource(String name) {
         return resources.get(name);

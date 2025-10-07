@@ -21,6 +21,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +36,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.BasicEMap;
 import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -98,6 +101,11 @@ public class ModelNexus {
     private final Supplier<NotificationAccumulator> notificationAccumulator;
 
     private final Map<String, Provider> providers = new HashMap<>();
+
+    /**
+     * The reverse mapping of child providers to parent providers
+     */
+    private final Map<String, Set<String>> childToParents = new HashMap<>();
 
 //    private final Map<String, EClass> models = new HashMap<>();
 
@@ -270,15 +278,11 @@ public class ModelNexus {
 
     /**
      * Will associate the given Parent provider with the given child. If parent or
-     * child do not exist, they will be created.
+     * child do not exist then an exception will be raised.
      *
-     * @param parentModel    name of the type of providers for the parent. Can be
-     *                       <code>null</code>
      * @param parentProvider The provider name of the parent. The name will be used
      *                       as ID and in the first setup as the friendlyname for
      *                       the Admin Service
-     * @param childModel     name of the type of providers for the parent. Can be
-     *                       <code>null</code>
      * @param childProvider  The provider name of the child. The name will be used
      *                       as ID and in the first setup as the friendlyname for
      *                       the Admin service
@@ -287,9 +291,6 @@ public class ModelNexus {
      */
     public void linkProviders(String parentProvider, String childProvider, Instant timestamp) {
 
-        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
-
-        NotificationAccumulator accumulator = notificationAccumulator.get();
 
         Provider parent = providers.get(parentProvider);
 
@@ -301,27 +302,49 @@ public class ModelNexus {
         if (child == null) {
             throw new IllegalArgumentException("No child provider " + childProvider);
         }
-        parent.getLinkedProviders().add(child);
 
-        // TODO link event
-        // accumulator.link(...)
+        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
+
+        ProviderPackage pp = ProviderPackage.eINSTANCE;
+
+        Admin admin = parent.getAdmin();
+        ResourceValueMetadata metadata = getOrInitializeResourceMetadata(admin, pp.getProvider_LinkedProviders());
+        Instant oldTs = metadata.getTimestamp();
+        if(oldTs == null || !oldTs.isAfter(metaTimestamp)) {
+            Set<String> set = childToParents.get(childProvider);
+            if(set == null) {
+                set = new HashSet<>();
+                childToParents.put(childProvider, set);
+            }
+
+            if(set.add(parentProvider)) {
+                if(!parent.isSetLinkedProviders()) {
+                    parent.eSet(pp.getProvider_LinkedProviders(), new BasicEList<>());
+                }
+                metadata.setTimestamp(metaTimestamp);
+                EList<Provider> linkedProviders = parent.getLinkedProviders();
+                linkedProviders.add(child);
+                notificationAccumulator.get().link(admin.getModelPackageUri(), admin.getModel(),
+                        parentProvider, linkedProviders.stream().map(Provider::getId).toList(),
+                        childProvider, metaTimestamp);
+            } else {
+                LOG.debug("The parent provider {} already has a linked child {}", parentProvider, childProvider);
+            }
+        } else {
+            LOG.debug("The existing parent provider linked providers update time {} is after the new update time {}",
+                    oldTs, metaTimestamp);
+        }
     }
 
     /**
      * Will disassociate the given Parent provider with the given child.
      *
-     * @param parentModel    name of the type of providers for the parent. Can be
-     *                       <code>null</code>.
      * @param parentProvider The provider name of the parent.
-     * @param childModel     name of the type of providers for the parent. Can be
-     *                       <code>null</code>.
      * @param childProvider  The provider name of the child.
-     * @param timestamp      the timestamp when the link is created. If null, the
+     * @param timestamp      the timestamp when the link is removed. If null, the
      *                       current timestamp is used.
      */
     public void unlinkProviders(String parentProvider, String childProvider, Instant timestamp) {
-
-        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
 
         Provider parent = providers.get(parentProvider);
 
@@ -333,10 +356,31 @@ public class ModelNexus {
         if (child == null) {
             throw new IllegalArgumentException("No child provider " + childProvider);
         }
-        parent.getLinkedProviders().remove(child);
 
-        // TODO unlink event
-        // accumulator.unlink(...)
+        Instant metaTimestamp = timestamp == null ? Instant.now() : timestamp;
+
+        ProviderPackage pp = ProviderPackage.eINSTANCE;
+
+        Admin admin = parent.getAdmin();
+        ResourceValueMetadata metadata = getOrInitializeResourceMetadata(admin, pp.getProvider_LinkedProviders());
+        Instant oldTs = metadata.getTimestamp();
+        if(oldTs == null || !oldTs.isAfter(metaTimestamp)) {
+            Set<String> set = childToParents.get(childProvider);
+
+            if(set != null && set.remove(parentProvider)) {
+                metadata.setTimestamp(metaTimestamp);
+                EList<Provider> linkedProviders = parent.getLinkedProviders();
+                linkedProviders.remove(child);
+                notificationAccumulator.get().unlink(admin.getModelPackageUri(), admin.getModel(),
+                        parentProvider, linkedProviders.stream().map(Provider::getId).toList(),
+                        childProvider, metaTimestamp);
+            } else {
+                LOG.debug("The parent provider {} has no linked child {}", parentProvider, childProvider);
+            }
+        } else {
+            LOG.debug("The existing parent provider linked providers update time {} is after the new update time {}",
+                    oldTs, metaTimestamp);
+        }
     }
 
     public void handleDataUpdate(Provider provider, String serviceName, EClass serviceEClass,
@@ -1074,7 +1118,23 @@ public class ModelNexus {
     }
 
     private void doDeleteProvider(String modelPackageUri, String model, String name) {
-        providers.remove(name);
+        Set<String> parents = childToParents.get(name);
+        if(parents != null) {
+            Instant now = Instant.now();
+            for(String parent : parents) {
+                unlinkProviders(parent, name, now);
+            }
+            childToParents.remove(name);
+        }
+        Provider p = providers.remove(name);
+        List<Provider> linked = Optional.<List<Provider>>ofNullable(p.getLinkedProviders())
+            .orElse(List.of());
+
+        for(Provider prov : linked) {
+            String id = prov.getId();
+            childToParents.getOrDefault(id, Set.of()).remove(name);
+        }
+
         notificationAccumulator.get().removeProvider(modelPackageUri, model, name);
     }
 

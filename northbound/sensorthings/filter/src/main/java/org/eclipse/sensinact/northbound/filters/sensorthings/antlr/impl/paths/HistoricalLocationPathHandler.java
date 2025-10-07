@@ -24,12 +24,12 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.Unsuppor
 public class HistoricalLocationPathHandler {
 
     private final ProviderSnapshot provider;
-    private final List<ResourceSnapshot> resources;
+    private final List<? extends ResourceSnapshot> resources;
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("things", this::subThings, "locations",
             this::subLocations);
 
-    public HistoricalLocationPathHandler(final ProviderSnapshot provider, final List<ResourceSnapshot> resources) {
+    public HistoricalLocationPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
         this.provider = provider;
         this.resources = resources;
     }
