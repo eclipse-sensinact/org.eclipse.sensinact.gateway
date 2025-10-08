@@ -13,6 +13,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.twin.impl;
 
+import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL;
+import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,6 +28,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,12 +44,14 @@ import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.command.impl.ActionHandler;
+import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -54,6 +59,7 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -79,6 +85,7 @@ public class SensinactTwinTest {
     private static final String TEST_MODEL = "testmodel";
     private static final String TEST_MODEL_WITH_METADATA = "testmodel_Metadata";
     private static final String TEST_PROVIDER = "testprovider";
+    private static final String TEST_PROVIDER_2 = "testprovider2";
     private static final String TEST_SERVICE = "testservice";
     private static final String TEST_RESOURCE = "testValue";
     private static final String TEST_ACTION_RESOURCE = "testAction";
@@ -300,6 +307,44 @@ public class SensinactTwinTest {
             assertFalse(act.isDone());
             assertEquals(4.2D, act.getValue());
         }
+
+        @Test
+        void testLinkProviders() {
+            SensinactProvider provider = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+            SensinactProvider provider2 = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER_2);
+
+            provider.addLinkedProvider(provider2);
+
+            List<? extends SensinactProvider> linkedProviders = provider.getLinkedProviders();
+
+            assertEquals(1, linkedProviders.size());
+
+            SensinactProvider linkedProvider = linkedProviders.get(0);
+            assertEquals(TEST_MODEL, linkedProvider.getModelName());
+            assertEquals(TEST_PROVIDER_2, linkedProvider.getName());
+
+            assertTrue(provider2.getLinkedProviders().isEmpty());
+
+            provider.removeLinkedProvider(provider2);
+
+            assertTrue(provider.getLinkedProviders().isEmpty());
+        }
+
+        @Test
+        void testProvidersUnlinkOnDelete() {
+            SensinactProvider provider = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+            SensinactProvider provider2 = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER_2);
+
+            provider.addLinkedProvider(provider2);
+
+            List<? extends SensinactProvider> linkedProviders = provider.getLinkedProviders();
+
+            assertEquals(1, linkedProviders.size());
+
+            provider2.delete();
+
+            assertTrue(provider.getLinkedProviders().isEmpty());
+        }
     }
 
     @Nested
@@ -315,6 +360,7 @@ public class SensinactTwinTest {
             assertEquals(2, list.size());
             ProviderSnapshot ps = list.stream().filter(p -> TEST_PROVIDER.equals(p.getName())).findFirst().get();
 
+            assertEquals(List.of(), ps.getLinkedProviders());
             assertEquals(2, ps.getServices().size());
             ServiceSnapshot ss = ps.getService(TEST_SERVICE);
             assertNotNull(ss);
@@ -332,6 +378,46 @@ public class SensinactTwinTest {
 
             list = twinImpl.filteredSnapshot(null, p -> TEST_PROVIDER.equals(p.getName()), null, null);
             assertEquals(1, list.size());
+        }
+
+        @Test
+        void includeLinkedProviders() {
+            SensinactEMFProvider provider = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+            SensinactEMFProvider provider2 = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER_2);
+            provider.addLinkedProvider(provider2);
+
+            provider2.getResource(ProviderPackage.eINSTANCE.getProvider_Admin().getName(),
+                    ProviderPackage.eINSTANCE.getAdmin_FriendlyName().getName()).setValue("foo");
+            provider2.getResource(ProviderPackage.eINSTANCE.getProvider_Admin().getName(),
+                    ProviderPackage.eINSTANCE.getAdmin_Description().getName()).setValue("bar");
+            provider2.getResource(ProviderPackage.eINSTANCE.getProvider_Admin().getName(),
+                    ProviderPackage.eINSTANCE.getAdmin_Location().getName()).setValue(new Point(12.3d, 45.6d));
+
+            List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null,
+                    p -> TEST_PROVIDER.equals(p.getName()), null, null, EnumSet.of(INCLUDE_LINKED_PROVIDER_IDS));
+            assertEquals(1, list.size());
+            assertEquals(1, list.get(0).getLinkedProviders().size());
+            LinkedProviderSnapshot lps = list.get(0).getLinkedProviders().get(0);
+            assertNotNull(lps.getModelPackageUri());
+            assertEquals(TEST_MODEL, lps.getModelName());
+            assertEquals(TEST_PROVIDER_2, lps.getName());
+            assertNull(lps.getFriendlyName());
+            assertNull(lps.getDescription());
+            assertNull(lps.getIcon());
+            assertNull(lps.getLocation());
+
+            list = twinImpl.filteredSnapshot(null,
+                    p -> TEST_PROVIDER.equals(p.getName()), null, null, EnumSet.of(INCLUDE_LINKED_PROVIDERS_FULL));
+            assertEquals(1, list.size());
+            assertEquals(1, list.get(0).getLinkedProviders().size());
+            lps = list.get(0).getLinkedProviders().get(0);
+            assertNotNull(lps.getModelPackageUri());
+            assertEquals(TEST_MODEL, lps.getModelName());
+            assertEquals(TEST_PROVIDER_2, lps.getName());
+            assertEquals("foo", lps.getFriendlyName());
+            assertEquals("bar", lps.getDescription());
+            assertNull(lps.getIcon());
+            assertEquals(new Point(12.3d, 45.6d), lps.getLocation());
         }
 
         @Test

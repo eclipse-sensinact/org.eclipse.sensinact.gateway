@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
@@ -160,6 +161,12 @@ public class ResourceSelectorTest {
                             @Override
                             public ResourceSnapshot getResource(String service, String resource) {
                                 return getRc();
+                            }
+
+                            @Override
+                            public List<LinkedProviderSnapshot> getLinkedProviders() {
+                                // No support for linked providers
+                                return List.of();
                             }
                         };
                     }

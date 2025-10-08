@@ -21,6 +21,7 @@ import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -114,7 +115,6 @@ class NotificationSnapshot {
             return List.of(service);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public ServiceSnapshot getService(String name) {
             if (service.getName().equals(name)) {
@@ -123,7 +123,6 @@ class NotificationSnapshot {
             return null;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public ResourceSnapshot getResource(String service, String resource) {
             if (NotificationSnapshot.this.service.getName().equals(service)
@@ -131,6 +130,12 @@ class NotificationSnapshot {
                 return NotificationSnapshot.this.resource;
             }
             return null;
+        }
+
+        @Override
+        public List<LinkedProviderSnapshot> getLinkedProviders() {
+            // No linked provider support
+            return List.of();
         }
     }
 
@@ -156,7 +161,6 @@ class NotificationSnapshot {
             return List.of(resource);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public ResourceSnapshot getResource(String name) {
             if (resource.getName().equals(name)) {

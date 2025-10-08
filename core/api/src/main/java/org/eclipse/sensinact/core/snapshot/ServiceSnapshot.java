@@ -25,7 +25,7 @@ public interface ServiceSnapshot extends Snapshot {
     /**
      * Returns the list of service resources
      */
-    <T extends ResourceSnapshot> List<T> getResources();
+    List<ResourceSnapshot> getResources();
 
     /**
      * Returns the snapshot of the service resource with the given name
@@ -33,5 +33,5 @@ public interface ServiceSnapshot extends Snapshot {
      * @param name Resource name
      * @return Resource snapshot, null if unknown
      */
-    <T extends ResourceSnapshot> T getResource(String name);
+    ResourceSnapshot getResource(String name);
 }

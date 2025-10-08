@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.twin;
 
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -184,7 +185,9 @@ public interface SensinactDigitalTwin extends CommandScoped {
 
     /**
      * Returns a (filtered) snapshot of the model. All null filters are ignored, all
-     * associated items are accepted.
+     * associated items are accepted. Equivalent to calling
+     * {@link #filteredSnapshot(BiPredicate, Predicate, Predicate, Predicate, EnumSet)}
+     * with an empty set of options.
      *
      * @param geoFilter      Provider location filter
      * @param providerFilter Provider filter (without services)
@@ -197,12 +200,37 @@ public interface SensinactDigitalTwin extends CommandScoped {
             Predicate<ResourceSnapshot> rcFilter);
 
     /**
+     * Returns a (filtered) snapshot of the model. All null filters are ignored, all
+     * associated items are accepted.
+     *
+     * @param geoFilter      Provider location filter
+     * @param providerFilter Provider filter (without services)
+     * @param svcFilter      Service filter (without resources)
+     * @param rcFilter       Resource filter (without values)
+     * @param options        The options for generating the snapshots
+     * @return The filtered snapshot
+     */
+    List<ProviderSnapshot> filteredSnapshot(BiPredicate<ProviderSnapshot, GeoJsonObject> geoFilter,
+            Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
+            Predicate<ResourceSnapshot> rcFilter, EnumSet<SnapshotOption> options);
+
+    /**
      * Returns the snapshot of the provider with the given name.
+     * Equivalent to calling {@link #snapshotProvider(String, EnumSet)}.
      *
      * @param providerName Name of the provider
      * @return The snapshot of the provider, null if not found
      */
     ProviderSnapshot snapshotProvider(String providerName);
+
+    /**
+     * Returns the snapshot of the provider with the given name.
+     *
+     * @param providerName Name of the provider
+     * @param options The options for generating the snapshots
+     * @return The snapshot of the provider, null if not found
+     */
+    ProviderSnapshot snapshotProvider(String providerName, EnumSet<SnapshotOption> options);
 
     /**
      * Returns the snapshot of a service of a provider
@@ -222,4 +250,8 @@ public interface SensinactDigitalTwin extends CommandScoped {
      * @return The snapshot of the resource, null if not found
      */
     ResourceSnapshot snapshotResource(String providerName, String serviceName, String resourceName);
+
+    public enum SnapshotOption {
+        INCLUDE_LINKED_PROVIDER_IDS, INCLUDE_LINKED_PROVIDERS_FULL;
+    }
 }

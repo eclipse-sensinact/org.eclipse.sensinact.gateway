@@ -162,7 +162,7 @@ public class ProviderSelectionCriterion {
         }
     }
 
-    private boolean checkResourceValues(ProviderSnapshot p, List<ResourceSnapshot> resources) {
+    private boolean checkResourceValues(ProviderSnapshot p, List<? extends ResourceSnapshot> resources) {
         // It must be for this provider
         if(providerFilter != ALWAYS && !providerFilter.test(p)) {
             return false;

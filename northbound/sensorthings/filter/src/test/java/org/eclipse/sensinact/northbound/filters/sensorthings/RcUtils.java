@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -30,94 +31,116 @@ import org.eclipse.sensinact.core.twin.TimedValue;
  */
 public class RcUtils {
 
+    private static final class TestServiceSnapshot implements ServiceSnapshot {
+        private final TestProviderSnapshot provider;
+        private final String svcName;
+        final List<ResourceSnapshot> resources = new ArrayList<>();
+
+        private TestServiceSnapshot(TestProviderSnapshot provider, String svcName) {
+            this.provider = provider;
+            this.svcName = svcName;
+        }
+
+        @Override
+        public Instant getSnapshotTime() {
+            return Instant.now();
+        }
+
+        @Override
+        public String getName() {
+            return svcName;
+        }
+
+        @Override
+        public String toString() {
+            return provider.toString() + "/" + svcName;
+        }
+
+        @Override
+        public List<ResourceSnapshot> getResources() {
+            return resources;
+        }
+
+        @Override
+        public ProviderSnapshot getProvider() {
+            return provider;
+        }
+
+        @Override
+        public ResourceSnapshot getResource(String name) {
+            return resources.stream().filter(r -> r.getName().equals(name)).findFirst().get();
+        }
+    }
+
+    private static final class TestProviderSnapshot implements ProviderSnapshot {
+        private final String providerName;
+        private final String modelName;
+        final List<ServiceSnapshot> services = new ArrayList<>();
+
+        private TestProviderSnapshot(String providerName, String modelName) {
+            this.providerName = providerName;
+            this.modelName = modelName;
+        }
+
+        @Override
+        public Instant getSnapshotTime() {
+            return Instant.now();
+        }
+
+        @Override
+        public String getModelPackageUri() {
+            return "https://eclipse.org/sensinact/test/";
+        }
+
+        @Override
+        public String getName() {
+            return providerName;
+        }
+
+        @Override
+        public String toString() {
+            return providerName;
+        }
+
+        @Override
+        public List<ServiceSnapshot> getServices() {
+            return services;
+        }
+
+        @Override
+        public String getModelName() {
+            return modelName;
+        }
+
+        @Override
+        public ServiceSnapshot getService(String name) {
+            return services.stream().filter(s -> s.getName().equals(name)).findFirst().get();
+        }
+
+        @Override
+        public ResourceSnapshot getResource(String service, String resource) {
+            return getService(service).getResource(resource);
+        }
+
+        @Override
+        public List<LinkedProviderSnapshot> getLinkedProviders() {
+            // Linked providers are not supported in the tests
+            return null;
+        }
+    }
+
     static ProviderSnapshot makeProvider(final String providerName) {
         return makeProvider(providerName, providerName);
     }
 
     static ProviderSnapshot makeProvider(final String modelName, final String providerName) {
-        return new ProviderSnapshot() {
-            final List<ServiceSnapshot> services = new ArrayList<>();
-
-            @Override
-            public Instant getSnapshotTime() {
-                return Instant.now();
-            }
-
-            @Override
-            public String getModelPackageUri() {
-                return "https://eclipse.org/sensinact/test/";
-            }
-
-            @Override
-            public String getName() {
-                return providerName;
-            }
-
-            @Override
-            public String toString() {
-                return providerName;
-            }
-
-            @Override
-            public List<ServiceSnapshot> getServices() {
-                return services;
-            }
-
-            @Override
-            public String getModelName() {
-                return modelName;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public ServiceSnapshot getService(String name) {
-                return services.stream().filter(s -> s.getName().equals(name)).findFirst().get();
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public ResourceSnapshot getResource(String service, String resource) {
-                return getService(service).getResource(resource);
-            }
-        };
+        return new TestProviderSnapshot(providerName, modelName);
     }
 
-    static ServiceSnapshot addService(final ProviderSnapshot provider, final String svcName) {
-        ServiceSnapshot svc = new ServiceSnapshot() {
-            final List<ResourceSnapshot> resources = new ArrayList<>();
-
-            @Override
-            public Instant getSnapshotTime() {
-                return Instant.now();
-            }
-
-            @Override
-            public String getName() {
-                return svcName;
-            }
-
-            @Override
-            public String toString() {
-                return provider.toString() + "/" + svcName;
-            }
-
-            @Override
-            public List<ResourceSnapshot> getResources() {
-                return resources;
-            }
-
-            @Override
-            public ProviderSnapshot getProvider() {
-                return provider;
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public ResourceSnapshot getResource(String name) {
-                return resources.stream().filter(r -> r.getName().equals(name)).findFirst().get();
-            }
-        };
-        provider.getServices().add(svc);
+    static TestServiceSnapshot addService(final ProviderSnapshot provider, final String svcName) {
+        TestProviderSnapshot test = (TestProviderSnapshot) provider;
+        TestServiceSnapshot svc = new TestServiceSnapshot(test, svcName);
+        test.getServices().add(svc);
         return svc;
     }
 
@@ -127,6 +150,7 @@ public class RcUtils {
 
     static ResourceSnapshot addResource(ServiceSnapshot svc, final String rcName, final Object value,
             final Instant rcTime) {
+        TestServiceSnapshot test = (TestServiceSnapshot) svc;
         ResourceSnapshot rc = new ResourceSnapshot() {
             @Override
             public String getName() {
@@ -140,7 +164,7 @@ public class RcUtils {
 
             @Override
             public String toString() {
-                return svc.toString() + "/" + rcName;
+                return test.toString() + "/" + rcName;
             }
 
             @Override
@@ -155,7 +179,7 @@ public class RcUtils {
 
             @Override
             public ServiceSnapshot getService() {
-                return svc;
+                return test;
             }
 
             @Override
@@ -179,7 +203,7 @@ public class RcUtils {
             }
         };
 
-        svc.getResources().add(rc);
+        test.getResources().add(rc);
         return rc;
     }
 }

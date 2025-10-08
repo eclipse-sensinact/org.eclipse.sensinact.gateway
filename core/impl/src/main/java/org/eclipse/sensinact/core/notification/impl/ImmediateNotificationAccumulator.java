@@ -19,12 +19,16 @@ import static org.eclipse.sensinact.core.notification.LifecycleNotification.Stat
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.RESOURCE_DELETED;
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_CREATED;
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_DELETED;
+import static org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action.ADDED;
+import static org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action.REMOVED;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LinkedProviderNotification;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
@@ -194,5 +198,20 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
     @Override
     protected void doComplete() {
         // No op by default
+    }
+
+    @Override
+    public void link(String modelPackageUri, String model, String parentProvider, List<String> list, String childProvider, Instant metaTimestamp) {
+        LinkedProviderNotification lpn = createLinkedProviderNotification(modelPackageUri, model, parentProvider,
+                childProvider, ADDED, list, metaTimestamp);
+        eventBus.deliver(lpn.getTopic(), lpn);
+    }
+
+    @Override
+    public void unlink(String modelPackageUri, String model, String parentProvider, List<String> list, String childProvider, Instant metaTimestamp) {
+        LinkedProviderNotification lpn = createLinkedProviderNotification(modelPackageUri, model, parentProvider,
+                childProvider, REMOVED, list, metaTimestamp);
+        eventBus.deliver(lpn.getTopic(), lpn);
+
     }
 }

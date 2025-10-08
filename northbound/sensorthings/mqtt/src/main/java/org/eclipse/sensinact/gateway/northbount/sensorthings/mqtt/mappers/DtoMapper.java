@@ -46,14 +46,14 @@ public class DtoMapper {
 
     private static final String NO_DESCRIPTION = "No description";
 
-    private static Optional<ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
+    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
         ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> "admin".equals(s.getName())).findFirst()
                 .get();
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
     private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider, String resource) {
-        Optional<ResourceSnapshot> rc = getProviderAdminField(provider, resource);
+        Optional<? extends ResourceSnapshot> rc = getProviderAdminField(provider, resource);
         if (rc.isPresent()) {
             TimedValue<?> value = rc.get().getValue();
             if (value != null) {
@@ -225,7 +225,7 @@ public class DtoMapper {
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             boolean allowNull) {
 
-        final Optional<ResourceSnapshot> locationResource = getProviderAdminField(provider, "location");
+        final Optional<? extends ResourceSnapshot> locationResource = getProviderAdminField(provider, "location");
 
         final Instant time;
         final Object rawValue;

@@ -521,7 +521,7 @@ public class QueryHandler implements IQueryHandler {
             } else {
                 final ProviderSnapshot provider = filteredSnapshot.iterator().next();
                 final ResourceValueFilter resourceValueFilter = updatedCriterion.getResourceValueFilter();
-                final List<ServiceSnapshot> services;
+                final List<? extends ServiceSnapshot> services;
                 if (resourceValueFilter != null) {
                     services = provider.getServices().stream()
                             .filter(s -> resourceValueFilter.test(provider, s.getResources()))
@@ -579,13 +579,13 @@ public class QueryHandler implements IQueryHandler {
             } else {
                 final ProviderSnapshot provider = filteredSnapshot.iterator().next();
                 // The admin service is
-                final Optional<ServiceSnapshot> service = provider.getServices().stream()
+                final Optional<? extends ServiceSnapshot> service = provider.getServices().stream()
                         .filter(s -> serviceId.equals(s.getName())).findFirst();
                 if (service.isEmpty()) {
                     result.resources = List.of();
                 } else {
                     final ResourceValueFilter resourceValueFilter = updatedCriterion.getResourceValueFilter();
-                    final List<ResourceSnapshot> resources;
+                    final List<? extends ResourceSnapshot> resources;
                     if (resourceValueFilter != null) {
                         resources = service.get().getResources().stream()
                                 .filter(r -> resourceValueFilter.test(provider, List.of(r)))

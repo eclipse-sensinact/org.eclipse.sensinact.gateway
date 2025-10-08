@@ -74,7 +74,7 @@ public class DtoMapper {
     private static final String NO_DESCRIPTION = "No description";
     private static final String NO_DEFINITION = "No definition";
 
-    private static Optional<ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
+    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
         ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> ADMIN.equals(s.getName())).findFirst()
                 .get();
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
@@ -82,7 +82,7 @@ public class DtoMapper {
 
     private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider,
             String resource) {
-        Optional<ResourceSnapshot> rc = getProviderAdminField(provider, resource);
+        Optional<? extends ResourceSnapshot> rc = getProviderAdminField(provider, resource);
         if (rc.isPresent()) {
             TimedValue<?> value = rc.get().getValue();
             if (value != null) {
@@ -499,7 +499,7 @@ public class DtoMapper {
 
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             ResourceSnapshot resource, boolean allowNull) {
-        Optional<ResourceSnapshot> optRS = resource.getService().getResources().stream()
+        Optional<? extends ResourceSnapshot> optRS = resource.getService().getResources().stream()
                 .filter(r -> r.getMetadata().keySet().contains(SENSORTHINGS_OBSERVEDAREA)).findFirst();
         TimedValue<GeoJsonObject> location = null;
         if (optRS.isPresent()) {
@@ -517,7 +517,7 @@ public class DtoMapper {
 
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             boolean allowNull) {
-        final Optional<ResourceSnapshot> locationResource = getProviderAdminField(provider, LOCATION);
+        final Optional<? extends ResourceSnapshot> locationResource = getProviderAdminField(provider, LOCATION);
 
         final Instant time;
         final Object rawValue;

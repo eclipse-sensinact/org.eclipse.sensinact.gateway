@@ -60,22 +60,25 @@ class ResourceDataBackedProviderSnapshot implements ProviderSnapshot {
         return rdn.model();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T extends ServiceSnapshot> List<T> getServices() {
-        return List.of((T) service);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends ServiceSnapshot> T getService(String name) {
-        return Objects.equals(name, rdn.service()) ? (T) service : null;
+    public  List<ServiceSnapshot> getServices() {
+        return List.of(service);
     }
 
     @Override
-    public <T extends ResourceSnapshot> T getResource(String service, String resource) {
+    public ServiceSnapshot getService(String name) {
+        return Objects.equals(name, rdn.service()) ? service : null;
+    }
+
+    @Override
+    public ResourceSnapshot getResource(String service, String resource) {
         return Objects.equals(service, rdn.service()) ? this.service.getResource(resource) :
                 null;
+    }
+
+    @Override
+    public List<LinkedProviderSnapshot> getLinkedProviders() {
+        return List.of();
     }
 }
 
@@ -104,16 +107,14 @@ class ResourceDataBackedServiceSnapshot implements ServiceSnapshot {
         return provider;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T extends ResourceSnapshot> List<T> getResources() {
-        return List.of((T) resource);
+    public List<ResourceSnapshot> getResources() {
+        return List.of(resource);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T extends ResourceSnapshot> T getResource(String name) {
-        return Objects.equals(name, provider.rdn.resource()) ? (T) resource : null;
+    public ResourceSnapshot getResource(String name) {
+        return Objects.equals(name, provider.rdn.resource()) ? resource : null;
     }
 
 }
