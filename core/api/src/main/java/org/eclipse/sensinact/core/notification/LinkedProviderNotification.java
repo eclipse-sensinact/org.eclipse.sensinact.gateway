@@ -22,7 +22,7 @@ import java.util.Objects;
  *
  * Topic name is
  *
- * LIFECYCLE/&lt;model&gt;/&lt;provider&gt;[/&lt;service&gt;[/&lt;resource&gt;]]
+ * LINKED/&lt;model&gt;/&lt;provider&gt;
  */
 public record LinkedProviderNotification(String modelPackageUri, String model, String provider,
         String child, Action action, List<String> linkedProviders, Instant timestamp) implements ResourceNotification {
