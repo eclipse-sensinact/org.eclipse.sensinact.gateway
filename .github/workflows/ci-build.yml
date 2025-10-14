@@ -8,21 +8,148 @@ on:
 
 jobs:
   build:
-
+    name: Build (compile without tests)
     runs-on: ubuntu-latest
 
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
     - name: Set up JDK 17
       uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
-      run: mvn -P ci-build -B verify --file pom.xml
 
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
+
+    - name: Build with Maven (skip tests)
+      run: mvn -P ci-build -B clean install -DskipTests --file pom.xml
+
+    - name: Cache Maven dependencies and build artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.m2/repository
+          **/target
+        key: build-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          build-${{ runner.os }}-
+
+    - name: Install dependencies for matrix generation
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxml2-utils jq
+
+    - name: Generate module matrix
+      id: set-matrix
+      run: |
+        cd $GITHUB_WORKSPACE
+        chmod +x .github/scripts/generate-module-matrix.sh
+        matrix_json=$(.github/scripts/generate-module-matrix.sh)
+        echo "matrix=$matrix_json" >> $GITHUB_OUTPUT
+        echo "Generated matrix:"
+        echo "$matrix_json" | jq .
+
+  test:
+    name: Test ${{ matrix.module }}
+    needs: build
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.build.outputs.matrix) }}
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Restore Maven build artifacts
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~/.m2/repository
+          **/target
+        key: build-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          build-${{ runner.os }}-
+        fail-on-cache-miss: true
+
+    - name: Run unit tests for ${{ matrix.module }}
+      run: |
+        cd ${{ matrix.module }}
+        mvn -P ci-build -B test
+      continue-on-error: true
+
+    - name: Run integration tests for ${{ matrix.module }}
+      run: |
+        cd ${{ matrix.module }}
+        mvn -P ci-build -B verify -DskipTests=false
+      continue-on-error: true
+
+    - name: Generate artifact name
+      id: artifact-name
+      run: |
+        # Replace slashes with dashes for artifact name
+        ARTIFACT_NAME=$(echo "${{ matrix.module }}" | sed 's/\//-/g')
+        echo "name=test-results-${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+
+    - name: Upload test results for ${{ matrix.module }}
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.0
+      with:
+        name: ${{ steps.artifact-name.outputs.name }}
+        path: |
+          ${{ matrix.module }}/target/surefire-reports/*.xml
+          ${{ matrix.module }}/target/failsafe-reports/*.xml
+        if-no-files-found: ignore
+        retention-days: 1
+
+  test-results:
+    name: Collect Test Results
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Download all test results
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      with:
+        pattern: test-results-*
+        path: test-results
+
+    - name: Publish Test Report
+      uses: mikepenz/action-junit-report@5b7ee5a21e8674b695313d769f3cbdfd5d4d53a4 # v6.0.0
+      if: always()
+      with:
+        report_paths: 'test-results/**/TEST-*.xml'
+        check_name: Test Results
+        fail_on_failure: true
+
+  # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
+  dependency-graph:
+    name: Update dependency graph
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
     - name: Update dependency graph
       continue-on-error: true
       uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
