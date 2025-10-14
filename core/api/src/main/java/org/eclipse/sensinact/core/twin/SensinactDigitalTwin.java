@@ -225,12 +225,27 @@ public interface SensinactDigitalTwin extends CommandScoped {
 
     /**
      * Returns the snapshot of the provider with the given name.
+     * Equivalent to calling {@link #snapshotProvider(String, EnumSet)}.
      *
      * @param providerName Name of the provider
+     * @param serviceFilter a filter to restrict the returned services
+     * @param resourceFilter a filter to restrict the returned resources
+     * @return The snapshot of the provider, null if not found
+     */
+    ProviderSnapshot snapshotProvider(String providerName, Predicate<ServiceSnapshot> serviceFilter,
+            Predicate<ResourceSnapshot> resourceFilter);
+
+    /**
+     * Returns the snapshot of the provider with the given name.
+     *
+     * @param providerName Name of the provider
+     * @param serviceFilter a filter to restrict the returned services
+     * @param resourceFilter a filter to restrict the returned resources
      * @param options The options for generating the snapshots
      * @return The snapshot of the provider, null if not found
      */
-    ProviderSnapshot snapshotProvider(String providerName, EnumSet<SnapshotOption> options);
+    ProviderSnapshot snapshotProvider(String providerName, Predicate<ServiceSnapshot> serviceFilter,
+            Predicate<ResourceSnapshot> resourceFilter, EnumSet<SnapshotOption> options);
 
     /**
      * Returns the snapshot of a service of a provider
@@ -240,6 +255,17 @@ public interface SensinactDigitalTwin extends CommandScoped {
      * @return The snapshot of the service, null if not found
      */
     ServiceSnapshot snapshotService(String providerName, String serviceName);
+
+    /**
+     * Returns the snapshot of a service of a provider
+     *
+     * @param providerName Name of the provider
+     * @param serviceName  Name of the service
+     * @param resourceFilter a filter to restrict the returned resources
+     * @return The snapshot of the service, null if not found
+     */
+    ServiceSnapshot snapshotService(String providerName, String serviceName,
+            Predicate<ResourceSnapshot> resourceFilter);
 
     /**
      * Returns the snapshot of a resource of a service of a provider

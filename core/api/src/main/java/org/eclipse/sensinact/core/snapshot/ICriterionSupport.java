@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -169,6 +170,12 @@ class ResourceDataBackedResourceSnapshot implements ResourceSnapshot {
     @Override
     public ValueType getValueType() {
         return ValueType.UPDATABLE;
+    }
+
+    @Override
+    public List<Entry<String, Class<?>>> getArguments() {
+        // Not an action resource
+        return null;
     }
 
 }

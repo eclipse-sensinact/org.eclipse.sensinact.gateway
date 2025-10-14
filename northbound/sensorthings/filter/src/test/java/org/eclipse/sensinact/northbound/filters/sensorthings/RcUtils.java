@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -200,6 +201,12 @@ public class RcUtils {
             @Override
             public Class<?> getType() {
                 return Object.class;
+            }
+
+            @Override
+            public List<Entry<String, Class<?>>> getArguments() {
+                // Not an action resource
+                return null;
             }
         };
 

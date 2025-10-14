@@ -15,10 +15,12 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
@@ -68,7 +70,7 @@ public abstract class AbstractAccess {
     }
 
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
-        return getSession().filteredSnapshot(new SnapshotFilter(id)).stream().findFirst();
+        return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
     protected ProviderSnapshot validateAndGetProvider(String id) {

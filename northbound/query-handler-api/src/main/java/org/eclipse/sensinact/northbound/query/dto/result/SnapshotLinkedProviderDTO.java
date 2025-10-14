@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,18 +14,22 @@ package org.eclipse.sensinact.northbound.query.dto.result;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import java.util.List;
-
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-public class CompleteProviderDescriptionDTO {
+public class SnapshotLinkedProviderDTO {
 
     /**
      * Provider ID
      */
     public String name;
+
+    /**
+     * Model Name
+     */
+    @JsonInclude(NON_NULL)
+    public String modelName;
 
     /**
      * Provider location, if available
@@ -46,13 +50,8 @@ public class CompleteProviderDescriptionDTO {
     public String friendlyName;
 
     /**
-     * List of services
-     */
-    public List<ResponseDescribeServiceDTO> services;
-
-    /**
-     * Provider friendly name, if available
+     * Provider description, if available
      */
     @JsonInclude(NON_NULL)
-    public List<String> linkedProviders;
+    public String description;
 }

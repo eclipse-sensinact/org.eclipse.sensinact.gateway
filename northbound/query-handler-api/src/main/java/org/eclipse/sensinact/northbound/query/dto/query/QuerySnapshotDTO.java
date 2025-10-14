@@ -18,6 +18,9 @@ import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.EQueryType;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Feature;
+
 /**
  *
  */
@@ -28,9 +31,17 @@ public class QuerySnapshotDTO extends AbstractQueryDTO {
      */
     public boolean includeMetadata = false;
 
+    @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     public List<ResourceSelector> filter;
+
+    @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    public List<SnapshotLinkOption> linkOptions;
 
     public QuerySnapshotDTO() {
         super(EQueryType.GET_SNAPSHOT);
+    }
+
+    public enum SnapshotLinkOption {
+        ID_ONLY, MODEL, ICON, LOCATION, DESCRIPTION, FRIENDLY_NAME, FULL;
     }
 }

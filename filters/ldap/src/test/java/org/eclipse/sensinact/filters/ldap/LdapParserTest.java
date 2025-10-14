@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -124,7 +125,6 @@ public class LdapParserTest {
                         return this;
                     }
 
-                    @SuppressWarnings("unchecked")
                     @Override
                     public ResourceSnapshot getResource(String name) {
                         return getRc();
@@ -159,13 +159,11 @@ public class LdapParserTest {
                                 return "model1";
                             }
 
-                            @SuppressWarnings("unchecked")
                             @Override
                             public ServiceSnapshot getService(String name) {
                                 return getSvc();
                             }
 
-                            @SuppressWarnings("unchecked")
                             @Override
                             public ResourceSnapshot getResource(String service, String resource) {
                                 return getRc();
@@ -189,6 +187,12 @@ public class LdapParserTest {
             @Override
             public ValueType getValueType() {
                 return ValueType.UPDATABLE;
+            }
+
+            @Override
+            public List<Entry<String, Class<?>>> getArguments() {
+                // Not an Action resource
+                return null;
             }
         };
     }

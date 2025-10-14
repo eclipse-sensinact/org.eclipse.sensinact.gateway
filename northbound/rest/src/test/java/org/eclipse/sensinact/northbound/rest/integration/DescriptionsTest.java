@@ -284,6 +284,8 @@ public class DescriptionsTest {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
         push.pushUpdate(dto).getValue();
+        dto = utils.makeDto(PROVIDER_2, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         TypedResponse<?> result = utils.queryJson("/providers/" + PROVIDER, TypedResponse.class);
@@ -291,6 +293,24 @@ public class DescriptionsTest {
         ResponseDescribeProviderDTO descr = utils.convert(result, ResponseDescribeProviderDTO.class);
         assertEquals(PROVIDER, descr.name);
         assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
+        assertEquals(List.of(), descr.linkedProviders);
+
+        // Link a provider
+        result = utils.queryJson("/providers/" + PROVIDER + "/link/" + PROVIDER_2, null, TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.DESCRIBE_PROVIDER, PROVIDER);
+        descr = utils.convert(result, ResponseDescribeProviderDTO.class);
+        assertEquals(PROVIDER, descr.name);
+        assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
+        assertEquals(List.of(PROVIDER_2), descr.linkedProviders);
+
+        // Unlink a provider
+        result = utils.queryJson("/providers/" + PROVIDER + "/link/" + PROVIDER_2,
+                "DELETE", null, TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.DESCRIBE_PROVIDER, PROVIDER);
+        descr = utils.convert(result, ResponseDescribeProviderDTO.class);
+        assertEquals(PROVIDER, descr.name);
+        assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
+        assertEquals(List.of(), descr.linkedProviders);
     }
 
     /**

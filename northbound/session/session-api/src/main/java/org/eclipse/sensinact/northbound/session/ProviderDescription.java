@@ -19,4 +19,6 @@ public class ProviderDescription {
     public String provider;
 
     public List<String> services;
+
+    public List<String> linkedProviders;
 }

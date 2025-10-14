@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.result;
 
+import java.util.List;
 import java.util.Map;
 
 public class SnapshotProviderDTO {
@@ -30,4 +31,9 @@ public class SnapshotProviderDTO {
      * List of services
      */
     public Map<String, SnapshotServiceDTO> services;
+
+    /**
+     * List of services
+     */
+    public List<SnapshotLinkedProviderDTO> linkedProviders;
 }

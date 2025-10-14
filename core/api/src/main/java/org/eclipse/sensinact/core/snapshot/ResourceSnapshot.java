@@ -13,7 +13,9 @@
 
 package org.eclipse.sensinact.core.snapshot;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -51,6 +53,12 @@ public interface ResourceSnapshot extends Snapshot {
      * Returns the kind of resource, see {@link ResourceType}
      */
     ResourceType getResourceType();
+
+    /**
+     * Returns the arguments for an Action resource, or <code>null</code> otherwise
+     * @return
+     */
+    List<Entry<String, Class<?>>> getArguments();
 
     /**
      * Returns the value type, <em>i.e.</em> the kind of access it allows. See
