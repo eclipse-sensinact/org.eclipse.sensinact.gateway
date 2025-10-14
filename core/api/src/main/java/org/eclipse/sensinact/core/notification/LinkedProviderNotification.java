@@ -18,7 +18,10 @@ import java.util.Objects;
 
 /**
  * Link notifications are sent to indicate the addition or removal of linked provider
- * provider/service/resource
+ * <p>
+ * The notification topic is determined by the parent provider, and the child provider
+ * is included in the payload, along with the remaining list of linked providers 
+ * after the operation represented by this event
  *
  * Topic name is
  *
