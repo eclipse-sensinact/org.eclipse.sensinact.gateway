@@ -83,16 +83,10 @@ jobs:
           build-${{ runner.os }}-
         fail-on-cache-miss: true
 
-    - name: Run unit tests for ${{ matrix.module }}
+    - name: Run unit and integration tests for ${{ matrix.module }}
       run: |
         cd ${{ matrix.module }}
-        mvn -P ci-build -B test
-      continue-on-error: true
-
-    - name: Run integration tests for ${{ matrix.module }}
-      run: |
-        cd ${{ matrix.module }}
-        mvn -P ci-build -B verify -DskipTests=false
+        mvn -P ci-build -B verify
       continue-on-error: true
 
     - name: Generate artifact name
