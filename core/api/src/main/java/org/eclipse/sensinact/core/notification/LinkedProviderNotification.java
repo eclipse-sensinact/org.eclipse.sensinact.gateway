@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Lifecycle notifications are sent to indicate the creation or deletion of a
+ * Link notifications are sent to indicate the addition or removal of linked provider
  * provider/service/resource
  *
  * Topic name is
