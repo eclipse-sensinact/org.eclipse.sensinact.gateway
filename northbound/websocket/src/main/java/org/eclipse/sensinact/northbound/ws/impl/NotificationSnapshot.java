@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.ws.impl;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -227,6 +228,12 @@ class NotificationSnapshot {
         @Override
         public Class<?> getType() {
             return resource.getType();
+        }
+
+        @Override
+        public List<Entry<String, Class<?>>> getArguments() {
+            // Not an action resource
+            return null;
         }
     }
 }

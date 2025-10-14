@@ -14,6 +14,7 @@ package org.eclipse.sensinact.northbound.session;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,9 @@ import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ClientMetadataListener;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 
@@ -290,6 +294,28 @@ public interface SensiNactSession {
     ProviderDescription describeProvider(String provider);
 
     /**
+     * Create a Provider Link
+     *
+     * @param parent
+     * @param child
+     * @return
+     * @throws IllegalArgumentException if there is no provider at the given
+     *                                  location
+     */
+    ProviderDescription linkProviders(String parent, String child);
+
+    /**
+     * Remove a Provider Link
+     *
+     * @param parent
+     * @param child
+     * @return
+     * @throws IllegalArgumentException if there is no provider at the given
+     *                                  location
+     */
+    ProviderDescription unlinkProviders(String parent, String child);
+
+    /**
      * Get the list of providers
      *
      * @return
@@ -303,6 +329,41 @@ public interface SensiNactSession {
      * @return A snapshot of the model
      */
     List<ProviderSnapshot> filteredSnapshot(ICriterion filter);
+
+    /**
+     * Returns a (filtered) snapshot of the model
+     *
+     * @param filter Optional filter to apply during snapshot
+     * @return A snapshot of the model
+     */
+    List<ProviderSnapshot> filteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions);
+
+    /**
+     * Returns a snapshot of a provider
+     *
+     * @param provider the provider name
+     * @return A snapshot of the provider
+     */
+    ProviderSnapshot providerSnapshot(String provider, EnumSet<SnapshotOption> snapshotOptions);
+
+    /**
+     * Returns a snapshot of a service
+     *
+     * @param provider the provider name
+     * @param service the service name
+     * @return A snapshot of a service
+     */
+    ServiceSnapshot serviceSnapshot(String provider, String service);
+
+    /**
+     * Returns a snapshot of a resource
+     *
+     * @param provider the provider name
+     * @param service the service name
+     * @param resource the resource name
+     * @return A snapshot of the model
+     */
+    ResourceSnapshot resourceSnapshot(String provider, String service, String resource);
 
     /**
      * Return the user that owns this session

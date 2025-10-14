@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.rest.impl;
 
+import static org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO.LinkAction.ADD;
+import static org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO.LinkAction.REMOVE;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,8 @@ import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParamete
 import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO.LinkAction;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO;
@@ -348,5 +353,23 @@ public class RestNorthbound implements IRestNorthbound {
         // Register the listener
         // TODO use single level wildcard final String topic = String.join("/", providerId, serviceName, rcName);
         listenerId.set(session.addListener(List.of("*"), cdl, null, cll, null));
+    }
+
+    @Override
+    public AbstractResultDTO linkProvider(String providerId, String childId) {
+        return doLinkOrUnlink(providerId, childId, ADD);
+    }
+
+    private AbstractResultDTO doLinkOrUnlink(String providerId, String childId, LinkAction action) {
+        final QueryLinkDTO query = new QueryLinkDTO();
+        query.uri = new SensinactPath(providerId);
+        query.child = childId;
+        query.action = action;
+        return handleQuery(query);
+    }
+
+    @Override
+    public AbstractResultDTO unlinkProvider(String providerId, String childId) {
+        return doLinkOrUnlink(providerId, childId, REMOVE);
     }
 }

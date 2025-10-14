@@ -28,4 +28,9 @@ public class ResponseDescribeProviderDTO implements SubResult {
      * Provider services
      */
     public List<String> services;
+
+    /**
+     * Provider services
+     */
+    public List<String> linkedProviders;
 }

@@ -20,6 +20,7 @@ import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -50,6 +51,16 @@ public interface IRestNorthbound {
     @Path("providers/{providerId}")
     @GET
     AbstractResultDTO describeProvider(@PathParam("providerId") String providerId);
+
+    @Path("providers/{providerId}/link/{childId}")
+    @POST
+    AbstractResultDTO linkProvider(@PathParam("providerId") String providerId,
+            @PathParam("childId") String childId);
+
+    @Path("providers/{providerId}/link/{childId}")
+    @DELETE
+    AbstractResultDTO unlinkProvider(@PathParam("providerId") String providerId,
+            @PathParam("childId") String childId);
 
     @Path("providers/{providerId}/services")
     @GET

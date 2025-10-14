@@ -55,6 +55,7 @@ import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
@@ -366,7 +367,14 @@ public class SensinactTwinTest {
             assertNotNull(ss);
             assertEquals(2, ss.getResources().size());
             assertNotNull(ss.getResource(TEST_RESOURCE));
+            assertEquals(ResourceType.SENSOR, ss.getResource(TEST_RESOURCE).getResourceType());
+            assertEquals(Integer.class, ss.getResource(TEST_RESOURCE).getType());
+            assertNull(ss.getResource(TEST_RESOURCE).getArguments());
             assertNotNull(ss.getResource(TEST_ACTION_RESOURCE));
+            assertEquals(ResourceType.ACTION, ss.getResource(TEST_ACTION_RESOURCE).getResourceType());
+            assertEquals(Double.class, ss.getResource(TEST_ACTION_RESOURCE).getType());
+            assertEquals(List.of(new SimpleEntry<>("foo", String.class), new SimpleEntry<>("bar", Instant.class)),
+                    ss.getResource(TEST_ACTION_RESOURCE).getArguments());
         }
 
         @Test
@@ -394,6 +402,11 @@ public class SensinactTwinTest {
                     ProviderPackage.eINSTANCE.getAdmin_Location().getName()).setValue(new Point(12.3d, 45.6d));
 
             List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null,
+                    p -> TEST_PROVIDER.equals(p.getName()), null, null, EnumSet.noneOf(SnapshotOption.class));
+            assertEquals(1, list.size());
+            assertEquals(0, list.get(0).getLinkedProviders().size());
+
+            list = twinImpl.filteredSnapshot(null,
                     p -> TEST_PROVIDER.equals(p.getName()), null, null, EnumSet.of(INCLUDE_LINKED_PROVIDER_IDS));
             assertEquals(1, list.size());
             assertEquals(1, list.get(0).getLinkedProviders().size());
@@ -451,6 +464,40 @@ public class SensinactTwinTest {
         }
 
         @Test
+        void simpleFilterOnProviderSnapshot() throws Exception {
+            twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+
+            Predicate<ServiceSnapshot> fs = s -> TEST_SERVICE.equals(s.getName());
+            Predicate<ResourceSnapshot> fr = r -> TEST_RESOURCE.equals(r.getName());
+
+            ProviderSnapshot ps = twinImpl.snapshotProvider(TEST_PROVIDER, fs, fr, EnumSet.noneOf(SnapshotOption.class));
+            assertEquals(1, ps.getServices().size());
+            ServiceSnapshot ss = ps.getService(TEST_SERVICE);
+            assertEquals(TEST_SERVICE, ss.getName());
+            assertEquals(1, ss.getResources().size());
+
+            ps = twinImpl.snapshotProvider(TEST_PROVIDER, null, null, EnumSet.noneOf(SnapshotOption.class));
+            assertEquals(2, ps.getServices().size());
+            ss = ps.getService(TEST_SERVICE);
+            assertEquals(TEST_SERVICE, ss.getName());
+            assertEquals(2, ss.getResources().size());
+        }
+
+        @Test
+        void simpleResourceFilterOnServiceSnapshot() throws Exception {
+            twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+
+            Predicate<ResourceSnapshot> p = r -> TEST_RESOURCE.equals(r.getName());
+
+            ServiceSnapshot ss = twinImpl.snapshotService(TEST_PROVIDER, TEST_SERVICE, p);
+            assertEquals(TEST_SERVICE, ss.getName());
+            assertEquals(1, ss.getResources().size());
+
+            ss = twinImpl.snapshotService(TEST_PROVIDER, TEST_SERVICE, null);
+            assertEquals(TEST_SERVICE, ss.getName());
+            assertEquals(2, ss.getResources().size());
+        }
+
         void simpleResourceValueFilter() throws Exception {
             twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
             twinImpl.getResource(TEST_PROVIDER, TEST_SERVICE, TEST_RESOURCE).setValue(5).getValue();

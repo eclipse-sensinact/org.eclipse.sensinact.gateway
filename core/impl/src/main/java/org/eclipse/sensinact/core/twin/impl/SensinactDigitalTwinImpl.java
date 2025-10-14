@@ -356,7 +356,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Filter providers according to their services
         providersStream = providersStream.map(p -> {
-            snapshotServicesAndResources(svcFilter, rcFilter, snapshotTime, p);
+            snapshotServicesAndResources(svcFilter, rcFilter, snapshotTime, p, false);
             return p;
         }).filter(p -> !p.getServices().isEmpty());
 
@@ -364,7 +364,8 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     }
 
     private void snapshotServicesAndResources(Predicate<ServiceSnapshot> svcFilter,
-            Predicate<ResourceSnapshot> rcFilter, final Instant snapshotTime, ProviderSnapshotImpl p) {
+            Predicate<ResourceSnapshot> rcFilter, final Instant snapshotTime, ProviderSnapshotImpl p,
+            boolean keepEmptyServices) {
         final Provider modelProvider = p.getModelProvider();
         nexusImpl.getServiceInstancesForProvider(modelProvider).entrySet().stream()
                 .map(e -> new ServiceSnapshotImpl(p, e.getKey(), e.getValue(), snapshotTime))
@@ -374,7 +375,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
                     snapshotResources(rcFilter, snapshotTime, s);
                     return s;
                 })
-                .filter(s -> !s.getResources().isEmpty())
+                .filter(s -> keepEmptyServices || !s.getResources().isEmpty())
                 .forEach(p::add);
     }
 
@@ -391,11 +392,18 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
     @Override
     public ProviderSnapshot snapshotProvider(String providerName) {
-        return snapshotProvider(providerName, NO_SNAPSHOT_OPTIONS);
+        return snapshotProvider(providerName, null, null, NO_SNAPSHOT_OPTIONS);
     }
 
     @Override
-    public ProviderSnapshot snapshotProvider(String providerName, EnumSet<SnapshotOption> snapshotOptions) {
+    public ProviderSnapshot snapshotProvider(String providerName, Predicate<ServiceSnapshot> serviceFilter,
+            Predicate<ResourceSnapshot> resourceFilter) {
+        return snapshotProvider(providerName, serviceFilter, resourceFilter, NO_SNAPSHOT_OPTIONS);
+    }
+
+    @Override
+    public ProviderSnapshot snapshotProvider(String providerName, Predicate<ServiceSnapshot> serviceFilter,
+            Predicate<ResourceSnapshot> resourceFilter, EnumSet<SnapshotOption> snapshotOptions) {
         final Instant snapshotTime = Instant.now();
 
         final Provider nexusProvider = nexusImpl.getProvider(providerName);
@@ -407,12 +415,18 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
                 nexusProvider, snapshotTime, snapshotOptions);
 
-        snapshotServicesAndResources(null, null, snapshotTime, providerSnapshot);
+        snapshotServicesAndResources(serviceFilter, resourceFilter, snapshotTime, providerSnapshot, true);
         return providerSnapshot;
     }
 
     @Override
     public ServiceSnapshot snapshotService(String providerName, String serviceName) {
+        return snapshotService(providerName, serviceName, null);
+    }
+
+    @Override
+    public ServiceSnapshot snapshotService(String providerName, String serviceName,
+            Predicate<ResourceSnapshot> resourceFilter) {
         final Instant snapshotTime = Instant.now();
 
         final Provider nexusProvider = nexusImpl.getProvider(providerName);
@@ -438,7 +452,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         providerSnapshot.add(svcSnapshot);
 
         // Get the resources
-        snapshotResources(null, snapshotTime, svcSnapshot);
+        snapshotResources(resourceFilter, snapshotTime, svcSnapshot);
         return svcSnapshot;
     }
 

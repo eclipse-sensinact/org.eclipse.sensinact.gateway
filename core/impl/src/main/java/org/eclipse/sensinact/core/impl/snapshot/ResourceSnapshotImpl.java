@@ -15,8 +15,11 @@ package org.eclipse.sensinact.core.impl.snapshot;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -131,5 +134,10 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
     @Override
     public ValueType getValueType() {
         return valueType;
+    }
+
+    @Override
+    public List<Entry<String, Class<?>>> getArguments() {
+        return resourceType == ResourceType.ACTION ? ResourceImpl.findActionParameters((EOperation)rcFeature) : null;
     }
 }

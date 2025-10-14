@@ -21,14 +21,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
 import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption;
 import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.MetadataDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeProviderDTO;
@@ -40,8 +46,10 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.annotation.bundle.Requirement;
@@ -49,6 +57,8 @@ import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
 @WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
@@ -68,6 +78,9 @@ public class DescriptionsTest {
     DataUpdate push;
 
     @InjectService
+    GatewayThread thread;
+
+    @InjectService
     IQueryHandler handler;
 
     final TestUtils utils = new TestUtils();
@@ -75,6 +88,24 @@ public class DescriptionsTest {
     @BeforeEach
     void start(@InjectService SensiNactSessionManager sessionManager) {
         session = sessionManager.getDefaultSession(USER);
+    }
+
+    @AfterEach
+    void stop() throws Exception {
+        List<ProviderDescription> providers = session.listProviders();
+            thread.execute(new AbstractSensinactCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                        PromiseFactory promiseFactory) {
+                    for(ProviderDescription pd : providers) {
+                        if("sensiNact".equals(pd.provider)) {
+                            continue;
+                        }
+                        twin.getProvider(pd.provider).delete();
+                    }
+                    return promiseFactory.resolved(null);
+                }
+            }).getValue();
     }
 
     /**
@@ -125,6 +156,41 @@ public class DescriptionsTest {
         }
         assertTrue(gotAdmin, "Admin service not found");
         assertTrue(gotService, "Test service not found");
+    }
+
+    @Test
+    void listLinks() throws Exception {
+        // Register the resource
+        GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
+        dto = utils.makeDto(PROVIDER_2, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
+
+        session.linkProviders(PROVIDER, PROVIDER_2);
+
+        final QueryDescribeDTO query = new QueryDescribeDTO();
+        query.uri = new SensinactPath();
+
+        // Check for success
+        AbstractResultDTO rawResult = handler.handleQuery(session, query);
+        utils.assertResultSuccess(rawResult, EResultType.COMPLETE_LIST);
+        ResultDescribeProvidersDTO result = (ResultDescribeProvidersDTO) rawResult;
+
+        // Check content
+        CompleteProviderDescriptionDTO providerDto = result.providers.stream()
+                .filter((p) -> PROVIDER.equals(p.name)).findFirst().get();
+        assertEquals(List.of(), providerDto.linkedProviders);
+
+        query.linkOptions = List.of(SnapshotLinkOption.ID_ONLY);
+        rawResult = handler.handleQuery(session, query);
+        utils.assertResultSuccess(rawResult, EResultType.COMPLETE_LIST);
+        result = (ResultDescribeProvidersDTO) rawResult;
+
+        // Check content
+        providerDto = result.providers.stream()
+                .filter((p) -> PROVIDER.equals(p.name)).findFirst().get();
+        assertEquals(List.of(PROVIDER_2), providerDto.linkedProviders);
+
     }
 
     /**
@@ -274,5 +340,30 @@ public class DescriptionsTest {
         assertEquals("unit", metadataDTO.name);
         assertEquals("dB", metadataDTO.value);
         assertEquals(String.class.getName(), metadataDTO.type);
+    }
+
+    /**
+     * Description of a single provider after a link
+     */
+    @Test
+    void providerLinkDescription() throws Exception {
+        // Register the resource
+        GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
+        dto = utils.makeDto(PROVIDER_2, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
+
+        // Check the list of providers
+        final QueryLinkDTO query = new QueryLinkDTO();
+        query.uri = new SensinactPath(PROVIDER);
+        query.child = PROVIDER_2;
+        AbstractResultDTO rawResult = handler.handleQuery(session, query);
+        utils.assertResultSuccess(rawResult, EResultType.DESCRIBE_PROVIDER, PROVIDER);
+
+        TypedResponse<?> result = (TypedResponse<?>) rawResult;
+        ResponseDescribeProviderDTO descr = utils.convert(result, ResponseDescribeProviderDTO.class);
+        assertEquals(PROVIDER, descr.name);
+        assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
+        assertEquals(Set.of(PROVIDER_2), Set.copyOf(descr.linkedProviders));
     }
 }

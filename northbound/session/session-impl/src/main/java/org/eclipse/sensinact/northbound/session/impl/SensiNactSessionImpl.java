@@ -17,6 +17,7 @@ import static org.eclipse.sensinact.core.authorization.PermissionLevel.ACT;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.UPDATE;
+import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS;
 import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
 import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.UNKNOWN;
 
@@ -24,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -57,11 +60,16 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
+import org.eclipse.sensinact.core.snapshot.CommonProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.snapshot.Snapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
@@ -75,6 +83,8 @@ import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.ServiceDescription;
+import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
+import org.eclipse.sensinact.northbound.session.snapshot.ImmutableProviderSnapshot;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
@@ -583,34 +593,25 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public ProviderDescription describeProvider(String provider) {
-        final PreAuth preAuth = preAuthorizer.preAuthProvider(DESCRIBE, provider);
-        if(preAuth == DENY) {
-            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
-                    user.getUserId(), String.format("%s", provider)));
-        }
+        // This does the auth checking for us, and restricts the services that come back
+        ProviderSnapshot snapshot = providerSnapshot(provider, false, EnumSet.of(SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS));
+        return toProviderDescription(snapshot);
+    }
 
-        return executeGetCommand((m) -> {
-                SensinactProvider sp = m.getProvider(provider);
-                if(preAuth == UNKNOWN) {
-                    if(sp != null) {
-                        if(!authorizer.hasProviderPermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider)) {
-                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
-                                    user.getUserId(), String.format("%s", provider)));
-                        }
-                    } else {
-                        if(!authorizer.hasProviderPermission(DESCRIBE, null, null, provider)) {
-                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
-                                    user.getUserId(), String.format("%s", provider)));
-                        }
-                    }
-                }
-                return sp;
-            }, (snProvider) -> {
-                final ProviderDescription description = new ProviderDescription();
-                description.provider = snProvider.getName();
-                description.services = List.copyOf(snProvider.getServices().keySet());
-                return description;
-            });
+    /**
+     * Converts a snapshot to a provider description. <strong><em>Does not perform authorization checks</em></strong>
+     * @param snapshot
+     * @return
+     */
+    private ProviderDescription toProviderDescription(ProviderSnapshot snapshot) {
+        ProviderDescription description = null;
+        if(snapshot != null) {
+            description = new ProviderDescription();
+            description.provider = snapshot.getName();
+            description.services = snapshot.getServices().stream().map(Snapshot::getName).toList();
+            description.linkedProviders = snapshot.getLinkedProviders().stream().map(Snapshot::getName).toList();
+        }
+        return description;
     }
 
     @Override
@@ -622,42 +623,160 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     final ProviderDescription description = new ProviderDescription();
                     description.provider = snProvider.getName();
                     description.services = List.copyOf(snProvider.getServices().keySet());
+                    description.linkedProviders = snProvider.getLinkedProviders().stream()
+                            .filter(lp -> authorizer.hasProviderPermission(DESCRIBE, lp.getModelPackageUri(),
+                                    lp.getModelName(), lp.getName()))
+                            .map(SensinactProvider::getName)
+                            .toList();
                     return description;
                 }).collect(Collectors.toList()), List.of());
     }
 
     @Override
     public List<ProviderSnapshot> filteredSnapshot(ICriterion filter) {
+        return filteredSnapshot(filter, EnumSet.noneOf(SnapshotOption.class));
+    }
+
+    @Override
+    public List<ProviderSnapshot> filteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions) {
         Predicate<ServiceSnapshot> service = this::authorizeService;
         Predicate<ResourceSnapshot> resource = this::authorizeResource;
 
+        Stream<ProviderSnapshot> snapshots;
         if (filter == null) {
-            return executeGetCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
-                    service, resource), Function.identity());
+            snapshots = executeGetCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
+                    service, resource, snapshotOptions), Function.identity()).stream();
         } else {
             BiPredicate<ProviderSnapshot, GeoJsonObject> location = filter.getLocationFilter();
             Predicate<ProviderSnapshot> provider = ps -> authorizeProvider(ps, location != null);
             Predicate<ProviderSnapshot> pf = filter.getProviderFilter();
             Predicate<ServiceSnapshot> sf = filter.getServiceFilter();
             Predicate<ResourceSnapshot> rf = filter.getResourceFilter();
-            return executeGetCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
-                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity());
+            snapshots = executeGetCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
+                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity()).stream();
+            final ResourceValueFilter rcFilter = filter.getResourceValueFilter();
+            if (rcFilter != null) {
+                snapshots = snapshots.filter(p -> rcFilter.test(p, p.getServices().stream()
+                        .flatMap(s -> s.getResources().stream()).toList()));
+            }
         }
+
+        return snapshots
+            .map(this::safeProviderSnapshot)
+            .toList();
     }
 
-    private boolean authorizeProvider(ProviderSnapshot ps, boolean useLocation) {
-        if(useLocation && !authorizer.hasResourcePermission(READ, ps.getModelPackageUri(), ps.getModelName(),
-                ps.getName(), "admin", "location")) {
+    /**
+     * Takes a provider snapshot and applies authorization checks to the linked providers
+     * <p>
+     * <strong><em>Does not perform authorization checks on services or resources</em></strong>
+     *
+     * @param ps
+     * @return
+     */
+    private ProviderSnapshot safeProviderSnapshot(ProviderSnapshot ps) {
+        return ps == null ? null : new ImmutableProviderSnapshot(ps.getModelPackageUri(), ps.getModelName(),
+                ps.getName(), ps.getSnapshotTime(), ps.getServices(), authorizedLinksFilter(ps.getLinkedProviders()));
+    }
+
+    /**
+     * Authorizes collection of a provider snapshot, including whether location access is permitted.
+     * <p>
+     * This should be used before geo-filtering, as the provider's location may not be visible to
+     * the caller.
+     *
+     * @param ps
+     * @param useLocation
+     * @return
+     */
+    private boolean authorizeProvider(CommonProviderSnapshot ps, boolean useLocation) {
+        if(useLocation && !hasReadResourcePermission(ps, "admin", "location")) {
             return false;
         }
 
         return authorizer.hasProviderPermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName());
     }
 
+    /**
+     * Authorizes READ access for the supplied resource
+     * @param ps
+     * @param service
+     * @param resource
+     * @return
+     */
+    private boolean hasReadResourcePermission(CommonProviderSnapshot ps, String service, String resource) {
+        return authorizer.hasResourcePermission(READ, ps.getModelPackageUri(), ps.getModelName(),
+                ps.getName(), service, resource);
+    }
+
+    /**
+     * Strips out linked providers that are not visible to the caller
+     * @param links
+     * @return
+     */
+    private List<LinkedProviderSnapshot> authorizedLinksFilter(List<LinkedProviderSnapshot> links) {
+        return links.stream().map(this::mapWithPermission).filter(Objects::nonNull).toList();
+    }
+
+    /**
+     * Maps a Linked Provider Snapshot into one with the relevant permissions applied
+     * and visibility restricted
+     *
+     * @param snapshot
+     * @return
+     */
+    private LinkedProviderSnapshot mapWithPermission(LinkedProviderSnapshot snapshot) {
+        if(authorizeProvider(snapshot, false)) {
+            boolean transform = false;
+            String friendlyName = snapshot.getFriendlyName();
+            if(friendlyName != null && !hasReadResourcePermission(snapshot, "admin", "friendlyName")) {
+                friendlyName = null;
+                transform = true;
+            }
+            String description = snapshot.getDescription();
+            if(description != null && !hasReadResourcePermission(snapshot, "admin", "description")) {
+                description = null;
+                transform = true;
+            }
+            String icon = snapshot.getIcon();
+            if(icon != null && !hasReadResourcePermission(snapshot, "admin", "icon")) {
+                icon = null;
+                transform = true;
+            }
+            GeoJsonObject location = snapshot.getLocation();
+            if(location != null && !hasReadResourcePermission(snapshot, "admin", "location")) {
+                location = null;
+                transform = true;
+            }
+            if(transform) {
+                return new ImmutableLinkedProviderSnapshot(snapshot.getModelPackageUri(), snapshot.getModelName(),
+                        snapshot.getName(), friendlyName, description, icon, location, snapshot.getSnapshotTime());
+            } else {
+                return snapshot;
+            }
+        } else {
+            // Not permitted to see this provider
+            return null;
+        }
+    }
+
+    /**
+     * Authorizes DESCRIBE access for the supplied service
+     * @param ss
+     * @return
+     */
     private boolean authorizeService(ServiceSnapshot ss) {
         ProviderSnapshot ps = ss.getProvider();
         return authorizer.hasServicePermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName(), ss.getName());
     }
+
+    /**
+     * Authorizes DESCRIBE access for the supplied resource
+     * @param sr
+     * @param service
+     * @param resource
+     * @return
+     */
     private boolean authorizeResource(ResourceSnapshot sr) {
         ServiceSnapshot ss = sr.getService();
         ProviderSnapshot ps = ss.getProvider();
@@ -847,5 +966,159 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public UserInfo getUserInfo() {
         return user;
+    }
+
+    @Override
+    public ProviderSnapshot providerSnapshot(String provider, EnumSet<SnapshotOption> snapshotOptions) {
+        return providerSnapshot(provider, true, snapshotOptions);
+    }
+
+    /**
+     * Gets a specific provider snapshot, optionally including resources
+     * @param provider
+     * @param includeResources
+     * @param snapshotOptions
+     * @return
+     */
+    private ProviderSnapshot providerSnapshot(String provider, boolean includeResources, EnumSet<SnapshotOption> snapshotOptions) {
+        final PreAuth preAuth = preAuthorizer.preAuthProvider(DESCRIBE, provider);
+        if(preAuth == DENY) {
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
+                    user.getUserId(), String.format("%s", provider)));
+        }
+
+        return executeGetCommand((m) -> {
+                // Avoid taking a snapshot until we know that we're allowed to see the provider
+                if(preAuth == UNKNOWN) {
+                    SensinactProvider sp = m.getProvider(provider);
+                    if(sp != null) {
+                        if(!authorizer.hasProviderPermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider)) {
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
+                                    user.getUserId(), String.format("%s", provider)));
+                        }
+                    } else {
+                        if(!authorizer.hasProviderPermission(DESCRIBE, null, null, provider)) {
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
+                                    user.getUserId(), String.format("%s", provider)));
+                        }
+                        // No point doing a snapshot if the provider doesn't exist
+                        return null;
+                    }
+                }
+                // Only get the parts of the snapshot that we're allowed to see
+                return m.snapshotProvider(provider, this::authorizeService,
+                        includeResources ? this::authorizeResource : x -> false, snapshotOptions);
+            }, this::safeProviderSnapshot);
+    }
+
+    @Override
+    public ServiceSnapshot serviceSnapshot(String provider, String service) {
+        final PreAuth preAuth = preAuthorizer.preAuthService(DESCRIBE, provider, service);
+        if(preAuth == DENY) {
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s in provider %s",
+                    user.getUserId(), String.format("%s", service), String.format("%s", provider)));
+        }
+
+        return executeGetCommand((m) -> {
+                // Avoid taking a snapshot until we know that we're allowed to see the service
+                if(preAuth == UNKNOWN) {
+                    SensinactProvider sp = m.getProvider(provider);
+                    if(sp != null) {
+                        if(!authorizer.hasServicePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service)) {
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s in provider %s",
+                                    user.getUserId(), String.format("%s", service), String.format("%s", provider)));
+                        }
+                    } else {
+                        if(!authorizer.hasServicePermission(DESCRIBE, null, null, provider, service)) {
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s in provider %s",
+                                    user.getUserId(), String.format("%s", service), String.format("%s", provider)));
+                        }
+                        // No point doing a snapshot if the provider doesn't exist
+                        return null;
+                    }
+                }
+                // Only get the parts of the snapshot that we're allowed to see
+                return m.snapshotService(provider, service, this::authorizeResource);
+        }, Function.identity());
+    }
+
+    @Override
+    public ResourceSnapshot resourceSnapshot(String provider, String service, String resource) {
+        final PreAuth preAuth = preAuthorizer.preAuthResource(DESCRIBE, provider, service, resource);
+        if(preAuth == DENY) {
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s/%s in provider %s",
+                    user.getUserId(), String.format("%s", service), String.format("%s", resource), String.format("%s", provider)));
+        }
+
+        return executeGetCommand((m) -> {
+                // Avoid taking a snapshot until we know that we're allowed to see the service
+                if(preAuth == UNKNOWN) {
+                    SensinactProvider sp = m.getProvider(provider);
+                    if(sp != null) {
+                        if(!authorizer.hasResourcePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service, resource)) {
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s/%s in provider %s",
+                                    user.getUserId(), String.format("%s", service), String.format("%s", resource), String.format("%s", provider)));
+                        }
+                    } else {
+                        if(!authorizer.hasResourcePermission(DESCRIBE, null, null, provider, service, resource)) {
+                            throw new NotPermittedException(String.format("The user %s does not have permission to describe resource %s/%s in provider %s",
+                                    user.getUserId(), String.format("%s", service), String.format("%s", resource), String.format("%s", provider)));
+                        }
+                        // No point doing a snapshot if the provider doesn't exist
+                        return null;
+                    }
+                }
+                // Only get the parts of the snapshot that we're allowed to see
+                return m.snapshotResource(provider, service, resource);
+        }, Function.identity());
+    }
+
+    @Override
+    public ProviderDescription linkProviders(String parent, String child) {
+        return linkOrUnlinkProviders(parent, child, true);
+    }
+
+    private ProviderDescription linkOrUnlinkProviders(String parent, String child, boolean add) {
+        final PreAuth preAuthParent = preAuthorizer.preAuthProvider(UPDATE, parent);
+        final PreAuth preAuthChild = preAuthorizer.preAuthProvider(UPDATE, child);
+        if(preAuthParent == DENY || preAuthChild == DENY) {
+            throw new NotPermittedException(String.format("The user %s does not have permission to describe providers %s and %s",
+                    user.getUserId(), String.format("%s", parent), String.format("%s", child)));
+        }
+
+        BiFunction<String, SensinactDigitalTwin, SensinactProvider> check = (name, twin) -> {
+            SensinactProvider sp = twin.getProvider(name);
+            if(sp != null) {
+                if(!authorizer.hasProviderPermission(UPDATE, sp.getModelPackageUri(), sp.getModelName(), name)) {
+                    throw new NotPermittedException(String.format("The user %s does not have permission to describe providers %s and %s",
+                            user.getUserId(), String.format("%s", parent), String.format("%s", child)));
+                }
+            } else {
+                if(!authorizer.hasProviderPermission(UPDATE, null, null, name)) {
+                    throw new NotPermittedException(String.format("The user %s does not have permission to describe providers %s and %s",
+                            user.getUserId(), String.format("%s", parent), String.format("%s", child)));
+                }
+            }
+            return sp;
+        };
+
+        return executeGetCommand((m) -> {
+                // Avoid taking a snapshot until we know that we're allowed to see the provider
+                SensinactProvider parentProvider = preAuthParent == UNKNOWN ? check.apply(parent, m) : m.getProvider(parent);
+                SensinactProvider childProvider = preAuthChild == UNKNOWN ? check.apply(child, m) : m.getProvider(child);
+                if(add) {
+                    parentProvider.addLinkedProvider(childProvider);
+                } else {
+                    parentProvider.removeLinkedProvider(childProvider);
+                }
+                // Only get the parts of the snapshot that we're allowed to see
+                return m.snapshotProvider(parent, this::authorizeService,
+                        x -> false, EnumSet.of(INCLUDE_LINKED_PROVIDER_IDS));
+            }, ps -> toProviderDescription(safeProviderSnapshot(ps)));
+    }
+
+    @Override
+    public ProviderDescription unlinkProviders(String parent, String child) {
+        return linkOrUnlinkProviders(parent, child, false);
     }
 }

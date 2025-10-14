@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.model.ResourceType;
@@ -116,7 +117,6 @@ public class ResourceSelectorTest {
                         return this;
                     }
 
-                    @SuppressWarnings("unchecked")
                     @Override
                     public ResourceSnapshot getResource(String name) {
                         return getRc();
@@ -151,13 +151,11 @@ public class ResourceSelectorTest {
                                 return "model1";
                             }
 
-                            @SuppressWarnings("unchecked")
                             @Override
                             public ServiceSnapshot getService(String name) {
                                 return getSvc();
                             }
 
-                            @SuppressWarnings("unchecked")
                             @Override
                             public ResourceSnapshot getResource(String service, String resource) {
                                 return getRc();
@@ -181,6 +179,12 @@ public class ResourceSelectorTest {
             @Override
             public ValueType getValueType() {
                 return ValueType.UPDATABLE;
+            }
+
+            @Override
+            public List<Entry<String, Class<?>>> getArguments() {
+                // Not an action resource
+                return null;
             }
         };
     }
