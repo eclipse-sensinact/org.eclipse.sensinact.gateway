@@ -112,7 +112,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         }
     }
 
-    private static Optional<ResourceSnapshot> getResource(final ProviderSnapshot provider, final String svcName,
+    private static Optional<? extends ResourceSnapshot> getResource(final ProviderSnapshot provider, final String svcName,
             final String rcName) {
         return provider.getServices().stream().filter(s -> s.getName().equals(svcName))
                 .flatMap(s -> s.getResources().stream()).filter(r -> r.getName().equals(rcName)).findFirst();
@@ -123,7 +123,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
             return false;
         }
 
-        Optional<ResourceSnapshot> resource = getResource(provider, svcName, rcName);
+        Optional<? extends ResourceSnapshot> resource = getResource(provider, svcName, rcName);
         if (resource.isEmpty()) {
             return false;
         }

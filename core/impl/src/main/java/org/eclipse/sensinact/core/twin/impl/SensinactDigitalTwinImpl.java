@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.twin.impl;
 
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -51,6 +52,7 @@ import org.osgi.util.promise.PromiseFactory;
 
 public class SensinactDigitalTwinImpl extends CommandScopedImpl implements SensinactEMFDigitalTwin {
 
+    private static final EnumSet<SnapshotOption> NO_SNAPSHOT_OPTIONS = EnumSet.noneOf(SnapshotOption.class);
     private final ModelNexus nexusImpl;
     private final PromiseFactory pf;
 
@@ -328,13 +330,19 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
     public List<ProviderSnapshot> filteredSnapshot(BiPredicate<ProviderSnapshot, GeoJsonObject> geoFilter,
             Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
             Predicate<ResourceSnapshot> rcFilter) {
+        return filteredSnapshot(geoFilter, providerFilter, svcFilter, rcFilter, NO_SNAPSHOT_OPTIONS);
+    }
+
+    @Override
+    public List<ProviderSnapshot> filteredSnapshot(BiPredicate<ProviderSnapshot, GeoJsonObject> geoFilter,
+            Predicate<ProviderSnapshot> providerFilter, Predicate<ServiceSnapshot> svcFilter,
+            Predicate<ResourceSnapshot> rcFilter, EnumSet<SnapshotOption> snapshotOptions) {
 
         final Instant snapshotTime = Instant.now();
 
         // Filter providers with their API model
         Stream<ProviderSnapshotImpl> providersStream = nexusImpl.getProviders().stream()
-                .map(p -> new ProviderSnapshotImpl(p.eClass().getEPackage().getNsURI(),
-                        EMFUtil.getModelName(p.eClass()), p, snapshotTime));
+                .map(p -> new ProviderSnapshotImpl(p, snapshotTime, snapshotOptions));
         if (providerFilter != null) {
             providersStream = providersStream.filter(providerFilter);
         }
@@ -383,6 +391,11 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
     @Override
     public ProviderSnapshot snapshotProvider(String providerName) {
+        return snapshotProvider(providerName, NO_SNAPSHOT_OPTIONS);
+    }
+
+    @Override
+    public ProviderSnapshot snapshotProvider(String providerName, EnumSet<SnapshotOption> snapshotOptions) {
         final Instant snapshotTime = Instant.now();
 
         final Provider nexusProvider = nexusImpl.getProvider(providerName);
@@ -392,8 +405,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         }
 
         final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
-                nexusImpl.getProviderPackageUri(nexusProvider.getId()),
-                nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
+                nexusProvider, snapshotTime, snapshotOptions);
 
         snapshotServicesAndResources(null, null, snapshotTime, providerSnapshot);
         return providerSnapshot;
@@ -418,8 +430,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Minimal snapshot of the provider owning the service
         final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
-                nexusImpl.getProviderPackageUri(nexusProvider.getId()),
-                nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
+                nexusProvider, snapshotTime, NO_SNAPSHOT_OPTIONS);
 
         // Describe the service
         final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName,
@@ -458,8 +469,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
 
         // Minimal description of the provider owning the service
         final ProviderSnapshotImpl providerSnapshot = new ProviderSnapshotImpl(
-                nexusImpl.getProviderPackageUri(nexusProvider.getId()),
-                nexusImpl.getProviderModel(nexusProvider.getId()), nexusProvider, snapshotTime);
+                nexusProvider, snapshotTime, NO_SNAPSHOT_OPTIONS);
 
         // Minimal description of the service owning the resource
         final ServiceSnapshotImpl svcSnapshot = new ServiceSnapshotImpl(providerSnapshot, serviceName,

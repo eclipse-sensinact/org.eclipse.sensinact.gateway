@@ -87,7 +87,7 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
     public List<SensinactEMFProvider> getLinkedProviders() {
         checkValid();
         return provider.getLinkedProviders().stream()
-                .map(p -> new SensinactProviderImpl(active, provider, nexus, promiseFactory))
+                .map(p -> new SensinactProviderImpl(active, p, nexus, promiseFactory))
                 .collect(Collectors.toList());
     }
 

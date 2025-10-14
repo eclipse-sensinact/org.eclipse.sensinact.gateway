@@ -10,21 +10,23 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.core.notification;
 
-public sealed interface ResourceNotification permits LifecycleNotification,
-    ResourceActionNotification, ResourceDataNotification, ResourceMetaDataNotification,
-    LinkedProviderNotification {
+package org.eclipse.sensinact.core.snapshot;
 
-    public String modelPackageUri();
+/**
+ * Common behaviours between {@link ProviderSnapshot} and
+ * {@link LinkedProviderSnapshot}
+ */
+public interface CommonProviderSnapshot extends Snapshot {
 
-    public String model();
+    /**
+     * Returns the package URI of the model of the provider
+     */
+    String getModelPackageUri();
 
-    public String provider();
+    /**
+     * Returns the name of the model of the provider
+     */
+    String getModelName();
 
-    public String service();
-
-    public String resource();
-
-    public String getTopic();
 }

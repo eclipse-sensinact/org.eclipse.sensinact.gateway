@@ -13,12 +13,21 @@
 
 package org.eclipse.sensinact.core.impl.snapshot;
 
+import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL;
+import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS;
+
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.model.core.provider.Provider;
 
 public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSnapshot {
@@ -41,7 +50,9 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
     /**
      * Provider model
      */
-    private Provider modelProvider;
+    private final Provider modelProvider;
+
+    private final List<LinkedProviderSnapshot> linked;
 
     /**
      * @param modelPackageUri Provider model package URI
@@ -49,12 +60,24 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
      * @param provider        Provider model
      * @param snapshotInstant Instant of snapshot
      */
-    public ProviderSnapshotImpl(final String modelPackageUri, final String modelName, final Provider provider,
-            final Instant snapshotInstant) {
+    public ProviderSnapshotImpl(final Provider provider,
+            final Instant snapshotInstant, EnumSet<SnapshotOption> snapshotOptions) {
         super(provider.getId(), snapshotInstant);
-        this.modelPackageUri = modelPackageUri;
-        this.modelName = modelName;
+        EClass eClass = provider.eClass();
+        this.modelPackageUri = eClass.getEPackage().getNsURI();
+        this.modelName = EMFUtil.getModelName(eClass);
         this.modelProvider = provider;
+        if(snapshotOptions.contains(INCLUDE_LINKED_PROVIDERS_FULL)) {
+            linked = provider.getLinkedProviders().stream()
+                    .<LinkedProviderSnapshot>map(p -> new LinkedProviderSnapshotImpl(p, snapshotInstant, true))
+                    .toList();
+        } else if(snapshotOptions.contains(INCLUDE_LINKED_PROVIDER_IDS)) {
+            linked = provider.getLinkedProviders().stream()
+                    .<LinkedProviderSnapshot>map(p -> new LinkedProviderSnapshotImpl(p, snapshotInstant, false))
+                    .toList();
+        } else {
+            linked = List.of();
+        }
     }
 
     @Override
@@ -77,19 +100,16 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
         this.services.put(svc.getName(), svc);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ServiceSnapshotImpl> getServices() {
+    public List<ServiceSnapshot> getServices() {
         return List.copyOf(services.values());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceSnapshotImpl getService(String name) {
         return services.get(name);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ResourceSnapshotImpl getResource(String service, String resource) {
         ServiceSnapshotImpl svc = services.get(service);
@@ -98,5 +118,10 @@ public class ProviderSnapshotImpl extends AbstractSnapshot implements ProviderSn
 
     public Provider getModelProvider() {
         return modelProvider;
+    }
+
+    @Override
+    public List<LinkedProviderSnapshot> getLinkedProviders() {
+        return linked;
     }
 }

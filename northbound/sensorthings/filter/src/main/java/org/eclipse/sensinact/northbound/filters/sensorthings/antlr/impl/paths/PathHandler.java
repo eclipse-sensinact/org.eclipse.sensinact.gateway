@@ -29,7 +29,7 @@ public class PathHandler {
 
     public Object handle(final ResourceValueFilterInputHolder holder) {
         final ProviderSnapshot provider = holder.getProvider();
-        final List<ResourceSnapshot> resources = holder.getResources();
+        final List<? extends ResourceSnapshot> resources = holder.getResources();
         final ResourceSnapshot resource = holder.getResource();
 
         switch (holder.getContext()) {

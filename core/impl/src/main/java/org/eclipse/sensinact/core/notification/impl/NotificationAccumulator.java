@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.notification.impl;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 public interface NotificationAccumulator {
@@ -181,5 +182,23 @@ public interface NotificationAccumulator {
      * Once completed an accumulator cannot be used again
      */
     void completeAndSend();
+
+    /**
+     * Called to notify of a new provider link
+     * @param parentProvider the parent
+     * @param list the list of providers after the change
+     * @param childProvider the new child
+     * @param metaTimestamp the timestamp
+     */
+    void link(String modelPackageUri, String model, String parentProvider, List<String> list, String childProvider, Instant metaTimestamp);
+
+    /**
+     * Called to notify of a new provider link
+     * @param parentProvider the parent
+     * @param list the list of providers after the change
+     * @param childProvider the removed child
+     * @param metaTimestamp the timestamp
+     */
+    void unlink(String modelPackageUri, String model, String parentProvider, List<String> list, String childProvider, Instant metaTimestamp);
 
 }

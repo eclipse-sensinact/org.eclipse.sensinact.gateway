@@ -19,6 +19,8 @@ import static org.eclipse.sensinact.core.notification.LifecycleNotification.Stat
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.RESOURCE_DELETED;
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_CREATED;
 import static org.eclipse.sensinact.core.notification.LifecycleNotification.Status.SERVICE_DELETED;
+import static org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action.ADDED;
+import static org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action.REMOVED;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,11 +28,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
+import org.eclipse.sensinact.core.notification.LinkedProviderNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -323,6 +327,50 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     }
                     return List.of(ran);
                 });
+    }
+
+    @Override
+    public void link(String modelPackageUri, String model, String parentProvider, List<String> list, String childProvider, Instant metaTimestamp) {
+        doLinkMerge(modelPackageUri, model, parentProvider, list, childProvider, metaTimestamp, false);
+    }
+
+    @Override
+    public void unlink(String modelPackageUri, String model, String parentProvider, List<String> list, String childProvider, Instant metaTimestamp) {
+        doLinkMerge(modelPackageUri, model, parentProvider, list, childProvider, metaTimestamp, true);
+    }
+
+    private void doLinkMerge(String modelPackageUri, String model, String parentProvider, List<String> list, String childProvider,
+            Instant metaTimestamp, boolean isRemove) {
+        check();
+        notifications.compute(new NotificationKey(parentProvider, null, null, LinkedProviderNotification.class), (a, b) -> {
+            LinkedProviderNotification lpn = createLinkedProviderNotification(modelPackageUri, model, parentProvider,
+                    childProvider, isRemove ? REMOVED: ADDED, list, metaTimestamp);
+            if (b != null) {
+                AtomicBoolean doAdd = new AtomicBoolean(true);
+                List<LinkedProviderNotification> notifications = b.stream()
+                    .map(rn -> {
+                        LinkedProviderNotification existing = (LinkedProviderNotification) rn;
+                        if(existing.child().equals(childProvider)) {
+                            if(existing.action() == REMOVED) {
+                                // Double delete, we only want the second, delete then add
+                                // treat as just an add. Either way we remove
+                                return null;
+                            } else if(isRemove) {
+                                // Add then remove, include neither
+                                doAdd.set(false);
+                                return null;
+                            }
+                        }
+                        return createLinkedProviderNotification(existing.modelPackageUri(), existing.model(), parentProvider,
+                                existing.child(), existing.action(), list, existing.timestamp());
+                    })
+                    .filter(Objects::nonNull)
+                    .toList();
+                Stream<ResourceNotification> additional = doAdd.get() ? Stream.of(lpn) : Stream.empty();
+                return Stream.<ResourceNotification>concat(notifications.stream(), additional).toList();
+            }
+            return List.of(lpn);
+        });
     }
 
     @Override
