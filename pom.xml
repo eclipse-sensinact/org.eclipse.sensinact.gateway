@@ -721,6 +721,11 @@
           </executions>
         </plugin>
         <plugin>
+          <groupId>biz.aQute.bnd</groupId>
+          <artifactId>bnd-run-maven-plugin</artifactId>
+          <version>${bnd.version}</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
           <version>3.3.0</version>
