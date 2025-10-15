@@ -30,5 +30,5 @@ public interface EMFModel extends Model {
 
     EMFServiceBuilder<EMFService> createService(String service);
 
-    EMFService createDynamicService(String svc, EClass svcEClass);
+    EMFService createServiceWithEClass(String svc, EClass svcEClass);
 }

@@ -97,6 +97,7 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
         dud.actionOnNull = dto.nullAction;
         dud.originalDto = dto;
         dud.modelEClass = dto.modelEClass;
+        dud.serviceEClassName = dto.serviceEClassName;
         dud.serviceEClass = dto.serviceEClass;
         dud.serviceReference = dto.serviceReference;
         return dud;
