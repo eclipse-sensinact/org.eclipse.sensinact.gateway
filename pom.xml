@@ -18,6 +18,7 @@
   <artifactId>sensinact-parent</artifactId>
   <version>${revision}${changelist}</version>
   <packaging>pom</packaging>
+  <name>SensiNact</name>
   <url>https://projects.eclipse.org/projects/technology.sensinact</url>
 
   <inceptionYear>2017</inceptionYear>

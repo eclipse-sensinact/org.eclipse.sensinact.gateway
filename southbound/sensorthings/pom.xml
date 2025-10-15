@@ -20,6 +20,7 @@
   <groupId>org.eclipse.sensinact.gateway.southbound.sensorthings</groupId>
   <artifactId>sensorthings</artifactId>
   <packaging>pom</packaging>
+  <name>SensiNact Southbound :: SensorThings</name>
 
   <modules>
     <module>sensing.rest</module>

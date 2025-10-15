@@ -20,7 +20,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>launcher</artifactId>
-  <name>Eclipse sensiNact Feature Launcher</name>
+  <name>SensiNact Distribution :: Launcher</name>
   <description>This project contains code for launching sensiNact gateway features</description>
 
   <properties>

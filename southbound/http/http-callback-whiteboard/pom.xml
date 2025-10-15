@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>http-callback-whiteboard</artifactId>
-  <name>Sensinact Southbound HTTP :: Callback whiteboard</name>
+  <name>SensiNact Southbound :: HTTP :: Callback Whiteboard</name>
   <description>HTTP callback whiteboard</description>
   <dependencies>
     <!-- Servlet API -->

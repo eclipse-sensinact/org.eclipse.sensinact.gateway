@@ -19,7 +19,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>provider</artifactId>
-  <name>SensiNact Provider Model</name>
+  <name>SensiNact Core :: Models :: Provider</name>
   <description>The model for sensinact gateway core.</description>
   <!-- No integration tests -->
   <properties>

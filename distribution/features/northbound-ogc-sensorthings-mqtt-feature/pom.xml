@@ -20,9 +20,9 @@
   </parent>
 
   <artifactId>northbound-ogc-sensorthings-mqtt-feature</artifactId>
-  <name>Eclipse sensiNact Northbound OGC Sensorthings MQTT Feature</name>
-  <description>This project contains a feature providing an OGC Sensorthings compatible MQTT extension for sensiNact</description>
   <packaging>pom</packaging>
+  <name>SensiNact Distribution :: Features :: Northbound OGC SensorThings MQTT</name>
+  <description>This project contains a feature providing an OGC Sensorthings compatible MQTT extension for sensiNact</description>
 
   <properties>
     <sensinact.version>${revision}${changelist}</sensinact.version>

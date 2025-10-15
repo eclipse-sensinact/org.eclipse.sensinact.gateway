@@ -23,7 +23,7 @@ SPDX-License-Identifier: EPL-2.0
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>pull-based</artifactId>
-  <name>Example pull-based</name>
+  <name>SensiNact Examples :: Pull-based</name>
   <description>The pull-based module shows how to make services that can "get" a
     sensor value. These are best for low power sensors that you only want to
     query if necessary</description>

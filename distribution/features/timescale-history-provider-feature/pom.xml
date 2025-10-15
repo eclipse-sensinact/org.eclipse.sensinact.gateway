@@ -7,8 +7,7 @@
   </parent>
   <artifactId>timescale-history-provider-feature</artifactId>
   <packaging>pom</packaging>
-
-  <name>Eclipse sensiNact Timescale DB History Provider  Feature</name>
+  <name>SensiNact Distribution :: Features :: Timescale History Provider</name>
   <description>This project contains a feature providing a Jakarta Servlet whiteboard</description>
 
   <dependencies>

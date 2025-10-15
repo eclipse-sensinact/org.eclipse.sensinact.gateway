@@ -6,7 +6,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>geo-json</artifactId>
-  <name>SensiNact GeoJSON mapping types</name>
+  <name>SensiNact Core :: GeoJSON</name>
   <description>Useful type mappings for GeoJSON objects</description>
 
   <dependencies>

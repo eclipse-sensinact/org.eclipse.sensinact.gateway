@@ -9,7 +9,7 @@
   <artifactId>virtual</artifactId>
   <packaging>pom</packaging>
 
-  <name>Virtual Southbound Connectors</name>
+  <name>SensiNact Southbound :: Virtual</name>
   <description>This reactor contains virtual connectors that are used for testing and demonstration purposes</description>
 
   <modules>

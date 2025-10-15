@@ -7,9 +7,9 @@
   </parent>
 
   <artifactId>northbound-ogc-sensorthings-feature</artifactId>
-  <name>Eclipse sensiNact Northbound OGC Sensorthings API Feature</name>
-  <description>This project contains a feature providing an OGC Sensorthings compatible REST API for sensiNact</description>
   <packaging>pom</packaging>
+  <name>SensiNact Distribution :: Features :: Northbound OGC SensorThings</name>
+  <description>This project contains a feature providing an OGC Sensorthings compatible REST API for sensiNact</description>
 
   <properties>
     <spatial4j.version>0.8</spatial4j.version>

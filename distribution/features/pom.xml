@@ -21,7 +21,7 @@
   <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
   <artifactId>features</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact Features</name>
+  <name>SensiNact Distribution :: Features</name>
   <description>This project contains definitions of sensiNact features</description>
 
   <modules>

@@ -6,9 +6,9 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>virtual-temperature-sensor-feature</artifactId>
-  <name>Eclipse sensiNact Virtual Temperature Feature</name>
-  <description>This project contains a feature providing a virtual temperature sensor</description>
   <packaging>pom</packaging>
+  <name>SensiNact Distribution :: Features :: Virtual Temperature Sensor</name>
+  <description>This project contains a feature providing a virtual temperature sensor</description>
 
   <dependencies>
     <dependency>
