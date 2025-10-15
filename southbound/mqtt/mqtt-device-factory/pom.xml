@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>mqtt-device-factory</artifactId>
-  <name>Sensinact Southbound MQTT :: Device Factory</name>
+  <name>SensiNact Southbound :: MQTT :: Device Factory</name>
   <description>MQTT device factory</description>
 
   <dependencies>

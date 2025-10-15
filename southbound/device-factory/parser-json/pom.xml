@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>parser-json</artifactId>
-  <name>SensiNact Southbound Device factory :: JSON parser</name>
+  <name>SensiNact Southbound :: Device Factory :: JSON Parser</name>
   <description>Parses JSON payloads for the device factory</description>
 
   <dependencies>

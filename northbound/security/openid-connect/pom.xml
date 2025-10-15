@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>openid-connect</artifactId>
-  <name>SensiNact Northbound Open Id Connect authentication validator</name>
+  <name>SensiNact Northbound :: Security :: Open Id Connect authentication validator</name>
   <description>A validator for Open Id Connect JWT</description>
 
   <properties>

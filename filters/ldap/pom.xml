@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>ldap</artifactId>
-  <name>SensiNact Northbound Filters :: LDAP</name>
+  <name>SensiNact Filters :: LDAP</name>
   <description>Converts LDAP filters to SensiNact filters</description>
   <dependencies>
     <dependency>

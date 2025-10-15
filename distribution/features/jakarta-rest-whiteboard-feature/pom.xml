@@ -19,7 +19,7 @@
   </parent>
   <artifactId>jakarta-rest-whiteboard-feature</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact Jakarta RESTful Web Services Whiteboard Feature</name>
+  <name>SensiNact Distribution :: Features :: Jakarta REST Whiteboard</name>
   <description>This project contains a feature providing a Jakarta RESTful Web Services whiteboard</description>
   <properties>
     <osgi.technology.rest.version>1.2.2</osgi.technology.rest.version>

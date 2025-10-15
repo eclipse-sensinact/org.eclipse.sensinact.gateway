@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>session-impl</artifactId>
-  <name>SensiNact Northbound Session Provider</name>
+  <name>SensiNact Northbound :: Session :: Provider</name>
 
   <dependencies>
     <dependency>

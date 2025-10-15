@@ -23,7 +23,7 @@ SPDX-License-Identifier: EPL-2.0
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>model-based</artifactId>
-  <name>Example model-based</name>
+  <name>SensiNact Examples :: Model-based</name>
   <description>The model-based module contains examples showing how to define a
     model using a resource descriptor</description>
 

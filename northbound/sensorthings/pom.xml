@@ -20,6 +20,7 @@
   <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
   <artifactId>sensorthings</artifactId>
   <packaging>pom</packaging>
+  <name>SensiNact Northbound :: SensorThings</name>
 
   <modules>
     <module>dto</module>
