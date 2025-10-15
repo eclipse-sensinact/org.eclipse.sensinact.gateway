@@ -29,8 +29,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,6 +46,7 @@ import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
@@ -73,11 +74,11 @@ public class AnnotationMapping {
 
             @Override
             Object getElementValue(Object source, String elementName) throws Exception {
-                return Arrays.stream(elements(source.getClass()))
-                        .filter(f -> elementName.equals(f.getName()))
+                return Arrays.stream(elements(source.getClass())).filter(f -> elementName.equals(f.getName()))
                         .findFirst().get().get(source);
             }
-        }, RECORD_COMPONENTS {
+        },
+        RECORD_COMPONENTS {
             @Override
             RecordComponent[] elements(Class<?> clazz) {
                 return clazz.getRecordComponents();
@@ -95,8 +96,7 @@ public class AnnotationMapping {
 
             @Override
             Object getElementValue(Object source, String elementName) throws Exception {
-                return Arrays.stream(elements(source.getClass()))
-                        .filter(rc -> elementName.equals(rc.getName()))
+                return Arrays.stream(elements(source.getClass())).filter(rc -> elementName.equals(rc.getName()))
                         .findFirst().get().getAccessor().invoke(source);
             }
         };
@@ -113,7 +113,8 @@ public class AnnotationMapping {
     static Function<Object, List<? extends AbstractUpdateDto>> getUpdateDtoMappings(Class<?> clazz) {
         try {
 
-            ElementType elementType = Record.class.isAssignableFrom(clazz) ? ElementType.RECORD_COMPONENTS : ElementType.FIELDS;
+            ElementType elementType = Record.class.isAssignableFrom(clazz) ? ElementType.RECORD_COMPONENTS
+                    : ElementType.FIELDS;
 
             Map<AnnotatedElement, Data> dataFields = getAnnotatedElements(clazz, elementType, Data.class);
             Map<AnnotatedElement, Metadata> metadataFields = getAnnotatedElements(clazz, elementType, Metadata.class);
@@ -194,9 +195,8 @@ public class AnnotationMapping {
 
     private static Function<Object, Instant> getTimestampMapping(Class<?> clazz, ElementType elementType) {
 
-        AnnotatedElement timestamp = Arrays.stream(elementType.elements(clazz)).
-                filter(f -> f.isAnnotationPresent(Timestamp.class))
-                .findFirst().orElse(null);
+        AnnotatedElement timestamp = Arrays.stream(elementType.elements(clazz))
+                .filter(f -> f.isAnnotationPresent(Timestamp.class)).findFirst().orElse(null);
 
         if (timestamp == null) {
             return x -> Instant.now();
@@ -229,8 +229,8 @@ public class AnnotationMapping {
 
     }
 
-    private static Function<Object, ? extends AbstractUpdateDto> createDataMapping(Class<?> clazz, ElementType elementType,
-            AnnotatedElement ae, Data data) {
+    private static Function<Object, ? extends AbstractUpdateDto> createDataMapping(Class<?> clazz,
+            ElementType elementType, AnnotatedElement ae, Data data) {
         String name = elementType.getName(ae);
         Class<?> type = data.type() == Object.class ? elementType.getType(ae) : data.type();
 
@@ -240,6 +240,7 @@ public class AnnotationMapping {
         Function<Object, String> provider = getProviderNameMappingForElement(clazz, elementType, ae);
         Function<Object, String> service = getServiceNameMappingForElement(clazz, elementType, ae);
         Function<Object, EClass> serviceEClass = getServiceEClassMappingForElement(clazz, elementType, ae);
+        Function<Object, String> serviceEClassName = getServiceEClassStringMappingForElement(clazz, elementType, ae);
         Function<Object, EReference> serviceReference = getServiceEReferenceMappingForElement(clazz, elementType, ae);
         Function<Object, String> resource = getResourceNameMappingForDataElement(clazz, elementType, ae);
 
@@ -284,6 +285,13 @@ public class AnnotationMapping {
             } catch (Throwable t) {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
+
+            try {
+                dto.serviceEClassName = serviceEClassName.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+
             try {
                 dto.serviceEClass = serviceEClass.apply(o);
             } catch (Throwable t) {
@@ -320,14 +328,15 @@ public class AnnotationMapping {
                     && !dto.serviceReference.getName().equals(dto.service)) {
                 firstFailure = firstFailure == null ? new IllegalArgumentException(String.format(
                         "The defined service name %s does not match the defined EReference %s for the field %s in class %s",
-                        dto.service, dto.serviceReference.getName(), elementType.getName(ae), clazz.getName())) : firstFailure;
+                        dto.service, dto.serviceReference.getName(), elementType.getName(ae), clazz.getName()))
+                        : firstFailure;
             }
             if (dto.serviceReference != null && dto.serviceEClass != null
                     && !dto.serviceReference.getEReferenceType().isSuperTypeOf(dto.serviceEClass)) {
                 firstFailure = firstFailure == null ? new IllegalArgumentException(String.format(
                         "The defined service EClass %s is no supertype EReferences return type %s for the field %s in class %s",
-                        dto.serviceEClass.getName(), dto.serviceReference.getEReferenceType().getName(), elementType.getName(ae),
-                        clazz.getName())) : firstFailure;
+                        dto.serviceEClass.getName(), dto.serviceReference.getEReferenceType().getName(),
+                        elementType.getName(ae), clazz.getName())) : firstFailure;
             }
 
             if (firstFailure != null) {
@@ -339,8 +348,8 @@ public class AnnotationMapping {
         return dtoMapper;
     }
 
-    private static Function<Object, ? extends AbstractUpdateDto> createMetaDataMapping(Class<?> clazz, ElementType elementType,
-            AnnotatedElement ae, Metadata metadata) {
+    private static Function<Object, ? extends AbstractUpdateDto> createMetaDataMapping(Class<?> clazz,
+            ElementType elementType, AnnotatedElement ae, Metadata metadata) {
         String name = elementType.getName(ae);
 
         Function<Object, String> modelPackageUri = getModelPackageUriMappingForElement(clazz, elementType, ae);
@@ -349,6 +358,7 @@ public class AnnotationMapping {
         Function<Object, String> provider = getProviderNameMappingForElement(clazz, elementType, ae);
         Function<Object, String> service = getServiceNameMappingForElement(clazz, elementType, ae);
         Function<Object, EClass> serviceEClass = getServiceEClassMappingForElement(clazz, elementType, ae);
+        Function<Object, String> serviceEClassName = getServiceEClassStringMappingForElement(clazz, elementType, ae);
         Function<Object, EReference> serviceReference = getServiceEReferenceMappingForElement(clazz, elementType, ae);
         Function<Object, String> resource = getResourceNameMappingForMetadataElement(clazz, elementType, ae);
 
@@ -425,6 +435,11 @@ public class AnnotationMapping {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
             try {
+                dto.serviceEClassName = serviceEClassName.apply(o);
+            } catch (Throwable t) {
+                firstFailure = firstFailure == null ? t : firstFailure;
+            }
+            try {
                 dto.serviceEClass = serviceEClass.apply(o);
             } catch (Throwable t) {
                 firstFailure = firstFailure == null ? t : firstFailure;
@@ -490,19 +505,19 @@ public class AnnotationMapping {
 
     private static Function<Object, String> getProviderNameMappingForElement(Class<?> clazz, ElementType elementType,
             AnnotatedElement ae) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Provider.class,
-                String.class, Set.of());
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Provider.class, String.class,
+                Set.of());
         if (mapping == null) {
-            throw new IllegalArgumentException(
-                    String.format("No provider is defined for the field %s in class %s", elementType.getName(ae), clazz.getName()));
+            throw new IllegalArgumentException(String.format("No provider is defined for the field %s in class %s",
+                    elementType.getName(ae), clazz.getName()));
         }
         return mapping;
     }
 
     private static Function<Object, String> getServiceNameMappingForElement(Class<?> clazz, ElementType elementType,
             AnnotatedElement ae) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Service.class,
-                String.class, Set.of(EClass.class, EReference.class));
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Service.class, String.class,
+                Set.of(EClass.class, EReference.class));
         if (mapping == null) {
             // Models EClass is optional
             mapping = o -> null;
@@ -512,7 +527,7 @@ public class AnnotationMapping {
 
     private static Function<Object, EClass> getServiceEClassMappingForElement(Class<?> clazz, ElementType elementType,
             AnnotatedElement ae) {
-        Function<Object, EClass> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Service.class,
+        Function<Object, EClass> mapping = getAnnotatedNameMapping(clazz, elementType, ae, ServiceModel.class,
                 EClass.class, Set.of(String.class, EReference.class));
         if (mapping == null) {
             // Models EClass is optional
@@ -521,8 +536,19 @@ public class AnnotationMapping {
         return mapping;
     }
 
-    private static Function<Object, EReference> getServiceEReferenceMappingForElement(Class<?> clazz, ElementType elementType,
-            AnnotatedElement ae) {
+    private static Function<Object, String> getServiceEClassStringMappingForElement(Class<?> clazz,
+            ElementType elementType, AnnotatedElement ae) {
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, ServiceModel.class,
+                String.class, Set.of(EClass.class));
+        if (mapping == null) {
+            // Models EClass is optional
+            mapping = o -> null;
+        }
+        return mapping;
+    }
+
+    private static Function<Object, EReference> getServiceEReferenceMappingForElement(Class<?> clazz,
+            ElementType elementType, AnnotatedElement ae) {
         Function<Object, EReference> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Service.class,
                 EReference.class, Set.of(String.class, EClass.class));
         if (mapping == null) {
@@ -532,10 +558,10 @@ public class AnnotationMapping {
         return mapping;
     }
 
-    private static Function<Object, String> getResourceNameMappingForDataElement(Class<?> clazz, ElementType elementType,
-            AnnotatedElement ae) {
-        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Resource.class,
-                String.class, Set.of());
+    private static Function<Object, String> getResourceNameMappingForDataElement(Class<?> clazz,
+            ElementType elementType, AnnotatedElement ae) {
+        Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Resource.class, String.class,
+                Set.of());
         if (mapping == null) {
             String fieldName = elementType.getName(ae);
             mapping = x -> fieldName;
@@ -559,13 +585,13 @@ public class AnnotationMapping {
         }
     }
 
-    private static Function<Object, String> getResourceNameMappingForMetadataElement(Class<?> clazz, ElementType elementType,
-            AnnotatedElement ae) {
+    private static Function<Object, String> getResourceNameMappingForMetadataElement(Class<?> clazz,
+            ElementType elementType, AnnotatedElement ae) {
         Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Resource.class, String.class,
                 Set.of());
         if (mapping == null) {
-            throw new IllegalArgumentException(
-                    String.format("No resource is defined for the field %s in class %s", elementType.getName(ae), clazz.getName()));
+            throw new IllegalArgumentException(String.format("No resource is defined for the field %s in class %s",
+                    elementType.getName(ae), clazz.getName()));
         }
         return mapping;
     }
@@ -605,8 +631,7 @@ public class AnnotationMapping {
                     .filter(r -> r.isAnnotationPresent(annotationType) && !r.isAnnotationPresent(Data.class)
                             && !r.isAnnotationPresent(Metadata.class))
                     // Exclude other legal types that we aren't looking for
-                    .filter(r -> !otherPossibleTypes.contains(elementType.getType(r)))
-                    .findFirst().orElse(null);
+                    .filter(r -> !otherPossibleTypes.contains(elementType.getType(r))).findFirst().orElse(null);
 
             if (annotatedElement != null) {
                 String name = elementType.getName(annotatedElement);
@@ -614,8 +639,7 @@ public class AnnotationMapping {
                 if (type != resultType) {
                     throw new IllegalArgumentException(
                             String.format("The class %s has a field %s annotated with %s that has a non String type %s",
-                                    clazz.getName(), name, annotationType.getSimpleName(),
-                                    type));
+                                    clazz.getName(), name, annotationType.getSimpleName(), type));
                 }
                 mapping = o -> getTypedValueFromElement(elementType, name, o, annotationType, resultType);
             } else if (resultType == String.class) {

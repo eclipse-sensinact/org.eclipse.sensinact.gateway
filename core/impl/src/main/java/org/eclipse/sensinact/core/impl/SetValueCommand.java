@@ -33,7 +33,6 @@ import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
@@ -65,12 +64,14 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
         EClass modelEClass = dataUpdateDto.modelEClass;
         String packageUri = modelEClass == null ? dataUpdateDto.modelPackageUri : modelEClass.getEPackage().getNsURI();
         String mod = modelEClass != null ? modelEClass.getName() : dataUpdateDto.model;
-        if(mod == null && dataUpdateDto.provider != null) {
-        SensinactEMFProvider provider = twin.getProvider(dataUpdateDto.provider);
-            if(provider == null) mod = dataUpdateDto.provider;
+        if (mod == null && dataUpdateDto.provider != null) {
+            SensinactEMFProvider provider = twin.getProvider(dataUpdateDto.provider);
+            if (provider == null)
+                mod = dataUpdateDto.provider;
             else {
                 mod = provider.getModelName();
-                if(packageUri == null) packageUri = provider.getModelPackageUri();
+                if (packageUri == null)
+                    packageUri = provider.getModelPackageUri();
             }
         }
         String provider = dataUpdateDto.provider;
@@ -99,19 +100,26 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
             }
             EMFService service = model.getServices().get(svc);
             if (service == null) {
-                if (ProviderPackage.Literals.DYNAMIC_PROVIDER.isSuperTypeOf(model.getModelEClass())) {
-                    service = model.createDynamicService(svc, svcEClass);
+                if (svcEClass == null && dataUpdateDto.serviceEClassName != null) {
+                    svcEClass = (EClass) modelEClass.getEPackage().getEClassifier(dataUpdateDto.serviceEClassName);
+                }
+                if (svcEClass != null) {
+                    service = model.createServiceWithEClass(svc, svcEClass);
                 } else if (!model.isFrozen()) {
                     service = model.createService(svc).withCreationTime(dataUpdateDto.timestamp).build();
                 }
             }
 
+            if (service == null) {
+                return promiseFactory.failed(new IllegalStateException(
+                        "Service '" + svc + "' does not exist in frozen model '" + mod + "'"));
+            }
+
             Resource r = service.getResources().get(res);
             if (!model.isFrozen() && r == null) {
-                Class<?> type = dataUpdateDto.type != null ? dataUpdateDto.type :
-                    dataUpdateDto.data != null ? dataUpdateDto.data.getClass() : null;
-                r = service.createResource(res).withValueType(ValueType.UPDATABLE)
-                        .withType(type).build();
+                Class<?> type = dataUpdateDto.type != null ? dataUpdateDto.type
+                        : dataUpdateDto.data != null ? dataUpdateDto.data.getClass() : null;
+                r = service.createResource(res).withValueType(ValueType.UPDATABLE).withType(type).build();
             }
             if (svcEClass == null) {
                 svcEClass = service.getServiceEClass();
@@ -125,29 +133,29 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
         }
 
         Function<TimedValue<Object>, Promise<Void>> cachedValueAction = null;
-        if(dataUpdateDto.data == null && dataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
+        if (dataUpdateDto.data == null && dataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
             final SensinactResource toUpdate = resource;
-            cachedValueAction = v -> v.getTimestamp() == null ? promiseFactory.resolved(null) :
-                toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
-        } else if(dataUpdateDto.actionOnDuplicate == DuplicateAction.UPDATE_IF_DIFFERENT) {
+            cachedValueAction = v -> v.getTimestamp() == null ? promiseFactory.resolved(null)
+                    : toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
+        } else if (dataUpdateDto.actionOnDuplicate == DuplicateAction.UPDATE_IF_DIFFERENT) {
             final SensinactResource toUpdate = resource;
             cachedValueAction = v -> {
-                if(v.getValue() == null) {
-                    return dataUpdateDto.data == null ? promiseFactory.resolved(null) :
-                        toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
+                if (v.getValue() == null) {
+                    return dataUpdateDto.data == null ? promiseFactory.resolved(null)
+                            : toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
                 } else {
-                    return v.getValue().equals(dataUpdateDto.data) ? promiseFactory.resolved(null) :
-                        toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
+                    return v.getValue().equals(dataUpdateDto.data) ? promiseFactory.resolved(null)
+                            : toUpdate.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
                 }
             };
         }
 
-        if(cachedValueAction != null) {
+        if (cachedValueAction != null) {
             // This must be a weak get so that it returns immediately with a resolved value
             Promise<TimedValue<Object>> p = resource.getValue(Object.class, GetLevel.WEAK).timeout(0);
             try {
                 Throwable t = p.getFailure();
-                if(t != null) {
+                if (t != null) {
                     LOG.error("Unable to retrieve cached value for {}/{}/{}", provider, svc, res, t);
                     return promiseFactory.failed(t);
                 } else {

@@ -88,7 +88,7 @@ public class ModelImpl extends CommandScopedImpl implements EMFModel {
     }
 
     @Override
-    public EMFService createDynamicService(String svc, EClass svcEClass) {
+    public EMFService createServiceWithEClass(String svc, EClass svcEClass) {
         return new ServiceImpl(active, this, svc, svcEClass, nexusImpl);
     }
 
