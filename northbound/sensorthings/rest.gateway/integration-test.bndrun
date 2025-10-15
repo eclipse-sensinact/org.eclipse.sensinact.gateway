@@ -8,8 +8,7 @@
 	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.southbound.history.timescale-provider',\
 	bnd.identity;id='ch.qos.logback.classic',\
-	bnd.identity;id='jul.to.slf4j',\
-	bnd.identity;id='org.mockito.mockito-core'
+	bnd.identity;id='jul.to.slf4j'
 
 -resolve.effective: active
 
@@ -47,6 +46,8 @@
 	junit-platform-commons;version='[1.10.1,1.10.2)',\
 	junit-platform-engine;version='[1.10.1,1.10.2)',\
 	junit-platform-launcher;version='[1.10.1,1.10.2)',\
+	net.bytebuddy.byte-buddy;version='[1.14.11,1.14.12)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.14.11,1.14.12)',\
 	org.antlr.antlr4-runtime;version='[4.12.0,4.12.1)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
 	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.7,1.3.8)',\
@@ -62,9 +63,9 @@
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
 	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
+	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.osgitech.rest;version='[1.2.2,1.2.3)',\
 	org.eclipse.osgitech.rest.jetty;version='[1.2.2,1.2.3)',\
