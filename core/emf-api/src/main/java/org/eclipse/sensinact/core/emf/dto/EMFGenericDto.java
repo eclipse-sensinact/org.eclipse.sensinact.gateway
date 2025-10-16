@@ -30,6 +30,14 @@ public final class EMFGenericDto extends BaseValueDto {
     public EClass modelEClass;
 
     /**
+     * The name of the {@link EClass} of a service. This must be set, when updating
+     * a {@link DynamicProvider}, where a service might not be available yet, it is
+     * an alternative to the serviceEClass and will be overwritten by the
+     * serviceEClass is set..
+     */
+    public String serviceEClassName;
+
+    /**
      * The {@link EClass} of a service. This must be set, when updating a
      * {@link DynamicProvider}, where a service might not be available yet.
      */

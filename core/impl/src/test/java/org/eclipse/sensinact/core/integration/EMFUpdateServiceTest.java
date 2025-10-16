@@ -33,6 +33,7 @@ import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -293,7 +294,7 @@ public class EMFUpdateServiceTest {
             @Model
             public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
 
-            @Service
+            @ServiceModel
             public EClass service = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Resource(RESOURCE)
@@ -311,7 +312,7 @@ public class EMFUpdateServiceTest {
             @Model
             public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
 
-            @Service
+            @ServiceModel
             public EClass service = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Resource(RESOURCE)
@@ -329,7 +330,7 @@ public class EMFUpdateServiceTest {
             @Model
             public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
 
-            @Service
+            @ServiceModel
             public EClass service = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Resource(RESOURCE)
@@ -475,26 +476,143 @@ public class EMFUpdateServiceTest {
         }
     }
 
+    @Nested
+    public class EMFStringServiceModel {
+
+        @Provider(DYNAMIC_PROVIDER)
+        public class DynamicTestStringServiceModelDTO {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
+
+            @ServiceModel
+            public String serviceModel = "TestTemperatur";
+
+            @Resource(RESOURCE)
+            @Service("temperature")
+            @Data
+            public String data;
+
+            @Timestamp(ChronoUnit.MILLIS)
+            public long timestamp;
+        }
+
+        @Provider(DYNAMIC_PROVIDER)
+        public class DynamicTestStringServiceModelWithMetadataDTO {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
+
+            @ServiceModel
+            public String serviceModel = "TestTemperatur";
+
+            @Service
+            public String serviceName = "humidity";
+
+            @Resource(RESOURCE)
+            @Data
+            public String data;
+
+            @Timestamp(ChronoUnit.MILLIS)
+            public long timestamp;
+        }
+
+        @Provider(PROVIDER)
+        public class NonDynamicTestStringServiceModelDTO {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.TEST_SENSOR;
+
+            @ServiceModel
+            public String serviceModel = "TestTemperatur";
+
+            @Resource(RESOURCE)
+            @Service("tmp")
+            @Data
+            public String data;
+
+            @Timestamp(ChronoUnit.MILLIS)
+            public long timestamp;
+        }
+
+        @Test
+        void dynamicUpdateDTOStringServiceModel() throws Exception {
+            DynamicTestStringServiceModelDTO dto = new DynamicTestStringServiceModelDTO();
+            dto.data = "15 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            assertNull(t, () -> "Failed with: " + (t != null ? t.getMessage() : "null"));
+            assertEquals("15 °C", getResourceValue("DynamicTestSensor", DYNAMIC_PROVIDER, "temperature", RESOURCE));
+        }
+
+        @Test
+        void dynamicUpdateDTOStringServiceModelMultipleUpdates() throws Exception {
+            // First update
+            DynamicTestStringServiceModelDTO dto = new DynamicTestStringServiceModelDTO();
+            dto.data = "16 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t1 = update.getFailure();
+            assertNull(t1, () -> "First update failed with: " + (t1 != null ? t1.getMessage() : "null"));
+            assertEquals("16 °C", getResourceValue("DynamicTestSensor", DYNAMIC_PROVIDER, "temperature", RESOURCE));
+
+            // Second update
+            dto.data = "17 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            update = push.pushUpdate(dto);
+            Throwable t2 = update.getFailure();
+            assertNull(t2, () -> "Second update failed with: " + (t2 != null ? t2.getMessage() : "null"));
+            assertEquals("17 °C", getResourceValue("DynamicTestSensor", DYNAMIC_PROVIDER, "temperature", RESOURCE));
+        }
+
+        @Test
+        void dynamicUpdateDTOStringServiceModelWithServiceName() throws Exception {
+            DynamicTestStringServiceModelWithMetadataDTO dto = new DynamicTestStringServiceModelWithMetadataDTO();
+            dto.data = "18 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            assertNull(t, () -> "Failed with: " + (t != null ? t.getMessage() : "null"));
+            assertEquals("18 °C", getResourceValue("DynamicTestSensor", DYNAMIC_PROVIDER, "humidity", RESOURCE));
+        }
+
+        @Test
+        void nonDynamicUpdateDTOStringServiceModel() throws Exception {
+            // This should fail because TestSensor is not a dynamic provider
+            NonDynamicTestStringServiceModelDTO dto = new NonDynamicTestStringServiceModelDTO();
+            dto.data = "19 °C";
+            dto.timestamp = Instant.now().toEpochMilli();
+
+            Promise<?> update = push.pushUpdate(dto);
+            Throwable t = update.getFailure();
+            assertNotNull(t, "Should fail for non-dynamic provider with String service model");
+        }
+    }
+
     private Object getResourceValue(String model, String provider, String service, String resource)
             throws InvocationTargetException, InterruptedException {
-        return gt
-                .execute(new ResourceCommand<Object>(TestdataPackage.eNS_URI, model, provider, service, resource) {
+        return gt.execute(new ResourceCommand<Object>(TestdataPackage.eNS_URI, model, provider, service, resource) {
 
-                    @Override
-                    protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
-                        return resource.getValue().map(t -> t.getValue());
-                    }
-                }).getValue();
+            @Override
+            protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue().map(t -> t.getValue());
+            }
+        }).getValue();
     }
+
     private Instant getResourceTimestamp(String model, String provider, String service, String resource)
             throws InvocationTargetException, InterruptedException {
-        return gt
-                .execute(new ResourceCommand<Instant>(TestdataPackage.eNS_URI, model, provider, service, resource) {
+        return gt.execute(new ResourceCommand<Instant>(TestdataPackage.eNS_URI, model, provider, service, resource) {
 
-                    @Override
-                    protected Promise<Instant> call(SensinactResource resource, PromiseFactory pf) {
-                        return resource.getValue().map(t -> t.getTimestamp());
-                    }
-                }).getValue();
+            @Override
+            protected Promise<Instant> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue().map(t -> t.getTimestamp());
+            }
+        }).getValue();
     }
 }

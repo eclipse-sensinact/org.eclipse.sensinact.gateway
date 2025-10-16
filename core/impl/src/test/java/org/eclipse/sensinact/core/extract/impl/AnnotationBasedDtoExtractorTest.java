@@ -38,6 +38,7 @@ import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
 import org.eclipse.sensinact.core.dto.impl.DataUpdateDto;
@@ -153,6 +154,7 @@ public class AnnotationBasedDtoExtractorTest {
         public String resource2;
 
     }
+
     /**
      * Tests for class level annotations for provider/service/resource
      */
@@ -503,8 +505,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(Integer.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
 
             // RESOURCE uses class level service and default resource
             checkCommonFields(extracted);
@@ -517,8 +519,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(String.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE_2.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE_2.equals(d.resource)).findFirst().get();
 
             // RESOURCE_2 uses field level service and default resource
             assertEquals("override", extracted.service);
@@ -534,8 +536,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(String.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
 
             // Units uses class level service and field level resource
             checkCommonFields(extracted);
@@ -563,7 +565,7 @@ public class AnnotationBasedDtoExtractorTest {
             @Service
             public EReference service = TestdataPackage.Literals.TEST_SENSOR__TEMP;
 
-            @Service
+            @ServiceModel
             public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Data
@@ -577,11 +579,28 @@ public class AnnotationBasedDtoExtractorTest {
             @Model
             public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
 
-            @Service
+            @ServiceModel
             public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Service
             public String serviceName = "humidity";
+
+            @Data
+            public String v1;
+
+        }
+
+        @Provider(PROVIDER)
+        public class EMFTestDynamicDtoWithStringServiceModel {
+
+            @Model
+            public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
+
+            @ServiceModel
+            public String serviceModel = "TestTemperatur";
+
+            @Service
+            public String serviceName = "temperature";
 
             @Data
             public String v1;
@@ -611,7 +630,7 @@ public class AnnotationBasedDtoExtractorTest {
             @Service
             public EReference service = TestdataPackage.Literals.TEST_SENSOR__TEMP;
 
-            @Service
+            @ServiceModel
             public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Data
@@ -649,6 +668,24 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(TestdataPackage.Literals.DYNAMIC_TEST_SENSOR, extracted.modelEClass);
             assertEquals(TestdataPackage.Literals.TEST_TEMPERATUR, extracted.serviceEClass);
             assertEquals("humidity", extracted.service);
+            assertEquals("v1", extracted.resource);
+        }
+
+        @Test
+        void dtoWithDynamicProviderAndStringServiceModel() {
+            EMFTestDynamicDtoWithStringServiceModel dto = new EMFTestDynamicDtoWithStringServiceModel();
+            dto.v1 = VALUE_2;
+
+            List<? extends AbstractUpdateDto> updates = extractor(EMFTestDynamicDtoWithStringServiceModel.class)
+                    .getUpdates(dto);
+
+            assertEquals(1, updates.size());
+
+            DataUpdateDto extracted = updates.stream().findFirst().map(DataUpdateDto.class::cast).get();
+
+            assertEquals(TestdataPackage.Literals.DYNAMIC_TEST_SENSOR, extracted.modelEClass);
+            assertEquals("TestTemperatur", extracted.serviceEClassName);
+            assertEquals("temperature", extracted.service);
             assertEquals("v1", extracted.resource);
         }
 
@@ -871,7 +908,8 @@ public class AnnotationBasedDtoExtractorTest {
         void basicRecordOneValueNullMetadata() {
             Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
 
-            BasicRecordFieldAnnotated dto = new BasicRecordFieldAnnotated(PROVIDER, SERVICE, time.toEpochMilli(), VALUE, null, null, null);
+            BasicRecordFieldAnnotated dto = new BasicRecordFieldAnnotated(PROVIDER, SERVICE, time.toEpochMilli(), VALUE,
+                    null, null, null);
 
             List<? extends AbstractUpdateDto> updates = extractor(BasicRecordFieldAnnotated.class).getUpdates(dto);
 
@@ -894,8 +932,8 @@ public class AnnotationBasedDtoExtractorTest {
         void basicRecordWithBothValuesAndMetadataValues() {
             Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
 
-            BasicRecordFieldAnnotated dto = new BasicRecordFieldAnnotated(PROVIDER, SERVICE, time.toEpochMilli(), VALUE, VALUE_2,
-                    METADATA_VALUE_2, METADATA_VALUE);
+            BasicRecordFieldAnnotated dto = new BasicRecordFieldAnnotated(PROVIDER, SERVICE, time.toEpochMilli(), VALUE,
+                    VALUE_2, METADATA_VALUE_2, METADATA_VALUE);
 
             List<? extends AbstractUpdateDto> updates = extractor(BasicRecordFieldAnnotated.class).getUpdates(dto);
 
@@ -988,7 +1026,8 @@ public class AnnotationBasedDtoExtractorTest {
         void basicRecordWithBothValuesAndMetadataValues() {
             Instant time = Instant.now().minus(Duration.ofDays(3)).truncatedTo(ChronoUnit.MILLIS);
 
-            BasicRecordFieldNames dto = new BasicRecordFieldNames(PROVIDER, SERVICE, time.toEpochMilli(), VALUE, VALUE_2);
+            BasicRecordFieldNames dto = new BasicRecordFieldNames(PROVIDER, SERVICE, time.toEpochMilli(), VALUE,
+                    VALUE_2);
 
             List<? extends AbstractUpdateDto> updates = extractor(BasicRecordFieldNames.class).getUpdates(dto);
 
@@ -1024,9 +1063,11 @@ public class AnnotationBasedDtoExtractorTest {
         @Test
         void mixedLevelAnnotationsAndOverrides() {
 
-            RecordMixedDefaultAndOverridden dto = new RecordMixedDefaultAndOverridden(VALUE, METADATA_VALUE, Integer.toBinaryString(VALUE), VALUE_2);
+            RecordMixedDefaultAndOverridden dto = new RecordMixedDefaultAndOverridden(VALUE, METADATA_VALUE,
+                    Integer.toBinaryString(VALUE), VALUE_2);
 
-            List<? extends AbstractUpdateDto> updates = extractor(RecordMixedDefaultAndOverridden.class).getUpdates(dto);
+            List<? extends AbstractUpdateDto> updates = extractor(RecordMixedDefaultAndOverridden.class)
+                    .getUpdates(dto);
 
             assertEquals(4, updates.size());
 
@@ -1044,8 +1085,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(Integer.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
 
             // RESOURCE uses class level service and default resource
             checkCommonFields(extracted);
@@ -1058,8 +1099,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(String.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(DataUpdateDto.class::isInstance).filter(d -> RESOURCE_2.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE_2.equals(d.resource)).findFirst().get();
 
             // RESOURCE_2 uses field level service and default resource
             assertEquals("override", extracted.service);
@@ -1075,8 +1116,8 @@ public class AnnotationBasedDtoExtractorTest {
             assertEquals(String.class, dud.type);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
-            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).filter(d -> RESOURCE.equals(d.resource))
-                    .findFirst().get();
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource)).findFirst().get();
 
             // Units uses class level service and field level resource
             checkCommonFields(extracted);
@@ -1103,7 +1144,7 @@ public class AnnotationBasedDtoExtractorTest {
             public Integer foo;
 
             @Metadata(onMap = MapAction.USE_KEYS_AS_FIELDS, onNull = NullAction.UPDATE, onDuplicate = DuplicateAction.UPDATE_ALWAYS)
-            public Map<String,String> fizzbuzz;
+            public Map<String, String> fizzbuzz;
         }
 
         @Test

@@ -233,7 +233,7 @@ public class ModelNexus {
             EClass sensiNactModel = getModel(EMFUtil.DEFAULT_SENSINACT_PACKAGE_URI, "sensinact")
                     .orElseGet(() -> createModel(EMFUtil.DEFAULT_SENSINACT_PACKAGE_URI, "sensinact", now));
             EReference svc = Optional.ofNullable(getServiceForModel(sensiNactModel, "system"))
-                    .orElseGet(() -> createService(sensiNactModel, "system", now));
+                    .orElseGet(() -> createService(sensiNactModel, "system", "System", now));
             EClass svcClass = svc.getEReferenceType();
             EStructuralFeature versionResource = Optional.ofNullable(svcClass.getEStructuralFeature("version"))
                     .orElseGet(() -> createResource(svcClass, "version", double.class, now, null));
@@ -291,7 +291,6 @@ public class ModelNexus {
      */
     public void linkProviders(String parentProvider, String childProvider, Instant timestamp) {
 
-
         Provider parent = providers.get(parentProvider);
 
         Provider child = providers.get(childProvider);
@@ -310,23 +309,22 @@ public class ModelNexus {
         Admin admin = parent.getAdmin();
         ResourceValueMetadata metadata = getOrInitializeResourceMetadata(admin, pp.getProvider_LinkedProviders());
         Instant oldTs = metadata.getTimestamp();
-        if(oldTs == null || !oldTs.isAfter(metaTimestamp)) {
+        if (oldTs == null || !oldTs.isAfter(metaTimestamp)) {
             Set<String> set = childToParents.get(childProvider);
-            if(set == null) {
+            if (set == null) {
                 set = new HashSet<>();
                 childToParents.put(childProvider, set);
             }
 
-            if(set.add(parentProvider)) {
-                if(!parent.isSetLinkedProviders()) {
+            if (set.add(parentProvider)) {
+                if (!parent.isSetLinkedProviders()) {
                     parent.eSet(pp.getProvider_LinkedProviders(), new BasicEList<>());
                 }
                 metadata.setTimestamp(metaTimestamp);
                 EList<Provider> linkedProviders = parent.getLinkedProviders();
                 linkedProviders.add(child);
-                notificationAccumulator.get().link(admin.getModelPackageUri(), admin.getModel(),
-                        parentProvider, linkedProviders.stream().map(Provider::getId).toList(),
-                        childProvider, metaTimestamp);
+                notificationAccumulator.get().link(admin.getModelPackageUri(), admin.getModel(), parentProvider,
+                        linkedProviders.stream().map(Provider::getId).toList(), childProvider, metaTimestamp);
             } else {
                 LOG.debug("The parent provider {} already has a linked child {}", parentProvider, childProvider);
             }
@@ -364,16 +362,15 @@ public class ModelNexus {
         Admin admin = parent.getAdmin();
         ResourceValueMetadata metadata = getOrInitializeResourceMetadata(admin, pp.getProvider_LinkedProviders());
         Instant oldTs = metadata.getTimestamp();
-        if(oldTs == null || !oldTs.isAfter(metaTimestamp)) {
+        if (oldTs == null || !oldTs.isAfter(metaTimestamp)) {
             Set<String> set = childToParents.get(childProvider);
 
-            if(set != null && set.remove(parentProvider)) {
+            if (set != null && set.remove(parentProvider)) {
                 metadata.setTimestamp(metaTimestamp);
                 EList<Provider> linkedProviders = parent.getLinkedProviders();
                 linkedProviders.remove(child);
-                notificationAccumulator.get().unlink(admin.getModelPackageUri(), admin.getModel(),
-                        parentProvider, linkedProviders.stream().map(Provider::getId).toList(),
-                        childProvider, metaTimestamp);
+                notificationAccumulator.get().unlink(admin.getModelPackageUri(), admin.getModel(), parentProvider,
+                        linkedProviders.stream().map(Provider::getId).toList(), childProvider, metaTimestamp);
             } else {
                 LOG.debug("The parent provider {} has no linked child {}", parentProvider, childProvider);
             }
@@ -687,12 +684,12 @@ public class ModelNexus {
         return model;
     }
 
-    private EReference doCreateService(EClass model, String name, Instant timestamp) {
+    private EReference doCreateService(EClass model, String refName, String serviceModelName, Instant timestamp) {
         EPackage ePackage = model.getEPackage();
-        EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(name, false), ePackage, null,
+        EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(serviceModelName, false), ePackage, null,
                 ProviderPackage.Literals.SERVICE);
-        EReference ref = EMFUtil.createServiceReference(model, name, service, true);
-        EMFUtil.fillMetadata(EMFUtil.getModelMetadata(ref), timestamp, false, name, ECollections.emptyEMap());
+        EReference ref = EMFUtil.createServiceReference(model, refName, service, true);
+        EMFUtil.fillMetadata(EMFUtil.getModelMetadata(ref), timestamp, false, refName, ECollections.emptyEMap());
         return ref;
     }
 
@@ -851,12 +848,12 @@ public class ModelNexus {
                 .orElseThrow(() -> new IllegalArgumentException("No model with name " + modelName));
     }
 
-    public EReference createService(EClass model, String service, Instant creationTimestamp) {
+    public EReference createService(EClass model, String service, String serviceModelName, Instant creationTimestamp) {
         if (model.getEStructuralFeature(service) != null) {
             throw new IllegalArgumentException(
                     "There is an existing service with name " + service + " in model " + model);
         }
-        return doCreateService(model, service, creationTimestamp);
+        return doCreateService(model, service, serviceModelName, creationTimestamp);
     }
 
     public Stream<EReference> getServiceReferencesForModel(EClass model) {
@@ -1119,18 +1116,17 @@ public class ModelNexus {
 
     private void doDeleteProvider(String modelPackageUri, String model, String name) {
         Set<String> parents = childToParents.get(name);
-        if(parents != null) {
+        if (parents != null) {
             Instant now = Instant.now();
-            for(String parent : parents) {
+            for (String parent : parents) {
                 unlinkProviders(parent, name, now);
             }
             childToParents.remove(name);
         }
         Provider p = providers.remove(name);
-        List<Provider> linked = Optional.<List<Provider>>ofNullable(p.getLinkedProviders())
-            .orElse(List.of());
+        List<Provider> linked = Optional.<List<Provider>>ofNullable(p.getLinkedProviders()).orElse(List.of());
 
-        for(Provider prov : linked) {
+        for (Provider prov : linked) {
             String id = prov.getId();
             childToParents.getOrDefault(id, Set.of()).remove(name);
         }

@@ -71,11 +71,18 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<EMFModel> implements E
 
     @Override
     public ServiceBuilder<ModelBuilder> withService(String name) {
+        return withService(name, name);
+    }
+
+    @Override
+    public ServiceBuilder<ModelBuilder> withService(String name, String serviceModelName) {
         checkValid();
         if (modelEClass != null) {
             throw new RuntimeException("Extendable Ecore Models arent supported yet.");
         }
-        ServiceBuilderImpl<ModelBuilder> sb = new ServiceBuilderImpl<>(active, this, null, name, nexusImpl);
+        String serviceModelNameToUse = serviceModelName == null ? name : serviceModelName;
+        ServiceBuilderImpl<ModelBuilder> sb = new ServiceBuilderImpl<>(active, this, null, name, serviceModelNameToUse,
+                nexusImpl);
         nested.add(sb);
         return sb;
     }
@@ -94,5 +101,4 @@ public class ModelBuilderImpl extends AbstractBuilderImpl<EMFModel> implements E
         nested.forEach(n -> n.doBuild(modelImpl));
         return modelImpl;
     }
-
 }
