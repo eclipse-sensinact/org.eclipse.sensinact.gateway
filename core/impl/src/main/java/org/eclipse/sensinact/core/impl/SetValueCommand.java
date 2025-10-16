@@ -106,7 +106,8 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
                 if (svcEClass != null) {
                     service = model.createServiceWithEClass(svc, svcEClass);
                 } else if (!model.isFrozen()) {
-                    service = model.createService(svc).withCreationTime(dataUpdateDto.timestamp).build();
+                    service = model.createService(svc, dataUpdateDto.serviceEClassName)
+                            .withCreationTime(dataUpdateDto.timestamp).build();
                 }
             }
 

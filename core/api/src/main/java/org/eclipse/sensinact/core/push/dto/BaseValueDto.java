@@ -21,6 +21,7 @@ import org.eclipse.sensinact.core.annotation.dto.ModelPackageUri;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 
 /**
  * A base dto for performing updates, suitable for subclassing by device modules
@@ -28,8 +29,8 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 public abstract class BaseValueDto {
 
     /**
-     * The model package URI of the model to which this value belongs. If null then a model package URI will be
-     * created if necessary
+     * The model package URI of the model to which this value belongs. If null then
+     * a model package URI will be created if necessary
      */
     @ModelPackageUri
     public String modelPackageUri;
@@ -46,6 +47,12 @@ public abstract class BaseValueDto {
      */
     @Provider
     public String provider;
+
+    /**
+     * The service to which this value belongs. Must be set.
+     */
+    @ServiceModel
+    public String serviceModel;
 
     /**
      * The service to which this value belongs. Must be set.

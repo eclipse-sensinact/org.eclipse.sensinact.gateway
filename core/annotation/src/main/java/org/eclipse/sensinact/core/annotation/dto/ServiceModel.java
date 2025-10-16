@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *
 * Contributors:
-*   Kentyou - initial implementation
+*   Data In Motion - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.core.annotation.dto;
 
@@ -23,11 +23,20 @@ import java.lang.annotation.Target;
  *
  * Either used:
  *
- * On a String field with no value to supply the service model name/uri.
+ * On a String field with no value to supply the service model name.
+ *
+ * <pre>
+ * &#64;ServiceModel
+ * public String serviceModelName;
+ * </pre>
+ *
+ * or
+ *
+ * On an {@link EClass} field with no value to supply the service model name.
  *
  * <pre>
  * &#64;Service
- * public String service;
+ * public EClass serviceEClass;
  * </pre>
  *
  * or

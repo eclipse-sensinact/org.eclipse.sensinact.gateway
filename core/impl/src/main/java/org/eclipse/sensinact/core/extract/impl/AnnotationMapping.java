@@ -517,7 +517,7 @@ public class AnnotationMapping {
     private static Function<Object, String> getServiceNameMappingForElement(Class<?> clazz, ElementType elementType,
             AnnotatedElement ae) {
         Function<Object, String> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Service.class, String.class,
-                Set.of(EClass.class, EReference.class));
+                Set.of(EReference.class));
         if (mapping == null) {
             // Models EClass is optional
             mapping = o -> null;
@@ -528,7 +528,7 @@ public class AnnotationMapping {
     private static Function<Object, EClass> getServiceEClassMappingForElement(Class<?> clazz, ElementType elementType,
             AnnotatedElement ae) {
         Function<Object, EClass> mapping = getAnnotatedNameMapping(clazz, elementType, ae, ServiceModel.class,
-                EClass.class, Set.of(String.class, EReference.class));
+                EClass.class, Set.of(String.class));
         if (mapping == null) {
             // Models EClass is optional
             mapping = o -> null;
@@ -550,7 +550,7 @@ public class AnnotationMapping {
     private static Function<Object, EReference> getServiceEReferenceMappingForElement(Class<?> clazz,
             ElementType elementType, AnnotatedElement ae) {
         Function<Object, EReference> mapping = getAnnotatedNameMapping(clazz, elementType, ae, Service.class,
-                EReference.class, Set.of(String.class, EClass.class));
+                EReference.class, Set.of(String.class));
         if (mapping == null) {
             // Models EClass is optional
             mapping = o -> null;

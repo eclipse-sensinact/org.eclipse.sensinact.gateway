@@ -31,10 +31,13 @@ public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, EMF
     private final ModelNexus nexusImpl;
     private final List<NestableBuilderImpl<?, ServiceImpl, ?>> nested = new ArrayList<>();
     private Instant creationTimestamp;
+    private String serviceModelName;
 
-    public ServiceBuilderImpl(AtomicBoolean active, P parent, ModelImpl built, String name, ModelNexus nexusImpl) {
+    public ServiceBuilderImpl(AtomicBoolean active, P parent, ModelImpl built, String name, String serviceModelName,
+            ModelNexus nexusImpl) {
         super(active, parent, built);
         this.name = name;
+        this.serviceModelName = serviceModelName == null ? name : serviceModelName;
         this.nexusImpl = nexusImpl;
     }
 
@@ -68,7 +71,7 @@ public class ServiceBuilderImpl<P> extends NestableBuilderImpl<P, ModelImpl, EMF
 
     protected EMFService doBuild(ModelImpl builtParent) {
         checkValid();
-        EReference service = nexusImpl.createService(builtParent.getModelEClass(), name,
+        EReference service = nexusImpl.createService(builtParent.getModelEClass(), name, serviceModelName,
                 creationTimestamp == null ? Instant.now() : creationTimestamp);
         ServiceImpl s = new ServiceImpl(active, builtParent, service.getName(), service.getEReferenceType(), nexusImpl);
         nested.forEach(n -> n.doBuild(s));
