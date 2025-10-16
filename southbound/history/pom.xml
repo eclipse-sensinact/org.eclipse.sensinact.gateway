@@ -21,7 +21,7 @@
   <artifactId>history</artifactId>
   <packaging>pom</packaging>
 
-  <name>History Connectors</name>
+  <name>SensiNact Southbound :: History</name>
   <description>This reactor contains connectors that are used for recording and accessing historical data</description>
 
   <modules>

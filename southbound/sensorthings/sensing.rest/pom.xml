@@ -18,6 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>sensing.rest</artifactId>
+  <name>SensiNact Southbound :: SensorThings :: Sensing REST</name>
 
   <dependencies>
     <dependency>

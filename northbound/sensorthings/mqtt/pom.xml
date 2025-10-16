@@ -8,9 +8,8 @@
     <version>${revision}${changelist}</version>
   </parent>
 
-
-  <name>Sensorthings MQTT</name>
   <artifactId>mqtt</artifactId>
+  <name>SensiNact Northbound :: SensorThings :: MQTT</name>
 
   <dependencies>
     <dependency>

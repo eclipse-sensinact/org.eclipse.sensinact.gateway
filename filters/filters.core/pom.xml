@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>filters.core</artifactId>
-  <name>SensiNact Northbound Filters :: Core</name>
+  <name>SensiNact Filters :: Core</name>
   <description>SensiNact filters core</description>
   <dependencies>
     <dependency>

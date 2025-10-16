@@ -7,7 +7,7 @@
   </parent>
   <artifactId>config</artifactId>
 
-  <name>Configurable Easy Rules for Eclipse sensiNact</name>
+  <name>SensiNact Southbound :: Rules :: Easy Rules :: Config</name>
   <description>Configuration driven rules based on JEXL and Easy Rules</description>
 
   <dependencies>

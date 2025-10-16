@@ -7,7 +7,7 @@
   </parent>
   <artifactId>osgi</artifactId>
 
-  <name>OSGi packaging for Easy Rules</name>
+  <name>SensiNact Southbound :: Rules :: Easy Rules :: OSGi</name>
   <description>An OSGi packaged version of Easy Rules, including helpers for sensiNact integration</description>
 
   <dependencies>

@@ -21,7 +21,7 @@
   <artifactId>mqtt-parent</artifactId>
   <packaging>pom</packaging>
 
-  <name>Southbound MQTT :: Parent</name>
+  <name>SensiNact Southbound :: MQTT</name>
   <description>Parent project of sensiNact southbound MQTT bundles</description>
 
   <modules>

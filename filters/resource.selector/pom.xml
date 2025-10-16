@@ -6,7 +6,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>resource.selector</artifactId>
-  <name>SensiNact Northbound Filters :: Resource Selector</name>
+  <name>SensiNact Filters :: Resource Selector</name>
   <description>Converts a resource selector SensiNact filters</description>
   <dependencies>
     <dependency>

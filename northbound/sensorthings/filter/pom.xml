@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>filter</artifactId>
-  <name>SensiNact Northbound SensorThings :: Filter Parser</name>
+  <name>SensiNact Northbound :: SensorThings :: Filter Parser</name>
   <description>Converts OGC SensorThings filters to SensiNact filters</description>
   <properties>
     <sensinact.core.version>${project.version}</sensinact.core.version>

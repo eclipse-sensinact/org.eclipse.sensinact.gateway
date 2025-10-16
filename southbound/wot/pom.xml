@@ -23,7 +23,7 @@
   <artifactId>wot</artifactId>
   <packaging>pom</packaging>
 
-  <name>Web of Things Connectors</name>
+  <name>SensiNact Southbound :: Web of Things</name>
   <description>This reactor contains southbound connectors that are used to handle Things</description>
 
   <properties>

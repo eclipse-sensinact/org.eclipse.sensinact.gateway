@@ -481,18 +481,17 @@ public class QueryHandler implements IQueryHandler {
                                 return dto;
                             });
                     for (var resourceSnapshot : serviceSnapshot.getResources()) {
-                        if (resourceSnapshot.getValue() != null) {
-                            SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
-                            resourceDTO.name = resourceSnapshot.getName();
-                            resourceDTO.type = resourceSnapshot.getType().getName();
-                            resourceDTO.timestamp = Optional.ofNullable(resourceSnapshot.getValue().getTimestamp())
-                                    .map(Instant::toEpochMilli).orElse(0L);
-                            resourceDTO.value = resourceSnapshot.getValue().getValue();
-                            if (query.includeMetadata) {
-                                resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
-                            }
-                            serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
+                        SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
+                        resourceDTO.name = resourceSnapshot.getName();
+                        resourceDTO.type = resourceSnapshot.getType().getName();
+                        Optional<TimedValue<?>> value = Optional.ofNullable(resourceSnapshot.getValue());
+                        resourceDTO.timestamp = value.map(TimedValue::getTimestamp).map(Instant::toEpochMilli)
+                                .orElse(0L);
+                        resourceDTO.value = value.map(TimedValue::getValue).orElse(null);
+                        if (query.includeMetadata) {
+                            resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
                         }
+                        serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
                     }
                 }
             }

@@ -17,7 +17,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>esri.geometry</artifactId>
-  <name>SensiNact Filters :: ESRI Geometry repackaging</name>
+  <name>SensiNact Filters :: ESRI Geometry</name>
   <description>Repackaging the ESRI Geometry API as an OSGi bundle</description>
 
   <properties>

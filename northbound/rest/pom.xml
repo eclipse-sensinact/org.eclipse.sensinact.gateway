@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>rest</artifactId>
-  <name>SensiNact Northbound REST</name>
+  <name>SensiNact Northbound :: REST</name>
   <description>Northbound REST access to sensiNact</description>
 
   <dependencies>

@@ -7,8 +7,7 @@
   </parent>
   <artifactId>jakarta-servlet-whiteboard-feature</artifactId>
   <packaging>pom</packaging>
-
-  <name>Eclipse sensiNact Servlet whiteboard Feature</name>
+  <name>SensiNact Distribution :: Features :: Jakarta Servlet Whiteboard</name>
   <description>This project contains a feature providing a Jakarta Servlet whiteboard</description>
 
   <dependencies>
