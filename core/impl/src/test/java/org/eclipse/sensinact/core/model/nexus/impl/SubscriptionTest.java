@@ -152,7 +152,7 @@ public class SubscriptionTest {
 
             Instant now = Instant.now();
             EClass model = nexus.createModel(TEST_MODEL, now);
-            EReference service = nexus.createService(model, TEST_SERVICE, now);
+            EReference service = nexus.createService(model, TEST_SERVICE, TEST_SERVICE, now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, now,
                     null);
             Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, now);
@@ -234,7 +234,7 @@ public class SubscriptionTest {
             Instant before = now.minus(Duration.ofHours(1));
 
             EClass model = nexus.createModel(TEST_MODEL, before);
-            EReference service = nexus.createService(model, TEST_SERVICE, before);
+            EReference service = nexus.createService(model, TEST_SERVICE, TEST_SERVICE, before);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, before,
                     null);
             EAttribute resource2 = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE_2, String.class,
@@ -325,8 +325,8 @@ public class SubscriptionTest {
             Instant before = now.minus(Duration.ofHours(1));
 
             EClass model = nexus.createModel(TEST_MODEL, before);
-            EReference service = nexus.createService(model, TEST_SERVICE, before);
-            EReference service2 = nexus.createService(model, TEST_SERVICE_2, before);
+            EReference service = nexus.createService(model, TEST_SERVICE, TEST_SERVICE, before);
+            EReference service2 = nexus.createService(model, TEST_SERVICE_2, TEST_SERVICE_2, before);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, before,
                     null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_RESOURCE_2, String.class,
@@ -420,7 +420,7 @@ public class SubscriptionTest {
 
             Instant now = Instant.now();
             EClass model = nexus.createModel(TEST_MODEL, now);
-            EReference service = nexus.createService(model, TEST_SERVICE, now);
+            EReference service = nexus.createService(model, TEST_SERVICE, TEST_SERVICE, now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_RESOURCE, String.class, now,
                     null);
             Provider p = nexus.createProviderInstance(TEST_MODEL, TEST_PROVIDER, now);

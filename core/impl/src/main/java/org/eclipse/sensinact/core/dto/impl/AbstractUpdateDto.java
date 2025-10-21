@@ -58,7 +58,15 @@ public abstract class AbstractUpdateDto {
      */
     public Object originalDto;
 
+    /**
+     * The provider {@link EClass}, optional
+     */
     public EClass modelEClass;
+
+    /**
+     * The name of the services {@link EClass}, optional
+     */
+    public String serviceEClassName;
 
     /**
      * The services {@link EClass}, optional

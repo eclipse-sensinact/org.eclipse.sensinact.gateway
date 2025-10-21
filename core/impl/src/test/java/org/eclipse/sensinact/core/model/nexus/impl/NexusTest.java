@@ -239,7 +239,7 @@ public class NexusTest {
 
             Instant now = Instant.now();
             EClass model = nexus.createModel(TEST_MODEL, now);
-            EReference service = nexus.createService(model, TESTSERVICE, now);
+            EReference service = nexus.createService(model, TESTSERVICE, TESTSERVICE, now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
@@ -318,7 +318,7 @@ public class NexusTest {
 
             Instant now = Instant.now();
             EClass model = nexus.createModel(TEST_MODEL, now);
-            EReference service = nexus.createService(model, TESTSERVICE, now);
+            EReference service = nexus.createService(model, TESTSERVICE, TESTSERVICE, now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
@@ -368,7 +368,7 @@ public class NexusTest {
 
             Instant now = Instant.now();
             EClass model = nexus.createModel(TEST_MODEL, now);
-            EReference service = nexus.createService(model, TESTSERVICE, now);
+            EReference service = nexus.createService(model, TESTSERVICE, TESTSERVICE, now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
@@ -389,7 +389,7 @@ public class NexusTest {
             Object value = svc.eGet(valueFeature);
             assertEquals("test", value);
 
-            EReference service2 = nexus.createService(model, "testservice2", now);
+            EReference service2 = nexus.createService(model, "testservice2", "testservice2", now);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), TEST_VALUE, String.class, now,
                     null);
             nexus.handleDataUpdate(p, service2.getName(), service2, service2.getEReferenceType(), resource2, "test2",
@@ -417,12 +417,54 @@ public class NexusTest {
         }
 
         @Test
+        void basicServiceWithModelNameTest() {
+
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+
+            Instant now = Instant.now();
+            EClass model = nexus.createModel(TEST_MODEL, now);
+            EReference service = nexus.createService(model, TESTSERVICE, "MyService", now);
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
+                    null);
+
+            assertEquals("MyService", service.getEReferenceType().getName());
+
+            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
+
+        }
+
+        @Test
+        void basicTwoServicesWithSameModelNameTest() {
+
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+
+            Instant now = Instant.now();
+            EClass model = nexus.createModel(TEST_MODEL, now);
+            EReference service = nexus.createService(model, TESTSERVICE, "MyService", now);
+            EReference service2 = nexus.createService(model, "testservice2", "MyService", now);
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
+                    null);
+
+            assertEquals("MyService", service.getEReferenceType().getName());
+            assertEquals("MyService", service2.getEReferenceType().getName());
+            assertEquals(service2.getEReferenceType(), service2.getEReferenceType());
+
+            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, "test", now);
+
+        }
+
+        @Test
         void basicFullProviderTest() {
             ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
             for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
                 EClass model = nexus.createModel("model_" + modelIdx, Instant.now());
                 for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
-                    EReference service = nexus.createService(model, "service_" + svcIdx, Instant.now());
+                    EReference service = nexus.createService(model, "service_" + svcIdx, "service_" + svcIdx,
+                            Instant.now());
                     EAttribute resource = nexus.createResource(service.getEReferenceType(), "resource", Integer.class,
                             Instant.now(), null);
                     Provider p;
@@ -462,7 +504,8 @@ public class NexusTest {
             for (int modelIdx = 0; modelIdx < 2; modelIdx++) {
                 EClass model = nexus.createModel(TEST_PKG, "model_" + modelIdx, Instant.now());
                 for (int svcIdx = 0; svcIdx < 2; svcIdx++) {
-                    EReference service = nexus.createService(model, "service_" + svcIdx, Instant.now());
+                    EReference service = nexus.createService(model, "service_" + svcIdx, "service_" + svcIdx,
+                            Instant.now());
                     EAttribute resource = nexus.createResource(service.getEReferenceType(), "resource", Integer.class,
                             Instant.now(), null);
                     Provider p;
@@ -597,7 +640,7 @@ public class NexusTest {
             Instant now = Instant.now();
 
             EClass model = nexus.createModel(TEST_MODEL, now);
-            EReference service = nexus.createService(model, TESTSERVICE, now);
+            EReference service = nexus.createService(model, TESTSERVICE, TESTSERVICE, now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), TEST_VALUE, String.class, now,
                     null);
             Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
@@ -712,14 +755,14 @@ public class NexusTest {
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now);
-            EReference service = nexus.createService(model, "testservice", now);
-            EReference service2 = nexus.createService(model, "testservice2", now);
+            EReference service = nexus.createService(model, "testservice", "testservice", now);
+            EReference service2 = nexus.createService(model, "testservice2", "testservice", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
                     null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), "testValue", String.class, now,
                     null);
             EClass model2 = nexus.createModel("something_else", now);
-            EReference service3 = nexus.createService(model2, "whatever", now);
+            EReference service3 = nexus.createService(model2, "whatever", "whatever", now);
             EAttribute resource3 = nexus.createResource(service3.getEReferenceType(), "testValue", String.class, now,
                     null);
             Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);
@@ -752,14 +795,14 @@ public class NexusTest {
             Instant now = Instant.now();
 
             EClass model = nexus.createModel("TestModel", now);
-            EReference service = nexus.createService(model, "testservice", now);
-            EReference service2 = nexus.createService(model, "testservice2", now);
+            EReference service = nexus.createService(model, "testservice", "testservice", now);
+            EReference service2 = nexus.createService(model, "testservice2", "testservice", now);
             EAttribute resource = nexus.createResource(service.getEReferenceType(), "testValue", String.class, now,
                     null);
             EAttribute resource2 = nexus.createResource(service2.getEReferenceType(), "testValue", String.class, now,
                     null);
             EClass model2 = nexus.createModel("something_else", now);
-            EReference service3 = nexus.createService(model2, "whatever", now);
+            EReference service3 = nexus.createService(model2, "whatever", "whatever", now);
             EAttribute resource3 = nexus.createResource(service3.getEReferenceType(), "testValue", String.class, now,
                     null);
             Provider p = nexus.createProviderInstance("TestModel", "testprovider", now);

@@ -27,5 +27,7 @@ public interface ModelBuilder {
 
     ServiceBuilder<ModelBuilder> withService(String name);
 
+    ServiceBuilder<ModelBuilder> withService(String name, String serviceModelName);
+
     Model build();
 }
