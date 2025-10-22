@@ -87,7 +87,6 @@ jobs:
       run: |
         cd ${{ matrix.module }}
         mvn -P ci-build -B verify
-      continue-on-error: true
 
     - name: Generate artifact name
       id: artifact-name
