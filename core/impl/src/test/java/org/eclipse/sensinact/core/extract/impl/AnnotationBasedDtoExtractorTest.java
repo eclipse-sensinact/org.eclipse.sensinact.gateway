@@ -613,7 +613,7 @@ public class AnnotationBasedDtoExtractorTest {
             @Model
             public EClass providerEClass = TestdataPackage.Literals.DYNAMIC_TEST_SENSOR;
 
-            @Service
+            @ServiceModel
             public EClass serviceEClass = TestdataPackage.Literals.TEST_TEMPERATUR;
 
             @Data
