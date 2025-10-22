@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -34,7 +35,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
     @Override
     public Sensor getSensor(String id) {
         return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id));
+                getExpansions(), parseFilter(EFilterContext.SENSORS), validateAndGetResourceSnapshot(id));
     }
 
     @Override
@@ -51,7 +52,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
         }
 
         return DtoMapper.toDatastream(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), validateAndGetResourceSnapshot(id));
+                uriInfo, getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.DATASTREAMS));
     }
 
     @PaginationLimit(500)
@@ -61,7 +62,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
             throw new NotFoundException();
         }
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), 0);
+                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.OBSERVATIONS), 0);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
         ResourceSnapshot resource = validateAndGetResourceSnapshot(id);
 
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), resource);
+                uriInfo, getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), resource);
 
         if (!id.equals(o.id)) {
             throw new NotFoundException();
@@ -95,7 +96,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
         Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), providerSnapshot);
+                getExpansions(), parseFilter(EFilterContext.THINGS), providerSnapshot);
         if (!provider.equals(t.id)) {
             throw new NotFoundException();
         }

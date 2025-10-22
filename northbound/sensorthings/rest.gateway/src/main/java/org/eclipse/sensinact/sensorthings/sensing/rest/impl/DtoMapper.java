@@ -28,8 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -52,6 +54,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.ObservationResourceSnapshot;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,7 +104,8 @@ public class DtoMapper {
     }
 
     public static Thing toThing(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ProviderSnapshot provider) {
         Thing thing = new Thing();
         thing.id = provider.getName();
 
@@ -121,19 +125,19 @@ public class DtoMapper {
 
         if(expansions.shouldExpand("Datastreams", thing)) {
             expansions.addExpansion("Datastreams", thing, DatastreamsAccessImpl.getDataStreams(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), provider));
+                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, provider));
         }
 
         if(expansions.shouldExpand("HistoricalLocations", thing)) {
             ResultList<HistoricalLocation> list = new ResultList<>();
             list.value = List.of(DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("HistoricalLocations"), provider));
+                    expansions.getExpansionSettings("HistoricalLocations"), filter, provider));
             expansions.addExpansion("HistoricalLocations", thing, list);
         }
         if(expansions.shouldExpand("Locations", thing)) {
             ResultList<Location> list = new ResultList<>();
             list.value = List.of(DtoMapper.toLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Locations"), provider));
+                    expansions.getExpansionSettings("Locations"), filter, provider));
             expansions.addExpansion("Locations", thing, list);
         }
 
@@ -141,7 +145,8 @@ public class DtoMapper {
     }
 
     public static Location toLocation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ProviderSnapshot provider) {
         Location location = new Location();
 
         final String providerName = provider.getName();
@@ -169,13 +174,13 @@ public class DtoMapper {
         if(expansions.shouldExpand("Things", location)) {
             ResultList<Thing> list = new ResultList<>();
             list.value = List.of(DtoMapper.toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), provider));
+                    expansions.getExpansionSettings("Thing"), filter, provider));
             expansions.addExpansion("Things", location, list);
         }
         if(expansions.shouldExpand("HistoricalLocations", location)) {
             ResultList<HistoricalLocation> list = new ResultList<>();
             list.value = List.of(DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("HistoricalLocations"), provider));
+                    expansions.getExpansionSettings("HistoricalLocations"), filter, provider));
             expansions.addExpansion("HistoricalLocations", location, list);
         }
 
@@ -183,7 +188,7 @@ public class DtoMapper {
     }
 
     public static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider, List<TimedValue<?>> historicalLocations) {
         if (provider == null) {
             throw new NotFoundException();
@@ -192,14 +197,14 @@ public class DtoMapper {
         List<HistoricalLocation> list = new ArrayList<>(historicalLocations.size());
         for (TimedValue<?> tv : historicalLocations) {
             list.add(toHistoricalLocation(userSession, application, mapper, uriInfo, expansions,
-                    provider, Optional.of(tv)));
+                    filter, provider, Optional.of(tv)));
         }
 
         return list;
     }
 
     public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider, Optional<TimedValue<?>> t) {
         if (provider == null) {
             throw new NotFoundException();
@@ -219,25 +224,28 @@ public class DtoMapper {
 
         if(expansions.shouldExpand("Thing", historicalLocation)) {
             expansions.addExpansion("Thing", historicalLocation, toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), provider));
+                    expansions.getExpansionSettings("Thing"), filter, provider));
         }
         if(expansions.shouldExpand("Locations", historicalLocation)) {
             ResultList<Location> list = new ResultList<>();
             list.value = List.of(DtoMapper.toLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Locations"), provider));
+                    expansions.getExpansionSettings("Locations"), filter, provider));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
         return historicalLocation;
     }
 
     public static HistoricalLocation toHistoricalLocation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ProviderSnapshot provider) {
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
-        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, provider, Optional.of(location));
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter,
+                provider, Optional.of(location));
     }
 
     public static Datastream toDatastream(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource,
+            ICriterion filter) {
         if (resource == null) {
             throw new NotFoundException();
         }
@@ -276,29 +284,30 @@ public class DtoMapper {
 
         if(expansions.shouldExpand("Observations", datastream)) {
             expansions.addExpansion("Observations", datastream, RootResourceAccessImpl.getObservationList(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), resource, 25));
+                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), resource, filter, 25));
         }
 
         if(expansions.shouldExpand("ObservedProperty", datastream)) {
             expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("ObservedProperty"), resource));
+                    expansions.getExpansionSettings("ObservedProperty"), filter, resource));
         }
 
         if(expansions.shouldExpand("Sensor", datastream)) {
             expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Sensor"), resource));
+                    expansions.getExpansionSettings("Sensor"), filter, resource));
         }
 
         if(expansions.shouldExpand("Thing", datastream)) {
             expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), provider));
+                    expansions.getExpansionSettings("Thing"), filter, provider));
         }
 
         return datastream;
     }
 
     public static Sensor toSensor(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ResourceSnapshot resource) {
         if (resource == null) {
             throw new NotFoundException();
         }
@@ -325,14 +334,14 @@ public class DtoMapper {
 
         if(expansions.shouldExpand("Datastreams", sensor)) {
             expansions.addExpansion("Datastreams", sensor, DatastreamsAccessImpl.getDataStreams(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), providerSnapshot));
+                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
         }
 
         return sensor;
     }
 
     public static List<Observation> toObservationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resourceSnapshot, List<TimedValue<?>> observations) {
         if (resourceSnapshot == null) {
             throw new NotFoundException();
@@ -340,24 +349,33 @@ public class DtoMapper {
 
         List<Observation> list = new ArrayList<>(observations.size());
         for (TimedValue<?> tv : observations) {
-            list.add(toObservation(userSession, application, mapper, uriInfo, expansions,
-                    resourceSnapshot, Optional.of(tv)));
+            toObservation(userSession, application, mapper, uriInfo, expansions, filter,
+                    resourceSnapshot, Optional.of(tv))
+            .ifPresent(list::add);
         }
 
         return list;
     }
 
-    public static Observation toObservation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+    public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource) {
-        return toObservation(userSession, application, mapper, uriInfo, expansions, resource, Optional.ofNullable(resource.getValue()));
+        return toObservation(userSession, application, mapper, uriInfo, expansions, filter,
+                resource, Optional.ofNullable(resource.getValue()));
     }
 
-    public static Observation toObservation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+    public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource, Optional<TimedValue<?>> t) {
         if (resource == null) {
             throw new NotFoundException();
+        }
+        ResourceValueFilter rvf = filter == null ? null : filter.getResourceValueFilter();
+        if(rvf != null) {
+            ResourceSnapshot rs = new ObservationResourceSnapshot(resource, t.orElse(new DefaultTimedValue<>()));
+            if(!rvf.test(rs.getService().getProvider(), List.of(rs))) {
+                return Optional.empty();
+            }
         }
 
         Observation observation = new Observation();
@@ -381,19 +399,20 @@ public class DtoMapper {
 
         if(expansions.shouldExpand("Datastream", observation)) {
             expansions.addExpansion("Datastream", observation, toDatastream(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Datastream"), resource));
+                    expansions.getExpansionSettings("Datastream"), resource, filter));
         }
 
         if(expansions.shouldExpand("FeatureOfInterest", observation)) {
             expansions.addExpansion("FeatureOfInterest", observation, toFeatureOfInterest(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("FeatureOfInterest"), providerSnapshot));
+                    mapper, uriInfo, expansions.getExpansionSettings("FeatureOfInterest"), filter, providerSnapshot));
         }
 
-        return observation;
+        return Optional.of(observation);
     }
 
     public static ObservedProperty toObservedProperty(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ResourceSnapshot resource) {
         ObservedProperty observedProperty = new ObservedProperty();
 
         final Map<String, Object> metadata = resource.getMetadata();
@@ -416,14 +435,15 @@ public class DtoMapper {
 
         if(expansions.shouldExpand("Datastreams", observedProperty)) {
             expansions.addExpansion("Datastreams", observedProperty, DatastreamsAccessImpl.getDataStreams(userSession,
-                    application, mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), providerSnapshot));
+                    application, mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
         }
 
         return observedProperty;
     }
 
     public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ProviderSnapshot provider) {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest();
 
         final String providerName = provider.getName();
@@ -449,7 +469,7 @@ public class DtoMapper {
 
         if(expansions.shouldExpand("Observations", featureOfInterest)) {
             expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), provider));
+                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, provider));
         }
 
         return featureOfInterest;

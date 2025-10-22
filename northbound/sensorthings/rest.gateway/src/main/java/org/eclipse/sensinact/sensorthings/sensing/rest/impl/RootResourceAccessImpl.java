@@ -31,9 +31,7 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
-import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -50,35 +48,14 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.RootResourceAccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 
 public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess {
 
-    private ISensorthingsFilterParser getFilterParser() {
-        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
-
-    private ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
-        final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
-        if (filterString == null || filterString.isBlank()) {
-            return null;
-        }
-
-        try {
-            return getFilterParser().parseFilter(filterString, context);
-        } catch (FilterParserException e) {
-            throw new BadRequestException("Error parsing filter", e);
-        }
-    }
-
-    private List<ProviderSnapshot> listProviders(final EFilterContext context) {
+    private List<ProviderSnapshot> listProviders(final ICriterion criterion) {
         final SensiNactSession userSession = getSession();
-        final ICriterion criterion = parseFilter(context);
         final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
         if (criterion != null && criterion.getResourceValueFilter() != null) {
             final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
@@ -91,14 +68,13 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         }
     }
 
-    private List<ResourceSnapshot> listSetResources(EFilterContext context) {
-        return listResources(context).stream().filter(ResourceSnapshot::isSet).collect(Collectors.toList());
+    private List<ResourceSnapshot> listSetResources(final ICriterion criterion) {
+        return listResources(criterion).stream().filter(ResourceSnapshot::isSet).collect(Collectors.toList());
     }
 
-    private List<ResourceSnapshot> listResources(EFilterContext context) {
+    private List<ResourceSnapshot> listResources(final ICriterion criterion) {
 
         final SensiNactSession userSession = getSession();
-        final ICriterion criterion = parseFilter(context);
         List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
         if (criterion != null && criterion.getResourceValueFilter() != null) {
             final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
@@ -133,9 +109,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Thing> getThings() {
         ResultList<Thing> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.THINGS);
+        ICriterion criterion = parseFilter(EFilterContext.THINGS);
+        List<ProviderSnapshot> providers = listProviders(criterion);
         list.value = providers.stream()
-                .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
+                .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .collect(toList());
 
         return list;
@@ -145,9 +122,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Location> getLocations() {
         ResultList<Location> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
+        ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
+        List<ProviderSnapshot> providers = listProviders(criterion);
         list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
+                .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .collect(toList());
 
         return list;
@@ -157,9 +135,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<HistoricalLocation> getHistoricalLocations() {
         ResultList<HistoricalLocation> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
+        ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
+        List<ProviderSnapshot> providers = listProviders(criterion);
         list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
+                .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .collect(toList());
         return list;
     }
@@ -168,9 +147,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Datastream> getDatastreams() {
         ResultList<Datastream> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.DATASTREAMS);
+        ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
+        List<ResourceSnapshot> resources = listSetResources(criterion);
         list.value = resources.stream()
-                .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r, criterion))
                 .collect(toList());
 
         return list;
@@ -180,9 +160,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Sensor> getSensors() {
         ResultList<Sensor> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.SENSORS);
+        ICriterion criterion = parseFilter(EFilterContext.SENSORS);
+        List<ResourceSnapshot> resources = listSetResources(criterion);
         list.value = resources.stream()
-                .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .collect(toList());
 
         return list;
@@ -193,9 +174,12 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Observation> getObservations() {
         ResultList<Observation> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVATIONS);
+        ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
+        List<ResourceSnapshot> resources = listSetResources(criterion);
         list.value = resources.stream()
-                .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(toList());
 
         return list;
@@ -205,9 +189,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<ObservedProperty> getObservedProperties() {
         ResultList<ObservedProperty> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVED_PROPERTIES);
+        ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
+        List<ResourceSnapshot> resources = listSetResources(criterion);
         list.value = resources.stream()
-                .map(r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
+                .map(r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .collect(toList());
 
         return list;
@@ -217,30 +202,32 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
         ResultList<FeatureOfInterest> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.FEATURES_OF_INTEREST);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        List<ProviderSnapshot> providers = listProviders(criterion);
         list.value = providers.stream()
-                .map(p -> toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
+                .map(p -> toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .collect(toList());
 
         return list;
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ResourceSnapshot resourceSnapshot) {
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ResourceSnapshot resourceSnapshot, ICriterion filter) {
         ExpansionSettings es = (ExpansionSettings) requestContext
                 .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,0);
+        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot, filter, 0);
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            int localResultLimit) {
+            ICriterion filter, int localResultLimit) {
 
         ResultList<Observation> list = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
-                mapper, uriInfo, expansions, resourceSnapshot, localResultLimit);
+                mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
         if (list.value.isEmpty() && resourceSnapshot.isSet()) {
-            list.value.add(DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, resourceSnapshot));
+            DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
+                .ifPresent(list.value::add);
         }
 
         return list;

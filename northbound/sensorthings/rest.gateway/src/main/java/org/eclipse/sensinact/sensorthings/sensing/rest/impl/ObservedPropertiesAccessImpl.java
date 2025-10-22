@@ -12,6 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
 import java.util.List;
@@ -32,7 +37,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
     @Override
     public ObservedProperty getObservedProperty(String id) {
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), validateAndGetResourceSnapshot(id));
+                uriInfo, getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
 
         if (!id.equals(o.id)) {
             throw new NotFoundException();
@@ -55,7 +60,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
         }
 
         return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id2));
+                getExpansions(), validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
     }
 
     @PaginationLimit(500)
@@ -65,7 +70,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
             throw new NotFoundException();
         }
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), 0);
+                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
     }
 
     @Override
@@ -83,7 +88,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
         }
 
         return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id2));
+                getExpansions(), parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
     }
 
     @Override
@@ -94,6 +99,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
             throw new NotFoundException();
         }
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetProvider(provider));
+                getExpansions(), parseFilter(THINGS), validateAndGetProvider(provider));
     }
 }

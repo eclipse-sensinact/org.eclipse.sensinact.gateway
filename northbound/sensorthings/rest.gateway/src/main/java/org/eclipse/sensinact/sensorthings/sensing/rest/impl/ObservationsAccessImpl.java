@@ -12,7 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static java.util.stream.Collectors.toList;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
 import java.time.Instant;
@@ -20,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -42,7 +48,8 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
         Instant timestamp = DtoMapper.getTimestampFromId(id);
 
-        Observation result = null;
+        ICriterion criterion = parseFilter(OBSERVATIONS);
+        Optional<Observation> result = null;
         if (resourceSnapshot.isSet()) {
             Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
             if (timestamp.isBefore(milliTimestamp)) {
@@ -57,22 +64,22 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                             Map.of("provider", provider, "service", service, "resource", resource, "time", timestampPlusOneMilli));
                     if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
                         result = DtoMapper.toObservation(getSession(), application, getMapper(),
-                                uriInfo, getExpansions(), resourceSnapshot, Optional.of(t));
+                                uriInfo, getExpansions(), criterion, resourceSnapshot, Optional.of(t));
                     }
                 }
             } else if (timestamp.equals(milliTimestamp)) {
                 result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), resourceSnapshot);
+                        getExpansions(), criterion, resourceSnapshot);
             }
         } else {
             result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), resourceSnapshot, Optional.empty());
+                    getExpansions(), criterion, resourceSnapshot, Optional.empty());
         }
 
-        if (result == null) {
+        if (result.isEmpty()) {
             throw new NotFoundException();
         }
-        return result;
+        return result.get();
     }
 
     @Override
@@ -80,7 +87,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
 
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), resourceSnapshot);
+                uriInfo, getExpansions(), resourceSnapshot, parseFilter(DATASTREAMS));
 
         if (!id.startsWith(String.valueOf(d.id))) {
             throw new NotFoundException();
@@ -93,14 +100,14 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     @Override
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), 0);
+                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
     }
 
     @Override
     public ObservedProperty getObservationDatastreamObservedProperty(String id) {
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
         return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), resourceSnapshot);
+                getExpansions(), parseFilter(OBSERVED_PROPERTIES), resourceSnapshot);
     }
 
     @Override
@@ -108,7 +115,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
 
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), resourceSnapshot);
+                getExpansions(), parseFilter(SENSORS), resourceSnapshot);
         if (!id.startsWith(String.valueOf(s.id))) {
             throw new NotFoundException();
         }
@@ -121,7 +128,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
         Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), providerSnapshot);
+                getExpansions(), parseFilter(THINGS), providerSnapshot);
         if (!provider.equals(t.id)) {
             throw new NotFoundException();
         }
@@ -133,7 +140,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), providerSnapshot);
+                getExpansions(), parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
     }
 
     // No history as it is *live* observation data not a data stream
@@ -142,12 +149,16 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
+        ICriterion criterion = parseFilter(OBSERVATIONS);
         ResultList<Observation> list = new ResultList<>();
         list.value =  providerSnapshot.getServices().stream()
                 .flatMap(s -> s.getResources().stream())
                 .filter(ResourceSnapshot::isSet)
                 .map(r -> DtoMapper.toObservation(getSession(), application, getMapper(),
-                        uriInfo, getExpansions(), r)).collect(toList());
+                        uriInfo, getExpansions(), criterion, r))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
         return list;
     }
 }
