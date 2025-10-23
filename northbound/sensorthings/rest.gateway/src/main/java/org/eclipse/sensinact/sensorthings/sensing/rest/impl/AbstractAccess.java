@@ -18,16 +18,22 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.ext
 import java.util.EnumSet;
 import java.util.Optional;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
+import org.eclipse.sensinact.filters.api.FilterParserException;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
@@ -98,5 +104,22 @@ public abstract class AbstractAccess {
             throw new NotFoundException();
         }
         return resourceSnapshot;
+    }
+
+    private ISensorthingsFilterParser getFilterParser() {
+        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    protected ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
+        final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
+        if (filterString == null || filterString.isBlank()) {
+            return null;
+        }
+
+        try {
+            return getFilterParser().parseFilter(filterString, context);
+        } catch (FilterParserException e) {
+            throw new BadRequestException("Error parsing filter", e);
+        }
     }
 }

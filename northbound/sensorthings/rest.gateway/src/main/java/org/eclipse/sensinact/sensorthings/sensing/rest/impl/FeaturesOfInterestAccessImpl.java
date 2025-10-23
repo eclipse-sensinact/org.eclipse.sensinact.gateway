@@ -13,10 +13,15 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
+import java.util.Optional;
+
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -42,7 +47,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
         FeatureOfInterest foi;
         try {
             foi = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), providerSnapshot);
+                    getExpansions(), parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -58,16 +63,19 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
         String provider = extractFirstIdSegment(id);
 
         return getLiveObservations(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetProvider(provider));
+                getExpansions(), parseFilter(EFilterContext.OBSERVATIONS), validateAndGetProvider(provider));
     }
 
     static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ProviderSnapshot provider) {
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         ResultList<Observation> list = new ResultList<>();
         list.value = provider.getServices().stream()
                 .flatMap(s -> s.getResources().stream())
                 .filter(ResourceSnapshot::isSet)
-                .map(r -> DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, r)).collect(toList());
+                .map(r -> DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, filter, r))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toList());
         return list;
     }
 
@@ -81,19 +89,19 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
 
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id2);
 
-        Observation o;
+        Optional<Observation> o;
         try {
             o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    resourceSnapshot);
+                    parseFilter(EFilterContext.FEATURES_OF_INTEREST), resourceSnapshot);
         } catch (Exception e) {
             throw new NotFoundException();
         }
 
-        if (!id2.equals(o.id)) {
+        if (o.isEmpty() || !id2.equals(o.get().id)) {
             throw new NotFoundException();
         }
 
-        return o;
+        return o.get();
     }
 
     @Override
@@ -109,7 +117,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
         Datastream d;
         try {
             d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    resourceSnapshot);
+                    resourceSnapshot, parseFilter(EFilterContext.DATASTREAMS));
         } catch (Exception e) {
             throw new NotFoundException();
         }

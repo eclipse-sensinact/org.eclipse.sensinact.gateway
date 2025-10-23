@@ -12,11 +12,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
 
 import java.util.List;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -38,7 +46,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), providerSnapshot);
+                getExpansions(), parseFilter(THINGS), providerSnapshot);
     }
 
     @Override
@@ -46,7 +54,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), providerSnapshot);
+                uriInfo, getExpansions(), parseFilter(DATASTREAMS), providerSnapshot);
     }
 
     @Override
@@ -58,7 +66,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         }
 
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id2));
+                getExpansions(), validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
 
         if (!id2.equals(d.id)) {
             throw new NotFoundException();
@@ -76,7 +84,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         }
 
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                requestContext, validateAndGetResourceSnapshot(id2));
+                requestContext, validateAndGetResourceSnapshot(id2), parseFilter(OBSERVATIONS));
     }
 
     @Override
@@ -88,7 +96,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         }
 
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id2));
+                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id2));
 
         if (!id2.equals(o.id)) {
             throw new NotFoundException();
@@ -106,7 +114,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         }
 
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id2));
+                parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
 
         if (!id2.equals(s.id)) {
             throw new NotFoundException();
@@ -131,12 +139,14 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         String provider = extractFirstIdSegment(id);
 
         try {
+            ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
-            if (list.value.isEmpty())
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
+            if (list.value.isEmpty()) {
                 list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), providerSnapshot));
+                        getExpansions(), filter, providerSnapshot));
+            }
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -156,7 +166,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         HistoricalLocation hl;
         try {
             hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), validateAndGetProvider(provider));
+                    getExpansions(), parseFilter(HISTORICAL_LOCATIONS), validateAndGetProvider(provider));
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
@@ -186,7 +196,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
 
         ResultList<Location> list = new ResultList<>();
         list.value = List.of(DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetProvider(provider)));
+                getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider)));
 
         return list;
     }
@@ -197,7 +207,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
 
         ResultList<Location> list = new ResultList<>();
         list.value = List.of(DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetProvider(provider)));
+                getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider)));
 
         return list;
     }
@@ -213,7 +223,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         getTimestampFromId(id2);
 
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetProvider(provider));
+                getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider));
 
         if (!id2.equals(l.id)) {
             throw new NotFoundException();
@@ -237,12 +247,14 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
     public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(String id, String id2) {
         String provider = extractFirstIdSegment(id2);
         try {
+            ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), providerSnapshot, 0);
-            if (list.value.isEmpty())
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
+            if (list.value.isEmpty()) {
                 list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), providerSnapshot));
+                        getExpansions(), filter, providerSnapshot));
+            }
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

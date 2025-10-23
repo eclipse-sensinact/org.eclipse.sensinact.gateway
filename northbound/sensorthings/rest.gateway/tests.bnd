@@ -17,6 +17,7 @@ Import-Package: \
     !io.r2dbc.*,\
     !javax.annotation.*, \
     !org.conscrypt, \
+    !org.eclipse.sensinact.northbound.filters.sensorthings.impl, \
     !org.testcontainers.r2dbc.*, \
     !sun.nio.ch, \
     *

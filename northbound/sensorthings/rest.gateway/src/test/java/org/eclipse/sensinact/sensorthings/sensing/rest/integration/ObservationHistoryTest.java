@@ -20,11 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -33,6 +37,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -333,5 +339,52 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         assertEquals(id, observation.id);
         assertEquals(TS_2012.plus(ofDays(1)), observation.resultTime);
         assertEquals("1", observation.result);
+    }
+
+    @Test
+    void testFilterPhenomenonTime() throws Exception {
+        final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<>() {
+        };
+
+        // Create two unique providers with different phenomenonTimes
+        String testProvider = "phenomenonTimeTestProvider";
+        String svc = "sensor";
+        String rc = "temperature";
+
+        // Create timestamps - one in 2010, one in 2020
+        Instant earlierTime = ZonedDateTime.of(2010, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
+        Instant laterTime = ZonedDateTime.of(2020, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
+
+        // Create resources with different timestamps
+        createResource(testProvider, svc, rc, 25.5, earlierTime);
+        createResource(testProvider, "admin", "location", new Point(Coordinates.EMPTY, null, null));
+        createResource(testProvider, svc, rc, 30.2, laterTime);
+
+        // Test phenomenonTime lt filter - should return only the earlier observation
+        ResultList<Observation> observations = utils.queryJson(
+                String.format(
+                        "/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
+                        URLEncoder.encode("phenomenonTime lt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
+                RESULT_OBSERVATIONS);
+
+        assertEquals(1, observations.value.size(), "Should find exactly one observation for earlier timestamp");
+        Observation obs = observations.value.get(0);
+        assertTrue(obs.id.toString().startsWith(testProvider + "~"), "Should be from testProvider: " + obs.id);
+        assertEquals(earlierTime, obs.phenomenonTime);
+        assertEquals(25.5, obs.result);
+
+        // Test phenomenonTime gt filter - should return only the later observation
+        observations = utils.queryJson(
+                String.format(
+                        "/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
+                        URLEncoder.encode("phenomenonTime gt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
+                RESULT_OBSERVATIONS);
+
+        assertEquals(1, observations.value.size(), "Should find exactly one observation for later timestamp");
+        obs = observations.value.get(0);
+        assertTrue(obs.id.toString().startsWith(testProvider + "~"), "Should be from testProvider: " + obs.id);
+        assertEquals(laterTime, obs.phenomenonTime);
+        assertEquals(30.2, obs.result);
+
     }
 }
