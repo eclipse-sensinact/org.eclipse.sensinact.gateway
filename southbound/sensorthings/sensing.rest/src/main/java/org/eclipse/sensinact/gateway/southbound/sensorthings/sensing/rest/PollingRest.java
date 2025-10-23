@@ -44,6 +44,7 @@ import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.gateway.geojson.Feature;
@@ -317,7 +318,7 @@ public class PollingRest {
 
     public record DatastreamUpdate(
             @Model EClass model,
-            @Service EClass service,
+            @ServiceModel EClass service,
             @Provider String providerId,
             @Service String serviceName,
             @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorThingsId,
