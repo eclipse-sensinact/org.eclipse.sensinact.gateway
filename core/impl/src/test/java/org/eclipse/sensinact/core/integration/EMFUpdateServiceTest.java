@@ -21,7 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.ecore.EClass;
@@ -39,6 +42,7 @@ import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
@@ -49,6 +53,7 @@ import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ResourceValueMetadata;
 import org.eclipse.sensinact.model.core.testdata.DynamicTestSensor;
 import org.eclipse.sensinact.model.core.testdata.TestAdmin;
+import org.eclipse.sensinact.model.core.testdata.TestManyAttributeSensor;
 import org.eclipse.sensinact.model.core.testdata.TestResource;
 import org.eclipse.sensinact.model.core.testdata.TestSensor;
 import org.eclipse.sensinact.model.core.testdata.TestTemperatur;
@@ -591,6 +596,69 @@ public class EMFUpdateServiceTest {
             Promise<?> update = push.pushUpdate(dto);
             Throwable t = update.getFailure();
             assertNotNull(t, "Should fail for non-dynamic provider with String service model");
+        }
+    }
+
+    @Nested
+    public class EMFMany {
+
+        @Test
+        void getManyContent() throws Exception {
+            // Register a provider with attributes marked as "many"
+            TestManyAttributeSensor emfProvider = TestdataFactory.eINSTANCE.createTestManyAttributeSensor();
+            emfProvider.setId("manyEmfTestProvider");
+            emfProvider.setSvc(TestdataFactory.eINSTANCE.createManyAttributeService());
+            emfProvider.getSvc().getLongs().addAll(List.of(1L, 2L));
+            emfProvider.getSvc().getStrings().addAll(List.of("a", "b"));
+            push.pushUpdate(emfProvider).getValue();
+
+            // Ensure we get the correct values
+            Object rc = getResourceValue(null, emfProvider.getId(), "svc", "longs");
+            assertInstanceOf(List.class, rc);
+            assertEquals(List.of(1L, 2L), rc);
+            rc = getResourceValue(null, emfProvider.getId(), "svc", "strings");
+            assertInstanceOf(List.class, rc);
+            assertEquals(List.of("a", "b"), rc);
+
+            // Update the provider
+            emfProvider.getSvc().getLongs().clear();
+            emfProvider.getSvc().getLongs().addAll(List.of(3L, 4L));
+            emfProvider.getSvc().getStrings().clear();
+            emfProvider.getSvc().getStrings().addAll(List.of("foo", "bar"));
+            push.pushUpdate(emfProvider).getValue();
+
+            rc = getResourceValue(null, emfProvider.getId(), "svc", "longs");
+            assertInstanceOf(List.class, rc);
+            assertEquals(List.of(3L, 4L), rc);
+            rc = getResourceValue(null, emfProvider.getId(), "svc", "strings");
+            assertInstanceOf(List.class, rc);
+            assertEquals(List.of("foo", "bar"), rc);
+
+            // Update the strings using push
+            GenericDto dto = new GenericDto();
+            dto.provider = emfProvider.getId();
+            dto.service = "svc";
+            dto.resource = "strings";
+            dto.value = List.of("c", "d");
+            dto.type = Collection.class;
+            push.pushUpdate(dto).getValue();
+
+            rc = getResourceValue(null, emfProvider.getId(), "svc", "strings");
+            assertInstanceOf(List.class, rc);
+            assertEquals(List.of("c", "d"), rc);
+
+            // Update the longs
+            dto = new GenericDto();
+            dto.provider = emfProvider.getId();
+            dto.service = "svc";
+            dto.resource = "longs";
+            dto.value = Set.of(42L);
+            dto.type = Collection.class;
+            push.pushUpdate(dto).getValue();
+
+            rc = getResourceValue(null, emfProvider.getId(), "svc", "longs");
+            assertInstanceOf(List.class, rc);
+            assertEquals(Set.of(42L), rc);
         }
     }
 
