@@ -38,6 +38,8 @@ import jakarta.ws.rs.core.UriInfo;
  */
 class HistoryResourceHelper {
 
+    private static final int PAGE_SIZE = 500;
+
     private HistoryResourceHelper() {
     }
 
@@ -78,8 +80,8 @@ class HistoryResourceHelper {
                 list.value.addAll(0, observationList);
                 if (timed.isEmpty()) {
                     break;
-                } else if (timed.size() == 500) {
-                    skip = list.value.size();
+                } else if (timed.size() == PAGE_SIZE) {
+                    skip += PAGE_SIZE;
                 }
                 // Keep going until the list is as full as count, or it hits maxResults
             } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
@@ -119,8 +121,8 @@ class HistoryResourceHelper {
                         expansions, filter, provider, timed));
                 if (timed.isEmpty()) {
                     break;
-                } else if (timed.size() == 500) {
-                    skip = list.value.size();
+                } else if (timed.size() == PAGE_SIZE) {
+                    skip += PAGE_SIZE;
                 }
 
             } while (list.value.size() < count && list.value.size() < maxResults);
