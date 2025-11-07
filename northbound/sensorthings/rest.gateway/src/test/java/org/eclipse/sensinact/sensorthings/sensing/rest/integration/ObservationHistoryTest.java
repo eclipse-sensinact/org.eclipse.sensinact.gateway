@@ -60,7 +60,7 @@ import org.testcontainers.utility.DockerImageName;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class ObservationHistoryTest extends AbstractIntegrationTest {
-    /** 2012-01-01T01:23:45.123456Z*/
+    /** 2012-01-01T01:23:45.123456Z */
     private static final Instant TS_2012 = Instant.parse("2012-01-01T01:23:45.123456Z");
 
     private static final TypeReference<ResultList<Observation>> RESULT_OBSERVATIONS = new TypeReference<ResultList<Observation>>() {
@@ -401,6 +401,11 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                         URLEncoder.encode("phenomenonTime gt 2014-07-01T00:00:00Z and phenomenonTime lt 2014-07-10T00:00:00Z ", StandardCharsets.UTF_8)),
                 new TypeReference<>() {});
         assertEquals(9, observations.value.size(), "Should find 9 observations between 1.7.2014 and 10.7.2014");
-        Observation obs = observations.value.get(0);
+        Instant start = ZonedDateTime.of(2014, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC).toInstant();
+        Instant end = ZonedDateTime.of(2014, 7, 10, 0, 0, 0, 0, ZoneOffset.UTC).toInstant();
+        for (Observation obs : observations.value) {
+            assertTrue(obs.phenomenonTime.isAfter(start));
+            assertTrue(obs.phenomenonTime.isBefore(end));
+        }
     }
 }
