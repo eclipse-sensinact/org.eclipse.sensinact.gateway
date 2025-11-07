@@ -23,6 +23,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.ext
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -144,8 +145,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value.isEmpty()) {
-                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot));
+                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), filter,
+                        providerSnapshot).ifPresent(list.value::add);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -163,15 +164,16 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
 
         getTimestampFromId(id2);
 
-        HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+            Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                     getExpansions(), parseFilter(HISTORICAL_LOCATIONS), validateAndGetProvider(provider));
+            if(hl.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return hl.get();
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
-
-        return hl;
     }
 
     @Override
@@ -252,8 +254,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value.isEmpty()) {
-                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot));
+                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), filter,
+                        providerSnapshot).ifPresent(list.value::add);
             }
             return list;
         } catch (IllegalArgumentException iae) {

@@ -20,6 +20,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.ext
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -40,18 +41,16 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-
-        HistoricalLocation hl;
         try {
-            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                     getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
+            if(historicalLocation.isEmpty() || !historicalLocation.get().id.equals(id)) {
+                throw new NotFoundException();
+            }
+            return historicalLocation.get();
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
-        if (!hl.id.equals(id)) {
-            throw new NotFoundException();
-        }
-        return hl;
     }
 
     @Override
@@ -108,8 +107,8 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value.isEmpty())
-                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot));
+                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -155,8 +154,8 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value.isEmpty())
-                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot));
+                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), filter,
+                        providerSnapshot).ifPresent(list.value::add);
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

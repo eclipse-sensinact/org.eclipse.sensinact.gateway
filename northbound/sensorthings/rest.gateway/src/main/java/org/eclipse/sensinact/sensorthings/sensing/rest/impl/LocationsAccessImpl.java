@@ -19,6 +19,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -56,8 +57,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value.isEmpty()) {
-                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot));
+                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -69,13 +70,13 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     public HistoricalLocation getLocationHistoricalLocation(String id, String id2) {
         String provider = DtoMapper.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        HistoricalLocation hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
+        Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
 
-        if(!id2.equals(hl.id)) {
+        if(hl.isEmpty() || !id2.equals(hl.get().id)) {
             throw new NotFoundException();
         }
-        return hl;
+        return hl.get();
     }
 
     @Override
@@ -127,8 +128,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value.isEmpty()) {
-                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot));
+                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
             }
             return list;
         } catch (IllegalArgumentException iae) {
