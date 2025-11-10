@@ -42,6 +42,16 @@ public class HistoricalLocationPathHandler {
                 // Provider
                 return provider.getName();
 
+            case "time":
+                // Get time from the HistoricalLocationResourceSnapshot TimedValue
+                if (!resources.isEmpty()) {
+                    final ResourceSnapshot resource = resources.get(0);
+                    if (resource.getValue() != null) {
+                        return resource.getValue().getTimestamp();
+                    }
+                }
+                return null;
+
             default:
                 return PathUtils.getProviderLevelField(provider, resources, parts[0]);
             }
