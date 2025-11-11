@@ -54,8 +54,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.HistoricalLocationResourceSnapshot;
-import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.ObservationResourceSnapshot;
+import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.GenericResourceSnapshot;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -218,9 +217,13 @@ public class DtoMapper {
         }
 
         ResourceValueFilter rvf = filter == null ? null : filter.getResourceValueFilter();
-        if(rvf != null) {
-            ResourceSnapshot rs = new HistoricalLocationResourceSnapshot(provider, t.orElse(new DefaultTimedValue<>()));
-            if(!rvf.test(rs.getService().getProvider(), List.of(rs))) {
+        if (rvf != null) {
+            Optional<? extends ResourceSnapshot> locationResource = getProviderAdminField(provider, LOCATION);
+            if (locationResource.isEmpty() || t.isEmpty()) {
+                return Optional.empty();
+            }
+            ResourceSnapshot rs = new GenericResourceSnapshot(locationResource.get(), t.get());
+            if (!rvf.test(rs.getService().getProvider(), List.of(rs))) {
                 return Optional.empty();
             }
         }
@@ -388,7 +391,7 @@ public class DtoMapper {
         }
         ResourceValueFilter rvf = filter == null ? null : filter.getResourceValueFilter();
         if(rvf != null) {
-            ResourceSnapshot rs = new ObservationResourceSnapshot(resource, t.orElse(new DefaultTimedValue<>()));
+            ResourceSnapshot rs = new GenericResourceSnapshot(resource, t.orElse(new DefaultTimedValue<>()));
             if(!rvf.test(rs.getService().getProvider(), List.of(rs))) {
                 return Optional.empty();
             }
