@@ -38,8 +38,6 @@ import jakarta.ws.rs.core.UriInfo;
  */
 class HistoryResourceHelper {
 
-    private static final int PAGE_SIZE = 500;
-
     private HistoryResourceHelper() {
     }
 
@@ -75,9 +73,8 @@ class HistoryResourceHelper {
             list.value.addAll(0, observationList);
             if (timed.isEmpty()) {
                 break;
-            } else if (timed.size() == PAGE_SIZE) {
-                skip += PAGE_SIZE;
             }
+            skip += timed.size();
             // Keep going until the list is as full as count, or it hits maxResults
         } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
         list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
@@ -99,7 +96,6 @@ class HistoryResourceHelper {
         Map<String, Object> params = initParameter(provider);
         // Get count for the full dataset (for pagination metadata)
         Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-        list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
 
         int skip = 0;
 
@@ -108,15 +104,19 @@ class HistoryResourceHelper {
             params.put("skip", skip);
 
             timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-            list.value.addAll(0, DtoMapper.toHistoricalLocationList(userSession, application, mapper, uriInfo,
-                    expansions, filter, provider, timed));
+            List<HistoricalLocation> historicalLocationList = DtoMapper.toHistoricalLocationList(userSession, application, mapper, uriInfo,
+                    expansions, filter, provider, timed);
+            if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
+                count -= (timed.size() - historicalLocationList.size());
+            }
+            list.value.addAll(0, historicalLocationList);
             if (timed.isEmpty()) {
                 break;
-            } else if (timed.size() == PAGE_SIZE) {
-                skip += PAGE_SIZE;
             }
+            skip += timed.size();
 
-        } while (list.value.size() < count && list.value.size() < maxResults);
+        } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
+        list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
         return list;
     }
 
