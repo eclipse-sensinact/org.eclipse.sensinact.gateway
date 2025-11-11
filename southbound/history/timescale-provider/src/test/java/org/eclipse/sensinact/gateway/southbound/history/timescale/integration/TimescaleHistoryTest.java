@@ -1149,6 +1149,135 @@ public class TimescaleHistoryTest {
                 }
             }).getValue();
         }
+
+        private double scale (int start, int delta, int scaleFactor) {
+            return ((double) (start + delta)) / (double) scaleFactor;
+        }
+
+        @Test
+        void manyGeoData() throws Exception {
+
+            final int latStart = -500;
+            final int lngStart = -1000;
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(new Point(scale(lngStart, 2 * i, 10), scale(latStart, i, 10)),
+                        TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.geo_data", 1000);
+
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
+
+                @SuppressWarnings("unchecked")
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // If equal, return the value
+                    List<TimedValue<?>> result = safeGet(resource
+                            .act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation", "fromTime",
+                                    TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
+                            .map(List.class::cast));
+                    assertEquals(367, result.size());
+                    for (int i = 0; i < 367; i++) {
+                        assertEquals(new Point(scale(lngStart, 2 * i, 10), scale(latStart, i, 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i)), result.get(i).getTimestamp());
+                    }
+
+                    // same query, skip 50
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "fromTime", TS_2012.atOffset(ZoneOffset.UTC), "toTime",
+                            TS_2013.atOffset(ZoneOffset.UTC), "skip", 50)).map(List.class::cast));
+                    assertEquals(317, result.size());
+                    for (int i = 0; i < 317; i++) {
+                        assertEquals(new Point(scale(lngStart, 2 * (i + 50), 10), scale(latStart, i + 50, 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i + 50)), result.get(i).getTimestamp());
+                    }
+
+                    // No Limit
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC)))
+                            .map(List.class::cast));
+                    assertEquals(501, result.size());
+                    for (int i = 0; i < 500; i++) {
+                        assertEquals(new Point(scale(lngStart, 2 * (i + 1), 10), scale(latStart, (i + 1), 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i + 1)), result.get(i).getTimestamp());
+                    }
+                    assertNull(result.get(500).getTimestamp());
+                    assertNull(result.get(500).getValue());
+
+                    // No start - get the latest 500 before the to time
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "toTime", TS_2014.atOffset(ZoneOffset.UTC))).map(List.class::cast));
+                    assertEquals(500, result.size());
+                    long valueAt2014 = TS_2012.until(TS_2014, ChronoUnit.DAYS);
+                    for (int i = 0; i < 500; i++) {
+                        int delta = (int) valueAt2014 - 499 + i;
+                        assertEquals(new Point(scale(lngStart, 2 * delta, 10), scale(latStart, delta, 10)), result.get(i).getValue());
+                        assertEquals(TS_2014.minus(ofDays(499 - i)), result.get(i).getTimestamp());
+                    }
+
+                    // No start or end - get the latest 500
+                    result = safeGet(
+                            resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation"))
+                                    .map(List.class::cast));
+                    assertEquals(500, result.size());
+
+                    for (int i = 0; i < 500; i++) {
+                        assertEquals(new Point(scale(lngStart, 2* (500 + i), 10), scale(latStart, 500 + i, 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(500 + i)), result.get(i).getTimestamp());
+                    }
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
+        void manyGeoCount() throws Exception {
+
+            double latStart = -50.0d;
+            double lngStart = -100.0d;
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(new Point(lngStart + 0.2d * i, latStart + 0.1d * i),
+                        TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.geo_data", 1000);
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "count") {
+
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // If equal, return the value
+                    Long result = safeGet(resource
+                            .act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation", "fromTime",
+                                    TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(367, result);
+
+                    // No Limit
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(999, result);
+
+                    // No start - get the latest 500 before the to time
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "toTime", TS_2014.atOffset(ZoneOffset.UTC))).map(Long.class::cast));
+                    assertEquals(366 + 365 + 1, result);
+
+                    // No start or end - get the latest 500
+                    result = safeGet(
+                            resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation"))
+                                    .map(Long.class::cast));
+                    assertEquals(1000, result);
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
     }
 }
 
