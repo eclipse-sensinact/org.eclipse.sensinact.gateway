@@ -6,4 +6,5 @@ The following examples will help you to quickly get started with the sensiNact g
 :maxdepth: 2
 
 Interacting
+Internationalization
 ```
