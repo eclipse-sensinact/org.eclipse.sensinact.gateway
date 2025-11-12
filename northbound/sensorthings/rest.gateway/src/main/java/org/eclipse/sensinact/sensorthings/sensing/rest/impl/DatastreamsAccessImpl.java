@@ -147,8 +147,8 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value.isEmpty())
-                list.value.add(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot));
+                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

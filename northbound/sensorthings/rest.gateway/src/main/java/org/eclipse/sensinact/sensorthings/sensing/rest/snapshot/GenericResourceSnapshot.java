@@ -133,16 +133,19 @@ class GenericServiceSnapshot implements ServiceSnapshot {
                 .orElse(null);
     }
 }
-public class ObservationResourceSnapshot implements ResourceSnapshot {
+public class GenericResourceSnapshot implements ResourceSnapshot {
 
     private final ServiceSnapshot service;
     private final ResourceSnapshot resource;
-    private final TimedValue<?> obs;
+    private final TimedValue<?> value;
 
-    public ObservationResourceSnapshot(ResourceSnapshot resource, TimedValue<?> obs) {
+    public GenericResourceSnapshot(ResourceSnapshot resource, TimedValue<?> value) {
+        if(null == resource || null == value) {
+            throw new IllegalArgumentException("Resource and value must not be null.");
+        }
         this.service = new GenericServiceSnapshot(resource.getService(), this);
         this.resource = resource;
-        this.obs = obs;
+        this.value = value;
     }
 
     @Override
@@ -172,7 +175,7 @@ public class ObservationResourceSnapshot implements ResourceSnapshot {
 
     @Override
     public TimedValue<?> getValue() {
-        return obs;
+        return value;
     }
 
     @Override

@@ -139,6 +139,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ProviderSnapshot> providers = listProviders(criterion);
         list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(toList());
         return list;
     }

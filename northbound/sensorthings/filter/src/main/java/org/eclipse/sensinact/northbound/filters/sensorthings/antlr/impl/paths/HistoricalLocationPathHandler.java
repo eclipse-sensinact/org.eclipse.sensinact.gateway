@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -42,6 +43,15 @@ public class HistoricalLocationPathHandler {
                 // Provider
                 return provider.getName();
 
+            case "time":
+                // Get time from the HistoricalLocationResourceSnapshot TimedValue
+                final Optional<? extends ResourceSnapshot> resource = resources.stream().filter(this::isAdminLocation)
+                        .findFirst();
+                if (resource.isPresent()) {
+                    return PathUtils.getResourceLevelField(provider, resource.get(), parts[0]);
+                }
+                return null;
+
             default:
                 return PathUtils.getProviderLevelField(provider, resources, parts[0]);
             }
@@ -52,6 +62,10 @@ public class HistoricalLocationPathHandler {
             }
             return handler.apply(String.join("/", Arrays.copyOfRange(parts, 1, parts.length)));
         }
+    }
+
+    private boolean isAdminLocation(ResourceSnapshot r) {
+        return "admin".equals(r.getService().getName()) && "location".equals(r.getName());
     }
 
     private Object subThings(final String path) {

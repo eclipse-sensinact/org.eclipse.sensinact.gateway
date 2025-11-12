@@ -67,6 +67,7 @@ public class PathUtils {
 
         case "resulttime":
         case "phenomenontime":
+        case "time":
         case "validtime":
             if (rcValue != null) {
                 return rcValue.getTimestamp();
