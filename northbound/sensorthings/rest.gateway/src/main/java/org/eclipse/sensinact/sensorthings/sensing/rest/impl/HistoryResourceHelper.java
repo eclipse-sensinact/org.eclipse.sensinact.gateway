@@ -48,43 +48,36 @@ class HistoryResourceHelper {
         ResultList<Observation> list = new ResultList<>();
         list.value = new ArrayList<>();
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
-
-        if (historyProvider != null) {
-            Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
-
-            if (localResultLimit > 0) {
-                maxResults = Math.min(localResultLimit, maxResults);
-            }
-
-            Map<String, Object> params = initParameter(resourceSnapshot);
-            // Get count for the full dataset (for pagination metadata)
-            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-
-            int skip = 0;
-
-            List<TimedValue<?>> timed;
-            do {
-                params.put("skip", skip);
-
-                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range",
-                        params);
-
-                // Filtering happens at a lower level, so we may not use all the discovered history
-                List<Observation> observationList = DtoMapper.toObservationList(userSession, application, mapper, uriInfo, expansions,
-                        filter, resourceSnapshot, timed);
-                if(count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
-                    count -= (timed.size() - observationList.size());
-                }
-                list.value.addAll(0, observationList);
-                if (timed.isEmpty()) {
-                    break;
-                } else if (timed.size() == 500) {
-                    skip = list.value.size();
-                }
-                // Keep going until the list is as full as count, or it hits maxResults
-            } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
-            list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
+        if (historyProvider == null) {
+            return list;
         }
+
+        Integer maxResults = getMaxResult(application, localResultLimit);
+        Map<String, Object> params = initParameter(resourceSnapshot);
+        // Get count for the full dataset (for pagination metadata)
+        Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
+        int skip = 0;
+
+        List<TimedValue<?>> timed;
+        do {
+            params.put("skip", skip);
+
+            timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
+
+            // Filtering happens at a lower level, so we may not use all the discovered history
+            List<Observation> observationList = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
+                    expansions, filter, resourceSnapshot, timed);
+            if (count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
+                count -= (timed.size() - observationList.size());
+            }
+            list.value.addAll(0, observationList);
+            if (timed.isEmpty()) {
+                break;
+            }
+            skip += timed.size();
+            // Keep going until the list is as full as count, or it hits maxResults
+        } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
+        list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
         return list;
     }
 
@@ -95,37 +88,44 @@ class HistoryResourceHelper {
         ResultList<HistoricalLocation> list = new ResultList<>();
         list.value = new ArrayList<>();
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
-
-        if (historyProvider != null) {
-            Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
-
-            if (localResultLimit > 0) {
-                maxResults = Math.min(localResultLimit, maxResults);
-            }
-
-            Map<String, Object> params = initParameter(provider);
-            // Get count for the full dataset (for pagination metadata)
-            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-            list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
-
-            int skip = 0;
-
-            List<TimedValue<?>> timed;
-            do {
-                params.put("skip", skip);
-
-                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-                list.value.addAll(0, DtoMapper.toHistoricalLocationList(userSession, application, mapper, uriInfo,
-                        expansions, filter, provider, timed));
-                if (timed.isEmpty()) {
-                    break;
-                } else if (timed.size() == 500) {
-                    skip = list.value.size();
-                }
-
-            } while (list.value.size() < count && list.value.size() < maxResults);
+        if (historyProvider == null) {
+            return list;
         }
+
+        Integer maxResults = getMaxResult(application, localResultLimit);
+        Map<String, Object> params = initParameter(provider);
+        // Get count for the full dataset (for pagination metadata)
+        Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
+
+        int skip = 0;
+
+        List<TimedValue<?>> timed;
+        do {
+            params.put("skip", skip);
+
+            timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
+            List<HistoricalLocation> historicalLocationList = DtoMapper.toHistoricalLocationList(userSession, application, mapper, uriInfo,
+                    expansions, filter, provider, timed);
+            if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
+                count -= (timed.size() - historicalLocationList.size());
+            }
+            list.value.addAll(0, historicalLocationList);
+            if (timed.isEmpty()) {
+                break;
+            }
+            skip += timed.size();
+
+        } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
+        list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
         return list;
+    }
+
+    private static Integer getMaxResult(Application application, int localResultLimit) {
+        Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
+        if (localResultLimit > 0) {
+            maxResults = Math.min(localResultLimit, maxResults);
+        }
+        return maxResults;
     }
 
     private static Map<String, Object> initParameter(ResourceSnapshot resourceSnapshot) {
