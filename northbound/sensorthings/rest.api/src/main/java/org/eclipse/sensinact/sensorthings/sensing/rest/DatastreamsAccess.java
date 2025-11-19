@@ -60,8 +60,10 @@ public interface DatastreamsAccess {
     @Path("Observations/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getDatastreamObservationsRef(@PathParam("id") String id) {
-        return getDatastreamObservations(id);
+    default public ResultList<Self> getDatastreamObservationsRef(@PathParam("id") String id) {
+        ResultList<Observation> datastreamObservations = getDatastreamObservations(id);
+        return new ResultList<>(datastreamObservations.count(), datastreamObservations.nextLink(),
+                datastreamObservations.value());
     }
 
     @Path("Observations({id2})")

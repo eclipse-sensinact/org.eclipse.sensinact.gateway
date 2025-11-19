@@ -22,10 +22,5 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonDeserialize(using = TimeIntervalDeserializer.class)
 @JsonSerialize(using = TimeIntervalSerializer.class)
-public class TimeInterval {
-
-    public Instant start;
-
-    public Instant end;
-
+public record TimeInterval(Instant start, Instant end) {
 }

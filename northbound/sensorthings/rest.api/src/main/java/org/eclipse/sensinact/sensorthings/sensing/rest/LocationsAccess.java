@@ -56,8 +56,10 @@ public interface LocationsAccess {
     @Path("HistoricalLocations/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getLocationHistoricalLocationsRef(@PathParam("id") String id) {
-        return getLocationHistoricalLocations(id);
+    default public ResultList<Self> getLocationHistoricalLocationsRef(@PathParam("id") String id) {
+        ResultList<HistoricalLocation> locationHistoricalLocations = getLocationHistoricalLocations(id);
+        return new ResultList<>(locationHistoricalLocations.count(), locationHistoricalLocations.nextLink(),
+                locationHistoricalLocations.value());
     }
 
     @Path("HistoricalLocations({id2})")
@@ -86,8 +88,9 @@ public interface LocationsAccess {
     @Path("Things/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getLocationThingsRef(@PathParam("id") String id) {
-        return getLocationThings(id);
+    default public ResultList<Self> getLocationThingsRef(@PathParam("id") String id) {
+        ResultList<Thing> locationThings = getLocationThings(id);
+        return new ResultList<>(locationThings.count(), locationThings.nextLink(), locationThings.value());
     }
 
     @Path("Things({id2})")

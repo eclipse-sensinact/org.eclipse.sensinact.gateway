@@ -106,23 +106,21 @@ public class DtoMapper {
     public static Thing toThing(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
-        Thing thing = new Thing();
-        thing.id = provider.getName();
+        String id = provider.getName();
 
-        String friendlyName = toString(getProviderAdminFieldValue(provider, FRIENDLY_NAME));
-        thing.name = Objects.requireNonNullElse(friendlyName, provider.getName());
+        String name = Objects.requireNonNullElse(toString(getProviderAdminFieldValue(provider, FRIENDLY_NAME)), provider.getName());
 
-        String description = toString(getProviderAdminFieldValue(provider, DESCRIPTION));
-        thing.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
+        String description = Objects.requireNonNullElse(toString(getProviderAdminFieldValue(provider, DESCRIPTION)), NO_DESCRIPTION);
 
-        thing.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Things({id})")
-                .resolveTemplate("id", thing.id).build().toString();
-        thing.datastreamsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("Datastreams").build().toString();
-        thing.historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("HistoricalLocations")
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Things({id})")
+                .resolveTemplate("id", id).build().toString();
+        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastreams").build().toString();
+        String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("HistoricalLocations")
                 .build().toString();
-        thing.locationsLink = uriInfo.getBaseUriBuilder().uri(thing.selfLink).path("Locations").build().toString();
+        String locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Locations").build().toString();
 
-
+        Thing thing = new Thing(selfLink, id, name, description, null,
+                datastreamsLink, historicalLocationsLink, locationsLink);
         if(expansions.shouldExpand("Datastreams", thing)) {
             expansions.addExpansion("Datastreams", thing, DatastreamsAccessImpl.getDataStreams(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, provider));
@@ -132,15 +130,14 @@ public class DtoMapper {
             Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
             if (historicalLocation.isPresent()) {
-                ResultList<HistoricalLocation> list = new ResultList<>();
-                list.value = List.of(historicalLocation.get());
+                ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", thing, list);
             }
         }
         if(expansions.shouldExpand("Locations", thing)) {
-            ResultList<Location> list = new ResultList<>();
-            list.value = List.of(DtoMapper.toLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Locations"), filter, provider));
+            ResultList<Location> list = new ResultList<>(null, null, List.of(
+                    DtoMapper.toLocation(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", thing, list);
         }
 
@@ -150,42 +147,36 @@ public class DtoMapper {
     public static Location toLocation(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
-        Location location = new Location();
-
         final String providerName = provider.getName();
         final TimedValue<GeoJsonObject> rcLocation = getLocation(provider, mapper, false);
         final Instant time = rcLocation.getTimestamp();
         final GeoJsonObject object = rcLocation.getValue();
 
-        location.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
+        String id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
 
-        String friendlyName = getProperty(object, "name");
-        location.name = Objects.requireNonNullElse(friendlyName, providerName);
+        String name = Objects.requireNonNullElse(getProperty(object, "name"), providerName);
 
-        String description = getProperty(object, DESCRIPTION);
-        location.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
+        String description = Objects.requireNonNullElse(getProperty(object, DESCRIPTION), NO_DESCRIPTION);
 
-        location.encodingType = ENCODING_TYPE_VND_GEO_JSON;
-        location.location = object;
-
-        location.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Locations({id})")
-                .resolveTemplate("id", location.id).build().toString();
-        location.thingsLink = uriInfo.getBaseUriBuilder().uri(location.selfLink).path("Things").build().toString();
-        location.historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(location.selfLink)
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Locations({id})")
+                .resolveTemplate("id", id).build().toString();
+        String thingsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Things").build().toString();
+        String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
                 .path("HistoricalLocations").build().toString();
 
+        Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object,
+                thingsLink, historicalLocationsLink);
         if(expansions.shouldExpand("Things", location)) {
-            ResultList<Thing> list = new ResultList<>();
-            list.value = List.of(DtoMapper.toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), filter, provider));
+            ResultList<Thing> list = new ResultList<>(null, null, List.of(
+                    DtoMapper.toThing(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Thing"), filter, provider)));
             expansions.addExpansion("Things", location, list);
         }
         if (expansions.shouldExpand("HistoricalLocations", location)) {
             Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
             if (historicalLocation.isPresent()) {
-                ResultList<HistoricalLocation> list = new ResultList<>();
-                list.value = List.of(historicalLocation.get());
+                ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", location, list);
             }
         }
@@ -228,27 +219,27 @@ public class DtoMapper {
             }
         }
 
-        HistoricalLocation historicalLocation = new HistoricalLocation();
         final Instant time = t.map(TimedValue::getTimestamp).orElse( Instant.EPOCH);
 
-        historicalLocation.id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
-        historicalLocation.time = time;
+        String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
 
-        historicalLocation.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("HistoricalLocations({id})")
-                .resolveTemplate("id", historicalLocation.id).build().toString();
-        historicalLocation.thingLink = uriInfo.getBaseUriBuilder().uri(historicalLocation.selfLink).path("Thing")
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("HistoricalLocations({id})")
+                .resolveTemplate("id", id).build().toString();
+        String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing")
                 .build().toString();
-        historicalLocation.locationsLink = uriInfo.getBaseUriBuilder().uri(historicalLocation.selfLink)
+        String locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
                 .path("Locations").build().toString();
 
+        HistoricalLocation historicalLocation = new HistoricalLocation(selfLink, id, time,
+                locationsLink, thingLink);
         if(expansions.shouldExpand("Thing", historicalLocation)) {
             expansions.addExpansion("Thing", historicalLocation, toThing(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Thing"), filter, provider));
         }
         if(expansions.shouldExpand("Locations", historicalLocation)) {
-            ResultList<Location> list = new ResultList<>();
-            list.value = List.of(DtoMapper.toLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Locations"), filter, provider));
+            ResultList<Location> list = new ResultList<>(null, null, List.of(
+                    DtoMapper.toLocation(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
         return Optional.of(historicalLocation);
@@ -269,38 +260,34 @@ public class DtoMapper {
             throw new NotFoundException();
         }
 
-        Datastream datastream = new Datastream();
-
         final ProviderSnapshot provider = resource.getService().getProvider();
         final Map<String, Object> metadata = resource.getMetadata();
 
-        datastream.id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(),
+        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(),
                 resource.getName());
 
-        datastream.name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
-        datastream.description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
+        String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
+        String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
 
-        // TODO can we make this more fine-grained
-        datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
+        UnitOfMeasurement unit = new UnitOfMeasurement(
+                Objects.toString(metadata.get(SENSORTHINGS_UNIT_NAME), null),
+                Objects.toString(metadata.get("unit"), null),
+                Objects.toString(metadata.get(SENSORTHINGS_UNIT_DEFINITION), null));
 
-        UnitOfMeasurement unit = new UnitOfMeasurement();
-        unit.symbol = Objects.toString(metadata.get("unit"), null);
-        unit.name = Objects.toString(metadata.get(SENSORTHINGS_UNIT_NAME), null);
-        unit.definition = Objects.toString(metadata.get(SENSORTHINGS_UNIT_DEFINITION), null);
-        datastream.unitOfMeasurement = unit;
+        Polygon observedArea = getObservedArea(getLocation(provider, mapper, resource, false).getValue());
 
-        datastream.observedArea = getObservedArea(getLocation(provider, mapper, resource, false).getValue());
-        datastream.properties = metadata;
-
-        datastream.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})")
-                .resolveTemplate("id", datastream.id).build().toString();
-        datastream.observationsLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Observations").build()
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})")
+                .resolveTemplate("id", id).build().toString();
+        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build()
                 .toString();
-        datastream.observedPropertyLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("ObservedProperty")
+        String observedPropertyLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("ObservedProperty")
                 .build().toString();
-        datastream.sensorLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Sensor").build().toString();
-        datastream.thingLink = uriInfo.getBaseUriBuilder().uri(datastream.selfLink).path("Thing").build().toString();
+        String sensorLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Sensor").build().toString();
+        String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
 
+        Datastream datastream = new Datastream(selfLink, id, name, description,
+                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit,
+                observedArea, null, null, metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
         if(expansions.shouldExpand("Observations", datastream)) {
             expansions.addExpansion("Observations", datastream, RootResourceAccessImpl.getObservationList(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("Observations"), resource, filter, 25));
@@ -331,26 +318,26 @@ public class DtoMapper {
             throw new NotFoundException();
         }
 
-        Sensor sensor = new Sensor();
 
         ProviderSnapshot providerSnapshot = resource.getService().getProvider();
         final String provider = providerSnapshot.getName();
         final Map<String, Object> metadata = resource.getMetadata();
 
-        sensor.id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
+        String id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
 
-        sensor.name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
-        sensor.description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-        sensor.properties = metadata;
+        String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
+        String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
 
-        sensor.metadata = metadata.getOrDefault(SENSORTHINGS_SENSOR_METADATA, "No metadata");
-        sensor.encodingType = toString(metadata.getOrDefault(SENSORTHINGS_SENSOR_ENCODING_TYPE, DEFAULT_ENCODING_TYPE));
+        Object sensorMetadata = metadata.getOrDefault(SENSORTHINGS_SENSOR_METADATA, "No metadata");
+        String encodingType = toString(metadata.getOrDefault(SENSORTHINGS_SENSOR_ENCODING_TYPE, DEFAULT_ENCODING_TYPE));
 
-        sensor.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Sensors({id})")
-                .resolveTemplate("id", sensor.id).build().toString();
-        sensor.datastreamsLink = uriInfo.getBaseUriBuilder().uri(sensor.selfLink).path("Datastreams").build()
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Sensors({id})")
+                .resolveTemplate("id", id).build().toString();
+        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastreams").build()
                 .toString();
 
+        Sensor sensor = new Sensor(selfLink, id, name, description, encodingType, sensorMetadata,
+                metadata, datastreamsLink);
         if(expansions.shouldExpand("Datastreams", sensor)) {
             expansions.addExpansion("Datastreams", sensor, DatastreamsAccessImpl.getDataStreams(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
@@ -397,25 +384,24 @@ public class DtoMapper {
             }
         }
 
-        Observation observation = new Observation();
         final Instant timestamp = t.map(TimedValue::getTimestamp).orElse(null);
 
         ProviderSnapshot providerSnapshot = resource.getService().getProvider();
-        observation.id = String.format("%s~%s~%s~%s", providerSnapshot.getName(),
+        String id = String.format("%s~%s~%s~%s", providerSnapshot.getName(),
                 resource.getService().getName(), resource.getName(), Long.toString(timestamp.toEpochMilli(), 16));
 
-        observation.resultTime = timestamp;
-        observation.result = t.map(TimedValue::getValue).orElse(null);
-        observation.phenomenonTime = timestamp;
-        observation.resultQuality = resource.getMetadata().get(SENSORTHINGS_OBSERVATION_QUALITY);
+        Object result = t.map(TimedValue::getValue).orElse(null);
+        Object resultQuality = resource.getMetadata().get(SENSORTHINGS_OBSERVATION_QUALITY);
 
-        observation.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
-                .resolveTemplate("id", observation.id).build().toString();
-        observation.datastreamLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink).path("Datastream").build()
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
+                .resolveTemplate("id", id).build().toString();
+        String datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build()
                 .toString();
-        observation.featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(observation.selfLink)
+        String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink)
                 .path("FeatureOfInterest").build().toString();
 
+        Observation observation = new Observation(selfLink, id, timestamp,
+                timestamp, result, resultQuality, null, null, datastreamLink, featureOfInterestLink);
         if(expansions.shouldExpand("Datastream", observation)) {
             expansions.addExpansion("Datastream", observation, toDatastream(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Datastream"), resource, filter));
@@ -432,26 +418,24 @@ public class DtoMapper {
     public static ObservedProperty toObservedProperty(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource) {
-        ObservedProperty observedProperty = new ObservedProperty();
-
         final Map<String, Object> metadata = resource.getMetadata();
 
         ProviderSnapshot providerSnapshot = resource.getService().getProvider();
-        observedProperty.id = String.format("%s~%s~%s", providerSnapshot.getName(),
+        String id = String.format("%s~%s~%s", providerSnapshot.getName(),
                 resource.getService().getName(), resource.getName());
 
-        observedProperty.name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
-        observedProperty.description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-        observedProperty.properties = metadata;
+        String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
+        String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
 
-        observedProperty.definition = toString(
+        String definition = toString(
                 metadata.getOrDefault(SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION, NO_DEFINITION));
 
-        observedProperty.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("ObservedProperties({id})")
-                .resolveTemplate("id", observedProperty.id).build().toString();
-        observedProperty.datastreamsLink = uriInfo.getBaseUriBuilder().uri(observedProperty.selfLink)
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("ObservedProperties({id})")
+                .resolveTemplate("id", id).build().toString();
+        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
                 .path("Datastreams").build().toString();
 
+        ObservedProperty observedProperty = new ObservedProperty(selfLink, id, name, description, definition, metadata, datastreamsLink);
         if(expansions.shouldExpand("Datastreams", observedProperty)) {
             expansions.addExpansion("Datastreams", observedProperty, DatastreamsAccessImpl.getDataStreams(userSession,
                     application, mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
@@ -463,29 +447,24 @@ public class DtoMapper {
     public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
-        FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-
         final String providerName = provider.getName();
 
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, false);
         final GeoJsonObject object = location.getValue();
 
-        featureOfInterest.id = providerName;
+        String id = providerName;
 
-        String friendlyName = getProperty(object, "name");
-        featureOfInterest.name = Objects.requireNonNullElse(friendlyName, providerName);
+        String name = Objects.requireNonNullElse(getProperty(object, "name"), providerName);
 
-        String description = getProperty(object, DESCRIPTION);
-        featureOfInterest.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
+        String description = Objects.requireNonNullElse(getProperty(object, DESCRIPTION), NO_DESCRIPTION);
 
-        featureOfInterest.encodingType = ENCODING_TYPE_VND_GEO_JSON;
-        featureOfInterest.feature = object;
-
-        featureOfInterest.selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("FeaturesOfInterest({id})")
-                .resolveTemplate("id", featureOfInterest.id).build().toString();
-        featureOfInterest.observationsLink = uriInfo.getBaseUriBuilder().uri(featureOfInterest.selfLink)
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("FeaturesOfInterest({id})")
+                .resolveTemplate("id", id).build().toString();
+        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
                 .path("Observations").build().toString();
 
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest(selfLink, id, name,
+                description, ENCODING_TYPE_VND_GEO_JSON, object, observationsLink);
         if(expansions.shouldExpand("Observations", featureOfInterest)) {
             expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, provider));

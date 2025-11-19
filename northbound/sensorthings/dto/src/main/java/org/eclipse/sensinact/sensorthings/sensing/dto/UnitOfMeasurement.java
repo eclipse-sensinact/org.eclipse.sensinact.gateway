@@ -12,11 +12,5 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
-public class UnitOfMeasurement {
-
-    public String name;
-
-    public String symbol;
-
-    public String definition;
+public record UnitOfMeasurement(String name, String symbol, String definition) {
 }

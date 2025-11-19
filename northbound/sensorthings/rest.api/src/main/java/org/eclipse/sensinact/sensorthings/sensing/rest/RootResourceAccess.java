@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl.create;
 
 import java.util.List;
 
@@ -25,6 +24,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse;
+import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.ServerSettings;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
@@ -41,9 +41,7 @@ public interface RootResourceAccess {
 
     @GET
     default RootResponse getRootResponse(@Context UriInfo info) {
-        RootResponse response = new RootResponse();
-        response.serverSettings = new ServerSettings();
-        response.serverSettings.conformance = List.of(
+        ServerSettings serverSettings = new ServerSettings(List.of(
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel",
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path",
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/order",
@@ -58,20 +56,20 @@ public interface RootResourceAccess {
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/filter",
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-filter-operations",
                 "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-query-functions"
+            ));
+
+        List<NameUrl> value = List.of(
+                new NameUrl("Things", info.getAbsolutePathBuilder().path("Things").toString()),
+                new NameUrl("Locations", info.getAbsolutePathBuilder().path("Locations").toString()),
+                new NameUrl("HistoricalLocations", info.getAbsolutePathBuilder().path("HistoricalLocations").toString()),
+                new NameUrl("Datastreams", info.getAbsolutePathBuilder().path("Datastreams").toString()),
+                new NameUrl("Sensors", info.getAbsolutePathBuilder().path("Sensors").toString()),
+                new NameUrl("Observations", info.getAbsolutePathBuilder().path("Observations").toString()),
+                new NameUrl("ObservedProperties", info.getAbsolutePathBuilder().path("ObservedProperties").toString()),
+                new NameUrl("FeaturesOfInterest", info.getAbsolutePathBuilder().path("FeaturesOfInterest").toString())
             );
 
-        response.value = List.of(
-                create("Things", info.getAbsolutePathBuilder().path("Things").toString()),
-                create("Locations", info.getAbsolutePathBuilder().path("Locations").toString()),
-                create("HistoricalLocations", info.getAbsolutePathBuilder().path("HistoricalLocations").toString()),
-                create("Datastreams", info.getAbsolutePathBuilder().path("Datastreams").toString()),
-                create("Sensors", info.getAbsolutePathBuilder().path("Sensors").toString()),
-                create("Observations", info.getAbsolutePathBuilder().path("Observations").toString()),
-                create("ObservedProperties", info.getAbsolutePathBuilder().path("ObservedProperties").toString()),
-                create("FeaturesOfInterest", info.getAbsolutePathBuilder().path("FeaturesOfInterest").toString())
-            );
-
-        return response;
+        return new RootResponse(serverSettings, value);
     }
 
     @GET

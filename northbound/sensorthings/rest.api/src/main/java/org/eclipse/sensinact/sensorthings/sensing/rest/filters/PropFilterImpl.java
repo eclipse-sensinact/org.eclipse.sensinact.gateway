@@ -13,14 +13,21 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
 import java.io.IOException;
+import java.lang.reflect.RecordComponent;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.Providers;
 import jakarta.ws.rs.ext.WriterInterceptor;
 import jakarta.ws.rs.ext.WriterInterceptorContext;
 
@@ -32,6 +39,13 @@ public class PropFilterImpl implements WriterInterceptor {
 
     @Context
     UriInfo uriInfo;
+
+    @Context
+    Providers providers;
+
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
 
     @Override
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
@@ -45,7 +59,27 @@ public class PropFilterImpl implements WriterInterceptor {
         boolean rawValue = uriInfo.getPath().endsWith("/$value");
 
         try {
-            Object prop = entity.getClass().getField(propName).get(entity);
+            Object prop;
+            if(entity instanceof Record) {
+                RecordComponent[] components = entity.getClass().getRecordComponents();
+                RecordComponent component = Arrays.stream(components)
+                    .filter(rc -> rc.getName().equals(propName))
+                    .findFirst().get();
+                prop = component.getAccessor().invoke(entity);
+            } else if (entity instanceof JsonNode jn) {
+                if(jn.has(propName)) {
+                    prop = jn.get(propName);
+                } else {
+                    throw new IllegalArgumentException("No property " + propName + " in object " + jn);
+                }
+            } else {
+                JsonNode jn = getMapper().convertValue(entity, JsonNode.class);
+                if(jn.has(propName)) {
+                    prop = jn.get(propName);
+                } else {
+                    throw new IllegalArgumentException("No property " + propName + " in object " + jn);
+                }
+            }
             context.setEntity(rawValue ? prop : Map.of(propName, prop));
         } catch (Exception e) {
             throw new BadRequestException("Failed to locate property " + propName, e);

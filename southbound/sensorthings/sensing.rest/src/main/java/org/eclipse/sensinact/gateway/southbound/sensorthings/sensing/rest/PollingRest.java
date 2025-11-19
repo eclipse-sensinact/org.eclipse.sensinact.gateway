@@ -56,7 +56,9 @@ import org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.dto.Ex
 import org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.dto.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -133,11 +135,11 @@ public class PollingRest {
                         new TypeReference<ResultList<ExpandedThing>>() {
                         });
 
-                List<SensorThingsUpdate> updates = list.value.stream().flatMap(this::toUpdates).toList();
+                List<SensorThingsUpdate> updates = list.value().stream().flatMap(this::toUpdates).toList();
 
                 dataUpdate.pushUpdate(updates);
 
-                uri = list.nextLink != null && !list.value.isEmpty() ? URI.create(list.nextLink) : null;
+                uri = list.nextLink() != null && !list.value().isEmpty() ? URI.create(list.nextLink()) : null;
 
             } while (uri != null);
         } catch (Exception e) {
@@ -152,15 +154,15 @@ public class PollingRest {
     }
 
     Stream<SensorThingsUpdate> toUpdates(ExpandedThing thing) {
-        String providerId = sanitizeId(thing.name == null ? thing.id : thing.name);
-        GeoJsonObject location = aggregate(thing.locations);
-        Map<String, Object> thingProperties = thing.properties.entrySet().stream()
+        String providerId = sanitizeId(thing.name() == null ? thing.id() : thing.name());
+        GeoJsonObject location = aggregate(thing.locations());
+        Map<String, Object> thingProperties = thing.properties().entrySet().stream()
                 .collect(toMap(e -> "sensorthings.thing." + e.getKey(), Entry::getValue));
-        ThingUpdate provider = new ThingUpdate(providerId, thing.name, thing.description, location, thing.id,
-                thingProperties);
+        ThingUpdate provider = new ThingUpdate(providerId, thing.name(), thing.description(), location,
+                thing.id(), thingProperties);
 
         return Stream.concat(Stream.of(provider),
-                thing.datastreams.stream().map(d -> toDatastreamUpdate(providerId, d)));
+                thing.datastreams().stream().map(d -> toDatastreamUpdate(providerId, d)));
     }
 
     private String sanitizeId(Object object) {
@@ -181,13 +183,13 @@ public class PollingRest {
     private Feature toFeature(Location location) {
         Feature f;
 
-        if (location.location != null) {
-            String id = sanitizeId(location.id);
-            f = switch (location.location.type()) {
+        if (location.location() != null) {
+            String id = sanitizeId(location.id());
+            f = switch (location.location().type()) {
             case Feature:
-                yield (Feature) location.location;
+                yield (Feature) location.location();
             case FeatureCollection:
-                yield toFeature((FeatureCollection) location.location);
+                yield toFeature((FeatureCollection) location.location());
             case GeometryCollection:
             case LineString:
             case MultiLineString:
@@ -195,10 +197,10 @@ public class PollingRest {
             case MultiPolygon:
             case Point:
             case Polygon:
-                yield new Feature(id, (Geometry) location.location, Map.of("sensorthings.location.description",
-                        location.description, "sensorthings.location.name", location.name), null, null);
+                yield new Feature(id, (Geometry) location.location(), Map.of("sensorthings.location.description",
+                        location.description(), "sensorthings.location.name", location.name()), null, null);
             default:
-                throw new IllegalArgumentException("Unknown GeoJSON object " + location.location.type());
+                throw new IllegalArgumentException("Unknown GeoJSON object " + location.location().type());
             };
         } else {
             f = null;
@@ -221,73 +223,75 @@ public class PollingRest {
     }
 
     private DatastreamUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds) {
-        String serviceName = sanitizeId(ds.name == null ? ds.id : ds.name);
-        Instant timestamp = ds.phenomenonTime == null ? null : ds.phenomenonTime.start;
+        String serviceName = sanitizeId(ds.name() == null ? ds.id() : ds.name());
+        Instant timestamp = ds.phenomenonTime() == null ? null : ds.phenomenonTime().start();
 
         Object observation;
         Map<String, Object> observationParameters;
-        if (ds.observations == null || ds.observations.isEmpty()) {
+        if (ds.observations() == null || ds.observations().isEmpty()) {
             observation = null;
             observationParameters = null;
         } else {
-            Observation o = ds.observations.get(0);
-            observation = o.result;
-            timestamp = o.phenomenonTime;
+            Observation o = ds.observations().get(0);
+            observation = o.result();
+            timestamp = o.phenomenonTime();
             observationParameters = new HashMap<>();
-            observationParameters.put("sensorthings.observation.id", String.valueOf(o.id));
-            observationParameters.put("sensorthings.observation.resultQuality", o.resultQuality);
-            if (o.parameters != null) {
-                o.parameters
+            observationParameters.put("sensorthings.observation.id", String.valueOf(o.id()));
+            observationParameters.put("sensorthings.observation.resultQuality", o.resultQuality());
+            if (o.parameters() != null) {
+                o.parameters()
                         .forEach((k, v) -> observationParameters.put("sensorthings.observation.parameters." + k, v));
             }
         }
 
         String unit;
         Map<String, Object> unitMetadata;
-        if (ds.unitOfMeasurement == null) {
+        if (ds.unitOfMeasurement() == null) {
             unit = null;
             unitMetadata = null;
         } else {
-            unit = ds.unitOfMeasurement.symbol;
-            unitMetadata = Map.of("sensorthings.unit.name", String.valueOf(ds.unitOfMeasurement.name),
-                    "sensorthings.unit.definition", String.valueOf(ds.unitOfMeasurement.definition));
+            unit = ds.unitOfMeasurement().symbol();
+            unitMetadata = Map.of("sensorthings.unit.name", String.valueOf(ds.unitOfMeasurement().name()),
+                    "sensorthings.unit.definition", String.valueOf(ds.unitOfMeasurement().definition()));
         }
 
         Object sensor;
         Map<String, Object> sensorMetadata;
-        if (ds.sensor == null) {
+        if (ds.sensor() == null) {
             sensor = null;
             sensorMetadata = null;
         } else {
-            sensor = Objects.toString(ds.sensor.id);
+            Sensor dsSensor = ds.sensor();
+            sensor = Objects.toString(dsSensor.id());
             sensorMetadata = new HashMap<>();
-            sensorMetadata.put("sensorthings.sensor.name", ds.sensor.name);
-            sensorMetadata.put("sensorthings.sensor.description", ds.sensor.description);
-            sensorMetadata.put("sensorthings.sensor.metadata", ds.sensor.metadata);
-            sensorMetadata.put("sensorthings.sensor.encodingType", ds.sensor.encodingType);
-            if (ds.sensor.properties != null) {
-                ds.sensor.properties.forEach((k, v) -> sensorMetadata.put("sensorthings.sensor.properties." + k, v));
+            sensorMetadata.put("sensorthings.sensor.name", ds.sensor().name());
+            sensorMetadata.put("sensorthings.sensor.description", ds.sensor().description());
+            sensorMetadata.put("sensorthings.sensor.metadata", ds.sensor().metadata());
+            sensorMetadata.put("sensorthings.sensor.encodingType", ds.sensor().encodingType());
+            if (ds.sensor().properties() != null) {
+                ds.sensor().properties().forEach((k, v) -> sensorMetadata.put("sensorthings.sensor.properties." + k, v));
             }
         }
 
         Object observedProperty;
         Map<String, Object> observedPropertyMetadata;
-        if (ds.observedProperty == null) {
+        if (ds.observedProperty() == null) {
             observedProperty = null;
             observedPropertyMetadata = null;
         } else {
-            observedProperty = ds.observedProperty.id;
+            ObservedProperty dsOp = ds.observedProperty();
+            observedProperty = dsOp.id();
             observedPropertyMetadata = new HashMap<>();
-            observedPropertyMetadata.put("sensorthings.observedProperty.name", ds.observedProperty.name);
-            observedPropertyMetadata.put("sensorthings.observedProperty.description", ds.observedProperty.description);
-            observedPropertyMetadata.put("sensorthings.observedProperty.definition", ds.observedProperty.definition);
-            if (ds.observedProperty.properties != null) {
-                ds.observedProperty.properties.forEach(
+            observedPropertyMetadata.put("sensorthings.observedProperty.name", ds.observedProperty().name());
+            observedPropertyMetadata.put("sensorthings.observedProperty.description", ds.observedProperty().description());
+            observedPropertyMetadata.put("sensorthings.observedProperty.definition", ds.observedProperty().definition());
+            if (ds.observedProperty().properties() != null) {
+                ds.observedProperty().properties().forEach(
                         (k, v) -> observedPropertyMetadata.put("sensorthings.observedProperty.properties." + k, v));
             }
         }
 
-        return new DatastreamUpdate(providerId, serviceName, ds.id, ds.name, ds.description, observation, timestamp,
+        return new DatastreamUpdate(providerId, serviceName, ds.id(), ds.name(), ds.description(), observation, timestamp,
                 observationParameters, unit, unitMetadata, sensor, sensorMetadata, observedProperty,
                 observedPropertyMetadata);
     }

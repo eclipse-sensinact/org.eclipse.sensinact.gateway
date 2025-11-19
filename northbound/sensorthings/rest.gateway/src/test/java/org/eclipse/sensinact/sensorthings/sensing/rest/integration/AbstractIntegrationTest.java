@@ -66,13 +66,17 @@ import jakarta.ws.rs.core.Application;
 public class AbstractIntegrationTest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class AnyIdDTO extends Id {
+    protected record AnyIdDTO(String selfLink, String id) implements Id {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    protected record SelfDTO(String selfLink) implements Self {
     }
 
     protected static final TypeReference<ResultList<AnyIdDTO>> RESULT_ANY = new TypeReference<>() {
     };
 
-    protected static final TypeReference<ResultList<Self>> RESULT_SELF = new TypeReference<>() {
+    protected static final TypeReference<ResultList<SelfDTO>> RESULT_SELF = new TypeReference<>() {
     };
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;

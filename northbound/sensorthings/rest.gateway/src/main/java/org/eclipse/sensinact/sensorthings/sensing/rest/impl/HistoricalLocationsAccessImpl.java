@@ -44,7 +44,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         try {
             Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                     getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
-            if(historicalLocation.isEmpty() || !historicalLocation.get().id.equals(id)) {
+            if(historicalLocation.isEmpty() || !historicalLocation.get().id().equals(id)) {
                 throw new NotFoundException();
             }
             return historicalLocation.get();
@@ -60,9 +60,9 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        ResultList<Location> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(LOCATIONS), providerSnapshot));
+        ResultList<Location> list = new ResultList<>(null, null, List.of(
+                DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(LOCATIONS), providerSnapshot)));
 
         return list;
     }
@@ -77,7 +77,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         Location loc = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(LOCATIONS), providerSnapshot);
 
-        if (!id2.equals(loc.id)) {
+        if (!id2.equals(loc.id())) {
             throw new NotFoundException();
         }
         return loc;
@@ -90,11 +90,9 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        ResultList<Thing> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(THINGS), providerSnapshot));
-
-        return list;
+        return new ResultList<>(null, null, List.of(
+                DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(THINGS), providerSnapshot)));
     }
 
     @Override
@@ -106,9 +104,9 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-            if (list.value.isEmpty())
-                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
+            if (list.value().isEmpty())
+                list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -129,7 +127,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
-        if (!t.id.equals(provider)) {
+        if (!t.id().equals(provider)) {
             throw new NotFoundException();
         }
         return t;
@@ -153,9 +151,9 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-            if (list.value.isEmpty())
-                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), filter,
-                        providerSnapshot).ifPresent(list.value::add);
+            if (list.value().isEmpty())
+                list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

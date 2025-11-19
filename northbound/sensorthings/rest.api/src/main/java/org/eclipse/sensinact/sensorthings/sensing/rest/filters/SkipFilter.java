@@ -40,16 +40,16 @@ public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilt
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         Integer skip = (Integer) requestContext.getProperty(SKIP_PROP);
-        if (skip == null) {
+        if (skip == null || skip == 0) {
             return;
         }
 
         Object entity = responseContext.getEntity();
         if (entity instanceof ResultList) {
-            @SuppressWarnings("unchecked")
-            ResultList<Self> resultList = (ResultList<Self>) entity;
-            int size = resultList.value.size();
-            resultList.value = resultList.value.subList(Math.min(skip, size), size);
+            ResultList<? extends Self> resultList = (ResultList<?>) entity;
+            int size = resultList.value().size();
+            responseContext.setEntity(new ResultList<>(resultList.count(), resultList.nextLink(),
+                    resultList.value().subList(Math.min(skip, size), size)));
         }
     }
 

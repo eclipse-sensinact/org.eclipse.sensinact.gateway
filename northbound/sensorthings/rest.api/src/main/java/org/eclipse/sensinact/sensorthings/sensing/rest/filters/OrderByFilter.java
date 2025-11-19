@@ -15,7 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 import static jakarta.ws.rs.Priorities.ENTITY_CODER;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -23,14 +23,20 @@ import java.util.List;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * Implements the $orderby query parameter
@@ -39,6 +45,13 @@ import jakarta.ws.rs.core.Response.Status;
 public class OrderByFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     private static final String ORDERBY_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.orderby";
+
+    @Context
+    Providers providers;
+
+    private ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
@@ -51,11 +64,11 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
 
         Object entity = responseContext.getEntity();
         if (entity instanceof ResultList) {
-            @SuppressWarnings("unchecked")
-            ResultList<Self> resultList = (ResultList<Self>) entity;
-            List<Self> sortedList = new ArrayList<>(resultList.value);
-            sortedList.sort(comparator);
-            resultList.value = List.copyOf(sortedList);
+            ResultList<? extends Self> resultList = (ResultList<?>) entity;
+            ResultList<? extends Self> newEntity = new ResultList<>(resultList.count(),
+                    resultList.nextLink(), resultList.value().stream()
+                    .sorted(comparator).toList());
+            responseContext.setEntity(newEntity);
         }
     }
 
@@ -110,8 +123,27 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
                 break;
             }
             try {
-                result = result.getClass().getField(s).get(result);
-            } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+                if(o instanceof Record) {
+                    RecordComponent[] components = o.getClass().getRecordComponents();
+                    RecordComponent component = Arrays.stream(components)
+                        .filter(rc -> rc.getName().equals(s))
+                        .findFirst().get();
+                    result = component.getAccessor().invoke(result);
+                } else if (o instanceof JsonNode jn) {
+                    if(jn.has(s)) {
+                        result = jn.get(s);
+                    } else {
+                        throw new IllegalArgumentException("No property " + s + " in object " + jn);
+                    }
+                } else {
+                    JsonNode jn = getMapper().convertValue(o, JsonNode.class);
+                    if(jn.has(s)) {
+                        result = jn.get(s);
+                    } else {
+                        throw new IllegalArgumentException("No property " + s + " in object " + jn);
+                    }
+                }
+            } catch (Exception e) {
                 throw new BadRequestException("Failed to order objects by " + Arrays.toString(path));
             }
         }

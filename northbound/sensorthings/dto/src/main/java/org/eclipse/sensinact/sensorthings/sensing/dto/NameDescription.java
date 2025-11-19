@@ -12,10 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
-public abstract class NameDescription extends Id {
+public interface NameDescription extends Id {
 
-    public String name;
+    public String name();
 
-    public String description;
+    public String description();
 
 }

@@ -16,15 +16,9 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Location extends NameDescription {
-
-    public String encodingType;
-
-    public GeoJsonObject location;
-
-    @JsonProperty("Things@iot.navigationLink")
-    public String thingsLink;
-
-    @JsonProperty("HistoricalLocations@iot.navigationLink")
-    public String historicalLocationsLink;
+public record Location(String selfLink, Object id, String name, String description,
+        String encodingType, GeoJsonObject location,
+        @JsonProperty("Things@iot.navigationLink") String thingsLink,
+        @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink)
+        implements NameDescription {
 }

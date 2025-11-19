@@ -45,17 +45,17 @@ class HistoryResourceHelper {
     static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ResourceSnapshot resourceSnapshot, ICriterion filter, int localResultLimit) {
-        ResultList<Observation> list = new ResultList<>();
-        list.value = new ArrayList<>();
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
+
         if (historyProvider == null) {
-            return list;
+            return new ResultList<>(null, null, List.of());
         }
 
         Integer maxResults = getMaxResult(application, localResultLimit);
         Map<String, Object> params = initParameter(resourceSnapshot);
         // Get count for the full dataset (for pagination metadata)
         Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
+        List<Observation> values = new ArrayList<>();
         int skip = 0;
 
         List<TimedValue<?>> timed;
@@ -70,33 +70,31 @@ class HistoryResourceHelper {
             if (count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
                 count -= (timed.size() - observationList.size());
             }
-            list.value.addAll(0, observationList);
+            values.addAll(0, observationList);
             if (timed.isEmpty()) {
                 break;
             }
             skip += timed.size();
             // Keep going until the list is as full as count, or it hits maxResults
-        } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
-        list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
-        return list;
+        } while ((count == null || values.size() < count) && values.size() < maxResults);
+        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ?
+                Integer.MAX_VALUE : count.intValue(), null, values);
     }
 
     @SuppressWarnings("unchecked")
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ProviderSnapshot provider, int localResultLimit) {
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = new ArrayList<>();
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
         if (historyProvider == null) {
-            return list;
+            return new ResultList<>(null, null, List.of());
         }
 
         Integer maxResults = getMaxResult(application, localResultLimit);
         Map<String, Object> params = initParameter(provider);
         // Get count for the full dataset (for pagination metadata)
         Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-
+        List<HistoricalLocation> values = new ArrayList<>();
         int skip = 0;
 
         List<TimedValue<?>> timed;
@@ -109,15 +107,15 @@ class HistoryResourceHelper {
             if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
                 count -= (timed.size() - historicalLocationList.size());
             }
-            list.value.addAll(0, historicalLocationList);
+            values.addAll(0, historicalLocationList);
             if (timed.isEmpty()) {
                 break;
             }
             skip += timed.size();
 
-        } while ((count == null || list.value.size() < count) && list.value.size() < maxResults);
-        list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
-        return list;
+        } while ((count == null || values.size() < count) && values.size() < maxResults);
+        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ?
+                Integer.MAX_VALUE : count.intValue(), null, values);
     }
 
     private static Integer getMaxResult(Application application, int localResultLimit) {

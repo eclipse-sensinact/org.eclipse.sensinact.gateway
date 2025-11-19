@@ -63,30 +63,30 @@ public class ValueTest extends AbstractIntegrationTest {
         // Check thing direct access
         Thing thing = utils.queryJson("/Things(" + PROVIDER + ")", Thing.class);
         assertNotNull(thing, "Thing not found");
-        assertEquals(PROVIDER, thing.id);
+        assertEquals(PROVIDER, thing.id());
 
         // Check sensor direct access
         final String sensorId = String.join("~", PROVIDER, svcName, rcName);
         Sensor sensor = utils.queryJson("/Sensors(" + sensorId + ")", Sensor.class);
         assertNotNull(sensor, "Sensor not found");
-        assertEquals(sensorId, sensor.id);
+        assertEquals(sensorId, sensor.id());
 
         // Get the data stream (should be a single one)
-        ResultList<Datastream> streams = utils.queryJson(sensor.datastreamsLink,
+        ResultList<Datastream> streams = utils.queryJson(sensor.datastreamsLink(),
                 new TypeReference<ResultList<Datastream>>() {
                 });
-        assertEquals(1, streams.value.size());
-        Datastream stream = streams.value.get(0);
+        assertEquals(1, streams.value().size());
+        Datastream stream = streams.value().get(0);
 
         // Get the observation
-        ResultList<Observation> observations = utils.queryJson(stream.observationsLink,
+        ResultList<Observation> observations = utils.queryJson(stream.observationsLink(),
                 new TypeReference<ResultList<Observation>>() {
                 });
-        assertEquals(1, observations.value.size());
-        Observation obs = observations.value.get(0);
+        assertEquals(1, observations.value().size());
+        Observation obs = observations.value().get(0);
 
-        assertEquals(value, obs.result);
-        Instant firstResultTime = obs.resultTime;
+        assertEquals(value, obs.result());
+        Instant firstResultTime = obs.resultTime();
         assertFalse(valueSetInstant.isAfter(firstResultTime));
 
         // Update the value
@@ -94,14 +94,14 @@ public class ValueTest extends AbstractIntegrationTest {
         Instant valueUpdateInstant = Instant.now();
         session.setResourceValue(PROVIDER, svcName, rcName, newValue);
 
-        observations = utils.queryJson(stream.observationsLink, new TypeReference<ResultList<Observation>>() {
+        observations = utils.queryJson(stream.observationsLink(), new TypeReference<ResultList<Observation>>() {
         });
-        assertEquals(1, observations.value.size());
-        obs = observations.value.get(0);
+        assertEquals(1, observations.value().size());
+        obs = observations.value().get(0);
 
-        assertEquals(newValue, obs.result);
+        assertEquals(newValue, obs.result());
         assertTrue(valueUpdateInstant.isAfter(firstResultTime));
-        assertFalse(valueUpdateInstant.isAfter(obs.resultTime));
+        assertFalse(valueUpdateInstant.isAfter(obs.resultTime()));
     }
 
     @Test
@@ -116,9 +116,9 @@ public class ValueTest extends AbstractIntegrationTest {
         Datastream ds = utils.queryJson(
                 String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", PROVIDER, svcName, rcName)),
                 Datastream.class);
-        assertNull(ds.unitOfMeasurement.name);
-        assertNull(ds.unitOfMeasurement.symbol);
-        assertNull(ds.unitOfMeasurement.definition);
+        assertNull(ds.unitOfMeasurement().name());
+        assertNull(ds.unitOfMeasurement().symbol());
+        assertNull(ds.unitOfMeasurement().definition());
 
         // Set its unit
         final String unitName = "degree Celsius";
@@ -131,9 +131,9 @@ public class ValueTest extends AbstractIntegrationTest {
         ds = utils.queryJson(
                 String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", PROVIDER, svcName, rcName)),
                 Datastream.class);
-        assertEquals(unitName, ds.unitOfMeasurement.name);
-        assertEquals(unitSymbol, ds.unitOfMeasurement.symbol);
-        assertEquals(unitDefinition, ds.unitOfMeasurement.definition);
+        assertEquals(unitName, ds.unitOfMeasurement().name());
+        assertEquals(unitSymbol, ds.unitOfMeasurement().symbol());
+        assertEquals(unitDefinition, ds.unitOfMeasurement().definition());
     }
 
     @Test
@@ -147,31 +147,31 @@ public class ValueTest extends AbstractIntegrationTest {
         // Check thing direct access
         Thing thing = utils.queryJson("/Things(" + id + ")", Thing.class);
         assertNotNull(thing, "Thing not found");
-        assertEquals(id, thing.id);
-        assertEquals("Foobar", thing.description);
+        assertEquals(id, thing.id());
+        assertEquals("Foobar", thing.description());
 
         // Check sensor direct access
         final String sensorId = String.join("~", id, "temp", "v1");
         Sensor sensor = utils.queryJson("/Sensors(" + sensorId + ")", Sensor.class);
         assertNotNull(sensor, "Sensor not found");
-        assertEquals(sensorId, sensor.id);
+        assertEquals(sensorId, sensor.id());
 
         // Get the data stream (should be a single one)
-        ResultList<Datastream> streams = utils.queryJson(sensor.datastreamsLink,
+        ResultList<Datastream> streams = utils.queryJson(sensor.datastreamsLink(),
                 new TypeReference<ResultList<Datastream>>() {
                 });
-        assertEquals(1, streams.value.size());
-        Datastream stream = streams.value.get(0);
+        assertEquals(1, streams.value().size());
+        Datastream stream = streams.value().get(0);
 
         // Get the observation
-        ResultList<Observation> observations = utils.queryJson(stream.observationsLink,
+        ResultList<Observation> observations = utils.queryJson(stream.observationsLink(),
                 new TypeReference<ResultList<Observation>>() {
                 });
-        assertEquals(1, observations.value.size());
-        Observation obs = observations.value.get(0);
+        assertEquals(1, observations.value().size());
+        Observation obs = observations.value().get(0);
 
-        assertEquals(value, obs.result);
-        Instant firstResultTime = obs.resultTime;
+        assertEquals(value, obs.result());
+        Instant firstResultTime = obs.resultTime();
         assertFalse(valueSetInstant.isAfter(firstResultTime));
 
         // Update the value
@@ -179,14 +179,14 @@ public class ValueTest extends AbstractIntegrationTest {
         Instant valueUpdateInstant = Instant.now();
         createResourceEMF(id, newValue);
 
-        observations = utils.queryJson(stream.observationsLink, new TypeReference<ResultList<Observation>>() {
+        observations = utils.queryJson(stream.observationsLink(), new TypeReference<ResultList<Observation>>() {
         });
-        assertEquals(1, observations.value.size());
-        obs = observations.value.get(0);
+        assertEquals(1, observations.value().size());
+        obs = observations.value().get(0);
 
-        assertEquals(newValue, obs.result);
+        assertEquals(newValue, obs.result());
         assertTrue(valueUpdateInstant.isAfter(firstResultTime));
-        assertFalse(valueUpdateInstant.isAfter(obs.resultTime));
+        assertFalse(valueUpdateInstant.isAfter(obs.resultTime()));
     }
 
     protected TestSensor createResourceEMF(String provider, String value) {

@@ -39,7 +39,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
 
-        if (!id.equals(o.id)) {
+        if (!id.equals(o.id())) {
             throw new NotFoundException();
         }
 
@@ -48,9 +48,8 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
 
     @Override
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
-        ResultList<Datastream> list = new ResultList<>();
-        list.value = List.of(getObservedPropertyDatastream(id, id));
-        return list;
+        return new ResultList<>(null, null, List.of(
+                getObservedPropertyDatastream(id, id)));
     }
 
     @Override

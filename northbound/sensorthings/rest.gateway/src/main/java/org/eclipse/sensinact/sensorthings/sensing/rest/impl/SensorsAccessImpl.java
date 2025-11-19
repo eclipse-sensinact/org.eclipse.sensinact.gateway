@@ -40,8 +40,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
 
     @Override
     public ResultList<Datastream> getSensorDatastreams(String id) {
-        ResultList<Datastream> list = new ResultList<>();
-        list.value = List.of(getSensorDatastream(id, id));
+        ResultList<Datastream> list = new ResultList<>(null, null,
+                List.of(getSensorDatastream(id, id)));
         return list;
     }
 
@@ -75,7 +75,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), resource);
 
-        if (!id.equals(o.id)) {
+        if (!id.equals(o.id())) {
             throw new NotFoundException();
         }
 
@@ -97,7 +97,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
 
         Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.THINGS), providerSnapshot);
-        if (!provider.equals(t.id)) {
+        if (!provider.equals(t.id())) {
             throw new NotFoundException();
         }
         return t;

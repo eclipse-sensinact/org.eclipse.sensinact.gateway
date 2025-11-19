@@ -40,20 +40,15 @@ public class RefFilterImpl implements WriterInterceptor {
         Object entity = context.getEntity();
 
         if(entity instanceof ResultList) {
-            @SuppressWarnings("unchecked")
-            ResultList<? extends Self> resultList = (ResultList<? extends Self>) entity;
-            ResultList<Self> newEntity = new ResultList<>();
-            newEntity.value = resultList.value.stream()
-                    .map(r -> {Self s = new Self(); s.selfLink = r.selfLink; return s;})
-                    .collect(toList());
-            newEntity.count = resultList.count;
-            newEntity.nextLink = resultList.nextLink;
+            ResultList<? extends Self> resultList = (ResultList<?>) entity;
+            ResultList<Self> newEntity = new ResultList<>(resultList.count(),
+                    resultList.nextLink(), resultList.value().stream()
+                    .map(r -> new SelfOnly(r.selfLink()))
+                    .collect(toList()));
             context.setEntity(newEntity);
         } else if (entity instanceof Self) {
             Self self = (Self) entity;
-            Self newEntity = new Self();
-            newEntity.selfLink = self.selfLink;
-            context.setEntity(newEntity);
+            context.setEntity(new SelfOnly(self.selfLink()));
         } else if(entity instanceof ObjectNode) {
             ObjectNode node = (ObjectNode) entity;
             if(!node.isArray()) {
@@ -71,4 +66,6 @@ public class RefFilterImpl implements WriterInterceptor {
 
         context.proceed();
     }
+
+    private record SelfOnly(String selfLink) implements Self {}
 }

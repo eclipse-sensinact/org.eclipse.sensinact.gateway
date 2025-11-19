@@ -69,7 +69,7 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
     }
 
     private String toStringId(Id context) {
-        return String.valueOf(context.id);
+        return String.valueOf(context.id());
     }
 
     public boolean isExpanded(String pathSegment) {
