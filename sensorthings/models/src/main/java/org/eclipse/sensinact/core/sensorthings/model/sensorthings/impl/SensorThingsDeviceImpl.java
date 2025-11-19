@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl;
 
 import org.eclipse.emf.common.notify.Notification;
 
@@ -19,11 +19,11 @@ import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
-import org.eclipse.sensinact.model.core.provider.impl.DynamicProviderImpl;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage;
 
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage;
+import org.eclipse.sensinact.model.core.provider.impl.DynamicProviderImpl;
 
 /**
  * <!-- begin-user-doc -->
@@ -33,7 +33,7 @@ import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.Sensorth
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl#getThing <em>Thing</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl#getThing <em>Thing</em>}</li>
  * </ul>
  *
  * @generated

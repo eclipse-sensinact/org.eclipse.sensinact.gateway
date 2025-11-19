@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings;
 
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -35,13 +35,13 @@ import org.osgi.annotation.versioning.ProviderType;
  *   <li>and each data type</li>
  * </ul>
  * <!-- end-user-doc -->
- * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsFactory
+ * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsFactory
  * @model kind="package"
  *        annotation="http://www.eclipse.org/OCL/Import ecore='http://www.eclipse.org/emf/2002/Ecore'"
  * @generated
  */
 @ProviderType
-@EPackage(uri = SensorthingsPackage.eNS_URI, genModel = "/sensorthings.genmodel", genModelSourceLocations = {"target/generated-resources/model/sensorthings.genmodel","sensing.rest/target/generated-resources/model/sensorthings.genmodel"}, ecore="/sensorthings.ecore", ecoreSourceLocations="/target/generated-resources/model/sensorthings.ecore")
+@EPackage(uri = SensorthingsPackage.eNS_URI, genModel = "/model/sensorthings.genmodel", genModelSourceLocations = {"src/main/resources/model/sensorthings.genmodel","sensorthings/src/main/resources/model/sensorthings.genmodel"}, ecore="/model/sensorthings.ecore", ecoreSourceLocations="/src/main/resources/model/sensorthings.ecore")
 public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 	/**
 	 * The package name.
@@ -73,14 +73,14 @@ public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	SensorthingsPackage eINSTANCE = org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl.init();
+	SensorthingsPackage eINSTANCE = org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl.init();
 
 	/**
-	 * The meta object id for the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl <em>Sensor Things Device</em>}' class.
+	 * The meta object id for the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl <em>Sensor Things Device</em>}' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsDevice()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsDevice()
 	 * @generated
 	 */
 	int SENSOR_THINGS_DEVICE = 0;
@@ -167,11 +167,11 @@ public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 	int SENSOR_THINGS_DEVICE_OPERATION_COUNT = ProviderPackage.DYNAMIC_PROVIDER_OPERATION_COUNT + 0;
 
 	/**
-	 * The meta object id for the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl <em>Sensor Things Service</em>}' class.
+	 * The meta object id for the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl <em>Sensor Things Service</em>}' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsService()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsService()
 	 * @generated
 	 */
 	int SENSOR_THINGS_SERVICE = 1;
@@ -231,11 +231,11 @@ public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 	int SENSOR_THINGS_SERVICE_OPERATION_COUNT = ProviderPackage.SERVICE_OPERATION_COUNT + 0;
 
 	/**
-	 * The meta object id for the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl <em>Data Stream Service</em>}' class.
+	 * The meta object id for the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl <em>Data Stream Service</em>}' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getDataStreamService()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getDataStreamService()
 	 * @generated
 	 */
 	int DATA_STREAM_SERVICE = 2;
@@ -341,140 +341,140 @@ public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 
 
 	/**
-	 * Returns the meta object for class '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice <em>Sensor Things Device</em>}'.
+	 * Returns the meta object for class '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice <em>Sensor Things Device</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for class '<em>Sensor Things Device</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice
 	 * @generated
 	 */
 	EClass getSensorThingsDevice();
 
 	/**
-	 * Returns the meta object for the reference '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice#getThing <em>Thing</em>}'.
+	 * Returns the meta object for the reference '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice#getThing <em>Thing</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the reference '<em>Thing</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice#getThing()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice#getThing()
 	 * @see #getSensorThingsDevice()
 	 * @generated
 	 */
 	EReference getSensorThingsDevice_Thing();
 
 	/**
-	 * Returns the meta object for class '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService <em>Sensor Things Service</em>}'.
+	 * Returns the meta object for class '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService <em>Sensor Things Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for class '<em>Sensor Things Service</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService
 	 * @generated
 	 */
 	EClass getSensorThingsService();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService#getId <em>Id</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getId <em>Id</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Id</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService#getId()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getId()
 	 * @see #getSensorThingsService()
 	 * @generated
 	 */
 	EAttribute getSensorThingsService_Id();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService#getDescription <em>Description</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getDescription <em>Description</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Description</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService#getDescription()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getDescription()
 	 * @see #getSensorThingsService()
 	 * @generated
 	 */
 	EAttribute getSensorThingsService_Description();
 
 	/**
-	 * Returns the meta object for class '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService <em>Data Stream Service</em>}'.
+	 * Returns the meta object for class '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService <em>Data Stream Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for class '<em>Data Stream Service</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService
 	 * @generated
 	 */
 	EClass getDataStreamService();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId <em>Sensor Things Id</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId <em>Sensor Things Id</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Sensor Things Id</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId()
 	 * @see #getDataStreamService()
 	 * @generated
 	 */
 	EAttribute getDataStreamService_SensorThingsId();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getName <em>Name</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getName <em>Name</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Name</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getName()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getName()
 	 * @see #getDataStreamService()
 	 * @generated
 	 */
 	EAttribute getDataStreamService_Name();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getDescription <em>Description</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getDescription <em>Description</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Description</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getDescription()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getDescription()
 	 * @see #getDataStreamService()
 	 * @generated
 	 */
 	EAttribute getDataStreamService_Description();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getLatestObservation <em>Latest Observation</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getLatestObservation <em>Latest Observation</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Latest Observation</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getLatestObservation()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getLatestObservation()
 	 * @see #getDataStreamService()
 	 * @generated
 	 */
 	EAttribute getDataStreamService_LatestObservation();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getUnit <em>Unit</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getUnit <em>Unit</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Unit</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getUnit()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getUnit()
 	 * @see #getDataStreamService()
 	 * @generated
 	 */
 	EAttribute getDataStreamService_Unit();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensor <em>Sensor</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensor <em>Sensor</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Sensor</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensor()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensor()
 	 * @see #getDataStreamService()
 	 * @generated
 	 */
 	EAttribute getDataStreamService_Sensor();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getObservedProperty <em>Observed Property</em>}'.
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getObservedProperty <em>Observed Property</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the meta object for the attribute '<em>Observed Property</em>'.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getObservedProperty()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getObservedProperty()
 	 * @see #getDataStreamService()
 	 * @generated
 	 */
@@ -504,11 +504,11 @@ public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 	 */
 	interface Literals {
 		/**
-		 * The meta object literal for the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl <em>Sensor Things Device</em>}' class.
+		 * The meta object literal for the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl <em>Sensor Things Device</em>}' class.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
-		 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl
-		 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsDevice()
+		 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsDeviceImpl
+		 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsDevice()
 		 * @generated
 		 */
 		EClass SENSOR_THINGS_DEVICE = eINSTANCE.getSensorThingsDevice();
@@ -522,11 +522,11 @@ public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 		EReference SENSOR_THINGS_DEVICE__THING = eINSTANCE.getSensorThingsDevice_Thing();
 
 		/**
-		 * The meta object literal for the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl <em>Sensor Things Service</em>}' class.
+		 * The meta object literal for the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl <em>Sensor Things Service</em>}' class.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
-		 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl
-		 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsService()
+		 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl
+		 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getSensorThingsService()
 		 * @generated
 		 */
 		EClass SENSOR_THINGS_SERVICE = eINSTANCE.getSensorThingsService();
@@ -548,11 +548,11 @@ public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 		EAttribute SENSOR_THINGS_SERVICE__DESCRIPTION = eINSTANCE.getSensorThingsService_Description();
 
 		/**
-		 * The meta object literal for the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl <em>Data Stream Service</em>}' class.
+		 * The meta object literal for the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl <em>Data Stream Service</em>}' class.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
-		 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl
-		 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getDataStreamService()
+		 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl
+		 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl#getDataStreamService()
 		 * @generated
 		 */
 		EClass DATA_STREAM_SERVICE = eINSTANCE.getDataStreamService();

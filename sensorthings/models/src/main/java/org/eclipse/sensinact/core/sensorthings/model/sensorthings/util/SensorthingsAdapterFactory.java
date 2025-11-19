@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.util;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings.util;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notifier;
@@ -19,18 +19,18 @@ import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
 
 import org.eclipse.emf.ecore.EObject;
 
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.*;
+
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.Service;
-
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.*;
 
 /**
  * <!-- begin-user-doc -->
  * The <b>Adapter Factory</b> for the model.
  * It provides an adapter <code>createXXX</code> method for each class of the model.
  * <!-- end-user-doc -->
- * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage
+ * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage
  * @generated
  */
 public class SensorthingsAdapterFactory extends AdapterFactoryImpl {
@@ -126,13 +126,13 @@ public class SensorthingsAdapterFactory extends AdapterFactoryImpl {
 
 
 	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice <em>Sensor Things Device</em>}'.
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice <em>Sensor Things Device</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice
 	 * @generated
 	 */
 	public Adapter createSensorThingsDeviceAdapter() {
@@ -140,13 +140,13 @@ public class SensorthingsAdapterFactory extends AdapterFactoryImpl {
 	}
 
 	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService <em>Sensor Things Service</em>}'.
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService <em>Sensor Things Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService
 	 * @generated
 	 */
 	public Adapter createSensorThingsServiceAdapter() {
@@ -154,13 +154,13 @@ public class SensorthingsAdapterFactory extends AdapterFactoryImpl {
 	}
 
 	/**
-	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService <em>Data Stream Service</em>}'.
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService <em>Data Stream Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService
 	 * @generated
 	 */
 	public Adapter createDataStreamServiceAdapter() {

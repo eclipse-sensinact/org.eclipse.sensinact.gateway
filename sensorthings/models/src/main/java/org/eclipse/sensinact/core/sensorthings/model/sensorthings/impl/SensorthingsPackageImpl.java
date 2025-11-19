@@ -10,22 +10,23 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
 
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsFactory;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage;
 
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsDevice;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorThingsService;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsFactory;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 
 /**
  * <!-- begin-user-doc -->
@@ -66,7 +67,7 @@ public class SensorthingsPackageImpl extends EPackageImpl implements Sensorthing
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see org.eclipse.emf.ecore.EPackage.Registry
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#eNS_URI
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#eNS_URI
 	 * @see #init()
 	 * @generated
 	 */
@@ -103,6 +104,7 @@ public class SensorthingsPackageImpl extends EPackageImpl implements Sensorthing
 
 		// Initialize simple dependencies
 		ProviderPackage.eINSTANCE.eClass();
+		EcorePackage.eINSTANCE.eClass();
 
 		// Create package meta-data objects
 		theSensorthingsPackage.createPackageContents();

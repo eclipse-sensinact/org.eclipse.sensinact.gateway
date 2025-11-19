@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -20,7 +20,7 @@ import org.eclipse.emf.ecore.impl.EFactoryImpl;
 
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.*;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.*;
 
 /**
  * <!-- begin-user-doc -->

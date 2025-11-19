@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl;
 
 import org.eclipse.emf.common.notify.Notification;
 
@@ -18,10 +18,10 @@ import org.eclipse.emf.ecore.EClass;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
-import org.eclipse.sensinact.model.core.provider.impl.ServiceImpl;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService;
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage;
 
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage;
+import org.eclipse.sensinact.model.core.provider.impl.ServiceImpl;
 
 /**
  * <!-- begin-user-doc -->
@@ -31,13 +31,13 @@ import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.Sensorth
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getSensorThingsId <em>Sensor Things Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getDescription <em>Description</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getLatestObservation <em>Latest Observation</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getUnit <em>Unit</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getSensor <em>Sensor</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getObservedProperty <em>Observed Property</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getSensorThingsId <em>Sensor Things Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getName <em>Name</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getDescription <em>Description</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getLatestObservation <em>Latest Observation</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getUnit <em>Unit</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getSensor <em>Sensor</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.DataStreamServiceImpl#getObservedProperty <em>Observed Property</em>}</li>
  * </ul>
  *
  * @generated

@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings;
 
 import org.eclipse.sensinact.model.core.provider.Service;
 
@@ -25,16 +25,16 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId <em>Sensor Things Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getDescription <em>Description</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getLatestObservation <em>Latest Observation</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getUnit <em>Unit</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensor <em>Sensor</em>}</li>
- *   <li>{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getObservedProperty <em>Observed Property</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId <em>Sensor Things Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getName <em>Name</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getDescription <em>Description</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getLatestObservation <em>Latest Observation</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getUnit <em>Unit</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensor <em>Sensor</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getObservedProperty <em>Observed Property</em>}</li>
  * </ul>
  *
- * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService()
+ * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService()
  * @model
  * @generated
  */
@@ -46,14 +46,14 @@ public interface DataStreamService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Sensor Things Id</em>' attribute.
 	 * @see #setSensorThingsId(Object)
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_SensorThingsId()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_SensorThingsId()
 	 * @model
 	 * @generated
 	 */
 	Object getSensorThingsId();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId <em>Sensor Things Id</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensorThingsId <em>Sensor Things Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Sensor Things Id</em>' attribute.
@@ -68,14 +68,14 @@ public interface DataStreamService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Name</em>' attribute.
 	 * @see #setName(String)
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Name()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Name()
 	 * @model
 	 * @generated
 	 */
 	String getName();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getName <em>Name</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getName <em>Name</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Name</em>' attribute.
@@ -90,14 +90,14 @@ public interface DataStreamService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Description</em>' attribute.
 	 * @see #setDescription(String)
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Description()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Description()
 	 * @model
 	 * @generated
 	 */
 	String getDescription();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getDescription <em>Description</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getDescription <em>Description</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Description</em>' attribute.
@@ -112,14 +112,14 @@ public interface DataStreamService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Latest Observation</em>' attribute.
 	 * @see #setLatestObservation(Object)
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_LatestObservation()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_LatestObservation()
 	 * @model
 	 * @generated
 	 */
 	Object getLatestObservation();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getLatestObservation <em>Latest Observation</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getLatestObservation <em>Latest Observation</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Latest Observation</em>' attribute.
@@ -134,14 +134,14 @@ public interface DataStreamService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Unit</em>' attribute.
 	 * @see #setUnit(String)
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Unit()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Unit()
 	 * @model
 	 * @generated
 	 */
 	String getUnit();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getUnit <em>Unit</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getUnit <em>Unit</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Unit</em>' attribute.
@@ -156,14 +156,14 @@ public interface DataStreamService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Sensor</em>' attribute.
 	 * @see #setSensor(String)
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Sensor()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_Sensor()
 	 * @model
 	 * @generated
 	 */
 	String getSensor();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getSensor <em>Sensor</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getSensor <em>Sensor</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Sensor</em>' attribute.
@@ -178,14 +178,14 @@ public interface DataStreamService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Observed Property</em>' attribute.
 	 * @see #setObservedProperty(String)
-	 * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_ObservedProperty()
+	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getDataStreamService_ObservedProperty()
 	 * @model
 	 * @generated
 	 */
 	String getObservedProperty();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.DataStreamService#getObservedProperty <em>Observed Property</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService#getObservedProperty <em>Observed Property</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Observed Property</em>' attribute.

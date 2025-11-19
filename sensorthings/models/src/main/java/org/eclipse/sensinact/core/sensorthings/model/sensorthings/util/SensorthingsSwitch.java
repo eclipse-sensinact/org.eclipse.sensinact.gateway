@@ -10,18 +10,18 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.util;
+package org.eclipse.sensinact.core.sensorthings.model.sensorthings.util;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 
 import org.eclipse.emf.ecore.util.Switch;
 
+import org.eclipse.sensinact.core.sensorthings.model.sensorthings.*;
+
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.Service;
-
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.*;
 
 /**
  * <!-- begin-user-doc -->
@@ -33,7 +33,7 @@ import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.*;
  * until a non-null result is returned,
  * which is the result of the switch.
  * <!-- end-user-doc -->
- * @see org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage
+ * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage
  * @generated
  */
 public class SensorthingsSwitch<T> extends Switch<T> {
