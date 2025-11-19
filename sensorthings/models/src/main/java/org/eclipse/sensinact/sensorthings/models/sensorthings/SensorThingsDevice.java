@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings;
+package org.eclipse.sensinact.sensorthings.models.sensorthings;
 
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 
@@ -25,10 +25,10 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice#getThing <em>Thing</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsDevice#getThing <em>Thing</em>}</li>
  * </ul>
  *
- * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getSensorThingsDevice()
+ * @see org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage#getSensorThingsDevice()
  * @model
  * @generated
  */
@@ -40,14 +40,14 @@ public interface SensorThingsDevice extends DynamicProvider {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Thing</em>' reference.
 	 * @see #setThing(SensorThingsService)
-	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getSensorThingsDevice_Thing()
+	 * @see org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage#getSensorThingsDevice_Thing()
 	 * @model
 	 * @generated
 	 */
 	SensorThingsService getThing();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice#getThing <em>Thing</em>}' reference.
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsDevice#getThing <em>Thing</em>}' reference.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Thing</em>' reference.

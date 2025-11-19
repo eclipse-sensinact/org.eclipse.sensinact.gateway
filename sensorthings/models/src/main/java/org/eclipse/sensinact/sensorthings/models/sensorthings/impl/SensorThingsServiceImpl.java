@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl;
+package org.eclipse.sensinact.sensorthings.models.sensorthings.impl;
 
 import org.eclipse.emf.common.notify.Notification;
 
@@ -18,10 +18,10 @@ import org.eclipse.emf.ecore.EClass;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService;
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage;
-
 import org.eclipse.sensinact.model.core.provider.impl.ServiceImpl;
+
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsService;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage;
 
 /**
  * <!-- begin-user-doc -->
@@ -31,8 +31,8 @@ import org.eclipse.sensinact.model.core.provider.impl.ServiceImpl;
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl#getId <em>Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorThingsServiceImpl#getDescription <em>Description</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.sensorthings.impl.SensorThingsServiceImpl#getId <em>Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.sensorthings.impl.SensorThingsServiceImpl#getDescription <em>Description</em>}</li>
  * </ul>
  *
  * @generated

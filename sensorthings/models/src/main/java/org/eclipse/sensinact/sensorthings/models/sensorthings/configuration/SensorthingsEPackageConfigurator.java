@@ -10,12 +10,12 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings.configuration;
+package org.eclipse.sensinact.sensorthings.models.sensorthings.configuration;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage;
 
 import org.gecko.emf.osgi.configurator.EPackageConfigurator;
 

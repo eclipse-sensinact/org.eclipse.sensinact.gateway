@@ -6,6 +6,7 @@
     <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
     <artifactId>sensorthings</artifactId>
     <version>${revision}${changelist}</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>models</artifactId>
   <name>SensiNact Sensorthings :: Models</name>

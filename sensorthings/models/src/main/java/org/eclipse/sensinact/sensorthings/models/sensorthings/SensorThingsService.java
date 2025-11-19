@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings;
+package org.eclipse.sensinact.sensorthings.models.sensorthings;
 
 import org.eclipse.sensinact.model.core.provider.Service;
 
@@ -25,11 +25,11 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getId <em>Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getDescription <em>Description</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsService#getId <em>Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsService#getDescription <em>Description</em>}</li>
  * </ul>
  *
- * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getSensorThingsService()
+ * @see org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage#getSensorThingsService()
  * @model
  * @generated
  */
@@ -41,14 +41,14 @@ public interface SensorThingsService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Id</em>' attribute.
 	 * @see #setId(Object)
-	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getSensorThingsService_Id()
+	 * @see org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage#getSensorThingsService_Id()
 	 * @model
 	 * @generated
 	 */
 	Object getId();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getId <em>Id</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsService#getId <em>Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Id</em>' attribute.
@@ -63,14 +63,14 @@ public interface SensorThingsService extends Service {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Description</em>' attribute.
 	 * @see #setDescription(String)
-	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#getSensorThingsService_Description()
+	 * @see org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage#getSensorThingsService_Description()
 	 * @model
 	 * @generated
 	 */
 	String getDescription();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService#getDescription <em>Description</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsService#getDescription <em>Description</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @param value the new value of the '<em>Description</em>' attribute.

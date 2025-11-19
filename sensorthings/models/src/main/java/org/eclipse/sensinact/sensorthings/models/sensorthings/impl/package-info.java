@@ -12,4 +12,4 @@
  */
 @org.osgi.annotation.bundle.Export
 @org.osgi.annotation.versioning.Version("1.0")
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl;
+package org.eclipse.sensinact.sensorthings.models.sensorthings.impl;

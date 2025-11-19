@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings;
+package org.eclipse.sensinact.sensorthings.models.sensorthings;
 
 import org.eclipse.emf.ecore.EFactory;
 
@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The <b>Factory</b> for the model.
  * It provides a create method for each non-abstract class of the model.
  * <!-- end-user-doc -->
- * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage
+ * @see org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage
  * @generated
  */
 @ProviderType
@@ -32,7 +32,7 @@ public interface SensorthingsFactory extends EFactory {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	SensorthingsFactory eINSTANCE = org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsFactoryImpl.init();
+	SensorthingsFactory eINSTANCE = org.eclipse.sensinact.sensorthings.models.sensorthings.impl.SensorthingsFactoryImpl.init();
 
 	/**
 	 * Returns a new object of class '<em>Sensor Things Device</em>'.

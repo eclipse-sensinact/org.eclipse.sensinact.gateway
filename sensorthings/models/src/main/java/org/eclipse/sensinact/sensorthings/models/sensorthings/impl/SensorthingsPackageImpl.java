@@ -10,7 +10,7 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl;
+package org.eclipse.sensinact.sensorthings.models.sensorthings.impl;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -20,13 +20,13 @@ import org.eclipse.emf.ecore.EcorePackage;
 
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.DataStreamService;
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsDevice;
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorThingsService;
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsFactory;
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage;
-
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+
+import org.eclipse.sensinact.sensorthings.models.sensorthings.DataStreamService;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsDevice;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorThingsService;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsFactory;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage;
 
 /**
  * <!-- begin-user-doc -->
@@ -67,7 +67,7 @@ public class SensorthingsPackageImpl extends EPackageImpl implements Sensorthing
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see org.eclipse.emf.ecore.EPackage.Registry
-	 * @see org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage#eNS_URI
+	 * @see org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage#eNS_URI
 	 * @see #init()
 	 * @generated
 	 */

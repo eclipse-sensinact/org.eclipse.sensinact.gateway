@@ -16,8 +16,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
 import static org.eclipse.sensinact.core.annotation.dto.MapAction.USE_KEYS_AS_FIELDS;
 import static org.eclipse.sensinact.core.annotation.dto.NullAction.UPDATE_IF_PRESENT;
-import static org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage.Literals.DATA_STREAM_SERVICE;
-import static org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage.Literals.SENSOR_THINGS_DEVICE;
+import static org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage.Literals.DATA_STREAM_SERVICE;
+import static org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage.Literals.SENSOR_THINGS_DEVICE;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -52,8 +52,9 @@ import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.GeometryCollection;
-import org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.dto.ExpandedDataStream;
 import org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.dto.ExpandedThing;
+import org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.dto.ExpandedDataStream;
+
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;

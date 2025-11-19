@@ -10,17 +10,17 @@
  * Contributors:
  *   Kentyou - initial API and implementation 
  */
-package org.eclipse.sensinact.core.sensorthings.model.sensorthings.configuration;
+package org.eclipse.sensinact.sensorthings.models.sensorthings.configuration;
 
 import java.util.Hashtable;
 
 import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EPackage;
 
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsFactory;
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsFactory;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage;
 
-import org.eclipse.sensinact.core.sensorthings.model.sensorthings.impl.SensorthingsPackageImpl;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.impl.SensorthingsPackageImpl;
 
 import org.gecko.emf.osgi.configurator.EPackageConfigurator;
 
@@ -41,10 +41,10 @@ import org.osgi.service.condition.Condition;
  * @generated
  */
 @Component(name = "SensorthingsConfigurator")
-@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.eclipse.sensinact.core.sensorthings.model.sensorthings.util.SensorthingsResourceFactoryImpl, org.eclipse.emf.ecore.resource.Resource$Factory\"" , "uses:=\"org.eclipse.emf.ecore.resource,org.eclipse.sensinact.core.sensorthings.model.sensorthings.util\"" })
-@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsFactory, org.eclipse.emf.ecore.EFactory\"" , "uses:=\"org.eclipse.emf.ecore,org.eclipse.sensinact.core.sensorthings.model.sensorthings\"" })
-@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.eclipse.sensinact.core.sensorthings.model.sensorthings.SensorthingsPackage, org.eclipse.emf.ecore.EPackage\"" , "uses:=\"org.eclipse.emf.ecore,org.eclipse.sensinact.core.sensorthings.model.sensorthings\"" })
-@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.gecko.emf.osgi.configurator.EPackageConfigurator\"" , "uses:=\"org.eclipse.emf.ecore,org.eclipse.sensinact.core.sensorthings.model.sensorthings\"" })
+@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.eclipse.sensinact.sensorthings.models.sensorthings.util.SensorthingsResourceFactoryImpl, org.eclipse.emf.ecore.resource.Resource$Factory\"" , "uses:=\"org.eclipse.emf.ecore.resource,org.eclipse.sensinact.sensorthings.models.sensorthings.util\"" })
+@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsFactory, org.eclipse.emf.ecore.EFactory\"" , "uses:=\"org.eclipse.emf.ecore,org.eclipse.sensinact.sensorthings.models.sensorthings\"" })
+@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage, org.eclipse.emf.ecore.EPackage\"" , "uses:=\"org.eclipse.emf.ecore,org.eclipse.sensinact.sensorthings.models.sensorthings\"" })
+@Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.gecko.emf.osgi.configurator.EPackageConfigurator\"" , "uses:=\"org.eclipse.emf.ecore,org.eclipse.sensinact.sensorthings.models.sensorthings\"" })
 @Capability( namespace = "osgi.service", attribute = { "objectClass:List<String>=\"org.osgi.service.condition.Condition\"" , "uses:=org.osgi.service.condition" })
 public class SensorthingsConfigurationComponent {
 	
