@@ -11,7 +11,7 @@
 *   Data In Motion - initial API and implementation
 *   Kentyou - fixes and updates to start basic testing
 **********************************************************************/
-package org.eclipse.sensinact.core.model.nexus.impl;
+package org.eclipse.sensinact.core.model.nexus;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1130,5 +1130,181 @@ public class NexusTest {
             assertNull(provider);
         }
 
+    }
+
+    @Nested
+    public class CollectionResourceTests {
+
+        private static final String TEST_MODEL = "TestCollectionModel";
+        private final String TEST_PKG = EMFUtil.constructPackageUri(TEST_MODEL);
+        private static final String TESTPROVIDER = "testprovider";
+
+        @Test
+        void createAndUpdateListResource() {
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+            Instant now = Instant.now();
+
+            EClass model = nexus.createModel(TEST_PKG, TEST_MODEL, now);
+            EReference service = nexus.createService(model, "testservice", "testservice", now);
+
+            // Create a collection resource with upperBound = -1
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), "testList", String.class, now,
+                    null, Map.of(), false, 0, false, 0, -1);
+
+            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+
+            // Update with a list of strings
+            java.util.List<String> testData = java.util.List.of("value1", "value2", "value3");
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, testData, now);
+
+            // Verify the data was stored correctly
+            Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
+            assertNotNull(provider);
+
+            EStructuralFeature serviceFeature = model.getEStructuralFeature(service.getName());
+            assertNotNull(serviceFeature);
+
+            Service svc = (Service) provider.eGet(serviceFeature);
+            assertNotNull(svc);
+
+            EStructuralFeature rcFeature = service.getEReferenceType().getEStructuralFeature(resource.getName());
+            assertNotNull(rcFeature);
+
+            Object value = svc.eGet(rcFeature);
+            assertNotNull(value);
+            assertTrue(value instanceof Collection, "Value should be a Collection");
+
+            @SuppressWarnings("unchecked")
+            Collection<String> collectionValue = (Collection<String>) value;
+            assertEquals(3, collectionValue.size());
+            assertTrue(collectionValue.contains("value1"));
+            assertTrue(collectionValue.contains("value2"));
+            assertTrue(collectionValue.contains("value3"));
+        }
+
+        @Test
+        void updateListResourceMultipleTimes() {
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+            Instant now = Instant.now();
+
+            EClass model = nexus.createModel(TEST_PKG, TEST_MODEL, now);
+            EReference service = nexus.createService(model, "testservice", "testservice", now);
+
+            // Create a collection resource
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), "testList", Integer.class, now,
+                    null, Map.of(), false, 0, false, 0, -1);
+
+            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+
+            // First update
+            java.util.List<Integer> firstData = java.util.List.of(1, 2, 3);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, firstData, now);
+
+            Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
+            EStructuralFeature serviceFeature = model.getEStructuralFeature(service.getName());
+            Service svc = (Service) provider.eGet(serviceFeature);
+            EStructuralFeature rcFeature = service.getEReferenceType().getEStructuralFeature(resource.getName());
+
+            @SuppressWarnings("unchecked")
+            Collection<Integer> value1 = (Collection<Integer>) svc.eGet(rcFeature);
+            assertEquals(3, value1.size());
+
+            // Second update - replace with different values
+            java.util.List<Integer> secondData = java.util.List.of(10, 20);
+            Instant later = now.plusSeconds(60);
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, secondData, later);
+
+            provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
+            svc = (Service) provider.eGet(serviceFeature);
+
+            @SuppressWarnings("unchecked")
+            Collection<Integer> value2 = (Collection<Integer>) svc.eGet(rcFeature);
+            assertEquals(2, value2.size());
+            assertTrue(value2.contains(10));
+            assertTrue(value2.contains(20));
+            assertFalse(value2.contains(1));
+        }
+
+        @Test
+        void emptyListResource() {
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+            Instant now = Instant.now();
+
+            EClass model = nexus.createModel(TEST_PKG, TEST_MODEL, now);
+            EReference service = nexus.createService(model, "testservice", "testservice", now);
+
+            // Create a collection resource
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), "testList", String.class, now,
+                    null, Map.of(), false, 0, false, 0, -1);
+
+            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+
+            // Update with an empty list
+            java.util.List<String> emptyData = java.util.List.of();
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, emptyData, now);
+
+            Provider provider = nexus.getProvider(TEST_PKG, TEST_MODEL, TESTPROVIDER);
+            EStructuralFeature serviceFeature = model.getEStructuralFeature(service.getName());
+            Service svc = (Service) provider.eGet(serviceFeature);
+            EStructuralFeature rcFeature = service.getEReferenceType().getEStructuralFeature(resource.getName());
+
+            Object value = svc.eGet(rcFeature);
+            assertNotNull(value);
+            assertTrue(value instanceof Collection);
+
+            @SuppressWarnings("unchecked")
+            Collection<String> collectionValue = (Collection<String>) value;
+            assertEquals(0, collectionValue.size());
+        }
+
+        @Test
+        void saveAndMergeListResourceChange() {
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+            Instant now = Instant.now();
+
+            EClass model = nexus.createModel(TEST_PKG, TEST_MODEL, now);
+            EReference service = nexus.createService(model, "testservice", "testservice", now);
+
+            // Create a collection resource
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), "testList", String.class, now,
+                    null, Map.of(), false, 0, false, 0, -1);
+
+            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+
+            // Initial update with a list
+            java.util.List<String> initialData = java.util.List.of("a", "b", "c");
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, initialData, now);
+
+            // Save the provider
+            Provider saved = nexus.save(p);
+
+            Mockito.clearInvocations(accumulator);
+
+            // Get the service and modify the list
+            EStructuralFeature serviceFeature = model.getEStructuralFeature(service.getName());
+            Service svc = (Service) saved.eGet(serviceFeature);
+            EStructuralFeature rcFeature = service.getEReferenceType().getEStructuralFeature(resource.getName());
+
+            @SuppressWarnings("unchecked")
+            EList<String> list = (EList<String>) svc.eGet(rcFeature);
+            list.clear();
+            list.add("x");
+            list.add("y");
+
+            // Update the metadata timestamp to indicate the change
+            Instant later = now.plusSeconds(60);
+            svc.getMetadata().get(resource).setTimestamp(later);
+
+            // Save again - this triggers EMFCompareUtil to detect changes
+            Provider savedAgain = nexus.save(saved);
+
+            // Verify the list was updated
+            svc = (Service) savedAgain.eGet(serviceFeature);
+            @SuppressWarnings("unchecked")
+            Collection<String> updatedList = (Collection<String>) svc.eGet(rcFeature);
+            assertEquals(2, updatedList.size());
+            assertTrue(updatedList.contains("x"));
+            assertTrue(updatedList.contains("y"));
+        }
     }
 }

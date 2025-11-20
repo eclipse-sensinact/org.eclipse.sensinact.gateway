@@ -11,7 +11,7 @@
 *   Data In Motion - initial API and implementation
 *   Kentyou - fixes and updates to start basic testing
 **********************************************************************/
-package org.eclipse.sensinact.core.model.nexus.impl;
+package org.eclipse.sensinact.core.model.nexus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

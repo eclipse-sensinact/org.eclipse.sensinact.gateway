@@ -268,7 +268,28 @@ public class EMFCompareUtil {
                     }
                 }
             } else {
-                isEqual = Objects.equals(oldValue, newValue);
+                // Handle EAttribute
+                if (resource.isMany()) {
+                    // For multi-valued attributes (collections), compare lists element-by-element
+                    List<?> oldList = (List<?>) oldValue;
+                    List<?> newList = (List<?>) newValue;
+
+                    // Quick size check first
+                    if (oldList.size() != newList.size()) {
+                        isEqual = false;
+                    } else {
+                        // Same size, check each element
+                        isEqual = true;
+                        for (int i = 0; i < oldList.size(); i++) {
+                            if (!Objects.equals(oldList.get(i), newList.get(i))) {
+                                isEqual = false;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    isEqual = Objects.equals(oldValue, newValue);
+                }
             }
             if (isEqual && Objects.equals(previousTimestamp, newTimestamp)) {
                 return;

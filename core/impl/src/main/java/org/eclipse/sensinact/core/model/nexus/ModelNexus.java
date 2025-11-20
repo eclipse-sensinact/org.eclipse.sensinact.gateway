@@ -236,9 +236,9 @@ public class ModelNexus {
                     .orElseGet(() -> createService(sensiNactModel, "system", "System", now));
             EClass svcClass = svc.getEReferenceType();
             EStructuralFeature versionResource = Optional.ofNullable(svcClass.getEStructuralFeature("version"))
-                    .orElseGet(() -> createResource(svcClass, "version", double.class, now, null));
+                    .orElseGet(() -> createMandatoryResource(svcClass, "version", double.class, now, null));
             EStructuralFeature startedResource = Optional.ofNullable(svcClass.getEStructuralFeature("started"))
-                    .orElseGet(() -> createResource(svcClass, "started", Instant.class, now, null));
+                    .orElseGet(() -> createMandatoryResource(svcClass, "started", Instant.class, now, null));
 
             Provider provider = Optional.ofNullable(getProvider("sensiNact"))
                     .orElseGet(() -> doCreateProvider(sensiNactModel, "sensiNact", now));
@@ -463,12 +463,47 @@ public class ModelNexus {
             metadata.setTimestamp(metaTimestamp);
 
             final Object storedData;
-            if (data == null || resourceType.isInstance(data)) {
-                storedData = data;
+
+            // Handle multi-valued features (collections)
+            if (resourceFeature.isMany()) {
+                if (data instanceof Collection) {
+                    @SuppressWarnings("unchecked")
+                    EList<Object> list = (EList<Object>) service.eGet(resourceFeature);
+                    list.clear();
+                    for (Object item : (Collection<?>) data) {
+                        if (item == null || resourceType.isInstance(item)) {
+                            list.add(item);
+                        } else {
+                            list.add(EMFUtil.convertToTargetType(resourceType, item));
+                        }
+                    }
+                    storedData = list;
+                } else if (data == null) {
+                    @SuppressWarnings("unchecked")
+                    EList<Object> list = (EList<Object>) service.eGet(resourceFeature);
+                    list.clear();
+                    storedData = list;
+                } else {
+                    // Single value for a multi-valued feature - add it to the list
+                    @SuppressWarnings("unchecked")
+                    EList<Object> list = (EList<Object>) service.eGet(resourceFeature);
+                    list.clear();
+                    if (resourceType.isInstance(data)) {
+                        list.add(data);
+                    } else {
+                        list.add(EMFUtil.convertToTargetType(resourceType, data));
+                    }
+                    storedData = list;
+                }
             } else {
-                storedData = EMFUtil.convertToTargetType(resourceType, data);
+                // Handle single-valued features
+                if (data == null || resourceType.isInstance(data)) {
+                    storedData = data;
+                } else {
+                    storedData = EMFUtil.convertToTargetType(resourceType, data);
+                }
+                service.eSet(resourceFeature, storedData);
             }
-            service.eSet(resourceFeature, storedData);
 
             Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(storedData, metadata, resourceFeature);
 
@@ -612,24 +647,30 @@ public class ModelNexus {
         return providers.values().stream().filter(p -> p.eClass().equals(model)).collect(Collectors.toList());
     }
 
-    public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
+    protected EAttribute createMandatoryResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue) {
-        return createResource(service, resource, type, timestamp, defaultValue, Map.of(), false, 0, false);
+        return createResource(service, resource, type, timestamp, defaultValue, Map.of(), false, 0, false, 1, 1);
+    }
+
+    protected EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
+            Object defaultValue) {
+        return createResource(service, resource, type, timestamp, defaultValue, Map.of(), false, 0, false, 0, 1);
     }
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, Map<String, Object> defaultMetadata, boolean hasGetter, long getterCacheMs,
-            boolean hasSetter) {
+            boolean hasSetter, int lowerBound, int upperBound) {
 
         return doCreateResource(service, resource, type, timestamp, defaultValue, defaultMetadata, List.of(), hasGetter,
-                getterCacheMs, hasSetter);
+                getterCacheMs, hasSetter, lowerBound, upperBound);
     }
 
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, Map<String, Object> defaultMetadata, List<MetadataValue> metadata, boolean hasGetter,
-            long getterCacheMs, boolean hasSetter) {
+            long getterCacheMs, boolean hasSetter, int lowerBound, int upperBound) {
         assertResourceNotExist(service, resource);
-        ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue);
+        ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue,
+                lowerBound, upperBound);
         resourceMetaData.setExternalGet(hasGetter);
         resourceMetaData.setExternalSet(hasSetter);
         if (getterCacheMs > 0) {

@@ -361,11 +361,13 @@ public class EMFUtil {
     }
 
     public static ResourceMetadata createResourceAttribute(EClass service, String resource, Class<?> type,
-            Object defaultValue) {
+            Object defaultValue, int lowerBound, int upperBound) {
         ResourceMetadata metaData = ProviderFactory.eINSTANCE.createResourceMetadata();
         EAttribute attribute = EcoreFactory.eINSTANCE.createEAttribute();
         attribute.setName(resource);
         attribute.setEType(convertClass(type, service.getEPackage()));
+        attribute.setLowerBound(lowerBound);
+        attribute.setUpperBound(upperBound);
         if (defaultValue != null) {
             attribute.setDefaultValue(defaultValue);
         }
@@ -387,11 +389,13 @@ public class EMFUtil {
         if (o == null) {
             converted = o;
         } else {
-            // Fast path this as we use GeoJSON a lot and the converter isn't able to handle sealed types
-            if(GeoJsonObject.class.isAssignableFrom(targetType)) {
+            // Fast path this as we use GeoJSON a lot and the converter isn't able to handle
+            // sealed types
+            if (GeoJsonObject.class.isAssignableFrom(targetType)) {
                 // Go via Jackson to use the JSON mapping
                 try {
-                    converted = o instanceof String ? mapper.readValue((String) o, targetType) : mapper.convertValue(o, targetType);
+                    converted = o instanceof String ? mapper.readValue((String) o, targetType)
+                            : mapper.convertValue(o, targetType);
                 } catch (JsonProcessingException e) {
                     LOG.error("Unable to process location data {} into target type {}", o, targetType);
                     throw new ConversionException("Unable to convert location data", e);
@@ -424,13 +428,14 @@ public class EMFUtil {
     /**
      * {@link ConverterFunction} that handles record inputs and targets.
      *
-     * Returns {@link ConverterFunction#CANNOT_HANDLE} if neither input nor target are records.
+     * Returns {@link ConverterFunction#CANNOT_HANDLE} if neither input nor target
+     * are records.
      *
-     * @param obj Input object
+     * @param obj        Input object
      * @param targetType Target type
      * @return The converted object or {@link ConverterFunction#CANNOT_HANDLE}
      * @throws ConversionException Error accessing input record value
-     * @throws Exception Error calling target record constructor
+     * @throws Exception           Error calling target record constructor
      */
     private static Object convertRecords(Object obj, Type targetType) throws Exception {
 
