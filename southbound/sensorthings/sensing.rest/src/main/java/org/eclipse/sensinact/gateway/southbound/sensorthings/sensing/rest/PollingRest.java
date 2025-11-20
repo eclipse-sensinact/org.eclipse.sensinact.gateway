@@ -71,7 +71,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Component(configurationPid = "sensinact.sensorthings.southbound.rest",
 configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class PollingRest {
-
+ 
     private static final String QUERY = """
             $expand=\
             Locations,\

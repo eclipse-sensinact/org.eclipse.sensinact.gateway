@@ -75,8 +75,8 @@
             <step>
               <trigger>src/main/resources/model/sensorthings.genmodel</trigger>
               <generateCommand>geckoEMF</generateCommand>
-              <output>src/main/java</output>
-              <clear>false</clear>
+              <output>src/generated/java</output>
+              <clear>true</clear>
               <properties>
                 <genmodel>src/main/resources/model/sensorthings.genmodel</genmodel>
               </properties>
