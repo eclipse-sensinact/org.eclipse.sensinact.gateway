@@ -13,7 +13,7 @@
   <properties>
     <sensinact.core.version>${project.version}</sensinact.core.version>
   </properties>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
