@@ -103,13 +103,21 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
      * @return The timed value from the service (both value and timestamp can be
      *         null)
      */
+    @SuppressWarnings("unchecked")
     private <T> TimedValue<T> getValueFromTwin(final Class<T> type) {
         final Instant currentTimestamp;
         final T currentValue;
         final Service svc = provider.getService(serviceName);
         if (svc != null) {
             // Service is there
-            final Object rawValue = svc.eGet((EStructuralFeature) resource);
+            EStructuralFeature feature = (EStructuralFeature) resource;
+            final Object rawValue = svc.eGet(feature);
+            if (feature.isMany()) {
+                // TODO: How to handle this?
+//                currentValue = ((Collection<?>) rawValue).stream().filter(o -> type.isAssignableFrom(o.getClass()))
+//                        .map(type::cast).toList();
+//            } else if (rawValue != null && type.isAssignableFrom(rawValue.getClass())) {
+            }
             if (rawValue != null && type.isAssignableFrom(rawValue.getClass())) {
                 currentValue = type.cast(rawValue);
             } else {
