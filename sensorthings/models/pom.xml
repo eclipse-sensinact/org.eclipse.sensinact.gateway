@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
+    <artifactId>sensorthings</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>models</artifactId>
+  <name>SensiNact Sensorthings :: Models</name>
+  <properties>
+    <sensinact.core.version>${project.version}</sensinact.core.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+
+    <!-- Model dependencies -->
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
+      <artifactId>provider</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geckoprojects.emf</groupId>
+      <artifactId>org.gecko.emf.osgi.component.minimal</artifactId>
+    </dependency>
+
+    <!-- Test dependencies-->
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.core</groupId>
+      <artifactId>impl</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-testing-maven-plugin</artifactId>
+      </plugin>
+      <!-- Generating model classes -->
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-generate-maven-plugin</artifactId>
+        <version>${bnd.version}</version>
+        <configuration>
+          <externalPlugins>
+            <dependency>
+              <groupId>org.geckoprojects.emf</groupId>
+              <artifactId>org.gecko.emf.osgi.codegen</artifactId>
+            </dependency>
+          </externalPlugins>
+          <steps>
+            <step>
+              <trigger>src/main/resources/model/sensorthings.genmodel</trigger>
+              <generateCommand>geckoEMF</generateCommand>
+              <output>src/generated/java</output>
+              <clear>true</clear>
+              <properties>
+                <genmodel>src/main/resources/model/sensorthings.genmodel</genmodel>
+              </properties>
+            </step>
+          </steps>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>add-generated-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.basedir}/src/generated/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

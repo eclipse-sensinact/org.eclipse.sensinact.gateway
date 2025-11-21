@@ -47,6 +47,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
+      <artifactId>models</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.geckoprojects.emf</groupId>
       <artifactId>org.gecko.emf.osgi.component.minimal</artifactId>
     </dependency>
@@ -83,39 +88,6 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-testing-maven-plugin</artifactId>
-      </plugin>
-      <!-- Generating model classes -->
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-generate-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
-        <configuration>
-          <externalPlugins>
-            <dependency>
-              <groupId>org.geckoprojects.emf</groupId>
-              <artifactId>org.gecko.emf.osgi.codegen</artifactId>
-            </dependency>
-          </externalPlugins>
-          <steps>
-            <step>
-              <trigger>src/main/resources/model/sensorthings.genmodel</trigger>
-              <generateCommand>geckoEMF</generateCommand>
-              <output>src/main/java</output>
-              <clear>false</clear>
-              <properties>
-                <genmodel>src/main/resources/model/sensorthings.genmodel</genmodel>
-              </properties>
-            </step>
-          </steps>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

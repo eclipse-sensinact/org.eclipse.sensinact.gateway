@@ -45,7 +45,7 @@ import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;

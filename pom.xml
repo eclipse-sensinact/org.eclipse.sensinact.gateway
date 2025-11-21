@@ -99,6 +99,7 @@
   <modules>
     <module>core</module>
     <module>filters</module>
+    <module>sensorthings</module>
     <module>southbound</module>
     <module>northbound</module>
     <module>examples</module>
