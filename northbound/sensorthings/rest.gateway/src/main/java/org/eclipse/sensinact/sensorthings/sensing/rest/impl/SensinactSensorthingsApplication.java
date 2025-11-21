@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.ISensinactSensorthingsRestExtra;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -32,8 +33,10 @@ import jakarta.ws.rs.core.Application;
 public class SensinactSensorthingsApplication extends Application {
 
     public static final String NOT_SET = "<<NOT_SET>>";
+
     public static @interface Config {
         String history_provider() default NOT_SET;
+
         int history_results_max() default 3000;
     }
 
@@ -43,6 +46,9 @@ public class SensinactSensorthingsApplication extends Application {
     @Reference
     ISensorthingsFilterParser filterParser;
 
+    @Reference
+    ISensinactSensorthingsRestExtra sensorthingRestExtra;
+
     @Activate
     Config config;
 
@@ -50,21 +56,13 @@ public class SensinactSensorthingsApplication extends Application {
     public Set<Class<?>> getClasses() {
         return Set.of(
                 // Features/extensions
-                SensorThingsFeature.class,
-                SensinactSessionProvider.class,
-                SensorthingsFilterProvider.class,
+                SensorThingsFeature.class, SensinactSessionProvider.class, SensorthingsFilterProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
-                DatastreamsAccessImpl.class,
-                FeaturesOfInterestAccessImpl.class,
-                HistoricalLocationsAccessImpl.class,
-                LocationsAccessImpl.class,
-                ObservationsAccessImpl.class,
-                ObservedPropertiesAccessImpl.class,
-                SensorsAccessImpl.class,
-                ThingsAccessImpl.class
-            );
+                DatastreamsAccessImpl.class, FeaturesOfInterestAccessImpl.class, HistoricalLocationsAccessImpl.class,
+                LocationsAccessImpl.class, ObservationsAccessImpl.class, ObservedPropertiesAccessImpl.class,
+                SensorsAccessImpl.class, ThingsAccessImpl.class);
     }
 
     public SensiNactSessionManager getSessionManager() {
