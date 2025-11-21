@@ -206,6 +206,11 @@
       <version>1.0.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>emf-api</artifactId>
+        <version>0.0.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

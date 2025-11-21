@@ -17,8 +17,7 @@ import java.util.Set;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
-import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.ISensinactSensorthingsRestExtra;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorThingsFeature;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -45,9 +44,6 @@ public class SensinactSensorthingsApplication extends Application {
 
     @Reference
     ISensorthingsFilterParser filterParser;
-
-    @Reference
-    ISensinactSensorthingsRestExtra sensorthingRestExtra;
 
     @Activate
     Config config;

@@ -30,6 +30,16 @@
       <artifactId>dto</artifactId>
       <version>${project.version}</version>
     </dependency>
+     <dependency>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+        <artifactId>session-api</artifactId>
+        <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
@@ -42,6 +52,7 @@
       <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
       <artifactId>jackson-jakarta-rs-json-provider</artifactId>
     </dependency>
+   
   </dependencies>
 
   <build>
