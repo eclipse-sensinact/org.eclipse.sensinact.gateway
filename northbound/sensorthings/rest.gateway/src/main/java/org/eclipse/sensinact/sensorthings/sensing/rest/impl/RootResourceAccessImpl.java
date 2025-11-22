@@ -111,7 +111,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ProviderSnapshot> providers = listProviders(criterion);
         return new ResultList<>(null, null, providers.stream()
                 .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .collect(toList()));
+                .toList());
     }
 
     @Override
@@ -120,7 +120,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ProviderSnapshot> providers = listProviders(criterion);
         return new ResultList<>(null, null, providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .collect(toList()));
+                .toList());
     }
 
     @Override
@@ -131,7 +131,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
                 .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(toList()));
+                .toList());
     }
 
     @Override
@@ -140,7 +140,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ResourceSnapshot> resources = listSetResources(criterion);
         return new ResultList<>(null, null, resources.stream()
                 .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r, criterion))
-                .collect(toList()));
+                .toList());
     }
 
     @Override
@@ -149,7 +149,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ResourceSnapshot> resources = listSetResources(criterion);
         return new ResultList<>(null, null, resources.stream()
                 .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                .collect(toList()));
+                .toList());
     }
 
     // No history as it is *live* observation data not a data stream
@@ -161,7 +161,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
                 .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(toList()));
+                .toList());
     }
 
     @Override
@@ -170,7 +170,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ResourceSnapshot> resources = listSetResources(criterion);
         return new ResultList<>(null, null, resources.stream()
                 .map(r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                .collect(toList()));
+                .toList());
     }
 
     @Override
@@ -179,7 +179,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ProviderSnapshot> providers = listProviders(criterion);
         return new ResultList<>(null, null, providers.stream()
                 .map(p -> toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .collect(toList()));
+                .toList());
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
