@@ -102,8 +102,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
 
     @Override
     public ResultList<Datastream> getDatastreamObservedPropertyDatastreams(String id) {
-        ResultList<Datastream> list = new ResultList<>(null, null, List.of(getDatastream(id)));
-        return list;
+        return new ResultList<>(null, null, List.of(getDatastream(id)));
     }
 
     @Override
