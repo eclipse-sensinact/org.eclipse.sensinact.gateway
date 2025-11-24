@@ -39,10 +39,4 @@ public class AccessResourceUseCase implements IAccessResourceUseCase {
         return resourceSnapshot;
     }
 
-    @Override
-    public boolean exists(SensiNactSession session, String id) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
 }

@@ -18,9 +18,13 @@ import java.util.Set;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorThingsFeature;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.ISensinactSensorthingsRestExtra;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
 
@@ -45,20 +49,28 @@ public class SensinactSensorthingsApplication extends Application {
     @Reference
     ISensorthingsFilterParser filterParser;
 
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+    ISensinactSensorthingsRestExtra sensinactSensorthingsExtra;
+
     @Activate
     Config config;
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(
+        Set<Class<?>> listResource = Set.of(
                 // Features/extensions
                 SensorThingsFeature.class, SensinactSessionProvider.class, SensorthingsFilterProvider.class,
+                AccessResourceUseCaseProvider.class, AccessProviderUseCaseProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
                 DatastreamsAccessImpl.class, FeaturesOfInterestAccessImpl.class, HistoricalLocationsAccessImpl.class,
                 LocationsAccessImpl.class, ObservationsAccessImpl.class, ObservedPropertiesAccessImpl.class,
                 SensorsAccessImpl.class, ThingsAccessImpl.class);
+        if (sensinactSensorthingsExtra != null) {
+            listResource.addAll(sensinactSensorthingsExtra.getExtraClasses());
+        }
+        return listResource;
     }
 
     public SensiNactSessionManager getSessionManager() {
