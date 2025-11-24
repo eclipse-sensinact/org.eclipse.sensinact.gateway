@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ISensinactSensorthingsApplication;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorThingsFeature;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.ISensinactSensorthingsRestExtra;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
@@ -33,12 +34,14 @@ import jakarta.ws.rs.core.Application;
 @Component(service = Application.class, configurationPid = "sensinact.sensorthings.northbound.rest")
 @JakartarsName("sensorthings")
 @JakartarsApplicationBase("/")
-public class SensinactSensorthingsApplication extends Application {
+public class SensinactSensorthingsApplication extends Application implements ISensinactSensorthingsApplication {
 
     public static final String NOT_SET = "<<NOT_SET>>";
 
     public static @interface Config {
-        String history_provider() default NOT_SET;
+        String history_provider()
+
+        default NOT_SET;
 
         int history_results_max() default 3000;
     }
@@ -70,7 +73,17 @@ public class SensinactSensorthingsApplication extends Application {
         if (sensinactSensorthingsExtra != null) {
             listResource.addAll(sensinactSensorthingsExtra.getExtraClasses());
         }
+
         return listResource;
+    }
+
+    @Override
+    public Set<Object> getSingletons() {
+        Set<Object> listResources = Set.of();
+        if (sensinactSensorthingsExtra != null) {
+            listResources.addAll(sensinactSensorthingsExtra.getExtraSingletons());
+        }
+        return listResources;
     }
 
     public SensiNactSessionManager getSessionManager() {

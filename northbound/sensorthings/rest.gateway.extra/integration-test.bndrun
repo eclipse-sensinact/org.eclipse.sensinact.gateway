@@ -6,12 +6,12 @@
 	bnd.identity;id='org.apache.felix.cm.json',\
 	bnd.identity;id='org.eclipse.osgitech.rest.jetty',\
 	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
-	bnd.identity;id='org.eclipse.sensinact.gateway.southbound.history.timescale-provider',\
 	bnd.identity;id='ch.qos.logback.classic',\
 	bnd.identity;id='jul.to.slf4j',\
 	bnd.identity;id='org.apache.felix.gogo.command',\
 	bnd.identity;id='org.apache.felix.gogo.runtime',\
-	bnd.identity;id='org.apache.felix.gogo.shell'
+	bnd.identity;id='org.apache.felix.gogo.shell',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.northbound.sensorthings.rest.gateway'
 
 -resolve.effective: active
 

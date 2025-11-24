@@ -29,6 +29,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IFilterConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
@@ -85,11 +86,20 @@ public abstract class AbstractAccess {
     }
 
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        return getProviderUserCase().execute(getSession(), id);
+        ProviderSnapshot providerSnapshot = getProviderUserCase().read(getSession(), id);
+        if (providerSnapshot == null) {
+            throw new NotFoundException(String.format("no provider for id {id}", id));
+        }
+        return providerSnapshot;
     }
 
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        return getResourceUserCase().execute(getSession(), id);
+        IAccessResourceUseCase useCase = getResourceUserCase();
+        ResourceSnapshot resourceSnapshot = useCase.read(getSession(), id);
+        if (resourceSnapshot == null) {
+            throw new NotFoundException();
+        }
+        return resourceSnapshot;
     }
 
     private ISensorthingsFilterParser getFilterParser() {

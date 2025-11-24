@@ -9,21 +9,21 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-import jakarta.ws.rs.NotFoundException;
-
-@Component(service = IAccessResourceUseCase.class)
+@Component(service = IAccessResourceUseCase.class, immediate = true)
 public class AccessResourceUseCase implements IAccessResourceUseCase {
 
-    @Reference
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC)
     IAccessProviderUseCase accessProviderUserCase;
 
     private ProviderSnapshot validateAndGetProvider(SensiNactSession session, String providerId) {
-        return accessProviderUserCase.execute(session, providerId);
+        return accessProviderUserCase.read(session, providerId);
     }
 
     @Override
-    public ResourceSnapshot execute(SensiNactSession session, String id) {
+    public ResourceSnapshot read(SensiNactSession session, String id) {
         String provider = extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, provider);
@@ -33,9 +33,6 @@ public class AccessResourceUseCase implements IAccessResourceUseCase {
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 
-        if (resourceSnapshot == null) {
-            throw new NotFoundException();
-        }
         return resourceSnapshot;
     }
 
