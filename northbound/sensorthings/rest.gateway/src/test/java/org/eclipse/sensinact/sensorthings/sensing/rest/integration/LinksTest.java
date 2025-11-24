@@ -101,7 +101,7 @@ public class LinksTest extends AbstractIntegrationTest {
         boolean found = false;
         for (Object rawItem : mirrorAccess) {
             S item = utils.getMapper().convertValue(rawItem, srcType);
-            if (srcObject.id.equals(item.id)) {
+            if (srcObject.id().equals(item.id())) {
                 found = true;
                 utils.assertDtoEquals(srcObject, item, srcType);
                 break;
@@ -138,7 +138,7 @@ public class LinksTest extends AbstractIntegrationTest {
     }
 
     private Set<Object> listIdsFromURL(final String url) throws IOException, InterruptedException {
-        return utils.queryJson(url, RESULT_ANY).value.stream().map(o -> o.id).collect(Collectors.toSet());
+        return utils.queryJson(url, RESULT_ANY).value().stream().map(o -> o.id()).collect(Collectors.toSet());
     }
 
     private final Map<Class<?>, List<String>> classFields = new HashMap<>();
@@ -150,8 +150,8 @@ public class LinksTest extends AbstractIntegrationTest {
             TypeReference<ResultList<T>> resultListType, Class<T> resultType) throws IOException, InterruptedException {
         ResultList<T> results = utils.queryJson(listUrl, resultListType);
         assertNotNull(results);
-        assertFalse(results.value.isEmpty(),
-                "No " + resultType.getSimpleName() + " found for " + srcObject.id + " on " + listUrl);
+        assertFalse(results.value().isEmpty(),
+                "No " + resultType.getSimpleName() + " found for " + srcObject.id() + " on " + listUrl);
 
         @SuppressWarnings("unchecked")
         Class<S> srcType = (Class<S>) srcObject.getClass();
@@ -159,22 +159,22 @@ public class LinksTest extends AbstractIntegrationTest {
         final ObjectMapper mapper = utils.getMapper();
 
         List<String> fields = List.of();
-        if (!results.value.isEmpty()) {
-            Class<?> itemType = results.value.get(0).getClass();
+        if (!results.value().isEmpty()) {
+            Class<?> itemType = results.value().get(0).getClass();
             fields = classFields.computeIfAbsent(itemType, (k) -> Arrays.stream(itemType.getFields()).filter((f) -> {
                 String fieldName = f.getName();
                 return fieldName.endsWith("Link") && !"selfLink".equals(fieldName);
             }).map(f -> f.getName()).collect(Collectors.toList()));
         }
 
-        for (T item : results.value) {
+        for (T item : results.value()) {
             // Check access from source object
-            String directAccessItemUrl = String.format("%s(%s)", listUrl, item.id);
+            String directAccessItemUrl = String.format("%s(%s)", listUrl, item.id());
             T directAccessItem = utils.queryJson(directAccessItemUrl, resultType);
             utils.assertDtoEquals(item, directAccessItem, resultType);
 
             // Check mirror
-            checkMirror(String.format("%s(%s)", listUrl, item.id), srcObject, srcType);
+            checkMirror(String.format("%s(%s)", listUrl, item.id()), srcObject, srcType);
 
             // Check deeper access
             for (String fieldName : fields) {
@@ -187,7 +187,7 @@ public class LinksTest extends AbstractIntegrationTest {
 
                     Set<Object> allItemsIds = listIdsFromURL(kindOfLink);
                     assertTrue(allItemsIds.containsAll(linkedItemsIds),
-                            linkedItemsIds + " not a subset of " + allItemsIds + " (src=" + srcObject.id + ", listUrl=" + listUrl + ", kindOfLink=" + kindOfLink + ")");
+                            linkedItemsIds + " not a subset of " + allItemsIds + " (src=" + srcObject.id() + ", listUrl=" + listUrl + ", kindOfLink=" + kindOfLink + ")");
                 } else {
                     // Returns a single item
                     Class<? extends Id> linkType = getDTOType(kindOfLink);
@@ -196,7 +196,7 @@ public class LinksTest extends AbstractIntegrationTest {
                             linkType);
 
                     Id directDto = mapper.convertValue(
-                            utils.queryJson(String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id), Map.class),
+                            utils.queryJson(String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id()), Map.class),
                             linkType);
 
                     utils.assertDtoEquals(directDto, linkedDto, linkType);
@@ -213,13 +213,13 @@ public class LinksTest extends AbstractIntegrationTest {
         RootResponse root = utils.queryJson("/", RootResponse.class);
         assertNotNull(root);
 
-        for (final NameUrl nameUrl : root.value) {
+        for (final NameUrl nameUrl : root.value()) {
             assertNotNull(nameUrl);
-            assertNotNull(nameUrl.name, "Null link name");
-            assertFalse(nameUrl.name.isEmpty(), "Empty name");
-            assertNotNull(nameUrl.url, "Null link URL");
-            assertFalse(nameUrl.url.isEmpty(), "Empty URL");
-            utils.assertURLStatus(nameUrl.url, 200);
+            assertNotNull(nameUrl.name(), "Null link name");
+            assertFalse(nameUrl.name().isEmpty(), "Empty name");
+            assertNotNull(nameUrl.url(), "Null link URL");
+            assertFalse(nameUrl.url().isEmpty(), "Empty URL");
+            utils.assertURLStatus(nameUrl.url(), 200);
         }
     }
 
@@ -235,26 +235,26 @@ public class LinksTest extends AbstractIntegrationTest {
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
         assertNotNull(things);
-        assertFalse(things.value.isEmpty(), "No thing found");
+        assertFalse(things.value().isEmpty(), "No thing found");
 
-        for (final Thing thing : things.value) {
+        for (final Thing thing : things.value()) {
             assertNotNull(thing);
-            assertNotNull(thing.id);
-            assertNotNull(thing.name);
+            assertNotNull(thing.id());
+            assertNotNull(thing.name());
 
             // Check self link
-            utils.assertURLStatus(thing.selfLink);
-            utils.assertDtoEquals(thing, utils.queryJson(thing.selfLink, Thing.class), Thing.class);
+            utils.assertURLStatus(thing.selfLink());
+            utils.assertDtoEquals(thing, utils.queryJson(thing.selfLink(), Thing.class), Thing.class);
 
             // Check sub-links existence
-            checkSubLinks(thing, thing.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
-            checkSubLinks(thing, thing.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
-            checkSubLinks(thing, thing.locationsLink, RESULT_LOCATIONS, Location.class);
+            checkSubLinks(thing, thing.datastreamsLink(), RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(thing, thing.historicalLocationsLink(), RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
+            checkSubLinks(thing, thing.locationsLink(), RESULT_LOCATIONS, Location.class);
 
             // Check mirrors
-            Set<Object> datastreamIDs = listIdsFromURL(thing.datastreamsLink);
-            Set<Object> locationIDs = listIdsFromURL(thing.locationsLink);
-            Set<Object> historicalLocationsIDs = listIdsFromURL(thing.historicalLocationsLink);
+            Set<Object> datastreamIDs = listIdsFromURL(thing.datastreamsLink());
+            Set<Object> locationIDs = listIdsFromURL(thing.locationsLink());
+            Set<Object> historicalLocationsIDs = listIdsFromURL(thing.historicalLocationsLink());
 
             for (Object dsId : datastreamIDs) {
                 Set<Object> dsThingStreamIDs = listIdsFromURL(
@@ -272,15 +272,15 @@ public class LinksTest extends AbstractIntegrationTest {
 
             for (Object locId : locationIDs) {
                 Set<Object> dsThingStreamIDs = listIdsFromURL(
-                        String.format("/Locations(%s)/Things(%s)/Datastreams", locId, thing.id));
+                        String.format("/Locations(%s)/Things(%s)/Datastreams", locId, thing.id()));
                 assertEquals(datastreamIDs, dsThingStreamIDs);
 
                 Set<Object> dsThingLocationIDs = listIdsFromURL(
-                        String.format("/Locations(%s)/Things(%s)/Locations", locId, thing.id));
+                        String.format("/Locations(%s)/Things(%s)/Locations", locId, thing.id()));
                 assertEquals(locationIDs, dsThingLocationIDs);
 
                 Set<Object> dsThingHistoricalLocationIDs = listIdsFromURL(
-                        String.format("/Locations(%s)/Things(%s)/HistoricalLocations", locId, thing.id));
+                        String.format("/Locations(%s)/Things(%s)/HistoricalLocations", locId, thing.id()));
                 assertEquals(historicalLocationsIDs, dsThingHistoricalLocationIDs);
             }
 
@@ -313,21 +313,21 @@ public class LinksTest extends AbstractIntegrationTest {
         // Get the new locations
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
         assertNotNull(locations);
-        assertFalse(locations.value.isEmpty(), "No location found");
+        assertFalse(locations.value().isEmpty(), "No location found");
 
-        for (final Location location : locations.value) {
+        for (final Location location : locations.value()) {
             assertNotNull(location);
-            assertNotNull(location.id);
-            assertNotNull(location.name);
+            assertNotNull(location.id());
+            assertNotNull(location.name());
 
             // Check self link
-            utils.assertURLStatus(location.selfLink);
-            utils.assertDtoEquals(location, utils.queryJson(location.selfLink, Location.class), Location.class);
+            utils.assertURLStatus(location.selfLink());
+            utils.assertDtoEquals(location, utils.queryJson(location.selfLink(), Location.class), Location.class);
 
             // Check sub-links existence
-            checkSubLinks(location, location.historicalLocationsLink, RESULT_HISTORICAL_LOCATIONS,
+            checkSubLinks(location, location.historicalLocationsLink(), RESULT_HISTORICAL_LOCATIONS,
                     HistoricalLocation.class);
-            checkSubLinks(location, location.thingsLink, RESULT_THINGS, Thing.class);
+            checkSubLinks(location, location.thingsLink(), RESULT_THINGS, Thing.class);
         }
     }
 
@@ -346,21 +346,21 @@ public class LinksTest extends AbstractIntegrationTest {
         ResultList<HistoricalLocation> historicalLocations = utils.queryJson("/HistoricalLocations",
                 RESULT_HISTORICAL_LOCATIONS);
         assertNotNull(historicalLocations);
-        assertFalse(historicalLocations.value.isEmpty(), "No historical location found");
+        assertFalse(historicalLocations.value().isEmpty(), "No historical location found");
 
-        for (final HistoricalLocation historicalLocation : historicalLocations.value) {
+        for (final HistoricalLocation historicalLocation : historicalLocations.value()) {
             assertNotNull(historicalLocation);
-            assertNotNull(historicalLocation.id);
-            assertNotNull(historicalLocation.time);
+            assertNotNull(historicalLocation.id());
+            assertNotNull(historicalLocation.time());
 
             // Check self link
-            utils.assertURLStatus(historicalLocation.selfLink);
+            utils.assertURLStatus(historicalLocation.selfLink());
             utils.assertDtoEquals(historicalLocation,
-                    utils.queryJson(historicalLocation.selfLink, HistoricalLocation.class), HistoricalLocation.class);
+                    utils.queryJson(historicalLocation.selfLink(), HistoricalLocation.class), HistoricalLocation.class);
 
             // Check sub-links existence
-            checkSubLinks(historicalLocation, historicalLocation.locationsLink, RESULT_LOCATIONS, Location.class);
-            utils.assertURLStatus(historicalLocation.thingLink);
+            checkSubLinks(historicalLocation, historicalLocation.locationsLink(), RESULT_LOCATIONS, Location.class);
+            utils.assertURLStatus(historicalLocation.thingLink());
         }
     }
 
@@ -375,41 +375,41 @@ public class LinksTest extends AbstractIntegrationTest {
         // Get the new locations
         ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
         assertNotNull(datastreams);
-        assertFalse(datastreams.value.isEmpty(), "No datastream found");
+        assertFalse(datastreams.value().isEmpty(), "No datastream found");
 
-        for (final Datastream datastream : datastreams.value) {
+        for (final Datastream datastream : datastreams.value()) {
             assertNotNull(datastream);
-            assertNotNull(datastream.id);
-            assertNotNull(datastream.name);
-            assertNotNull(datastream.unitOfMeasurement);
+            assertNotNull(datastream.id());
+            assertNotNull(datastream.name());
+            assertNotNull(datastream.unitOfMeasurement());
 
             // Check self link
-            utils.assertURLStatus(datastream.selfLink);
-            utils.assertDtoEquals(datastream, utils.queryJson(datastream.selfLink, Datastream.class), Datastream.class);
+            utils.assertURLStatus(datastream.selfLink());
+            utils.assertDtoEquals(datastream, utils.queryJson(datastream.selfLink(), Datastream.class), Datastream.class);
 
             // Check sub-links
-            checkSubLinks(datastream, datastream.observationsLink, RESULT_OBSERVATIONS, Observation.class);
-            ObservedProperty obsProp = utils.queryJson(datastream.observedPropertyLink, ObservedProperty.class);
-            Sensor sensor = utils.queryJson(datastream.sensorLink, Sensor.class);
-            Thing thing = utils.queryJson(datastream.thingLink, Thing.class);
+            checkSubLinks(datastream, datastream.observationsLink(), RESULT_OBSERVATIONS, Observation.class);
+            ObservedProperty obsProp = utils.queryJson(datastream.observedPropertyLink(), ObservedProperty.class);
+            Sensor sensor = utils.queryJson(datastream.sensorLink(), Sensor.class);
+            Thing thing = utils.queryJson(datastream.thingLink(), Thing.class);
 
             // Check mirrors
-            ResultList<Observation> observations = utils.queryJson(datastream.observationsLink, RESULT_OBSERVATIONS);
-            Set<Object> observationIDs = observations.value.stream().map(o -> o.id).collect(Collectors.toSet());
-            for (Observation obs : observations.value) {
+            ResultList<Observation> observations = utils.queryJson(datastream.observationsLink(), RESULT_OBSERVATIONS);
+            Set<Object> observationIDs = observations.value().stream().map(o -> o.id()).collect(Collectors.toSet());
+            for (Observation obs : observations.value()) {
                 Set<Object> obsDatastreamObsIDs = listIdsFromURL(
-                        String.format("/Observations(%s)/Datastream/Observations", obs.id));
+                        String.format("/Observations(%s)/Datastream/Observations", obs.id()));
                 assertEquals(observationIDs, obsDatastreamObsIDs);
 
                 utils.assertDtoEquals(obsProp,
-                        utils.queryJson(String.format("/Observations(%s)/Datastream/ObservedProperty", obs.id),
+                        utils.queryJson(String.format("/Observations(%s)/Datastream/ObservedProperty", obs.id()),
                                 ObservedProperty.class),
                         ObservedProperty.class);
                 utils.assertDtoEquals(sensor,
-                        utils.queryJson(String.format("/Observations(%s)/Datastream/Sensor", obs.id), Sensor.class),
+                        utils.queryJson(String.format("/Observations(%s)/Datastream/Sensor", obs.id()), Sensor.class),
                         Sensor.class);
                 utils.assertDtoEquals(thing,
-                        utils.queryJson(String.format("/Observations(%s)/Datastream/Thing", obs.id), Thing.class),
+                        utils.queryJson(String.format("/Observations(%s)/Datastream/Thing", obs.id()), Thing.class),
                         Thing.class);
             }
         }
@@ -426,21 +426,21 @@ public class LinksTest extends AbstractIntegrationTest {
         // Get the new locations
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
         assertNotNull(sensors);
-        assertFalse(sensors.value.isEmpty(), "No sensor found");
+        assertFalse(sensors.value().isEmpty(), "No sensor found");
 
-        for (final Sensor sensor : sensors.value) {
+        for (final Sensor sensor : sensors.value()) {
             assertNotNull(sensor);
-            assertNotNull(sensor.id);
-            assertNotNull(sensor.name);
+            assertNotNull(sensor.id());
+            assertNotNull(sensor.name());
 
             // Check self link
-            utils.assertURLStatus(sensor.selfLink);
-            utils.assertDtoEquals(sensor, utils.queryJson(sensor.selfLink, Sensor.class), Sensor.class);
+            utils.assertURLStatus(sensor.selfLink());
+            utils.assertDtoEquals(sensor, utils.queryJson(sensor.selfLink(), Sensor.class), Sensor.class);
 
             // Check sub-links existence
-            checkSubLinks(sensor, sensor.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(sensor, sensor.datastreamsLink(), RESULT_DATASTREAMS, Datastream.class);
 
-            Set<Object> datastreamIDs = listIdsFromURL(sensor.datastreamsLink);
+            Set<Object> datastreamIDs = listIdsFromURL(sensor.datastreamsLink());
             for (Object dsId : datastreamIDs) {
                 Set<Object> dsStreamIDs = listIdsFromURL(String.format("/Datastreams(%s)/Sensor/Datastreams", dsId));
                 assertEquals(datastreamIDs, dsStreamIDs);
@@ -459,22 +459,22 @@ public class LinksTest extends AbstractIntegrationTest {
         // Get the new locations
         ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
         assertNotNull(observations);
-        assertFalse(observations.value.isEmpty(), "No observation found");
+        assertFalse(observations.value().isEmpty(), "No observation found");
 
-        for (final Observation observation : observations.value) {
+        for (final Observation observation : observations.value()) {
             assertNotNull(observation);
-            assertNotNull(observation.id);
-            assertNotNull(observation.phenomenonTime);
-            assertNotNull(observation.resultTime);
+            assertNotNull(observation.id());
+            assertNotNull(observation.phenomenonTime());
+            assertNotNull(observation.resultTime());
 
             // Check self link
-            utils.assertURLStatus(observation.selfLink);
-            utils.assertDtoEquals(observation, utils.queryJson(observation.selfLink, Observation.class),
+            utils.assertURLStatus(observation.selfLink());
+            utils.assertDtoEquals(observation, utils.queryJson(observation.selfLink(), Observation.class),
                     Observation.class);
 
             // Check sub-links existence
-            utils.assertURLStatus(observation.datastreamLink);
-            utils.assertURLStatus(observation.featureOfInterestLink);
+            utils.assertURLStatus(observation.datastreamLink());
+            utils.assertURLStatus(observation.featureOfInterestLink());
         }
     }
 
@@ -491,22 +491,22 @@ public class LinksTest extends AbstractIntegrationTest {
                 new TypeReference<ResultList<ObservedProperty>>() {
                 });
         assertNotNull(observedProperties);
-        assertFalse(observedProperties.value.isEmpty(), "No observed property found");
+        assertFalse(observedProperties.value().isEmpty(), "No observed property found");
 
-        for (final ObservedProperty observed : observedProperties.value) {
+        for (final ObservedProperty observed : observedProperties.value()) {
             assertNotNull(observed);
-            assertNotNull(observed.id);
-            assertNotNull(observed.name);
+            assertNotNull(observed.id());
+            assertNotNull(observed.name());
 
             // Check self link
-            utils.assertURLStatus(observed.selfLink);
-            utils.assertDtoEquals(observed, utils.queryJson(observed.selfLink, ObservedProperty.class),
+            utils.assertURLStatus(observed.selfLink());
+            utils.assertDtoEquals(observed, utils.queryJson(observed.selfLink(), ObservedProperty.class),
                     ObservedProperty.class);
 
             // Check sub-links existence
-            checkSubLinks(observed, observed.datastreamsLink, RESULT_DATASTREAMS, Datastream.class);
+            checkSubLinks(observed, observed.datastreamsLink(), RESULT_DATASTREAMS, Datastream.class);
 
-            Set<Object> datastreamIDs = listIdsFromURL(observed.datastreamsLink);
+            Set<Object> datastreamIDs = listIdsFromURL(observed.datastreamsLink());
             for (Object dsId : datastreamIDs) {
                 Set<Object> dsStreamIDs = listIdsFromURL(
                         String.format("/Datastreams(%s)/ObservedProperty/Datastreams", dsId));
@@ -528,26 +528,26 @@ public class LinksTest extends AbstractIntegrationTest {
                 new TypeReference<ResultList<FeatureOfInterest>>() {
                 });
         assertNotNull(features);
-        assertFalse(features.value.isEmpty(), "No features found");
+        assertFalse(features.value().isEmpty(), "No features found");
 
-        for (final FeatureOfInterest feature : features.value) {
+        for (final FeatureOfInterest feature : features.value()) {
             assertNotNull(feature);
-            assertNotNull(feature.id);
-            assertNotNull(feature.name);
+            assertNotNull(feature.id());
+            assertNotNull(feature.name());
 
             // Check self link
-            utils.assertURLStatus(feature.selfLink);
-            utils.assertDtoEquals(feature, utils.queryJson(feature.selfLink, FeatureOfInterest.class),
+            utils.assertURLStatus(feature.selfLink());
+            utils.assertDtoEquals(feature, utils.queryJson(feature.selfLink(), FeatureOfInterest.class),
                     FeatureOfInterest.class);
 
             // Observations have a timestamp, but not the feature of interest
-            checkSubLinks(feature, feature.observationsLink, RESULT_OBSERVATIONS, Observation.class);
+            checkSubLinks(feature, feature.observationsLink(), RESULT_OBSERVATIONS, Observation.class);
 
-            ResultList<Observation> observations = utils.queryJson(feature.observationsLink, RESULT_OBSERVATIONS);
-            Set<Object> observationIDs = observations.value.stream().map(o -> o.id).collect(Collectors.toSet());
-            for (Observation obs : observations.value) {
+            ResultList<Observation> observations = utils.queryJson(feature.observationsLink(), RESULT_OBSERVATIONS);
+            Set<Object> observationIDs = observations.value().stream().map(o -> o.id()).collect(Collectors.toSet());
+            for (Observation obs : observations.value()) {
                 Set<Object> obsFeaturesObsIDs = listIdsFromURL(
-                        String.format("/Observations(%s)/FeatureOfInterest/Observations", obs.id));
+                        String.format("/Observations(%s)/FeatureOfInterest/Observations", obs.id()));
                 assertEquals(observationIDs, obsFeaturesObsIDs);
             }
         }

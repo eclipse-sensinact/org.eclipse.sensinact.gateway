@@ -41,7 +41,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(LOCATIONS), providerSnapshot);
 
-        if(!id.equals(l.id)) {
+        if(!id.equals(l.id())) {
             throw new NotFoundException();
         }
 
@@ -56,9 +56,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-            if (list.value.isEmpty()) {
-                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
+            if (list.value().isEmpty()) {
+                list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -73,7 +73,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
 
-        if(hl.isEmpty() || !id2.equals(hl.get().id)) {
+        if(hl.isEmpty() || !id2.equals(hl.get().id())) {
             throw new NotFoundException();
         }
         return hl.get();
@@ -92,16 +92,12 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
 
     @Override
     public ResultList<Location> getLocationHistoricalLocationLocations(String id, String id2) {
-        ResultList<Location> list = new ResultList<>();
-        list.value = List.of(getLocation(id));
-        return list;
+        return new ResultList<>(null, null, List.of(getLocation(id)));
     }
 
     @Override
     public ResultList<Thing> getLocationThings(String id) {
-        ResultList<Thing> list = new ResultList<>();
-        list.value = List.of(getLocationThing(id, id));
-        return list;
+        return new ResultList<>(null, null, List.of(getLocationThing(id, id)));
     }
 
     @Override
@@ -127,9 +123,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-            if (list.value.isEmpty()) {
-                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
+            if (list.value().isEmpty()) {
+                list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -139,8 +135,6 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
 
     @Override
     public ResultList<Location> getLocationThingLocations(String id, String id2) {
-        ResultList<Location> list = new ResultList<>();
-        list.value = List.of(getLocation(id));
-        return list;
+        return new ResultList<>(null, null, List.of(getLocation(id)));
     }
 }

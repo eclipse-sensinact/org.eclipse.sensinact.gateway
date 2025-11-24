@@ -107,110 +107,79 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public ResultList<Thing> getThings() {
-        ResultList<Thing> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        list.value = providers.stream()
+        return new ResultList<>(null, null, providers.stream()
                 .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .collect(toList());
-
-        return list;
+                .toList());
     }
 
     @Override
     public ResultList<Location> getLocations() {
-        ResultList<Location> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
+        return new ResultList<>(null, null, providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .collect(toList());
-
-        return list;
+                .toList());
     }
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocations() {
-        ResultList<HistoricalLocation> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        list.value = providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
+        return new ResultList<>(null, null, providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
                 .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(toList());
-        return list;
+                .toList());
     }
 
     @Override
     public ResultList<Datastream> getDatastreams() {
-        ResultList<Datastream> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         List<ResourceSnapshot> resources = listSetResources(criterion);
-        list.value = resources.stream()
+        return new ResultList<>(null, null, resources.stream()
                 .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r, criterion))
-                .collect(toList());
-
-        return list;
+                .toList());
     }
 
     @Override
     public ResultList<Sensor> getSensors() {
-        ResultList<Sensor> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.SENSORS);
         List<ResourceSnapshot> resources = listSetResources(criterion);
-        list.value = resources.stream()
+        return new ResultList<>(null, null, resources.stream()
                 .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                .collect(toList());
-
-        return list;
+                .toList());
     }
 
     // No history as it is *live* observation data not a data stream
     @Override
     public ResultList<Observation> getObservations() {
-        ResultList<Observation> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
         List<ResourceSnapshot> resources = listSetResources(criterion);
-        list.value = resources.stream()
+        return new ResultList<>(null, null, resources.stream()
                 .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(toList());
-
-        return list;
+                .toList());
     }
 
     @Override
     public ResultList<ObservedProperty> getObservedProperties() {
-        ResultList<ObservedProperty> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
         List<ResourceSnapshot> resources = listSetResources(criterion);
-        list.value = resources.stream()
+        return new ResultList<>(null, null, resources.stream()
                 .map(r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                .collect(toList());
-
-        return list;
+                .toList());
     }
 
     @Override
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
-        ResultList<FeatureOfInterest> list = new ResultList<>();
-
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        list.value = providers.stream()
+        return new ResultList<>(null, null, providers.stream()
                 .map(p -> toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .collect(toList());
-
-        return list;
+                .toList());
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
@@ -227,9 +196,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<Observation> list = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
                 mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
-        if (list.value.isEmpty() && resourceSnapshot.isSet()) {
-            DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
-                .ifPresent(list.value::add);
+        if (list.value().isEmpty() && resourceSnapshot.isSet()) {
+            list = new ResultList<Observation>(null, null, DtoMapper
+                    .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
+                    .map(List::of)
+                    .orElse(List.of()));
         }
 
         return list;

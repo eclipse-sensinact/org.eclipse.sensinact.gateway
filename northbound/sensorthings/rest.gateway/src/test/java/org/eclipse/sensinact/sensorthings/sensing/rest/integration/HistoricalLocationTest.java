@@ -248,7 +248,7 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
 
         ResultList<HistoricalLocation> o = utils.queryJson("/Things(fizz)/HistoricalLocations?$count=true", new TypeReference<ResultList<HistoricalLocation>>() {
         });
-        assertEquals(o.count, 10);
+        assertEquals(o.count(), 10);
     }
 
     @Test
@@ -261,7 +261,7 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
 
         ResultList<HistoricalLocation> o = utils.queryJson("/Locations(fizz)/HistoricalLocations?$count=true", new TypeReference<ResultList<HistoricalLocation>>() {
         });
-        assertEquals(o.count, 10);
+        assertEquals(o.count(), 10);
     }
 
     @Test
@@ -279,7 +279,7 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
                 "/Datastreams(" + id + ")/Thing/HistoricalLocations?$count=true",
                 new TypeReference<ResultList<HistoricalLocation>>() {
                 });
-        assertEquals(o.count, 10);
+        assertEquals(o.count(), 10);
     }
 
 }

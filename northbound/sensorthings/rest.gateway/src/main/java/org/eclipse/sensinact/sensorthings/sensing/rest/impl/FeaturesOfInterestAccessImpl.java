@@ -51,7 +51,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
-        if (!foi.id.equals(id)) {
+        if (!foi.id().equals(id)) {
             throw new NotFoundException();
         }
         return foi;
@@ -68,15 +68,13 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
 
     static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
-        ResultList<Observation> list = new ResultList<>();
-        list.value = provider.getServices().stream()
+        return new ResultList<>(null, null, provider.getServices().stream()
                 .flatMap(s -> s.getResources().stream())
                 .filter(ResourceSnapshot::isSet)
                 .map(r -> DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, filter, r))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(toList());
-        return list;
+                .collect(toList()));
     }
 
     @Override
@@ -97,7 +95,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
             throw new NotFoundException();
         }
 
-        if (o.isEmpty() || !id2.equals(o.get().id)) {
+        if (o.isEmpty() || !id2.equals(o.get().id())) {
             throw new NotFoundException();
         }
 
@@ -122,7 +120,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
             throw new NotFoundException();
         }
 
-        if (!id2.startsWith(String.valueOf(d.id))) {
+        if (!id2.startsWith(String.valueOf(d.id()))) {
             throw new NotFoundException();
         }
 

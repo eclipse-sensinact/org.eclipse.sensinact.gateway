@@ -262,37 +262,37 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
 
-        assertEquals(1000, observations.count);
-        assertEquals(500, observations.value.size()); //Is this 500 because of https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
-        assertNotNull(observations.nextLink);
+        assertEquals(1000, observations.count());
+        assertEquals(500, observations.value().size()); //Is this 500 because of https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
+        assertNotNull(observations.nextLink());
 
         for (int i = 0; i < 500; i++) {
             Instant ts = TS_2012.plus(ofDays(i));
-            assertEquals(ts, observations.value.get(i).resultTime);
-            assertEquals(String.valueOf(i), observations.value.get(i).result);
+            assertEquals(ts, observations.value().get(i).resultTime());
+            assertEquals(String.valueOf(i), observations.value().get(i).result());
         }
 
-        observations = utils.queryJson(observations.nextLink, RESULT_OBSERVATIONS);
+        observations = utils.queryJson(observations.nextLink(), RESULT_OBSERVATIONS);
 
-        assertEquals(1000, observations.count);
-        assertEquals(500, observations.value.size());
-        assertNull(observations.nextLink);
+        assertEquals(1000, observations.count());
+        assertEquals(500, observations.value().size());
+        assertNull(observations.nextLink());
 
         for (int i = 0; i < 500; i++) {
             Instant ts = TS_2012.plus(ofDays(i + 500));
-            assertEquals(ts, observations.value.get(i).resultTime);
-            assertEquals(String.valueOf(i + 500), observations.value.get(i).result);
+            assertEquals(ts, observations.value().get(i).resultTime());
+            assertEquals(String.valueOf(i + 500), observations.value().get(i).result());
         }
 
         observations = utils.queryJson("/Datastreams(foo~bar~foobar)/Observations?$count=true", RESULT_OBSERVATIONS);
-        assertEquals(4000, observations.count);
-        assertEquals(500, observations.value.size());
-        assertNotNull(observations.nextLink);
+        assertEquals(4000, observations.count());
+        assertEquals(500, observations.value().size());
+        assertNotNull(observations.nextLink());
 
         for (int i = 0; i < 500; i++) {
             Instant ts = TS_2012.plus(ofDays(i + 1000));
-            assertEquals(ts, observations.value.get(i).resultTime);
-            assertEquals(i + 1000, observations.value.get(i).result);
+            assertEquals(ts, observations.value().get(i).resultTime());
+            assertEquals(i + 1000, observations.value().get(i).result());
         }
     }
 
@@ -310,9 +310,9 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
         Observation o = utils.queryJson("/Observations(" + id + ")", new TypeReference<Observation>() {
         });
-        assertEquals(id, o.id);
-        assertEquals(TS_2012.plus(ofDays(3)), o.resultTime);
-        assertEquals("3", o.result);
+        assertEquals(id, o.id());
+        assertEquals(TS_2012.plus(ofDays(3)), o.resultTime());
+        assertEquals("3", o.result());
     }
 
     @Test
@@ -325,20 +325,20 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });
 
-        assertFalse(streams.value.isEmpty());
-        Datastream datastream = streams.value.stream().filter(d -> "ding~dong~bell".equals(d.id)).findFirst().get();
+        assertFalse(streams.value().isEmpty());
+        Datastream datastream = streams.value().stream().filter(d -> "ding~dong~bell".equals(d.id())).findFirst().get();
 
-        ResultList<Observation> observations = utils.queryJson(datastream.observationsLink,
+        ResultList<Observation> observations = utils.queryJson(datastream.observationsLink(),
                 new TypeReference<ResultList<Observation>>() {
                 });
 
-        assertEquals(10, observations.value.size());
-        Observation observation = observations.value.get(1);
+        assertEquals(10, observations.value().size());
+        Observation observation = observations.value().get(1);
         String id = String.format("%s~%s~%s~%s", "ding", "dong", "bell",
                 Long.toString(TS_2012.plus(ofDays(1)).toEpochMilli(), 16));
-        assertEquals(id, observation.id);
-        assertEquals(TS_2012.plus(ofDays(1)), observation.resultTime);
-        assertEquals("1", observation.result);
+        assertEquals(id, observation.id());
+        assertEquals(TS_2012.plus(ofDays(1)), observation.resultTime());
+        assertEquals("1", observation.result());
     }
 
     @Test
@@ -367,11 +367,11 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                         URLEncoder.encode("phenomenonTime lt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
                 RESULT_OBSERVATIONS);
 
-        assertEquals(1, observations.value.size(), "Should find exactly one observation for earlier timestamp");
-        Observation obs = observations.value.get(0);
-        assertTrue(obs.id.toString().startsWith(testProvider + "~"), "Should be from testProvider: " + obs.id);
-        assertEquals(earlierTime, obs.phenomenonTime);
-        assertEquals(25.5, obs.result);
+        assertEquals(1, observations.value().size(), "Should find exactly one observation for earlier timestamp");
+        Observation obs = observations.value().get(0);
+        assertTrue(obs.id().toString().startsWith(testProvider + "~"), "Should be from testProvider: " + obs.id());
+        assertEquals(earlierTime, obs.phenomenonTime());
+        assertEquals(25.5, obs.result());
 
         // Test phenomenonTime gt filter - should return only the later observation
         observations = utils.queryJson(
@@ -380,11 +380,11 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                         URLEncoder.encode("phenomenonTime gt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
                 RESULT_OBSERVATIONS);
 
-        assertEquals(1, observations.value.size(), "Should find exactly one observation for later timestamp");
-        obs = observations.value.get(0);
-        assertTrue(obs.id.toString().startsWith(testProvider + "~"), "Should be from testProvider: " + obs.id);
-        assertEquals(laterTime, obs.phenomenonTime);
-        assertEquals(30.2, obs.result);
+        assertEquals(1, observations.value().size(), "Should find exactly one observation for later timestamp");
+        obs = observations.value().get(0);
+        assertTrue(obs.id().toString().startsWith(testProvider + "~"), "Should be from testProvider: " + obs.id());
+        assertEquals(laterTime, obs.phenomenonTime());
+        assertEquals(30.2, obs.result());
 
     }
 
@@ -400,12 +400,12 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                         "/Datastreams(foo~bar~foobar)/Observations?$filter=%s",
                         URLEncoder.encode("phenomenonTime gt 2014-07-01T00:00:00Z and phenomenonTime lt 2014-07-10T00:00:00Z ", StandardCharsets.UTF_8)),
                 new TypeReference<>() {});
-        assertEquals(9, observations.value.size(), "Should find 9 observations between 1.7.2014 and 10.7.2014");
+        assertEquals(9, observations.value().size(), "Should find 9 observations between 1.7.2014 and 10.7.2014");
         Instant start = ZonedDateTime.of(2014, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC).toInstant();
         Instant end = ZonedDateTime.of(2014, 7, 10, 0, 0, 0, 0, ZoneOffset.UTC).toInstant();
-        for (Observation obs : observations.value) {
-            assertTrue(obs.phenomenonTime.isAfter(start));
-            assertTrue(obs.phenomenonTime.isBefore(end));
+        for (Observation obs : observations.value()) {
+            assertTrue(obs.phenomenonTime().isAfter(start));
+            assertTrue(obs.phenomenonTime().isBefore(end));
         }
     }
 }

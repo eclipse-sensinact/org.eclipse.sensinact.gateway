@@ -89,7 +89,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), resourceSnapshot, parseFilter(DATASTREAMS));
 
-        if (!id.startsWith(String.valueOf(d.id))) {
+        if (!id.startsWith(String.valueOf(d.id()))) {
             throw new NotFoundException();
         }
 
@@ -116,7 +116,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
 
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(SENSORS), resourceSnapshot);
-        if (!id.startsWith(String.valueOf(s.id))) {
+        if (!id.startsWith(String.valueOf(s.id()))) {
             throw new NotFoundException();
         }
         return s;
@@ -129,7 +129,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
 
         Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(THINGS), providerSnapshot);
-        if (!provider.equals(t.id)) {
+        if (!provider.equals(t.id())) {
             throw new NotFoundException();
         }
         return t;
@@ -150,15 +150,14 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
-        ResultList<Observation> list = new ResultList<>();
-        list.value =  providerSnapshot.getServices().stream()
+        return new ResultList<>(null, null, providerSnapshot
+                .getServices().stream()
                 .flatMap(s -> s.getResources().stream())
                 .filter(ResourceSnapshot::isSet)
                 .map(r -> DtoMapper.toObservation(getSession(), application, getMapper(),
                         uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .toList();
-        return list;
+                .toList());
     }
 }

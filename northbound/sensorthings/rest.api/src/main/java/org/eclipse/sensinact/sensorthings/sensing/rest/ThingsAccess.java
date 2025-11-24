@@ -59,8 +59,10 @@ public interface ThingsAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getThingDatastreamsRef(@PathParam("id") String id) {
-        return getThingDatastreams(id);
+    default public ResultList<Self> getThingDatastreamsRef(@PathParam("id") String id) {
+        ResultList<Datastream> thingDatastreams = getThingDatastreams(id);
+        return new ResultList<>(thingDatastreams.count(), thingDatastreams.nextLink(),
+                thingDatastreams.value());
     }
 
     @Path("Datastreams({id2})")
@@ -97,8 +99,10 @@ public interface ThingsAccess {
     @Path("HistoricalLocations/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getThingHistoricalLocationsRef(@PathParam("id") String id) {
-        return getThingHistoricalLocations(id);
+    default public ResultList<Self> getThingHistoricalLocationsRef(@PathParam("id") String id) {
+        ResultList<HistoricalLocation> thingHistoricalLocations = getThingHistoricalLocations(id);
+        return new ResultList<>(thingHistoricalLocations.count(), thingHistoricalLocations.nextLink(),
+                thingHistoricalLocations.value());
     }
 
     @Path("HistoricalLocations({id2})")
@@ -127,8 +131,10 @@ public interface ThingsAccess {
     @Path("Locations/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getThingLocationsRef(@PathParam("id") String id) {
-        return getThingLocations(id);
+    default public ResultList<Self> getThingLocationsRef(@PathParam("id") String id) {
+        ResultList<Location> thingLocations = getThingLocations(id);
+        return new ResultList<>(thingLocations.count(), thingLocations.nextLink(),
+                thingLocations.value());
     }
 
     @Path("Locations({id2})")

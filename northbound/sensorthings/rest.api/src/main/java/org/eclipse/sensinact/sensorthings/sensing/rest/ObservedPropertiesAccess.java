@@ -57,8 +57,10 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getObservedPropertyDatastreamsRef(@PathParam("id") String id) {
-        return getObservedPropertyDatastreams(id);
+    default public ResultList<Self> getObservedPropertyDatastreamsRef(@PathParam("id") String id) {
+        ResultList<Datastream> observedPropertyDatastreams = getObservedPropertyDatastreams(id);
+        return new ResultList<Self>(observedPropertyDatastreams.count(), observedPropertyDatastreams.nextLink(),
+                observedPropertyDatastreams.value());
     }
 
     @Path("Datastreams({id2})")

@@ -127,7 +127,7 @@ class HistoryResourceHelperTest {
                     application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
-            assertTrue(result.value.isEmpty());
+            assertTrue(result.value().isEmpty());
         }
 
         @Test
@@ -156,7 +156,7 @@ class HistoryResourceHelperTest {
                     application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
-            assertEquals(count.intValue(), result.count.intValue());
+            assertEquals(count.intValue(), result.count().intValue());
             verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
             verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
         }
@@ -214,13 +214,13 @@ class HistoryResourceHelperTest {
                     application, mapper, uriInfo, expansions, resourceSnapshot, filter, 0);
 
             assertNotNull(result);
-            assertEquals(4, result.value.size());
+            assertEquals(4, result.value().size());
             // Result batches come in reverse order
-            assertEquals("value1", result.value.get(0).result);
-            assertEquals("value3", result.value.get(1).result);
-            assertEquals("value1", result.value.get(2).result);
-            assertEquals("value1", result.value.get(3).result);
-            assertEquals(4, result.count.intValue());
+            assertEquals("value1", result.value().get(0).result());
+            assertEquals("value3", result.value().get(1).result());
+            assertEquals("value1", result.value().get(2).result());
+            assertEquals("value1", result.value().get(3).result());
+            assertEquals(4, result.count().intValue());
             verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
             verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
         }
@@ -250,7 +250,7 @@ class HistoryResourceHelperTest {
                     application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
-            assertEquals(Integer.MAX_VALUE, result.count.intValue());
+            assertEquals(Integer.MAX_VALUE, result.count().intValue());
         }
 
         @Test
@@ -270,7 +270,7 @@ class HistoryResourceHelperTest {
                     application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
-            assertEquals(null, result.count);
+            assertEquals(null, result.count());
         }
     }
 }

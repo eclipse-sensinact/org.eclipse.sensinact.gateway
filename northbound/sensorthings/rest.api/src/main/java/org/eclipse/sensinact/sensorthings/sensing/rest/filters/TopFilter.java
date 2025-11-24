@@ -52,17 +52,18 @@ public class TopFilter implements ContainerRequestFilter, ContainerResponseFilte
 
         Object entity = responseContext.getEntity();
         if (entity instanceof ResultList) {
-            @SuppressWarnings("unchecked")
-            ResultList<Self> resultList = (ResultList<Self>) entity;
-            int size = resultList.value.size();
-            resultList.value = resultList.value.subList(0, Math.min(top, size));
+            ResultList<? extends Self> resultList = (ResultList<?>) entity;
+            int size = resultList.value().size();
+            List<? extends Self> value = resultList.value().subList(0, Math.min(top, size));
 
             Integer skip = (Integer) requestContext.getProperty(SkipFilter.SKIP_PROP);
             Integer nextSkip = (skip == null) ? top : top + skip;
+            String nextLink = null;
             if (top < size) {
-                resultList.nextLink = requestContext.getUriInfo().getRequestUriBuilder()
+                nextLink = requestContext.getUriInfo().getRequestUriBuilder()
                         .replaceQueryParam("$skip", nextSkip).build().toString();
             }
+            responseContext.setEntity(new ResultList<>(resultList.count(), nextLink, value));
         }
     }
 

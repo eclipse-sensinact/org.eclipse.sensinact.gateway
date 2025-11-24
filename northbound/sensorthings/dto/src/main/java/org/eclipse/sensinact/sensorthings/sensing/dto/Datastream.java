@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import java.util.Map;
@@ -22,35 +23,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Datastream extends NameDescription {
-
-    public String observationType;
-
-    public UnitOfMeasurement unitOfMeasurement;
-
-    @JsonInclude(NON_NULL)
-    public Geometry observedArea;
-
-    @JsonInclude(NON_NULL)
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    public TimeInterval phenomenonTime;
-
-    @JsonInclude(NON_NULL)
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    public TimeInterval resultTime;
-
-    @JsonInclude(NON_NULL)
-    public Map<String, Object> properties;
-
-    @JsonProperty("Observations@iot.navigationLink")
-    public String observationsLink;
-
-    @JsonProperty("ObservedProperty@iot.navigationLink")
-    public String observedPropertyLink;
-
-    @JsonProperty("Sensor@iot.navigationLink")
-    public String sensorLink;
-
-    @JsonProperty("Thing@iot.navigationLink")
-    public String thingLink;
+public record Datastream(String selfLink, Object id, String name, String description, String observationType,
+        UnitOfMeasurement unitOfMeasurement, @JsonInclude(NON_NULL) Geometry observedArea,
+        @JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval phenomenonTime,
+        @JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval resultTime,
+        @JsonInclude(NON_NULL) Map<String, Object> properties,
+        @JsonProperty("Observations@iot.navigationLink") String observationsLink,
+        @JsonProperty("ObservedProperty@iot.navigationLink") String observedPropertyLink,
+        @JsonProperty("Sensor@iot.navigationLink") String sensorLink,
+        @JsonProperty("Thing@iot.navigationLink") String thingLink) implements NameDescription {
 }

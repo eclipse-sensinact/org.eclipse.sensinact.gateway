@@ -55,8 +55,10 @@ public interface FeaturesOfInterestAccess {
     @Path("Observations/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getFeatureOfInterestObservationsRef(@PathParam("id") String id) {
-        return getFeatureOfInterestObservations(id);
+    default public ResultList<Self> getFeatureOfInterestObservationsRef(@PathParam("id") String id) {
+        ResultList<Observation> featureOfInterestObservations = getFeatureOfInterestObservations(id);
+        return new ResultList<Self>(featureOfInterestObservations.count(), featureOfInterestObservations.nextLink(),
+                featureOfInterestObservations.value());
     }
 
     @Path("Observations({id2})")

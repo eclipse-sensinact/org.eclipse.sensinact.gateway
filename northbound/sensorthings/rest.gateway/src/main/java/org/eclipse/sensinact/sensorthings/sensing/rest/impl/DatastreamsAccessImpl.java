@@ -71,7 +71,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
         Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 filter, validateAndGetResourceSnapshot(id));
 
-        if (o.isEmpty() || !id2.equals(o.get().id)) {
+        if (o.isEmpty() || !id2.equals(o.get().id())) {
             throw new NotFoundException();
         }
         return o.get();
@@ -94,7 +94,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
 
-        if (!id.equals(o.id)) {
+        if (!id.equals(o.id())) {
             throw new NotFoundException();
         }
         return o;
@@ -102,9 +102,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
 
     @Override
     public ResultList<Datastream> getDatastreamObservedPropertyDatastreams(String id) {
-        ResultList<Datastream> list = new ResultList<>();
-        list.value = List.of(getDatastream(id));
-        return list;
+        return new ResultList<>(null, null, List.of(getDatastream(id)));
     }
 
     @Override
@@ -112,7 +110,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(SENSORS), validateAndGetResourceSnapshot(id));
 
-        if (!id.equals(s.id)) {
+        if (!id.equals(s.id())) {
             throw new NotFoundException();
         }
         return s;
@@ -146,9 +144,9 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-            if (list.value.isEmpty())
-                DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot).ifPresent(list.value::add);
+            if (list.value().isEmpty())
+                list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -167,19 +165,15 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
             throw new NotFoundException();
         }
 
-        ResultList<Location> list = new ResultList<>();
-        list.value = List.of(hl);
-        return list;
+        return new ResultList<>(null, null, List.of(hl));
     }
 
     static ResultList<Datastream> getDataStreams(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot providerSnapshot) {
-        ResultList<Datastream> list = new ResultList<>();
-        list.value = providerSnapshot.getServices().stream()
+        return new ResultList<>(null, null, providerSnapshot.getServices().stream()
                 .flatMap(s -> s.getResources().stream())
                 .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
-                .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter)).collect(toList());
-        return list;
+                .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter)).collect(toList()));
     }
 }

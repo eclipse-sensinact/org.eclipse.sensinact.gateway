@@ -57,8 +57,9 @@ public interface SensorsAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    default public ResultList<? extends Self> getSensorDatastreamsRef(@PathParam("id") String id) {
-        return getSensorDatastreams(id);
+    default public ResultList<Self> getSensorDatastreamsRef(@PathParam("id") String id) {
+        ResultList<Datastream> sensorDatastreams = getSensorDatastreams(id);
+        return new ResultList<Self>(sensorDatastreams.count(), sensorDatastreams.nextLink(), sensorDatastreams.value());
     }
 
     @Path("Datastreams({id2})")
