@@ -27,9 +27,20 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
+      <artifactId>models</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>rest.api</artifactId>
       <version>${project.version}</version>
+    </dependency>
+     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
+      <artifactId>rest.gateway</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -81,13 +92,18 @@
     <!-- OSGi -->
     <dependency>
       <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.osgi</groupId>
       <artifactId>osgi.cmpn</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -210,6 +226,25 @@
         <groupId>org.eclipse.sensinact.gateway.core</groupId>
         <artifactId>emf-api</artifactId>
         <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+    <!-- gogo shell test --> 
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.shell</artifactId>
+      <version>1.1.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>1.1.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.gogo.command</artifactId>
+      <version>1.1.2</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

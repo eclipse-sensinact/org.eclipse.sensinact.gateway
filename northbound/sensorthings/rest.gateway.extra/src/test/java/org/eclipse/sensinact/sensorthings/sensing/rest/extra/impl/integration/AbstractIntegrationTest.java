@@ -18,10 +18,7 @@ import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.rest.ISensinactSensorthingsApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -50,9 +47,6 @@ public class AbstractIntegrationTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
     static final HttpClient client = HttpClient.newHttpClient();
-
-    protected SensiNactSessionManager sessionManager;
-    protected SensiNactSession session;
 
     @InjectService
     protected GatewayThread thread;
@@ -127,11 +121,8 @@ public class AbstractIntegrationTest {
 
         Application app = tracker.waitForService(5000);
         assertNotNull(app);
-        assertInstanceOf(ISensinactSensorthingsApplication.class, app);
 
-        sessionManager = ((ISensinactSensorthingsApplication) app).getSessionManager();
-
-        session = sessionManager.getDefaultSession(USER);
+        assertInstanceOf(Application.class, app);
 
         // Wait for the servlet to be ready
         boolean ready = false;
@@ -154,7 +145,6 @@ public class AbstractIntegrationTest {
 
     @AfterEach
     void stop() {
-        session.expire();
 
         thread.execute(new AbstractSensinactCommand<Void>() {
             @Override

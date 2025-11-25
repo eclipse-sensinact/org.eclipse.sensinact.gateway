@@ -15,7 +15,12 @@ public abstract class AbstractExtraUseCase<D extends Id> implements IExtraUseCas
         this.type = (Class<D>) param;
     }
 
+    protected String sanitizeId(Object object) {
+        return String.valueOf(object).replaceAll("[^0-9a-zA-Z\\.\\-_]", "_");
+    }
+
     public Class<D> getType() {
         return type;
     }
+
 }

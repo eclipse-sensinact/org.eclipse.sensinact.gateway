@@ -1,59 +1,48 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
+
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-@Component(service = IExtraUseCase.class, property = {
-        "model.class=org.eclipse.sensinact.sensorthings.sensing.dto.Location" })
-@JakartarsApplicationSelect(value = "sensorthings")
+@Component(service = IExtraUseCase.class)
 public class LocationsExtraUseCase extends AbstractExtraUseCase<Location> {
 
     @Reference
     DataUpdate dataUpdate;
 
     @Reference
-    IAccessProviderUseCase providerUseCase;
+    IAccessResourceUseCase resourceUseCase;
 
-    public boolean create(SensiNactSession session, Location dto) {
-        String providerId = dto.thingsLink;
-        // check if provider exists
-        ProviderSnapshot providerSnapshot = providerUseCase.read(session, providerId);
-        // call create
-        if (providerSnapshot == null) {
-            return false;
-        }
-        dataUpdate.pushUpdate(dto);
-
-        return false;
+    @Override
+    public ExtraUseCaseResponse<Location> create(SensiNactSession session, UriInfo urlInfo, Location dto) {
+        return new ExtraUseCaseResponse<Location>(false, "not implemented");
 
     }
 
     @Override
-    public boolean update(SensiNactSession session, String id, Location dto) {
-        // TODO Auto-generated method stub
-        return false;
+    public ExtraUseCaseResponse<Location> update(SensiNactSession session, UriInfo urlInfo, String id, Location dto) {
+        return new ExtraUseCaseResponse<Location>(false, "not implemented");
+
     }
 
     @Override
-    public boolean delete(SensiNactSession session, String id) {
+    public ExtraUseCaseResponse<Location> delete(SensiNactSession session, UriInfo urlInfo, String id) {
         // TODO Auto-generated method stub
-        return false;
+        return new ExtraUseCaseResponse<Location>(false, "not implemented");
     }
 
     @Override
-    public boolean patch(SensiNactSession session, String id, Location dto) {
+    public ExtraUseCaseResponse<Location> patch(SensiNactSession session, UriInfo urlInfo, String id, Location dto) {
         // TODO Auto-generated method stub
-        return false;
+        return new ExtraUseCaseResponse<Location>(false, "not implemented");
     }
-
 }

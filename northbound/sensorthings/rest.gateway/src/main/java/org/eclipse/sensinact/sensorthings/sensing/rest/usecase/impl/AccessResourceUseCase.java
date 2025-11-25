@@ -10,12 +10,11 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUse
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 @Component(service = IAccessResourceUseCase.class, immediate = true)
 public class AccessResourceUseCase implements IAccessResourceUseCase {
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC)
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
     IAccessProviderUseCase accessProviderUserCase;
 
     private ProviderSnapshot validateAndGetProvider(SensiNactSession session, String providerId) {

@@ -12,29 +12,30 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
-import org.eclipse.sensinact.sensorthings.sensing.rest.ISensinactSensorthingsApplication;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorThingsFeature;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.ISensinactSensorthingsRestExtra;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
 
 import jakarta.ws.rs.core.Application;
 
-@Component(service = Application.class, configurationPid = "sensinact.sensorthings.northbound.rest")
+@Component(service = { Application.class }, configurationPid = "sensinact.sensorthings.northbound.rest")
 @JakartarsName("sensorthings")
 @JakartarsApplicationBase("/")
-public class SensinactSensorthingsApplication extends Application implements ISensinactSensorthingsApplication {
+public class SensinactSensorthingsApplication extends Application {
 
     public static final String NOT_SET = "<<NOT_SET>>";
 
@@ -52,39 +53,31 @@ public class SensinactSensorthingsApplication extends Application implements ISe
     @Reference
     ISensorthingsFilterParser filterParser;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
-    ISensinactSensorthingsRestExtra sensinactSensorthingsExtra;
-
     @Activate
     Config config;
 
     @Override
     public Set<Class<?>> getClasses() {
-        Set<Class<?>> listResource = Set.of(
+
+        Set<Class<?>> listResource = new HashSet<Class<?>>(Set.of(
                 // Features/extensions
                 SensorThingsFeature.class, SensinactSessionProvider.class, SensorthingsFilterProvider.class,
-                AccessResourceUseCaseProvider.class, AccessProviderUseCaseProvider.class,
+                AccessProviderUseCaseProvider.class, AccessResourceUseCaseProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
                 DatastreamsAccessImpl.class, FeaturesOfInterestAccessImpl.class, HistoricalLocationsAccessImpl.class,
                 LocationsAccessImpl.class, ObservationsAccessImpl.class, ObservedPropertiesAccessImpl.class,
-                SensorsAccessImpl.class, ThingsAccessImpl.class);
-        if (sensinactSensorthingsExtra != null) {
-            listResource.addAll(sensinactSensorthingsExtra.getExtraClasses());
-        }
+                SensorsAccessImpl.class, ThingsAccessImpl.class));
 
         return listResource;
     }
 
-    @Override
-    public Set<Object> getSingletons() {
-        Set<Object> listResources = Set.of();
-        if (sensinactSensorthingsExtra != null) {
-            listResources.addAll(sensinactSensorthingsExtra.getExtraSingletons());
-        }
-        return listResources;
-    }
+    @Reference
+    IAccessProviderUseCase accesProviderUseCase;
+
+    @Reference
+    IAccessResourceUseCase accessResourceUseCase;
 
     public SensiNactSessionManager getSessionManager() {
         return sessionManager;
@@ -92,10 +85,15 @@ public class SensinactSensorthingsApplication extends Application implements ISe
 
     @Override
     public Map<String, Object> getProperties() {
-        return NOT_SET.equals(config.history_provider())
-                ? Map.of("session.manager", sessionManager, "filter.parser", filterParser,
-                        "sensinact.history.result.limit", config.history_results_max())
-                : Map.of("session.manager", sessionManager, "filter.parser", filterParser, "sensinact.history.provider",
-                        config.history_provider(), "sensinact.history.result.limit", config.history_results_max());
+        Map<String, Object> properties = NOT_SET.equals(config.history_provider())
+                ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
+                        "sensinact.history.result.limit", config.history_results_max(), "access.resource.usecase",
+                        accessResourceUseCase, "access.provider.usecase", accesProviderUseCase))
+                : new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
+                        "sensinact.history.provider", config.history_provider(), "sensinact.history.result.limit",
+                        config.history_results_max(), "access.resource.usecase", accessResourceUseCase,
+                        "access.provider.usecase", accesProviderUseCase));
+
+        return properties;
     }
 }
