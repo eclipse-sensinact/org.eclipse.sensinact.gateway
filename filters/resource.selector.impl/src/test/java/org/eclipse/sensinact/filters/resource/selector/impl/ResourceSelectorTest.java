@@ -186,6 +186,11 @@ public class ResourceSelectorTest {
                 // Not an action resource
                 return null;
             }
+
+            @Override
+            public boolean isMultiple() {
+                return value instanceof List;
+            }
         };
     }
 

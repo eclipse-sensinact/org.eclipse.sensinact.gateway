@@ -43,7 +43,7 @@ public interface ResourcePushHandler {
      *         might therefore be different from newValue. The returned value will
      *         be stored in the twin.
      */
-    <T> Promise<TimedValue<T>> pushValue(String modelPackageUri, String model, String provider, String service,
-            String resource, Class<T> clazz, TimedValue<T> cachedValue, TimedValue<T> newValue,
-            Consumer<TimedValue<T>> gatewayUpdate);
+    <T> Promise<TimedValue<?>> pushValue(String modelPackageUri, String model, String provider, String service,
+            String resource, Class<T> clazz, TimedValue<?> cachedValue, TimedValue<?> newValue,
+            Consumer<TimedValue<?>> gatewayUpdate);
 }

@@ -57,7 +57,7 @@ public interface ResourceBuilder<B, T> {
 
     /**
      * Default metadata that should be provided by the model for this resource
-     * 
+     *
      * @param defaultMetadata
      * @return
      */
@@ -146,7 +146,7 @@ public interface ResourceBuilder<B, T> {
     /**
      * Sets the lower boundary of this resource. The default is 0. Any value larger
      * then higher then zero means that this is a mandatory resource.
-     * 
+     *
      * @param lowerBound the lower boundary of this Resources values
      */
     ResourceBuilder<B, T> withLowerBound(int lowerBound);
@@ -154,7 +154,7 @@ public interface ResourceBuilder<B, T> {
     /**
      * Sets the upper boundary of this resource. The default is 1. Any value larger
      * then higher then one means that this is a list. Unbound is indicated by -1
-     * 
+     *
      * @param upperBound the upper boundary of this Resources values
      */
     ResourceBuilder<B, T> withUpperBound(int upperBound);

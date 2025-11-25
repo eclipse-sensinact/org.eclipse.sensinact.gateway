@@ -33,9 +33,9 @@ class SetMethod extends AbstractResourceMethod implements WhiteboardSet<Object> 
 
     @SuppressWarnings("unchecked")
     @Override
-    public Promise<TimedValue<Object>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
+    public Promise<TimedValue<?>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
             String provider, String service, String resource, Class<Object> resourceType,
-            TimedValue<Object> cachedValue, TimedValue<Object> newValue) {
+            TimedValue<?> cachedValue, TimedValue<?> newValue) {
 
         final Map<Object, Object> params = new HashMap<>();
         params.put(SetSegment.RESULT_TYPE, resourceType);
@@ -45,13 +45,13 @@ class SetMethod extends AbstractResourceMethod implements WhiteboardSet<Object> 
             Object o = super.invoke(modelPackageUri, model, provider, service, resource, params, SetParam.class,
                     SetParam::value);
             if (o instanceof Promise) {
-                return ((Promise<TimedValue<Object>>) o);
+                return ((Promise<TimedValue<?>>) o);
             } else if (o instanceof TimedValue) {
-                return pf.resolved((TimedValue<Object>) o);
+                return pf.resolved((TimedValue<?>) o);
             } else if (o == null) {
                 return pf.resolved(null);
             } else if (resourceType.isAssignableFrom(o.getClass())) {
-                return pf.resolved(new DefaultTimedValue<Object>(resourceType.cast(o)));
+                return pf.resolved(new DefaultTimedValue<>(resourceType.cast(o)));
             } else {
                 return pf.failed(new Exception("Invalid result type: " + o.getClass()));
             }
@@ -61,9 +61,9 @@ class SetMethod extends AbstractResourceMethod implements WhiteboardSet<Object> 
     }
 
     @Override
-    public Promise<TimedValue<Object>> pullValue(PromiseFactory promiseFactory, String modelPackageUri, String model,
+    public Promise<TimedValue<?>> pullValue(PromiseFactory promiseFactory, String modelPackageUri, String model,
             String provider, String service, String resource, Class<Object> resourceType,
-            TimedValue<Object> cachedValue) {
+            TimedValue<?> cachedValue) {
         return promiseFactory.resolved(cachedValue);
     }
 }

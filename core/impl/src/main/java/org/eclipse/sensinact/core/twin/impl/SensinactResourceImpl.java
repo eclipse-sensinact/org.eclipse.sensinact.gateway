@@ -15,6 +15,7 @@ package org.eclipse.sensinact.core.twin.impl;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -103,22 +104,18 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
      * @return The timed value from the service (both value and timestamp can be
      *         null)
      */
-    @SuppressWarnings("unchecked")
-    private <T> TimedValue<T> getValueFromTwin(final Class<T> type) {
+    private <T> TimedValue<?> getValueFromTwin(final Class<T> type) {
         final Instant currentTimestamp;
-        final T currentValue;
+        final Object currentValue;
         final Service svc = provider.getService(serviceName);
         if (svc != null) {
             // Service is there
             EStructuralFeature feature = (EStructuralFeature) resource;
             final Object rawValue = svc.eGet(feature);
             if (feature.isMany()) {
-                // TODO: How to handle this?
-//                currentValue = ((Collection<?>) rawValue).stream().filter(o -> type.isAssignableFrom(o.getClass()))
-//                        .map(type::cast).toList();
-//            } else if (rawValue != null && type.isAssignableFrom(rawValue.getClass())) {
-            }
-            if (rawValue != null && type.isAssignableFrom(rawValue.getClass())) {
+                currentValue = ((Collection<?>) rawValue).stream().filter(o -> type.isAssignableFrom(o.getClass()))
+                        .map(type::cast).toList();
+            } else if (type.isInstance(rawValue)) {
                 currentValue = type.cast(rawValue);
             } else {
                 currentValue = null;
@@ -136,14 +133,16 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             currentTimestamp = null;
         }
 
-        return new DefaultTimedValue<T>(currentValue, currentTimestamp);
+        return new DefaultTimedValue<>(currentValue, currentTimestamp);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> Promise<Void> setValue(T value, Instant timestamp) {
         checkValid();
+        return doSetValue(value, timestamp);
+    }
 
+    private Promise<Void> doSetValue(Object value, Instant timestamp) {
         if (getResourceType() == ResourceType.ACTION) {
             return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
         }
@@ -162,9 +161,9 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             if (hasExternalSetter) {
                 // Check new value type
                 final TimedValue<?> cachedValue = getValueFromTwin(type);
-                final TimedValue<T> newValue = new DefaultTimedValue<T>(value, timestamp);
-                return modelNexus.pushValue(provider, serviceName, resource, (Class<T>) type,
-                        (TimedValue<T>) cachedValue, newValue).map(x -> null);
+                final TimedValue<?> newValue = new DefaultTimedValue<>(value, timestamp);
+                return modelNexus.pushValue(provider, serviceName, resource, type,
+                        cachedValue, newValue).map(x -> null);
             } else {
                 // No external setter: update the twin
                 modelNexus.handleDataUpdate(provider, serviceName, svc.getServiceEClass(),
@@ -179,7 +178,24 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     @Override
     public <T> Promise<TimedValue<T>> getValue(final Class<T> type, final GetLevel getLevel) {
         checkValid();
+        return doGetValue(type, getLevel).map(SensinactResourceImpl::mapToSingleValue);
+    }
 
+    @SuppressWarnings("unchecked")
+    private static <T> TimedValue<T> mapToSingleValue(TimedValue<?> tv) {
+        if(tv.isEmpty()) {
+            return (TimedValue<T>) tv;
+        }
+        Object value = tv.getValue();
+        if(value instanceof List<?> c) {
+            return c.isEmpty() ? new DefaultTimedValue<>() :
+                new DefaultTimedValue<>((T) c.get(0), tv.getTimestamp());
+        } else {
+            return (TimedValue<T>) tv;
+        }
+    }
+
+    private <T> Promise<TimedValue<?>> doGetValue(final Class<T> type, final GetLevel getLevel) {
         if (getResourceType() == ResourceType.ACTION) {
             return promiseFactory.failed(new IllegalArgumentException("This is an action resource"));
         }
@@ -199,7 +215,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         }
 
         // Get the currently cached value
-        final TimedValue<T> cachedValue = getValueFromTwin(type);
+        final TimedValue<?> cachedValue = getValueFromTwin(type);
         if (!hasExternalGetter || getLevel == GetLevel.WEAK) {
             // Push-based or weak get: return the cached value
             return promiseFactory.resolved(cachedValue);
@@ -273,4 +289,49 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         return modelNexus.act(provider, serviceName, resource, parameters);
     }
 
+    @Override
+    public int getLowerBound() {
+        checkValid();
+        return resource.getLowerBound();
+    }
+
+    @Override
+    public int getUpperBound() {
+        checkValid();
+        return resource.getUpperBound();
+    }
+
+    @Override
+    public boolean isMultiple() {
+        checkValid();
+        return resource.isMany();
+    }
+
+    @Override
+    public <T> Promise<Void> setValue(List<? extends T> value, Instant timestamp) {
+        checkValid();
+        return doSetValue(value, timestamp);
+    }
+
+    @Override
+    public <T> Promise<TimedValue<List<T>>> getMultiValue(Class<T> type, GetLevel getLevel) {
+        checkValid();
+        return doGetValue(type, getLevel).map(SensinactResourceImpl::mapToMultiValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> TimedValue<List<T>> mapToMultiValue(TimedValue<?> tv) {
+        if(tv.isEmpty()) {
+            return (TimedValue<List<T>>) tv;
+        }
+        Object value = tv.getValue();
+        if(value instanceof List) {
+            return (TimedValue<List<T>>) tv;
+        } else if(value instanceof Collection<?> c) {
+            List<T> list = (List<T>) List.copyOf(c);
+            return new DefaultTimedValue<>(list, tv.getTimestamp());
+        } else {
+            return new DefaultTimedValue<>(List.of((T) value), tv.getTimestamp());
+        }
+    }
 }

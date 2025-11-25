@@ -20,10 +20,10 @@ public abstract class AbstractDescriptiveReadWrite<T> extends AbstractDescriptiv
         implements WhiteboardSet<T> {
 
     @Override
-    public Promise<TimedValue<T>> pushValue(PromiseFactory pf, String modelPackageUri, String model, String provider,
-            String service, String resource, Class<T> resourceType, TimedValue<T> cachedValue, TimedValue<T> newValue) {
+    public Promise<TimedValue<?>> pushValue(PromiseFactory pf, String modelPackageUri, String model, String provider,
+            String service, String resource, Class<T> resourceType, TimedValue<?> cachedValue, TimedValue<?> newValue) {
 
-        Promise<TimedValue<T>> p = doPushValue(pf, modelPackageUri, model, provider, service, resource, cachedValue,
+        Promise<TimedValue<?>> p = doPushValue(pf, modelPackageUri, model, provider, service, resource, cachedValue,
                 newValue);
         if (p == null) {
             return pf.failed(new NullPointerException(getClass().getName() + " returned a null promise"));
@@ -31,7 +31,7 @@ public abstract class AbstractDescriptiveReadWrite<T> extends AbstractDescriptiv
         return p;
     }
 
-    protected abstract Promise<TimedValue<T>> doPushValue(PromiseFactory promiseFactory, String modelPackageUri,
-            String model, String provider, String service, String resource, TimedValue<T> cachedValue,
-            TimedValue<T> newValue);
+    protected abstract Promise<TimedValue<?>> doPushValue(PromiseFactory promiseFactory, String modelPackageUri,
+            String model, String provider, String service, String resource, TimedValue<?> cachedValue,
+            TimedValue<?> newValue);
 }

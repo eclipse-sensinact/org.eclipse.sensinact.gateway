@@ -40,6 +40,6 @@ public interface ResourcePullHandler {
      * @return The promise of the value to be returned by the external getter (can't
      *         be null). This value will be stored in the twin.
      */
-    <T> Promise<TimedValue<T>> pullValue(String modelPackageUri, String model, String provider, String service,
-            String resource, Class<T> clazz, TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate);
+    <T> Promise<TimedValue<?>> pullValue(String modelPackageUri, String model, String provider, String service,
+            String resource, Class<T> clazz, TimedValue<?> cachedValue, Consumer<TimedValue<?>> gatewayUpdate);
 }

@@ -156,6 +156,7 @@ public class EMFUpdateServiceTest {
             assertEquals(oneMinuteAgo, current);
         }
 
+        @SuppressWarnings("null")
         @Test
         void serviceWithMetadataWithoutTimestamp() throws Exception {
             TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
@@ -620,6 +621,22 @@ public class EMFUpdateServiceTest {
             assertInstanceOf(List.class, rc);
             assertEquals(List.of("a", "b"), rc);
 
+            // Try again with types
+            rc = getResourceValue(null, emfProvider.getId(), "svc", "longs", Long.class);
+            assertInstanceOf(Long.class, rc);
+            assertEquals(1L, rc);
+            rc = getResourceValue(null, emfProvider.getId(), "svc", "strings", String.class);
+            assertInstanceOf(String.class, rc);
+            assertEquals("a", rc);
+
+            // Try multi
+            rc = getResourceMultiValue(null, emfProvider.getId(), "svc", "longs", Long.class);
+            assertInstanceOf(List.class, rc);
+            assertEquals(List.of(1L, 2L), rc);
+            rc = getResourceMultiValue(null, emfProvider.getId(), "svc", "strings", String.class);
+            assertInstanceOf(List.class, rc);
+            assertEquals(List.of("a", "b"), rc);
+
             // Update the provider
             emfProvider.getSvc().getLongs().clear();
             emfProvider.getSvc().getLongs().addAll(List.of(3L, 4L));
@@ -658,7 +675,7 @@ public class EMFUpdateServiceTest {
 
             rc = getResourceValue(null, emfProvider.getId(), "svc", "longs");
             assertInstanceOf(List.class, rc);
-            assertEquals(Set.of(42L), rc);
+            assertEquals(List.of(42L), rc);
         }
     }
 
@@ -669,6 +686,28 @@ public class EMFUpdateServiceTest {
             @Override
             protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
                 return resource.getValue().map(t -> t.getValue());
+            }
+        }).getValue();
+    }
+
+    private Object getResourceValue(String model, String provider, String service, String resource, Class<?> type)
+            throws InvocationTargetException, InterruptedException {
+        return gt.execute(new ResourceCommand<Object>(TestdataPackage.eNS_URI, model, provider, service, resource) {
+
+            @Override
+            protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue(type).map(t -> t.getValue());
+            }
+        }).getValue();
+    }
+
+    private Object getResourceMultiValue(String model, String provider, String service, String resource, Class<?> type)
+            throws InvocationTargetException, InterruptedException {
+        return gt.execute(new ResourceCommand<Object>(TestdataPackage.eNS_URI, model, provider, service, resource) {
+
+            @Override
+            protected Promise<Object> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMultiValue(type).map(t -> t.getValue());
             }
         }).getValue();
     }

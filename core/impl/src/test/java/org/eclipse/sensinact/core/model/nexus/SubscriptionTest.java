@@ -52,7 +52,6 @@ import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
-import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
 import org.eclipse.sensinact.model.core.provider.Admin;
@@ -1452,6 +1451,7 @@ public class SubscriptionTest {
             Mockito.clearInvocations(accumulator);
 //            stripMetadata(saved);
 
+            @SuppressWarnings("unused")
             Provider modified = nexus.save(EcoreUtil.copy(saved));
 
             Mockito.verifyNoMoreInteractions(accumulator);

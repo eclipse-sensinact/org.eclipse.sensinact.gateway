@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.whiteboard.impl;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -42,10 +43,9 @@ class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> 
         return nullAction;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Promise<TimedValue<Object>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
-            String provider, String service, String resource, Class<Object> resourceType, TimedValue<Object> cachedValue) {
+    public Promise<TimedValue<?>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
+            String provider, String service, String resource, Class<Object> resourceType, TimedValue<?> cachedValue) {
 
         try {
             final Map<Object, Object> params = new HashMap<>();
@@ -54,29 +54,52 @@ class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> 
             Object result = super.invoke(modelPackageUri, model, provider, service, resource, params, GetParam.class,
                     GetParam::value);
 
-            if (result instanceof Promise) {
-                return (Promise<TimedValue<Object>>) result;
-            } else if (result instanceof TimedValue) {
-                return pf.resolved((TimedValue<Object>) result);
-            } else if (result == null) {
-                switch (nullAction) {
-                case IGNORE:
-                    return pf.resolved(null);
-                case UPDATE_IF_PRESENT:
-                    return pf.resolved(cachedValue == null || cachedValue.getTimestamp() == null ? null
-                            : new DefaultTimedValue<Object>(null));
-                case UPDATE:
-                    return pf.resolved(new DefaultTimedValue<Object>(null));
-                default:
-                    return pf.failed(new IllegalArgumentException("Unknown null action: " + nullAction));
-                }
-            } else if (resourceType.isAssignableFrom(result.getClass())) {
-                return pf.resolved(new DefaultTimedValue<Object>(resourceType.cast(result)));
+            Promise<?> toReturn;
+            if (result instanceof Promise<?> p) {
+                toReturn = p;
             } else {
-                return pf.failed(new Exception("Invalid result type: " + result.getClass()));
+                toReturn = pf.resolved(result);
             }
+
+            return toReturn.map(o -> convertToTvIfNeeded(o, resourceType, cachedValue));
         } catch (Exception e) {
             return pf.failed(e);
+        }
+    }
+
+    private TimedValue<?> convertToTvIfNeeded(Object o, Class<?> resourceType, TimedValue<?> cachedValue) throws Exception {
+        if(o == null) {
+            switch (nullAction) {
+            case IGNORE:
+                return null;
+            case UPDATE_IF_PRESENT:
+                return cachedValue == null || cachedValue.getTimestamp() == null ? null
+                        : new DefaultTimedValue<>(null);
+            case UPDATE:
+                return new DefaultTimedValue<>(null);
+            default:
+                throw new IllegalArgumentException("Unknown null action: " + nullAction);
+            }
+        } else if(o instanceof TimedValue<?> t) {
+            if(t.isEmpty() || t.getValue() == null) {
+                return t;
+            }
+            return new DefaultTimedValue<>(convertIfNeeded(t.getValue(), resourceType), t.getTimestamp());
+        } else {
+            return new DefaultTimedValue<>(convertIfNeeded(o, resourceType));
+        }
+    }
+
+    private Object convertIfNeeded(Object o, Class<?> resourceType) throws Exception {
+        if(o == null) {
+            return null;
+        } else if (resourceType.isInstance(o)) {
+            return o;
+        } else if (o instanceof Collection &&
+                ((Collection<?>)o).stream().allMatch(resourceType::isInstance)) {
+            return o;
+        } else {
+            throw new Exception("Invalid result type: " + o);
         }
     }
 }
