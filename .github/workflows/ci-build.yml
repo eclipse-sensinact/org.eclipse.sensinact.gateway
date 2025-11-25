@@ -35,8 +35,6 @@ jobs:
           ~/.m2/repository
           **/target
         key: build-${{ runner.os }}-${{ github.sha }}
-        restore-keys: |
-          build-${{ runner.os }}-
 
     - name: Install dependencies for matrix generation
       run: |
@@ -79,8 +77,6 @@ jobs:
           ~/.m2/repository
           **/target
         key: build-${{ runner.os }}-${{ github.sha }}
-        restore-keys: |
-          build-${{ runner.os }}-
         fail-on-cache-miss: true
 
     - name: Run unit and integration tests for ${{ matrix.module }}
