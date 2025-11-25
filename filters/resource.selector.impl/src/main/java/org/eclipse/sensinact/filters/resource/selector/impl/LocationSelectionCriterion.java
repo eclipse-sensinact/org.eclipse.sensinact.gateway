@@ -20,10 +20,12 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection.MatchType;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
 import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
@@ -163,9 +165,12 @@ public class LocationSelectionCriterion {
         // in the gateway, and for every subsequent update
         RELATE_OPERATOR.accelerateGeometry(target, null, enumMedium);
 
-        final Geometry targetValue = target;
+        Predicate<GeoJsonObject> filter = Objects::nonNull;
+        return filter.and(getGeometryFilter(ls.type(), target));
+    }
 
-        return switch(ls.type()) {
+    private static Predicate<GeoJsonObject> getGeometryFilter(MatchType type, final Geometry targetValue) {
+        return switch(type) {
             case CONTAINS:
                 yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, CONTAINS, null);
             case DISJOINT:
@@ -181,7 +186,7 @@ public class LocationSelectionCriterion {
             case WITHIN:
                 yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, WITHIN, null);
             default:
-                throw new IllegalArgumentException("Unknown match type " + ls.type());
+                throw new IllegalArgumentException("Unknown match type " + type);
         };
     }
 
