@@ -10,24 +10,21 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.dto;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+package org.eclipse.sensinact.sensorthings.sensing.dto.expand;
 
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record ExpandedThing(String selfLink, Object id, String name, String description,
-        @JsonInclude(NON_NULL) Map<String, Object> properties,
-        @JsonProperty("Datastreams@iot.navigationLink") String datastreamsLink,
+public record ExpandedLocation(String selfLink, Object id, String name, String description, String encodingType,
+        GeoJsonObject location, @JsonProperty("Things@iot.navigationLink") String thingsLink,
         @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink,
-        @JsonProperty("Locations@iot.navigationLink") String locationsLink,
-        @JsonProperty("Datastreams") List<ExpandedDataStream> datastreams,
-        @JsonProperty("Locations") List<Location> locations) implements NameDescription {
+        @JsonProperty("Things") List<Id> things) implements NameDescription {
+
+    ;
+
 }

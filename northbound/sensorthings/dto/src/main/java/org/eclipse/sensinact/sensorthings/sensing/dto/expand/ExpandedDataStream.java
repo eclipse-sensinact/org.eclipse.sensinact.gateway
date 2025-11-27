@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
 import static org.eclipse.sensinact.core.annotation.dto.MapAction.USE_KEYS_AS_FIELDS;
 import static org.eclipse.sensinact.core.annotation.dto.NullAction.UPDATE_IF_PRESENT;
@@ -31,71 +33,37 @@ import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
+import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
+import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ExpandedDataStream extends Datastream {
+public record ExpandedDataStream(String selfLink, Object id, String name, String description, String observationType,
+UnitOfMeasurement unitOfMeasurement, @JsonInclude(NON_NULL) Geometry observedArea,
+@JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval phenomenonTime,
+@JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval resultTime,
+@JsonInclude(NON_NULL) Map<String, Object> properties,
+@JsonProperty("Observations@iot.navigationLink") String observationsLink,
+@JsonProperty("ObservedProperty@iot.navigationLink") String observedPropertyLink,
+@JsonProperty("Sensor@iot.navigationLink") String sensorLink,
+@JsonProperty("Thing@iot.navigationLink") String thingLink,
+@JsonProperty("Observations") List<Observation> observations,
+@JsonProperty("ObservedProperty") ObservedProperty observedProperty,
+@JsonProperty("Sensor") Sensor sensor,
+@JsonProperty("Observations@iot.nextLink") String nextObservation,
+@JsonProperty("Thing") Id thing) implements NameDescription {
+} 
 
-    public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
-            @Service String serviceName, @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorThingsId,
-            @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String name,
-            @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
-            @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object latestObservation,
-            @Timestamp Instant timestamp, @Resource("latestObservation") @Metadata(onMap = {
-                    USE_KEYS_AS_FIELDS }) Map<String, Object> observationParameters,
-            @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unit,
-            @Resource("unit") @Metadata(onMap = { USE_KEYS_AS_FIELDS }) Map<String, Object> unitMetadata,
-            @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object sensor,
-            @Resource("sensor") @Metadata(onMap = { USE_KEYS_AS_FIELDS }) Map<String, Object> sensorMetadata,
-            @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object observedProperty,
-            @Resource("observedProperty") @Metadata(onMap = {
-                    USE_KEYS_AS_FIELDS }) Map<String, Object> observedPropertyMetadata)
-            implements SensorThingsUpdate{
-        public DatastreamUpdate {
-            if (model == null) {
-                model = SENSOR_THINGS_DEVICE;
-            }
-            if (model != SENSOR_THINGS_DEVICE) {
-                throw new IllegalArgumentException(
-                        "The model for the provider must be " + SENSOR_THINGS_DEVICE.getName());
-            }
-            if (service == null) {
-                service = DATA_STREAM_SERVICE;
-            }
-            if (service != DATA_STREAM_SERVICE) {
-                throw new IllegalArgumentException(
-                        "The model for the datastream must be " + DATA_STREAM_SERVICE.getName());
-            }
-        }
 
-        public DatastreamUpdate(String providerId, String serviceName, Object sensorThingsId, String name,
-                String description, Object latestObservation, Instant timestamp,
-                Map<String, Object> observationParameters, String unit, Map<String, Object> unitMetadata, Object sensor,
-                Map<String, Object> sensorMetadata, Object observedProperty,
-                Map<String, Object> observedPropertyMetadata) {
-            this(SENSOR_THINGS_DEVICE, DATA_STREAM_SERVICE, providerId, serviceName, sensorThingsId, name, description,
-                    latestObservation, timestamp, observationParameters, unit, unitMetadata, sensor, sensorMetadata,
-                    observedProperty, observedPropertyMetadata);
-        }
-    }
+  
+    
 
-    @JsonProperty("Observations")
-    public List<Observation> observations;
-
-    @JsonProperty("ObservedProperty")
-    public ObservedProperty observedProperty;
-
-    @JsonProperty("Sensor")
-    public Sensor sensor;
-
-    @JsonProperty("Observations@iot.nextLink")
-    public String nextObservation;
-
-    @JsonProperty("Thing")
-    public Id thing;
-}

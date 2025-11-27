@@ -27,6 +27,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,13 +71,21 @@ public abstract class AbstractAccess {
     }
 
     protected ExpansionSettings getExpansions() {
-        ExpansionSettings es = (ExpansionSettings) requestContext
-                .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
         return es == null ? EMPTY : es;
     }
 
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
         return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
+    }
+
+    protected IExtraDelegate getExtraDelegate() {
+        IExtraDelegate extraDelegate = providers.getContextResolver(IExtraDelegate.class, MediaType.WILDCARD_TYPE)
+                .getContext(null);
+        if (extraDelegate == null) {
+            throw new UnsupportedOperationException("Not available");
+        }
+        return extraDelegate;
     }
 
     protected ProviderSnapshot validateAndGetProvider(String id) {
@@ -100,7 +109,7 @@ public abstract class AbstractAccess {
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 
-        if(resourceSnapshot == null) {
+        if (resourceSnapshot == null) {
             throw new NotFoundException();
         }
         return resourceSnapshot;

@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toDatastream;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toFeatureOfInterest;
@@ -44,7 +43,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.RootResourceAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.RootResourceAccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,7 +51,7 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
 
-public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess {
+public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess, RootResourceCreate {
 
     private List<ProviderSnapshot> listProviders(final ICriterion criterion) {
         final SensiNactSession userSession = getSession();
@@ -86,8 +85,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         }
     }
 
-    private static Optional<? extends ResourceSnapshot> getResource(final ProviderSnapshot provider, final String svcName,
-            final String rcName) {
+    private static Optional<? extends ResourceSnapshot> getResource(final ProviderSnapshot provider,
+            final String svcName, final String rcName) {
         return provider.getServices().stream().filter(s -> s.getName().equals(svcName))
                 .flatMap(s -> s.getResources().stream()).filter(r -> r.getName().equals(rcName)).findFirst();
     }
@@ -109,29 +108,31 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Thing> getThings() {
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null, providers.stream()
-                .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .toList());
+        return new ResultList<>(null, null,
+                providers.stream().map(
+                        p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                        .toList());
     }
 
     @Override
     public ResultList<Location> getLocations() {
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null, providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .toList());
+        return new ResultList<>(null, null,
+                providers.stream().filter(p -> hasResourceSet(p, "admin", "location")).map(
+                        p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                        .toList());
     }
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocations() {
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null, providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList());
+        return new ResultList<>(null, null,
+                providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
+                        .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                                criterion, p))
+                        .filter(Optional::isPresent).map(Optional::get).toList());
     }
 
     @Override
@@ -147,9 +148,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Sensor> getSensors() {
         ICriterion criterion = parseFilter(EFilterContext.SENSORS);
         List<ResourceSnapshot> resources = listSetResources(criterion);
-        return new ResultList<>(null, null, resources.stream()
-                .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                .toList());
+        return new ResultList<>(null, null,
+                resources.stream().map(
+                        r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
+                        .toList());
     }
 
     // No history as it is *live* observation data not a data stream
@@ -159,17 +161,15 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         List<ResourceSnapshot> resources = listSetResources(criterion);
         return new ResultList<>(null, null, resources.stream()
                 .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList());
+                .filter(Optional::isPresent).map(Optional::get).toList());
     }
 
     @Override
     public ResultList<ObservedProperty> getObservedProperties() {
         ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
         List<ResourceSnapshot> resources = listSetResources(criterion);
-        return new ResultList<>(null, null, resources.stream()
-                .map(r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
+        return new ResultList<>(null, null, resources.stream().map(
+                r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .toList());
     }
 
@@ -177,16 +177,16 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null, providers.stream()
-                .map(p -> toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .toList());
+        return new ResultList<>(null, null, providers.stream().map(p -> toFeatureOfInterest(getSession(), application,
+                getMapper(), uriInfo, getExpansions(), criterion, p)).toList());
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ResourceSnapshot resourceSnapshot, ICriterion filter) {
-        ExpansionSettings es = (ExpansionSettings) requestContext
-                .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot, filter, 0);
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
+            ResourceSnapshot resourceSnapshot, ICriterion filter) {
+        ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,
+                filter, 0);
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
@@ -199,10 +199,61 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         if (list.value().isEmpty() && resourceSnapshot.isSet()) {
             list = new ResultList<Observation>(null, null, DtoMapper
                     .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
-                    .map(List::of)
-                    .orElse(List.of()));
+                    .map(List::of).orElse(List.of()));
         }
 
         return list;
     }
+    
+
+    @Override
+    public Response createDatastream(ExpandedDataStream datastream) {
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, Datastream.class);
+
+    }
+
+    @Override
+    public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest) {
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest,
+                FeatureOfInterest.class);
+
+    }
+
+    @Override
+    public Response createHistoricalLocation(HistoricalLocation historicalLocations) {
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, historicalLocations,
+                HistoricalLocation.class);
+
+    }
+
+    @Override
+    public Response createLocation(ExpandedLocation location) {
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, Location.class);
+
+    }
+
+    @Override
+    public Response createObservation(Observation observation) {
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation, Observation.class);
+
+    }
+
+    @Override
+    public Response createObservedProperties(ObservedProperty observedProperty) {
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, observedProperty, ObservedProperty.class);
+
+    }
+
+    @Override
+    public Response createSensors(Sensor sensor) {
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor, Sensor.class);
+
+    }
+
+    @Override
+    public Response createThing(ExpandedThing thing) {
+
+        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, thing, Thing.class);
+    }
+
 }

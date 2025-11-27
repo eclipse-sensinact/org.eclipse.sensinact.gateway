@@ -22,8 +22,8 @@ import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.GeometryCollection;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream.DatastreamUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing.ThingUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 
 import jakarta.ws.rs.BadRequestException;
 

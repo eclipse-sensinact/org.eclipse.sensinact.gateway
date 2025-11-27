@@ -10,14 +10,13 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.dto.expand;
+package org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.dto;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
 
@@ -30,7 +29,5 @@ public record ExpandedThing(String selfLink, Object id, String name, String desc
         @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink,
         @JsonProperty("Locations@iot.navigationLink") String locationsLink,
         @JsonProperty("Datastreams") List<ExpandedDataStream> datastreams,
-        @JsonProperty("Locations") List<Location> locations,
-        @JsonProperty("HistoricalLocations") List<HistoricalLocation> historicalLocations) implements NameDescription {
-
+        @JsonProperty("Locations") List<Location> locations) implements NameDescription {
 }

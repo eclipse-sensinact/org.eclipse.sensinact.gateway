@@ -18,7 +18,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
