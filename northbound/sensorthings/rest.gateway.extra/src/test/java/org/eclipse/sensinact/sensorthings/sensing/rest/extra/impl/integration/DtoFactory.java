@@ -1,7 +1,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
@@ -10,8 +9,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 
 public class DtoFactory {
 
-    public static Datastream getDatastreamMinimal() {
-        Datastream ds = new Datastream();
+    public static ExpandedDataStream getDatastreamMinimal() {
+        ExpandedDataStream ds = new ExpandedDataStream();
         ds.name = "Temperature Datastream";
         ds.description = "Measures temperature";
 

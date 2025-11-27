@@ -38,10 +38,12 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
-public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess {
+public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess, ObservationsUpdate {
 
     @Override
     public Observation getObservation(String id) {
@@ -159,5 +161,10 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList());
+    }
+
+    @Override
+    public Response updateObservation(String id, Observation observation) {
+        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, observation, Observation.class);
     }
 }

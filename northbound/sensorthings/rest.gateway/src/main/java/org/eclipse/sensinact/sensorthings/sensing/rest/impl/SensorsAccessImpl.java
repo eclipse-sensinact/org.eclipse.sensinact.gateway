@@ -27,10 +27,12 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.SensorsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
-public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
+public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, SensorsUpdate {
 
     @Override
     public Sensor getSensor(String id) {
@@ -101,5 +103,10 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
             throw new NotFoundException();
         }
         return t;
+    }
+
+    @Override
+    public Response updateSensor(String id, Sensor sensor) {
+        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, sensor, Sensor.class);
     }
 }

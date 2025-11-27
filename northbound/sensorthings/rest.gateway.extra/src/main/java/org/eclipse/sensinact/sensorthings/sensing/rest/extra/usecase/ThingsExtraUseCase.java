@@ -35,8 +35,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing> {
 
         // update/create provider
         try {
-            Object obj = dataUpdate.pushUpdate(listDtoModels).getValue();
-            obj.toString();
+            dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
             return new ExtraUseCaseResponse<Snapshot>(false, "fail to create");
@@ -68,20 +67,20 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing> {
 
     public ExtraUseCaseResponse<Snapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {
 
-        ExpandedThing thing = request.model();
-        String id = (String) thing.id;
-        // check if already exists
-        Snapshot readedThing = providerUseCase.read(request.session(), id);
-        if (readedThing == null) {
-            return new ExtraUseCaseResponse<Snapshot>(false, String.format("not existing provider Thing {}", id));
+        List<SensorThingsUpdate> listDtoModels = toDtos(request);
+
+        // update/create provider
+        try {
+            dataUpdate.pushUpdate(listDtoModels).getValue();
+
+        } catch (InvocationTargetException | InterruptedException e) {
+            return new ExtraUseCaseResponse<Snapshot>(false, "fail to create");
+
         }
-        dataUpdate.pushUpdate(thing);
 
-        Snapshot updatedThing = providerUseCase.read(request.session(), id);
-
-        if (updatedThing != null) {
-            return new ExtraUseCaseResponse<Snapshot>(id, updatedThing);
-
+        Snapshot snapshot = providerUseCase.read(request.session(), request.id());
+        if (snapshot != null) {
+            return new ExtraUseCaseResponse<Snapshot>(request.id(), snapshot);
         }
         return new ExtraUseCaseResponse<Snapshot>(false, "fail to get Snapshot");
 

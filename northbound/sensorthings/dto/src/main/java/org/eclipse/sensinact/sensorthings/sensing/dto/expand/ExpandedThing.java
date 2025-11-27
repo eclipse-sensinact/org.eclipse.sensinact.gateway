@@ -27,6 +27,7 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 
@@ -37,7 +38,7 @@ public class ExpandedThing extends Thing {
     @Service("admin")
     public record ThingUpdate(@Model EClass model, @Provider String providerId,
             @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
-            @Service("thing") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
+            @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
             @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location,
             @Service("thing") @Resource("id") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object thingId,
             @Service("thing") @Resource("id") @Metadata(onMap = {
@@ -64,5 +65,8 @@ public class ExpandedThing extends Thing {
 
     @JsonProperty("Locations")
     public List<Location> locations;
+
+    @JsonProperty("HistoricalLocations")
+    public List<HistoricalLocation> historicalLocations;
 
 }

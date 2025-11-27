@@ -1,20 +1,15 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.ArrayList;
-import java.util.stream.Stream;
+import java.util.List;
 
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.Snapshot;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.Helpers;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.utils.IDtoMapper;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
@@ -23,20 +18,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = IExtraUseCase.class)
 public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation> {
 
-    @Reference
-    DataUpdate dataUpdate;
-
-    @Reference
-    IDtoMapper dtoMapper;
-
-    @Reference
-    IAccessProviderUseCase providerUseCase;
-
-    @Reference
-    IAccessProviderUseCase resourceUseCase;
-
     public ExtraUseCaseResponse<Snapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
-        Stream<SensorThingsUpdate> listDtoModels = toDtos(request);
+        List<SensorThingsUpdate> listDtoModels = toDtos(request);
         String id = (String) request.model().id;
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
@@ -57,14 +40,6 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
     }
 
-    private ProviderSnapshot getProviderSnapshot(ExtraUseCaseRequest<ExpandedLocation> request, Id thingId) {
-        ProviderSnapshot provider = providerUseCase.read(request.session(), (String) thingId.id);
-        if (provider == null) {
-            throw new IllegalStateException("Provider not found for thing ID: " + thingId.id);
-        }
-        return provider;
-    }
-
     public ExtraUseCaseResponse<Snapshot> patch(ExtraUseCaseRequest<ExpandedLocation> request) {
         return new ExtraUseCaseResponse<Snapshot>(false, "fail to get providerSnapshot");
 
@@ -74,14 +49,17 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
         ExpandedLocation location = request.model();
+        if (location.things == null || location.things.size() == 0) {
+            throw new UnsupportedOperationException("Not supported yet");
+        } else {
+            List<SensorThingsUpdate> listThingsUpdate = location.things.stream()
+                    .map(thingId -> getProviderSnapshot(request, thingId))
+                    .map((provider) -> toExpandedThing(request, location, provider)).flatMap((expandedThing) -> {
+                        return Helpers.toUpdates(expandedThing);
+                    }).toList();
 
-        Stream<SensorThingsUpdate> listThingsUpdate = location.things.stream()
-                .map(thingId -> getProviderSnapshot(request, thingId))
-                .map((provider) -> toExpandedThing(request, location, provider)).flatMap((expandedThing) -> {
-                    return Helpers.toUpdates(expandedThing);
-                });
-
-        return listThingsUpdate;
+            return listThingsUpdate;
+        }
     }
 
     private ExpandedThing toExpandedThing(ExtraUseCaseRequest<ExpandedLocation> request, ExpandedLocation location,

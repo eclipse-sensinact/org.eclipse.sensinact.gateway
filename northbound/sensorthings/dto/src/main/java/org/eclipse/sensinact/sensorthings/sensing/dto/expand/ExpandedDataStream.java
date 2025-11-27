@@ -32,6 +32,7 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
@@ -95,4 +96,6 @@ public class ExpandedDataStream extends Datastream {
     @JsonProperty("Observations@iot.nextLink")
     public String nextObservation;
 
+    @JsonProperty("Thing")
+    public Id thing;
 }
