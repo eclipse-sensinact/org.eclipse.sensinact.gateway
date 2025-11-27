@@ -12,21 +12,22 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static org.eclipse.sensinact.sensorthings.sensing.rest.access.ExpansionSettings.EMPTY;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+
+import java.util.EnumSet;
+import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.utils.IDtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,26 +55,11 @@ public abstract class AbstractAccess {
     @Context
     protected ContainerRequestContext requestContext;
 
-    protected IDtoMapper getDtoMapper() {
-        return providers.getContextResolver(IDtoMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
-    }
-
-    protected ExpansionSettings getExpansions() {
-        ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return es == null ? EMPTY : es;
-    }
-
-    protected IExtraDelegate getExtraDelegate() {
-        IExtraDelegate extraDelegate = providers.getContextResolver(IExtraDelegate.class, MediaType.WILDCARD_TYPE)
-                .getContext(null);
-        if (extraDelegate == null) {
-            throw new UnsupportedOperationException("Not available");
-        }
-        return extraDelegate;
-    }
-
-    private ISensorthingsFilterParser getFilterParser() {
-        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
+    /**
+     * Returns a user session
+     */
+    protected SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
     /**
@@ -83,25 +69,45 @@ public abstract class AbstractAccess {
         return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
     }
 
-    /**
-     * Returns a IAccessResourceUseCase
-     */
-    protected IAccessProviderUseCase getProviderUserCase() {
-        return providers.getContextResolver(IAccessProviderUseCase.class, MediaType.WILDCARD_TYPE).getContext(null);
+    protected ExpansionSettings getExpansions() {
+        ExpansionSettings es = (ExpansionSettings) requestContext
+                .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        return es == null ? EMPTY : es;
     }
 
-    /**
-     * Returns a IAccessResourceUseCase
-     */
-    protected IAccessResourceUseCase getResourceUserCase() {
-        return providers.getContextResolver(IAccessResourceUseCase.class, MediaType.WILDCARD_TYPE).getContext(null);
+    private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
+        return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
-    /**
-     * Returns a user session
-     */
-    protected SensiNactSession getSession() {
-        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    protected ProviderSnapshot validateAndGetProvider(String id) {
+        DtoMapper.validatedProviderId(id);
+
+        Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
+
+        if (providerSnapshot.isEmpty()) {
+            throw new NotFoundException("Unknown provider");
+        }
+        return providerSnapshot.get();
+    }
+
+    protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
+        String provider = extractFirstIdSegment(id);
+
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
+        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
+        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+
+        ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
+
+        if(resourceSnapshot == null) {
+            throw new NotFoundException();
+        }
+        return resourceSnapshot;
+    }
+
+    private ISensorthingsFilterParser getFilterParser() {
+        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
     protected ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
@@ -115,25 +121,5 @@ public abstract class AbstractAccess {
         } catch (FilterParserException e) {
             throw new BadRequestException("Error parsing filter", e);
         }
-    }
-
-    protected ProviderSnapshot validateAndGetProvider(String id) {
-        getDtoMapper().validatedProviderId(id);
-
-        ProviderSnapshot providerSnapshot = getProviderUserCase().read(getSession(), id);
-        if (providerSnapshot == null) {
-            throw new NotFoundException(String.format("no provider for id {id}", id));
-        }
-        return providerSnapshot;
-    }
-
-    protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-
-        IAccessResourceUseCase useCase = getResourceUserCase();
-        ResourceSnapshot resourceSnapshot = useCase.read(getSession(), id);
-        if (resourceSnapshot == null) {
-            throw new NotFoundException();
-        }
-        return resourceSnapshot;
     }
 }
