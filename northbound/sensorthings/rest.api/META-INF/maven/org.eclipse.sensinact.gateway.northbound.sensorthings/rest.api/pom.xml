@@ -15,52 +15,44 @@
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
     <artifactId>sensorthings</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
-  <artifactId>dto</artifactId>
-  <name>SensiNact Northbound :: SensorThings :: DTO</name>
+  <artifactId>rest.api</artifactId>
+  <name>SensiNact Northbound :: SensorThings :: REST API</name>
 
   <dependencies>
-    <dependency>
-      <groupId>org.eclipse.sensinact.gateway.core</groupId>
-      <artifactId>geo-json</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi.annotation</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
-      <artifactId>models</artifactId>
+      <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
+      <artifactId>dto</artifactId>
       <version>${project.version}</version>
     </dependency>
      <dependency>
-      <groupId>org.eclipse.sensinact.gateway.core</groupId>
-      <artifactId>api</artifactId>
+        <groupId>org.eclipse.sensinact.gateway.core</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
     </dependency>
-     <dependency>
-         <groupId>org.eclipse.sensinact.gateway.core</groupId>
-         <artifactId>annotation</artifactId>
-         <version>${project.version}</version>
-     </dependency>
-     <dependency>
-         <groupId>org.eclipse.sensinact.gateway.core</groupId>
-         <artifactId>emf-api</artifactId>
-          <version>${project.version}</version>
-     </dependency>
-      <dependency>
-        <groupId>jakarta.ws.rs</groupId>
-        <artifactId>jakarta.ws.rs-api</artifactId>
-      </dependency>
-      
+    <dependency>
+        <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+        <artifactId>session-api</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+    </dependency>
+   
   </dependencies>
 
   <build>

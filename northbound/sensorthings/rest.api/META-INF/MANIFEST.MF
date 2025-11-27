@@ -1,0 +1,56 @@
+Manifest-Version: 1.0
+Created-By: Maven JAR Plugin 3.3.0
+Build-Jdk-Spec: 21
+Bundle-Copyright: Copyright (c) (2025) Contributors to the Eclipse Found
+ ation.
+Bundle-Description: This reactor contains northbound connectors that are
+  used to interact with sensiNact
+Bundle-Developers: timothyjward;name="Timothy Ward";organization=Kentyou
+ ;organizationUrl="https://www.kentyou.com/",tcalmant;name="Thomas Calma
+ nt";organization=Kentyou;organizationUrl="https://www.kentyou.com/",jue
+ rgen-albert;name="Jürgen Albert";organization="Data in Motion";organiz
+ ationUrl="https://www.datainmotion.de/",stbischof;name="Stefan Bischof"
+Bundle-DocURL: https://projects.eclipse.org/projects/technology.sensinac
+ t/northbound/sensorthings/rest.api
+Bundle-License: "EPL 2.0";link="http://www.eclipse.org/legal/epl-2.0";de
+ scription="Except for 3rd party content and examples."
+Bundle-ManifestVersion: 2
+Bundle-Name: SensiNact Northbound :: SensorThings :: REST API
+Bundle-SCM: url="https://github.com/eclipse/org.eclipse.sensinact.gatewa
+ y/northbound/sensorthings/rest.api",connection="scm:git:git@github.com:
+ eclipse/org.eclipse.sensinact.gateway.git/northbound/sensorthings/rest.
+ api",developer-connection="scm:git:git@github.com:eclipse/org.eclipse.s
+ ensinact.gateway.git/northbound/sensorthings/rest.api",tag=HEAD
+Bundle-SymbolicName: org.eclipse.sensinact.gateway.northbound.sensorthin
+ gs.rest.api
+Bundle-Vendor: Eclipse Foundation
+Bundle-Version: 0.0.2.202511261244
+Export-Package: org.eclipse.sensinact.sensorthings.sensing.rest.access;v
+ ersion="0.0.1";uses:="jakarta.ws.rs,jakarta.ws.rs.core,org.eclipse.sens
+ inact.core.snapshot,org.eclipse.sensinact.northbound.session,org.eclips
+ e.sensinact.sensorthings.sensing.dto,org.eclipse.sensinact.sensorthings
+ .sensing.rest.annotation",org.eclipse.sensinact.sensorthings.sensing.re
+ st.annotation;version="0.0.1";uses:="jakarta.ws.rs",org.eclipse.sensina
+ ct.sensorthings.sensing.rest.util;version="0.0.1";uses:="com.fasterxml.
+ jackson.databind,jakarta.ws.rs.container,jakarta.ws.rs.core,org.eclipse
+ .sensinact.core.snapshot,org.eclipse.sensinact.core.twin,org.eclipse.se
+ nsinact.northbound.session,org.eclipse.sensinact.sensorthings.sensing.d
+ to,org.eclipse.sensinact.sensorthings.sensing.rest.access"
+Git-Descriptor: Brain_IoT_All_In_One-1475-g1db2e9bd4-dirty
+Git-SHA: 1db2e9bd437df653d39d73dd34170087187a513a
+Import-Package: com.fasterxml.jackson.databind;version="[2.18,3)",com.fa
+ sterxml.jackson.databind.node;version="[2.18,3)",com.fasterxml.jackson.
+ datatype.jsr310;version="[2.18,3)",com.fasterxml.jackson.jakarta.rs.jso
+ n;version="[2.18,3)",jakarta.annotation;version="[2.1,3)",jakarta.ws.rs
+ ;version="[3.1,4)",jakarta.ws.rs.container;version="[3.1,4)",jakarta.ws
+ .rs.core;version="[3.1,4)",jakarta.ws.rs.ext;version="[3.1,4)",java.io,
+ java.lang,java.lang.annotation,java.lang.invoke,java.lang.reflect,java.
+ net,java.nio.charset,java.time,java.util,java.util.function,java.util.s
+ tream,org.eclipse.sensinact.core.snapshot;version="[0.2,1)",org.eclipse
+ .sensinact.core.twin;version="[0.2,1)",org.eclipse.sensinact.northbound
+ .session;version="[0.2,1)",org.eclipse.sensinact.sensorthings.sensing.d
+ to;version="[0.0,1)",org.eclipse.sensinact.sensorthings.sensing.rest.an
+ notation;version="[0.0,1)"
+Private-Package: org.eclipse.sensinact.sensorthings.sensing.rest.filters
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+

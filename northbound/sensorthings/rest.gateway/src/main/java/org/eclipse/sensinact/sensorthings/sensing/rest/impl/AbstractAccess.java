@@ -21,10 +21,12 @@ import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IFilterConstants;
+import org.eclipse.sensinact.sensorthings.sensing.rest.utils.IDtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,11 +54,28 @@ public abstract class AbstractAccess {
     @Context
     protected ContainerRequestContext requestContext;
 
+    protected IDtoMapper getDtoMapper() {
+        return providers.getContextResolver(IDtoMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    protected ExpansionSettings getExpansions() {
+        ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        return es == null ? EMPTY : es;
+    }
+
+    protected IExtraDelegate getExtraDelegate() {
+        return providers.getContextResolver(IExtraDelegate.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    private ISensorthingsFilterParser getFilterParser() {
+        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
     /**
-     * Returns a user session
+     * Returns an object mapper
      */
-    protected SensiNactSession getSession() {
-        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    protected ObjectMapper getMapper() {
+        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
     }
 
     /**
@@ -74,36 +93,10 @@ public abstract class AbstractAccess {
     }
 
     /**
-     * Returns an object mapper
+     * Returns a user session
      */
-    protected ObjectMapper getMapper() {
-        return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
-    }
-
-    protected ExpansionSettings getExpansions() {
-        ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return es == null ? EMPTY : es;
-    }
-
-    protected ProviderSnapshot validateAndGetProvider(String id) {
-        ProviderSnapshot providerSnapshot = getProviderUserCase().read(getSession(), id);
-        if (providerSnapshot == null) {
-            throw new NotFoundException(String.format("no provider for id {id}", id));
-        }
-        return providerSnapshot;
-    }
-
-    protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        IAccessResourceUseCase useCase = getResourceUserCase();
-        ResourceSnapshot resourceSnapshot = useCase.read(getSession(), id);
-        if (resourceSnapshot == null) {
-            throw new NotFoundException();
-        }
-        return resourceSnapshot;
-    }
-
-    private ISensorthingsFilterParser getFilterParser() {
-        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
+    protected SensiNactSession getSession() {
+        return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
     protected ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
@@ -117,5 +110,25 @@ public abstract class AbstractAccess {
         } catch (FilterParserException e) {
             throw new BadRequestException("Error parsing filter", e);
         }
+    }
+
+    protected ProviderSnapshot validateAndGetProvider(String id) {
+        getDtoMapper().validatedProviderId(id);
+
+        ProviderSnapshot providerSnapshot = getProviderUserCase().read(getSession(), id);
+        if (providerSnapshot == null) {
+            throw new NotFoundException(String.format("no provider for id {id}", id));
+        }
+        return providerSnapshot;
+    }
+
+    protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
+
+        IAccessResourceUseCase useCase = getResourceUserCase();
+        ResourceSnapshot resourceSnapshot = useCase.read(getSession(), id);
+        if (resourceSnapshot == null) {
+            throw new NotFoundException();
+        }
+        return resourceSnapshot;
     }
 }

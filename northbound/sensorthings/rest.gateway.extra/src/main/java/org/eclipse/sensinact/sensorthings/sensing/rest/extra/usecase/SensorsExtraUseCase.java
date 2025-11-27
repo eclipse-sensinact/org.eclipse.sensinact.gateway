@@ -1,13 +1,14 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.core.snapshot.Snapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import jakarta.ws.rs.core.UriInfo;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
@@ -20,29 +21,42 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<Sensor> {
     DataUpdate dataUpdate;
 
     @Reference
-    IAccessResourceUseCase resourceUseCase;
+    IAccessProviderUseCase providerUseCase;
 
-    @Override
-    public ExtraUseCaseResponse<Sensor> create(SensiNactSession session, UriInfo urlInfo, Sensor dto) {
-        return new ExtraUseCaseResponse<Sensor>(false, "not implemented");
+    public ExtraUseCaseResponse<Snapshot> create(ExtraUseCaseRequest<Sensor> request) {
+        try {
+            Object obj = dataUpdate.pushUpdate(request.model()).getValue();
+            // ProviderSnapshot provider = providerUseCase.read(session,
+            // model.providerId());
+            return new ExtraUseCaseResponse<Snapshot>(false, "fail to get providerSnapshot");
+
+        } catch (InvocationTargetException | InterruptedException e) {
+            return new ExtraUseCaseResponse<Snapshot>(false, "fail to get providerSnapshot");
+
+        }
+
+    }
+
+    public ExtraUseCaseResponse<Snapshot> delete(ExtraUseCaseRequest<Sensor> request) {
+        return new ExtraUseCaseResponse<Snapshot>(false, "fail to get providerSnapshot");
+
+    }
+
+    public ExtraUseCaseResponse<Snapshot> patch(ExtraUseCaseRequest<Sensor> request) {
+        return new ExtraUseCaseResponse<Snapshot>(false, "fail to get providerSnapshot");
 
     }
 
     @Override
-    public ExtraUseCaseResponse<Sensor> update(SensiNactSession session, UriInfo urlInfo, String id, Sensor dto) {
-        return new ExtraUseCaseResponse<Sensor>(false, "not implemented");
+    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<Sensor> request) {
+
+        // TODO
+        return null;
+    }
+
+    public ExtraUseCaseResponse<Snapshot> update(ExtraUseCaseRequest<Sensor> request) {
+        return new ExtraUseCaseResponse<Snapshot>(false, "fail to get providerSnapshot");
 
     }
 
-    @Override
-    public ExtraUseCaseResponse<Sensor> delete(SensiNactSession session, UriInfo urlInfo, String id) {
-        // TODO Auto-generated method stub
-        return new ExtraUseCaseResponse<Sensor>(false, "not implemented");
-    }
-
-    @Override
-    public ExtraUseCaseResponse<Sensor> patch(SensiNactSession session, UriInfo urlInfo, String id, Sensor dto) {
-        // TODO Auto-generated method stub
-        return new ExtraUseCaseResponse<Sensor>(false, "not implemented");
-    }
 }

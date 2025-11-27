@@ -1,19 +1,22 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import org.eclipse.sensinact.core.snapshot.Snapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.ws.rs.core.UriInfo;
 
-public interface IExtraUseCase<D extends Id> {
+public interface IExtraUseCase<M extends Id> {
 
-    public record ExtraUseCaseResponse<D>(String id, D dto, boolean success, String message) {
+    public record ExtraUseCaseResponse<Snapshot>(String id, Snapshot snapshot, boolean success, String message) {
         public ExtraUseCaseResponse(boolean success, String message) {
             this(null, null, success, message);
         }
 
-        public ExtraUseCaseResponse(String id, D dto) {
-            this(id, dto, true, null);
+        public ExtraUseCaseResponse(String id, Snapshot model) {
+            this(id, model, true, null);
         }
 
         public ExtraUseCaseResponse(String id) {
@@ -21,13 +24,24 @@ public interface IExtraUseCase<D extends Id> {
         }
     }
 
-    public Class<D> getType();
+    public record ExtraUseCaseRequest<M>(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
+            M model) {
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id) {
+            this(session, mapper, uriInfo, id, null);
+        }
 
-    public ExtraUseCaseResponse<D> create(SensiNactSession session, UriInfo urlInfo, D dto);
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, M model) {
+            this(session, mapper, uriInfo, null, model);
+        }
+    }
 
-    public ExtraUseCaseResponse<D> update(SensiNactSession session, UriInfo urlInfo, String id, D dto);
+    public ExtraUseCaseResponse<Snapshot> create(ExtraUseCaseRequest<M> request);
 
-    public ExtraUseCaseResponse<D> delete(SensiNactSession session, UriInfo urlInfo, String id);
+    public ExtraUseCaseResponse<Snapshot> delete(ExtraUseCaseRequest<M> request);
 
-    public ExtraUseCaseResponse<D> patch(SensiNactSession session, UriInfo urlInfo, String id, D dto);
+    public Class<M> getType();
+
+    public ExtraUseCaseResponse<Snapshot> patch(ExtraUseCaseRequest<M> request);
+
+    public ExtraUseCaseResponse<Snapshot> update(ExtraUseCaseRequest<M> request);
 }

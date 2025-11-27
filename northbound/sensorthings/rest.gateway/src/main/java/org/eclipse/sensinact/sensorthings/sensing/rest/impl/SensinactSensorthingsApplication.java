@@ -19,14 +19,17 @@ import java.util.Set;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorThingsFeature;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.utils.IDtoMapper;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
 
@@ -37,8 +40,6 @@ import jakarta.ws.rs.core.Application;
 @JakartarsApplicationBase("/")
 public class SensinactSensorthingsApplication extends Application {
 
-    public static final String NOT_SET = "<<NOT_SET>>";
-
     public static @interface Config {
         String history_provider()
 
@@ -46,6 +47,8 @@ public class SensinactSensorthingsApplication extends Application {
 
         int history_results_max() default 3000;
     }
+
+    public static final String NOT_SET = "<<NOT_SET>>";
 
     @Reference
     SensiNactSessionManager sessionManager;
@@ -56,13 +59,25 @@ public class SensinactSensorthingsApplication extends Application {
     @Activate
     Config config;
 
+    @Reference
+    IAccessProviderUseCase accesProviderUseCase;
+
+    @Reference
+    IAccessResourceUseCase accessResourceUseCase;
+
+    @Reference
+    IDtoMapper dtoMapper;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
+    IExtraDelegate extraDelegate;
+
     @Override
     public Set<Class<?>> getClasses() {
 
         Set<Class<?>> listResource = new HashSet<Class<?>>(Set.of(
                 // Features/extensions
                 SensorThingsFeature.class, SensinactSessionProvider.class, SensorthingsFilterProvider.class,
-                AccessProviderUseCaseProvider.class, AccessResourceUseCaseProvider.class,
+                AccessProviderUseCaseProvider.class, AccessResourceUseCaseProvider.class, DtoMapperProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
@@ -73,27 +88,22 @@ public class SensinactSensorthingsApplication extends Application {
         return listResource;
     }
 
-    @Reference
-    IAccessProviderUseCase accesProviderUseCase;
-
-    @Reference
-    IAccessResourceUseCase accessResourceUseCase;
-
-    public SensiNactSessionManager getSessionManager() {
-        return sessionManager;
-    }
-
     @Override
     public Map<String, Object> getProperties() {
         Map<String, Object> properties = NOT_SET.equals(config.history_provider())
                 ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
                         "sensinact.history.result.limit", config.history_results_max(), "access.resource.usecase",
-                        accessResourceUseCase, "access.provider.usecase", accesProviderUseCase))
+                        accessResourceUseCase, "dto.mapper", dtoMapper, "access.provider.usecase",
+                        accesProviderUseCase))
                 : new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
                         "sensinact.history.provider", config.history_provider(), "sensinact.history.result.limit",
-                        config.history_results_max(), "access.resource.usecase", accessResourceUseCase,
-                        "access.provider.usecase", accesProviderUseCase));
+                        config.history_results_max(), "access.resource.usecase", accessResourceUseCase, "dto.mapper",
+                        dtoMapper, "access.provider.usecase", accesProviderUseCase));
 
         return properties;
+    }
+
+    public SensiNactSessionManager getSessionManager() {
+        return sessionManager;
     }
 }
