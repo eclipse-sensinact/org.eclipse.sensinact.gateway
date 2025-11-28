@@ -15,15 +15,15 @@ package org.eclipse.sensinact.sensorthings.sensing.dto.expand;
 import java.util.List;
 
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record ExpandedLocation(String selfLink, Object id, String name, String description, String encodingType,
         GeoJsonObject location, @JsonProperty("Things@iot.navigationLink") String thingsLink,
         @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink,
-        @JsonProperty("Things") List<Id> things) implements NameDescription {
+        @JsonProperty("Things") List<Thing> things) implements NameDescription {
 
     ;
 

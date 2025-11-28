@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
@@ -25,13 +24,16 @@ public class DtoFactory {
         return getDatastreamMinimalLinkThing(name, null);
     }
 
-    public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, Thing thngId) {
-
+    public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, Thing thingId) {
+        Sensor sensor = new Sensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
+                "http://example.com/humidity-sensor.pdf", null, null);
         // Required
+        ObservedProperty op = new ObservedProperty(null, null, "Temperature", "Air temperature",
+                "http://example.com/op/temperature", null, null);
         UnitOfMeasurement uom = new UnitOfMeasurement("Celsius", "°C", "http://unitsofmeasure.org");
 
         return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
-                null, null, null, null, null, null, null, thngId);
+                null, null, null, null, op, sensor, null, thingId);
     }
 
     public static ExpandedLocation getIdLocation(Object id) {
@@ -48,45 +50,6 @@ public class DtoFactory {
     public static Thing getIdThing(Object id) {
 
         return new Thing(null, id, null, null, null, null, null, null);
-    }
-
-    public static ExpandedDataStream getDatastreamLinkThingWithSensor(String name, Thing thingId) {
-
-        // Required unit
-        UnitOfMeasurement uom = new UnitOfMeasurement("Percent", "%", "http://unitsofmeasure.org");
-
-        // Inline sensor
-        Sensor sensor = new Sensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null);
-
-        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
-                null, null, null, null, null, sensor, null, thingId);
-    }
-
-    public static ExpandedDataStream getDatastreamWithSensor(String name) {
-
-        return getDatastreamLinkThingWithSensor(name, null);
-    }
-
-    public static ExpandedDataStream getDatastreamLinkThingWithSensorObservedProperty(String name, Thing thingId) {
-
-        // Required unit
-        UnitOfMeasurement uom = new UnitOfMeasurement("Percent", "%", "http://unitsofmeasure.org");
-
-        // Inline sensor
-
-        Sensor sensor = new Sensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null);
-        ObservedProperty op = new ObservedProperty(null, null, "Temperature", "Air temperature",
-                "http://example.com/op/temperature", null, null);
-
-        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
-                null, null, null, null, op, sensor, null, thingId);
-    }
-
-    public static ExpandedDataStream getDatastreamWithSensorObservedProperty(String name) {
-
-        return getDatastreamLinkThingWithSensorObservedProperty(name, null);
     }
 
     public static ExpandedDataStream getDatastreamLinkThingWithSensorObservedPropertyObservation(String name,
@@ -112,17 +75,12 @@ public class DtoFactory {
                 null, null, null, List.of(observation1, observation2), op, sensor, null, thing);
     }
 
-    public static ExpandedDataStream getDatastreamWithSensorObservedPropertyObservation(String name) {
-
-        return getDatastreamLinkThingWithSensorObservedProperty(name, null);
-    }
-
     public static ExpandedLocation getLocation(String name) {
 
         return getLocationLinkThing(name, null);
     }
 
-    public static ExpandedLocation getLocationLinkThing(String name, List<Id> things) {
+    public static ExpandedLocation getLocationLinkThing(String name, List<Thing> things) {
         return new ExpandedLocation(null, null, name, "location1 test", "application/vnd.geo+json",
                 new Point(-122.4194, 37.7749), null, null, things);
     }

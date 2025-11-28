@@ -2,10 +2,15 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.List;
 
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+import jakarta.ws.rs.BadRequestException;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
@@ -13,13 +18,26 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(service = IExtraUseCase.class)
 public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation, ProviderSnapshot> {
+    @Reference
+    IAccessProviderUseCase providerUseCase;
+
+    @Reference
+    DataUpdate dataUpdate;
+
+    @Override
+    protected IAccessProviderUseCase getProviderUseCase() {
+        return providerUseCase;
+    }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
-        String id = (String) request.model().id();
+        if (request.model().things() == null || request.model().things().size() == 0) {
+            throw new BadRequestException("no linked things found");
+        }
+        String id = (String) request.model().things().stream().findFirst().get().id();
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
-            ProviderSnapshot resource = resourceUseCase.read(request.session(), id);
+            ProviderSnapshot resource = providerUseCase.read(request.session(), id);
             if (resource != null) {
                 return new ExtraUseCaseResponse<ProviderSnapshot>(id, resource);
             }
@@ -64,7 +82,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
         String id = (String) request.model().id();
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
-            ProviderSnapshot resource = resourceUseCase.read(request.session(), id);
+            ProviderSnapshot resource = providerUseCase.read(request.session(), id);
             if (resource != null) {
                 return new ExtraUseCaseResponse<ProviderSnapshot>(id, resource);
             }

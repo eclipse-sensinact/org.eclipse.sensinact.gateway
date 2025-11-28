@@ -19,10 +19,15 @@ import org.osgi.service.component.annotations.Reference;
 public class SensorsExtraUseCase extends AbstractExtraUseCase<Sensor, ResourceSnapshot> {
 
     @Reference
-    DataUpdate dataUpdate;
+    IAccessProviderUseCase providerUseCase;
 
     @Reference
-    IAccessProviderUseCase providerUseCase;
+    DataUpdate dataUpdate;
+
+    @Override
+    protected IAccessProviderUseCase getProviderUseCase() {
+        return providerUseCase;
+    }
 
     public ExtraUseCaseResponse<ResourceSnapshot> create(ExtraUseCaseRequest<Sensor> request) {
         try {

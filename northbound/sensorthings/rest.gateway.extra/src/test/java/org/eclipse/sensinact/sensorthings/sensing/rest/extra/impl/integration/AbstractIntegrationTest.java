@@ -33,6 +33,7 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.Application;
@@ -101,6 +102,10 @@ public class AbstractIntegrationTest {
         final HttpRequest req = HttpRequest.newBuilder(targetUri).uri(targetUri)
                 .header(CONTENT_TYPE, "application/json").PUT(HttpRequest.BodyPublishers.ofString(body)).build();
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+    }
+
+    public static String getIdFromJson(JsonNode node) {
+        return node.get("@iot.id").asText();
     }
 
     public static final String CONTENT_TYPE = "Content-Type";

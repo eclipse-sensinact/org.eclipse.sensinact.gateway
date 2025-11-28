@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.junit.jupiter.api.Test;
@@ -44,13 +45,30 @@ public class CreateLocationTest extends AbstractIntegrationTest {
         String name = "testCreateLocation";
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
-        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
-        List<Id> listId = new ArrayList<Id>();
-        listId.add(thing);
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        List<Thing> listId = new ArrayList<Thing>();
+        listId.add(DtoFactory.getIdThing(idThing));
         ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name, listId);
 
         // when
-        json = getJsonResponseFromPost(dtoLocation, "/1.1/Locations", 201);
+        json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        UtilsAssert.assertLocation(dtoLocation, json);
+
+    }
+
+    @Test
+    public void testCreateLocationthroughThing() throws Exception {
+        // given
+        String name = "testCreateLocationthroughThing";
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        ExpandedLocation dtoLocation = DtoFactory.getLocation(name);
+
+        // when
+        json = getJsonResponseFromPost(dtoLocation, String.format("Things(%s)/Locations", idThing), 201);
         UtilsAssert.assertLocation(dtoLocation, json);
 
     }

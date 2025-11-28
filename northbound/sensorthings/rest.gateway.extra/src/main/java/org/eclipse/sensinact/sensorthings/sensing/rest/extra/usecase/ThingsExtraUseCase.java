@@ -85,4 +85,9 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
 
     }
 
+    @Override
+    protected IAccessProviderUseCase getProviderUseCase() {
+        return providerUseCase;
+    }
+
 }

@@ -27,7 +27,7 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object latestObservation,
         @Timestamp Instant timestamp, @Resource("latestObservation") @Metadata(onMap = {
                 USE_KEYS_AS_FIELDS }) Map<String, Object> observationParameters,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unit,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object unit,
         @Resource("unit") @Metadata(onMap = { USE_KEYS_AS_FIELDS }) Map<String, Object> unitMetadata,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object sensor,
         @Resource("sensor") @Metadata(onMap = { USE_KEYS_AS_FIELDS }) Map<String, Object> sensorMetadata,
@@ -48,12 +48,20 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
         if (service != DATA_STREAM_SERVICE) {
             throw new IllegalArgumentException("The model for the datastream must be " + DATA_STREAM_SERVICE.getName());
         }
+        if (observationParameters == null)
+            observationParameters = Map.of();
+        if (unitMetadata == null)
+            unitMetadata = Map.of();
+        if (sensorMetadata == null)
+            sensorMetadata = Map.of();
+        if (observedPropertyMetadata == null)
+            observedPropertyMetadata = Map.of();
     }
 
     public DatastreamUpdate(String providerId, String serviceName, Object sensorThingsId, String name,
             String description, Object latestObservation, Instant timestamp, Map<String, Object> observationParameters,
-            String unit, Map<String, Object> unitMetadata, Object sensor, Map<String, Object> sensorMetadata,
-            Object observedProperty, Map<String, Object> observedPropertyMetadata) {
+            String unit, Map<String, Object> unitMetadata, String sensor, Map<String, Object> sensorMetadata,
+            String observedProperty, Map<String, Object> observedPropertyMetadata) {
         this(SENSOR_THINGS_DEVICE, DATA_STREAM_SERVICE, providerId, serviceName, sensorThingsId, name, description,
                 latestObservation, timestamp, observationParameters, unit, unitMetadata, sensor, sensorMetadata,
                 observedProperty, observedPropertyMetadata);

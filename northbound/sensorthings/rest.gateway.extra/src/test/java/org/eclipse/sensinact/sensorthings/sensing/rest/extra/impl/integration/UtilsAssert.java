@@ -52,10 +52,13 @@ public class UtilsAssert {
                     assertNotNull(locationsNode, "Locations array must be present");
                     assertEquals(dtoThing.locations().size(), listLocation.size(), "Number of locations must match");
                     for (int i = 0; i < dtoThing.locations().size(); i++) {
-                        assertEquals(dtoThing.locations().get(i).name(), listLocation.get(i).get("id").asText());
+                        String locationNameResult = listLocation.get(i).get("properties")
+                                .get("sensorthings.location.name").asText();
+                        assertEquals(dtoThing.locations().get(i).name(), locationNameResult);
                     }
                 } else {
-                    assertEquals(dtoThing.locations().get(0).name(), location.get("id").asText());
+                    String locationNameResult = location.get("properties").get("sensorthings.location.name").asText();
+                    assertEquals(dtoThing.locations().get(0).name(), locationNameResult);
 
                 }
             }
