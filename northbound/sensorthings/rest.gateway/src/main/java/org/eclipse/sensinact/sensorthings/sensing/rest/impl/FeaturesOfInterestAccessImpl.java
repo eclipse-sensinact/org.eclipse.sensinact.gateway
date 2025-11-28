@@ -16,6 +16,9 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -38,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 public class FeaturesOfInterestAccessImpl extends AbstractAccess
@@ -131,46 +135,44 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
 
     @Override
     public Response createFeaturesOfInterestCObservation(String id, Observation observation) {
-        ExpandedFeatureOfInterest featureOfInterest = getFeatureOfInterest(id, ExpandedFeatureOfInterest.class);
-        featureOfInterest.observations = getFeatureOfInterestObservations(id).value;
-        if (featureOfInterest.observations == null || featureOfInterest.observations.size() == 0) {
-            featureOfInterest.observations = List.of(observation);
-        } else {
-            featureOfInterest.observations.add(observation);
+        FeatureOfInterest readedFeatureOfInterest = getFeatureOfInterest(id);
+        if (readedFeatureOfInterest == null) {
+            throw new NotFoundException(String.format("FeatureOfInterest %s not found", id));
         }
-        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, featureOfInterest,
+        ResultList<Observation> observations = getFeatureOfInterestObservations(id);
+        List<Observation> listObservationToUpdates = new ArrayList<Observation>();
+        if (observations != null && observations.value() != null && observations.value().size() > 0) {
+            listObservationToUpdates.addAll(observations.value());
+        }
+        listObservationToUpdates.add(observation);
+
+        ExpandedFeatureOfInterest featureOfInterest = new ExpandedFeatureOfInterest(null, readedFeatureOfInterest.id(),
+                readedFeatureOfInterest.name(), readedFeatureOfInterest.description(),
+                readedFeatureOfInterest.encodingType(), readedFeatureOfInterest.feature(),
+                readedFeatureOfInterest.observationsLink(), listObservationToUpdates);
+
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, null,
                 ExpandedFeatureOfInterest.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        FeatureOfInterest createDto = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot);
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
     }
 
     @Override
     public Response updateFeaturesOfInterest(String id, FeatureOfInterest featureOfInterest) {
 
-        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, featureOfInterest,
-                FeatureOfInterest.class);
+        throw new UnsupportedOperationException("not yet implemented");
 
     }
 
     @Override
     public Response updateFeaturesOfInterestObservation(String featureId, String observationId,
             Observation observation) {
-        ExpandedFeatureOfInterest featureOfInterest = getFeatureOfInterest(featureId, ExpandedFeatureOfInterest.class);
-        List<Observation> observations = featureOfInterest.observations;
-        if (observations == null || observations.isEmpty()) {
-            throw new UnsupportedOperationException(String.format("No Observation %s found", observationId));
-        }
-        boolean updated = false;
-        for (int i = 0; i < observations.size(); i++) {
-            Observation obs = observations.get(i);
-            if (obs.id.equals(observationId)) {
-                observations.set(i, observation); // Replace the existing observation
-                updated = true;
-                break; // No need to continue looping
-            }
-        }
-        if (!updated) {
-            throw new UnsupportedOperationException(String.format("No Observation %s found", observationId));
-        }
-        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, featureId, featureOfInterest,
-                ExpandedFeatureOfInterest.class);
+        throw new UnsupportedOperationException("not yet implemented");
+
     }
 }

@@ -8,14 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.UriInfo;
 
-public interface IExtraUseCase<M extends Id> {
+public interface IExtraUseCase<M extends Id, S extends Snapshot> {
 
-    public record ExtraUseCaseResponse<Snapshot>(String id, Snapshot snapshot, boolean success, String message) {
+    public record ExtraUseCaseResponse<S>(String id, S snapshot, boolean success, String message) {
         public ExtraUseCaseResponse(boolean success, String message) {
             this(null, null, success, message);
         }
 
-        public ExtraUseCaseResponse(String id, Snapshot model) {
+        public ExtraUseCaseResponse(String id, S model) {
             this(id, model, true, null);
         }
 
@@ -35,13 +35,13 @@ public interface IExtraUseCase<M extends Id> {
         }
     }
 
-    public ExtraUseCaseResponse<Snapshot> create(ExtraUseCaseRequest<M> request);
+    public ExtraUseCaseResponse<S> create(ExtraUseCaseRequest<M> request);
 
-    public ExtraUseCaseResponse<Snapshot> delete(ExtraUseCaseRequest<M> request);
+    public ExtraUseCaseResponse<S> delete(ExtraUseCaseRequest<M> request);
 
     public Class<M> getType();
 
-    public ExtraUseCaseResponse<Snapshot> patch(ExtraUseCaseRequest<M> request);
+    public ExtraUseCaseResponse<S> patch(ExtraUseCaseRequest<M> request);
 
-    public ExtraUseCaseResponse<Snapshot> update(ExtraUseCaseRequest<M> request);
+    public ExtraUseCaseResponse<S> update(ExtraUseCaseRequest<M> request);
 }

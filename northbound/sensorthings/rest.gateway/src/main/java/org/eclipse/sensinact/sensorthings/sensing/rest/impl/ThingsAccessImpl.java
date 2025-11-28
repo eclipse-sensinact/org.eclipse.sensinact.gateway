@@ -35,12 +35,18 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.ThingsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
-public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
+public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate, ThingsUpdate {
 
     @Override
     public Thing getThing(String id) {
@@ -259,5 +265,40 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess {
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
+    }
+
+    @Override
+    public Response updateDatastream(String id, String id2, ExpandedDataStream datastream) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("not yet implemented");
+
+    }
+
+    @Override
+    public Response updateLocation(String id, String id2, ExpandedLocation location) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("not yet implemented");
+
+    }
+
+    @Override
+    public Response updateThing(String id, ExpandedThing thing) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("not yet implemented");
+
+    }
+
+    @Override
+    public Response createDatastream(String id, ExpandedDataStream datastream) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("not yet implemented");
+
+    }
+
+    @Override
+    public Response createLocation(String id, ExpandedLocation location) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("not yet implemented");
+
     }
 }

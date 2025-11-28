@@ -43,7 +43,6 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.utils.IDtoMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -68,8 +67,6 @@ class HistoryResourceHelperTest {
 
     @Mock
     private ObjectMapper mapper;
-
-    private IDtoMapper dtoMapper = new DtoMapper();
 
     @Mock
     private UriInfo uriInfo;
@@ -122,8 +119,8 @@ class HistoryResourceHelperTest {
         void noHistoryProvider() {
             when(application.getProperties()).thenReturn(Map.of());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(dtoMapper, userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertTrue(result.value().isEmpty());
@@ -151,8 +148,8 @@ class HistoryResourceHelperTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(timedValues);
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(dtoMapper, userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertEquals(count.intValue(), result.count().intValue());
@@ -177,8 +174,8 @@ class HistoryResourceHelperTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
-            HistoryResourceHelper.loadHistoricalObservations(dtoMapper, userSession, application, mapper, uriInfo,
-                    expansions, resourceSnapshot, null, localResultLimit);
+            HistoryResourceHelper.loadHistoricalObservations(userSession, application, mapper, uriInfo, expansions,
+                    resourceSnapshot, null, localResultLimit);
 
             verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
         }
@@ -209,8 +206,8 @@ class HistoryResourceHelperTest {
                     .thenReturn(timedValues, timedValues, List.of(new DefaultTimedValue<>("value1", now.minus(3, DAYS)),
                             new DefaultTimedValue<>("value3", now.minus(3, DAYS))), List.of());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(dtoMapper, userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, filter, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, filter, 0);
 
             assertNotNull(result);
             assertEquals(4, result.value().size());
@@ -245,8 +242,8 @@ class HistoryResourceHelperTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(dtoMapper, userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertEquals(Integer.MAX_VALUE, result.count().intValue());
@@ -266,8 +263,8 @@ class HistoryResourceHelperTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(dtoMapper, userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertEquals(null, result.count());

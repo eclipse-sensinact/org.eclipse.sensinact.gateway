@@ -162,6 +162,6 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
 
     @Override
     public Response updateObservation(String id, Observation observation) {
-        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, observation, Observation.class);
+        throw new UnsupportedOperationException("not yet implemented");
     }
 }

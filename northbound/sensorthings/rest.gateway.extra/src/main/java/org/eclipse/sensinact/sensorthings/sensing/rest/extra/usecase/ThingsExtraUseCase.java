@@ -4,9 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.snapshot.Snapshot;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.Helpers;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
@@ -18,7 +17,7 @@ import org.osgi.service.component.annotations.Reference;
  * object
  */
 @Component(service = IExtraUseCase.class)
-public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing> {
+public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, ProviderSnapshot> {
 
     @Reference
     DataUpdate dataUpdate;
@@ -29,8 +28,8 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing> {
     @Reference
     IAccessResourceUseCase resourceUseCase;
 
-    public ExtraUseCaseResponse<Snapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
-        String id = sanitizeId(request.model().id != null ? request.model().id : request.model().name);
+    public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
+        String id = DtoMapper.sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         // update/create provider
@@ -38,34 +37,34 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing> {
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<Snapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
 
         }
 
-        Snapshot provider = providerUseCase.read(request.session(), id);
+        ProviderSnapshot provider = providerUseCase.read(request.session(), id);
         if (provider != null) {
-            return new ExtraUseCaseResponse<Snapshot>(id, provider);
+            return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
         }
-        return new ExtraUseCaseResponse<Snapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
 
     }
 
-    public ExtraUseCaseResponse<Snapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
-        return new ExtraUseCaseResponse<Snapshot>(false, "fail to get Snapshot");
+    public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
 
     }
 
-    public ExtraUseCaseResponse<Snapshot> patch(ExtraUseCaseRequest<ExpandedThing> request) {
-        return new ExtraUseCaseResponse<Snapshot>(false, "fail to get Snapshot");
+    public ExtraUseCaseResponse<ProviderSnapshot> patch(ExtraUseCaseRequest<ExpandedThing> request) {
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
 
     }
 
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedThing> request) {
-        return Helpers.toUpdates(request.model()).toList();
+        return DtoMapper.toUpdates(request.model()).toList();
     }
 
-    public ExtraUseCaseResponse<Snapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {
+    public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {
 
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
@@ -74,15 +73,15 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing> {
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<Snapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
 
         }
 
-        Snapshot snapshot = providerUseCase.read(request.session(), request.id());
+        ProviderSnapshot snapshot = providerUseCase.read(request.session(), request.id());
         if (snapshot != null) {
-            return new ExtraUseCaseResponse<Snapshot>(request.id(), snapshot);
+            return new ExtraUseCaseResponse<ProviderSnapshot>(request.id(), snapshot);
         }
-        return new ExtraUseCaseResponse<Snapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
 
     }
 

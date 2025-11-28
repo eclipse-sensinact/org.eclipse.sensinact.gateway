@@ -7,10 +7,10 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.junit.jupiter.api.Test;
 
@@ -60,18 +60,15 @@ public class CreateThingTest extends AbstractIntegrationTest {
     @Test
     public void testCreateThingExistingLocation() throws Exception {
         // Given
-
-        ExpandedThing dtoThing = new ExpandedThing();
-        dtoThing.name = "testCreateThingExistingLocation";
-        dtoThing.description = "testThing existing Location ";
-        dtoThing.properties = Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25");
-
-        Location location1 = DtoFactory.getLocation1();
-        HttpResponse<String> response = queryPost("/Locations", location1);
+        String name = "testCreateThingExistingLocation";
+        ExpandedLocation location = DtoFactory.getLocation(name);
+        HttpResponse<String> response = queryPost("/Locations", location);
         Location createdLocation = mapper.readValue(response.body(), Location.class);
-        Location IdLocation = new Location();
-        IdLocation.id = createdLocation.id;
-        dtoThing.locations = List.of(IdLocation);
+        List<ExpandedLocation> idLocations = List.of(DtoFactory.getIdLocation(createdLocation.id()));
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations("testCreateThingExistingLocation",
+                "testThing existing Location", Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"),
+                idLocations);
+
         // When
 
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
@@ -101,18 +98,15 @@ public class CreateThingTest extends AbstractIntegrationTest {
     @Test
     public void testCreateThingExistsDatastream() throws Exception {
         // Given
+        String name = "testCreateThingExistsDatastream";
 
-        ExpandedThing dtoThing = new ExpandedThing();
-        dtoThing.name = "testCreateThingExistsDatastream";
-        dtoThing.description = "testThing existing Datastream ";
-        dtoThing.properties = Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25");
-
-        Datastream datastream = DtoFactory.getDatastreamMinimal();
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimal(name);
         HttpResponse<String> response = queryPost("/Datastreams", datastream);
         ExpandedDataStream createdDatastream = mapper.readValue(response.body(), ExpandedDataStream.class);
-        ExpandedDataStream IdDatastream = new ExpandedDataStream();
-        IdDatastream.id = createdDatastream.id;
-        dtoThing.datastreams = List.of(IdDatastream);
+        List<ExpandedDataStream> idDatastream = List.of(DtoFactory.getIdDatastream(createdDatastream.id()));
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreams(name, "testThing existing Datastream ",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), idDatastream);
+
         // When
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
@@ -139,10 +133,10 @@ public class CreateThingTest extends AbstractIntegrationTest {
     @Test
     public void testCreateThingSimple() throws Exception {
         // Given
-        ExpandedThing dtoThing = new ExpandedThing();
-        dtoThing.name = "testExtraThing";
-        dtoThing.description = "testThing";
-        dtoThing.properties = Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25");
+        String name = "testCreateThingSimple";
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThing(name, "testThing",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         // When
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
         // Then
@@ -178,20 +172,17 @@ public class CreateThingTest extends AbstractIntegrationTest {
     @Test
     public void testCreateThingWith1Location() throws Exception {
         // Given
-        ExpandedThing dtoThing = new ExpandedThing();
-        String thingName = "testExtraThingWithLocation";
-        dtoThing.name = thingName;
-        dtoThing.description = "testThing With Location ";
-        dtoThing.properties = Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25");
-        Location location1 = DtoFactory.getLocation1();
-        dtoThing.locations = List.of(location1);
+        String name = "testExtraThingWithLocation";
 
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name));
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name, "testThing With 1 Location ",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locations);
         // When
 
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
         UtilsAssert.assertThing(dtoThing, json);
-        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations", thingName));
+        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations", name));
         UtilsAssert.assertThing(dtoThing, json, true);
     }
 
@@ -229,23 +220,21 @@ public class CreateThingTest extends AbstractIntegrationTest {
     @Test
     public void testCreateThingWithLocationAndDatastream() throws Exception {
         // Given
-        ExpandedThing dtoThing = new ExpandedThing();
-        String thingName = "testCreateThingWithLocationAndDatastream";
-        dtoThing.name = thingName;
-        dtoThing.description = "testThing With Location and Datastream";
-        dtoThing.properties = Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25");
-        Location location1 = DtoFactory.getLocation1();
-        dtoThing.locations = List.of(location1);
+        String name = "testCreateThingWithLocationAndDatastream";
 
-        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal();
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name));
 
-        dtoThing.datastreams = List.of(datastream1);
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
         // When
 
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
         UtilsAssert.assertThing(dtoThing, json);
-        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations,Datastreams", thingName));
+        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations,Datastreams", name));
         UtilsAssert.assertThing(dtoThing, json, true);
 
     }
@@ -289,27 +278,87 @@ public class CreateThingTest extends AbstractIntegrationTest {
     // @formatter:on
     public void testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation() throws Exception {
         // Given
-        ExpandedThing dtoThing = new ExpandedThing();
-        String thingName = "testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
-        dtoThing.name = thingName;
-        dtoThing.description = "testThing With Location and Datastream";
-        dtoThing.properties = Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25");
-        Location location1 = DtoFactory.getLocation1();
-        dtoThing.locations = List.of(location1);
+        String name = "testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
 
-        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal();
-        ExpandedDataStream datastream2 = DtoFactory.getDatastreamWithSensor();
-        ExpandedDataStream datastream3 = DtoFactory.getDatastreamWithSensorObservedProperty();
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name));
 
-        dtoThing.datastreams = List.of(datastream1, datastream2, datastream3);
+        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal(name);
+        ExpandedDataStream datastream2 = DtoFactory.getDatastreamWithSensor(name + "1");
+        ExpandedDataStream datastream3 = DtoFactory.getDatastreamWithSensorObservedProperty(name + "2");
+
+        List<ExpandedDataStream> datastreams = List.of(datastream1, datastream2, datastream3);
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
         // When
 
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
         UtilsAssert.assertThing(dtoThing, json);
         json = getJsonResponseFromGet(String.format(
-                "/Things(%s)?$expand=Locations,Datastreams($expand=Sensor,ObservedProperty,Observations)", thingName));
+                "/Things(%s)?$expand=Locations,Datastreams($expand=Sensor,ObservedProperty,Observations)", name));
         UtilsAssert.assertThing(dtoThing, json, true);
+    }
+
+    // @formatter:off
+    /* 
+     * e.g
+    POST /Things
+
+    {
+        "name": "testExtraThing",
+        "description": "testThing existing Location",
+        "properties": {
+            "manufacturer": "New Corp",
+            "installationDate": "2025-11-25"
+        },
+        Locations:[
+            {
+                name:"location1",
+                description:"",
+                location:{
+                ...
+                },
+                encodingType:""
+            }
+        ],
+        Datastreams:[
+            {
+                ...,
+                Sensor:{
+                    ...
+                },
+                ObservedProperty:{...},
+                Observations:[
+                {...}
+                ]
+            }
+        ]
+    }
+    */
+    // @formatter:on
+    public void testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation()
+            throws Exception {
+        // Given
+        String name = "testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
+
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name));
+
+        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal(name);
+        ExpandedDataStream datastream2 = DtoFactory.getDatastreamWithSensor(name + "1");
+        ExpandedDataStream datastream3 = DtoFactory.getDatastreamWithSensorObservedProperty(name + "2");
+
+        List<ExpandedDataStream> datastreams = List.of(datastream1, datastream2, datastream3);
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
+        // When
+
+        JsonNode json = getJsonResponseFromPost(dtoThing,
+                "/Things?$expand=Locations,Datastreams($expand=Sensor,ObservedProperty,Observations)", 201);
+
+        UtilsAssert.assertThing(dtoThing, json, true);
+
     }
 
  // @formatter:off
@@ -342,21 +391,20 @@ public class CreateThingTest extends AbstractIntegrationTest {
     @Test
     public void testCreateThingWithMultipleLocation() throws Exception {
         // Given
-        ExpandedThing dtoThing = new ExpandedThing();
-        String thingName = "testCreateThingWithMultipleLocation";
-        dtoThing.name = thingName;
-        dtoThing.description = "testThing With Multiple Location ";
-        dtoThing.properties = Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25");
-        Location location1 = DtoFactory.getLocation1();
-        Location location2 = DtoFactory.getLocation2();
-        dtoThing.locations = List.of(location1, location2);
+        String name = "testCreateThingWithMultipleLocation";
 
+        ExpandedLocation location1 = DtoFactory.getLocation(name);
+        ExpandedLocation location2 = DtoFactory.getLocation(name + "1");
+        List<ExpandedLocation> locations = List.of(location1, location2);
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locations);
         // When
 
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
         UtilsAssert.assertThing(dtoThing, json);
-        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations", thingName));
+        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations", name));
         UtilsAssert.assertThing(dtoThing, json, true);
     }
 

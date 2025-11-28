@@ -80,12 +80,8 @@ public abstract class AbstractAccess {
     }
 
     protected IExtraDelegate getExtraDelegate() {
-        IExtraDelegate extraDelegate = providers.getContextResolver(IExtraDelegate.class, MediaType.WILDCARD_TYPE)
-                .getContext(null);
-        if (extraDelegate == null) {
-            throw new UnsupportedOperationException("Not available");
-        }
-        return extraDelegate;
+        return providers.getContextResolver(IExtraDelegate.class, MediaType.WILDCARD_TYPE).getContext(null);
+
     }
 
     protected ProviderSnapshot validateAndGetProvider(String id) {

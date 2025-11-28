@@ -25,7 +25,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
-import org.eclipse.sensinact.sensorthings.sensing.rest.utils.IDtoMapper;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -65,9 +64,6 @@ public class SensinactSensorthingsApplication extends Application {
     @Reference
     IAccessResourceUseCase accessResourceUseCase;
 
-    @Reference
-    IDtoMapper dtoMapper;
-
     @Reference(cardinality = ReferenceCardinality.OPTIONAL)
     IExtraDelegate extraDelegate;
 
@@ -77,7 +73,7 @@ public class SensinactSensorthingsApplication extends Application {
         Set<Class<?>> listResource = new HashSet<Class<?>>(Set.of(
                 // Features/extensions
                 SensorThingsFeature.class, SensinactSessionProvider.class, SensorthingsFilterProvider.class,
-                AccessProviderUseCaseProvider.class, AccessResourceUseCaseProvider.class, DtoMapperProvider.class,
+                AccessProviderUseCaseProvider.class, AccessResourceUseCaseProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
@@ -93,12 +89,11 @@ public class SensinactSensorthingsApplication extends Application {
         Map<String, Object> properties = NOT_SET.equals(config.history_provider())
                 ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
                         "sensinact.history.result.limit", config.history_results_max(), "access.resource.usecase",
-                        accessResourceUseCase, "dto.mapper", dtoMapper, "access.provider.usecase",
-                        accesProviderUseCase))
+                        accessResourceUseCase, "access.provider.usecase", accesProviderUseCase))
                 : new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
                         "sensinact.history.provider", config.history_provider(), "sensinact.history.result.limit",
-                        config.history_results_max(), "access.resource.usecase", accessResourceUseCase, "dto.mapper",
-                        dtoMapper, "access.provider.usecase", accesProviderUseCase));
+                        config.history_results_max(), "access.resource.usecase", accessResourceUseCase,
+                        "access.provider.usecase", accesProviderUseCase));
 
         return properties;
     }

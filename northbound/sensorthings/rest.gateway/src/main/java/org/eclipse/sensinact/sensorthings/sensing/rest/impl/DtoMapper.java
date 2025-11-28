@@ -12,14 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVATION_QUALITY;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_SENSOR_ENCODING_TYPE;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_SENSOR_METADATA;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_UNIT_DEFINITION;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_UNIT_NAME;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.FeaturesOfInterestAccessImpl.getLiveObservations;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_OBSERVATION_QUALITY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_SENSOR_ENCODING_TYPE;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_SENSOR_METADATA;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_UNIT_DEFINITION;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensorthingsAnnotations.SENSORTHINGS_UNIT_NAME;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -77,14 +77,14 @@ public class DtoMapper {
     private static final String NO_DESCRIPTION = "No description";
     private static final String NO_DEFINITION = "No definition";
 
-    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
+    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider,
+            String resource) {
         ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> ADMIN.equals(s.getName())).findFirst()
                 .get();
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
-    private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider,
-            String resource) {
+    private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider, String resource) {
         Optional<? extends ResourceSnapshot> rc = getProviderAdminField(provider, resource);
         if (rc.isPresent()) {
             TimedValue<?> value = rc.get().getValue();
@@ -103,50 +103,49 @@ public class DtoMapper {
         return o == null || o.isEmpty() ? null : String.valueOf(o.get());
     }
 
-    public static Thing toThing(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider) {
+    public static Thing toThing(SensiNactSession userSession, Application application, ObjectMapper mapper,
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         String id = provider.getName();
 
-        String name = Objects.requireNonNullElse(toString(getProviderAdminFieldValue(provider, FRIENDLY_NAME)), provider.getName());
+        String name = Objects.requireNonNullElse(toString(getProviderAdminFieldValue(provider, FRIENDLY_NAME)),
+                provider.getName());
 
-        String description = Objects.requireNonNullElse(toString(getProviderAdminFieldValue(provider, DESCRIPTION)), NO_DESCRIPTION);
+        String description = Objects.requireNonNullElse(toString(getProviderAdminFieldValue(provider, DESCRIPTION)),
+                NO_DESCRIPTION);
 
-        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Things({id})")
-                .resolveTemplate("id", id).build().toString();
-        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastreams").build().toString();
-        String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("HistoricalLocations")
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Things({id})").resolveTemplate("id", id)
                 .build().toString();
+        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastreams").build().toString();
+        String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("HistoricalLocations").build()
+                .toString();
         String locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Locations").build().toString();
 
-        Thing thing = new Thing(selfLink, id, name, description, null,
-                datastreamsLink, historicalLocationsLink, locationsLink);
-        if(expansions.shouldExpand("Datastreams", thing)) {
+        Thing thing = new Thing(selfLink, id, name, description, null, datastreamsLink, historicalLocationsLink,
+                locationsLink);
+        if (expansions.shouldExpand("Datastreams", thing)) {
             expansions.addExpansion("Datastreams", thing, DatastreamsAccessImpl.getDataStreams(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, provider));
         }
 
-        if(expansions.shouldExpand("HistoricalLocations", thing)) {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
+        if (expansions.shouldExpand("HistoricalLocations", thing)) {
+            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
             if (historicalLocation.isPresent()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", thing, list);
             }
         }
-        if(expansions.shouldExpand("Locations", thing)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(
-                    DtoMapper.toLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Locations"), filter, provider)));
+        if (expansions.shouldExpand("Locations", thing)) {
+            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", thing, list);
         }
 
         return thing;
     }
 
-    public static Location toLocation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider) {
+    public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         final String providerName = provider.getName();
         final TimedValue<GeoJsonObject> rcLocation = getLocation(provider, mapper, false);
         final Instant time = rcLocation.getTimestamp();
@@ -158,18 +157,17 @@ public class DtoMapper {
 
         String description = Objects.requireNonNullElse(getProperty(object, DESCRIPTION), NO_DESCRIPTION);
 
-        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Locations({id})")
-                .resolveTemplate("id", id).build().toString();
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Locations({id})").resolveTemplate("id", id)
+                .build().toString();
         String thingsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Things").build().toString();
-        String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
-                .path("HistoricalLocations").build().toString();
+        String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("HistoricalLocations").build()
+                .toString();
 
         Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object,
                 thingsLink, historicalLocationsLink);
-        if(expansions.shouldExpand("Things", location)) {
-            ResultList<Thing> list = new ResultList<>(null, null, List.of(
-                    DtoMapper.toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), filter, provider)));
+        if (expansions.shouldExpand("Things", location)) {
+            ResultList<Thing> list = new ResultList<>(null, null, List.of(DtoMapper.toThing(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("Thing"), filter, provider)));
             expansions.addExpansion("Things", location, list);
         }
         if (expansions.shouldExpand("HistoricalLocations", location)) {
@@ -184,25 +182,25 @@ public class DtoMapper {
         return location;
     }
 
-    public static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider, List<TimedValue<?>> historicalLocations) {
+    public static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot provider, List<TimedValue<?>> historicalLocations) {
         if (provider == null) {
             throw new NotFoundException();
         }
 
         List<HistoricalLocation> list = new ArrayList<>(historicalLocations.size());
         for (TimedValue<?> tv : historicalLocations) {
-            toHistoricalLocation(userSession, application, mapper, uriInfo, expansions,
-                    filter, provider, Optional.of(tv)).ifPresent(list::add);
+            toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider,
+                    Optional.of(tv)).ifPresent(list::add);
         }
 
         return list;
     }
 
-    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider, Optional<TimedValue<?>> t) {
+    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot provider, Optional<TimedValue<?>> t) {
         if (provider == null) {
             throw new NotFoundException();
         }
@@ -219,43 +217,38 @@ public class DtoMapper {
             }
         }
 
-        final Instant time = t.map(TimedValue::getTimestamp).orElse( Instant.EPOCH);
+        final Instant time = t.map(TimedValue::getTimestamp).orElse(Instant.EPOCH);
 
         String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("HistoricalLocations({id})")
                 .resolveTemplate("id", id).build().toString();
-        String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing")
-                .build().toString();
-        String locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
-                .path("Locations").build().toString();
+        String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
+        String locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Locations").build().toString();
 
-        HistoricalLocation historicalLocation = new HistoricalLocation(selfLink, id, time,
-                locationsLink, thingLink);
-        if(expansions.shouldExpand("Thing", historicalLocation)) {
+        HistoricalLocation historicalLocation = new HistoricalLocation(selfLink, id, time, locationsLink, thingLink);
+        if (expansions.shouldExpand("Thing", historicalLocation)) {
             expansions.addExpansion("Thing", historicalLocation, toThing(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Thing"), filter, provider));
         }
-        if(expansions.shouldExpand("Locations", historicalLocation)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(
-                    DtoMapper.toLocation(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Locations"), filter, provider)));
+        if (expansions.shouldExpand("Locations", historicalLocation)) {
+            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
         return Optional.of(historicalLocation);
     }
 
-    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider) {
+    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot provider) {
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
-        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter,
-                provider, Optional.of(location));
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider,
+                Optional.of(location));
     }
 
-    public static Datastream toDatastream(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource,
-            ICriterion filter) {
+    public static Datastream toDatastream(SensiNactSession userSession, Application application, ObjectMapper mapper,
+            UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource, ICriterion filter) {
         if (resource == null) {
             throw new NotFoundException();
         }
@@ -263,47 +256,45 @@ public class DtoMapper {
         final ProviderSnapshot provider = resource.getService().getProvider();
         final Map<String, Object> metadata = resource.getMetadata();
 
-        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(),
-                resource.getName());
+        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(), resource.getName());
 
         String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
         String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
 
-        UnitOfMeasurement unit = new UnitOfMeasurement(
-                Objects.toString(metadata.get(SENSORTHINGS_UNIT_NAME), null),
+        UnitOfMeasurement unit = new UnitOfMeasurement(Objects.toString(metadata.get(SENSORTHINGS_UNIT_NAME), null),
                 Objects.toString(metadata.get("unit"), null),
                 Objects.toString(metadata.get(SENSORTHINGS_UNIT_DEFINITION), null));
 
         Polygon observedArea = getObservedArea(getLocation(provider, mapper, resource, false).getValue());
 
-        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})")
-                .resolveTemplate("id", id).build().toString();
-        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build()
-                .toString();
-        String observedPropertyLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("ObservedProperty")
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})").resolveTemplate("id", id)
                 .build().toString();
+        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build().toString();
+        String observedPropertyLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("ObservedProperty").build()
+                .toString();
         String sensorLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Sensor").build().toString();
         String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
 
         Datastream datastream = new Datastream(selfLink, id, name, description,
-                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit,
-                observedArea, null, null, metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
-        if(expansions.shouldExpand("Observations", datastream)) {
-            expansions.addExpansion("Observations", datastream, RootResourceAccessImpl.getObservationList(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), resource, filter, 25));
+                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
+                metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
+        if (expansions.shouldExpand("Observations", datastream)) {
+            expansions.addExpansion("Observations", datastream,
+                    RootResourceAccessImpl.getObservationList(userSession, application, mapper, uriInfo,
+                            expansions.getExpansionSettings("Observations"), resource, filter, 25));
         }
 
-        if(expansions.shouldExpand("ObservedProperty", datastream)) {
-            expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("ObservedProperty"), filter, resource));
+        if (expansions.shouldExpand("ObservedProperty", datastream)) {
+            expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper,
+                    uriInfo, expansions.getExpansionSettings("ObservedProperty"), filter, resource));
         }
 
-        if(expansions.shouldExpand("Sensor", datastream)) {
+        if (expansions.shouldExpand("Sensor", datastream)) {
             expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Sensor"), filter, resource));
         }
 
-        if(expansions.shouldExpand("Thing", datastream)) {
+        if (expansions.shouldExpand("Thing", datastream)) {
             expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Thing"), filter, provider));
         }
@@ -311,13 +302,11 @@ public class DtoMapper {
         return datastream;
     }
 
-    public static Sensor toSensor(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ResourceSnapshot resource) {
+    public static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ResourceSnapshot resource) {
         if (resource == null) {
             throw new NotFoundException();
         }
-
 
         ProviderSnapshot providerSnapshot = resource.getService().getProvider();
         final String provider = providerSnapshot.getName();
@@ -331,16 +320,16 @@ public class DtoMapper {
         Object sensorMetadata = metadata.getOrDefault(SENSORTHINGS_SENSOR_METADATA, "No metadata");
         String encodingType = toString(metadata.getOrDefault(SENSORTHINGS_SENSOR_ENCODING_TYPE, DEFAULT_ENCODING_TYPE));
 
-        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Sensors({id})")
-                .resolveTemplate("id", id).build().toString();
-        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastreams").build()
-                .toString();
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Sensors({id})").resolveTemplate("id", id)
+                .build().toString();
+        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastreams").build().toString();
 
-        Sensor sensor = new Sensor(selfLink, id, name, description, encodingType, sensorMetadata,
-                metadata, datastreamsLink);
-        if(expansions.shouldExpand("Datastreams", sensor)) {
-            expansions.addExpansion("Datastreams", sensor, DatastreamsAccessImpl.getDataStreams(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
+        Sensor sensor = new Sensor(selfLink, id, name, description, encodingType, sensorMetadata, metadata,
+                datastreamsLink);
+        if (expansions.shouldExpand("Datastreams", sensor)) {
+            expansions.addExpansion("Datastreams", sensor,
+                    DatastreamsAccessImpl.getDataStreams(userSession, application, mapper, uriInfo,
+                            expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
         }
 
         return sensor;
@@ -355,9 +344,8 @@ public class DtoMapper {
 
         List<Observation> list = new ArrayList<>(observations.size());
         for (TimedValue<?> tv : observations) {
-            toObservation(userSession, application, mapper, uriInfo, expansions, filter,
-                    resourceSnapshot, Optional.of(tv))
-            .ifPresent(list::add);
+            toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot,
+                    Optional.of(tv)).ifPresent(list::add);
         }
 
         return list;
@@ -366,8 +354,8 @@ public class DtoMapper {
     public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource) {
-        return toObservation(userSession, application, mapper, uriInfo, expansions, filter,
-                resource, Optional.ofNullable(resource.getValue()));
+        return toObservation(userSession, application, mapper, uriInfo, expansions, filter, resource,
+                Optional.ofNullable(resource.getValue()));
     }
 
     public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
@@ -377,9 +365,9 @@ public class DtoMapper {
             throw new NotFoundException();
         }
         ResourceValueFilter rvf = filter == null ? null : filter.getResourceValueFilter();
-        if(rvf != null) {
+        if (rvf != null) {
             ResourceSnapshot rs = new GenericResourceSnapshot(resource, t.orElse(new DefaultTimedValue<>()));
-            if(!rvf.test(rs.getService().getProvider(), List.of(rs))) {
+            if (!rvf.test(rs.getService().getProvider(), List.of(rs))) {
                 return Optional.empty();
             }
         }
@@ -387,27 +375,26 @@ public class DtoMapper {
         final Instant timestamp = t.map(TimedValue::getTimestamp).orElse(null);
 
         ProviderSnapshot providerSnapshot = resource.getService().getProvider();
-        String id = String.format("%s~%s~%s~%s", providerSnapshot.getName(),
-                resource.getService().getName(), resource.getName(), Long.toString(timestamp.toEpochMilli(), 16));
+        String id = String.format("%s~%s~%s~%s", providerSnapshot.getName(), resource.getService().getName(),
+                resource.getName(), Long.toString(timestamp.toEpochMilli(), 16));
 
         Object result = t.map(TimedValue::getValue).orElse(null);
         Object resultQuality = resource.getMetadata().get(SENSORTHINGS_OBSERVATION_QUALITY);
 
-        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
-                .resolveTemplate("id", id).build().toString();
-        String datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build()
+        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})").resolveTemplate("id", id)
+                .build().toString();
+        String datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build().toString();
+        String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("FeatureOfInterest").build()
                 .toString();
-        String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink)
-                .path("FeatureOfInterest").build().toString();
 
-        Observation observation = new Observation(selfLink, id, timestamp,
-                timestamp, result, resultQuality, null, null, datastreamLink, featureOfInterestLink);
-        if(expansions.shouldExpand("Datastream", observation)) {
+        Observation observation = new Observation(selfLink, id, timestamp, timestamp, result, resultQuality, null, null,
+                datastreamLink, featureOfInterestLink);
+        if (expansions.shouldExpand("Datastream", observation)) {
             expansions.addExpansion("Datastream", observation, toDatastream(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Datastream"), resource, filter));
         }
 
-        if(expansions.shouldExpand("FeatureOfInterest", observation)) {
+        if (expansions.shouldExpand("FeatureOfInterest", observation)) {
             expansions.addExpansion("FeatureOfInterest", observation, toFeatureOfInterest(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("FeatureOfInterest"), filter, providerSnapshot));
         }
@@ -421,24 +408,24 @@ public class DtoMapper {
         final Map<String, Object> metadata = resource.getMetadata();
 
         ProviderSnapshot providerSnapshot = resource.getService().getProvider();
-        String id = String.format("%s~%s~%s", providerSnapshot.getName(),
-                resource.getService().getName(), resource.getName());
+        String id = String.format("%s~%s~%s", providerSnapshot.getName(), resource.getService().getName(),
+                resource.getName());
 
         String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
         String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
 
-        String definition = toString(
-                metadata.getOrDefault(SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION, NO_DEFINITION));
+        String definition = toString(metadata.getOrDefault(SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION, NO_DEFINITION));
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("ObservedProperties({id})")
                 .resolveTemplate("id", id).build().toString();
-        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
-                .path("Datastreams").build().toString();
+        String datastreamsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastreams").build().toString();
 
-        ObservedProperty observedProperty = new ObservedProperty(selfLink, id, name, description, definition, metadata, datastreamsLink);
-        if(expansions.shouldExpand("Datastreams", observedProperty)) {
-            expansions.addExpansion("Datastreams", observedProperty, DatastreamsAccessImpl.getDataStreams(userSession,
-                    application, mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
+        ObservedProperty observedProperty = new ObservedProperty(selfLink, id, name, description, definition, metadata,
+                datastreamsLink);
+        if (expansions.shouldExpand("Datastreams", observedProperty)) {
+            expansions.addExpansion("Datastreams", observedProperty,
+                    DatastreamsAccessImpl.getDataStreams(userSession, application, mapper, uriInfo,
+                            expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
         }
 
         return observedProperty;
@@ -460,12 +447,11 @@ public class DtoMapper {
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("FeaturesOfInterest({id})")
                 .resolveTemplate("id", id).build().toString();
-        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink)
-                .path("Observations").build().toString();
+        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build().toString();
 
-        FeatureOfInterest featureOfInterest = new FeatureOfInterest(selfLink, id, name,
-                description, ENCODING_TYPE_VND_GEO_JSON, object, observationsLink);
-        if(expansions.shouldExpand("Observations", featureOfInterest)) {
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest(selfLink, id, name, description,
+                ENCODING_TYPE_VND_GEO_JSON, object, observationsLink);
+        if (expansions.shouldExpand("Observations", featureOfInterest)) {
             expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, provider));
         }
@@ -527,8 +513,9 @@ public class DtoMapper {
             return toString(Optional.ofNullable(f.properties()).map(m -> m.get(propName)));
         } else if (location instanceof FeatureCollection) {
             FeatureCollection fc = (FeatureCollection) location;
-            return fc.features().stream().map(f -> toString(Optional.ofNullable(f.properties()).map(m -> m.get(propName)))).filter(p -> p != null)
-                    .findFirst().orElse(null);
+            return fc.features().stream()
+                    .map(f -> toString(Optional.ofNullable(f.properties()).map(m -> m.get(propName))))
+                    .filter(p -> p != null).findFirst().orElse(null);
         }
         return null;
     }
@@ -541,7 +528,7 @@ public class DtoMapper {
         if (optRS.isPresent()) {
             ResourceSnapshot rs = optRS.get();
             TimedValue<?> value = rs.getValue();
-            if(value != null) {
+            if (value != null) {
                 location = getLocation(mapper, value.getValue(), rs.getValue().getTimestamp(), allowNull);
             }
         }

@@ -51,8 +51,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
-        return new ResultList<>(null, null, List.of(
-                getObservedPropertyDatastream(id, id)));
+        return new ResultList<>(null, null, List.of(getObservedPropertyDatastream(id, id)));
     }
 
     @Override
@@ -106,8 +105,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
-        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, observedProperty,
-                ObservedProperty.class);
+        throw new UnsupportedOperationException("not yet implemented");
 
     }
 }

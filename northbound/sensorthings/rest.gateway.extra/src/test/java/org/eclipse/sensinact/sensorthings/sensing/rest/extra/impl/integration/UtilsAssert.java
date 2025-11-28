@@ -13,13 +13,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class UtilsAssert {
 
     public static void assertDatastream(ExpandedDataStream expectedLocation, JsonNode datastream) {
-        assertEquals(expectedLocation.name, datastream.get("name"), "");
-        assertEquals(expectedLocation.description, datastream.get("description"), "");
+        assertDatastream(expectedLocation, datastream, false);
+    }
 
-        if (expectedLocation.observedProperty != null) {
+    public static void assertDatastream(ExpandedDataStream expectedLocation, JsonNode datastream, boolean expanded) {
+        assertEquals(expectedLocation.name(), datastream.get("name"), "");
+        assertEquals(expectedLocation.description(), datastream.get("description"), "");
+
+        if (expectedLocation.observedProperty() != null) {
             JsonNode observedPropertyNode = datastream.get("observedProperty");
             assertNotNull(observedPropertyNode, "Observations array must be present");
-            assertEquals(expectedLocation.observedProperty, observedPropertyNode, "");
+            assertEquals(expectedLocation.observedProperty(), observedPropertyNode, "");
         }
     }
 
@@ -37,30 +41,30 @@ public class UtilsAssert {
 
     public static void assertThing(ExpandedThing dtoThing, JsonNode json, boolean expanded) {
         assertTrue(json.has("@iot.id"), "Response must contain @iot.id");
-        assertEquals(dtoThing.name, json.get("name").asText());
-        assertEquals(dtoThing.description, json.get("description").asText());
+        assertEquals(dtoThing.name(), json.get("name").asText());
+        assertEquals(dtoThing.description(), json.get("description").asText());
         if (expanded) {
-            if (dtoThing.locations != null && dtoThing.locations.size() > 0) {
+            if (dtoThing.locations() != null && dtoThing.locations().size() > 0) {
                 JsonNode locationsNode = json.get("Locations").get(0);
                 JsonNode location = locationsNode.get("location");
-                if (dtoThing.locations.size() > 1) {
+                if (dtoThing.locations().size() > 1) {
                     JsonNode listLocation = location.get("features");
                     assertNotNull(locationsNode, "Locations array must be present");
-                    assertEquals(dtoThing.locations.size(), listLocation.size(), "Number of locations must match");
-                    for (int i = 0; i < dtoThing.locations.size(); i++) {
-                        assertEquals(dtoThing.locations.get(i).name, listLocation.get(i).get("id").asText());
+                    assertEquals(dtoThing.locations().size(), listLocation.size(), "Number of locations must match");
+                    for (int i = 0; i < dtoThing.locations().size(); i++) {
+                        assertEquals(dtoThing.locations().get(i).name(), listLocation.get(i).get("id").asText());
                     }
                 } else {
-                    assertEquals(dtoThing.locations.get(0).name, location.get("id").asText());
+                    assertEquals(dtoThing.locations().get(0).name(), location.get("id").asText());
 
                 }
             }
-            if (dtoThing.datastreams != null && dtoThing.datastreams.size() > 0) {
+            if (dtoThing.datastreams() != null && dtoThing.datastreams().size() > 0) {
                 JsonNode datastreamNode = json.get("Datastreams");
                 assertNotNull(datastreamNode, "Datastreams array must be present");
-                assertEquals(dtoThing.datastreams.size(), datastreamNode.size(), "Number of Datastreams must match");
-                for (int i = 0; i < dtoThing.datastreams.size(); i++) {
-                    assertDatastream(dtoThing.datastreams.get(i), datastreamNode.get(i));
+                assertEquals(dtoThing.datastreams().size(), datastreamNode.size(), "Number of Datastreams must match");
+                for (int i = 0; i < dtoThing.datastreams().size(); i++) {
+                    assertDatastream(dtoThing.datastreams().get(i), datastreamNode.get(i));
                 }
             }
         }

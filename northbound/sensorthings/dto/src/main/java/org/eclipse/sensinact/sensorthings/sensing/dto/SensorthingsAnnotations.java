@@ -10,7 +10,7 @@
 * Contributors:
 *   Data In Motion - initial API and implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
+package org.eclipse.sensinact.sensorthings.sensing.dto;
 
 /**
  * Constants for the recognized Sensorthings annotations

@@ -170,7 +170,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public Response updateHistoricalLocation(String id, HistoricalLocation location) {
-        return getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, location, HistoricalLocation.class);
+        throw new UnsupportedOperationException("not yet implemented");
 
     }
 

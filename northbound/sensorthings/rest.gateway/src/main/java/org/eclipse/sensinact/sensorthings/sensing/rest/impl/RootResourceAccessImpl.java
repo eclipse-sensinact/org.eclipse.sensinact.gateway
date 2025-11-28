@@ -22,6 +22,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toO
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toSensor;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toThing;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,14 +42,19 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.RootResourceAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.create.RootResourceCreate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess, RootResourceCreate {
@@ -204,56 +210,114 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         return list;
     }
-    
 
     @Override
     public Response createDatastream(ExpandedDataStream datastream) {
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, Datastream.class);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream,
+                ExpandedDataStream.class);
+        ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
+        Datastream createDto = toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                (ResourceSnapshot) snapshot, criterion);
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
+        return Response.created(createdUri).entity(createDto).build();
     }
 
     @Override
     public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest) {
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest,
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest,
                 FeatureOfInterest.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        FeatureOfInterest createDto = toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, (ProviderSnapshot) snapshot);
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 
     @Override
     public Response createHistoricalLocation(HistoricalLocation historicalLocations) {
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, historicalLocations,
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, historicalLocations,
                 HistoricalLocation.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        HistoricalLocation createDto = toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, (ProviderSnapshot) snapshot).get();
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 
     @Override
     public Response createLocation(ExpandedLocation location) {
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, Location.class);
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location,
+                ExpandedLocation.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        Location createDto = toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                (ProviderSnapshot) snapshot);
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 
     @Override
     public Response createObservation(Observation observation) {
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation, Observation.class);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation,
+                Observation.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        Observation createDto = toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, (ResourceSnapshot) snapshot).get();
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 
     @Override
     public Response createObservedProperties(ObservedProperty observedProperty) {
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, observedProperty, ObservedProperty.class);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observedProperty,
+                ObservedProperty.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        ObservedProperty createDto = toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, (ResourceSnapshot) snapshot);
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 
     @Override
     public Response createSensors(Sensor sensor) {
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor, Sensor.class);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor, Sensor.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        Sensor createDto = toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                (ResourceSnapshot) snapshot);
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 
     @Override
     public Response createThing(ExpandedThing thing) {
 
-        return getExtraDelegate().create(getSession(), getMapper(), uriInfo, thing, Thing.class);
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, thing,
+                ExpandedThing.class);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        Thing createDto = toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                (ProviderSnapshot) snapshot);
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
     }
 
 }

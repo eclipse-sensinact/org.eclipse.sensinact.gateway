@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -30,7 +29,7 @@ public record ExpandedThing(String selfLink, Object id, String name, String desc
         @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink,
         @JsonProperty("Locations@iot.navigationLink") String locationsLink,
         @JsonProperty("Datastreams") List<ExpandedDataStream> datastreams,
-        @JsonProperty("Locations") List<Location> locations,
+        @JsonProperty("Locations") List<ExpandedLocation> locations,
         @JsonProperty("HistoricalLocations") List<HistoricalLocation> historicalLocations) implements NameDescription {
 
 }
