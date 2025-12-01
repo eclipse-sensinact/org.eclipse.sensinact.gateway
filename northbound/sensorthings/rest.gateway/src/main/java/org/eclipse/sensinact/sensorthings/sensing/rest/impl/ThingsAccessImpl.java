@@ -21,12 +21,16 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toLocation;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
@@ -37,16 +41,15 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.update.ThingsUpdate;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate, ThingsUpdate {
+public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate {
 
     @Override
     public Thing getThing(String id) {
@@ -269,33 +272,30 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response createDatastream(String id, ExpandedDataStream datastream) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("not yet implemented");
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, id);
+        ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
+        Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot);
+        if (createDto.get() == null) {
+            throw new BadRequestException("fail to create datastream");
+        }
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.get().id())).build();
+
+        return Response.created(createdUri).entity(createDto.get()).build();
 
     }
 
     @Override
     public Response createLocation(String id, ExpandedLocation location) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("not yet implemented");
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, id);
+        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+        Location createDto = toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                (ProviderSnapshot) snapshot);
+
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 
-    @Override
-    public Response updateDatastream(String id, String id2, ExpandedDataStream datastream) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Response updateLocation(String id, String id2, ExpandedLocation location) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Response updateThing(String id, ExpandedThing thing) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
