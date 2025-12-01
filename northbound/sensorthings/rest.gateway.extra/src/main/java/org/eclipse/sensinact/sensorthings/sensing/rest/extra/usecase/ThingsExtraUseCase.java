@@ -29,7 +29,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
     IAccessResourceUseCase resourceUseCase;
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
-        String id = DtoMapper.sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
+        String id = DtoMapper.sanitizeId(getId(request.model()));
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         // update/create provider
@@ -88,6 +88,12 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
     @Override
     protected IAccessProviderUseCase getProviderUseCase() {
         return providerUseCase;
+    }
+
+    @Override
+    public String getId(ExpandedThing aDto) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

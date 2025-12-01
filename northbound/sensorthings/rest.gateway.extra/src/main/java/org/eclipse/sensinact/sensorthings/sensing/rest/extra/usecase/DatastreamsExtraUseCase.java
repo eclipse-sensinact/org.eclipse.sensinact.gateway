@@ -34,7 +34,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
     }
 
     public ExtraUseCaseResponse<ResourceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        String id = DtoMapper.sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
+        String id = getId(request.model());
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         // update/create provider
@@ -99,6 +99,11 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         }
         return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get Snapshot");
 
+    }
+
+    @Override
+    public String getId(ExpandedDataStream dto) {
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.thing().id() + "~" + dto.name());
     }
 
 }

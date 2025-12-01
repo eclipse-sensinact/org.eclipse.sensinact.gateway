@@ -45,6 +45,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
@@ -289,7 +290,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     }
 
     @Override
-    public Response createSensors(Sensor sensor) {
+    public Response createSensors(ExpandedSensor sensor) {
         ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         Sensor createDto = toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,

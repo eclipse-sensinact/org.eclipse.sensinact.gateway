@@ -29,17 +29,24 @@ public class HistoricalLocationsExtraUseCase extends AbstractExtraUseCase<Histor
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<HistoricalLocation> request) {
+        // TODO what is the id if not setted ?
+        String id = getId(request.model());
+        List<SensorThingsUpdate> listDtoModels = toDtos(request);
+
+        // update/create provider
         try {
-            Object obj = dataUpdate.pushUpdate(request.model()).getValue();
-            // ProviderSnapshot provider = providerUseCase.read(session,
-            // model.providerId());
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get providerSnapshot");
+            dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get providerSnapshot");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
 
         }
 
+        ProviderSnapshot snapshot = providerUseCase.read(request.session(), id);
+        if (snapshot != null) {
+            return new ExtraUseCaseResponse<ProviderSnapshot>(id, snapshot);
+        }
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<HistoricalLocation> request) {
@@ -61,6 +68,11 @@ public class HistoricalLocationsExtraUseCase extends AbstractExtraUseCase<Histor
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<HistoricalLocation> request) {
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get providerSnapshot");
 
+    }
+
+    @Override
+    public String getId(HistoricalLocation dto) {
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.time());
     }
 
 }

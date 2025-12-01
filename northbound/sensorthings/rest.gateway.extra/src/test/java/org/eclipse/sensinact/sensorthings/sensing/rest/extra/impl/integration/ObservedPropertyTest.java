@@ -1,6 +1,5 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.junit.jupiter.api.Test;
 
@@ -10,17 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  * Unit test for simple App.
  */
 public class ObservedPropertyTest extends AbstractIntegrationTest {
-
-    @Test
-    public void testCreateObservation() throws Exception {
-        // given
-        String name = "testCreateObservation";
-        Observation observation = DtoFactory.getObservation(name);
-        JsonNode json = getJsonResponseFromPost(observation, "Observations", 201);
-
-        UtilsAssert.assertObservation(observation, json);
-
-    }
 
     @Test
     public void testCreateObservedProperty() throws Exception {

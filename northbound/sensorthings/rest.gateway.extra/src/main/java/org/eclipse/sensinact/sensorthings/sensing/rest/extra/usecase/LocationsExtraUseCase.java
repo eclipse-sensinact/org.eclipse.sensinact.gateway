@@ -94,4 +94,9 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
     }
 
+    @Override
+    public String getId(ExpandedLocation dto) {
+        return null;
+    }
+
 }

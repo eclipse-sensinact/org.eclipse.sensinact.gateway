@@ -34,9 +34,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     }
 
     public ExtraUseCaseResponse<ResourceSnapshot> create(ExtraUseCaseRequest<ExpandedObservation> request) {
-        // TODO ? what is a valid id for ExpandedObservation ?
-        String id = DtoMapper
-                .sanitizeId(request.model().id() != null ? request.model().id() : request.model().resultTime());
+        String id = DtoMapper.sanitizeId(getId(request.model()));
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         // update/create provider
@@ -85,6 +83,11 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     public ExtraUseCaseResponse<ResourceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
         return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get providerSnapshot");
 
+    }
+
+    @Override
+    public String getId(ExpandedObservation aDto) {
+        return null;
     }
 
 }
