@@ -2,8 +2,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import java.util.Map;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,7 @@ public class ObservationTest extends AbstractIntegrationTest {
     public void testCreateObservation() throws Exception {
         // given
         String name = "testCreateObservation";
-        Observation observation = DtoFactory.getObservation(name);
+        ExpandedObservation observation = DtoFactory.getObservation(name);
         JsonNode json = getJsonResponseFromPost(observation, "Observations", 201);
 
         UtilsAssert.assertObservation(observation, json);
@@ -39,7 +39,7 @@ public class ObservationTest extends AbstractIntegrationTest {
                 201);
         UtilsAssert.assertDatastream(dtoDatastream, json);
 
-        Observation observation = DtoFactory.getObservation(name);
+        ExpandedObservation observation = DtoFactory.getObservation(name);
         json = getJsonResponseFromPost(observation, String.format("Datastream(%s)/Observations", getIdFromJson(json)),
                 201);
 

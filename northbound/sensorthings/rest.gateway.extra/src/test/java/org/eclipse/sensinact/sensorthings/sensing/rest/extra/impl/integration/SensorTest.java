@@ -1,6 +1,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,7 +14,7 @@ public class SensorTest extends AbstractIntegrationTest {
     public void testCreateSensor() throws Exception {
         // given
         String name = "testCreateSensor";
-        Sensor sensor = DtoFactory.getSensor(name);
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
 
         UtilsAssert.assertSensor(sensor, json);

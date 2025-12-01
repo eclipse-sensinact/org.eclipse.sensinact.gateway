@@ -29,13 +29,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
 
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response;
 
-public class ObservedPropertiesAccessImpl extends AbstractAccess
-        implements ObservedPropertiesAccess, ObservedPropertiesUpdate {
+public class ObservedPropertiesAccessImpl extends AbstractAccess implements ObservedPropertiesAccess {
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
@@ -103,9 +100,4 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
                 validateAndGetProvider(provider));
     }
 
-    @Override
-    public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
-        throw new UnsupportedOperationException("not yet implemented");
-
-    }
 }

@@ -1,6 +1,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,7 +15,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // given
         String name = "testCreateObservedProperty";
 
-        ObservedProperty observedProperty = DtoFactory.getObservedProperty(name);
+        ExpandedObservedProperty observedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(observedProperty, "ObservedProperties", 201);
         // when
 

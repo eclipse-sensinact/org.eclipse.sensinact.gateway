@@ -28,14 +28,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.LocationsAccess;
-import org.eclipse.sensinact.sensorthings.sensing.rest.update.LocationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response;
 
-public class LocationsAccessImpl extends AbstractAccess implements LocationsAccess, LocationsUpdate {
+public class LocationsAccessImpl extends AbstractAccess implements LocationsAccess {
 
     @Override
     public Location getLocation(String id) {
@@ -141,18 +138,6 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     @Override
     public ResultList<Location> getLocationThingLocations(String id, String id2) {
         return new ResultList<>(null, null, List.of(getLocation(id)));
-    }
-
-    @Override
-    public Response updateLocation(String id, ExpandedLocation location) {
-        throw new UnsupportedOperationException("not yet implemented");
-
-    }
-
-    @Override
-    public Response updateLocationThingLink(String id, String id2, ExpandedLocation id3) {
-        throw new UnsupportedOperationException("not yet implemented");
-
     }
 
 }

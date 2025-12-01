@@ -38,12 +38,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response;
 
-public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess, ObservationsUpdate {
+public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess {
 
     @Override
     public Observation getObservation(String id) {
@@ -160,8 +158,4 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                 .filter(Optional::isPresent).map(Optional::get).toList());
     }
 
-    @Override
-    public Response updateObservation(String id, Observation observation) {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
 }

@@ -41,12 +41,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.update.ThingsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate, ThingsUpdate {
+public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate {
 
     @Override
     public Thing getThing(String id) {

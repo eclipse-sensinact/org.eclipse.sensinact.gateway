@@ -29,18 +29,15 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.FeaturesOfInterestAccess;
-import org.eclipse.sensinact.sensorthings.sensing.rest.update.FeaturesOfInterestUpdate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-public class FeaturesOfInterestAccessImpl extends AbstractAccess
-        implements FeaturesOfInterestAccess, FeaturesOfInterestUpdate {
+public class FeaturesOfInterestAccessImpl extends AbstractAccess implements FeaturesOfInterestAccess {
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
@@ -128,17 +125,4 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
         return d;
     }
 
-    @Override
-    public Response updateFeaturesOfInterest(String id, FeatureOfInterest featureOfInterest) {
-
-        throw new UnsupportedOperationException("not yet implemented");
-
-    }
-
-    @Override
-    public Response updateFeaturesOfInterestObservation(String featureId, String observationId,
-            Observation observation) {
-        throw new UnsupportedOperationException("not yet implemented");
-
-    }
 }

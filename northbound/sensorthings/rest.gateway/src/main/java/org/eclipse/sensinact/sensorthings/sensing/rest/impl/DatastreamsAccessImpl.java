@@ -41,13 +41,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.update.DatastreamsUpdate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -57,8 +55,7 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-public class DatastreamsAccessImpl extends AbstractAccess
-        implements DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
+public class DatastreamsAccessImpl extends AbstractAccess implements DatastreamsAccess, DatastreamsCreate {
 
     @Override
     public Datastream getDatastream(String id) {
@@ -187,18 +184,6 @@ public class DatastreamsAccessImpl extends AbstractAccess
                 .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
                 .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter))
                 .collect(toList()));
-    }
-
-    @Override
-    public Response updateDatastreams(String id, ExpandedDataStream dataStream) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Response updateDatastreamsObservation(String id, String id2, Observation observation) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override

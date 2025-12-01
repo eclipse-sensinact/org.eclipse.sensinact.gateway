@@ -6,13 +6,13 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
@@ -25,9 +25,9 @@ public class DtoFactory {
     }
 
     public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, RefId thingId) {
-        Sensor sensor = getSensor("sensor1");
+        ExpandedSensor sensor = getSensor("sensor1");
         // Required
-        ObservedProperty op = getObservedProperty("Temperature");
+        ExpandedObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
         return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
@@ -38,22 +38,23 @@ public class DtoFactory {
         return new UnitOfMeasurement(name, "°C", "http://unitsofmeasure.org");
     }
 
-    public static Sensor getSensor(String name) {
-        return new Sensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null);
+    public static ExpandedSensor getSensor(String name) {
+        return new ExpandedSensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
+                "http://example.com/humidity-sensor.pdf", null, null, null);
 
     }
 
-    public static ObservedProperty getObservedProperty(String name) {
-        return new ObservedProperty(null, null, "Temperature", "Air temperature", "http://example.com/op/temperature",
-                null, null);
+    public static ExpandedObservedProperty getObservedProperty(String name) {
+        return new ExpandedObservedProperty(null, null, "Temperature", "Air temperature",
+                "http://example.com/op/temperature", null, null, null, null, null);
 
     }
 
-    public static Observation getObservation(String name) {
+    public static ExpandedObservation getObservation(String name) {
         Instant now = Instant.now();
         Instant after = Instant.now();
-        return new Observation(null, "obs2", now, after, null, null, new TimeInterval(now, after), null, null, null);
+        return new ExpandedObservation(null, "obs2", now, after, null, null, new TimeInterval(now, after), null, null,
+                null, null, null);
 
     }
 
@@ -80,11 +81,11 @@ public class DtoFactory {
         UnitOfMeasurement uom = getUnitOfMeasure("Percent");
 
         // Inline sensor
-        Observation observation1 = getObservation("osb1");
-        Observation observation2 = getObservation("obs2");
+        ExpandedObservation observation1 = getObservation("osb1");
+        ExpandedObservation observation2 = getObservation("obs2");
 
-        Sensor sensor = getSensor("sensor");
-        ObservedProperty op = getObservedProperty("op1");
+        ExpandedSensor sensor = getSensor("sensor");
+        ExpandedObservedProperty op = getObservedProperty("op1");
         return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
                 null, null, null, List.of(observation1, observation2), op, sensor, null, thing);
     }
