@@ -44,6 +44,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
@@ -213,8 +214,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createDatastream(ExpandedDataStream datastream) {
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream,
-                ExpandedDataStream.class);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         Datastream createDto = toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 (ResourceSnapshot) snapshot, criterion);
@@ -225,8 +225,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest) {
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest,
-                FeatureOfInterest.class);
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         FeatureOfInterest createDto = toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), criterion, (ProviderSnapshot) snapshot);
@@ -239,8 +238,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createHistoricalLocation(HistoricalLocation historicalLocations) {
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, historicalLocations,
-                HistoricalLocation.class);
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, historicalLocations);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         HistoricalLocation createDto = toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), criterion, (ProviderSnapshot) snapshot).get();
@@ -253,8 +251,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createLocation(ExpandedLocation location) {
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location,
-                ExpandedLocation.class);
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         Location createDto = toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
                 (ProviderSnapshot) snapshot);
@@ -266,9 +263,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     }
 
     @Override
-    public Response createObservation(Observation observation) {
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation,
-                Observation.class);
+    public Response createObservation(ExpandedObservation observation) {
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         Observation createDto = toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, (ResourceSnapshot) snapshot).get();
@@ -281,8 +277,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createObservedProperties(ObservedProperty observedProperty) {
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observedProperty,
-                ObservedProperty.class);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observedProperty);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         ObservedProperty createDto = toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), criterion, (ResourceSnapshot) snapshot);
@@ -295,7 +290,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createSensors(Sensor sensor) {
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor, Sensor.class);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         Sensor createDto = toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
                 (ResourceSnapshot) snapshot);
@@ -309,8 +304,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     @Override
     public Response createThing(ExpandedThing thing) {
 
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, thing,
-                ExpandedThing.class);
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, thing);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         Thing createDto = toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
                 (ProviderSnapshot) snapshot);

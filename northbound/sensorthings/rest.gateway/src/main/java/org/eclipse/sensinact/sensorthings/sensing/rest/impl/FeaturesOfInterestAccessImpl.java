@@ -16,9 +16,6 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -30,10 +27,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedFeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.FeaturesOfInterestAccess;
-import org.eclipse.sensinact.sensorthings.sensing.rest.create.FeaturesOfInterestCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.FeaturesOfInterestUpdate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +40,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 public class FeaturesOfInterestAccessImpl extends AbstractAccess
-        implements FeaturesOfInterestAccess, FeaturesOfInterestCreate, FeaturesOfInterestUpdate {
+        implements FeaturesOfInterestAccess, FeaturesOfInterestUpdate {
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
@@ -131,35 +126,6 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
         }
 
         return d;
-    }
-
-    @Override
-    public Response createFeaturesOfInterestCObservation(String id, Observation observation) {
-        FeatureOfInterest readedFeatureOfInterest = getFeatureOfInterest(id);
-        if (readedFeatureOfInterest == null) {
-            throw new NotFoundException(String.format("FeatureOfInterest %s not found", id));
-        }
-        ResultList<Observation> observations = getFeatureOfInterestObservations(id);
-        List<Observation> listObservationToUpdates = new ArrayList<Observation>();
-        if (observations != null && observations.value() != null && observations.value().size() > 0) {
-            listObservationToUpdates.addAll(observations.value());
-        }
-        listObservationToUpdates.add(observation);
-
-        ExpandedFeatureOfInterest featureOfInterest = new ExpandedFeatureOfInterest(null, readedFeatureOfInterest.id(),
-                readedFeatureOfInterest.name(), readedFeatureOfInterest.description(),
-                readedFeatureOfInterest.encodingType(), readedFeatureOfInterest.feature(),
-                readedFeatureOfInterest.observationsLink(), listObservationToUpdates);
-
-        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo, id, null,
-                ExpandedFeatureOfInterest.class);
-        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
-        FeatureOfInterest createDto = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
-
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
-
-        return Response.created(createdUri).entity(createDto).build();
     }
 
     @Override

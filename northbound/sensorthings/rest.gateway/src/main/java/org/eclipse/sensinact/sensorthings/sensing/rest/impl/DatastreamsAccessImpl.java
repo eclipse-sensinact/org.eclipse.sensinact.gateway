@@ -22,11 +22,13 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -40,6 +42,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
@@ -48,6 +51,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.update.DatastreamsUpdate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
@@ -198,8 +202,18 @@ public class DatastreamsAccessImpl extends AbstractAccess
     }
 
     @Override
-    public Response createDatastreamsObservation(String id, Observation observation) {
-        // TODO Auto-generated method stub
-        return null;
+    public Response createDatastreamsObservation(String id, ExpandedObservation observation) {
+        // check if datastream exists
+        getDatastream(id);
+        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation, id);
+        ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
+        Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot);
+        if (createDto.get() == null) {
+            throw new BadRequestException("fail to create observation");
+        }
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.get().id())).build();
+
+        return Response.created(createdUri).entity(createDto.get()).build();
     }
 }
