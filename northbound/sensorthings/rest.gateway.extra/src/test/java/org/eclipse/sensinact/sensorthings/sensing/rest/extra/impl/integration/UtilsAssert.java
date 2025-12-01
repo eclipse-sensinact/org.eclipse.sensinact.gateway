@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
@@ -32,7 +35,32 @@ public class UtilsAssert {
     }
 
     public static void assertLocation(ExpandedLocation dtoLocation, JsonNode json, boolean expanded) {
+        assertEquals(dtoLocation.name(), json.get("name"));
+        assertEquals(dtoLocation.description(), json.get("description"));
+        assertEquals(dtoLocation.location(), json.get("location"));
+    }
 
+    public static void assertSensor(Sensor sensor, JsonNode json) {
+        assertEquals(sensor.name(), json.get("name"));
+        assertEquals(sensor.description(), json.get("description"));
+        assertEquals(sensor.encodingType(), json.get("encodingType"));
+        assertEquals(sensor.properties(), json.get("properties"));
+        assertEquals(sensor.metadata(), json.get("metadata"));
+    }
+
+    public static void assertObservedProperty(ObservedProperty observedProperty, JsonNode json) {
+        assertEquals(observedProperty.definition(), json.get("definition"));
+        assertEquals(observedProperty.description(), json.get("description"));
+        assertEquals(observedProperty.name(), json.get("name"));
+        assertEquals(observedProperty.properties(), json.get("properties"));
+
+    }
+
+    public static void assertObservation(Observation observation, JsonNode json) {
+        assertEquals(observation.parameters(), json.get("parameters"));
+        assertEquals(observation.phenomenonTime(), json.get("phenomenonType"));
+        assertEquals(observation.resultQuality(), json.get("resultQuality"));
+        assertEquals(observation.resultTime(), json.get("resultTime"));
     }
 
     public static void assertThing(ExpandedThing dtoThing, JsonNode json) {

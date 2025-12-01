@@ -25,15 +25,36 @@ public class DtoFactory {
     }
 
     public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, Thing thingId) {
-        Sensor sensor = new Sensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null);
+        Sensor sensor = getSensor("sensor1");
         // Required
-        ObservedProperty op = new ObservedProperty(null, null, "Temperature", "Air temperature",
-                "http://example.com/op/temperature", null, null);
-        UnitOfMeasurement uom = new UnitOfMeasurement("Celsius", "°C", "http://unitsofmeasure.org");
+        ObservedProperty op = getObservedProperty("Temperature");
+        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
         return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
                 null, null, null, null, op, sensor, null, thingId);
+    }
+
+    private static UnitOfMeasurement getUnitOfMeasure(String name) {
+        return new UnitOfMeasurement(name, "°C", "http://unitsofmeasure.org");
+    }
+
+    public static Sensor getSensor(String name) {
+        return new Sensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
+                "http://example.com/humidity-sensor.pdf", null, null);
+
+    }
+
+    public static ObservedProperty getObservedProperty(String name) {
+        return new ObservedProperty(null, null, "Temperature", "Air temperature", "http://example.com/op/temperature",
+                null, null);
+
+    }
+
+    public static Observation getObservation(String name) {
+        Instant now = Instant.now();
+        Instant after = Instant.now();
+        return new Observation(null, "obs2", now, after, null, null, new TimeInterval(now, after), null, null, null);
+
     }
 
     public static ExpandedLocation getIdLocation(Object id) {
@@ -56,21 +77,14 @@ public class DtoFactory {
             Thing thing) {
 
         // Required unit
-        UnitOfMeasurement uom = new UnitOfMeasurement("Percent", "%", "http://unitsofmeasure.org");
-        Instant now = Instant.now();
-        Instant after = Instant.now();
+        UnitOfMeasurement uom = getUnitOfMeasure("Percent");
 
         // Inline sensor
-        Observation observation1 = new Observation(null, "obs1", now, after, null, null, new TimeInterval(now, after),
-                null, null, null);
-        Observation observation2 = new Observation(null, "obs2", now, after, null, null, new TimeInterval(now, after),
-                null, null, null);
+        Observation observation1 = getObservation("osb1");
+        Observation observation2 = getObservation("obs2");
 
-        Sensor sensor = new Sensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null);
-        ObservedProperty op = new ObservedProperty(null, null, "Temperature", "Air temperature",
-                "http://example.com/op/temperature", null, null);
-
+        Sensor sensor = getSensor("sensor");
+        ObservedProperty op = getObservedProperty("op1");
         return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
                 null, null, null, List.of(observation1, observation2), op, sensor, null, thing);
     }

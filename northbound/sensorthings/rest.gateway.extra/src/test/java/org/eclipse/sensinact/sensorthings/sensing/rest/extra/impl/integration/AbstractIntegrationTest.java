@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -33,6 +34,8 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,6 +51,22 @@ public class AbstractIntegrationTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
     static final HttpClient client = HttpClient.newHttpClient();
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    protected JsonNode getJsonResponseFromGet(String url) throws IOException, InterruptedException {
+        HttpResponse<String> response = queryGet(url);
+        return mapper.readTree(response.body());
+    }
+
+    protected JsonNode getJsonResponseFromPost(Id dto, String SubUrl, int expectedStatus)
+            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+        HttpResponse<String> response = queryPost(SubUrl, dto);
+        // Then
+        assertEquals(response.statusCode(), expectedStatus);
+        JsonNode json = mapper.readTree(response.body());
+
+        return json;
+    }
 
     @InjectService
     protected GatewayThread thread;
