@@ -37,7 +37,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
@@ -264,27 +263,6 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
-    }
-
-    @Override
-    public Response updateDatastream(String id, String id2, ExpandedDataStream datastream) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("not yet implemented");
-
-    }
-
-    @Override
-    public Response updateLocation(String id, String id2, ExpandedLocation location) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("not yet implemented");
-
-    }
-
-    @Override
-    public Response updateThing(String id, ExpandedThing thing) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("not yet implemented");
-
     }
 
     @Override
