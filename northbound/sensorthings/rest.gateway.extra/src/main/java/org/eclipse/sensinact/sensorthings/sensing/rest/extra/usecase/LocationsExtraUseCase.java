@@ -67,7 +67,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
             throw new UnsupportedOperationException("Not supported yet");
         } else {
             List<SensorThingsUpdate> listThingsUpdate = location.things().stream()
-                    .map(thingId -> getProviderSnapshot(request, thingId))
+                    .map(thingId -> getProviderSnapshot(request, (String) thingId.id()))
                     .map((provider) -> DtoMapper.toExpandedThing(request, location, provider))
                     .flatMap((expandedThing) -> {
                         return DtoMapper.toUpdates(expandedThing);

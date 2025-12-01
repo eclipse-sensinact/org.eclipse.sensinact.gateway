@@ -14,11 +14,11 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.create;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 
 import jakarta.ws.rs.POST;
@@ -45,7 +45,7 @@ public interface RootResourceCreate {
 
     @POST
     @Path("/Observations")
-    public Response createObservation(Observation observation);
+    public Response createObservation(ExpandedObservation observation);
 
     @POST
     @Path("/ObservedProperties")

@@ -73,7 +73,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             throw new UnsupportedOperationException(String.format("Thing id not found in Datastream Payload"));
         }
         String id = (String) datastream.thing().id();
-        ProviderSnapshot snapshot = getProviderSnapshot(request, datastream.thing());
+        ProviderSnapshot snapshot = getProviderSnapshot(request, id);
         if (snapshot == null) {
             throw new UnsupportedOperationException(String.format("Thing %s not found", id));
         }

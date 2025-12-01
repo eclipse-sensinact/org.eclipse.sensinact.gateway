@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +31,7 @@ public class ThingTest extends AbstractIntegrationTest {
         "properties": {
             "manufacturer": "New Corp",
             "installationDate": "2025-11-25"
-        },
+        }, 
         "Locations": [
             { "@iot.id": "idLocation" }
         ]
@@ -47,8 +47,8 @@ public class ThingTest extends AbstractIntegrationTest {
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(alreadyExists, "/Things", 201);
 
-        List<Thing> listId = new ArrayList<Thing>();
-        listId.add(DtoFactory.getIdThing(getIdFromJson(json)));
+        List<RefId> listId = new ArrayList<RefId>();
+        listId.add(DtoFactory.getRefId(getIdFromJson(json)));
         ExpandedLocation location = DtoFactory.getLocationLinkThing(name, listId);
         HttpResponse<String> response = queryPost("/Locations", location);
         Location createdLocation = mapper.readValue(response.body(), Location.class);
@@ -94,7 +94,7 @@ public class ThingTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoExistsThingFromDataStream, "/Things", 201);
         String idExistsThing = getIdFromJson(json);
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name,
-                DtoFactory.getIdThing(idExistsThing));
+                DtoFactory.getRefId(idExistsThing));
         HttpResponse<String> response = queryPost("/Datastreams", datastream);
         ExpandedDataStream createdDatastream = mapper.readValue(response.body(), ExpandedDataStream.class);
         List<ExpandedDataStream> idDatastream = List.of(DtoFactory.getIdDatastream(createdDatastream.id()));

@@ -31,12 +31,18 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     @SuppressWarnings("unchecked")
     public <D extends Id, S extends Snapshot> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            D dto, Class<D> clazz) {
+            D dto, String parnetId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
 
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, dto);
         ExtraUseCaseResponse<S> result = useCase.create(request);
         return result.success() ? result.snapshot() : null;
+
+    }
+
+    public <D extends Id, S extends Snapshot> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
+            D dto) {
+        return create(session, mapper, uriInfo, dto, null);
 
     }
 
@@ -61,12 +67,18 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     @SuppressWarnings("unchecked")
     public <D extends Id, S extends Snapshot> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            String id, D dto, Class<D> clazz) {
+            String id, D dto, String parentId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
-        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id, dto);
+        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.update(request);
         return result.success() ? result.snapshot() : null;
 
+    }
+
+    @Override
+    public <D extends Id, S extends Snapshot> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
+            String id, D dto) {
+        return update(session, mapper, uriInfo, id, dto, null);
     }
 
 }

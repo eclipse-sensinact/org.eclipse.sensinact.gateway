@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,8 +24,8 @@ public class LocationTest extends AbstractIntegrationTest {
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         String idThing = getIdFromJson(json);
-        List<Thing> listId = new ArrayList<Thing>();
-        listId.add(DtoFactory.getIdThing(idThing));
+        List<RefId> listId = new ArrayList<RefId>();
+        listId.add(DtoFactory.getRefId(idThing));
         ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name, listId);
 
         // when

@@ -21,7 +21,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
 
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getIdThing(name));
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(name));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
@@ -58,7 +58,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedPropertyObservation(name,
-                DtoFactory.getIdThing(name));
+                DtoFactory.getRefId(getIdFromJson(json)));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
@@ -77,7 +77,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedPropertyObservation(name,
-                DtoFactory.getIdThing(name));
+                DtoFactory.getRefId(getIdFromJson(json)));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams?$expand(Sensor,ObservedProperty,Observations", 201);

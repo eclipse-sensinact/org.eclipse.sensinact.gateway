@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+* Copyright (c) 2022 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,18 +12,17 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand;
 
-import java.util.List;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import java.util.Map;
+
 import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record ExpandedLocation(String selfLink, Object id, String name, String description, String encodingType,
-        GeoJsonObject location, @JsonProperty("Things@iot.navigationLink") String thingsLink,
-        @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink,
-        @JsonProperty("Things") List<RefId> things) implements NameDescription {
-
-    ;
-
+public record ExpandedSensor(String selfLink, Object id, String name, String description, String encodingType,
+        Object metadata, @JsonInclude(NON_NULL) Map<String, Object> properties,
+        @JsonProperty("Datastreams@iot.navigationLink") String datastreamsLink,
+        @JsonProperty("Datastream") RefId datastream) implements NameDescription {
 }

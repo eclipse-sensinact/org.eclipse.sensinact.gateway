@@ -9,12 +9,12 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
 public class DtoFactory {
 
@@ -24,7 +24,7 @@ public class DtoFactory {
         return getDatastreamMinimalLinkThing(name, null);
     }
 
-    public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, Thing thingId) {
+    public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, RefId thingId) {
         Sensor sensor = getSensor("sensor1");
         // Required
         ObservedProperty op = getObservedProperty("Temperature");
@@ -68,13 +68,13 @@ public class DtoFactory {
                 null, null, null, null, null);
     }
 
-    public static Thing getIdThing(Object id) {
+    public static RefId getRefId(Object id) {
 
-        return new Thing(null, id, null, null, null, null, null, null);
+        return new RefId(id);
     }
 
     public static ExpandedDataStream getDatastreamLinkThingWithSensorObservedPropertyObservation(String name,
-            Thing thing) {
+            RefId thing) {
 
         // Required unit
         UnitOfMeasurement uom = getUnitOfMeasure("Percent");
@@ -94,7 +94,7 @@ public class DtoFactory {
         return getLocationLinkThing(name, null);
     }
 
-    public static ExpandedLocation getLocationLinkThing(String name, List<Thing> things) {
+    public static ExpandedLocation getLocationLinkThing(String name, List<RefId> things) {
         return new ExpandedLocation(null, null, name, "location1 test", "application/vnd.geo+json",
                 new Point(-122.4194, 37.7749), null, null, things);
     }

@@ -51,7 +51,7 @@ public class AbstractIntegrationTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
     static final HttpClient client = HttpClient.newHttpClient();
-    private static final ObjectMapper mapper = new ObjectMapper();
+    protected static final ObjectMapper mapper = new ObjectMapper();
 
     protected JsonNode getJsonResponseFromGet(String url) throws IOException, InterruptedException {
         HttpResponse<String> response = queryGet(url);

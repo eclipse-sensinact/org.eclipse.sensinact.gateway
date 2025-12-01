@@ -22,10 +22,10 @@ public abstract class AbstractExtraUseCase<M extends Id, S extends Snapshot> imp
         this.type = (Class<M>) param;
     }
 
-    protected ProviderSnapshot getProviderSnapshot(ExtraUseCaseRequest<M> request, Id thingId) {
-        ProviderSnapshot provider = getProviderUseCase().read(request.session(), (String) thingId.id());
+    protected ProviderSnapshot getProviderSnapshot(ExtraUseCaseRequest<M> request, String thingId) {
+        ProviderSnapshot provider = getProviderUseCase().read(request.session(), thingId);
         if (provider == null) {
-            throw new IllegalStateException("Provider not found for thing ID: " + thingId.id());
+            throw new IllegalStateException("Provider not found for thing ID: " + thingId);
         }
         return provider;
     }
