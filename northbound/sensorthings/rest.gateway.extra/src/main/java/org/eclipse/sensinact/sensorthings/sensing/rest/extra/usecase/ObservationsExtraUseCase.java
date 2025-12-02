@@ -7,7 +7,6 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -20,18 +19,11 @@ import jakarta.ws.rs.BadRequestException;
  */
 @Component(service = IExtraUseCase.class)
 public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObservation, ResourceSnapshot> {
-    @Reference
-    IAccessProviderUseCase providerUseCase;
 
     @Reference
     IAccessResourceUseCase resourceUseCase;
     @Reference
     DataUpdate dataUpdate;
-
-    @Override
-    protected IAccessProviderUseCase getProviderUseCase() {
-        return providerUseCase;
-    }
 
     public ExtraUseCaseResponse<ResourceSnapshot> create(ExtraUseCaseRequest<ExpandedObservation> request) {
         String id = DtoMapper.sanitizeId(getId(request.model()));

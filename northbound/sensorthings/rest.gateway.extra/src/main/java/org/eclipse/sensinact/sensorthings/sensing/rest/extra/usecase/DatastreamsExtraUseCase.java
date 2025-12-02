@@ -4,12 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -18,22 +16,15 @@ import org.osgi.service.component.annotations.Reference;
  * object
  */
 @Component(service = IExtraUseCase.class)
-public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataStream, ResourceSnapshot> {
-    @Reference
-    IAccessProviderUseCase providerUseCase;
-
-    @Reference
-    IAccessResourceUseCase resourceUseCase;
+public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataStream, ServiceSnapshot> {
 
     @Reference
     DataUpdate dataUpdate;
 
-    @Override
-    protected IAccessProviderUseCase getProviderUseCase() {
-        return providerUseCase;
-    }
+    @Reference
+    IAccessServiceUseCase serviceUseCase;
 
-    public ExtraUseCaseResponse<ResourceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
+    public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
         String id = getId(request.model());
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
@@ -42,25 +33,26 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to create");
 
         }
 
-        ResourceSnapshot snapshot = resourceUseCase.read(request.session(), id);
+        ServiceSnapshot snapshot = serviceUseCase.read(request.session(), id);
         if (snapshot != null) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(id, snapshot);
+
+            return new ExtraUseCaseResponse<ServiceSnapshot>(id, snapshot);
         }
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
 
     }
 
-    public ExtraUseCaseResponse<ResourceSnapshot> delete(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get providerSnapshot");
+    public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedDataStream> request) {
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerSnapshot");
 
     }
 
-    public ExtraUseCaseResponse<ResourceSnapshot> patch(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get providerSnapshot");
+    public ExtraUseCaseResponse<ServiceSnapshot> patch(ExtraUseCaseRequest<ExpandedDataStream> request) {
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerSnapshot");
 
     }
 
@@ -73,37 +65,31 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             throw new UnsupportedOperationException(String.format("Thing id not found in Datastream Payload"));
         }
         String id = (String) datastream.thing().id();
-        ProviderSnapshot snapshot = getProviderSnapshot(request, id);
-        if (snapshot == null) {
-            throw new UnsupportedOperationException(String.format("Thing %s not found", id));
-        }
+
         return List.of(DtoMapper.toDatastreamUpdate(id, datastream));
 
     }
 
-    public ExtraUseCaseResponse<ResourceSnapshot> update(ExtraUseCaseRequest<ExpandedDataStream> request) {
+    public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedDataStream> request) {
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
+        String id = getId(request.model());
 
         // update/create provider
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to create");
-
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to create");
         }
 
-        ResourceSnapshot snapshot = resourceUseCase.read(request.session(), request.id());
-        if (snapshot != null) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(request.id(), snapshot);
-        }
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get Snapshot");
+        ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), id);
+        return new ExtraUseCaseResponse<ServiceSnapshot>(id, serviceSnapshot);
 
     }
 
     @Override
     public String getId(ExpandedDataStream dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.thing().id() + "~" + dto.name());
+        return (String) (dto.id() != null ? dto.id() : dto.thing().id() + "~" + dto.name());
     }
 
 }

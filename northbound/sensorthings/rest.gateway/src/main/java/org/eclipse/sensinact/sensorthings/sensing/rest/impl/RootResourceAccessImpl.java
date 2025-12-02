@@ -31,6 +31,7 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -215,10 +216,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createDatastream(ExpandedDataStream datastream) {
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        Datastream createDto = toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                (ResourceSnapshot) snapshot, criterion);
+
+        Datastream createDto = toDatastream(getSession(), application, getMapper(), uriInfo, EMPTY,
+                snapshot.getResource("name"), criterion);
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
         return Response.created(createdUri).entity(createDto).build();

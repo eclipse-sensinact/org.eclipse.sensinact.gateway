@@ -8,7 +8,6 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -25,11 +24,8 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
     @Reference
     IAccessProviderUseCase providerUseCase;
 
-    @Reference
-    IAccessResourceUseCase resourceUseCase;
-
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
-        String id = DtoMapper.sanitizeId(getId(request.model()));
+        String id = getId(request.model());
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         // update/create provider
@@ -86,14 +82,8 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
     }
 
     @Override
-    protected IAccessProviderUseCase getProviderUseCase() {
-        return providerUseCase;
-    }
-
-    @Override
-    public String getId(ExpandedThing aDto) {
-        // TODO Auto-generated method stub
-        return null;
+    public String getId(ExpandedThing dto) {
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
 }

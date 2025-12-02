@@ -16,17 +16,20 @@ public class DatastreamTest extends AbstractIntegrationTest {
     @Test
     public void testCreateDatastream() throws Exception {
         // given
+        String nameThing = "testCreateDatastreamThing";
         String name = "testCreateDatastream";
-        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
 
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(name));
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name,
+                DtoFactory.getRefId(nameThing));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
         UtilsAssert.assertDatastream(dtoDatastream, json);
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)", dtoDatastream.name()));
+        json = getJsonResponseFromGet(String.format("Datastreams(%s)", getIdFromJson(json)));
         UtilsAssert.assertDatastream(dtoDatastream, json, true);
 
     }

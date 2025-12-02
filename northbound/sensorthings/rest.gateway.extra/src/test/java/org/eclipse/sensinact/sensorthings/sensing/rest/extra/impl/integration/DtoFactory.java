@@ -29,9 +29,11 @@ public class DtoFactory {
         // Required
         ExpandedObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
-
-        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
-                null, null, null, null, op, sensor, null, thingId);
+        Instant start = Instant.now();
+        Instant end = Instant.now();
+        TimeInterval interval = new TimeInterval(end, start);
+        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, interval, interval,
+                null, null, null, null, null, null, op, sensor, null, thingId);
     }
 
     private static UnitOfMeasurement getUnitOfMeasure(String name) {

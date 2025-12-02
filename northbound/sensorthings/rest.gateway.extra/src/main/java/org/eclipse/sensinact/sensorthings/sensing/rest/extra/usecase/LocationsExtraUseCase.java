@@ -24,11 +24,6 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
     @Reference
     DataUpdate dataUpdate;
 
-    @Override
-    protected IAccessProviderUseCase getProviderUseCase() {
-        return providerUseCase;
-    }
-
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
         if (request.model().things() == null || request.model().things().size() == 0) {
@@ -67,7 +62,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
             throw new UnsupportedOperationException("Not supported yet");
         } else {
             List<SensorThingsUpdate> listThingsUpdate = location.things().stream()
-                    .map(thingId -> getProviderSnapshot(request, (String) thingId.id()))
+                    .map(thingId -> providerUseCase.read(request.session(), (String) thingId.id()))
                     .map((provider) -> DtoMapper.toExpandedThing(request, location, provider))
                     .flatMap((expandedThing) -> {
                         return DtoMapper.toUpdates(expandedThing);
