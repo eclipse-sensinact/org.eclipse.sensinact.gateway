@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.impl;
 
+import java.util.Collection;
 import java.util.function.Function;
 
 import org.eclipse.emf.ecore.EClass;
@@ -27,6 +28,7 @@ import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.core.model.Resource;
+import org.eclipse.sensinact.core.model.ResourceBuilder;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.push.DataUpdateException;
@@ -120,7 +122,29 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
             if (!model.isFrozen() && r == null) {
                 Class<?> type = dataUpdateDto.type != null ? dataUpdateDto.type
                         : dataUpdateDto.data != null ? dataUpdateDto.data.getClass() : null;
-                r = service.createResource(res).withValueType(ValueType.UPDATABLE).withType(type).build();
+                ResourceBuilder<Resource, Object> resourceBuilder = service.createResource(res)
+                        .withValueType(ValueType.UPDATABLE);
+                if (Collection.class.isAssignableFrom(type)) {
+                    Class<?> elementType = Object.class; // default fallback
+
+                    if (dataUpdateDto.type != null && !Collection.class.isAssignableFrom(dataUpdateDto.type)) {
+                        // If type is explicitly provided and not a collection, it's the element type
+                        elementType = dataUpdateDto.type;
+                    } else if (dataUpdateDto.data instanceof Collection) {
+                        // Otherwise infer from the first element in the data
+                        Collection<?> collection = (Collection<?>) dataUpdateDto.data;
+                        if (!collection.isEmpty()) {
+                            Object firstElement = collection.iterator().next();
+                            if (firstElement != null) {
+                                elementType = firstElement.getClass();
+                            }
+                        }
+                    }
+
+                    r = resourceBuilder.withType(elementType).withUpperBound(-1).build();
+                } else {
+                    r = resourceBuilder.withType(type).build();
+                }
             }
             if (svcEClass == null) {
                 svcEClass = service.getServiceEClass();

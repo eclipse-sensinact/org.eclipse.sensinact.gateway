@@ -234,6 +234,29 @@ public class AnnotationMapping {
         String name = elementType.getName(ae);
         Class<?> type = data.type() == Object.class ? elementType.getType(ae) : data.type();
 
+        // If the type is a collection and no explicit type is set, try to extract element type from generics
+        final Class<?> elementTypeForCollection;
+        if (data.type() == Object.class && java.util.Collection.class.isAssignableFrom(type)) {
+            java.lang.reflect.Type genericType = null;
+            if (ae instanceof Field) {
+                genericType = ((Field) ae).getGenericType();
+            } else if (ae instanceof RecordComponent) {
+                genericType = ((RecordComponent) ae).getGenericType();
+            }
+
+            Class<?> extractedType = null;
+            if (genericType instanceof java.lang.reflect.ParameterizedType) {
+                java.lang.reflect.ParameterizedType paramType = (java.lang.reflect.ParameterizedType) genericType;
+                java.lang.reflect.Type[] typeArgs = paramType.getActualTypeArguments();
+                if (typeArgs.length > 0 && typeArgs[0] instanceof Class) {
+                    extractedType = (Class<?>) typeArgs[0];
+                }
+            }
+            elementTypeForCollection = extractedType;
+        } else {
+            elementTypeForCollection = null;
+        }
+
         Function<Object, String> modelPackageUri = getModelPackageUriMappingForElement(clazz, elementType, ae);
         Function<Object, String> model = getModelNameMappingForElement(clazz, elementType, ae);
         Function<Object, EClass> modelEClass = getModelEClassMappingForElement(clazz, elementType, ae);
@@ -312,7 +335,7 @@ public class AnnotationMapping {
             } catch (Throwable t) {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
-            dto.type = type;
+            dto.type = elementTypeForCollection != null ? elementTypeForCollection : type;
 
             if (dto.service == null) {
                 if (dto.serviceReference != null) {

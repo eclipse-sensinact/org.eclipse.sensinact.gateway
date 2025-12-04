@@ -700,8 +700,8 @@ public class SensinactWhiteboard {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Promise<TimedValue<T>> pullValue(String modelPackageUri, String model, String provider, String service,
-            String resource, Class<T> type, TimedValue<T> cachedValue, Consumer<TimedValue<T>> gatewayUpdate) {
+    public <T> Promise<TimedValue<?>> pullValue(String modelPackageUri, String model, String provider, String service,
+            String resource, Class<T> type, TimedValue<?> cachedValue, Consumer<TimedValue<?>> gatewayUpdate) {
         // Find the handler method
         final RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
         final Optional<WhiteboardContext<WhiteboardGet<?>>> opt = lookupContext(key, provider, getMethodRegistry);
@@ -720,7 +720,7 @@ public class SensinactWhiteboard {
                 return currentPromise.map(tv -> (TimedValue<T>) tv);
             }
 
-            final Deferred<TimedValue<T>> d = promiseFactory.deferred();
+            final Deferred<TimedValue<?>> d = promiseFactory.deferred();
 
             final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.pull.request",
                     "sensinact.whiteboard.pull.request." + String.join(".", modelPackageUri, model, service, resource),
@@ -736,7 +736,7 @@ public class SensinactWhiteboard {
                 }
             });
 
-            Consumer<TimedValue<T>> coCall = (v) -> {
+            Consumer<TimedValue<?>> coCall = (v) -> {
                 try {
                     if (gatewayUpdate != null) {
                         gatewayUpdate.accept(v);
@@ -746,15 +746,15 @@ public class SensinactWhiteboard {
                 }
             };
 
-            final Promise<TimedValue<T>> promise = d.getPromise().onResolve(() -> overallTimer.close());
+            final Promise<TimedValue<?>> promise = d.getPromise().onResolve(() -> overallTimer.close());
             return runOnGateway(promise, coCall, cachedValue);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Promise<TimedValue<T>> pushValue(String modelPackageUri, String model, String provider, String service,
-            String resource, Class<T> type, TimedValue<T> cachedValue, TimedValue<T> newValue,
-            Consumer<TimedValue<T>> gatewayUpdate) {
+    public <T> Promise<TimedValue<?>> pushValue(String modelPackageUri, String model, String provider, String service,
+            String resource, Class<T> type, TimedValue<?> cachedValue, TimedValue<?> newValue,
+            Consumer<TimedValue<?>> gatewayUpdate) {
 
         final RegistryKey key = new RegistryKey(modelPackageUri, model, service, resource);
         final Optional<WhiteboardContext<WhiteboardSet<?>>> opt = lookupContext(key, provider, setMethodRegistry);
@@ -763,7 +763,7 @@ public class SensinactWhiteboard {
                     .format("No suitable whiteboard handler for %s/%s/%s/%s", model, provider, service, resource)));
         }
 
-        final Deferred<TimedValue<T>> d = promiseFactory.deferred();
+        final Deferred<TimedValue<?>> d = promiseFactory.deferred();
         // Coudln't find a better way to manage casting with generics
         final WhiteboardContext<WhiteboardSet<T>> ctx = (WhiteboardContext<WhiteboardSet<T>>) (Object) opt.get();
 
@@ -781,7 +781,7 @@ public class SensinactWhiteboard {
             }
         });
 
-        final Promise<TimedValue<T>> promise = d.getPromise().onResolve(() -> overallTimer.close());
+        final Promise<TimedValue<?>> promise = d.getPromise().onResolve(() -> overallTimer.close());
         return runOnGateway(promise, gatewayUpdate, cachedValue);
     }
 
@@ -796,10 +796,10 @@ public class SensinactWhiteboard {
      * @param gatewayUpdate Method to call in the gateway thread.
      * @return
      */
-    private <T> Promise<TimedValue<T>> runOnGateway(final Promise<TimedValue<T>> promisedValue,
-            final Consumer<TimedValue<T>> gatewayUpdate, final TimedValue<T> cachedValue) {
+    private <T> Promise<TimedValue<?>> runOnGateway(final Promise<TimedValue<?>> promisedValue,
+            final Consumer<TimedValue<?>> gatewayUpdate, final TimedValue<?> cachedValue) {
         final PromiseFactory gatewayPromiseFactory = gatewayThread.getPromiseFactory();
-        final Deferred<TimedValue<T>> deferred = gatewayPromiseFactory.deferred();
+        final Deferred<TimedValue<?>> deferred = gatewayPromiseFactory.deferred();
         if (gatewayUpdate == null) {
             // Return the promised value from the gateway thread
             deferred.resolveWith(promisedValue);
@@ -810,10 +810,10 @@ public class SensinactWhiteboard {
                 try {
                     final Throwable t = promisedValue.getFailure();
                     if (t == null) {
-                        final TimedValue<T> value = promisedValue.getValue();
-                        deferred.resolveWith(gatewayThread.execute(new AbstractSensinactCommand<TimedValue<T>>() {
+                        final TimedValue<?> value = promisedValue.getValue();
+                        deferred.resolveWith(gatewayThread.execute(new AbstractSensinactCommand<TimedValue<?>>() {
                             @Override
-                            protected Promise<TimedValue<T>> call(SensinactDigitalTwin twin,
+                            protected Promise<TimedValue<?>> call(SensinactDigitalTwin twin,
                                     SensinactModelManager modelMgr, PromiseFactory pf) {
                                 try {
                                     gatewayUpdate.accept(value);

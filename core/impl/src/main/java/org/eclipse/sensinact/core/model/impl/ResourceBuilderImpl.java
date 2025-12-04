@@ -40,6 +40,8 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     private boolean hasGetter;
     private long getterCacheMs;
     private boolean hasSetter;
+    private int lowerBound = 0;
+    private int upperBound = 1;
 
     public ResourceBuilderImpl(AtomicBoolean active, R parent, ServiceImpl builtParent, String name,
             ModelNexus nexusImpl) {
@@ -122,6 +124,20 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     }
 
     @Override
+    public ResourceBuilder<R, T> withLowerBound(int lowerBound) {
+        checkValid();
+        this.lowerBound = lowerBound;
+        return this;
+    }
+
+    @Override
+    public ResourceBuilder<R, T> withUpperBound(int upperBound) {
+        checkValid();
+        this.upperBound = upperBound;
+        return this;
+    }
+
+    @Override
     public ResourceBuilder<R, T> withGetterCache(Duration cacheDuration) {
         checkValid();
         if (cacheDuration == null || cacheDuration.isNegative()) {
@@ -150,7 +166,12 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
             if (namedParameterTypes != null) {
                 throw new IllegalArgumentException("Action details cannot be set for a SENSOR resource");
             }
-
+            if (lowerBound < 0) {
+                throw new IllegalArgumentException("lower bound must not be smaller then zero");
+            }
+            if (lowerBound > upperBound) {
+                throw new IllegalArgumentException("lower bound must not be higher then upper bound");
+            }
             if (type == null && initialValue == null) {
                 throw new IllegalArgumentException("The resource " + name + " must define a type or a value");
             } else if (type == null) {
@@ -160,6 +181,10 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
                         + " is not compatible with the type " + type.getName());
             }
         } else if (resourceType == ResourceType.ACTION) {
+            if (lowerBound != 0 || upperBound != 1) {
+                throw new IllegalArgumentException(
+                        "The action resource " + name + " must not define a upper or lower bound");
+            }
             if (type == null) {
                 throw new IllegalArgumentException("The action resource " + name + " must define a type");
             }
@@ -184,7 +209,7 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
             break;
         case SENSOR:
             createResource = nexusImpl.createResource(builtParent.getServiceEClass(), name, type, timestamp,
-                    initialValue, defaultMetadata, hasGetter, getterCacheMs, hasSetter);
+                    initialValue, defaultMetadata, hasGetter, getterCacheMs, hasSetter, lowerBound, upperBound);
             break;
         case PROPERTY:
         case STATE_VARIABLE:

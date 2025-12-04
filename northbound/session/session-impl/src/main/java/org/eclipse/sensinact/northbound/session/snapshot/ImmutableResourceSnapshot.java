@@ -30,7 +30,8 @@ import org.eclipse.sensinact.core.twin.TimedValue;
  * A default immutable representation of a provider snapshot
  */
 record ImmutableResourceSnapshot(ServiceSnapshot service, String name, ValueType valueType, ResourceType resourceType,
-        Class<?> type, TimedValue<?> value, Map<String, Object> metadata, List<Entry<String, Class<?>>> arguments) implements ResourceSnapshot {
+        Class<?> type, TimedValue<?> value, Map<String, Object> metadata, List<Entry<String, Class<?>>> arguments,
+        boolean multiple) implements ResourceSnapshot {
 
     ImmutableResourceSnapshot {
         // We must be careful as <code>null</code> is a valid metadata value
@@ -40,7 +41,7 @@ record ImmutableResourceSnapshot(ServiceSnapshot service, String name, ValueType
     }
 
     ImmutableResourceSnapshot(ImmutableServiceSnapshot ss, ResourceSnapshot r) {
-        this(ss, r.getName(), r.getValueType(), r.getResourceType(), r.getType(), r.getValue(), r.getMetadata(), r.getArguments());
+        this(ss, r.getName(), r.getValueType(), r.getResourceType(), r.getType(), r.getValue(), r.getMetadata(), r.getArguments(), r.isMultiple());
     }
 
     @Override
@@ -91,5 +92,10 @@ record ImmutableResourceSnapshot(ServiceSnapshot service, String name, ValueType
     @Override
     public List<Entry<String, Class<?>>> getArguments() {
         return arguments;
+    }
+
+    @Override
+    public boolean isMultiple() {
+        return multiple;
     }
 }

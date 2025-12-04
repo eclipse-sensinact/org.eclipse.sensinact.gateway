@@ -140,4 +140,9 @@ public class ResourceSnapshotImpl extends AbstractSnapshot implements ResourceSn
     public List<Entry<String, Class<?>>> getArguments() {
         return resourceType == ResourceType.ACTION ? ResourceImpl.findActionParameters((EOperation)rcFeature) : null;
     }
+
+    @Override
+    public boolean isMultiple() {
+        return rcFeature.isMany();
+    }
 }

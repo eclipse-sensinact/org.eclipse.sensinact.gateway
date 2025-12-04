@@ -155,6 +155,22 @@ public class AnnotationBasedDtoExtractorTest {
 
     }
 
+    @ModelPackageUri(MODEL_PACKAGE_URI)
+    @Model(MODEL)
+    @Provider(PROVIDER)
+    @Service(SERVICE)
+    @Resource(RESOURCE)
+    public static class BasicDtoClassLevelWithCollection {
+        @Data
+        public List<String> foo;
+
+        @Metadata
+        public String units;
+
+        @Metadata(value = METADATA_KEY, onNull = NullAction.UPDATE, onDuplicate = DuplicateAction.UPDATE_ALWAYS)
+        public String fizzbuzz;
+    }
+
     /**
      * Tests for class level annotations for provider/service/resource
      */
@@ -286,6 +302,44 @@ public class AnnotationBasedDtoExtractorTest {
             assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
 
             dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap("units", METADATA_VALUE_2), dud2.metadata);
+            assertFalse(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
+        }
+
+        @Test
+        void basicDtoWithCollection() {
+            BasicDtoClassLevelWithCollection dto = new BasicDtoClassLevelWithCollection();
+
+            dto.foo = List.of("value1", "value2", "value3");
+            dto.units = METADATA_VALUE_2;
+
+            List<? extends AbstractUpdateDto> updates = extractor(BasicDtoClassLevelWithCollection.class).getUpdates(dto);
+
+            // Should have 1 data update + 2 metadata updates (units and fizzbuzz which is null)
+            assertEquals(3, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(dto.foo, dud.data);
+            assertEquals(String.class, dud.type, "Type should be String.class (the element type), not List.class");
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance)
+                    .filter(d -> ((MetadataUpdateDto) d).metadata.containsKey("units")).findFirst().get();
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud2 = (MetadataUpdateDto) extracted;
 
             assertEquals(singletonMap("units", METADATA_VALUE_2), dud2.metadata);
             assertFalse(dud2.removeNullValues, "Null values should be removed");

@@ -619,13 +619,19 @@ public class WhiteboardImplTest {
         }
     }
 
-    static class Content {
+    public static class Content {
         String oldValue;
         String newValue;
 
         @Override
         public String toString() {
             return "Content(old=" + oldValue + " ;; new=" + newValue + ")";
+        }
+
+        public static Content valueOf(String s) {
+            Content c = new Content();
+            c.newValue = s;
+            return c;
         }
     }
 
@@ -652,10 +658,10 @@ public class WhiteboardImplTest {
         @SET(model = "foobar", service = "svc", resource = "b", type = Content.class)
         public TimedValue<Content> doSet(@UriParam(UriSegment.RESOURCE) String resource,
                 @SetParam(SetSegment.CACHED_VALUE) TimedValue<Content> cached,
-                @SetParam(SetSegment.NEW_VALUE) TimedValue<String> newValue) {
+                @SetParam(SetSegment.NEW_VALUE) TimedValue<Content> newValue) {
             Content content = new Content();
             content.oldValue = cached.getValue() != null ? cached.getValue().newValue : null;
-            content.newValue = newValue.getValue();
+            content.newValue = newValue.getValue().newValue;
             return new DefaultTimedValue<Content>(content, newValue.getTimestamp());
         }
     }
@@ -769,8 +775,8 @@ public class WhiteboardImplTest {
         void testReadOnly() throws Throwable {
             AbstractDescriptiveReadOnly<Integer> getHandler = new AbstractDescriptiveReadOnly<>() {
                 @Override
-                public Promise<TimedValue<Integer>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
-                        String provider, String service, String resource, TimedValue<Integer> cachedValue) {
+                public Promise<TimedValue<?>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, TimedValue<?> cachedValue) {
                     return pf.resolved(new DefaultTimedValue<>(42));
                 }
             };
@@ -799,16 +805,16 @@ public class WhiteboardImplTest {
                 Long value = 42L;
 
                 @Override
-                public Promise<TimedValue<Long>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
-                        String provider, String service, String resource, TimedValue<Long> cachedValue) {
+                public Promise<TimedValue<?>> doPullValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, TimedValue<?> cachedValue) {
                     return pf.resolved(new DefaultTimedValue<Long>(value));
                 }
 
                 @Override
-                public Promise<TimedValue<Long>> doPushValue(PromiseFactory pf, String modelPackageUri, String model,
-                        String provider, String service, String resource, TimedValue<Long> cachedValue,
-                        TimedValue<Long> newValue) {
-                    this.value = newValue.getValue();
+                public Promise<TimedValue<?>> doPushValue(PromiseFactory pf, String modelPackageUri, String model,
+                        String provider, String service, String resource, TimedValue<?> cachedValue,
+                        TimedValue<?> newValue) {
+                    this.value = (Long) newValue.getValue();
                     return pf.resolved(new DefaultTimedValue<Long>(value));
                 }
             };
@@ -1008,18 +1014,18 @@ public class WhiteboardImplTest {
                 Long value = 42L;
 
                 @Override
-                public Promise<TimedValue<Long>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
+                public Promise<TimedValue<?>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
                         String provider, String service, String resource, Class<Long> resourceType,
-                        TimedValue<Long> cachedValue) {
-                    return pf.resolved(new DefaultTimedValue<Long>(value));
+                        TimedValue<?> cachedValue) {
+                    return pf.resolved(new DefaultTimedValue<>(value));
                 }
 
                 @Override
-                public Promise<TimedValue<Long>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
+                public Promise<TimedValue<?>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
                         String provider, String service, String resource, Class<Long> resourceType,
-                        TimedValue<Long> cachedValue, TimedValue<Long> newValue) {
-                    this.value = newValue.getValue();
-                    return pf.resolved(new DefaultTimedValue<Long>(value));
+                        TimedValue<?> cachedValue, TimedValue<?> newValue) {
+                    this.value = (Long) newValue.getValue();
+                    return pf.resolved(new DefaultTimedValue<>(value));
                 }
             };
 

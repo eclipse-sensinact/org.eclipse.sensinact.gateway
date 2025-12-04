@@ -194,6 +194,11 @@ public class LdapParserTest {
                 // Not an Action resource
                 return null;
             }
+
+            @Override
+            public boolean isMultiple() {
+                return value instanceof List;
+            }
         };
     }
 

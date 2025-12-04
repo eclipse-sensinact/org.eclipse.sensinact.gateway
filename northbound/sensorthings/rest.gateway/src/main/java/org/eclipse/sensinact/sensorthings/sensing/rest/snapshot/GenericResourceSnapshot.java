@@ -197,4 +197,9 @@ public class GenericResourceSnapshot implements ResourceSnapshot {
     public ValueType getValueType() {
         return resource.getValueType();
     }
+
+    @Override
+    public boolean isMultiple() {
+        return resource.isMultiple();
+    }
 }

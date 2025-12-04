@@ -235,5 +235,10 @@ class NotificationSnapshot {
             // Not an action resource
             return null;
         }
+
+        @Override
+        public boolean isMultiple() {
+            return value.getValue() instanceof List;
+        }
     }
 }

@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -135,9 +136,9 @@ public class ModelNexus {
             }
 
             @Override
-            public <T> Promise<TimedValue<T>> pullValue(String modelPackageUri, String model, String provider,
-                    String service, String resource, Class<T> type, TimedValue<T> cachedValue,
-                    Consumer<TimedValue<T>> gatewayUpdate) {
+            public <T> Promise<TimedValue<?>> pullValue(String modelPackageUri, String model, String provider,
+                    String service, String resource, Class<T> type, TimedValue<?> cachedValue,
+                    Consumer<TimedValue<?>> gatewayUpdate) {
                 if (resourceValuePullHandler != null) {
                     return resourceValuePullHandler.pullValue(modelPackageUri, model, provider, service, resource, type,
                             cachedValue, gatewayUpdate);
@@ -146,9 +147,9 @@ public class ModelNexus {
             }
 
             @Override
-            public <T> Promise<TimedValue<T>> pushValue(String modelPackageUri, String model, String provider,
-                    String service, String resource, Class<T> type, TimedValue<T> cachedValue, TimedValue<T> newValue,
-                    Consumer<TimedValue<T>> gatewayUpdate) {
+            public <T> Promise<TimedValue<?>> pushValue(String modelPackageUri, String model, String provider,
+                    String service, String resource, Class<T> type, TimedValue<?> cachedValue, TimedValue<?> newValue,
+                    Consumer<TimedValue<?>> gatewayUpdate) {
                 if (resourceValuePushHandler != null) {
                     return resourceValuePushHandler.pushValue(modelPackageUri, model, provider, service, resource, type,
                             cachedValue, newValue, gatewayUpdate);
@@ -236,9 +237,9 @@ public class ModelNexus {
                     .orElseGet(() -> createService(sensiNactModel, "system", "System", now));
             EClass svcClass = svc.getEReferenceType();
             EStructuralFeature versionResource = Optional.ofNullable(svcClass.getEStructuralFeature("version"))
-                    .orElseGet(() -> createResource(svcClass, "version", double.class, now, null));
+                    .orElseGet(() -> createMandatoryResource(svcClass, "version", double.class, now, null));
             EStructuralFeature startedResource = Optional.ofNullable(svcClass.getEStructuralFeature("started"))
-                    .orElseGet(() -> createResource(svcClass, "started", Instant.class, now, null));
+                    .orElseGet(() -> createMandatoryResource(svcClass, "started", Instant.class, now, null));
 
             Provider provider = Optional.ofNullable(getProvider("sensiNact"))
                     .orElseGet(() -> doCreateProvider(sensiNactModel, "sensiNact", now));
@@ -463,12 +464,47 @@ public class ModelNexus {
             metadata.setTimestamp(metaTimestamp);
 
             final Object storedData;
-            if (data == null || resourceType.isInstance(data)) {
-                storedData = data;
+
+            // Handle multi-valued features (collections)
+            if (resourceFeature.isMany()) {
+                if (data instanceof Collection) {
+                    @SuppressWarnings("unchecked")
+                    EList<Object> list = (EList<Object>) service.eGet(resourceFeature);
+                    list.clear();
+                    for (Object item : (Collection<?>) data) {
+                        if (item == null || resourceType.isInstance(item)) {
+                            list.add(item);
+                        } else {
+                            list.add(EMFUtil.convertToTargetType(resourceType, item));
+                        }
+                    }
+                    storedData = list;
+                } else if (data == null) {
+                    @SuppressWarnings("unchecked")
+                    EList<Object> list = (EList<Object>) service.eGet(resourceFeature);
+                    list.clear();
+                    storedData = list;
+                } else {
+                    // Single value for a multi-valued feature - add it to the list
+                    @SuppressWarnings("unchecked")
+                    EList<Object> list = (EList<Object>) service.eGet(resourceFeature);
+                    list.clear();
+                    if (resourceType.isInstance(data)) {
+                        list.add(data);
+                    } else {
+                        list.add(EMFUtil.convertToTargetType(resourceType, data));
+                    }
+                    storedData = list;
+                }
             } else {
-                storedData = EMFUtil.convertToTargetType(resourceType, data);
+                // Handle single-valued features
+                if (data == null || resourceType.isInstance(data)) {
+                    storedData = data;
+                } else {
+                    storedData = EMFUtil.convertToTargetType(resourceType, data);
+                }
+                service.eSet(resourceFeature, storedData);
             }
-            service.eSet(resourceFeature, storedData);
 
             Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(storedData, metadata, resourceFeature);
 
@@ -612,24 +648,30 @@ public class ModelNexus {
         return providers.values().stream().filter(p -> p.eClass().equals(model)).collect(Collectors.toList());
     }
 
-    public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
+    protected EAttribute createMandatoryResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue) {
-        return createResource(service, resource, type, timestamp, defaultValue, Map.of(), false, 0, false);
+        return createResource(service, resource, type, timestamp, defaultValue, Map.of(), false, 0, false, 1, 1);
+    }
+
+    protected EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
+            Object defaultValue) {
+        return createResource(service, resource, type, timestamp, defaultValue, Map.of(), false, 0, false, 0, 1);
     }
 
     public EAttribute createResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, Map<String, Object> defaultMetadata, boolean hasGetter, long getterCacheMs,
-            boolean hasSetter) {
+            boolean hasSetter, int lowerBound, int upperBound) {
 
         return doCreateResource(service, resource, type, timestamp, defaultValue, defaultMetadata, List.of(), hasGetter,
-                getterCacheMs, hasSetter);
+                getterCacheMs, hasSetter, lowerBound, upperBound);
     }
 
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, Map<String, Object> defaultMetadata, List<MetadataValue> metadata, boolean hasGetter,
-            long getterCacheMs, boolean hasSetter) {
+            long getterCacheMs, boolean hasSetter, int lowerBound, int upperBound) {
         assertResourceNotExist(service, resource);
-        ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue);
+        ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue,
+                lowerBound, upperBound);
         resourceMetaData.setExternalGet(hasGetter);
         resourceMetaData.setExternalSet(hasSetter);
         if (getterCacheMs > 0) {
@@ -978,16 +1020,17 @@ public class ModelNexus {
      * @param cachedValue Current twin value
      * @return The promise of the new value
      */
-    public <T> Promise<TimedValue<T>> pullValue(Provider provider, String serviceName, ETypedElement resource,
-            Class<T> valueType, TimedValue<T> cachedValue) {
+    public <T> Promise<TimedValue<?>> pullValue(Provider provider, String serviceName, ETypedElement resource,
+            Class<T> valueType, TimedValue<?> cachedValue) {
         if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to pull a value without a pull handler"));
         }
 
         try {
             final String modelName = EMFUtil.getModelName(provider.eClass());
+            final TimedValue<?> safeCachedValue = convert(resource, cachedValue);
             return whiteboard.pullValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
-                    serviceName, resource.getName(), valueType, cachedValue, (tv) -> {
+                    serviceName, resource.getName(), valueType, safeCachedValue, (tv) -> {
                         if (tv != null) {
                             handleDataUpdate(provider, serviceName, (EClass) resource.eContainer(),
                                     (EStructuralFeature) resource, tv.getValue(), tv.getTimestamp());
@@ -995,6 +1038,34 @@ public class ModelNexus {
                     });
         } catch (Throwable t) {
             return Promises.failed(t);
+        }
+    }
+
+    private static <T> TimedValue<?> convert(ETypedElement resource, TimedValue<?> tv) {
+        if(tv.isEmpty()) {
+            return tv;
+        }
+        Object value = tv.getValue();
+        Instant ts = tv.getTimestamp();
+        EClassifier eType = resource.getEType();
+        Class<?> clz = eType.getInstanceClass();
+        Function<Object, Object> convert = obj -> clz.isInstance(obj) ? obj :
+            EMFUtil.convertToTargetType(eType, obj);
+        if(resource.isMany()) {
+            if(value == null) {
+                return new DefaultTimedValue<>(List.of(), ts);
+            } else if (value instanceof Collection<?> c) {
+                return new DefaultTimedValue<>(c.stream()
+                        .map(convert).toList(), ts);
+            } else {
+                return new DefaultTimedValue<>(List.of(convert.apply(value)), ts);
+            }
+        } else {
+            if(value == null) {
+                return tv;
+            } else {
+                return new DefaultTimedValue<>(convert.apply(value), ts);
+            }
         }
     }
 
@@ -1010,7 +1081,7 @@ public class ModelNexus {
      * @param cachedValue Current twin value
      * @return The promise of the new value
      */
-    public <T> Promise<TimedValue<T>> pullValue(Provider provider, EReference service, ETypedElement resource,
+    public <T> Promise<TimedValue<?>> pullValue(Provider provider, EReference service, ETypedElement resource,
             Class<T> valueType, TimedValue<T> cachedValue) {
         if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to pull a value without a pull handler"));
@@ -1018,8 +1089,9 @@ public class ModelNexus {
 
         try {
             final String modelName = EMFUtil.getModelName(provider.eClass());
+            final TimedValue<?> safeCachedValue = convert(resource, cachedValue);
             return whiteboard.pullValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
-                    service.getName(), resource.getName(), valueType, cachedValue, (tv) -> {
+                    service.getName(), resource.getName(), valueType, safeCachedValue, (tv) -> {
                         if (tv != null) {
                             handleDataUpdate(provider, service.getName(), service, (EClass) service.getEType(),
                                     (EStructuralFeature) resource, tv.getValue(), tv.getTimestamp());
@@ -1044,16 +1116,18 @@ public class ModelNexus {
      * @return The promise of a new resource value (can differ from
      *         <code>newValue</code>)
      */
-    public <T> Promise<TimedValue<T>> pushValue(Provider provider, String serviceName, ETypedElement resource,
-            Class<T> valueType, TimedValue<T> cachedValue, TimedValue<T> newValue) {
+    public <T> Promise<TimedValue<?>> pushValue(Provider provider, String serviceName, ETypedElement resource,
+            Class<T> valueType, TimedValue<?> cachedValue, TimedValue<?> newValue) {
         if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to push a value without a push handler"));
         }
 
         try {
             final String modelName = EMFUtil.getModelName(provider.eClass());
+            final TimedValue<?> safeCachedValue = convert(resource, cachedValue);
+            final TimedValue<?> safeNewValue = convert(resource, newValue);
             return whiteboard.pushValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
-                    serviceName, resource.getName(), valueType, cachedValue, newValue, (tv) -> {
+                    serviceName, resource.getName(), valueType, safeCachedValue, safeNewValue, (tv) -> {
                         if (tv != null) {
                             handleDataUpdate(provider, serviceName, (EClass) resource.eContainer(),
                                     (EStructuralFeature) resource, (Object) tv.getValue(), tv.getTimestamp());
@@ -1078,16 +1152,18 @@ public class ModelNexus {
      * @return The promise of a new resource value (can differ from
      *         <code>newValue</code>)
      */
-    public <T> Promise<TimedValue<T>> pushValue(Provider provider, EReference service, ETypedElement resource,
-            Class<T> valueType, TimedValue<T> cachedValue, TimedValue<T> newValue) {
+    public <T> Promise<TimedValue<?>> pushValue(Provider provider, EReference service, ETypedElement resource,
+            Class<T> valueType, TimedValue<?> cachedValue, TimedValue<?> newValue) {
         if (whiteboard == null) {
             return Promises.failed(new IllegalAccessError("Trying to push a value without a push handler"));
         }
 
         try {
             final String modelName = EMFUtil.getModelName(provider.eClass());
+            final TimedValue<?> safeCachedValue = convert(resource, cachedValue);
+            final TimedValue<?> safeNewValue = convert(resource, cachedValue);
             return whiteboard.pushValue(provider.eClass().getEPackage().getNsURI(), modelName, provider.getId(),
-                    service.getName(), resource.getName(), valueType, cachedValue, newValue, (tv) -> {
+                    service.getName(), resource.getName(), valueType, safeCachedValue, safeNewValue, (tv) -> {
                         if (tv != null) {
                             handleDataUpdate(provider, service.getName(), service, (EClass) service.getEType(),
                                     (EStructuralFeature) resource, (Object) tv.getValue(), tv.getTimestamp());

@@ -178,6 +178,11 @@ class ResourceDataBackedResourceSnapshot implements ResourceSnapshot {
         return null;
     }
 
+    @Override
+    public boolean isMultiple() {
+        return service.provider.rdn.newValue() instanceof List || service.provider.rdn.oldValue() instanceof List;
+    }
+
 }
 
 abstract class CombinationCriterion implements ICriterion {
