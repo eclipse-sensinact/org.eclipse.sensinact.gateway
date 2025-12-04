@@ -64,7 +64,7 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
 
-public class DtoMapper {
+public class DtoMapperExtended {
 
     private static final String ADMIN = "admin";
     private static final String DESCRIPTION = "description";
@@ -103,8 +103,8 @@ public class DtoMapper {
         return o == null || o.isEmpty() ? null : String.valueOf(o.get());
     }
 
-    public static Thing toThing(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
+    public static E toThing(SensiNactSession userSession, Application application, ObjectMapper mapper, UriInfo uriInfo,
+            ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         String id = provider.getName();
 
         String name = Objects.requireNonNullElse(toString(getProviderAdminFieldValue(provider, FRIENDLY_NAME)),
@@ -128,15 +128,16 @@ public class DtoMapper {
         }
 
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
+            Optional<HistoricalLocation> historicalLocation = DtoMapperExtended.toHistoricalLocation(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter,
+                    provider);
             if (historicalLocation.isPresent()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", thing, list);
             }
         }
         if (expansions.shouldExpand("Locations", thing)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(userSession,
+            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapperExtended.toLocation(userSession,
                     application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", thing, list);
         }
@@ -166,13 +167,14 @@ public class DtoMapper {
         Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object,
                 thingsLink, historicalLocationsLink);
         if (expansions.shouldExpand("Things", location)) {
-            ResultList<Thing> list = new ResultList<>(null, null, List.of(DtoMapper.toThing(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Thing"), filter, provider)));
+            ResultList<Thing> list = new ResultList<>(null, null, List.of(DtoMapperExtended.toThing(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("Thing"), filter, provider)));
             expansions.addExpansion("Things", location, list);
         }
         if (expansions.shouldExpand("HistoricalLocations", location)) {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
+            Optional<HistoricalLocation> historicalLocation = DtoMapperExtended.toHistoricalLocation(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter,
+                    provider);
             if (historicalLocation.isPresent()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", location, list);
@@ -232,7 +234,7 @@ public class DtoMapper {
                     expansions.getExpansionSettings("Thing"), filter, provider));
         }
         if (expansions.shouldExpand("Locations", historicalLocation)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(userSession,
+            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapperExtended.toLocation(userSession,
                     application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
@@ -595,21 +597,21 @@ public class DtoMapper {
         if (resource == null) {
             throw new NotFoundException();
         }
-    
+
         final ProviderSnapshot provider = resource.getService().getProvider();
         final Map<String, Object> metadata = resource.getMetadata();
-    
+
         String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(), resource.getName());
-    
+
         String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
         String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-    
+
         UnitOfMeasurement unit = new UnitOfMeasurement(Objects.toString(metadata.get(SENSORTHINGS_UNIT_NAME), null),
                 Objects.toString(metadata.get("unit"), null),
                 Objects.toString(metadata.get(SENSORTHINGS_UNIT_DEFINITION), null));
-    
+
         Polygon observedArea = getObservedArea(getLocation(provider, mapper, resource, false).getValue());
-    
+
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})").resolveTemplate("id", id)
                 .build().toString();
         String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build().toString();
@@ -617,7 +619,7 @@ public class DtoMapper {
                 .toString();
         String sensorLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Sensor").build().toString();
         String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
-    
+
         Datastream datastream = new Datastream(selfLink, id, name, description,
                 "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
                 metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
@@ -626,22 +628,22 @@ public class DtoMapper {
                     RootResourceAccessImpl.getObservationList(userSession, application, mapper, uriInfo,
                             expansions.getExpansionSettings("Observations"), resource, filter, 25));
         }
-    
+
         if (expansions.shouldExpand("ObservedProperty", datastream)) {
             expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper,
                     uriInfo, expansions.getExpansionSettings("ObservedProperty"), filter, resource));
         }
-    
+
         if (expansions.shouldExpand("Sensor", datastream)) {
             expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Sensor"), filter, resource));
         }
-    
+
         if (expansions.shouldExpand("Thing", datastream)) {
             expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Thing"), filter, provider));
         }
-    
+
         return datastream;
     }
 

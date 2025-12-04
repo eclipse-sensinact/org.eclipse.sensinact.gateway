@@ -20,7 +20,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 public record ThingUpdate(@Model EClass model, @Provider String providerId,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location,
         @Service("thing") @Resource("id") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object thingId,
         @Service("thing") @Resource("id") @Metadata(onMap = {
                 USE_KEYS_AS_FIELDS }) Map<String, Object> properties)
@@ -36,6 +35,6 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
 
     public ThingUpdate(String providerId, String friendlyName, String description, GeoJsonObject location,
             Object thingId, Map<String, Object> properties) {
-        this(SENSOR_THINGS_DEVICE, providerId, friendlyName, description, location, thingId, properties);
+        this(SENSOR_THINGS_DEVICE, providerId, friendlyName, description, thingId, properties);
     }
 }
