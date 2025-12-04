@@ -2,11 +2,11 @@ package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
 import static org.eclipse.sensinact.core.annotation.dto.NullAction.UPDATE_IF_PRESENT;
-import static org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage.Literals.DATA_STREAM_SERVICE;
-import static org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage.Literals.SENSOR_THINGS_DEVICE;
+import static org.eclipse.sensinact.sensorthings.models.sensorthings.extended.SensorthingsExtendedPackage.Literals.DATA_STREAM_SERVICE_EXTENDED;
+import static org.eclipse.sensinact.sensorthings.models.sensorthings.extended.SensorthingsExtendedPackage.Literals.SENSORTHING_DEVICE_EXTENDED;
 
 import java.time.Instant;
-import java.util.Map;
+import java.util.List;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.annotation.dto.Data;
@@ -21,28 +21,33 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
         @Service String serviceName, @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorThingsId,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String name,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
-        @Timestamp Instant timestamp) implements SensorThingsUpdate {
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) SensorUpdate sensor,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) ObservedPropertyUpdate observedProperty,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) ObservationUpdate latestObservation,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<ObservationUpdate> observations, @Timestamp Instant timestamp)
+        implements SensorThingsUpdate {
+
     public DatastreamUpdate {
         if (model == null) {
-            model = SENSOR_THINGS_DEVICE;
+            model = SENSORTHING_DEVICE_EXTENDED;
         }
-        if (model != SENSOR_THINGS_DEVICE) {
-            throw new IllegalArgumentException("The model for the provider must be " + SENSOR_THINGS_DEVICE.getName());
+        if (model != SENSORTHING_DEVICE_EXTENDED) {
+            throw new IllegalArgumentException(
+                    "The model for the provider must be " + SENSORTHING_DEVICE_EXTENDED.getName());
         }
         if (service == null) {
-            service = DATA_STREAM_SERVICE;
+            service = DATA_STREAM_SERVICE_EXTENDED;
         }
-        if (service != DATA_STREAM_SERVICE) {
-            throw new IllegalArgumentException("The model for the datastream must be " + DATA_STREAM_SERVICE.getName());
+        if (service != DATA_STREAM_SERVICE_EXTENDED) {
+            throw new IllegalArgumentException(
+                    "The model for the datastream must be " + DATA_STREAM_SERVICE_EXTENDED.getName());
         }
-
     }
 
     public DatastreamUpdate(String providerId, String serviceName, Object sensorThingsId, String name,
-            String description, Object latestObservation, Instant timestamp, Map<String, Object> observationParameters,
-            String unit, Map<String, Object> unitMetadata, String sensor, Map<String, Object> sensorMetadata,
-            String observedProperty, Map<String, Object> observedPropertyMetadata) {
-        this(SENSOR_THINGS_DEVICE, DATA_STREAM_SERVICE, providerId, serviceName, sensorThingsId, name, description,
-                timestamp);
+            String description, SensorUpdate sensor, ObservedPropertyUpdate observedProperty,
+            ObservationUpdate latestObservation, List<ObservationUpdate> observations, Instant timestamp) {
+        this(SENSORTHING_DEVICE_EXTENDED, DATA_STREAM_SERVICE_EXTENDED, providerId, serviceName, sensorThingsId, name,
+                description, sensor, observedProperty, latestObservation, observations, timestamp);
     }
 }
