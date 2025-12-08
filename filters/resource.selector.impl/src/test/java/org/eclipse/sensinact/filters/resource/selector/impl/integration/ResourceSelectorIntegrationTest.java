@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.impl.integration;
 
+import static org.eclipse.sensinact.filters.resource.selector.api.LocationSelection.MatchType.WITHIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -35,6 +36,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.filters.api.IFilterParser;
+import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
@@ -44,6 +46,7 @@ import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.Prov
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
@@ -84,8 +87,10 @@ public class ResourceSelectorIntegrationTest {
     void setup() throws Exception {
         BulkGenericDto dtos = new BulkGenericDto();
         dtos.dtos = new ArrayList<>();
+        dtos.dtos.add(makeRc("temperature", "Temp1", "admin", "location", new Point(12d, 34d)));
         dtos.dtos.add(makeRc("temperature", "Temp1", "sensor", "temperature", 10));
         dtos.dtos.add(makeRc("temperature", "Temp1", "sensor", "unit", "°C"));
+        dtos.dtos.add(makeRc("temperature", "Temp2", "admin", "location", new Point(56d, 78d)));
         dtos.dtos.add(makeRc("temperature", "Temp2", "sensor", "temperature", 40));
         dtos.dtos.add(makeRc("temperature", "Temp2", "sensor", "unit", "°F"));
         dtos.dtos.add(makeRc("temperature", "Temp3", "sensor", "temperature", 20));
@@ -116,7 +121,7 @@ public class ResourceSelectorIntegrationTest {
                     @Override
                     protected Promise<Collection<ProviderSnapshot>> call(SensinactDigitalTwin model,
                             PromiseFactory pf) {
-                        return pf.resolved(model.filteredSnapshot(null, parsedFilter.getProviderFilter(),
+                        return pf.resolved(model.filteredSnapshot(parsedFilter.getLocationFilter(), parsedFilter.getProviderFilter(),
                                 parsedFilter.getServiceFilter(), parsedFilter.getResourceFilter()));
                     }
 
@@ -315,6 +320,29 @@ public class ResourceSelectorIntegrationTest {
         results = applyFilter(rs);
         assertEquals(1, results.size());
         assertFindProviders(results, "naming2");
+    }
+
+    @Test
+    void testLocation() throws Exception {
+        ResourceSelector rs = new ResourceSelector(List.of(
+                new ProviderSelection(null, null, null,
+                        List.of(new ResourceSelection(new Selection("sensor", null, false), new Selection("temperature", null, false), null)),
+                        List.of(new LocationSelection(new Point(11d, 33d), 500_000d, false, WITHIN)))),
+                List.of());
+
+        List<ProviderSnapshot> results = applyFilter(rs);
+        assertEquals(1, results.size());
+        assertFindProviders(results, "Temp1");
+
+        rs = new ResourceSelector(List.of(
+                new ProviderSelection(null, null, null,
+                        List.of(new ResourceSelection(new Selection("sensor", null, false), new Selection("temperature", null, false), null)),
+                        List.of(new LocationSelection(new Point(55d, 77d), 500_000d, false, WITHIN)))),
+                List.of());
+
+        results = applyFilter(rs);
+        assertEquals(1, results.size());
+        assertFindProviders(results, "Temp2");
     }
 
     /**
