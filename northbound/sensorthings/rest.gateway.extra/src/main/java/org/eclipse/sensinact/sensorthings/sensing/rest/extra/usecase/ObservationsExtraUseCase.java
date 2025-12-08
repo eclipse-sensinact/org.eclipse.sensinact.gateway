@@ -69,7 +69,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
         }
         String providerId = DtoMapper.extractFirstIdSegment(idDatastream);
 
-        return List.of(DtoMapper.toObservationUpdate(providerId, idDatastream, observation));
+        return List.of(DtoMapper.toObservsationUpdate(providerId, idDatastream, observation));
     }
 
     public ExtraUseCaseResponse<ResourceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {

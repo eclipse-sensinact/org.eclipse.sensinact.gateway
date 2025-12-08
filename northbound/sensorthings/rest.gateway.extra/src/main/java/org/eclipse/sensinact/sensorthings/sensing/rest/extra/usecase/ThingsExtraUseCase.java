@@ -32,6 +32,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
+
         } catch (InvocationTargetException | InterruptedException e) {
             return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
 
@@ -57,7 +58,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
 
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedThing> request) {
-        return DtoMapper.toUpdates(request.model()).toList();
+        return DtoMapper.toUpdates(request.model());
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {

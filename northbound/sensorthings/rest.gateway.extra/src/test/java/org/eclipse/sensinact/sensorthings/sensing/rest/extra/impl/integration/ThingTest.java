@@ -216,9 +216,9 @@ public class ThingTest extends AbstractIntegrationTest {
         // Given
         String name = "testCreateThingWithLocationAndDatastream";
 
-        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name));
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "1"));
 
-        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name));
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name + "2"));
 
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
                 "testThing With Location and Datastream",
@@ -387,19 +387,18 @@ public class ThingTest extends AbstractIntegrationTest {
         // Given
         String name = "testCreateThingWithMultipleLocation";
 
-        ExpandedLocation location1 = DtoFactory.getLocation(name);
-        ExpandedLocation location2 = DtoFactory.getLocation(name + "1");
+        ExpandedLocation location1 = DtoFactory.getLocation(name + "1");
+        ExpandedLocation location2 = DtoFactory.getLocation(name + "2");
         List<ExpandedLocation> locations = List.of(location1, location2);
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name,
                 "testThing With Location and Datastream",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locations);
         // When
 
-        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Locations", 201);
 
-        UtilsAssert.assertThing(dtoThing, json);
-        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations", name));
         UtilsAssert.assertThing(dtoThing, json, true);
+
     }
 
 }

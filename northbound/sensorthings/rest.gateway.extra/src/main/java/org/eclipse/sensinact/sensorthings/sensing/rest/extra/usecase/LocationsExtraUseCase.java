@@ -61,13 +61,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
         if (location.things() == null || location.things().size() == 0) {
             throw new UnsupportedOperationException("Not supported yet");
         } else {
-            List<SensorThingsUpdate> listThingsUpdate = location.things().stream()
-                    .map(thingId -> providerUseCase.read(request.session(), (String) thingId.id()))
-                    .map((provider) -> DtoMapper.toExpandedThing(request, location, provider))
-                    .flatMap((expandedThing) -> {
-                        return DtoMapper.toUpdates(expandedThing);
-                    }).toList();
-
+            List<SensorThingsUpdate> listThingsUpdate = DtoMapper.toThingUpdates(request.model());
             return listThingsUpdate;
         }
     }

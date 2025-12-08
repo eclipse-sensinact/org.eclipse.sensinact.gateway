@@ -73,19 +73,17 @@ public class UtilsAssert {
         assertEquals(dtoThing.description(), json.get("description").asText());
         if (expanded) {
             if (dtoThing.locations() != null && dtoThing.locations().size() > 0) {
-                JsonNode locationsNode = json.get("Locations").get(0);
-                JsonNode location = locationsNode.get("location");
+                JsonNode locationsNode = json.get("Locations");
                 if (dtoThing.locations().size() > 1) {
-                    JsonNode listLocation = location.get("features");
                     assertNotNull(locationsNode, "Locations array must be present");
-                    assertEquals(dtoThing.locations().size(), listLocation.size(), "Number of locations must match");
+                    assertEquals(dtoThing.locations().size(), locationsNode.size(), "Number of locations must match");
                     for (int i = 0; i < dtoThing.locations().size(); i++) {
-                        String locationNameResult = listLocation.get(i).get("properties")
-                                .get("sensorthings.location.name").asText();
-                        assertEquals(dtoThing.locations().get(i).name(), locationNameResult);
+                        String locationNameResult = locationsNode.get(i).get("name").asText();
+                        String locationNameExpected = dtoThing.locations().get(i).name();
+                        assertEquals(locationNameExpected, locationNameResult);
                     }
                 } else {
-                    String locationNameResult = location.get("properties").get("sensorthings.location.name").asText();
+                    String locationNameResult = locationsNode.get(0).get("name").asText();
                     assertEquals(dtoThing.locations().get(0).name(), locationNameResult);
 
                 }

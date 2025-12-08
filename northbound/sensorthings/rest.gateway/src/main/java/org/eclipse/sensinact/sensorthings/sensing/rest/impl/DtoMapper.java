@@ -247,61 +247,6 @@ public class DtoMapper {
                 Optional.of(location));
     }
 
-    public static Datastream toDatastream(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource, ICriterion filter) {
-        if (resource == null) {
-            throw new NotFoundException();
-        }
-
-        final ProviderSnapshot provider = resource.getService().getProvider();
-        final Map<String, Object> metadata = resource.getMetadata();
-
-        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(), resource.getName());
-
-        String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
-        String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-
-        UnitOfMeasurement unit = new UnitOfMeasurement(Objects.toString(metadata.get(SENSORTHINGS_UNIT_NAME), null),
-                Objects.toString(metadata.get("unit"), null),
-                Objects.toString(metadata.get(SENSORTHINGS_UNIT_DEFINITION), null));
-
-        Polygon observedArea = getObservedArea(getLocation(provider, mapper, resource, false).getValue());
-
-        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})").resolveTemplate("id", id)
-                .build().toString();
-        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build().toString();
-        String observedPropertyLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("ObservedProperty").build()
-                .toString();
-        String sensorLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Sensor").build().toString();
-        String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
-
-        Datastream datastream = new Datastream(selfLink, id, name, description,
-                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
-                metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
-        if (expansions.shouldExpand("Observations", datastream)) {
-            expansions.addExpansion("Observations", datastream,
-                    RootResourceAccessImpl.getObservationList(userSession, application, mapper, uriInfo,
-                            expansions.getExpansionSettings("Observations"), resource, filter, 25));
-        }
-
-        if (expansions.shouldExpand("ObservedProperty", datastream)) {
-            expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper,
-                    uriInfo, expansions.getExpansionSettings("ObservedProperty"), filter, resource));
-        }
-
-        if (expansions.shouldExpand("Sensor", datastream)) {
-            expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Sensor"), filter, resource));
-        }
-
-        if (expansions.shouldExpand("Thing", datastream)) {
-            expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), filter, provider));
-        }
-
-        return datastream;
-    }
-
     public static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ResourceSnapshot resource) {
         if (resource == null) {
@@ -595,21 +540,21 @@ public class DtoMapper {
         if (resource == null) {
             throw new NotFoundException();
         }
-    
+
         final ProviderSnapshot provider = resource.getService().getProvider();
         final Map<String, Object> metadata = resource.getMetadata();
-    
+
         String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(), resource.getName());
-    
+
         String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
         String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
-    
+
         UnitOfMeasurement unit = new UnitOfMeasurement(Objects.toString(metadata.get(SENSORTHINGS_UNIT_NAME), null),
                 Objects.toString(metadata.get("unit"), null),
                 Objects.toString(metadata.get(SENSORTHINGS_UNIT_DEFINITION), null));
-    
+
         Polygon observedArea = getObservedArea(getLocation(provider, mapper, resource, false).getValue());
-    
+
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Datastreams({id})").resolveTemplate("id", id)
                 .build().toString();
         String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build().toString();
@@ -617,7 +562,7 @@ public class DtoMapper {
                 .toString();
         String sensorLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Sensor").build().toString();
         String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
-    
+
         Datastream datastream = new Datastream(selfLink, id, name, description,
                 "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
                 metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
@@ -626,22 +571,22 @@ public class DtoMapper {
                     RootResourceAccessImpl.getObservationList(userSession, application, mapper, uriInfo,
                             expansions.getExpansionSettings("Observations"), resource, filter, 25));
         }
-    
+
         if (expansions.shouldExpand("ObservedProperty", datastream)) {
             expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper,
                     uriInfo, expansions.getExpansionSettings("ObservedProperty"), filter, resource));
         }
-    
+
         if (expansions.shouldExpand("Sensor", datastream)) {
             expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Sensor"), filter, resource));
         }
-    
+
         if (expansions.shouldExpand("Thing", datastream)) {
             expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Thing"), filter, provider));
         }
-    
+
         return datastream;
     }
 

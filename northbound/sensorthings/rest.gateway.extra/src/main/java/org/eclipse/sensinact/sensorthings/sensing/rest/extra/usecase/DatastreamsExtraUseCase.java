@@ -66,7 +66,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         }
         String id = (String) datastream.thing().id();
 
-        return List.of(DtoMapper.toDatastreamUpdate(id, datastream));
+        return DtoMapper.toDatastreamUpdate(id, datastream);
 
     }
 

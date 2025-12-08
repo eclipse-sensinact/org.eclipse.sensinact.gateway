@@ -2,7 +2,7 @@ package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
 import static org.eclipse.sensinact.core.annotation.dto.MapAction.USE_KEYS_AS_FIELDS;
-import static org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage.Literals.SENSOR_THINGS_DEVICE;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 
 import java.util.Map;
 
@@ -13,7 +13,6 @@ import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
 @Service("admin")
@@ -24,17 +23,22 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
         @Service("thing") @Resource("id") @Metadata(onMap = {
                 USE_KEYS_AS_FIELDS }) Map<String, Object> properties)
         implements SensorThingsUpdate{
+
     public ThingUpdate {
         if (model == null) {
-            model = SENSOR_THINGS_DEVICE;
+            model = SENSOR_THING_DEVICE;
         }
-        if (model != SENSOR_THINGS_DEVICE) {
-            throw new IllegalArgumentException("The model for the provider must be " + SENSOR_THINGS_DEVICE.getName());
+        if (model != SENSOR_THING_DEVICE) {
+            throw new IllegalArgumentException("The model for the provider must be " + SENSOR_THING_DEVICE.getName());
+        }
+        if (properties == null) {
+            properties = Map.of();
         }
     }
 
-    public ThingUpdate(String providerId, String friendlyName, String description, GeoJsonObject location,
-            Object thingId, Map<String, Object> properties) {
-        this(SENSOR_THINGS_DEVICE, providerId, friendlyName, description, thingId, properties);
+    public ThingUpdate(String providerId, String friendlyName, String description, Object thingId,
+            Map<String, Object> properties) {
+        this(SENSOR_THING_DEVICE, providerId, friendlyName, description, thingId, properties);
     }
+
 }

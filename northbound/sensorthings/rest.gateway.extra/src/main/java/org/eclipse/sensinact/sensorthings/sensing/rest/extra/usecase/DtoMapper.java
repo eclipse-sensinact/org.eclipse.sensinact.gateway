@@ -3,6 +3,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import static java.util.stream.Collectors.toMap;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,9 @@ import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.GeometryCollection;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedFeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
@@ -32,6 +35,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
 
@@ -104,21 +108,6 @@ public class DtoMapper {
         return String.valueOf(object).replaceAll("[^0-9a-zA-Z\\.\\-_]", "_");
     }
 
-    public static DatastreamUpdate toObservationUpdate(String providerId, String idDatastream,
-            ExpandedObservation obs) {
-        String serviceName = idDatastream;
-
-        Object observation;
-        Map<String, Object> observationParameters;
-
-        observation = getObservationId(obs);
-        Instant timestamp = obs.phenomenonTime();
-        observationParameters = getObservationParameters(obs);
-
-        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, observation, timestamp,
-                observationParameters, null, null, null, null, null, null);
-    }
-
     private static Map<String, Object> getObservationParameters(ExpandedObservation obs) {
         Map<String, Object> observationParameters;
         observationParameters = new HashMap<>();
@@ -135,18 +124,6 @@ public class DtoMapper {
         Object observation;
         observation = sanitizeId(obs.result());
         return observation;
-    }
-
-    public static DatastreamUpdate toObservedPropertyUpdate(String providerId, String idDatastream, String idSensor,
-            ExpandedObservedProperty obs) {
-        String serviceName = idDatastream;
-        // TODO check if sensor is the correct one
-        Map<String, Object> observedPropertyMetadata;
-        String observedProperty = getObservedPropertyId(obs);
-
-        observedPropertyMetadata = getObservedPropertyMetadata(obs);
-        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
-                null, null, observedProperty, observedPropertyMetadata);
     }
 
     private static Map<String, Object> getObservedPropertyMetadata(ExpandedObservedProperty obs) {
@@ -167,17 +144,6 @@ public class DtoMapper {
         return observedProperty;
     }
 
-    public static DatastreamUpdate toSensorUpdate(String providerId, String idDatastream, ExpandedSensor dsSensor) {
-        String serviceName = idDatastream;
-        Map<String, Object> sensorMetadata;
-
-        String sensor = getSensorId(dsSensor);
-        sensorMetadata = getSensorMetadata(dsSensor);
-        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
-                sensor, sensorMetadata, null, null);
-
-    }
-
     private static Map<String, Object> getSensorMetadata(ExpandedSensor dsSensor) {
         Map<String, Object> sensorMetadata;
         sensorMetadata = new HashMap<>();
@@ -196,59 +162,48 @@ public class DtoMapper {
         return sensor;
     }
 
-    public static DatastreamUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds) {
-        String serviceName = sanitizeId(ds.name() == null ? ds.id() : ds.name());
-        Instant timestamp = ds.phenomenonTime() == null ? null : ds.phenomenonTime().start();
+    public static SensorThingsUpdate toObservsationUpdate(String providerId, String datastreamId,
+            ExpandedObservation observation) {
+        return null;// TODO
+    }
 
-        Object observation;
-        Map<String, Object> observationParameters;
-        if (ds.observations() == null || ds.observations().isEmpty()) {
-            observation = Map.of();
-            observationParameters = Map.of();
-        } else {
-            ExpandedObservation o = ds.observations().get(0);
-            observation = getObservationId(o);
-            timestamp = o.phenomenonTime();
-            observationParameters = getObservationParameters(o);
-        }
+    public static SensorThingsUpdate toObservedPropertyUpdate(String providerId, String datastreamId, String idSensor,
+            ExpandedObservedProperty observedProperty) {
+        return null; // TODO
+    }
 
-        String unit;
-        Map<String, Object> unitMetadata;
-        if (ds.unitOfMeasurement() == null) {
-            unit = null;
-            unitMetadata = null;
-        } else {
-            unit = getUnitId(ds);
-            unitMetadata = getUnitMetadata(ds);
-        }
+    public static SensorThingsUpdate toSensorUpdate(String providerId, String datastreamId, ExpandedSensor sensor) {
+        return null; // TODO
+    }
 
-        String sensor;
-        Map<String, Object> sensorMetadata;
-        if (ds.sensor() == null) {
-            sensor = null;
-            sensorMetadata = Map.of();
-        } else {
-            ExpandedSensor dsSensor = ds.sensor();
-            sensor = getSensorId(dsSensor);
-            sensorMetadata = getSensorMetadata(dsSensor);
+    public static SensorThingsUpdate toFeatureOfInterestUpdate(String providerId, String datastreamId,
+            ExpandedFeatureOfInterest featureOfInterest) {
+        return null; // TODO
+    }
 
-        }
+    public static SensorThingsUpdate toUnitOfMeasureUpdate(String providerId, String datastreamId,
+            UnitOfMeasurement unitOfMeasure) {
+        return null; // TODO
+    }
 
-        String observedProperty;
-        Map<String, Object> observedPropertyMetadata;
-        if (ds.observedProperty() == null) {
-            observedProperty = null;
-            observedPropertyMetadata = Map.of();
-        } else {
-            ExpandedObservedProperty dsOp = ds.observedProperty();
-            observedProperty = getObservedPropertyId(dsOp);
+    public static SensorThingsUpdate toLocationUpdate(String providerId, ExpandedLocation location) {
+        String idLocation = sanitizeId(location.id() == null ? location.name(): location.id());
+        return new LocationUpdate(providerId, idLocation, idLocation,location.name(), location.description(),
+                location.encodingType(), location.location());
+    }
 
-            observedPropertyMetadata = getObservedPropertyMetadata(dsOp);
-
-        }
-        return new DatastreamUpdate(providerId, serviceName, ds.name(), ds.name(), ds.description(), observation,
-                timestamp, observationParameters, unit, unitMetadata, sensor, sensorMetadata, observedProperty,
-                observedPropertyMetadata);
+    public static List<SensorThingsUpdate> toDatastreamUpdate(String providerId, ExpandedDataStream ds) {
+        String serviceName = sanitizeId(ds.id() != null ? ds.id() : ds.name());
+        String dsId = sanitizeId(ds.id() != null ? ds.id() : ds.name());
+        String sensorId = sanitizeId(ds.sensor().id() != null ? ds.sensor().id() : ds.sensor().name());
+        List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
+        listUpdate.add(new DatastreamUpdate(providerId, serviceName, dsId, ds.name(), ds.description(), ds.properties(),
+                ds.observations().get(0).phenomenonTime()));
+        listUpdate.add(toSensorUpdate(providerId, dsId, ds.sensor()));
+        listUpdate.add(toObservedPropertyUpdate(providerId, dsId, sensorId, ds.observedProperty()));
+        listUpdate.addAll(ds.observations().stream().map(o -> toObservsationUpdate(providerId, dsId, o)).toList());
+        listUpdate.add(toUnitOfMeasureUpdate(providerId, dsId, ds.unitOfMeasurement()));
+        return listUpdate;
     }
 
     private static Map<String, Object> getUnitMetadata(ExpandedDataStream ds) {
@@ -321,39 +276,42 @@ public class DtoMapper {
         return o == null || o.isEmpty() ? null : String.valueOf(o.get());
     }
 
-    public static Stream<SensorThingsUpdate> toUpdates(ExpandedThing thing) {
+    public static List<SensorThingsUpdate> toUpdates(ExpandedThing thing) {
         String providerId = sanitizeId(thing.name() == null ? thing.id() : thing.name());
         Object id = thing.id() == null ? providerId : thing.id();
-        GeoJsonObject location = null;
-        if (thing.locations() != null) {
-            location = aggregate(thing.locations());
-        }
+        List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
         Map<String, Object> thingProperties = null;
+      
+
+        ThingUpdate provider = new ThingUpdate(providerId, thing.name(), thing.description(), id, thingProperties);
+
+        listUpdate.add(provider);
+
         if (thing.properties() != null) {
             thingProperties = thing.properties().entrySet().stream()
                     .collect(toMap(e -> "sensorthings.thing." + e.getKey(), Entry::getValue));
         }
-        ThingUpdate provider = new ThingUpdate(providerId, thing.name(), thing.description(), location, id,
-                thingProperties);
-        Stream<SensorThingsUpdate> thingUpdate = Stream.of(provider);
-
-        if (thing.datastreams() != null) {
-            Stream<SensorThingsUpdate> datastreamUpdate = thing.datastreams().stream()
-                    .map(d -> toDatastreamUpdate(providerId, d));
-            return Stream.concat(thingUpdate, datastreamUpdate);
+        if (thing.locations() != null) {
+            listUpdate.addAll(thing.locations().stream().map(l -> toLocationUpdate(providerId, l)).toList());
         }
-        return thingUpdate;
+        if (thing.datastreams() != null) {
 
+            listUpdate.addAll(thing.datastreams().stream().map(d -> toDatastreamUpdate(providerId, d))
+                    .flatMap(List::stream).toList());
+
+        }
+        return listUpdate;
     }
 
-    public static Stream<SensorThingsUpdate> toUpdates(String providerId, String thingId,
-            List<ExpandedLocation> locations, List<ExpandedDataStream> datastreams) {
-        GeoJsonObject location = aggregate(locations);
+    public static List<SensorThingsUpdate> toThingUpdates(ExpandedLocation location) {
+        List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
 
-        ThingUpdate provider = new ThingUpdate(providerId, null, null, location, thingId, null);
-        Stream<SensorThingsUpdate> thingUpdate = Stream.of(provider);
-        Stream<SensorThingsUpdate> datastreamUpdate = datastreams.stream().map(d -> toDatastreamUpdate(providerId, d));
-        return Stream.concat(thingUpdate, datastreamUpdate);
+        listUpdate.addAll(location.things().stream().map(thing -> new ThingUpdate((String) thing.id(), // providerId
+                null, null, thing.id(), null)).toList());
+
+        listUpdate.addAll(
+                location.things().stream().map(thing -> toLocationUpdate((String) thing.id(), location)).toList());
+        return listUpdate;
     }
 
     public static String getProperty(GeoJsonObject location, String propName) {
