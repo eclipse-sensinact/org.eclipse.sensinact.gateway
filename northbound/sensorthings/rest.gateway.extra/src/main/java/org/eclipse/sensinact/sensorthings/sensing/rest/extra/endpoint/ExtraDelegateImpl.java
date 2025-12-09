@@ -31,10 +31,10 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     @SuppressWarnings("unchecked")
     public <D extends Id, S extends Snapshot> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            D dto, String parnetId) {
+            D dto, String parentId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
 
-        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, dto);
+        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.create(request);
         return result.success() ? result.snapshot() : null;
 

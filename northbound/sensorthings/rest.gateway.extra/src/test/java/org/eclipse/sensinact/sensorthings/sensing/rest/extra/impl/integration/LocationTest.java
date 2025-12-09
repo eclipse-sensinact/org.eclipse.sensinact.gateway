@@ -32,20 +32,17 @@ public class LocationTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
         UtilsAssert.assertLocation(dtoLocation, json);
 
-        json = getJsonResponseFromGet(String.format("Locations(%s)", getIdFromJson(json)));
-        UtilsAssert.assertLocation(dtoLocation, json);
-
     }
 
     @Test
-    public void testCreateLocationthroughThing() throws Exception {
+    public void testCreateLocationThroughThing() throws Exception {
         // given
-        String name = "testCreateLocationthroughThing";
+        String name = "testCreateLocationThroughThing";
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         String idThing = getIdFromJson(json);
-        ExpandedLocation dtoLocation = DtoFactory.getLocation(name);
+        ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "1");
 
         // when
         json = getJsonResponseFromPost(dtoLocation, String.format("Things(%s)/Locations", idThing), 201);

@@ -21,8 +21,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toLocation;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +28,7 @@ import java.util.Optional;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -288,10 +287,11 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response createLocation(String id, ExpandedLocation location) {
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, id);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
-        Location createDto = toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                (ProviderSnapshot) snapshot);
+
+        Location createDto = ModelToDTO.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

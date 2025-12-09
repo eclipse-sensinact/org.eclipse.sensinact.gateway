@@ -136,8 +136,8 @@ public class DtoMapper {
             }
         }
         if (expansions.shouldExpand("Locations", thing)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(userSession,
-                    application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
+            ResultList<Location> list = new ResultList<>(null, null, List.of(toLocation(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", thing, list);
         }
 

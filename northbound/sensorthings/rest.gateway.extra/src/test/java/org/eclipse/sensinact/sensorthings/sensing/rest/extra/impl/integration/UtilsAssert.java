@@ -35,9 +35,9 @@ public class UtilsAssert {
     }
 
     public static void assertLocation(ExpandedLocation dtoLocation, JsonNode json, boolean expanded) {
-        assertEquals(dtoLocation.name(), json.get("name"));
-        assertEquals(dtoLocation.description(), json.get("description"));
-        assertEquals(dtoLocation.location(), json.get("location"));
+        assertEquals(dtoLocation.name(), json.get("name").asText());
+        assertEquals(dtoLocation.description(), json.get("description").asText());
+        assertEquals(dtoLocation.location().toJsonString(), json.get("location").toString());
     }
 
     public static void assertSensor(ExpandedSensor sensor, JsonNode json) {

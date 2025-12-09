@@ -30,8 +30,9 @@ public interface IExtraUseCase<M extends Id, S extends Snapshot> {
             this(session, mapper, uriInfo, id, null, null);
         }
 
-        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, M model) {
-            this(session, mapper, uriInfo, null, model, null);
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, M model,
+                String parentId) {
+            this(session, mapper, uriInfo, null, model, parentId);
         }
     }
 
