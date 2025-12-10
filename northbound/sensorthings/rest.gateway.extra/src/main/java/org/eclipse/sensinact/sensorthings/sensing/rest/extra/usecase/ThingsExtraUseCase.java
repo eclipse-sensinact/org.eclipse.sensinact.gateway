@@ -32,7 +32,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
-
         } catch (InvocationTargetException | InterruptedException e) {
             return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
 

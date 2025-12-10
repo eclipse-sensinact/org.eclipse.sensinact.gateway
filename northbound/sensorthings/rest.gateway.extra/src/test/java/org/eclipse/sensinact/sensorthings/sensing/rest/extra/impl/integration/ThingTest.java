@@ -1,7 +1,5 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
-import static org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration.AbstractIntegrationTest.mapper;
-
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class ThingTest extends AbstractIntegrationTest {
 
     // @formatter:off
-    /* 
+    /*
     POST /Things
 
     {
@@ -31,7 +29,7 @@ public class ThingTest extends AbstractIntegrationTest {
         "properties": {
             "manufacturer": "New Corp",
             "installationDate": "2025-11-25"
-        }, 
+        },
         "Locations": [
             { "@iot.id": "idLocation" }
         ]
@@ -66,7 +64,7 @@ public class ThingTest extends AbstractIntegrationTest {
     }
 
     // @formatter:off
-    /* 
+    /*
     POST /Things
 
     {
@@ -98,6 +96,7 @@ public class ThingTest extends AbstractIntegrationTest {
         HttpResponse<String> response = queryPost("/Datastreams", datastream);
         ExpandedDataStream createdDatastream = mapper.readValue(response.body(), ExpandedDataStream.class);
         List<ExpandedDataStream> idDatastream = List.of(DtoFactory.getIdDatastream(createdDatastream.id()));
+
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreams(name, "testThing existing Datastream ",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), idDatastream);
 
@@ -109,7 +108,7 @@ public class ThingTest extends AbstractIntegrationTest {
     }
 
     // @formatter:off
-    /* 
+    /*
      * e.g
     POST /Things
 
@@ -139,7 +138,7 @@ public class ThingTest extends AbstractIntegrationTest {
     }
 
     // @formatter:off
-    /* 
+    /*
      * e.g
     POST /Things
 
@@ -157,7 +156,7 @@ public class ThingTest extends AbstractIntegrationTest {
             ...
             },
             encodingType:""
-            
+
         ]
     }
     */
@@ -181,7 +180,7 @@ public class ThingTest extends AbstractIntegrationTest {
     }
 
     // @formatter:off
-    /* 
+    /*
      * e.g
     POST /Things
 
@@ -234,7 +233,7 @@ public class ThingTest extends AbstractIntegrationTest {
     }
 
     // @formatter:off
-    /* 
+    /*
      * e.g
     POST /Things
 
@@ -295,7 +294,7 @@ public class ThingTest extends AbstractIntegrationTest {
     }
 
     // @formatter:off
-    /* 
+    /*
      * e.g
     POST /Things
 
@@ -356,7 +355,7 @@ public class ThingTest extends AbstractIntegrationTest {
     }
 
  // @formatter:off
-    /* 
+    /*
      * e.g
     POST /Things
 
@@ -378,7 +377,7 @@ public class ThingTest extends AbstractIntegrationTest {
                 encodingType:""
             }
         ],
-       
+
     }
     */
     // @formatter:on

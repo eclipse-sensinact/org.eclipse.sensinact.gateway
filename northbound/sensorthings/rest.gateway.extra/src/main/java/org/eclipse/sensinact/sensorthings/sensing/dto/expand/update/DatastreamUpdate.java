@@ -16,14 +16,23 @@ import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
 public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
-        @Service String serviceName, @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorThingsId,
+        @Service String serviceName, @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorThingId,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String name,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
         @Timestamp Instant timestamp,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) SensorUpdate sensor,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) ObservedPropertyUpdate observedProperty,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) UnitOfMeasureUpdate unit,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String type) implements SensorThingsUpdate {
+        // sensor
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorDescription,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorEncodingType,
+        // observed property
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyId,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyDescription,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyDefinition,
+        // unit
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitSymbol,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitDefinition) implements SensorThingsUpdate {
 
     public DatastreamUpdate {
         if (model == null) {
@@ -42,10 +51,16 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
     }
 
     public DatastreamUpdate(String providerId, String serviceName, Object sensorThingsId, String name,
-            String description, Instant timestamp, SensorUpdate sensor, ObservedPropertyUpdate observedProperty,
-            UnitOfMeasureUpdate unit) {
+            String description, Instant timestamp, String sensorName, String sensorDescription,
+            String sensorEncodingType,
+            // observed property
+            String observedPropertyId, String observedPropertyName, String observedPropertyDescription,
+            String observedPropertyDefinition,
+            // unit
+            String unitName, String unitSymbol, String unitDefinition) {
         this(SENSOR_THING_DEVICE, DATA_STREAM_SERVICE, providerId, serviceName, sensorThingsId, name, description,
-                timestamp, sensor, observedProperty, unit, DATA_STREAM_SERVICE.getInstanceClass().getSimpleName());
+                timestamp, sensorName, sensorDescription, sensorEncodingType, observedPropertyId, observedPropertyName,
+                observedPropertyDescription, observedPropertyDefinition, unitName, unitSymbol, unitDefinition);
     }
 
 }

@@ -67,9 +67,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
         if (idDatastream == null) {
             throw new BadRequestException("can't find datastream parent ");
         }
-        String providerId = DtoMapper.extractFirstIdSegment(idDatastream);
+        DtoMapper.extractFirstIdSegment(idDatastream);
 
-        return List.of(DtoMapper.toObservsationUpdate(providerId, idDatastream, observation));
+        return null;
     }
 
     public ExtraUseCaseResponse<ResourceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {

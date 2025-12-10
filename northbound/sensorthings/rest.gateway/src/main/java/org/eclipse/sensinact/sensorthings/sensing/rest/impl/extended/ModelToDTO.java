@@ -1,8 +1,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended;
 
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION_SERVICE;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.DATA_STREAM_SERVICE;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +14,7 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -55,10 +55,14 @@ public class ModelToDTO {
         return provider.getServices().stream().filter(s -> name.equals(s.getName())).findFirst().get();
     }
 
+    public static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
+        return Optional.ofNullable(session.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
+    }
+
     public static Thing toThing(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         String id = provider.getName();
-        ;
+
         ServiceSnapshot serviceAdmin = getServiceSnapshot(provider, ADMIN);
         String name = Objects.requireNonNullElse(getResourceField(serviceAdmin, FRIENDLY_NAME, String.class),
                 provider.getName());
@@ -72,7 +76,8 @@ public class ModelToDTO {
         String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("HistoricalLocations").build()
                 .toString();
         String locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Locations").build().toString();
-
+        @SuppressWarnings("unchecked")
+        List<String> locationIds = getResourceField(serviceAdmin, "locationIds", List.class);
         Thing thing = new Thing(selfLink, id, name, description, null, datastreamsLink, historicalLocationsLink,
                 locationsLink);
 
@@ -90,8 +95,13 @@ public class ModelToDTO {
             }
         }
         if (expansions.shouldExpand("Locations", thing)) {
-            ResultList<Location> list = new ResultList<>(null, null, ModelToDTO.toLocations(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider));
+            List<Location> locations = locationIds.stream()
+                    .map(idLocation -> getProviderSnapshot(userSession, idLocation)).filter(p -> p.get() != null)
+                    .map(p -> toLocation(userSession, application, mapper, uriInfo, expansions, filter,
+                            p.get().getService(ADMIN)))
+                    .toList();
+
+            ResultList<Location> list = new ResultList<>(null, null, locations);
             expansions.addExpansion("Locations", thing, list);
         }
 
@@ -100,15 +110,13 @@ public class ModelToDTO {
 
     public static Datastream toDatastream(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
-        if (isServiceType(service, DATA_STREAM_SERVICE)) {
-            throw new NotFoundException();
-        }
 
         String providerName = service.getProvider().getName();
         String id = String.format("%s~%s", providerName, service.getName());
 
         String name = getResourceField(service, FRIENDLY_NAME, String.class);
         String description = getResourceField(service, DESCRIPTION, String.class);
+
         @SuppressWarnings("unchecked")
         Map<String, Object> metadata = getResourceField(service, "properties", Map.class);
         UnitOfMeasurement unit = toUnitOfMeasure(userSession, application, mapper, uriInfo, expansions, filter,
@@ -238,13 +246,6 @@ public class ModelToDTO {
         return new DefaultTimedValue<>(parsedLocation, time);
     }
 
-    public static List<Location> toLocations(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
-        return provider.getServices().stream().filter(s -> isServiceType(s, SENSOR_THING_LOCATION_SERVICE))
-                .map(s -> toLocation(userSession, application, mapper, uriInfo, expansions, filter, s)).toList();
-
-    }
-
     private static boolean isServiceType(ServiceSnapshot s, EClass clazz) {
         return getServiceType(s) != null ? getServiceType(s).equals(clazz.getInstanceClass().getSimpleName()) : false;
     }
@@ -259,9 +260,7 @@ public class ModelToDTO {
     public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
         // check service is container correct type
-        if (!isServiceType(service, SENSOR_THING_LOCATION_SERVICE)) {
-            return null;
-        }
+
         final TimedValue<GeoJsonObject> rcLocation = getLocation(service, mapper, false);
         final Instant time = rcLocation.getTimestamp();
         final GeoJsonObject object = rcLocation.getValue();
@@ -336,7 +335,7 @@ public class ModelToDTO {
         if (provider == null) {
             throw new NotFoundException();
         }
-        return provider.getServices().stream().filter(s -> isServiceType(s, DATA_STREAM_SERVICE))
+        return provider.getServices().stream()
                 .map(s -> toDatastream(userSession, application, mapper, uriInfo, expansions, filter, s)).toList();
 
     }

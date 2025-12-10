@@ -4,6 +4,7 @@ import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_I
 import static org.eclipse.sensinact.core.annotation.dto.MapAction.USE_KEYS_AS_FIELDS;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EClass;
@@ -21,7 +22,8 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
         @Service("thing") @Resource("id") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object thingId,
         @Service("thing") @Resource("id") @Metadata(onMap = {
-                USE_KEYS_AS_FIELDS }) Map<String, Object> properties)
+                USE_KEYS_AS_FIELDS }) Map<String, Object> properties,
+        @Service("thing") @Resource("locationIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> locationIds)
         implements SensorThingsUpdate{
 
     public ThingUpdate {
@@ -34,11 +36,14 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
         if (properties == null) {
             properties = Map.of();
         }
+        if (locationIds == null) {
+            locationIds = List.of();
+        }
     }
 
     public ThingUpdate(String providerId, String friendlyName, String description, Object thingId,
-            Map<String, Object> properties) {
-        this(SENSOR_THING_DEVICE, providerId, friendlyName, description, thingId, properties);
+            Map<String, Object> properties, List<String> locationIds) {
+        this(SENSOR_THING_DEVICE, providerId, friendlyName, description, thingId, properties, locationIds);
     }
 
 }

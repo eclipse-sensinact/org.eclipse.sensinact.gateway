@@ -19,14 +19,15 @@ public class UtilsAssert {
         assertDatastream(expectedLocation, datastream, false);
     }
 
-    public static void assertDatastream(ExpandedDataStream expectedLocation, JsonNode datastream, boolean expanded) {
-        assertEquals(expectedLocation.name(), datastream.get("name"), "");
-        assertEquals(expectedLocation.description(), datastream.get("description"), "");
-
-        if (expectedLocation.observedProperty() != null) {
-            JsonNode observedPropertyNode = datastream.get("observedProperty");
-            assertNotNull(observedPropertyNode, "Observations array must be present");
-            assertEquals(expectedLocation.observedProperty(), observedPropertyNode, "");
+    public static void assertDatastream(ExpandedDataStream expectedDatastream, JsonNode datastream, boolean expanded) {
+        assertEquals(expectedDatastream.name(), datastream.get("name").asText(), "");
+        assertEquals(expectedDatastream.description(), datastream.get("description").asText(), "");
+        if (expanded) {
+            if (expectedDatastream.observedProperty() != null) {
+                JsonNode observedPropertyNode = datastream.get("observedProperty");
+                assertNotNull(observedPropertyNode, "Observations array must be present");
+                assertEquals(expectedDatastream.observedProperty(), observedPropertyNode, "");
+            }
         }
     }
 

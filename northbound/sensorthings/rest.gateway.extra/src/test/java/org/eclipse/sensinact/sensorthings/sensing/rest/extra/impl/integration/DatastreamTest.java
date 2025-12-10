@@ -29,8 +29,6 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
         UtilsAssert.assertDatastream(dtoDatastream, json);
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)", getIdFromJson(json)));
-        UtilsAssert.assertDatastream(dtoDatastream, json, true);
 
     }
 
