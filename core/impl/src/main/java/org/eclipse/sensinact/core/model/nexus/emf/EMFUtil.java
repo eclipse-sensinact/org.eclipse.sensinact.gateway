@@ -380,22 +380,22 @@ public class EMFUtil {
         return convertToTargetType(targetType.getInstanceClass(), o);
     }
 
-    public static Object convertToTargetType(Class<?> targetType, Object o) {
+    public static Object convertToTargetType(Type targetType, Object o) {
         return convertToTargetType((EDataType) typeMap.get(targetType), targetType, o);
     }
 
-    private static Object convertToTargetType(EDataType targetEType, Class<?> targetType, Object o) {
+    private static Object convertToTargetType(EDataType targetEType, Type targetType, Object o) {
         Object converted;
-        if (o == null) {
+        if (o == null || (targetType instanceof Class && ((Class<?>)targetType).isInstance(o))) {
             converted = o;
         } else {
             // Fast path this as we use GeoJSON a lot and the converter isn't able to handle
             // sealed types
-            if (GeoJsonObject.class.isAssignableFrom(targetType)) {
+            if (targetType instanceof Class && GeoJsonObject.class.isAssignableFrom((Class<?>)targetType)) {
                 // Go via Jackson to use the JSON mapping
                 try {
-                    converted = o instanceof String ? mapper.readValue((String) o, targetType)
-                            : mapper.convertValue(o, targetType);
+                    converted = o instanceof String ? mapper.readValue((String) o, (Class<?>) targetType)
+                            : mapper.convertValue(o, (Class<?>) targetType);
                 } catch (JsonProcessingException e) {
                     LOG.error("Unable to process location data {} into target type {}", o, targetType);
                     throw new ConversionException("Unable to convert location data", e);
@@ -481,12 +481,15 @@ public class EMFUtil {
 
     }
 
-    public static EOperation createAction(EClass serviceEClass, String name, Class<?> type, List<EParameter> params) {
+    public static EOperation createAction(EClass serviceEClass, String name, Class<?> type, List<EParameter> params,
+            int lowerBound, int upperBound) {
         ActionMetadata metaData = ProviderFactory.eINSTANCE.createActionMetadata();
         EOperation operation = EcoreFactory.eINSTANCE.createEOperation();
         operation.setName(name);
         operation.setEType(convertClass(type, serviceEClass.getEPackage()));
         operation.getEParameters().addAll(params);
+        operation.setLowerBound(lowerBound);
+        operation.setUpperBound(upperBound);
         serviceEClass.getEOperations().add(operation);
         addMetaDataAnnnotation(operation, metaData);
         return operation;

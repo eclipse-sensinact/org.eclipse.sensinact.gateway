@@ -17,18 +17,30 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
+import org.eclipse.sensinact.core.annotation.verb.VerbAnnotationConstants.Marker;
+import org.osgi.util.promise.Promise;
 
 /**
  * Used to define a GET method for "pull based" querying of values
- *
+ * <p>
  * Can be repeated if a single method can return results for more than one
  * service/resource.
- *
- * @see UriParam
+ * <p>
+ * A GET method may return any of:
+ * <ul>
+ *   <li>A TimedValue - providing a data value and timestamp</li>
+ *   <li>An Object - providing a data value with the timestamp {@link Instant#now}</li>
+ *   <li>An Promise - containing a TimedValue or Object</li>
+ * </ul>
+ * <p>
+ * Note that get methods may receive parameters annotated with {@link UriParam} which
+ * will provide information about the resource being queried. Other parameters
+ * must be annotated with {@link GetParam}.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
@@ -50,7 +62,7 @@ public @interface GET {
      *
      * @return
      */
-    String modelPackageUri() default AnnotationConstants.NOT_SET;;
+    String modelPackageUri() default AnnotationConstants.NOT_SET;
 
     /**
      * The model that this GET method applies to, can be omitted if {@link #value()}
@@ -58,7 +70,7 @@ public @interface GET {
      *
      * @return
      */
-    String model() default AnnotationConstants.NOT_SET;;
+    String model() default AnnotationConstants.NOT_SET;
 
     /**
      * The service that this GET method applies to, can be omitted if
@@ -67,22 +79,58 @@ public @interface GET {
      *
      * @return
      */
-    String service() default AnnotationConstants.NOT_SET;;
+    String service() default AnnotationConstants.NOT_SET;
 
     /**
      * The resource that this GET method applies to
      *
      * @return
      */
-    String resource() default AnnotationConstants.NOT_SET;;
+    String resource() default AnnotationConstants.NOT_SET;
 
     /**
      * The type of the resource data. If not set then the return type of the method
-     * is used.
+     * is used to determine the type of the resource. First the return
+     * type is unwrapped from any {@link Promise} and TimedValue types.
+     *
+     * <ul>
+     *   <li>If the return is an array type then the component type of the
+     *   array will be used</li>
+     *   <li>If the return type is a <code>List</code>, <code>Set</code> or
+     *   <code>Collection</code> and has a bound type parameter then the generic
+     *   type parameter will be used.</li>
+     *   <li>If no suitable type information is available (for example the
+     *   method returns <code>List<?></code> or <code>Promise<TimedValue<?>></code>
+     *   <code>Object</code> will be used</code>
+     *   <li>In all other cases the return type will be used</li>
      *
      * @return
      */
-    Class<?> type() default Object.class;
+    Class<?> type() default Marker.class;
+
+    /**
+     * The lower bound for the resource data. If not set then the resource may be
+     * empty.
+     *
+     * @return
+     */
+    int lowerBound() default 0;
+
+    /**
+     * The upper bound for the resource data. If not set then the resource bounds
+     * will be set based on the type of the annotated method. Specifically:
+     *
+     * <ul>
+     *   <li> An array type = -1</li>
+     *   <li> <code>List</code>, <code>Set</code>, <code>Collection</code> = -1</li>
+     *   <li> All other types = 1</li>
+     * <ul>
+     *
+     * A bound of <code>-1</code> means no upper limit. A bound of <code>1</code> means
+     * that the resource value is unary.
+     * @return
+     */
+    int upperBound() default VerbAnnotationConstants.NO_UPPER_BOUND_SET;
 
     /**
      * Duration of the value cache. If the value is requested using a CACHED get and

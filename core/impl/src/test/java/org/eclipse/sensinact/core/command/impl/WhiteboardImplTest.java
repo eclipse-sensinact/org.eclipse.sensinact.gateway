@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.core.command.impl;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -27,6 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
@@ -171,6 +174,25 @@ public class WhiteboardImplTest {
         }
     }
 
+    <T> TimedValue<List<T>> getMultiValue(String provider, String service, String resource, Class<T> type)
+            throws Throwable {
+        return getMultiValue(provider, service, resource, type, GetLevel.NORMAL);
+    }
+
+    <T> TimedValue<List<T>> getMultiValue(String provider, String service, String resource, Class<T> type, GetLevel getLevel)
+            throws Throwable {
+        try {
+            return thread.execute(new ResourceCommand<TimedValue<List<T>>>(provider, service, resource) {
+                @Override
+                protected Promise<TimedValue<List<T>>> call(SensinactResource resource, PromiseFactory pf) {
+                    return resource.getMultiValue(type, getLevel);
+                }
+            }).getValue();
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
     Object setValue(String provider, String svc, String rc, Function<SensinactResource, Promise<?>> setter)
             throws Throwable {
         try {
@@ -241,6 +263,28 @@ public class WhiteboardImplTest {
                 return resource;
             default:
                 return "x";
+            }
+        }
+        @ACT(model = "foo", service = "multi-actions", resource = "d")
+        public String[] doMultiAction2(@UriParam(UriSegment.RESOURCE) String resource) {
+            switch (resource) {
+            case "d":
+                return new String[] {"a", "b", "c", "d"};
+            default:
+                return new String[]{"x"};
+            }
+        }
+
+        @ACT(model = "foo", service = "multi-actions", resource = "e")
+        @ACT(model = "foo", service = "multi-actions", resource = "f", type = CharSequence.class, lowerBound = 1, upperBound = 6)
+        public List<String> doMultiAction3(@UriParam(UriSegment.RESOURCE) String resource) {
+            switch (resource) {
+            case "e":
+                return List.of("a", "b", "c", "d", "e");
+            case "f":
+                return List.of("a", "b", "c", "d", "e", "f");
+            default:
+                return List.of("x");
             }
         }
     }
@@ -316,16 +360,21 @@ public class WhiteboardImplTest {
             svc = "multi-actions";
             rc = "a";
             runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(0, r.getLowerBound());
+                assertEquals(1, r.getUpperBound());
                 assertEquals(List.of(), r.getArguments());
+                assertEquals(String.class, r.getType());
                 return null;
             });
-
             result = act(PROVIDER_A, svc, rc, Map.of());
             assertEquals("a", result);
 
             rc = "b";
             runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(0, r.getLowerBound());
+                assertEquals(1, r.getUpperBound());
                 assertEquals(List.of(), r.getArguments());
+                assertEquals(String.class, r.getType());
                 return null;
             });
             result = act(PROVIDER_A, svc, rc, Map.of());
@@ -333,11 +382,47 @@ public class WhiteboardImplTest {
 
             rc = "c";
             runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(0, r.getLowerBound());
+                assertEquals(1, r.getUpperBound());
                 assertEquals(List.of(), r.getArguments());
+                assertEquals(String.class, r.getType());
                 return null;
             });
             result = act(PROVIDER_A, svc, rc, Map.of());
             assertEquals("c", result);
+
+            rc = "d";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(0, r.getLowerBound());
+                assertEquals(-1, r.getUpperBound());
+                assertEquals(List.of(), r.getArguments());
+                assertEquals(String.class, r.getType());
+                return null;
+            });
+            result = act(PROVIDER_A, svc, rc, Map.of());
+            assertArrayEquals(new String[] {"a", "b", "c", "d"}, (Object[]) result);
+
+            rc = "e";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(0, r.getLowerBound());
+                assertEquals(-1, r.getUpperBound());
+                assertEquals(List.of(), r.getArguments());
+                assertEquals(String.class, r.getType());
+                return null;
+            });
+            result = act(PROVIDER_A, svc, rc, Map.of());
+            assertEquals(List.of("a", "b", "c", "d", "e"), result);
+
+            rc = "f";
+            runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                assertEquals(1, r.getLowerBound());
+                assertEquals(6, r.getUpperBound());
+                assertEquals(List.of(), r.getArguments());
+                assertEquals(CharSequence.class, r.getType());
+                return null;
+            });
+            result = act(PROVIDER_A, svc, rc, Map.of());
+            assertEquals(List.of("a", "b", "c", "d", "e", "f"), result);
         }
     }
 
@@ -362,6 +447,47 @@ public class WhiteboardImplTest {
                 }
             default:
                 return "x";
+            }
+        }
+
+        @GET(model = "bar", service = "pull", resource = "c", onNull = NullAction.UPDATE_IF_PRESENT)
+        public String[] doMultiResource2(@UriParam(UriSegment.RESOURCE) String resource,
+                @GetParam(GetSegment.RESULT_TYPE) Class<?> type,
+                @GetParam(GetSegment.CACHED_VALUE) TimedValue<?> cached) {
+            switch (resource) {
+            case "c":
+                @SuppressWarnings("unchecked") List<String> old = (List<String>) cached.getValue();
+                if (old != null && !old.isEmpty()) {
+                    String[] newArray = new String[old.size() + 1];
+                    newArray[0] = "new c";
+                    for(int i = 0; i < old.size(); i++) {
+                        newArray[i+1] = old.get(i);
+                    }
+                    return newArray;
+                } else {
+                    return new String[]{"c"};
+                }
+            default:
+                return new String[] {"x"};
+            }
+        }
+
+        @GET(model = "bar", service = "pull", resource = "d", onNull = NullAction.UPDATE_IF_PRESENT)
+        @GET(model = "bar", service = "pull", resource = "e", onNull = NullAction.UPDATE_IF_PRESENT, lowerBound = 1, upperBound = 6, type = CharSequence.class)
+        public List<String> doMultiResource3(@UriParam(UriSegment.RESOURCE) String resource,
+                @GetParam(GetSegment.RESULT_TYPE) Class<?> type,
+                @GetParam(GetSegment.CACHED_VALUE) TimedValue<?> cached) {
+            switch (resource) {
+            case "d":
+            case "e":
+                @SuppressWarnings("unchecked") List<String> old = (List<String>) cached.getValue();
+                if (old != null && !old.isEmpty()) {
+                    return Stream.concat(Stream.of("new " + resource), old.stream()).toList();
+                } else {
+                    return List.of(resource);
+                }
+            default:
+                return List.of("x");
             }
         }
     }
@@ -394,6 +520,9 @@ public class WhiteboardImplTest {
 
             runRcCommand(PROVIDER_A, svc, "a", (r) -> {
                 assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                assertEquals(0, r.getLowerBound());
+                assertEquals(1, r.getUpperBound());
+                assertEquals(String.class, r.getType());
                 return null;
             });
 
@@ -416,6 +545,9 @@ public class WhiteboardImplTest {
             // Now try for resource b
             runRcCommand(PROVIDER_A, svc, "b", (r) -> {
                 assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                assertEquals(0, r.getLowerBound());
+                assertEquals(1, r.getUpperBound());
+                assertEquals(String.class, r.getType());
                 return null;
             });
 
@@ -445,6 +577,51 @@ public class WhiteboardImplTest {
             secondTimestamp = result.getTimestamp();
             assertTrue(secondTimestamp.isAfter(initialTimestamp),
                     secondTimestamp + " should be after " + initialTimestamp);
+
+            // Now try for resource c
+            runRcCommand(PROVIDER_A, svc, "c", (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                assertEquals(0, r.getLowerBound());
+                assertEquals(-1, r.getUpperBound());
+                assertEquals(String.class, r.getType());
+                return null;
+            });
+            TimedValue<List<String>> multiResult = getMultiValue(PROVIDER_A, svc, "c", String.class, GetLevel.NORMAL);
+            assertEquals(List.of("c"), multiResult.getValue());
+            assertNotNull(multiResult.getTimestamp(), "No timestamp returned");
+            multiResult = getMultiValue(PROVIDER_A, svc, "c", String.class, GetLevel.STRONG);
+            assertEquals(List.of("new c", "c"), multiResult.getValue());
+            assertNotNull(multiResult.getTimestamp(), "No timestamp returned");
+
+            // Now try for resource d
+            runRcCommand(PROVIDER_A, svc, "d", (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                assertEquals(0, r.getLowerBound());
+                assertEquals(-1, r.getUpperBound());
+                assertEquals(String.class, r.getType());
+                return null;
+            });
+            multiResult = getMultiValue(PROVIDER_A, svc, "d", String.class, GetLevel.NORMAL);
+            assertEquals(List.of("d"), multiResult.getValue());
+            assertNotNull(multiResult.getTimestamp(), "No timestamp returned");
+            multiResult = getMultiValue(PROVIDER_A, svc, "d", String.class, GetLevel.STRONG);
+            assertEquals(List.of("new d", "d"), multiResult.getValue());
+            assertNotNull(multiResult.getTimestamp(), "No timestamp returned");
+
+            // Now try for resource e
+            runRcCommand(PROVIDER_A, svc, "e", (r) -> {
+                assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                assertEquals(1, r.getLowerBound());
+                assertEquals(6, r.getUpperBound());
+                assertEquals(CharSequence.class, r.getType());
+                return null;
+            });
+            multiResult = getMultiValue(PROVIDER_A, svc, "e", String.class, GetLevel.NORMAL);
+            assertEquals(List.of("e"), multiResult.getValue());
+            assertNotNull(multiResult.getTimestamp(), "No timestamp returned");
+            multiResult = getMultiValue(PROVIDER_A, svc, "e", String.class, GetLevel.STRONG);
+            assertEquals(List.of("new e", "e"), multiResult.getValue());
+            assertNotNull(multiResult.getTimestamp(), "No timestamp returned");
 
         }
 
@@ -547,7 +724,7 @@ public class WhiteboardImplTest {
     }
 
     public static class BasePushResourceTest {
-        @SET(model = "bar", service = "push", resource = "a", type = String.class)
+        @SET(model = "bar", service = "push", resource = "a")
         @SET(model = "bar", service = "push", resource = "b", type = String.class)
         public TimedValue<String> doMultiResource(@UriParam(UriSegment.RESOURCE) String resource,
                 @SetParam(SetSegment.RESULT_TYPE) Class<?> type,
@@ -571,6 +748,52 @@ public class WhiteboardImplTest {
 
             return new DefaultTimedValue<String>(value, newValue.getTimestamp());
         }
+
+        @SET(model = "bar", service = "push", resource = "c", type = String.class)
+        public TimedValue<String[]> doMultiResource2(@UriParam(UriSegment.RESOURCE) String resource,
+                @SetParam(SetSegment.RESULT_TYPE) Class<?> type,
+                @SetParam(SetSegment.CACHED_VALUE) TimedValue<String[]> cached,
+                @SetParam(SetSegment.NEW_VALUE) TimedValue<String[]> newValue) {
+
+            final String[] value;
+            switch (resource) {
+            case "c":
+                String[] oldVal = cached.getValue();
+                String[] newVal = newValue.getValue();
+                if (oldVal != null) {
+                    value = new String[oldVal.length + newVal.length];
+                    System.arraycopy(newVal, 0, value, 0, newVal.length);
+                    System.arraycopy(oldVal, 0, value, newVal.length, oldVal.length);
+                } else {
+                    value = Arrays.copyOf(newVal, newVal.length);
+                }
+                break;
+            default:
+                value = new String[] {"x"};
+            }
+
+            return new DefaultTimedValue<>(value, newValue.getTimestamp());
+        }
+
+        @SET(model = "bar", service = "push", resource = "d", type = String.class)
+        public TimedValue<List<String>> doMultiResource3(@UriParam(UriSegment.RESOURCE) String resource,
+                @SetParam(SetSegment.RESULT_TYPE) Class<?> type,
+                @SetParam(SetSegment.CACHED_VALUE) TimedValue<List<String>> cached,
+                @SetParam(SetSegment.NEW_VALUE) TimedValue<List<String>> newValue) {
+
+            final List<String> value;
+            switch (resource) {
+            case "d":
+                List<String> oldVal = cached.getValue();
+                List<String> newVal = newValue.getValue();
+                value = Stream.concat(newVal.stream(), oldVal.stream()).toList();
+                break;
+            default:
+                value = List.of("x");
+            }
+
+            return new DefaultTimedValue<>(value, newValue.getTimestamp());
+        }
     }
 
     @Nested
@@ -588,6 +811,9 @@ public class WhiteboardImplTest {
             for (String rc : List.of("a", "b")) {
                 runRcCommand(PROVIDER_A, svc, rc, (r) -> {
                     assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                    assertEquals(0, r.getLowerBound());
+                    assertEquals(1, r.getUpperBound());
+                    assertEquals(String.class, r.getType());
                     return null;
                 });
 
@@ -615,6 +841,48 @@ public class WhiteboardImplTest {
                 assertEquals("resource:toto", result.getValue());
                 assertNotNull(result.getTimestamp(), "No timestamp returned");
                 assertEquals(setTimestamp2, result.getTimestamp());
+            }
+
+            for (String rc : List.of("c", "d")) {
+                runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                    assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                    assertEquals(0, r.getLowerBound());
+                    assertEquals(-1, r.getUpperBound());
+                    assertEquals(String.class, r.getType());
+                    return null;
+                });
+
+                // No value at first (empty list, null timestamp)
+                TimedValue<List<String>> result = getMultiValue(PROVIDER_A, svc, rc, String.class);
+                assertEquals(List.of(), result.getValue());
+                assertNull(result.getTimestamp());
+
+                // Set the value
+                final Instant setTimestamp = Instant.now().minus(Duration.ofMinutes(5));
+                setValue(PROVIDER_A, svc, rc, (r) -> r.setValue("toto", setTimestamp));
+
+                // Get the value
+                result = getMultiValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
+                assertEquals(List.of("toto"), result.getValue());
+                assertNotNull(result.getTimestamp(), "No timestamp returned");
+                assertEquals(setTimestamp, result.getTimestamp());
+
+                // Second set: the computed value is the one that must be returned
+                final Instant setTimestamp2 = Instant.now().minus(Duration.ofMinutes(1));
+                setValue(PROVIDER_A, svc, rc, (r) -> r.setValue("titi", setTimestamp2));
+
+                // Get the value
+                result = getMultiValue(PROVIDER_A, svc, rc, String.class, GetLevel.STRONG);
+                assertEquals(List.of("titi", "toto"), result.getValue());
+                assertNotNull(result.getTimestamp(), "No timestamp returned");
+                assertEquals(setTimestamp2, result.getTimestamp());
+                runRcCommand(PROVIDER_A, svc, rc, (r) -> {
+                    assertThrows(IllegalArgumentException.class, () -> r.getArguments());
+                    assertEquals(0, r.getLowerBound());
+                    assertEquals(-1, r.getUpperBound());
+                    assertEquals(String.class, r.getType());
+                    return null;
+                });
             }
         }
     }

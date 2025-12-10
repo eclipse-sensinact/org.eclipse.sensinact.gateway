@@ -104,7 +104,9 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz);
+    default <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
+        return getResourceValue(provider, service, resource, clazz, GetLevel.NORMAL);
+    }
 
     /**
      * Get the value of a resource
@@ -121,7 +123,14 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel);
+    default <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel) {
+        final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz, getLevel);
+        if (tv != null) {
+            return tv.getValue();
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Get the timed value of a resource with a {@link GetLevel#NORMAL} operation.
@@ -137,7 +146,9 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz);
+    default <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz) {
+        return getResourceTimedValue(provider, service, resource, clazz, GetLevel.NORMAL);
+    }
 
     /**
      * Get the timed value of a resource with a {@link GetLevel#NORMAL} operation.
@@ -156,6 +167,84 @@ public interface SensiNactSession {
      *                                  location
      */
     <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
+            GetLevel getLevel);
+    /**
+     * Get the value of a resource with with a {@link GetLevel#NORMAL} operation.
+     *
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @return The resource value, can be null
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    default <T> List<T> getResourceMultiValue(String provider, String service, String resource, Class<T> clazz) {
+        return getResourceMultiValue(provider, service, resource, clazz, GetLevel.NORMAL);
+    }
+
+    /**
+     * Get the value of a resource
+     *
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @param getLevel The level of get operation. Only concerns resources with an external getter.
+     * @return The resource value, can be null
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    default <T> List<T> getResourceMultiValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel) {
+        final TimedValue<List<T>> tv = getResourceTimedMultiValue(provider, service, resource, clazz, getLevel);
+        if (tv != null) {
+            return tv.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the timed value of a resource with a {@link GetLevel#NORMAL} operation.
+     *
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @return The timed value of the resource. Can return null.
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    default <T> TimedValue<List<T>> getResourceTimedMultiValue(String provider, String service, String resource, Class<T> clazz) {
+        return getResourceTimedMultiValue(provider, service, resource, clazz, GetLevel.NORMAL);
+    }
+
+    /**
+     * Get the timed value of a resource with a {@link GetLevel#NORMAL} operation.
+     *
+     * @param <T>      Resource value type
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param clazz    Resource value type class
+     * @param getLevel The level of get operation. Only concerns resources with an
+     *                 external getter.
+     * @return The timed value of the resource. Can return null.
+     * @throws ClassCastException       if the value cannot be cast to the relevant
+     *                                  type
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
+    <T> TimedValue<List<T>> getResourceTimedMultiValue(String provider, String service, String resource, Class<T> clazz,
             GetLevel getLevel);
 
     /**

@@ -15,6 +15,8 @@ package org.eclipse.sensinact.core.whiteboard.impl;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
+import static org.eclipse.sensinact.core.annotation.verb.VerbAnnotationConstants.NO_UPPER_BOUND_SET;
+import static org.eclipse.sensinact.core.annotation.verb.VerbAnnotationConstants.NO_TYPE_SET;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -600,15 +602,18 @@ public class SensinactWhiteboard {
         });
     }
 
-    private Class<?> getType(Class<?> methodReturnType, Class<?> givenType) {
-        return givenType != null ? givenType : methodReturnType;
+    private Class<?> getType(Class<?> resourceType, Class<?> givenType) {
+        return givenType != NO_TYPE_SET ? givenType : resourceType;
     }
 
     private void processActMethod(final WhiteboardContext<ActMethod> ctx, final ACT annotation) {
         RegistryKey key = new RegistryKey(annotation.modelPackageUri(), annotation.model(), annotation.service(),
                 annotation.resource());
         processAnnotatedMethod(
-                key, (type) -> type == ResourceType.ACTION, (b) -> b.withType(ctx.handler.getReturnType())
+                key, (type) -> type == ResourceType.ACTION, (b) -> b.withType(getType(ctx.handler.getResourceType(), annotation.type()))
+                        .withLowerBound(Math.max(0, annotation.lowerBound()))
+                        .withUpperBound(annotation.upperBound() == NO_UPPER_BOUND_SET ? ctx.handler.getUpperBound() :
+                                annotation.upperBound())
                         .withAction(ctx.handler.getNamedParameterTypes()).buildAll(),
                 ctx, actMethodRegistry, serviceIdToActMethods);
     }
@@ -616,7 +621,10 @@ public class SensinactWhiteboard {
     private void processGetMethod(final RegistryKey key, final WhiteboardContext<GetMethod> ctx, final GET annotation,
             final boolean hasSet) {
         processAnnotatedMethod(key, (type) -> type != ResourceType.ACTION, (b) -> {
-            ResourceBuilder<?, ?> builder = b.withType(getType(ctx.handler.getReturnType(), annotation.type()))
+            ResourceBuilder<?, ?> builder = b.withType(getType(ctx.handler.getResourceType(), annotation.type()))
+                    .withLowerBound(Math.max(0, annotation.lowerBound()))
+                    .withUpperBound(annotation.upperBound() == NO_UPPER_BOUND_SET ? ctx.handler.getUpperBound() :
+                            annotation.upperBound())
                     .withGetter()
                     .withGetterCache(Duration.of(annotation.cacheDuration(), annotation.cacheDurationUnit()));
             if (hasSet) {
@@ -629,7 +637,10 @@ public class SensinactWhiteboard {
     private void processSetMethod(final RegistryKey key, final WhiteboardContext<SetMethod> ctx, final SET annotation,
             final boolean hasGet) {
         processAnnotatedMethod(key, (type) -> type != ResourceType.ACTION, (b) -> {
-            ResourceBuilder<?, ?> builder = b.withType(getType(ctx.handler.getReturnType(), annotation.type()))
+            ResourceBuilder<?, ?> builder = b.withType(getType(ctx.handler.getResourceType(), annotation.type()))
+                    .withLowerBound(Math.max(0, annotation.lowerBound()))
+                    .withUpperBound(annotation.upperBound() == NO_UPPER_BOUND_SET ? ctx.handler.getUpperBound() :
+                            annotation.upperBound())
                     .withSetter();
             if (hasGet) {
                 builder = builder.withGetter();

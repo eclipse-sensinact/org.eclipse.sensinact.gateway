@@ -19,7 +19,8 @@ import java.lang.annotation.Target;
 
 /**
  * A parameter annotation used to indicate that a sensiNact URI, or URI segment,
- * should be passed to the resource method
+ * should be passed to the resource method. The type of the annotated parameter
+ * must be {@link String}.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)

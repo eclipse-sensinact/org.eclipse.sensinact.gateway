@@ -955,7 +955,8 @@ public class ModelNexus {
     }
 
     public EOperation createActionResource(EClass serviceEClass, String name, Class<?> type,
-            List<Entry<String, Class<?>>> namedParameterTypes, Map<String, Object> defaultMetadata) {
+            List<Entry<String, Class<?>>> namedParameterTypes, Map<String, Object> defaultMetadata,
+            int lowerBound, int upperBound) {
 
         assertResourceNotExist(serviceEClass, name);
 
@@ -965,7 +966,7 @@ public class ModelNexus {
         EMap<String, MetadataValue> defaultFeatureMetadata = defaultMetadata == null ? new BasicEMap<>()
                 : toDefaultMetadataValue(defaultMetadata);
 
-        EOperation action = EMFUtil.createAction(serviceEClass, name, type, params);
+        EOperation action = EMFUtil.createAction(serviceEClass, name, type, params, lowerBound, upperBound);
         EMFUtil.fillMetadata(EMFUtil.getModelMetadata(action), null, false, name, defaultFeatureMetadata);
 
         return action;

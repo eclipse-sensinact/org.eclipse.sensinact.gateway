@@ -13,9 +13,11 @@
 package org.eclipse.sensinact.core.whiteboard.impl;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.whiteboard.WhiteboardAct;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -32,10 +34,29 @@ class ActMethod extends AbstractResourceMethod implements WhiteboardAct<Object> 
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Map<Object, Object> rawParam = (Map) arguments;
         try {
-            return promiseFactory
-                    .resolved(super.invoke(modelPackageUri, model, provider, service, resource, rawParam, null, null));
+            Object value = super.invoke(modelPackageUri, model, provider, service, resource, rawParam, null, null);
+            Promise<Object> result;
+            if(value instanceof Promise<?> p) {
+                // Ensure use of the correct threads
+                result = promiseFactory.resolvedWith(p);
+            } else {
+                result = promiseFactory.resolved(value);
+            }
+            return result;
         } catch (Exception e) {
             return promiseFactory.failed(e);
+        }
+    }
+
+    @Override
+    protected boolean isAnnotatedParam(Parameter param) {
+        return param.isAnnotationPresent(ActParam.class);
+    }
+
+    @Override
+    protected void validateArg(Parameter param) {
+        if(isPromise(param.getParameterizedType())) {
+            throw new IllegalArgumentException("Act method parameters must not be Promises");
         }
     }
 }
