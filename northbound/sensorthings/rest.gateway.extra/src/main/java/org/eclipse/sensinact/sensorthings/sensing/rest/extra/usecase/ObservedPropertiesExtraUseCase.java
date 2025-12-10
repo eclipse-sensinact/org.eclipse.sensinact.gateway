@@ -1,24 +1,24 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import jakarta.ws.rs.BadRequestException;
-
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-@Component(service = IExtraUseCase.class)
-public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCase<ExpandedObservedProperty, ResourceSnapshot> {
+@Component(service = { IExtraUseCase.class, IObservedPropertyExtraUseCase.class })
+public class ObservedPropertiesExtraUseCase
+        extends AbstractExtraUseCase<ExpandedObservedProperty, ExpandedObservedProperty>
+        implements IObservedPropertyExtraUseCase {
 
     @Reference
     DataUpdate dataUpdate;
@@ -26,60 +26,49 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCase<Expande
     @Reference
     IAccessResourceUseCase resourceUseCase;
 
-    public ExtraUseCaseResponse<ResourceSnapshot> create(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+    Map<String, ExpandedObservedProperty> observedPropertyById = new ConcurrentHashMap<String, ExpandedObservedProperty>();
+
+    public ExtraUseCaseResponse<ExpandedObservedProperty> create(
+            ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         String id = getId(request.model());
-        List<SensorThingsUpdate> listDtoModels = toDtos(request);
-
-        // update/create provider
-        try {
-            dataUpdate.pushUpdate(listDtoModels).getValue();
-
-        } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(false, e, "fail to create");
-
-        }
-
-        ResourceSnapshot snapshot = resourceUseCase.read(request.session(), id);
-        if (snapshot != null) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(id, snapshot);
-        }
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get Snapshot");
-    }
-
-    public ExtraUseCaseResponse<ResourceSnapshot> delete(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get providerSnapshot");
+        ExpandedObservedProperty observedProperty = request.model();
+        String observedPropertyId = getId(observedProperty);
+        observedPropertyById.put(observedPropertyId, observedProperty);
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(id, observedProperty);
 
     }
 
-    public ExtraUseCaseResponse<ResourceSnapshot> patch(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get providerSnapshot");
+    @Override
+    public String getId(ExpandedObservedProperty dto) {
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    }
+
+    public ExtraUseCaseResponse<ExpandedObservedProperty> delete(
+            ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "fail to get providerSnapshot");
+
+    }
+
+    public ExtraUseCaseResponse<ExpandedObservedProperty> patch(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "fail to get providerSnapshot");
 
     }
 
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         // read thing for each location and update it
-        ExpandedObservedProperty observedProperty = request.model();
-        String idDatastream = observedProperty.datastream() != null ? (String) observedProperty.datastream().id()
-                : null;
-        String idThing = idDatastream.split("~").length > 0 ? idDatastream.split("~")[0] : null;
-
-        if (idDatastream == null || idThing == null) {
-            throw new BadRequestException("can't find parent ids");
-        }
-
-        return List.of(DtoMapper.toObservedPropertyUpdate(idThing, idDatastream, observedProperty));
+        return null;
     }
 
-    public ExtraUseCaseResponse<ResourceSnapshot> update(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to get providerSnapshot");
+    public ExtraUseCaseResponse<ExpandedObservedProperty> update(
+            ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "fail to get providerSnapshot");
 
     }
 
     @Override
-    public String getId(ExpandedObservedProperty dto) {
-        // TODO Auto-generated method stub
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.datastream().id() + "~" + dto.name());
+    public ExpandedObservedProperty getObservedProperty(String id) {
+        return observedPropertyById.remove(id);
     }
 
 }

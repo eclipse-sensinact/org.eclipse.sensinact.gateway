@@ -89,7 +89,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     @Override
     public String getId(ExpandedDataStream dto) {
-        return (String) (dto.id() != null ? dto.id() : dto.thing().id() + "~" + dto.name());
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
 }

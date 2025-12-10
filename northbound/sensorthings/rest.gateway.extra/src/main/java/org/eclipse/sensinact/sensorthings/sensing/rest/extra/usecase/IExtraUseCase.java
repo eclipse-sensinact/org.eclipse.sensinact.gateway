@@ -1,6 +1,5 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
-import org.eclipse.sensinact.core.snapshot.Snapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 
@@ -8,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.UriInfo;
 
-public interface IExtraUseCase<M extends Id, S extends Snapshot> {
+public interface IExtraUseCase<M extends Id, S> {
 
     public record ExtraUseCaseResponse<S>(String id, S snapshot, boolean success, Throwable e, String message) {
         public ExtraUseCaseResponse(boolean success, Throwable e, String message) {

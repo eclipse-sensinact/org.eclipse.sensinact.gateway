@@ -3,7 +3,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.snapshot.Snapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
@@ -22,7 +21,7 @@ import jakarta.ws.rs.core.UriInfo;
 @Component(service = IExtraDelegate.class)
 public class ExtraDelegateImpl implements IExtraDelegate {
 
-    private final Map<Class<? extends Id>, IExtraUseCase<? extends Id, ? extends Snapshot>> useCases = new HashMap<>();
+    private final Map<Class<? extends Id>, IExtraUseCase<? extends Id, ?>> useCases = new HashMap<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, bind = "bindExtraUseCase", unbind = "unbindExtraUseCase")
     public void bindExtraUseCase(IExtraUseCase<? extends Id, ?> useCase) {
@@ -30,8 +29,8 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends Id, S extends Snapshot> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            D dto, String parentId) {
+    public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, D dto,
+            String parentId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
 
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, dto, parentId);
@@ -43,15 +42,14 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     }
 
-    public <D extends Id, S extends Snapshot> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            D dto) {
+    public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, D dto) {
         return create(session, mapper, uriInfo, dto, null);
 
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends Id, S extends Snapshot> S delete(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            String id, Class<D> clazz) {
+    public <D extends Id, S> S delete(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
+            Class<D> clazz) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(clazz);
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id);
         ExtraUseCaseResponse<S> result = useCase.create(request);
@@ -62,7 +60,7 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @SuppressWarnings("unchecked")
-    protected <D extends Id, S extends Snapshot> IExtraUseCase<D, S> getExtraUseCase(Class<D> clazz) {
+    protected <D extends Id, S> IExtraUseCase<D, S> getExtraUseCase(Class<D> clazz) {
         return (IExtraUseCase<D, S>) useCases.get(clazz);
     }
 
@@ -71,8 +69,8 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends Id, S extends Snapshot> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            String id, D dto, String parentId) {
+    public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id, D dto,
+            String parentId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.update(request);
@@ -83,8 +81,8 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @Override
-    public <D extends Id, S extends Snapshot> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
-            String id, D dto) {
+    public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
+            D dto) {
         return update(session, mapper, uriInfo, id, dto, null);
     }
 

@@ -47,6 +47,11 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
 
     }
 
+    @Override
+    public String getId(ExpandedThing dto) {
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    }
+
     public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
 
@@ -91,11 +96,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
 
-    }
-
-    @Override
-    public String getId(ExpandedThing dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
 }

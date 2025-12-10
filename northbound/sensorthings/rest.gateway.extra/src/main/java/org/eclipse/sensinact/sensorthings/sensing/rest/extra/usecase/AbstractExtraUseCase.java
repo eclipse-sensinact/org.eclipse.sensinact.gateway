@@ -7,7 +7,7 @@ import org.eclipse.sensinact.core.snapshot.Snapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
-public abstract class AbstractExtraUseCase<M extends Id, S extends Snapshot> implements IExtraUseCase<M, S> {
+public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUseCase<M, S> {
 
     private Class<M> type;
 

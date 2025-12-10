@@ -86,7 +86,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
                 @SuppressWarnings("unchecked")
                 List<String> ids = (List<String>) resource.getValue().getValue();
 
-                ids.add(DtoMapper.sanitizeId(location.id() != null ? location.id() : location.name()));
+                ids.add(getId(location));
 
                 return new ThingUpdate(providerId, null, null, providerId, null, ids);
             }).forEach(listUpdates::add);
@@ -103,7 +103,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
-                String locationId = (String) request.model().id();
+                String locationId = getId(request.model());
                 return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService(locationId));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
@@ -116,7 +116,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
     @Override
     public String getId(ExpandedLocation dto) {
-        return null;
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
 }

@@ -36,19 +36,44 @@ public class DtoFactory {
                 null, null, null, null, null, null, op, sensor, null, thingId);
     }
 
+    public static ExpandedDataStream getDatastreamMinimalLinkThingLinkObservedProperty(String name, RefId thingId,
+            RefId obId) {
+        // Required
+        ExpandedObservedProperty op = new ExpandedObservedProperty(null, obId, null, null, null, null, null);
+        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
+        Instant start = Instant.now();
+        Instant end = Instant.now();
+        TimeInterval interval = new TimeInterval(end, start);
+        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, interval, interval,
+                null, null, null, null, null, null, op, null, null, thingId);
+    }
+
+    public static ExpandedDataStream getDatastreamMinimalLinkThingLinkSensor(String name, RefId thingId,
+            RefId sensorId) {
+        // Required
+        ExpandedSensor sensor = new ExpandedSensor(null, sensorId, null, null, null, null, null, null);
+        ExpandedObservedProperty op = getObservedProperty("Temperature");
+        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
+        Instant start = Instant.now();
+        Instant end = Instant.now();
+        TimeInterval interval = new TimeInterval(end, start);
+        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, interval, interval,
+                null, null, null, null, null, null, op, sensor, null, thingId);
+    }
+
     private static UnitOfMeasurement getUnitOfMeasure(String name) {
         return new UnitOfMeasurement(name, "°C", "http://unitsofmeasure.org");
     }
 
     public static ExpandedSensor getSensor(String name) {
         return new ExpandedSensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null, null);
+                "http://example.com/humidity-sensor.pdf", null, null);
 
     }
 
     public static ExpandedObservedProperty getObservedProperty(String name) {
         return new ExpandedObservedProperty(null, null, "Temperature", "Air temperature",
-                "http://example.com/op/temperature", null, null, null);
+                "http://example.com/op/temperature", null, null);
 
     }
 
