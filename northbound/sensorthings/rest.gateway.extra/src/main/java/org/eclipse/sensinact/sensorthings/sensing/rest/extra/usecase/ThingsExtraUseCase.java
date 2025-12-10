@@ -1,10 +1,12 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
@@ -33,7 +35,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, e, "fail to create");
 
         }
 
@@ -55,9 +57,19 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
 
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedThing> request) {
-        return DtoMapper.toUpdates(request.model());
+        // check if Thing already exists with location get locations
+        List<String> locationIds = new ArrayList<String>();
+        ProviderSnapshot provider = providerUseCase.read(request.session(), (String) request.model().id());
+        if (provider != null) {
+            ResourceSnapshot resource = provider.getResource("thing", "locationsIds");
+            if (resource.getValue() != null)
+                locationIds.addAll((List<String>) resource.getValue().getValue());
+        }
+
+        return DtoMapper.toUpdates(request.model(), locationIds);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {

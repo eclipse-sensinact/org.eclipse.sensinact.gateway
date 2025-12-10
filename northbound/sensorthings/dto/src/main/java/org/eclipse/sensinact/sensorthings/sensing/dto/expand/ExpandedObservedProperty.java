@@ -12,6 +12,5 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record ExpandedObservedProperty(String selfLink, Object id, String name, String description, String definition,
         @JsonInclude(NON_NULL) Map<String, Object> properties,
         @JsonProperty("Datastreams@iot.navigationLink") String datastreamsLink,
-        @JsonProperty("Datastream") RefId datastream, @JsonProperty("Thing") RefId thing,
-        @JsonProperty("Sensor") RefId sensor) implements NameDescription {
+        @JsonProperty("Datastream") RefId datastream) implements NameDescription {
 }

@@ -48,7 +48,7 @@ public class DtoFactory {
 
     public static ExpandedObservedProperty getObservedProperty(String name) {
         return new ExpandedObservedProperty(null, null, "Temperature", "Air temperature",
-                "http://example.com/op/temperature", null, null, null, null, null);
+                "http://example.com/op/temperature", null, null, null);
 
     }
 
@@ -76,20 +76,19 @@ public class DtoFactory {
         return new RefId(id);
     }
 
-    public static ExpandedDataStream getDatastreamLinkThingWithSensorObservedPropertyObservation(String name,
-            RefId thing) {
+    public static ExpandedDataStream getDatastreamLinkThingWithSensorObservedProperty(String name, RefId thing) {
 
         // Required unit
         UnitOfMeasurement uom = getUnitOfMeasure("Percent");
 
-        // Inline sensor
-        ExpandedObservation observation1 = getObservation("osb1");
-        ExpandedObservation observation2 = getObservation("obs2");
+//        // Inline sensor
+//        ExpandedObservation observation1 = getObservation("osb1");
+//        ExpandedObservation observation2 = getObservation("obs2");
 
         ExpandedSensor sensor = getSensor("sensor");
         ExpandedObservedProperty op = getObservedProperty("op1");
         return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, null, null, null, null,
-                null, null, null, List.of(observation1, observation2), op, sensor, null, thing);
+                null, null, null, null, op, sensor, null, thing);
     }
 
     public static ExpandedLocation getLocation(String name) {

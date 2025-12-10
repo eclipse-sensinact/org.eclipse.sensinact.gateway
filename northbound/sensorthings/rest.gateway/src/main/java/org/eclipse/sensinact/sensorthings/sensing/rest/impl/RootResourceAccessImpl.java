@@ -46,6 +46,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
@@ -278,11 +279,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     }
 
     @Override
-    public Response createObservedProperties(ObservedProperty observedProperty) {
+    public Response createObservedProperties(ExpandedObservedProperty observedProperty) {
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observedProperty);
         ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
         ObservedProperty createDto = ModelToDTO.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
+                getExpansions(), criterion, snapshot, observedProperty.datastreamsLink());
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -294,8 +295,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public Response createSensors(ExpandedSensor sensor) {
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor);
         ICriterion criterion = parseFilter(EFilterContext.SENSORS);
+
+        String datastreamLink = ModelToDTO.getLink(uriInfo, ModelToDTO.VERSION + "/Thing()", "/Datastream({id})",
+                sensor.datastream() != null ? (String) sensor.datastream().id() : null);
         Sensor createDto = ModelToDTO.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot);
+                criterion, snapshot, datastreamLink);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

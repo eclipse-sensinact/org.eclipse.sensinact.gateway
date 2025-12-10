@@ -33,7 +33,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, e, "fail to create");
 
         }
 
@@ -79,7 +79,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, e, "fail to create");
         }
 
         ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), id);

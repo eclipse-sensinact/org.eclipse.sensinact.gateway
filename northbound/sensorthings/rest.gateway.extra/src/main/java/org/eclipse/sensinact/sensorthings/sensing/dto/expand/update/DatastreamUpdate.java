@@ -6,6 +6,8 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.DATA_STREAM_SERVICE;
 
 import java.time.Instant;
+import java.util.Map;
+
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.Model;
@@ -21,15 +23,22 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
         @Timestamp Instant timestamp,
         // sensor
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorId,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorName,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorDescription,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorEncodingType,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object sensorMetadata,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Map<String, Object> sensorProperties,
+
         // observed property
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyId,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyName,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyDescription,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observedPropertyDefinition,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Map<String, Object> observedPropertyProperties,
+
         // unit
+
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitName,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitSymbol,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitDefinition) implements SensorThingsUpdate {
@@ -51,16 +60,17 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
     }
 
     public DatastreamUpdate(String providerId, String serviceName, Object sensorThingsId, String name,
-            String description, Instant timestamp, String sensorName, String sensorDescription,
-            String sensorEncodingType,
+            String description, Instant timestamp, String sensorId, String sensorName, String sensorDescription,
+            String sensorEncodingType, Object sensorMetadata, Map<String, Object> sensorProperties,
             // observed property
             String observedPropertyId, String observedPropertyName, String observedPropertyDescription,
-            String observedPropertyDefinition,
+            String observedPropertyDefinition, Map<String, Object> observedPropertyProperties,
             // unit
             String unitName, String unitSymbol, String unitDefinition) {
         this(SENSOR_THING_DEVICE, DATA_STREAM_SERVICE, providerId, serviceName, sensorThingsId, name, description,
-                timestamp, sensorName, sensorDescription, sensorEncodingType, observedPropertyId, observedPropertyName,
-                observedPropertyDescription, observedPropertyDefinition, unitName, unitSymbol, unitDefinition);
+                timestamp, sensorId, sensorName, sensorDescription, sensorEncodingType, sensorMetadata,
+                sensorProperties, observedPropertyId, observedPropertyName, observedPropertyDescription,
+                observedPropertyDefinition, observedPropertyProperties, unitName, unitSymbol, unitDefinition);
     }
 
 }

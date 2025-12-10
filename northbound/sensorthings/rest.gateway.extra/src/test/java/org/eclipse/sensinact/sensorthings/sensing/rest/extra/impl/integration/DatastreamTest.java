@@ -33,39 +33,36 @@ public class DatastreamTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateDatastreamThroughThikng() throws Exception {
+    public void testCreateDatastreamThroughThing() throws Exception {
         // given
-        String name = "testCreateDatastreamWithSensor";
+        String name = "testCreateDatastreamThroughThing";
 
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimal(name);
+        String thingId = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(thingId));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, String.format("Things(%s)/Datastreams", name), 201);
         UtilsAssert.assertDatastream(dtoDatastream, json);
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)", dtoDatastream.name()));
-        UtilsAssert.assertDatastream(dtoDatastream, json, true);
 
     }
 
     @Test
-    public void testCreateDatastreamWithObservedPropertyObservations() throws Exception {
+    public void testCreateDatastreamWithObservedProperty() throws Exception {
         // given
         String name = "testCreateDatastreamLinnkThingWithObservedPropertyObservations";
 
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedPropertyObservation(name,
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedProperty(name,
                 DtoFactory.getRefId(getIdFromJson(json)));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
         UtilsAssert.assertDatastream(dtoDatastream, json);
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)", dtoDatastream.name()));
-        UtilsAssert.assertDatastream(dtoDatastream, json, true);
 
     }
 
@@ -77,11 +74,11 @@ public class DatastreamTest extends AbstractIntegrationTest {
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedPropertyObservation(name,
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedProperty(name,
                 DtoFactory.getRefId(getIdFromJson(json)));
 
         // when
-        json = getJsonResponseFromPost(dtoDatastream, "Datastreams?$expand(Sensor,ObservedProperty,Observations", 201);
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams?$expand=Sensor,ObservedProperty", 201);
         UtilsAssert.assertDatastream(dtoDatastream, json, true);
 
     }

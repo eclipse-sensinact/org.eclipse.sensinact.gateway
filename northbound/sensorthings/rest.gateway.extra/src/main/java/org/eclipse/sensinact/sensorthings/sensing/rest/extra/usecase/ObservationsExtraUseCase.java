@@ -34,7 +34,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ResourceSnapshot>(false, e, "fail to create");
 
         }
 

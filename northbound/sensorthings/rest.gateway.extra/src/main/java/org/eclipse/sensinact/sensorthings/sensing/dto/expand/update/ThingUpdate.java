@@ -36,9 +36,7 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
         if (properties == null) {
             properties = Map.of();
         }
-        if (locationIds == null) {
-            locationIds = List.of();
-        }
+
     }
 
     public ThingUpdate(String providerId, String friendlyName, String description, Object thingId,

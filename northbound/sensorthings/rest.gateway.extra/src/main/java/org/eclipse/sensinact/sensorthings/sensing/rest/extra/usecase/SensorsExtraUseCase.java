@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
@@ -36,7 +35,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Re
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ResourceSnapshot>(false, e, "fail to create");
 
         }
 

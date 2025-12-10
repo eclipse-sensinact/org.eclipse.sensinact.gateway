@@ -36,7 +36,10 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.create(request);
-        return result.success() ? result.snapshot() : null;
+        if (!result.success()) {
+            throw new UnsupportedOperationException(result.message(), result.e());
+        }
+        return result.snapshot();
 
     }
 
@@ -52,8 +55,10 @@ public class ExtraDelegateImpl implements IExtraDelegate {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(clazz);
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id);
         ExtraUseCaseResponse<S> result = useCase.create(request);
-        return result.success() ? result.snapshot() : null;
-
+        if (!result.success()) {
+            throw new UnsupportedOperationException(result.message(), result.e());
+        }
+        return result.snapshot();
     }
 
     @SuppressWarnings("unchecked")
@@ -71,8 +76,10 @@ public class ExtraDelegateImpl implements IExtraDelegate {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.update(request);
-        return result.success() ? result.snapshot() : null;
-
+        if (!result.success()) {
+            throw new UnsupportedOperationException(result.message(), result.e());
+        }
+        return result.snapshot();
     }
 
     @Override

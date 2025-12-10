@@ -35,7 +35,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCase<Expande
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ResourceSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ResourceSnapshot>(false, e, "fail to create");
 
         }
 
@@ -62,14 +62,13 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCase<Expande
         ExpandedObservedProperty observedProperty = request.model();
         String idDatastream = observedProperty.datastream() != null ? (String) observedProperty.datastream().id()
                 : null;
-        String idSensor = observedProperty.sensor() != null ? (String) observedProperty.sensor().id() : null;
-        String idThing = observedProperty.thing() != null ? (String) observedProperty.thing().id() : null;
+        String idThing = idDatastream.split("~").length > 0 ? idDatastream.split("~")[0] : null;
 
-        if (idDatastream == null || idThing == null || idSensor == null) {
+        if (idDatastream == null || idThing == null) {
             throw new BadRequestException("can't find parent ids");
         }
 
-        return List.of(DtoMapper.toObservedPropertyUpdate(idThing, idDatastream, idSensor, observedProperty));
+        return List.of(DtoMapper.toObservedPropertyUpdate(idThing, idDatastream, observedProperty));
     }
 
     public ExtraUseCaseResponse<ResourceSnapshot> update(ExtraUseCaseRequest<ExpandedObservedProperty> request) {

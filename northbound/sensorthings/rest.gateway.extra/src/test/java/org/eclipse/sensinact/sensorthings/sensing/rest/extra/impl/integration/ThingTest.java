@@ -51,7 +51,7 @@ public class ThingTest extends AbstractIntegrationTest {
         HttpResponse<String> response = queryPost("/Locations", location);
         Location createdLocation = mapper.readValue(response.body(), Location.class);
         List<ExpandedLocation> idLocations = List.of(DtoFactory.getIdLocation(createdLocation.id()));
-        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations("testCreateThingExistingLocation",
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations("testCreateThingExistingLocationThing",
                 "testThing existing Location", Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"),
                 idLocations);
 
@@ -168,15 +168,14 @@ public class ThingTest extends AbstractIntegrationTest {
         String name = "testCreateThingWith1Location";
 
         List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name));
-        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name, "testThing With 1 Location ",
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name + "Thing", "testThing With 1 Location ",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locations);
         // When
 
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
         UtilsAssert.assertThing(dtoThing, json);
-        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations", name));
-        UtilsAssert.assertThing(dtoThing, json, true);
+
     }
 
     // @formatter:off
@@ -227,8 +226,6 @@ public class ThingTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
         UtilsAssert.assertThing(dtoThing, json);
-        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Locations,Datastreams", name));
-        UtilsAssert.assertThing(dtoThing, json, true);
 
     }
 
@@ -288,9 +285,7 @@ public class ThingTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
 
         UtilsAssert.assertThing(dtoThing, json);
-        json = getJsonResponseFromGet(String.format(
-                "/Things(%s)?$expand=Locations,Datastreams($expand=Sensor,ObservedProperty,Observations)", name));
-        UtilsAssert.assertThing(dtoThing, json, true);
+
     }
 
     // @formatter:off

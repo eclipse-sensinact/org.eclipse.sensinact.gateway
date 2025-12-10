@@ -24,9 +24,10 @@ public class UtilsAssert {
         assertEquals(expectedDatastream.description(), datastream.get("description").asText(), "");
         if (expanded) {
             if (expectedDatastream.observedProperty() != null) {
-                JsonNode observedPropertyNode = datastream.get("observedProperty");
-                assertNotNull(observedPropertyNode, "Observations array must be present");
-                assertEquals(expectedDatastream.observedProperty(), observedPropertyNode, "");
+                JsonNode observedPropertyNode = datastream.get("ObservedProperty");
+                assertNotNull(observedPropertyNode, "observedProperty array must be present");
+                assertEquals(expectedDatastream.observedProperty().name(), observedPropertyNode.get("name").asText(),
+                        "");
             }
         }
     }

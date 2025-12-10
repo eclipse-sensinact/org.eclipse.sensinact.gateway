@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -45,7 +44,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimi
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.ModelToDTO;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
@@ -272,16 +270,14 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response createDatastream(String id, ExpandedDataStream datastream) {
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
-        if (createDto.get() == null) {
-            throw new BadRequestException("fail to create datastream");
-        }
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.get().id())).build();
+        Datastream createDto = ModelToDTO.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
 
-        return Response.created(createdUri).entity(createDto.get()).build();
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+
+        return Response.created(createdUri).entity(createDto).build();
 
     }
 

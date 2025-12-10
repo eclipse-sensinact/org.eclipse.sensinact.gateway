@@ -32,14 +32,14 @@ public class LocationTest extends AbstractIntegrationTest {
     @Test
     public void testCreateLocationLinkedThing() throws Exception {
         // given
-        String name = "testCreateLocation";
+        String name = "testCreateLocationLinkedThing";
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         String idThing = getIdFromJson(json);
         List<RefId> listId = new ArrayList<RefId>();
         listId.add(DtoFactory.getRefId(idThing));
-        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name, listId);
+        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name + "1", listId);
 
         // when
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);

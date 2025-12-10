@@ -10,17 +10,21 @@ import jakarta.ws.rs.core.UriInfo;
 
 public interface IExtraUseCase<M extends Id, S extends Snapshot> {
 
-    public record ExtraUseCaseResponse<S>(String id, S snapshot, boolean success, String message) {
+    public record ExtraUseCaseResponse<S>(String id, S snapshot, boolean success, Throwable e, String message) {
+        public ExtraUseCaseResponse(boolean success, Throwable e, String message) {
+            this(null, null, success, e, message);
+        }
+
         public ExtraUseCaseResponse(boolean success, String message) {
-            this(null, null, success, message);
+            this(null, null, success, null, message);
         }
 
         public ExtraUseCaseResponse(String id, S model) {
-            this(id, model, true, null);
+            this(id, model, true, null, null);
         }
 
         public ExtraUseCaseResponse(String id) {
-            this(id, null, true, null);
+            this(id, null, true, null, null);
         }
     }
 
