@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -171,10 +172,12 @@ public class RulesWhiteboardIntegrationTest {
 
         ICriterion criterion = Mockito.mock(ICriterion.class, Mockito.CALLS_REAL_METHODS);
 
+        AtomicBoolean s2Acquired = new AtomicBoolean(false);
         Mockito.when(rule.getInputFilter()).thenReturn(criterion);
         Mockito.doAnswer(x -> {
+            System.out.println("Rule called on thread: " + Thread.currentThread().toString());
             s1.release();
-            s2.acquire();
+            s2Acquired.set(s2.tryAcquire(5000, TimeUnit.MILLISECONDS));
             return null;
         }).when(rule).evaluate(Mockito.anyList(), Mockito.any(ResourceUpdater.class));
 
@@ -191,6 +194,7 @@ public class RulesWhiteboardIntegrationTest {
         // Release the block and we should be called again
         s2.release();
         assertTrue(s1.tryAcquire(1000, TimeUnit.MILLISECONDS));
+        assertTrue(s2Acquired.get());
     }
 
     private ArgumentMatcher<List<ProviderSnapshot>> hasProviders(String... names) {
