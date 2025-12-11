@@ -170,23 +170,26 @@ public class LocationSelectionCriterion {
     }
 
     private static Predicate<GeoJsonObject> getGeometryFilter(MatchType type, final Geometry targetValue) {
-        return switch(type) {
+        Predicate<Geometry> locationCheck = switch(type) {
             case CONTAINS:
-                yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, CONTAINS, null);
+                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, CONTAINS, null);
             case DISJOINT:
-                yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, DISJOINT, null);
+                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, DISJOINT, null);
             case INTERSECTS:
                 yield l -> {
-                    Geometry g = toEsriGeometry(l);
-                    return RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_1, null) ||
-                            RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_2, null) ||
-                            RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_3, null) ||
-                            RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_4, null);
+                    return RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_1, null) ||
+                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_2, null) ||
+                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_3, null) ||
+                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_4, null);
                 };
             case WITHIN:
-                yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, WITHIN, null);
+                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, WITHIN, null);
             default:
                 throw new IllegalArgumentException("Unknown match type " + type);
+        };
+        return l -> {
+            Geometry g = toEsriGeometry(l);
+            return !g.isEmpty() && locationCheck.test(g);
         };
     }
 

@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.filters.resource.selector.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection.MatchType;
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
 import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
 import org.eclipse.sensinact.gateway.geojson.Geometry;
@@ -534,6 +536,55 @@ public class LocationSelectionCriterionTest {
             LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
 
             assertTrue(new LocationSelectionCriterion(ls).locationFilter().test(mp));
+        }
+    }
+
+    @Nested
+    class EmptyValues {
+        private static final Point EMPTY_POINT = new Point(Coordinates.EMPTY, null, null);
+        private static final LineString EMPTY_LINE = new LineString(List.of(), null, null);
+        private static final Polygon EMPTY_POLY = new Polygon(List.of(List.of()), null, null);
+
+        @Test
+        void polygonAndEmptyPoint() {
+            Polygon serpentine = (Polygon) getFeature(SERPENTINE).geometry();
+
+            LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+            ls = new LocationSelection(serpentine, null, false, MatchType.WITHIN);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+            ls = new LocationSelection(serpentine, null, false, MatchType.INTERSECTS);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+            ls = new LocationSelection(serpentine, null, false, MatchType.DISJOINT);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+        }
+
+        @Test
+        void polygonAndEmptyLine() {
+            Polygon serpentine = (Polygon) getFeature(SERPENTINE).geometry();
+
+            LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+            ls = new LocationSelection(serpentine, null, false, MatchType.WITHIN);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+            ls = new LocationSelection(serpentine, null, false, MatchType.INTERSECTS);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+            ls = new LocationSelection(serpentine, null, false, MatchType.DISJOINT);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+        }
+
+        @Test
+        void polygonAndEmptyPoly() {
+            Polygon serpentine = (Polygon) getFeature(SERPENTINE).geometry();
+
+            LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
+            ls = new LocationSelection(serpentine, null, false, MatchType.WITHIN);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
+            ls = new LocationSelection(serpentine, null, false, MatchType.INTERSECTS);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
+            ls = new LocationSelection(serpentine, null, false, MatchType.DISJOINT);
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
         }
     }
 }
