@@ -275,40 +275,21 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     @Override
-    public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz) {
-        final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz);
-        if (tv != null) {
-            return tv.getValue();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel) {
-        final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz, getLevel);
-        if (tv != null) {
-            return tv.getValue();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz) {
-        return getResourceTimedValue(provider, service, resource, clazz, GetLevel.NORMAL);
-    }
-
-    @Override
     public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
             GetLevel getLevel) {
-        return doGetResourceTimedValue(provider, service, resource, clazz, getLevel);
+        return doGetResourceTimedValue(provider, service, resource, sr -> sr.getValue(clazz, getLevel));
     }
 
-    private <T> TimedValue<T> doGetResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
-            GetLevel getLevel) {
-        return doResourceWork(provider, service, resource, sr -> sr.getValue(clazz, getLevel), READ, () -> String.format("The user %s does not have permission to read resource %s",
+    private <T> TimedValue<T> doGetResourceTimedValue(String provider, String service, String resource,
+            Function<SensinactResource, Promise<TimedValue<T>>> action) {
+        return doResourceWork(provider, service, resource, action, READ, () -> String.format("The user %s does not have permission to read resource %s",
                     user.getUserId(), String.format("%s/%s/%s", provider, service, resource)));
+    }
+
+    @Override
+    public <T> TimedValue<List<T>> getResourceTimedMultiValue(String provider, String service, String resource, Class<T> clazz,
+            GetLevel getLevel) {
+        return doGetResourceTimedValue(provider, service, resource, sr -> sr.getMultiValue(clazz, getLevel));
     }
 
     @Override

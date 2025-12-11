@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.core.whiteboard.impl;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -54,14 +54,14 @@ class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> 
             Object result = super.invoke(modelPackageUri, model, provider, service, resource, params, GetParam.class,
                     GetParam::value);
 
-            Promise<?> toReturn;
+            Promise<TimedValue<?>> toReturn;
             if (result instanceof Promise<?> p) {
-                toReturn = p;
+                toReturn = pf.resolvedWith(p).map(o -> convertToTvIfNeeded(o, resourceType, cachedValue));
             } else {
-                toReturn = pf.resolved(result);
+                toReturn = pf.resolved(convertToTvIfNeeded(result, resourceType, cachedValue));
             }
 
-            return toReturn.map(o -> convertToTvIfNeeded(o, resourceType, cachedValue));
+            return toReturn;
         } catch (Exception e) {
             return pf.failed(e);
         }
@@ -84,22 +84,40 @@ class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> 
             if(t.isEmpty() || t.getValue() == null) {
                 return t;
             }
-            return new DefaultTimedValue<>(convertIfNeeded(t.getValue(), resourceType), t.getTimestamp());
+            return new DefaultTimedValue<>(convertValueIfNeeded(t.getValue(), resourceType), t.getTimestamp());
         } else {
-            return new DefaultTimedValue<>(convertIfNeeded(o, resourceType));
+            return new DefaultTimedValue<>(convertValueIfNeeded(o, resourceType));
         }
     }
 
-    private Object convertIfNeeded(Object o, Class<?> resourceType) throws Exception {
-        if(o == null) {
-            return null;
-        } else if (resourceType.isInstance(o)) {
-            return o;
-        } else if (o instanceof Collection &&
-                ((Collection<?>)o).stream().allMatch(resourceType::isInstance)) {
-            return o;
-        } else {
-            throw new Exception("Invalid result type: " + o);
+    @Override
+    protected boolean isAnnotatedParam(Parameter param) {
+        return param.isAnnotationPresent(GetParam.class);
+    }
+
+    @Override
+    protected void validateArg(Parameter param) {
+        GetParam get = param.getAnnotation(GetParam.class);
+        if(get == null) {
+            throw new IllegalArgumentException("The parameter " + param + " in method " +
+                    param.getDeclaringExecutable() + " is not annotated with GetParam");
+        }
+        switch (get.value()) {
+        case CACHED_VALUE:
+            if(isPromise(param.getType())) {
+                throw new IllegalArgumentException("The parameter " + param + " in method " +
+                        param.getDeclaringExecutable() + " has a GetParam value CACHED_VALUE but receives a Promise");
+            }
+            break;
+        case RESULT_TYPE:
+            if(!param.getType().equals(Class.class)) {
+                throw new IllegalArgumentException("The parameter " + param + " in method " +
+                        param.getDeclaringExecutable() + " has a GetParam value RESULT_TYPE but is not of type Class");
+            }
+            break;
+        default:
+            throw new IllegalArgumentException("The parameter " + param + " in method " +
+                    param.getDeclaringExecutable() + " has an unknown GetParam value " + get.value());
         }
     }
 }

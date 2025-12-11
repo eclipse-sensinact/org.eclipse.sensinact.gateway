@@ -161,16 +161,16 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
         if (resourceType == null) {
             resourceType = ResourceType.SENSOR;
         }
+        if (lowerBound < 0) {
+            throw new IllegalArgumentException("lower bound must not be smaller then zero");
+        }
+        if (upperBound > -1 && lowerBound > upperBound) {
+            throw new IllegalArgumentException("lower bound must not be higher then upper bound");
+        }
 
         if (resourceType == ResourceType.SENSOR) {
             if (namedParameterTypes != null) {
                 throw new IllegalArgumentException("Action details cannot be set for a SENSOR resource");
-            }
-            if (lowerBound < 0) {
-                throw new IllegalArgumentException("lower bound must not be smaller then zero");
-            }
-            if (lowerBound > upperBound) {
-                throw new IllegalArgumentException("lower bound must not be higher then upper bound");
             }
             if (type == null && initialValue == null) {
                 throw new IllegalArgumentException("The resource " + name + " must define a type or a value");
@@ -181,10 +181,6 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
                         + " is not compatible with the type " + type.getName());
             }
         } else if (resourceType == ResourceType.ACTION) {
-            if (lowerBound != 0 || upperBound != 1) {
-                throw new IllegalArgumentException(
-                        "The action resource " + name + " must not define a upper or lower bound");
-            }
             if (type == null) {
                 throw new IllegalArgumentException("The action resource " + name + " must define a type");
             }
@@ -205,7 +201,7 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
         switch (resourceType) {
         case ACTION:
             createResource = nexusImpl.createActionResource(builtParent.getServiceEClass(), name, type,
-                    namedParameterTypes, defaultMetadata);
+                    namedParameterTypes, defaultMetadata, lowerBound, upperBound);
             break;
         case SENSOR:
             createResource = nexusImpl.createResource(builtParent.getServiceEClass(), name, type, timestamp,
