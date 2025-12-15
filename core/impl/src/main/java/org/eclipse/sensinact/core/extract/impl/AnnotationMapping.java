@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.extract.impl;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static org.eclipse.sensinact.core.annotation.dto.AnnotationConstants.NOT_SET;
+import static org.eclipse.sensinact.core.annotation.dto.AnnotationConstants.NO_UPPER_BOUND_SET;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -236,6 +237,7 @@ public class AnnotationMapping {
 
         // If the type is a collection and no explicit type is set, try to extract element type from generics
         final Class<?> elementTypeForCollection;
+        final int upperBound;
         if (data.type() == Object.class && java.util.Collection.class.isAssignableFrom(type)) {
             java.lang.reflect.Type genericType = null;
             if (ae instanceof Field) {
@@ -253,8 +255,13 @@ public class AnnotationMapping {
                 }
             }
             elementTypeForCollection = extractedType;
+            upperBound = data.upperBound() == NO_UPPER_BOUND_SET ? -1 : data.upperBound();
+        } else if (data.type() == Object.class && type.isArray()) {
+            elementTypeForCollection = type.getComponentType();
+            upperBound = data.upperBound() == NO_UPPER_BOUND_SET ? -1 : data.upperBound();
         } else {
             elementTypeForCollection = null;
+            upperBound = data.upperBound() == NO_UPPER_BOUND_SET ? 1 : data.upperBound();
         }
 
         Function<Object, String> modelPackageUri = getModelPackageUriMappingForElement(clazz, elementType, ae);
@@ -336,6 +343,7 @@ public class AnnotationMapping {
                 firstFailure = firstFailure == null ? t : firstFailure;
             }
             dto.type = elementTypeForCollection != null ? elementTypeForCollection : type;
+            dto.upperBound = upperBound;
 
             if (dto.service == null) {
                 if (dto.serviceReference != null) {

@@ -130,7 +130,7 @@ public @interface GET {
      * that the resource value is unary.
      * @return
      */
-    int upperBound() default VerbAnnotationConstants.NO_UPPER_BOUND_SET;
+    int upperBound() default AnnotationConstants.NO_UPPER_BOUND_SET;
 
     /**
      * Duration of the value cache. If the value is requested using a CACHED get and

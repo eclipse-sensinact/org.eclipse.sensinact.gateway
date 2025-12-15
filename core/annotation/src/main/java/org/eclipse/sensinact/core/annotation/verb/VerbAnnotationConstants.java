@@ -21,13 +21,6 @@ public final class VerbAnnotationConstants {
     private VerbAnnotationConstants() {};
 
     /**
-     * This marker value is used to indicate that no upper bound
-     * has been set in the annotation, and that inference should
-     * be used to determine whether this resource is multi-valued.
-     */
-    public static final int NO_UPPER_BOUND_SET = -3;
-
-    /**
      * This marker value is used to indicate that no resource
      * type has been set in the annotation and that inference
      * should be used to determine the type of this resource.

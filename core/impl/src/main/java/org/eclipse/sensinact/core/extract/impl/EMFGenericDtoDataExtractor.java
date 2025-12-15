@@ -65,6 +65,7 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
             DataUpdateDto dud = copyCommonFields(dto, instant, new DataUpdateDto());
             dud.type = dto.type;
             dud.data = dto.value;
+            dud.upperBound = dto.upperBound;
             dud.modelEClass = dto.modelEClass;
             list.add(dud);
         }
