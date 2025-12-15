@@ -93,12 +93,16 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
             sensor = sensorExtraUseCase.getInMemorySensor(idSensor);
 
+        } else {
+            sensor = datastream.sensor();
         }
         ExpandedObservedProperty observedProperty = null;
         // retrieve create observedPorperty
         if (datastream.observedProperty() != null && DtoMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
             String idObservedProperty = getIdFromRecord(datastream.observedProperty());
             observedProperty = observedPropertyUseCase.getInMemoryObservedProperty(idObservedProperty);
+        } else {
+            observedProperty = datastream.observedProperty();
         }
         UnitOfMeasurement unit = datastream.unitOfMeasurement();
         return DtoMapper.toDatastreamUpdate(providerId, datastream, sensor, observedProperty, unit);
