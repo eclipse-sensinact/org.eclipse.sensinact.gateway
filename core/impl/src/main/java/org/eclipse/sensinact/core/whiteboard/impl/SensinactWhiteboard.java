@@ -15,7 +15,7 @@ package org.eclipse.sensinact.core.whiteboard.impl;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
-import static org.eclipse.sensinact.core.annotation.verb.VerbAnnotationConstants.NO_UPPER_BOUND_SET;
+import static org.eclipse.sensinact.core.annotation.dto.AnnotationConstants.NO_UPPER_BOUND_SET;
 import static org.eclipse.sensinact.core.annotation.verb.VerbAnnotationConstants.NO_TYPE_SET;
 
 import java.lang.annotation.Annotation;

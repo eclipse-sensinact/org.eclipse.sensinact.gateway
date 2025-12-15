@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
 import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.dto.impl.AbstractUpdateDto;
@@ -150,6 +151,7 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertNull(dud.type);
+            assertEquals(AnnotationConstants.NO_UPPER_BOUND_SET, dud.upperBound);
             assertEquals(NullAction.IGNORE, dud.actionOnNull);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
@@ -171,6 +173,7 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE, dud.data);
             assertEquals(Long.class, dud.type);
+            assertEquals(AnnotationConstants.NO_UPPER_BOUND_SET, dud.upperBound);
             assertEquals(NullAction.IGNORE, dud.actionOnNull);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }
@@ -192,6 +195,31 @@ public class GenericDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertNull(dud.type);
+            assertEquals(AnnotationConstants.NO_UPPER_BOUND_SET, dud.upperBound);
+            assertEquals(NullAction.IGNORE, dud.actionOnNull);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+        }
+
+        @Test
+        void multiValue() {
+            GenericDto testDto = makeTestDto(PROVIDER, SERVICE, RESOURCE, VALUE_2, null, null);
+            testDto.upperBound = 2;
+            List<? extends AbstractUpdateDto> updates = extractor()
+                    .getUpdates(testDto);
+
+            assertEquals(1, updates.size(), "Wrong number of updates " + updates.size());
+
+            AbstractUpdateDto extracted = updates.get(0);
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(VALUE_2, dud.data);
+            assertNull(dud.type);
+            assertEquals(2, dud.upperBound);
             assertEquals(NullAction.IGNORE, dud.actionOnNull);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
         }

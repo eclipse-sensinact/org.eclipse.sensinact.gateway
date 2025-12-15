@@ -105,7 +105,7 @@ public @interface ACT {
      * that the resource value is unary.
      * @return
      */
-    int upperBound() default VerbAnnotationConstants.NO_UPPER_BOUND_SET;
+    int upperBound() default AnnotationConstants.NO_UPPER_BOUND_SET;
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)

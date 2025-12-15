@@ -41,6 +41,22 @@ public @interface Data {
     Class<?> type() default Object.class;
 
     /**
+     * The upper bound for the resource data. If not set then the resource bounds
+     * will be set based on the type of the annotated field. Specifically:
+     *
+     * <ul>
+     *   <li> An array type = -1</li>
+     *   <li> <code>List</code>, <code>Set</code>, <code>Collection</code> = -1</li>
+     *   <li> All other types = 1</li>
+     * <ul>
+     *
+     * A bound of <code>-1</code> means no upper limit. A bound of <code>1</code> means
+     * that the resource value is unary.
+     * @return
+     */
+    int upperBound() default AnnotationConstants.NO_UPPER_BOUND_SET;
+
+    /**
      * The resource action when the data field is null
      *
      * @return

@@ -13,10 +13,12 @@
 package org.eclipse.sensinact.core.impl;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.function.Function;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
 import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
@@ -28,7 +30,6 @@ import org.eclipse.sensinact.core.emf.model.SensinactEMFModelManager;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFDigitalTwin;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.core.model.Resource;
-import org.eclipse.sensinact.core.model.ResourceBuilder;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.push.DataUpdateException;
@@ -120,31 +121,19 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
 
             Resource r = service.getResources().get(res);
             if (!model.isFrozen() && r == null) {
-                Class<?> type = dataUpdateDto.type != null ? dataUpdateDto.type
-                        : dataUpdateDto.data != null ? dataUpdateDto.data.getClass() : null;
-                ResourceBuilder<Resource, Object> resourceBuilder = service.createResource(res)
-                        .withValueType(ValueType.UPDATABLE);
-                if (Collection.class.isAssignableFrom(type)) {
-                    Class<?> elementType = Object.class; // default fallback
-
-                    if (dataUpdateDto.type != null && !Collection.class.isAssignableFrom(dataUpdateDto.type)) {
-                        // If type is explicitly provided and not a collection, it's the element type
-                        elementType = dataUpdateDto.type;
-                    } else if (dataUpdateDto.data instanceof Collection) {
-                        // Otherwise infer from the first element in the data
-                        Collection<?> collection = (Collection<?>) dataUpdateDto.data;
-                        if (!collection.isEmpty()) {
-                            Object firstElement = collection.iterator().next();
-                            if (firstElement != null) {
-                                elementType = firstElement.getClass();
-                            }
-                        }
-                    }
-
-                    r = resourceBuilder.withType(elementType).withUpperBound(-1).build();
-                } else {
-                    r = resourceBuilder.withType(type).build();
+                Class<?> type = getOrInferType();
+                if (type == null) {
+                    LOG.error("Unable to determine the type of resource {}/{} in model {}", svc, res, mod);
+                    throw new IllegalArgumentException("Unable to determine the type of a resource " + svc +
+                            "/" + res + " in model " + mod);
                 }
+
+                r = service.createResource(res)
+                        .withValueType(ValueType.UPDATABLE)
+                        .withUpperBound(dataUpdateDto.upperBound == AnnotationConstants.NO_UPPER_BOUND_SET ?
+                                getUpperBound(dataUpdateDto.data) : dataUpdateDto.upperBound)
+                        .withType(type)
+                        .build();
             }
             if (svcEClass == null) {
                 svcEClass = service.getServiceEClass();
@@ -192,5 +181,48 @@ public class SetValueCommand extends AbstractSensinactCommand<Void> {
         } else {
             return resource.setValue(dataUpdateDto.data, dataUpdateDto.timestamp);
         }
+    }
+
+    private Class<?> getOrInferType() {
+        Class<?> type;
+        if (dataUpdateDto.type != null) {
+            type = dataUpdateDto.type;
+        } else if(Collection.class.isInstance(dataUpdateDto.data)) {
+            // Infer from the first non-null element in the data
+            Collection<?> collection = (Collection<?>) dataUpdateDto.data;
+            Iterator<?> it = collection.iterator();
+            Object result = null;
+            while(it.hasNext() && result == null) {
+                result = it.next();
+            }
+            if (result != null) {
+                type = result.getClass();
+            } else {
+                // No type data
+                type = null;
+            }
+        } else if (dataUpdateDto.data != null) {
+            if (dataUpdateDto.data.getClass().isArray()) {
+                // Infer from the array component type
+                type = dataUpdateDto.data.getClass().getComponentType();
+            } else {
+                type = dataUpdateDto.data.getClass();
+            }
+        } else {
+            // No type data
+            type = null;
+        }
+        return type;
+    }
+
+    private int getUpperBound(Object value) {
+        if(value == null) {
+            return 1;
+        } else if (Collection.class.isInstance(value)) {
+            return -1;
+        } else if (value.getClass().isArray()) {
+            return -1;
+        }
+        return 1;
     }
 }
