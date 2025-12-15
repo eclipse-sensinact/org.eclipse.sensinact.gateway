@@ -3,7 +3,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
-import org.eclipse.sensinact.core.snapshot.Snapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 

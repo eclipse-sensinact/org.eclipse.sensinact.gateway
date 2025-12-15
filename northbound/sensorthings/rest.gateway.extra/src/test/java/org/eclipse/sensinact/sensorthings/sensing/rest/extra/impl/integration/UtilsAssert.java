@@ -43,17 +43,17 @@ public class UtilsAssert {
     }
 
     public static void assertSensor(ExpandedSensor sensor, JsonNode json) {
-        assertEquals(sensor.name(), json.get("name"));
-        assertEquals(sensor.description(), json.get("description"));
-        assertEquals(sensor.encodingType(), json.get("encodingType"));
+        assertEquals(sensor.name(), json.get("name").asText());
+        assertEquals(sensor.description(), json.get("description").asText());
+        assertEquals(sensor.encodingType(), json.get("encodingType").asText());
         assertEquals(sensor.properties(), json.get("properties"));
-        assertEquals(sensor.metadata(), json.get("metadata"));
+        assertEquals(sensor.metadata(), json.get("metadata").asText());
     }
 
     public static void assertObservedProperty(ExpandedObservedProperty observedProperty, JsonNode json) {
-        assertEquals(observedProperty.definition(), json.get("definition"));
-        assertEquals(observedProperty.description(), json.get("description"));
-        assertEquals(observedProperty.name(), json.get("name"));
+        assertEquals(observedProperty.definition(), json.get("definition").asText());
+        assertEquals(observedProperty.description(), json.get("description").asText());
+        assertEquals(observedProperty.name(), json.get("name").asText());
         assertEquals(observedProperty.properties(), json.get("properties"));
 
     }

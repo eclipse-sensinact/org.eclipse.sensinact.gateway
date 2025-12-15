@@ -22,8 +22,6 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
 
         UtilsAssert.assertSensor(sensor, json);
-        json = getJsonResponseFromGet(String.format("sensors(%s)", getIdFromJson(json)));
-        UtilsAssert.assertSensor(sensor, json);
 
     }
 

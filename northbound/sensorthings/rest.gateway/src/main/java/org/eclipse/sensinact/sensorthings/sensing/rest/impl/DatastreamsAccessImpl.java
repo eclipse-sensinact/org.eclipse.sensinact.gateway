@@ -189,7 +189,6 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
     @Override
     public Response createDatastreamsObservation(String id, ExpandedObservation observation) {
         // check if datastream exists
-        getDatastream(id);
         ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,

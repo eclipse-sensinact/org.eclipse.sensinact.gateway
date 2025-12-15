@@ -1,8 +1,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
@@ -25,14 +25,16 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ex
     @Reference
     IAccessResourceUseCase resourceUseCase;
 
-    Map<String, ExpandedSensor> sensorById = new ConcurrentHashMap<String, ExpandedSensor>();
+    Map<String, ExpandedSensor> sensorById = new HashMap<String, ExpandedSensor>();
 
     public ExtraUseCaseResponse<ExpandedSensor> create(ExtraUseCaseRequest<ExpandedSensor> request) {
-        String id = getId(request.model());
         ExpandedSensor sensor = request.model();
-        String sensorId = getId(sensor);
-        sensorById.put(sensorId, sensor);
-        return new ExtraUseCaseResponse<ExpandedSensor>(id, sensor);
+        String observedPropertyId = getId(sensor);
+        ExpandedSensor createdSensor = new ExpandedSensor(null, observedPropertyId, sensor.name(), sensor.description(),
+                sensor.encodingType(), sensor.metadata(), sensor.properties(), null);
+        sensorById.put(observedPropertyId, createdSensor);
+
+        return new ExtraUseCaseResponse<ExpandedSensor>(observedPropertyId, createdSensor);
 
     }
 
@@ -57,13 +59,18 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ex
     }
 
     @Override
-    public ExpandedSensor getSensor(String id) {
-        return sensorById.remove(id);
+    public String getId(ExpandedSensor dto) {
+        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
     @Override
-    public String getId(ExpandedSensor dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    public ExpandedSensor getInMemorySensor(String id) {
+        return sensorById.get(id);
+    }
+
+    @Override
+    public ExpandedSensor removeInMemorySensor(String id) {
+        return sensorById.remove(id);
     }
 
 }

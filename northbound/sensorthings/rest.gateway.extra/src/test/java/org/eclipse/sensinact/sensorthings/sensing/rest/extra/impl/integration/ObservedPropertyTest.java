@@ -19,10 +19,8 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // given
         String name = "testCreateObservedProperty";
         ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
-        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedPropertys", 201);
+        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
 
-        UtilsAssert.assertObservedProperty(ObservedProperty, json);
-        json = getJsonResponseFromGet(String.format("ObservedPropertys(%s)", getIdFromJson(json)));
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
 
     }
@@ -32,7 +30,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // given
         String name = "testCreateDatastreamLinkObservedProperty";
         ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
-        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedPropertys", 201);
+        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String ObservedPropertyId = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
 
@@ -43,8 +41,10 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(ObservedPropertyId));
-        json = getJsonResponseFromPost(thing, "Datastreams?$expand=ObservedProperty", 201);
-        UtilsAssert.assertDatastream(datastream, json, true);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
+                name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
+        UtilsAssert.assertDatastream(expectedDatastream, json, true);
 
     }
 }

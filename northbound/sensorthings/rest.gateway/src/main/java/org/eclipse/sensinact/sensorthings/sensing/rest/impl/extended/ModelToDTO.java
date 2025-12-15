@@ -161,7 +161,8 @@ public class ModelToDTO {
     public static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
             String datastreamLink) {
-        String sensorId = getResourceField(service, "sensorId", String.class);
+        String sensorId = String.format("%s~%s~%s", service.getProvider().getName(), service.getName(),
+                getResourceField(service, "sensorId", String.class));
         String sensorName = getResourceField(service, "sensorName", String.class);
         String sensorDescription = getResourceField(service, "sensorDescription", String.class);
         String sensorEncodingType = getResourceField(service, "sensorEncodingType", String.class);

@@ -230,10 +230,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest) {
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest);
-        ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
-        FeatureOfInterest createDto = ModelToDTO.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
+        FeatureOfInterest createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest);
+
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
         return Response.created(createdUri).entity(createDto).build();

@@ -18,6 +18,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import java.time.Instant;
 import java.util.Map;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 
@@ -31,6 +32,6 @@ public record ExpandedObservation(String selfLink, Object id, @JsonFormat(shape 
         @JsonInclude(NON_NULL) Map<String, Object> parameters,
         @JsonProperty("Datastream@iot.navigationLink") String datastreamLink,
         @JsonProperty("FeatureOfInterest@iot.navigationLink") String featureOfInterestLink,
-        @JsonProperty("Datastream") RefId datastream, @JsonProperty("FeatureOfInterest") RefId featureOfInterest)
-        implements Id {
+        @JsonProperty("Datastream") RefId datastream,
+        @JsonProperty("FeatureOfInterest") FeatureOfInterest featureOfInterest) implements Id {
 }

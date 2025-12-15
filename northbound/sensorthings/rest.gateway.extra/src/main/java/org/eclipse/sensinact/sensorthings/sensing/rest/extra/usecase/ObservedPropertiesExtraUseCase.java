@@ -1,13 +1,13 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -24,17 +24,20 @@ public class ObservedPropertiesExtraUseCase
     DataUpdate dataUpdate;
 
     @Reference
-    IAccessResourceUseCase resourceUseCase;
+    IAccessServiceUseCase serviceUseCase;
 
-    Map<String, ExpandedObservedProperty> observedPropertyById = new ConcurrentHashMap<String, ExpandedObservedProperty>();
+    Map<String, ExpandedObservedProperty> observedPropertyById = new HashMap<String, ExpandedObservedProperty>();
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> create(
             ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        String id = getId(request.model());
         ExpandedObservedProperty observedProperty = request.model();
         String observedPropertyId = getId(observedProperty);
-        observedPropertyById.put(observedPropertyId, observedProperty);
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(id, observedProperty);
+        ExpandedObservedProperty createExpandedProperty = new ExpandedObservedProperty(null, observedPropertyId,
+                observedProperty.name(), observedProperty.description(), observedProperty.definition(),
+                observedProperty.properties(), null);
+        observedPropertyById.put(observedPropertyId, createExpandedProperty);
+
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(observedPropertyId, createExpandedProperty);
 
     }
 
@@ -56,7 +59,6 @@ public class ObservedPropertiesExtraUseCase
 
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        // read thing for each location and update it
         return null;
     }
 
@@ -67,7 +69,12 @@ public class ObservedPropertiesExtraUseCase
     }
 
     @Override
-    public ExpandedObservedProperty getObservedProperty(String id) {
+    public ExpandedObservedProperty getInMemoryObservedProperty(String id) {
+        return observedPropertyById.get(id);
+    }
+
+    @Override
+    public ExpandedObservedProperty removeInMemoryObservedProperty(String id) {
         return observedPropertyById.remove(id);
     }
 

@@ -5,5 +5,5 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 public interface IAccessServiceUseCase {
 
-    public ServiceSnapshot read(SensiNactSession session, String id);
+    public ServiceSnapshot read(SensiNactSession session, String providerId, String serviceId);
 }

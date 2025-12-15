@@ -50,9 +50,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testCreateDatastreamWithObservedProperty() throws Exception {
+    public void testCreateDatastreamWithSensorAndObservedProperty() throws Exception {
         // given
-        String name = "testCreateDatastreamLinnkThingWithObservedPropertyObservations";
+        String name = "testCreateDatastreamWithSensorAndObservedProperty";
 
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
