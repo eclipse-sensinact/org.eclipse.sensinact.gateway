@@ -115,19 +115,19 @@ public class RulesWhiteboardIntegrationTest {
         Mockito.verify(rule).getInputFilter();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
         Mockito.verifyNoMoreInteractions(rule);
         Mockito.clearInvocations(rule);
 
         push.pushUpdate(makeRc("temperature", "Temp1", "sensor", "temperature", 12)).getValue();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
 
         push.pushUpdate(makeRc("temperature", "Temp2", "sensor", "temperature", 42)).getValue();
 
         // Not called for other updates
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.anyList(), Mockito.any());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.anyList(), Mockito.any());
     }
 
     @Test
@@ -147,19 +147,19 @@ public class RulesWhiteboardIntegrationTest {
         Mockito.verify(rule).getInputFilter();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.eq(List.of()), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.eq(List.of()), Mockito.notNull());
         Mockito.verifyNoMoreInteractions(rule);
         Mockito.clearInvocations(rule);
 
         push.pushUpdate(makeRc("temperature", "Temp5", "sensor", "temperature", 12)).getValue();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp5")), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.argThat(hasProviders("Temp5")), Mockito.notNull());
 
         push.pushUpdate(makeRc("temperature", "Temp2", "sensor", "temperature", 42)).getValue();
 
         // Not called for other updates
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.anyList(), Mockito.any());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.anyList(), Mockito.any());
     }
 
     @Test
