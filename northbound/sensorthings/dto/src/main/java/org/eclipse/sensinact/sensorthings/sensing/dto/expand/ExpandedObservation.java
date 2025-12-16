@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record ExpandedObservation(String selfLink, Object id, @JsonFormat(shape = STRING) Instant phenomenonTime,
         @JsonFormat(shape = STRING) Instant resultTime, Object result, @JsonInclude(NON_NULL) Object resultQuality,
         @JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval validTime,
-        @JsonInclude(NON_NULL) Map<String, Object> parameters,
+        @JsonInclude(NON_NULL) Map<String, Object> parameters, @JsonInclude(NON_NULL) Map<String, Object> properties,
         @JsonProperty("Datastream@iot.navigationLink") String datastreamLink,
         @JsonProperty("FeatureOfInterest@iot.navigationLink") String featureOfInterestLink,
         @JsonProperty("Datastream") RefId datastream,

@@ -17,7 +17,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
-        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
 
         if (!id.equals(o.id())) {
@@ -57,7 +57,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
             throw new NotFoundException();
         }
 
-        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
     }
 
@@ -85,7 +85,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
             throw new NotFoundException();
         }
 
-        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        return DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
     }
 
@@ -96,7 +96,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 validateAndGetProvider(provider));
     }
 

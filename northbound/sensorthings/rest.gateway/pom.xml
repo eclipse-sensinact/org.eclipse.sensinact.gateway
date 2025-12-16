@@ -10,7 +10,9 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
@@ -64,6 +66,12 @@
       <version>${sensinact.core.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
       <artifactId>provider</artifactId>
@@ -211,10 +219,10 @@
       <version>1.0.1</version>
       <scope>test</scope>
     </dependency>
-    
-    
+
+
   </dependencies>
-  
+
 
   <build>
     <plugins>

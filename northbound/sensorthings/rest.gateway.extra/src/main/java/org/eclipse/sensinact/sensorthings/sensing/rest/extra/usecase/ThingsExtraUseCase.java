@@ -49,7 +49,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
 
     @Override
     public String getId(ExpandedThing dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
@@ -74,7 +74,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
                 locationIds.addAll((List<String>) resource.getValue().getValue());
         }
 
-        return DtoMapper.toUpdates(request.model(), locationIds);
+        return DtoToModelMapper.toUpdates(request.model(), locationIds);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {

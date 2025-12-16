@@ -43,7 +43,7 @@ public class ObservedPropertiesExtraUseCase
 
     @Override
     public String getId(ExpandedObservedProperty dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> delete(

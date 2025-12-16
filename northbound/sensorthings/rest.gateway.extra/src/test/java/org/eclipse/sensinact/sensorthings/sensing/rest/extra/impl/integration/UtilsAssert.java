@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
@@ -19,15 +21,22 @@ public class UtilsAssert {
         assertDatastream(expectedLocation, datastream, false);
     }
 
-    public static void assertDatastream(ExpandedDataStream expectedDatastream, JsonNode datastream, boolean expanded) {
-        assertEquals(expectedDatastream.name(), datastream.get("name").asText(), "");
-        assertEquals(expectedDatastream.description(), datastream.get("description").asText(), "");
+    public static void assertDatastream(ExpandedDataStream dto, JsonNode json, boolean expanded) {
+        assertSelfLink(dto, json);
+
+        assertEquals(dto.name(), json.get("name").asText(), "");
+        assertEquals(dto.description(), json.get("description").asText(), "");
         if (expanded) {
-            if (expectedDatastream.observedProperty() != null) {
-                JsonNode observedPropertyNode = datastream.get("ObservedProperty");
+            if (dto.observedProperty() != null) {
+                JsonNode observedPropertyNode = json.get("ObservedProperty");
                 assertNotNull(observedPropertyNode, "observedProperty array must be present");
-                assertEquals(expectedDatastream.observedProperty().name(), observedPropertyNode.get("name").asText(),
-                        "");
+                assertEquals(dto.observedProperty().name(), observedPropertyNode.get("name").asText(), "");
+            }
+            if (dto.observations() != null && dto.observations().size() > 0) {
+                assertEquals(1, json.get("Observations").size());
+                assertObservation(dto.observations().get(dto.observations().size() - 1),
+                        json.get("Observations").get(0));
+
             }
         }
     }
@@ -36,66 +45,98 @@ public class UtilsAssert {
         assertLocation(dtoLocation, json, false);
     }
 
-    public static void assertLocation(ExpandedLocation dtoLocation, JsonNode json, boolean expanded) {
-        assertEquals(dtoLocation.name(), json.get("name").asText());
-        assertEquals(dtoLocation.description(), json.get("description").asText());
-        assertEquals(dtoLocation.location().toJsonString(), json.get("location").toString());
+    public static void assertFeatureOfInterest(FeatureOfInterest dtoFeatureOfInterest, JsonNode json) {
+        assertFeatureOfInterest(dtoFeatureOfInterest, json, false);
     }
 
-    public static void assertSensor(ExpandedSensor sensor, JsonNode json) {
-        assertEquals(sensor.name(), json.get("name").asText());
-        assertEquals(sensor.description(), json.get("description").asText());
-        assertEquals(sensor.encodingType(), json.get("encodingType").asText());
-        assertEquals(sensor.properties(), json.get("properties"));
-        assertEquals(sensor.metadata(), json.get("metadata").asText());
+    public static void assertFeatureOfInterest(FeatureOfInterest dto, JsonNode json, boolean expanded) {
+        assertSelfLink(dto, json);
+
+        assertEquals(dto.name(), json.get("name").asText());
+        assertEquals(dto.description(), json.get("description").asText());
+        assertEquals(dto.feature().toJsonString(), json.get("feature").toString());
     }
 
-    public static void assertObservedProperty(ExpandedObservedProperty observedProperty, JsonNode json) {
-        assertEquals(observedProperty.definition(), json.get("definition").asText());
-        assertEquals(observedProperty.description(), json.get("description").asText());
-        assertEquals(observedProperty.name(), json.get("name").asText());
-        assertEquals(observedProperty.properties(), json.get("properties"));
+    public static void assertLocation(ExpandedLocation dto, JsonNode json, boolean expanded) {
+        assertSelfLink(dto, json);
+
+        assertEquals(dto.name(), json.get("name").asText());
+        assertEquals(dto.description(), json.get("description").asText());
+        assertEquals(dto.location().toJsonString(), json.get("location").toString());
 
     }
 
-    public static void assertObservation(ExpandedObservation observation, JsonNode json) {
-        assertEquals(observation.parameters(), json.get("parameters"));
-        assertEquals(observation.phenomenonTime(), json.get("phenomenonType"));
-        assertEquals(observation.resultQuality(), json.get("resultQuality"));
-        assertEquals(observation.resultTime(), json.get("resultTime"));
+    public static void assertSensor(ExpandedSensor dto, JsonNode json) {
+        assertSelfLink(dto, json);
+        assertEquals(dto.name(), json.get("name").asText());
+        assertEquals(dto.description(), json.get("description").asText());
+        assertEquals(dto.encodingType(), json.get("encodingType").asText());
+        assertEquals(dto.properties(), json.get("properties"));
+        assertEquals(dto.metadata(), json.get("metadata").asText());
+
     }
 
-    public static void assertThing(ExpandedThing dtoThing, JsonNode json) {
-        assertThing(dtoThing, json, false);
+    public static void assertSelfLink(Id dto, JsonNode json) {
+
+        // assertEquals(dto.selfLink(), json.get("selfLink").asText());
     }
 
-    public static void assertThing(ExpandedThing dtoThing, JsonNode json, boolean expanded) {
-        assertTrue(json.has("@iot.id"), "Response must contain @iot.id");
-        assertEquals(dtoThing.name(), json.get("name").asText());
-        assertEquals(dtoThing.description(), json.get("description").asText());
+    public static void assertObservedProperty(ExpandedObservedProperty dto, JsonNode json) {
+        assertSelfLink(dto, json);
+
+        assertEquals(dto.definition(), json.get("definition").asText());
+        assertEquals(dto.description(), json.get("description").asText());
+        assertEquals(dto.name(), json.get("name").asText());
+        assertEquals(dto.properties(), json.get("properties"));
+
+    }
+
+    public static void assertObservation(ExpandedObservation dto, JsonNode json, boolean expanded) {
+        assertSelfLink(dto, json);
+
+        assertEquals(dto.parameters(), json.get("parameters"));
+        assertEquals(dto.phenomenonTime().toString(), json.get("phenomenonTime").asText());
+        assertEquals(dto.resultQuality(), json.get("resultQuality").asText());
+        assertEquals(dto.resultTime().toString(), json.get("resultTime").asText());
         if (expanded) {
-            if (dtoThing.locations() != null && dtoThing.locations().size() > 0) {
+            assertFeatureOfInterest(dto.featureOfInterest(), json.get("FeatureOfInterest"));
+        }
+    }
+
+    public static void assertObservation(ExpandedObservation dto, JsonNode json) {
+        assertObservation(dto, json, false);
+    }
+
+    public static void assertThing(ExpandedThing dto, JsonNode json) {
+        assertThing(dto, json, false);
+    }
+
+    public static void assertThing(ExpandedThing dto, JsonNode json, boolean expanded) {
+        assertSelfLink(dto, json);
+
+        assertTrue(json.has("@iot.id"), "Response must contain @iot.id");
+        assertEquals(dto.name(), json.get("name").asText());
+        assertEquals(dto.description(), json.get("description").asText());
+        if (expanded) {
+            if (dto.locations() != null && dto.locations().size() > 0) {
                 JsonNode locationsNode = json.get("Locations");
-                if (dtoThing.locations().size() > 1) {
+                if (dto.locations().size() > 1) {
                     assertNotNull(locationsNode, "Locations array must be present");
-                    assertEquals(dtoThing.locations().size(), locationsNode.size(), "Number of locations must match");
-                    for (int i = 0; i < dtoThing.locations().size(); i++) {
-                        String locationNameResult = locationsNode.get(i).get("name").asText();
-                        String locationNameExpected = dtoThing.locations().get(i).name();
-                        assertEquals(locationNameExpected, locationNameResult);
+                    assertEquals(dto.locations().size(), locationsNode.size(), "Number of locations must match");
+                    for (int i = 0; i < dto.locations().size(); i++) {
+                        assertLocation(dto.locations().get(i), locationsNode.get(i));
                     }
                 } else {
-                    String locationNameResult = locationsNode.get(0).get("name").asText();
-                    assertEquals(dtoThing.locations().get(0).name(), locationNameResult);
+                    assertEquals(dto.locations().get(0), locationsNode.get(0));
 
                 }
             }
-            if (dtoThing.datastreams() != null && dtoThing.datastreams().size() > 0) {
+            if (dto.datastreams() != null && dto.datastreams().size() > 0) {
                 JsonNode datastreamNode = json.get("Datastreams");
                 assertNotNull(datastreamNode, "Datastreams array must be present");
-                assertEquals(dtoThing.datastreams().size(), datastreamNode.size(), "Number of Datastreams must match");
-                for (int i = 0; i < dtoThing.datastreams().size(); i++) {
-                    assertDatastream(dtoThing.datastreams().get(i), datastreamNode.get(i));
+                assertEquals(dto.datastreams().size(), datastreamNode.size(), "Number of Datastreams must match");
+                for (int i = 0; i < dto.datastreams().size(); i++) {
+                    assertDatastream(dto.datastreams().get(i), datastreamNode.get(i));
                 }
             }
         }

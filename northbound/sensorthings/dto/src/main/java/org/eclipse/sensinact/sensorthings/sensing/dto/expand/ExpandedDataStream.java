@@ -38,7 +38,6 @@ public record ExpandedDataStream(String selfLink, Object id, String name, String
         @JsonProperty("Thing@iot.navigationLink") String thingLink,
         @JsonProperty("Observations") List<ExpandedObservation> observations,
         @JsonProperty("ObservedProperty") ExpandedObservedProperty observedProperty,
-        @JsonProperty("Sensor") ExpandedSensor sensor,
-        @JsonProperty("Observations@iot.nextLink") String nextObservation, @JsonProperty("Thing") RefId thing)
-        implements NameDescription {
+        @JsonProperty("Sensor") ExpandedSensor sensor, @JsonProperty("Observations@iot.nextLink") String obsLink,
+        @JsonProperty("Thing") RefId thing) implements NameDescription {
 }

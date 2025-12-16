@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -85,7 +85,7 @@ public abstract class AbstractAccess {
     }
 
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        DtoMapper.validatedProviderId(id);
+        DtoMapperGet.validatedProviderId(id);
 
         Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
 

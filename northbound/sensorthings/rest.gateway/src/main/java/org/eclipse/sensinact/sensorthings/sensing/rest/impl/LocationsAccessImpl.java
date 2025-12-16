@@ -16,7 +16,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,9 +36,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
 
     @Override
     public Location getLocation(String id) {
-        String provider = DtoMapper.extractFirstIdSegment(id);
+        String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Location l = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), providerSnapshot);
 
         if (!id.equals(l.id())) {
@@ -58,7 +58,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                                 filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
@@ -69,9 +69,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
 
     @Override
     public HistoricalLocation getLocationHistoricalLocation(String id, String id2) {
-        String provider = DtoMapper.extractFirstIdSegment(id);
+        String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
+        Optional<HistoricalLocation> hl = DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
 
         if (hl.isEmpty() || !id2.equals(hl.get().id())) {
@@ -85,9 +85,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         if (!id2.equals(id)) {
             throw new NotFoundException();
         }
-        String provider = DtoMapper.extractFirstIdSegment(id);
+        String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 providerSnapshot);
     }
 
@@ -103,9 +103,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
 
     @Override
     public Thing getLocationThing(String id, String id2) {
-        String provider = DtoMapper.extractFirstIdSegment(id);
+        String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 providerSnapshot);
     }
 
@@ -126,7 +126,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                                 filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;

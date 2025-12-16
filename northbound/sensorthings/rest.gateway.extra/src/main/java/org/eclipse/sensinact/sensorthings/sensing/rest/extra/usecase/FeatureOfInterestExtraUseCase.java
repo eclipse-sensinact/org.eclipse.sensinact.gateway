@@ -39,7 +39,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
 
     @Override
     public String getId(FeatureOfInterest dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
     public ExtraUseCaseResponse<FeatureOfInterest> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {

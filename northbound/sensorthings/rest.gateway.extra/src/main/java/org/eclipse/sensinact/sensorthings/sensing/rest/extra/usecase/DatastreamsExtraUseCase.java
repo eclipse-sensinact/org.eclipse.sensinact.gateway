@@ -2,8 +2,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
-
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
@@ -86,36 +84,65 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             throw new BadRequestException("Thing id not found");
         }
 
+        ExpandedSensor sensor = getExpandedSensor(datastream);
+        ExpandedObservedProperty observedProperty = getExpandedObservedProperty(datastream);
+        UnitOfMeasurement unit = datastream.unitOfMeasurement();
+
+        if (datastream.observations() != null && datastream.observations().size() > 0) {
+            return datastream.observations().stream().map(obs -> DtoToModelMapper.toDatastreamUpdate(providerId,
+                    datastream, sensor, observedProperty, unit, obs, obs.featureOfInterest())).toList();
+        } else {
+            return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, datastream, sensor, observedProperty, unit,
+                    null, null));
+        }
+
+    }
+
+    private ExpandedSensor getExpandedSensor(ExpandedDataStream datastream) {
         ExpandedSensor sensor = null;
         // retrieve created sensor
-        if (datastream.sensor() != null && DtoMapper.isRecordOnlyField(datastream.sensor(), "id")) {
-            String idSensor = getIdFromRecord(datastream.sensor());
+        if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
+            String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
 
             sensor = sensorExtraUseCase.getInMemorySensor(idSensor);
 
         } else {
             sensor = datastream.sensor();
         }
+        return sensor;
+    }
+
+    private void removeExpandedSensor(ExpandedDataStream datastream) {
+        // retrieve created sensor
+        if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
+            String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
+
+            sensorExtraUseCase.removeInMemorySensor(idSensor);
+
+        }
+
+    }
+
+    private ExpandedObservedProperty getExpandedObservedProperty(ExpandedDataStream datastream) {
         ExpandedObservedProperty observedProperty = null;
         // retrieve create observedPorperty
-        if (datastream.observedProperty() != null && DtoMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
-            String idObservedProperty = getIdFromRecord(datastream.observedProperty());
+        if (datastream.observedProperty() != null
+                && DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
+            String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
             observedProperty = observedPropertyUseCase.getInMemoryObservedProperty(idObservedProperty);
         } else {
             observedProperty = datastream.observedProperty();
         }
-        UnitOfMeasurement unit = datastream.unitOfMeasurement();
-        return DtoMapper.toDatastreamUpdate(providerId, datastream, sensor, observedProperty, unit);
-
+        return observedProperty;
     }
 
-    private String getIdFromRecord(Object record) {
-        Object field = DtoMapper.getRecordField(record, "id");
-        Object id = null;
-        if (field instanceof Map) {
-            id = ((Map<?, ?>) field).values().stream().findFirst().get();
+    private void removeExpandedObservedProperty(ExpandedDataStream datastream) {
+        // retrieve create observedPorperty
+        if (datastream.observedProperty() != null
+                && DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
+            String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
+            observedPropertyUseCase.removeInMemoryObservedProperty(idObservedProperty);
         }
-        return id instanceof String ? (String) id : null;
 
     }
 
@@ -136,6 +163,10 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         }
 
         ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), thingId, id);
+
+        removeExpandedObservedProperty(request.model());
+        removeExpandedSensor(request.model());
+
         return new ExtraUseCaseResponse<ServiceSnapshot>(id, serviceSnapshot);
 
     }

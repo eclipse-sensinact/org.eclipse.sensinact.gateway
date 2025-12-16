@@ -38,6 +38,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.core.Application;
 
@@ -97,6 +98,8 @@ public class AbstractIntegrationTest {
             targetUri = URI.create("http://localhost:8185/v1.1/" + path);
         }
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
         String body = mapper.writeValueAsString(dto);
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).uri(targetUri)

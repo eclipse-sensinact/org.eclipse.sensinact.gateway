@@ -5,7 +5,7 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -18,12 +18,12 @@ public class AccessResourceUseCase implements IAccessResourceUseCase {
 
     @Override
     public ResourceSnapshot read(SensiNactSession session, String id) {
-        String providerId = DtoMapper.extractFirstIdSegment(id);
+        String providerId = DtoMapperGet.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
 
-        String service = DtoMapper.extractFirstIdSegment(id.substring(providerId.length() + 1));
-        String resource = DtoMapper.extractFirstIdSegment(id.substring(providerId.length() + service.length() + 2));
+        String service = DtoMapperGet.extractFirstIdSegment(id.substring(providerId.length() + 1));
+        String resource = DtoMapperGet.extractFirstIdSegment(id.substring(providerId.length() + service.length() + 2));
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 

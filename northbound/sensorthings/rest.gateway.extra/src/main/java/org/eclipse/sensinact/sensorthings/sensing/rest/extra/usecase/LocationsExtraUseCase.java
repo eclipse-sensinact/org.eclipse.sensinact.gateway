@@ -64,7 +64,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
         // read thing for each location and update it
         ExpandedLocation location = request.model();
 
-        List<SensorThingsUpdate> listUpdates = DtoMapper.toLocationUpdates(request.model());
+        List<SensorThingsUpdate> listUpdates = DtoToModelMapper.toLocationUpdates(request.model());
         if (location.things() != null && location.things().size() >= 0 || request.parentId() != null) {
             List<String> listThingIds = new ArrayList<String>();
 
@@ -116,7 +116,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
     @Override
     public String getId(ExpandedLocation dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
 }

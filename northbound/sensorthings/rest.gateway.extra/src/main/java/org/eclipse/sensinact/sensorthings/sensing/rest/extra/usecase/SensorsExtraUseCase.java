@@ -60,7 +60,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ex
 
     @Override
     public String getId(ExpandedSensor dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
     @Override

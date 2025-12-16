@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
@@ -24,9 +25,22 @@ public class DtoFactory {
         return getDatastreamMinimalLinkThing(name, null);
     }
 
+    /**
+     * { "name": "Weather station location", "description": "Geographic location of
+     * the weather station", "encodingType": "application/vnd.geo+json", "feature":
+     * { "type": "Point", "coordinates": [2.3522, 48.8566] } }
+     *
+     * @param name
+     * @return
+     */
+    public static FeatureOfInterest getFeatureOfInterest(String name) {
+
+        return new FeatureOfInterest(null, null, name, "Geographic location of the weather station",
+                "application/vnd.geo+json", new Point(-122.4194, 37.7749), null);
+    }
+
     public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, RefId thingId) {
         ExpandedSensor sensor = getSensor("sensor1");
-        // Required
         ExpandedObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         Instant start = Instant.now();
@@ -34,6 +48,17 @@ public class DtoFactory {
         TimeInterval interval = new TimeInterval(end, start);
         return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, interval, interval,
                 null, null, null, null, null, null, op, sensor, null, thingId);
+    }
+
+    public static ExpandedDataStream getDatastreamMinimalLinkThingWithObservations(String name, RefId thingId,
+            List<ExpandedObservation> listObs) {
+        ExpandedSensor sensor = getSensor("sensor1");
+        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
+        Instant start = Instant.now();
+        Instant end = Instant.now();
+        TimeInterval interval = new TimeInterval(end, start);
+        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, interval, interval,
+                null, null, null, null, null, listObs, null, sensor, null, thingId);
     }
 
     public static ExpandedDataStream getDatastreamMinimalWithThingObervedPropertySensor(String name, RefId thingId,
@@ -88,11 +113,27 @@ public class DtoFactory {
 
     }
 
-    public static ExpandedObservation getObservation(String name) {
+    public static ExpandedObservation getObservationLinkDatastream(String name, RefId datastreamId) {
+        return getObservationLinkDatastream(name, datastreamId, null);
+
+    }
+
+    public static ExpandedObservation getObservationLinkDatastream(String name, RefId datastreamId,
+            FeatureOfInterest featureOfInterest) {
         Instant now = Instant.now();
         Instant after = Instant.now();
-        return new ExpandedObservation(null, "obs2", now, after, null, null, new TimeInterval(now, after), null, null,
-                null, null, null);
+        return new ExpandedObservation(null, "obs2", now, after, 5.0, "test", new TimeInterval(now, after), null, null,
+                null, null, datastreamId, featureOfInterest);
+
+    }
+
+    public static ExpandedObservation getObservation(String name) {
+        return getObservationLinkDatastream(name, null, null);
+
+    }
+
+    public static ExpandedObservation getObservationWithFeatureOfInterest(String name) {
+        return getObservationLinkDatastream(name, null, getFeatureOfInterest(name + "Feature"));
 
     }
 

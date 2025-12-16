@@ -13,14 +13,14 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toDatastream;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toFeatureOfInterest;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toHistoricalLocation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toLocation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toObservation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toObservedProperty;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toSensor;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toThing;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toDatastream;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toFeatureOfInterest;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toHistoricalLocation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toLocation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toObservation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toObservedProperty;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toSensor;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toThing;
 
 import java.net.URI;
 import java.util.List;
@@ -53,7 +53,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.RootResourceAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.RootResourceCreate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.ModelToDTO;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -208,7 +208,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
                 mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
         if (list.value().isEmpty() && resourceSnapshot.isSet()) {
-            list = new ResultList<Observation>(null, null, DtoMapper
+            list = new ResultList<Observation>(null, null, DtoMapperGet
                     .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
                     .map(List::of).orElse(List.of()));
         }
@@ -221,7 +221,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
-        Datastream createDto = ModelToDTO.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -242,7 +242,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public Response createHistoricalLocation(HistoricalLocation historicalLocation) {
         ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, historicalLocation);
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
-        HistoricalLocation createDto = ModelToDTO.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+        HistoricalLocation createDto = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), criterion, snapshot);
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -254,21 +254,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public Response createLocation(ExpandedLocation location) {
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location);
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
-        Location createDto = ModelToDTO.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
-
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
-
-        return Response.created(createdUri).entity(createDto).build();
-
-    }
-
-    @Override
-    public Response createObservation(ExpandedObservation observation) {
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation);
-        ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
-        Observation createDto = ModelToDTO.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -302,8 +289,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, thing);
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
-        Thing createDto = ModelToDTO.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot);
+        Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

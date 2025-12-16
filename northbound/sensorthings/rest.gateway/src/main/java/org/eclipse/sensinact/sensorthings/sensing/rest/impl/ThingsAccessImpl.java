@@ -19,8 +19,8 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.getTimestampFromId;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +42,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.ModelToDTO;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
@@ -53,8 +53,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
     public Thing getThing(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
-        return ModelToDTO.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                providerSnapshot);
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), providerSnapshot);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
             throw new NotFoundException();
         }
 
-        Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Datastream d = DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
 
         if (!id2.equals(d.id())) {
@@ -103,7 +103,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
             throw new NotFoundException();
         }
 
-        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id2));
 
         if (!id2.equals(o.id())) {
@@ -121,7 +121,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
             throw new NotFoundException();
         }
 
-        Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Sensor s = DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
 
         if (!id2.equals(s.id())) {
@@ -153,8 +153,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -173,7 +173,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         getTimestampFromId(id2);
 
         try {
-            Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
+            Optional<HistoricalLocation> hl = DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(),
                     uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), validateAndGetProvider(provider));
             if (hl.isEmpty()) {
                 throw new NotFoundException();
@@ -204,8 +204,9 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
         getTimestampFromId(id2);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
+        ResultList<Location> list = new ResultList<>(null, null,
+                List.of(DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        parseFilter(LOCATIONS), validateAndGetProvider(provider))));
 
         return list;
     }
@@ -214,8 +215,9 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
     public ResultList<Location> getThingLocations(String id) {
         String provider = extractFirstIdSegment(id);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
+        ResultList<Location> list = new ResultList<>(null, null,
+                List.of(DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        parseFilter(LOCATIONS), validateAndGetProvider(provider))));
 
         return list;
     }
@@ -230,7 +232,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
         getTimestampFromId(id2);
 
-        Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Location l = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), validateAndGetProvider(provider));
 
         if (!id2.equals(l.id())) {
@@ -259,8 +261,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -272,7 +274,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
     public Response createDatastream(String id, ExpandedDataStream datastream) {
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        Datastream createDto = ModelToDTO.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
@@ -286,7 +288,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, id);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
 
-        Location createDto = ModelToDTO.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();

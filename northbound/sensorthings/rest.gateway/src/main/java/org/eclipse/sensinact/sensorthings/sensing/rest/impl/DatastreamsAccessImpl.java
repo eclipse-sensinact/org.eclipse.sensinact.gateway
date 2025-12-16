@@ -20,7 +20,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.net.URI;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -46,6 +46,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -59,7 +60,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
 
     @Override
     public Datastream getDatastream(String id) {
-        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 validateAndGetResourceSnapshot(id), parseFilter(DATASTREAMS));
     }
 
@@ -75,7 +76,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
     @Override
     public Observation getDatastreamObservation(String id, String id2) {
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+        Optional<Observation> o = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), filter, validateAndGetResourceSnapshot(id));
 
         if (o.isEmpty() || !id2.equals(o.get().id())) {
@@ -92,13 +93,13 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
     @Override
     public FeatureOfInterest getDatastreamObservationFeatureOfInterest(String id, String id2) {
         String provider = extractFirstIdSegment(id);
-        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        return DtoMapperGet.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(FEATURES_OF_INTEREST), validateAndGetProvider(provider));
     }
 
     @Override
     public ObservedProperty getDatastreamObservedProperty(String id) {
-        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
 
         if (!id.equals(o.id())) {
@@ -114,7 +115,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
 
     @Override
     public Sensor getDatastreamSensor(String id) {
-        Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Sensor s = DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(SENSORS), validateAndGetResourceSnapshot(id));
 
         if (!id.equals(s.id())) {
@@ -131,8 +132,8 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
     @Override
     public Thing getDatastreamThing(String id) {
         String provider = extractFirstIdSegment(id);
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                validateAndGetProvider(provider));
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), validateAndGetProvider(provider));
     }
 
     @Override
@@ -153,8 +154,8 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
                 list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -167,7 +168,7 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
 
         Location hl;
         try {
-            hl = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            hl = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                     parseFilter(LOCATIONS), validateAndGetProvider(provider));
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -182,22 +183,24 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
         return new ResultList<>(null, null, providerSnapshot.getServices().stream()
                 .flatMap(s -> s.getResources().stream())
                 .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
-                .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter))
+                .map(r -> DtoMapperGet.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter))
                 .collect(toList()));
     }
 
     @Override
     public Response createDatastreamsObservation(String id, ExpandedObservation observation) {
         // check if datastream exists
-        ResourceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
-        if (createDto.get() == null) {
+        String datastreamLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Datastreams({id})", id);
+
+        Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot, datastreamLink);
+        if (createDto == null) {
             throw new BadRequestException("fail to create observation");
         }
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.get().id())).build();
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
-        return Response.created(createdUri).entity(createDto.get()).build();
+        return Response.created(createdUri).entity(createDto).build();
     }
 }

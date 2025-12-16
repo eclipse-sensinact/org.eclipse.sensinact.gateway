@@ -14,7 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
 
         FeatureOfInterest foi;
         try {
-            foi = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            foi = DtoMapperGet.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
                     parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
@@ -70,7 +70,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
             ProviderSnapshot provider) {
         return new ResultList<>(null, null, provider.getServices().stream().flatMap(s -> s.getResources().stream())
                 .filter(ResourceSnapshot::isSet)
-                .map(r -> DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, filter, r))
+                .map(r -> DtoMapperGet.toObservation(userSession, application, mapper, uriInfo, expansions, filter, r))
                 .filter(Optional::isPresent).map(Optional::get).collect(toList()));
     }
 
@@ -86,7 +86,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
 
         Optional<Observation> o;
         try {
-            o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            o = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                     parseFilter(EFilterContext.FEATURES_OF_INTEREST), resourceSnapshot);
         } catch (Exception e) {
             throw new NotFoundException();
@@ -111,7 +111,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
 
         Datastream d;
         try {
-            d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            d = DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                     resourceSnapshot, parseFilter(EFilterContext.DATASTREAMS));
         } catch (Exception e) {
             throw new NotFoundException();

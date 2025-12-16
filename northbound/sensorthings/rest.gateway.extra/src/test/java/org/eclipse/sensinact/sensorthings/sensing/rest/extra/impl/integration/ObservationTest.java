@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -15,17 +16,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class ObservationTest extends AbstractIntegrationTest {
 
     @Test
-    public void testCreateObservation() throws Exception {
-        // given
-        String name = "testCreateObservation";
-        ExpandedObservation observsation = DtoFactory.getObservation(name);
-        JsonNode json = getJsonResponseFromPost(observsation, "ObservedPropertys", 201);
-
-        UtilsAssert.assertObservation(observsation, json);
-
-    }
-
-    @Test
     public void createCreateObservationThroughDatastream() throws Exception {
         // given
         String name = "createCreateObservationThroughDatastream";
@@ -37,13 +27,35 @@ public class ObservationTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
                 DtoFactory.getRefId(thingId));
-        json = getJsonResponseFromPost(thing, "Datastreams?$expand=ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
         UtilsAssert.assertDatastream(datastream, json, true);
         String datastreamId = getIdFromJson(json);
         ExpandedObservation observsation = DtoFactory.getObservation(name);
-        json = getJsonResponseFromPost(observsation, String.format("Datastream(%s)/Observsations", datastreamId), 201);
+        json = getJsonResponseFromPost(observsation, String.format("Datastreams(%s)/Observations", datastreamId), 201);
 
         UtilsAssert.assertObservation(observsation, json);
+
+    }
+
+    @Test
+    public void createCreateObservationsInDatastream() throws Exception {
+        // given
+        String name = "createCreateObservationsInDatastream";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists2", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedObservation observsation1 = DtoFactory.getObservation(name + "1");
+        ExpandedObservation observsation2 = DtoFactory.getObservation(name + "2");
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingWithObservations(name + "Datastream",
+                DtoFactory.getRefId(thingId), List.of(observsation1, observsation2));
+
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations", 201);
+
+        UtilsAssert.assertDatastream(datastream, json, true);
 
     }
 }
