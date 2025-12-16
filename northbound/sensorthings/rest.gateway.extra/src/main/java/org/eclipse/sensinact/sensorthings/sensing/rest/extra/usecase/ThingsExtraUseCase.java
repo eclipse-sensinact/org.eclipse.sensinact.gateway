@@ -13,6 +13,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import jakarta.ws.rs.InternalServerErrorException;
+
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
@@ -35,7 +37,8 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, e, "fail to create");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, new InternalServerErrorException(e),
+                    e.getMessage());
 
         }
 
@@ -67,7 +70,10 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedThing> request) {
         // check if Thing already exists with location get locations
         List<String> locationIds = new ArrayList<String>();
-        ProviderSnapshot provider = providerUseCase.read(request.session(), (String) request.model().id());
+        ExpandedThing thing = request.model();
+        DtoToModelMapper.checkRequireField(thing);
+        String id = getId(thing);
+        ProviderSnapshot provider = providerUseCase.read(request.session(), id);
         if (provider != null) {
             ResourceSnapshot resource = provider.getResource("thing", "locationsIds");
             if (resource.getValue() != null)

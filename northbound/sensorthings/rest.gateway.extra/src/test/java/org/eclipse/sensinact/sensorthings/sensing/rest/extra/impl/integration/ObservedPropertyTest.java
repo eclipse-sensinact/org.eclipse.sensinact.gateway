@@ -26,6 +26,20 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void testCreateObservedPropertyMissingField() throws Exception {
+        // given
+        String name = "testCreateObservedPropertyMissingField";
+        // name
+        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(null, "test");
+        getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 400);
+
+        // definition
+        ObservedProperty = DtoFactory.getObservedProperty(name, null);
+        getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 400);
+
+    }
+
+    @Test
     public void testCreateDatastreamLinkObservedProperty() throws Exception {
         // given
         String name = "testCreateDatastreamLinkObservedProperty";

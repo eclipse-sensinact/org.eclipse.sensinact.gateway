@@ -14,6 +14,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
@@ -46,7 +47,8 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, e, "fail to create");
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
+                    e.getMessage());
 
         }
 
@@ -69,10 +71,18 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
 
     }
 
+    private void checkRequireLink(ServiceSnapshot datastream) {
+        if (datastream == null) {
+            throw new BadRequestException("datastream not found in Observation Payload");
+        }
+
+    }
+
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedObservation> request) {
         // read thing for each location and update it
         ExpandedObservation observation = request.model();
+        DtoToModelMapper.checkRequireField(observation);
         // parent can be datastream or featureOfInterest TODO
         String idFullDatastream = request.parentId();
         String providerId = DtoToModelMapper.extractFirstIdSegment(idFullDatastream);
@@ -81,6 +91,11 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
             throw new BadRequestException("can't find datastream parent ");
         }
         FeatureOfInterest foi = getFeatureOfInterest(observation);
+        if (foi != null) {
+            DtoToModelMapper.checkRequireField(foi);
+
+        }
+        checkRequireLink(serviceUseCase.read(request.session(), providerId, idDatastream));
 
         return List
                 .of(DtoToModelMapper.toDatastreamUpdate(providerId, idDatastream, null, null, null, observation, foi));

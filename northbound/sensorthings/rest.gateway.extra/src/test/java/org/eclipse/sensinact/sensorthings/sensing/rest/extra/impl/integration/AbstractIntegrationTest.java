@@ -64,9 +64,11 @@ public class AbstractIntegrationTest {
         HttpResponse<String> response = queryPost(SubUrl, dto);
         // Then
         assertEquals(response.statusCode(), expectedStatus);
-        JsonNode json = mapper.readTree(response.body());
+        if (response.statusCode() < 400) {
+            return mapper.readTree(response.body());
 
-        return json;
+        }
+        return null;
     }
 
     @InjectService

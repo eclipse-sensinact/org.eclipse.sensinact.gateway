@@ -31,6 +31,7 @@ public class ObservedPropertiesExtraUseCase
     public ExtraUseCaseResponse<ExpandedObservedProperty> create(
             ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         ExpandedObservedProperty observedProperty = request.model();
+        DtoToModelMapper.checkRequireField(observedProperty);
         String observedPropertyId = getId(observedProperty);
         ExpandedObservedProperty createExpandedProperty = new ExpandedObservedProperty(null, observedPropertyId,
                 observedProperty.name(), observedProperty.description(), observedProperty.definition(),

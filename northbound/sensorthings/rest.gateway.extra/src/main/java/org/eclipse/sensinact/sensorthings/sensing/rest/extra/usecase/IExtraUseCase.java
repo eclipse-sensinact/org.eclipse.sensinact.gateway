@@ -9,8 +9,8 @@ import jakarta.ws.rs.core.UriInfo;
 
 public interface IExtraUseCase<M extends Id, S> {
 
-    public record ExtraUseCaseResponse<S>(String id, S snapshot, boolean success, Throwable e, String message) {
-        public ExtraUseCaseResponse(boolean success, Throwable e, String message) {
+    public record ExtraUseCaseResponse<S>(String id, S snapshot, boolean success, RuntimeException e, String message) {
+        public ExtraUseCaseResponse(boolean success, RuntimeException e, String message) {
             this(null, null, success, e, message);
         }
 

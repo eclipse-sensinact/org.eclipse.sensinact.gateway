@@ -29,6 +29,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ex
 
     public ExtraUseCaseResponse<ExpandedSensor> create(ExtraUseCaseRequest<ExpandedSensor> request) {
         ExpandedSensor sensor = request.model();
+        DtoToModelMapper.checkRequireField(sensor);
         String observedPropertyId = getId(sensor);
         ExpandedSensor createdSensor = new ExpandedSensor(null, observedPropertyId, sensor.name(), sensor.description(),
                 sensor.encodingType(), sensor.metadata(), sensor.properties(), null);

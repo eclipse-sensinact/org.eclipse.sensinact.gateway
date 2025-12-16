@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,32 @@ public class ObservationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void createCreateObservationMissingField() throws Exception {
+        // given
+        String name = "createCreateObservationMissingField";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name + "alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
+                DtoFactory.getRefId(thingId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        UtilsAssert.assertDatastream(datastream, json, true);
+        String datastreamId = getIdFromJson(json);
+        // result
+        ExpandedObservation observsation = DtoFactory.getObservationLinkDatastream(name, null, Instant.now(), null,
+                null);
+        json = getJsonResponseFromPost(observsation, String.format("Datastreams(%s)/Observations", datastreamId), 400);
+
+        // phenomenomTime
+        observsation = DtoFactory.getObservationLinkDatastream(name, 5.0, null, null, null);
+        json = getJsonResponseFromPost(observsation, String.format("Datastreams(%s)/Observations", datastreamId), 400);
+
+    }
+
+    @Test
     public void createCreateObservationsInDatastream() throws Exception {
         // given
         String name = "createCreateObservationsInDatastream";
@@ -53,7 +80,7 @@ public class ObservationTest extends AbstractIntegrationTest {
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingWithObservations(name + "Datastream",
                 DtoFactory.getRefId(thingId), List.of(observsation1, observsation2));
 
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,ObservedProperty", 201);
 
         UtilsAssert.assertDatastream(datastream, json, true);
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
@@ -30,6 +31,24 @@ public class LocationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void testCreateLocationMissingField() throws Exception {
+        // given
+        String name = "testCreateLocation";
+
+        // name
+        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(null, "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749), null);
+        getJsonResponseFromPost(dtoLocation, "Locations", 400);
+        // encoding type
+        dtoLocation = DtoFactory.getLocationLinkThing(name + "1", null, new Point(-122.4194, 37.7749), null);
+        getJsonResponseFromPost(dtoLocation, "Locations", 400);
+
+        // location
+        dtoLocation = DtoFactory.getLocationLinkThing(name + "1", "application/vnd.geo+json", null, null);
+        getJsonResponseFromPost(dtoLocation, "Locations", 400);
+    }
+
+    @Test
     public void testCreateLocationLinkedThing() throws Exception {
         // given
         String name = "testCreateLocationLinkedThing";
@@ -39,7 +58,8 @@ public class LocationTest extends AbstractIntegrationTest {
         String idThing = getIdFromJson(json);
         List<RefId> listId = new ArrayList<RefId>();
         listId.add(DtoFactory.getRefId(idThing));
-        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name + "1", listId);
+        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name + "1", "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749), listId);
 
         // when
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);

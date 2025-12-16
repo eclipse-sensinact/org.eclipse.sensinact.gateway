@@ -66,6 +66,94 @@ public class DtoToModelMapper {
 
     }
 
+    public static void checkRequireField(ExpandedSensor dto) {
+        if (dto == null) {
+            throw new BadRequestException("sensor not found in  Payload");
+        }
+        if (dto.name() == null) {
+            throw new BadRequestException("name not found in  Payload");
+        }
+        if (dto.encodingType() == null) {
+            throw new BadRequestException("encodingType not found in  Payload");
+        }
+        if (dto.metadata() == null) {
+            throw new BadRequestException("metadata not found in  Payload");
+        }
+
+    }
+
+    public static void checkRequireField(ExpandedObservedProperty dto) {
+        if (dto == null) {
+            throw new BadRequestException("ObservedProperty not found in  Payload");
+        }
+        if (dto.name() == null) {
+            throw new BadRequestException("name not found in  Payload");
+        }
+        if (dto.definition() == null) {
+            throw new BadRequestException("definition not found in  Payload");
+        }
+
+    }
+
+    public static void checkRequireField(ExpandedObservation dto) {
+        if (dto.result() == null) {
+            throw new BadRequestException("result not found in  Payload");
+        }
+        if (dto.phenomenonTime() == null) {
+            throw new BadRequestException("phenomenonTime not found in  Payload");
+        }
+
+    }
+
+    public static void checkRequireField(ExpandedThing dto) {
+        if (dto.name() == null) {
+            throw new BadRequestException("name not found in  Payload");
+        }
+
+    }
+
+    public static void checkRequireField(ExpandedLocation dto) {
+        if (dto.name() == null) {
+            throw new BadRequestException("name not found in  Payload");
+        }
+        if (dto.encodingType() == null) {
+            throw new BadRequestException("encodingType not found in  Payload");
+        }
+        if (dto.location() == null) {
+            throw new BadRequestException("location not found in  Payload");
+        }
+
+    }
+
+    public static void checkRequireField(FeatureOfInterest dto) {
+        if (dto.name() == null) {
+            throw new BadRequestException("name not found in  Payload");
+        }
+        if (dto.encodingType() == null) {
+            throw new BadRequestException("encodingType not found in  Payload");
+        }
+        if (dto.feature() == null) {
+            throw new BadRequestException("feature ot found in  Payload");
+        }
+
+    }
+
+    public static void checkRequireField(ExpandedDataStream datastream) {
+        if (datastream.name() == null) {
+            throw new BadRequestException("name not found in  Payload");
+        }
+        if (datastream.description() == null) {
+            throw new BadRequestException("description not found in  Payload");
+        }
+        if (datastream.unitOfMeasurement() == null) {
+            throw new BadRequestException("unit Of Measure not found in  Payload");
+        }
+        if (datastream.observationType() == null) {
+            throw new BadRequestException("observationType not found in  Payload");
+        }
+
+    }
+
     public static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider,
             String resource) {
         ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> ADMIN.equals(s.getName())).findFirst()

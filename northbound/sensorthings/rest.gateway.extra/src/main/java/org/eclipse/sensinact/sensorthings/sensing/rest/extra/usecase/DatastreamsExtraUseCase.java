@@ -3,17 +3,20 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
@@ -24,6 +27,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     @Reference
     DataUpdate dataUpdate;
+
+    @Reference
+    IAccessProviderUseCase providerUseCase;
 
     @Reference
     IAccessServiceUseCase serviceUseCase;
@@ -43,8 +49,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, e, "fail to create");
-
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
+                    e.getMessage());
         }
         String thingId = request.model().thing().id() == null ? request.parentId()
                 : (String) request.model().thing().id();
@@ -70,23 +76,41 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     }
 
+    private void checkRequireLink(ProviderSnapshot thing, ExpandedSensor sensor,
+            ExpandedObservedProperty observedProperty, UnitOfMeasurement unit) {
+
+        if (thing == null) {
+            throw new BadRequestException("Thing not found in Datastream Payload");
+        }
+        if (sensor == null) {
+            throw new BadRequestException("Sensor not found in Datastream Payload");
+        }
+        if (observedProperty == null) {
+            throw new BadRequestException("ObservedProperty  not found in Datastream Payload");
+        }
+        if (unit == null) {
+            throw new BadRequestException("unit  not found in Datastream Payload");
+        }
+    }
+
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedDataStream> request) {
         // read thing for each location and update it
         ExpandedDataStream datastream = request.model();
+        DtoToModelMapper.checkRequireField(datastream);
 
-        if (datastream.thing() == null) {
-            throw new UnsupportedOperationException(String.format("Thing id not found in Datastream Payload"));
-        }
         String providerId = request.model().thing() != null ? (String) request.model().thing().id()
                 : request.parentId();
         if (providerId == null) {
             throw new BadRequestException("Thing id not found");
         }
+        ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
 
         ExpandedSensor sensor = getExpandedSensor(datastream);
         ExpandedObservedProperty observedProperty = getExpandedObservedProperty(datastream);
         UnitOfMeasurement unit = datastream.unitOfMeasurement();
+
+        checkRequireLink(provider, sensor, observedProperty, unit);
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
             return datastream.observations().stream().map(obs -> DtoToModelMapper.toDatastreamUpdate(providerId,
@@ -108,6 +132,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
         } else {
             sensor = datastream.sensor();
+            DtoToModelMapper.checkRequireField(sensor);
         }
         return sensor;
     }
@@ -132,6 +157,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             observedProperty = observedPropertyUseCase.getInMemoryObservedProperty(idObservedProperty);
         } else {
             observedProperty = datastream.observedProperty();
+            DtoToModelMapper.checkRequireField(observedProperty);
+
         }
         return observedProperty;
     }
@@ -159,7 +186,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, e, "fail to create");
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
+                    e.getMessage());
         }
 
         ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), thingId, id);

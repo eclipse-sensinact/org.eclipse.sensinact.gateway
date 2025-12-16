@@ -14,6 +14,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import jakarta.ws.rs.InternalServerErrorException;
+
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
@@ -44,7 +46,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
 
         } catch (Exception e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, e, "fail to get providerProviderSnapshot");
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
+                    e.getMessage());
         }
 
     }
@@ -63,6 +66,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
         ExpandedLocation location = request.model();
+        DtoToModelMapper.checkRequireField(location);
 
         List<SensorThingsUpdate> listUpdates = DtoToModelMapper.toLocationUpdates(request.model());
         if (location.things() != null && location.things().size() >= 0 || request.parentId() != null) {

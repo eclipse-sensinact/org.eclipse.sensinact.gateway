@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.osgi.service.component.annotations.Component;
@@ -31,6 +30,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
     public ExtraUseCaseResponse<FeatureOfInterest> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
         String id = getId(request.model());
         FeatureOfInterest featureOfInterest = request.model();
+        DtoToModelMapper.checkRequireField(featureOfInterest);
         String featureOfInterestId = getId(featureOfInterest);
         featureOfInterestById.put(featureOfInterestId, featureOfInterest);
         return new ExtraUseCaseResponse<FeatureOfInterest>(id, featureOfInterest);

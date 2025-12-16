@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
@@ -47,7 +48,8 @@ public class ThingTest extends AbstractIntegrationTest {
 
         List<RefId> listId = new ArrayList<RefId>();
         listId.add(DtoFactory.getRefId(getIdFromJson(json)));
-        ExpandedLocation location = DtoFactory.getLocationLinkThing(name, listId);
+        ExpandedLocation location = DtoFactory.getLocationLinkThing(name, "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749), listId);
         HttpResponse<String> response = queryPost("/Locations", location);
         Location createdLocation = mapper.readValue(response.body(), Location.class);
         List<ExpandedLocation> idLocations = List.of(DtoFactory.getIdLocation(createdLocation.id()));
@@ -93,8 +95,9 @@ public class ThingTest extends AbstractIntegrationTest {
         String idExistsThing = getIdFromJson(json);
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name,
                 DtoFactory.getRefId(idExistsThing));
-        HttpResponse<String> response = queryPost("/Datastreams", datastream);
-        ExpandedDataStream createdDatastream = mapper.readValue(response.body(), ExpandedDataStream.class);
+        json = getJsonResponseFromPost(datastream, "/Datastreams", 201);
+
+        ExpandedDataStream createdDatastream = mapper.readValue(json.toString(), ExpandedDataStream.class);
         List<ExpandedDataStream> idDatastream = List.of(DtoFactory.getIdDatastream(createdDatastream.id()));
 
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreams(name, "testThing existing Datastream ",
@@ -134,6 +137,18 @@ public class ThingTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
         // Then
         UtilsAssert.assertThing(dtoThing, json);
+
+    }
+
+    @Test
+    public void testCreateThingSimpleMissingField() throws Exception {
+        // Given
+        String name = "testCreateThingSimpleMissingField";
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThing(null, "testThing",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        // When
+        getJsonResponseFromPost(dtoThing, "/Things", 400);
 
     }
 
