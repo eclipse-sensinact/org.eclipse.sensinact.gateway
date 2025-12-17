@@ -38,8 +38,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
-
 import jakarta.ws.rs.NotFoundException;
 
 public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess {
@@ -130,7 +128,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Thing t = DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(THINGS), providerSnapshot);
         if (!provider.equals(t.id())) {
             throw new NotFoundException();
