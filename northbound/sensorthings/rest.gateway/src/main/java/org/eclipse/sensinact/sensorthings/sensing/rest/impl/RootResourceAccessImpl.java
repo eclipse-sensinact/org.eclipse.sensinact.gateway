@@ -45,7 +45,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
@@ -232,18 +231,6 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest) {
         FeatureOfInterest createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
-
-        return Response.created(createdUri).entity(createDto).build();
-
-    }
-
-    @Override
-    public Response createHistoricalLocation(HistoricalLocation historicalLocation) {
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, historicalLocation);
-        ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
-        HistoricalLocation createDto = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
         return Response.created(createdUri).entity(createDto).build();

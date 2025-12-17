@@ -20,24 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class ThingTest extends AbstractIntegrationTest {
 
-    // @formatter:off
-    /*
-    POST /Things
-
-    {
-        "name": "testCreateThingExistingLocation",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        },
-        "Locations": [
-            { "@iot.id": "idLocation" }
-        ]
-    }
-    */
-    // @formatter:on
-
     @Test
     public void testCreateThingExistingLocation() throws Exception {
         // Given
@@ -64,24 +46,6 @@ public class ThingTest extends AbstractIntegrationTest {
         UtilsAssert.assertThing(dtoThing, json);
 
     }
-
-    // @formatter:off
-    /*
-    POST /Things
-
-    {
-        "name": "testCreateThingExistingLocation",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        },
-        "Datastreams": [
-            { "@iot.id": "idLocation" }
-        ]
-    }
-    */
-    // @formatter:on
 
     @Test
     public void testCreateThingExistsDatastream() throws Exception {
@@ -110,22 +74,6 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
-    // @formatter:off
-    /*
-     * e.g
-    POST /Things
-
-    {
-        "name": "testExtraThing",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        }
-    }
-    */
-    // @formatter:on
-
     @Test
     public void testCreateThingSimple() throws Exception {
         // Given
@@ -152,31 +100,6 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
-    // @formatter:off
-    /*
-     * e.g
-    POST /Things
-
-    {
-        "name": "testExtraThing",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        },
-        Locations:[
-            name:"location1",
-            description:"",
-            location:{
-            ...
-            },
-            encodingType:""
-
-        ]
-    }
-    */
-    // @formatter:on
-
     @Test
     public void testCreateThingWith1Location() throws Exception {
         // Given
@@ -192,37 +115,6 @@ public class ThingTest extends AbstractIntegrationTest {
         UtilsAssert.assertThing(dtoThing, json);
 
     }
-
-    // @formatter:off
-    /*
-     * e.g
-    POST /Things
-
-    {
-        "name": "testExtraThing",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        },
-        Locations:[
-            {
-                name:"location1",
-                description:"",
-                location:{
-                ...
-                },
-                encodingType:""
-            }
-        ],
-        Datastreams:[
-            {
-                ...
-            }
-        ]
-    }
-    */
-    // @formatter:on
 
     @Test
     public void testCreateThingWithLocationAndDatastream() throws Exception {
@@ -244,43 +136,6 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
-    // @formatter:off
-    /*
-     * e.g
-    POST /Things
-
-    {
-        "name": "testExtraThing",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        },
-        Locations:[
-            {
-                name:"location1",
-                description:"",
-                location:{
-                ...
-                },
-                encodingType:""
-            }
-        ],
-        Datastreams:[
-            {
-                ...,
-                Sensor:{
-                    ...
-                },
-                ObservedProperty:{...},
-                Observations:[
-                {...}
-                ]
-            }
-        ]
-    }
-    */
-    // @formatter:on
     public void testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation() throws Exception {
         // Given
         String name = "testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
@@ -303,43 +158,6 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
-    // @formatter:off
-    /*
-     * e.g
-    POST /Things
-
-    {
-        "name": "testExtraThing",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        },
-        Locations:[
-            {
-                name:"location1",
-                description:"",
-                location:{
-                ...
-                },
-                encodingType:""
-            }
-        ],
-        Datastreams:[
-            {
-                ...,
-                Sensor:{
-                    ...
-                },
-                ObservedProperty:{...},
-                Observations:[
-                {...}
-                ]
-            }
-        ]
-    }
-    */
-    // @formatter:on
     public void testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation()
             throws Exception {
         // Given
@@ -364,33 +182,6 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
- // @formatter:off
-    /*
-     * e.g
-    POST /Things
-
-    {
-        "name": "testExtraThing",
-        "description": "testThing existing Location",
-        "properties": {
-            "manufacturer": "New Corp",
-            "installationDate": "2025-11-25"
-        },
-        Locations:[
-            {...},
-            {
-                name:"location1",
-                description:"",
-                location:{
-                ...
-                },
-                encodingType:""
-            }
-        ],
-
-    }
-    */
-    // @formatter:on
     @Test
     public void testCreateThingWithMultipleLocation() throws Exception {
         // Given
