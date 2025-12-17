@@ -140,6 +140,13 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     }
 
+    /**
+     * get cache sensor if we create datastream using link sensor id or directly
+     * sensor inline or null
+     *
+     * @param datastream
+     * @return
+     */
     private ExpandedSensor getCachedExpandedSensor(ExpandedDataStream datastream) {
         ExpandedSensor sensor = null;
         // retrieve created sensor
@@ -147,7 +154,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
 
             sensor = sensorExtraUseCase.getInMemorySensor(idSensor);
-
+            if (sensor == null) {
+                throw new BadRequestException(String.format("sensor id %s doesn't exists", idSensor));
+            }
         } else {
             sensor = datastream.sensor();
             DtoToModelMapper.checkRequireField(sensor);
@@ -155,6 +164,13 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         return sensor;
     }
 
+    /**
+     * get cache foi if we create observation using link foi id or directly foi
+     * inline or null
+     *
+     * @param foi
+     * @return
+     */
     private FeatureOfInterest getCachedFeatureOfInterest(FeatureOfInterest foi) {
         FeatureOfInterest featureOfInterest = null;
         // retrieve created sensor
@@ -162,6 +178,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             String idFoi = DtoToModelMapper.getIdFromRecord(foi);
 
             featureOfInterest = featureOfInterestUseCase.getInMemoryFeatureOfInterest(idFoi);
+            if (featureOfInterest == null) {
+                throw new BadRequestException(String.format("Feature of interest id %s doesn't exists", idFoi));
+            }
 
         } else {
             featureOfInterest = foi;
@@ -170,6 +189,11 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         return featureOfInterest;
     }
 
+    /**
+     * remove cache sensor linked to datastream
+     *
+     * @param datastream
+     */
     private void removeCachedExpandedSensor(ExpandedDataStream datastream) {
         // retrieve created sensor
         if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
@@ -181,6 +205,13 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     }
 
+    /**
+     * get observed property if we create datastream using link observedpropertyh id
+     * or observed property inline or null
+     *
+     * @param datastream
+     * @return
+     */
     private ExpandedObservedProperty getCachedExpandedObservedProperty(ExpandedDataStream datastream) {
         ExpandedObservedProperty observedProperty = null;
         // retrieve create observedPorperty
@@ -188,6 +219,10 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
                 && DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
             String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
             observedProperty = observedPropertyUseCase.getInMemoryObservedProperty(idObservedProperty);
+            if (observedProperty == null) {
+                throw new BadRequestException(
+                        String.format("observedProperty id %s doesn't exists", idObservedProperty));
+            }
         } else {
             observedProperty = datastream.observedProperty();
             DtoToModelMapper.checkRequireField(observedProperty);
@@ -196,6 +231,11 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         return observedProperty;
     }
 
+    /**
+     * remove cache observed Property linked to datastream
+     *
+     * @param datastream
+     */
     private void removeCachedExpandedObservedProperty(ExpandedDataStream datastream) {
         // retrieve create observedPorperty
         if (datastream.observedProperty() != null
@@ -206,6 +246,11 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     }
 
+    /**
+     * remove cache sensor linked to observation
+     *
+     * @param datastream
+     */
     private void removeCachedFeatureOfInterest(FeatureOfInterest foi) {
         // retrieve create observedPorperty
         if (foi != null && DtoToModelMapper.isRecordOnlyField(foi, "id")) {
