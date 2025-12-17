@@ -63,7 +63,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(dtoObservation,
                 String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
 
-        UtilsAssert.assertObservation(dtoObservation, json, true);
+        UtilsAssert.assertObservation(dtoObservation, json);
         assertNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
 
     }

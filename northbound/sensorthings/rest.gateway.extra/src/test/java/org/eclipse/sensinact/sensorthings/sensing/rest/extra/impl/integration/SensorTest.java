@@ -45,9 +45,11 @@ public class SensorTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
+        // when
         json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor", 201);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
+        // then
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
         assertNull(sensorUseCase.getInMemorySensor(sensorId));
 

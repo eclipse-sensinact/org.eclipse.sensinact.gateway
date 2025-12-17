@@ -122,8 +122,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         }
         ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
 
-        ExpandedSensor sensor = getExpandedSensor(datastream);
-        ExpandedObservedProperty observedProperty = getExpandedObservedProperty(datastream);
+        ExpandedSensor sensor = getCachedExpandedSensor(datastream);
+        ExpandedObservedProperty observedProperty = getCachedExpandedObservedProperty(datastream);
         UnitOfMeasurement unit = datastream.unitOfMeasurement();
 
         checkRequireLink(provider, sensor, observedProperty, unit);
@@ -131,7 +131,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         if (datastream.observations() != null && datastream.observations().size() > 0) {
             return datastream
                     .observations().stream().map(obs -> DtoToModelMapper.toDatastreamUpdate(providerId, datastream,
-                            sensor, observedProperty, unit, obs, getFeatureOfInterest(obs.featureOfInterest())))
+                            sensor, observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
                     .toList();
         } else {
             return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, datastream, sensor, observedProperty, unit,
@@ -140,7 +140,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     }
 
-    private ExpandedSensor getExpandedSensor(ExpandedDataStream datastream) {
+    private ExpandedSensor getCachedExpandedSensor(ExpandedDataStream datastream) {
         ExpandedSensor sensor = null;
         // retrieve created sensor
         if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
@@ -155,7 +155,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         return sensor;
     }
 
-    private FeatureOfInterest getFeatureOfInterest(FeatureOfInterest foi) {
+    private FeatureOfInterest getCachedFeatureOfInterest(FeatureOfInterest foi) {
         FeatureOfInterest featureOfInterest = null;
         // retrieve created sensor
         if (foi != null && DtoToModelMapper.isRecordOnlyField(foi, "id")) {
@@ -170,7 +170,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         return featureOfInterest;
     }
 
-    private void removeExpandedSensor(ExpandedDataStream datastream) {
+    private void removeCachedExpandedSensor(ExpandedDataStream datastream) {
         // retrieve created sensor
         if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
             String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
@@ -181,7 +181,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     }
 
-    private ExpandedObservedProperty getExpandedObservedProperty(ExpandedDataStream datastream) {
+    private ExpandedObservedProperty getCachedExpandedObservedProperty(ExpandedDataStream datastream) {
         ExpandedObservedProperty observedProperty = null;
         // retrieve create observedPorperty
         if (datastream.observedProperty() != null
@@ -196,12 +196,21 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         return observedProperty;
     }
 
-    private void removeExpandedObservedProperty(ExpandedDataStream datastream) {
+    private void removeCachedExpandedObservedProperty(ExpandedDataStream datastream) {
         // retrieve create observedPorperty
         if (datastream.observedProperty() != null
                 && DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
             String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
             observedPropertyUseCase.removeInMemoryObservedProperty(idObservedProperty);
+        }
+
+    }
+
+    private void removeCachedFeatureOfInterest(FeatureOfInterest foi) {
+        // retrieve create observedPorperty
+        if (foi != null && DtoToModelMapper.isRecordOnlyField(foi, "id")) {
+            String idFoi = DtoToModelMapper.getIdFromRecord(foi);
+            featureOfInterestUseCase.removeInMemoryFeatureOfInterest(idFoi);
         }
 
     }
@@ -225,8 +234,12 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
         ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), thingId, id);
 
-        removeExpandedObservedProperty(request.model());
-        removeExpandedSensor(request.model());
+        removeCachedExpandedObservedProperty(request.model());
+        removeCachedExpandedSensor(request.model());
+        if (request.model().observations() != null) {
+            request.model().observations().stream()
+                    .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+        }
 
         return new ExtraUseCaseResponse<ServiceSnapshot>(id, serviceSnapshot);
 

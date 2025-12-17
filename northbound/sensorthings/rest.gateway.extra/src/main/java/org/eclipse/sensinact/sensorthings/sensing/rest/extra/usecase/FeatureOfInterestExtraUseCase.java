@@ -44,8 +44,10 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
         FeatureOfInterest featureOfInterest = request.model();
         DtoToModelMapper.checkRequireField(featureOfInterest);
         String featureOfInterestId = getId(featureOfInterest);
-        featureOfInterestById.put(featureOfInterestId, featureOfInterest);
-        return new ExtraUseCaseResponse<FeatureOfInterest>(id, featureOfInterest);
+        FeatureOfInterest createFoi = new FeatureOfInterest(featureOfInterest.selfLink(), id, featureOfInterest.name(),
+                featureOfInterest.description(), featureOfInterest.encodingType(), featureOfInterest.feature(), null);
+        featureOfInterestById.put(featureOfInterestId, createFoi);
+        return new ExtraUseCaseResponse<FeatureOfInterest>(id, createFoi);
 
     }
 
