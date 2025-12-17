@@ -57,12 +57,12 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
     }
 
     public ExtraUseCaseResponse<FeatureOfInterest> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "not implemented");
 
     }
 
     public ExtraUseCaseResponse<FeatureOfInterest> patch(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "not implemented");
 
     }
 
@@ -73,7 +73,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
     }
 
     public ExtraUseCaseResponse<FeatureOfInterest> update(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "not implemented");
 
     }
 

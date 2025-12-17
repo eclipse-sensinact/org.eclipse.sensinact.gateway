@@ -57,7 +57,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
         if (provider != null) {
             return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
         }
-        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "failed to create Thing");
 
     }
 
@@ -67,12 +67,12 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
-        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> patch(ExtraUseCaseRequest<ExpandedThing> request) {
-        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
     }
 
@@ -111,7 +111,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
         if (snapshot != null) {
             return new ExtraUseCaseResponse<ProviderSnapshot>(request.id(), snapshot);
         }
-        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
     }
 

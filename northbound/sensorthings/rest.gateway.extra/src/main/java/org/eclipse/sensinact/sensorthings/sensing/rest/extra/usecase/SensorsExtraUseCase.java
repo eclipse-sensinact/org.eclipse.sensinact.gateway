@@ -52,12 +52,12 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ex
     }
 
     public ExtraUseCaseResponse<ExpandedSensor> delete(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<ExpandedSensor>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ExpandedSensor>(false, "not implemented");
 
     }
 
     public ExtraUseCaseResponse<ExpandedSensor> patch(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<ExpandedSensor>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ExpandedSensor>(false, "not implemented");
 
     }
 
@@ -67,7 +67,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ex
     }
 
     public ExtraUseCaseResponse<ExpandedSensor> update(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<ExpandedSensor>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ExpandedSensor>(false, "not implemented");
 
     }
 

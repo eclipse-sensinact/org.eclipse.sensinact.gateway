@@ -74,12 +74,12 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> patch(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
 
@@ -140,7 +140,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
 

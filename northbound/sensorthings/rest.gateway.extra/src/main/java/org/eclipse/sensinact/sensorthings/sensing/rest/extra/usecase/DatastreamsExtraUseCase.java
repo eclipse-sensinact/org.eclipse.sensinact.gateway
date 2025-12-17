@@ -83,12 +83,12 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> patch(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
 

@@ -61,12 +61,12 @@ public class ObservedPropertiesExtraUseCase
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> delete(
             ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
 
     }
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> patch(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
 
     }
 
@@ -77,7 +77,7 @@ public class ObservedPropertiesExtraUseCase
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> update(
             ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "fail to get providerSnapshot");
+        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
 
     }
 

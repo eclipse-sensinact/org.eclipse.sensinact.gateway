@@ -55,7 +55,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
                         : (String) request.model().id();
                 return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService("locations"));
             }
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
 
         } catch (Exception e) {
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
