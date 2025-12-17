@@ -20,7 +20,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
-import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -29,9 +28,7 @@ import java.util.Optional;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -39,16 +36,13 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.create.ObservationsCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response;
 
-public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess, ObservationsCreate {
+public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess {
 
     @Override
     public Observation getObservation(String id) {
@@ -163,18 +157,6 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                 .flatMap(s -> s.getResources().stream()).filter(ResourceSnapshot::isSet).map(r -> DtoMapperGet
                         .toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent).map(Optional::get).toList());
-    }
-
-    @Override
-    public Response createObservation(ExpandedObservation observation) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation);
-        ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
-        Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot, null);
-
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
-
-        return Response.created(createdUri).entity(createDto).build();
     }
 
 }
