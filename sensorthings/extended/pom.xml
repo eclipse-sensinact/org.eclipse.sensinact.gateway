@@ -8,8 +8,8 @@
     <version>${revision}${changelist}</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>models</artifactId>
-  <name>SensiNact Sensorthings :: Models</name>
+  <artifactId>extended</artifactId>
+  <name>SensiNact Sensorthings :: Models Extended</name>
   <properties>
     <sensinact.core.version>${project.version}</sensinact.core.version>
   </properties>
@@ -73,14 +73,13 @@
           </externalPlugins>
           <steps>
             <step>
-              <trigger>src/main/resources/model/sensorthings.genmodel</trigger>
-              <generateCommand>geckoEMF</generateCommand>
-              <output>src/generated/java</output>
-              <clear>true</clear>
-              <properties>
-                <genmodel>src/main/resources/model/sensorthings.genmodel</genmodel>
-              </properties>
-            </step>
+                <trigger>src/main/resources/model/sensorthings.extended.genmodel</trigger>
+                <generateCommand>geckoEMF</generateCommand>
+                <output>src/generated/java</output>
+                <properties>
+                  <genmodel>src/main/resources/model/sensorthings.extended.genmodel</genmodel>
+                </properties>
+              </step>
           </steps>
         </configuration>
         <executions>
