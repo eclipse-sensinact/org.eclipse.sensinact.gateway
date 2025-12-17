@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
@@ -48,6 +49,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     @Reference
     ISensorExtraUseCase sensorExtraUseCase;
+
+    @Reference
+    IFeatureOfInterestExtraUseCase featureOfInterestUseCase;
 
     @Reference
     IObservedPropertyExtraUseCase observedPropertyUseCase;
@@ -125,8 +129,10 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         checkRequireLink(provider, sensor, observedProperty, unit);
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
-            return datastream.observations().stream().map(obs -> DtoToModelMapper.toDatastreamUpdate(providerId,
-                    datastream, sensor, observedProperty, unit, obs, obs.featureOfInterest())).toList();
+            return datastream
+                    .observations().stream().map(obs -> DtoToModelMapper.toDatastreamUpdate(providerId, datastream,
+                            sensor, observedProperty, unit, obs, getFeatureOfInterest(obs.featureOfInterest())))
+                    .toList();
         } else {
             return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, datastream, sensor, observedProperty, unit,
                     null, null));
@@ -147,6 +153,21 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             DtoToModelMapper.checkRequireField(sensor);
         }
         return sensor;
+    }
+
+    private FeatureOfInterest getFeatureOfInterest(FeatureOfInterest foi) {
+        FeatureOfInterest featureOfInterest = null;
+        // retrieve created sensor
+        if (foi != null && DtoToModelMapper.isRecordOnlyField(foi, "id")) {
+            String idFoi = DtoToModelMapper.getIdFromRecord(foi);
+
+            featureOfInterest = featureOfInterestUseCase.getInMemoryFeatureOfInterest(idFoi);
+
+        } else {
+            featureOfInterest = foi;
+            DtoToModelMapper.checkRequireField(featureOfInterest);
+        }
+        return featureOfInterest;
     }
 
     private void removeExpandedSensor(ExpandedDataStream datastream) {

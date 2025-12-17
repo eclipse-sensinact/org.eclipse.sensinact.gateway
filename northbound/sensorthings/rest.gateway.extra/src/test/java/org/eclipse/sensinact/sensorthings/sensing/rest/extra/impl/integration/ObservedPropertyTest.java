@@ -1,5 +1,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -47,6 +50,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String ObservedPropertyId = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
+        assertNotNull(observedPropertyUseCase.getInMemoryObservedProperty(ObservedPropertyId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -59,6 +63,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
+        assertNull(observedPropertyUseCase.getInMemoryObservedProperty(ObservedPropertyId));
 
     }
 }

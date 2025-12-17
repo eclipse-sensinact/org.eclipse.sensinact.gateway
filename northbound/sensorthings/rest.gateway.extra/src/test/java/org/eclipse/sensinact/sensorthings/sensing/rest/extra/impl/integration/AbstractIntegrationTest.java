@@ -20,6 +20,9 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IFeatureOfInterestExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IObservedPropertyExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ISensorExtraUseCase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -73,6 +76,15 @@ public class AbstractIntegrationTest {
 
     @InjectService
     protected GatewayThread thread;
+
+    @InjectService
+    protected ISensorExtraUseCase sensorUseCase;
+
+    @InjectService
+    protected IObservedPropertyExtraUseCase observedPropertyUseCase;
+
+    @InjectService
+    protected IFeatureOfInterestExtraUseCase foiUseCase;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {
         // Normalize URI

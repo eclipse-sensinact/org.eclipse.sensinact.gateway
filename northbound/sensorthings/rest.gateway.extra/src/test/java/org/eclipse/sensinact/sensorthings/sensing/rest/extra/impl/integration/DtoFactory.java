@@ -148,6 +148,11 @@ public class DtoFactory {
 
     }
 
+    public static ExpandedObservation getObservationLinkFeatureOfInterest(String name, String foiId) {
+        return getObservationWithFeatureOfInterest(name,
+                new FeatureOfInterest(null, foiId, null, null, null, null, null));
+    }
+
     public static ExpandedObservation getObservationWithFeatureOfInterest(String name, FeatureOfInterest feature) {
         return getObservationLinkDatastream(name, null, feature);
 
