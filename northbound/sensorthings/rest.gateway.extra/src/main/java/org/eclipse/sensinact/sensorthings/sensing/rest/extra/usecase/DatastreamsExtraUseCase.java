@@ -76,6 +76,12 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         ServiceSnapshot snapshot = serviceUseCase.read(request.session(), thingId, id);
         if (snapshot != null) {
 
+            removeCachedExpandedObservedProperty(request.model());
+            removeCachedExpandedSensor(request.model());
+            if (request.model().observations() != null) {
+                request.model().observations().stream()
+                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+            }
             return new ExtraUseCaseResponse<ServiceSnapshot>(id, snapshot);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
@@ -150,16 +156,18 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
     private ExpandedSensor getCachedExpandedSensor(ExpandedDataStream datastream) {
         ExpandedSensor sensor = null;
         // retrieve created sensor
-        if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
-            String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
+        if (datastream.sensor() != null) {
+            if (DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
+                String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
 
-            sensor = sensorExtraUseCase.getInMemorySensor(idSensor);
-            if (sensor == null) {
-                throw new BadRequestException(String.format("sensor id %s doesn't exists", idSensor));
+                sensor = sensorExtraUseCase.getInMemorySensor(idSensor);
+                if (sensor == null) {
+                    throw new BadRequestException(String.format("sensor id %s doesn't exists", idSensor));
+                }
+            } else {
+                sensor = datastream.sensor();
+                DtoToModelMapper.checkRequireField(sensor);
             }
-        } else {
-            sensor = datastream.sensor();
-            DtoToModelMapper.checkRequireField(sensor);
         }
         return sensor;
     }
@@ -174,17 +182,19 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
     private FeatureOfInterest getCachedFeatureOfInterest(FeatureOfInterest foi) {
         FeatureOfInterest featureOfInterest = null;
         // retrieve created sensor
-        if (foi != null && DtoToModelMapper.isRecordOnlyField(foi, "id")) {
-            String idFoi = DtoToModelMapper.getIdFromRecord(foi);
+        if (foi != null) {
+            if (DtoToModelMapper.isRecordOnlyField(foi, "id")) {
 
-            featureOfInterest = featureOfInterestUseCase.getInMemoryFeatureOfInterest(idFoi);
-            if (featureOfInterest == null) {
-                throw new BadRequestException(String.format("Feature of interest id %s doesn't exists", idFoi));
+                String idFoi = DtoToModelMapper.getIdFromRecord(foi);
+
+                featureOfInterest = featureOfInterestUseCase.getInMemoryFeatureOfInterest(idFoi);
+                if (featureOfInterest == null) {
+                    throw new BadRequestException(String.format("Feature of interest id %s doesn't exists", idFoi));
+                }
+            } else {
+                featureOfInterest = foi;
+                DtoToModelMapper.checkRequireField(featureOfInterest);
             }
-
-        } else {
-            featureOfInterest = foi;
-            DtoToModelMapper.checkRequireField(featureOfInterest);
         }
         return featureOfInterest;
     }
@@ -215,18 +225,18 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
     private ExpandedObservedProperty getCachedExpandedObservedProperty(ExpandedDataStream datastream) {
         ExpandedObservedProperty observedProperty = null;
         // retrieve create observedPorperty
-        if (datastream.observedProperty() != null
-                && DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
-            String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
-            observedProperty = observedPropertyUseCase.getInMemoryObservedProperty(idObservedProperty);
-            if (observedProperty == null) {
-                throw new BadRequestException(
-                        String.format("observedProperty id %s doesn't exists", idObservedProperty));
+        if (datastream.observedProperty() != null) {
+            if (DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
+                String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
+                observedProperty = observedPropertyUseCase.getInMemoryObservedProperty(idObservedProperty);
+                if (observedProperty == null) {
+                    throw new BadRequestException(
+                            String.format("observedProperty id %s doesn't exists", idObservedProperty));
+                }
+            } else {
+                observedProperty = datastream.observedProperty();
+                DtoToModelMapper.checkRequireField(observedProperty);
             }
-        } else {
-            observedProperty = datastream.observedProperty();
-            DtoToModelMapper.checkRequireField(observedProperty);
-
         }
         return observedProperty;
     }

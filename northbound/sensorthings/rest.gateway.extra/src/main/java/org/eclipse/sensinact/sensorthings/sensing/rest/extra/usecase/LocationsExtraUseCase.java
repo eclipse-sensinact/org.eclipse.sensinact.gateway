@@ -51,8 +51,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
-                String locationId = request.model().id() == null ? request.model().name()
-                        : (String) request.model().id();
+                String locationId = getId(request.model());
                 return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService("locations"));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
