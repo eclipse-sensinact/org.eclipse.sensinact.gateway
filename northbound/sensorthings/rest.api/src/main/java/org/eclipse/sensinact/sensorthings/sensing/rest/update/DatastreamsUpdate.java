@@ -23,10 +23,25 @@ import jakarta.ws.rs.core.Response;
 
 public interface DatastreamsUpdate {
 
+    /**
+     * update datastream link to thing
+     *
+     * @param id
+     * @param dataStream
+     * @return
+     */
     @PUT
     @PATCH
     public Response updateDatastreams(@PathParam("id") String id, ExpandedDataStream dataStream);
 
+    /**
+     * update observation link to thing and datastream
+     *
+     * @param id
+     * @param id2
+     * @param observation
+     * @return
+     */
     @PUT
     @PATCH
     @Path("/Observations({id2})")

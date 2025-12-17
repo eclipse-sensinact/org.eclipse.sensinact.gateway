@@ -20,6 +20,13 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 public interface SensorsUpdate {
+    /**
+     * update sensor
+     *
+     * @param id
+     * @param sensor
+     * @return
+     */
     @PUT
     @PATCH
     public Response updateSensor(@PathParam("id") String id, Sensor sensor);

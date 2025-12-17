@@ -19,6 +19,9 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * record of location for creation/update
+ */
 public record ExpandedLocation(String selfLink, Object id, String name, String description, String encodingType,
         GeoJsonObject location, @JsonProperty("Things@iot.navigationLink") String thingsLink,
         @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink,

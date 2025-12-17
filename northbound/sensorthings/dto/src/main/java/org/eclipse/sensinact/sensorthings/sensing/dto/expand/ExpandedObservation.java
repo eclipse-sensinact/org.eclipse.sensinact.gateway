@@ -26,6 +26,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * record of observation for creation/update
+ */
 public record ExpandedObservation(String selfLink, Object id, @JsonFormat(shape = STRING) Instant phenomenonTime,
         @JsonFormat(shape = STRING) Instant resultTime, Object result, @JsonInclude(NON_NULL) Object resultQuality,
         @JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval validTime,

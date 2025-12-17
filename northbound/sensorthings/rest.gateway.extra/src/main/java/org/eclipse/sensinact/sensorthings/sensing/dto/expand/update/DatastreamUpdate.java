@@ -1,3 +1,15 @@
+/*********************************************************************
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
@@ -19,6 +31,9 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
+/**
+ * update record for datastream
+ */
 public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
         @Service String serviceName, @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorThingId,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String name,

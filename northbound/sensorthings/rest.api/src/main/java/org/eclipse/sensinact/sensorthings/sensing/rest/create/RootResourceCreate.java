@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.create;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
@@ -25,31 +24,62 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 
 public interface RootResourceCreate {
-
+    /**
+     * create datastream
+     *
+     * @param datastream
+     * @return
+     */
     @POST
     @Path("/Datastreams")
     public Response createDatastream(ExpandedDataStream datastream);
 
+    /**
+     * create feature of interest
+     *
+     * @param featuresOfInterest
+     * @return
+     */
     @POST
     @Path("/FeaturesOfInterest")
     public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest);
 
-    @POST
-    @Path("/HistoricalLocations")
-    public Response createHistoricalLocation(HistoricalLocation historicalLocations);
-
+    /**
+     * create location
+     *
+     * @param location
+     * @return
+     */
     @POST
     @Path("/Locations")
     public Response createLocation(ExpandedLocation location);
 
+    /**
+     * create observed Property
+     *
+     * @param observedProperty
+     * @return
+     */
     @POST
     @Path("/ObservedProperties")
     public Response createObservedProperties(ExpandedObservedProperty observedProperty);
 
+    /**
+     * create sensor
+     *
+     * @param sensor
+     * @return
+     */
     @POST
     @Path("/Sensors")
     public Response createSensors(ExpandedSensor sensor);
 
+    /**
+     * create a thing
+     *
+     * @param thing
+     * @return
+     */
     @POST
     @Path("/Things")
     public Response createThing(ExpandedThing thing);

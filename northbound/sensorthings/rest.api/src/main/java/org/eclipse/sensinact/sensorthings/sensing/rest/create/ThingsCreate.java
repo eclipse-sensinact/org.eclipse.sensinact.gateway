@@ -22,10 +22,24 @@ import jakarta.ws.rs.core.Response;
 
 public interface ThingsCreate {
 
+    /**
+     * create datastream link to thing
+     *
+     * @param id
+     * @param datastream
+     * @return
+     */
     @POST
     @Path("/Datastreams")
     public Response createDatastream(@PathParam("id") String id, ExpandedDataStream datastream);
 
+    /**
+     * create location link to thing
+     *
+     * @param id
+     * @param location
+     * @return
+     */
     @POST
     @Path("/Locations")
     public Response createLocation(@PathParam("id") String id, ExpandedLocation location);

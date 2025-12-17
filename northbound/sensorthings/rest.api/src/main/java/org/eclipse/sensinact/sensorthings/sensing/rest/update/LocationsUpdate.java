@@ -21,10 +21,25 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 public interface LocationsUpdate {
+    /**
+     * update location
+     *
+     * @param id
+     * @param location
+     * @return
+     */
     @PUT
     @PATCH
     public Response updateLocation(@PathParam("id") String id, ExpandedLocation location);
 
+    /**
+     * update linked thing on location
+     *
+     * @param id
+     * @param id2
+     * @param dto
+     * @return
+     */
     @PUT
     @PATCH
     @Path("/Things({id2}")

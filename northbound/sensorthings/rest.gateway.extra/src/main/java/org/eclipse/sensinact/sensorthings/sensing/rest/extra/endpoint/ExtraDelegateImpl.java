@@ -1,3 +1,15 @@
+/*********************************************************************
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 
 import java.util.HashMap;
@@ -17,6 +29,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.UriInfo;
+
+/**
+ * service that allow to aggregate use case and delegate http operations for
+ * extra (post,put,delete) for endpoint
+ */
 
 @Component(service = IExtraDelegate.class)
 public class ExtraDelegateImpl implements IExtraDelegate {

@@ -22,10 +22,25 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 public interface FeaturesOfInterestUpdate {
+    /**
+     * update feature of interest
+     *
+     * @param id
+     * @param observation
+     * @return
+     */
     @PUT
     @PATCH
     public Response updateFeaturesOfInterest(@PathParam("id") String id, FeatureOfInterest observation);
 
+    /**
+     * update feature of interest link to observations
+     *
+     * @param id
+     * @param id2
+     * @param observation
+     * @return
+     */
     @PUT
     @PATCH
     @Path("/Observations({id2})")

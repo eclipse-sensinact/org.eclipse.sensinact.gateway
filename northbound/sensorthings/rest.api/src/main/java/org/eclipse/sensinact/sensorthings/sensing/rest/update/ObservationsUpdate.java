@@ -20,6 +20,13 @@ import jakarta.ws.rs.core.Response;
 
 public interface ObservationsUpdate {
 
+    /**
+     * update observation
+     *
+     * @param id
+     * @param observation
+     * @return
+     */
     @PUT
     public Response updateObservation(@PathParam("id") String id, Observation observation);
 

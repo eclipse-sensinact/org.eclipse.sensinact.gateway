@@ -70,20 +70,43 @@ public abstract class AbstractAccess {
         return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
     }
 
+    /**
+     * return the expansion session for managing expand
+     *
+     * @return
+     */
     protected ExpansionSettings getExpansions() {
         ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
         return es == null ? EMPTY : es;
     }
 
+    /**
+     * return the Provider link to the id
+     *
+     * @param id
+     * @return
+     */
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
         return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
+    /**
+     * return the service ExtraDelegate that manage the extra (POST,PUT,DELETE) on
+     * sensorthing entity
+     *
+     * @return
+     */
     protected IExtraDelegate getExtraDelegate() {
         return providers.getContextResolver(IExtraDelegate.class, MediaType.WILDCARD_TYPE).getContext(null);
 
     }
 
+    /**
+     * validate and get provider link to the id
+     *
+     * @param id
+     * @return
+     */
     protected ProviderSnapshot validateAndGetProvider(String id) {
         DtoMapperGet.validatedProviderId(id);
 
@@ -95,6 +118,12 @@ public abstract class AbstractAccess {
         return providerSnapshot.get();
     }
 
+    /**
+     * validate and get the resource link to the id
+     *
+     * @param id
+     * @return
+     */
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
         String provider = extractFirstIdSegment(id);
 
@@ -111,10 +140,22 @@ public abstract class AbstractAccess {
         return resourceSnapshot;
     }
 
+    /**
+     * get filterParser
+     *
+     * @return
+     */
     private ISensorthingsFilterParser getFilterParser() {
         return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
+    /**
+     * return criterion for filtering regarding the context
+     *
+     * @param context
+     * @return
+     * @throws WebApplicationException
+     */
     protected ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
         final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
         if (filterString == null || filterString.isBlank()) {

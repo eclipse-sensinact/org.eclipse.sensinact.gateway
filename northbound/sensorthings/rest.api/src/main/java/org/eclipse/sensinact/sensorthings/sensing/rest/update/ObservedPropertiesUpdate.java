@@ -20,6 +20,13 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 public interface ObservedPropertiesUpdate {
+    /**
+     * update observed property
+     *
+     * @param id
+     * @param observedProperty
+     * @return
+     */
     @PUT
     @PATCH
     public Response updateObservedProperties(@PathParam("id") String id, ObservedProperty observedProperty);

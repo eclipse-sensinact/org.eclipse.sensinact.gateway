@@ -23,18 +23,40 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
 public interface ThingsUpdate {
-
+    /**
+     * update datastream link to thing
+     *
+     * @param id
+     * @param id2
+     * @param datastream
+     * @return
+     */
     @PUT
     @PATCH
     @Path("/Datastreams({id2})")
     public Response updateDatastream(@PathParam("id") String id, @PathParam("id2") String id2,
             ExpandedDataStream datastream);
 
+    /**
+     * update location link to thing
+     *
+     * @param id
+     * @param id2
+     * @param location
+     * @return
+     */
     @PUT
     @PATCH
     @Path("/Locations({id2})")
     public Response updateLocation(@PathParam("id") String id, @PathParam("id2") String id2, ExpandedLocation location);
 
+    /**
+     * update thing
+     *
+     * @param id
+     * @param thing
+     * @return
+     */
     @PUT
     @PATCH
     public Response updateThing(@PathParam("id") String id, ExpandedThing thing);

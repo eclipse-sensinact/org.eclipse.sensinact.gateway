@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand;
 
+/**
+ * interface for defining a update EMF using dataUpdate
+ */
 public interface SensorThingsUpdate {
 
 }

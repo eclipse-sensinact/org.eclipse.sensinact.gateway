@@ -27,6 +27,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * modelisation of datastream for creation/update
+ */
 public record ExpandedDataStream(String selfLink, Object id, String name, String description, String observationType,
         UnitOfMeasurement unitOfMeasurement, @JsonInclude(NON_NULL) Geometry observedArea,
         @JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval phenomenonTime,

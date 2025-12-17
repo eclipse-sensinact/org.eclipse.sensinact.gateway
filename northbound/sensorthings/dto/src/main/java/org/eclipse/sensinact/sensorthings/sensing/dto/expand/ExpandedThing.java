@@ -23,6 +23,9 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * record for thing on creation/update
+ */
 public record ExpandedThing(String selfLink, Object id, String name, String description,
         @JsonInclude(NON_NULL) Map<String, Object> properties,
         @JsonProperty("Datastreams@iot.navigationLink") String datastreamsLink,

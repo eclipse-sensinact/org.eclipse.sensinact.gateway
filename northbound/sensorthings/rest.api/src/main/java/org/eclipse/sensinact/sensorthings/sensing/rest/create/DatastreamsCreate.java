@@ -21,6 +21,13 @@ import jakarta.ws.rs.core.Response;
 
 public interface DatastreamsCreate {
 
+    /**
+     * create observation link to datastream
+     *
+     * @param id
+     * @param observation
+     * @return
+     */
     @POST
     @Path("/Observations")
     public Response createDatastreamsObservation(@PathParam("id") String id, ExpandedObservation observation);
