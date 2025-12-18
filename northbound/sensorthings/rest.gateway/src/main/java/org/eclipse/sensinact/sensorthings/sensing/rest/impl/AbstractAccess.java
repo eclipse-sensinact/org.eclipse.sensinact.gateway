@@ -40,6 +40,7 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
 
 public abstract class AbstractAccess {
@@ -97,7 +98,12 @@ public abstract class AbstractAccess {
      * @return
      */
     protected IExtraDelegate getExtraDelegate() {
-        return providers.getContextResolver(IExtraDelegate.class, MediaType.WILDCARD_TYPE).getContext(null);
+        ContextResolver<IExtraDelegate> contextResolver = providers.getContextResolver(IExtraDelegate.class,
+                MediaType.WILDCARD_TYPE);
+        if (contextResolver == null || contextResolver.getContext(null) == null) {
+            throw new WebApplicationException("operation PUT/POST/DELET not available", 405);
+        }
+        return contextResolver.getContext(null);
 
     }
 
