@@ -73,13 +73,14 @@
           </externalPlugins>
           <steps>
             <step>
-                <trigger>src/main/resources/model/sensorthings.extended.genmodel</trigger>
-                <generateCommand>geckoEMF</generateCommand>
-                <output>src/generated/java</output>
-                <properties>
-                  <genmodel>src/main/resources/model/sensorthings.extended.genmodel</genmodel>
-                </properties>
-              </step>
+              <trigger>src/main/resources/model/sensorthings.extended.genmodel</trigger>
+              <generateCommand>geckoEMF</generateCommand>
+              <output>src/generated/java</output>
+              <clear>true</clear>
+              <properties>
+                <genmodel>src/main/resources/model/sensorthings.extended.genmodel</genmodel>
+              </properties>
+            </step>
           </steps>
         </configuration>
         <executions>
