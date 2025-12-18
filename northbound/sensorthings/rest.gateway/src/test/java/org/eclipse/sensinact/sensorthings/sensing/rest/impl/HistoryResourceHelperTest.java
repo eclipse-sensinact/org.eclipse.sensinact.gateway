@@ -88,12 +88,8 @@ class HistoryResourceHelperTest {
 
     // Helper method to verify parameter maps contain expected basic parameters
     private Map<String, Object> hasBasicParams() {
-        return argThat(params ->
-            params != null &&
-            "testProvider".equals(params.get("provider")) &&
-            "testService".equals(params.get("service")) &&
-            "testResource".equals(params.get("resource"))
-        );
+        return argThat(params -> params != null && "testProvider".equals(params.get("provider"))
+                && "testService".equals(params.get("service")) && "testResource".equals(params.get("resource")));
     }
 
     private void setupResourceSnapshotMocks() {
@@ -123,8 +119,8 @@ class HistoryResourceHelperTest {
         void noHistoryProvider() {
             when(application.getProperties()).thenReturn(Map.of());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertTrue(result.value().isEmpty());
@@ -152,13 +148,14 @@ class HistoryResourceHelperTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(timedValues);
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertEquals(count.intValue(), result.count().intValue());
             verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
-            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
+            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"),
+                    hasBasicParams());
         }
 
         @Test
@@ -172,7 +169,8 @@ class HistoryResourceHelperTest {
             Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
                     "sensinact.history.result.limit", maxResults);
             when(application.getProperties()).thenReturn(appProperties);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams())).thenReturn(50L);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
+                    .thenReturn(50L);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
@@ -200,18 +198,16 @@ class HistoryResourceHelperTest {
                     .thenReturn(count);
 
             ICriterion filter = new SensorthingsFilterComponent().parseFilter(
-                    String.format("result eq 'value1' or phenomenonTime lt %s", now.minus(1, DAYS)),
-                    OBSERVATIONS);
+                    String.format("result eq 'value1' or phenomenonTime lt %s", now.minus(1, DAYS)), OBSERVATIONS);
 
             List<TimedValue<?>> timedValues = Arrays.asList(new DefaultTimedValue<>("value1", now),
                     new DefaultTimedValue<>("value2", now));
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(timedValues, timedValues, List.of(
-                            new DefaultTimedValue<>("value1", now.minus(3, DAYS)),
+                    .thenReturn(timedValues, timedValues, List.of(new DefaultTimedValue<>("value1", now.minus(3, DAYS)),
                             new DefaultTimedValue<>("value3", now.minus(3, DAYS))), List.of());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, filter, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, filter, 0);
 
             assertNotNull(result);
             assertEquals(4, result.value().size());
@@ -222,10 +218,10 @@ class HistoryResourceHelperTest {
             assertEquals("value1", result.value().get(3).result());
             assertEquals(4, result.count().intValue());
             verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
-            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
+            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"),
+                    hasBasicParams());
         }
     }
-
 
     @Nested
     @DisplayName("Edge Cases")
@@ -246,8 +242,8 @@ class HistoryResourceHelperTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertEquals(Integer.MAX_VALUE, result.count().intValue());
@@ -262,12 +258,13 @@ class HistoryResourceHelperTest {
             Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
                     "sensinact.history.result.limit", 1000);
             when(application.getProperties()).thenReturn(appProperties);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams())).thenReturn(null);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
+                    .thenReturn(null);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
-            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession,
-                    application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
+            ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
+                    mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
             assertEquals(null, result.count());

@@ -1,0 +1,69 @@
+/*********************************************************************
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.Map;
+
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+/**
+ * Unit test for simple App.
+ */
+public class SensorTest extends AbstractIntegrationTest {
+
+    @Test
+    public void testCreateSensor() throws Exception {
+        // given
+        String name = "testCreateSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+
+        UtilsAssert.assertSensor(sensor, json);
+
+    }
+
+    @Test
+    public void testCreateDatastreamLinkSensor() throws Exception {
+        // given
+        String name = "testCreateDatastreamLinkSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        String sensorId = getIdFromJson(json);
+        UtilsAssert.assertSensor(sensor, json);
+        assertNotNull(sensorUseCase.getInMemorySensor(sensorId));
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
+        // when
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor", 201);
+        ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
+                name + "1", DtoFactory.getRefId(thingId), sensor, null);
+        // then
+        UtilsAssert.assertDatastream(expectedDatastream, json, true);
+        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+
+    }
+}

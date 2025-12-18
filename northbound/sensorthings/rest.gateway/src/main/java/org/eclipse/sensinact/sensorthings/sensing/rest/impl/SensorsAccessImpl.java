@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.SensorsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 
 import jakarta.ws.rs.NotFoundException;
@@ -34,14 +34,13 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
 
     @Override
     public Sensor getSensor(String id) {
-        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.SENSORS), validateAndGetResourceSnapshot(id));
+        return DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.SENSORS), validateAndGetResourceSnapshot(id));
     }
 
     @Override
     public ResultList<Datastream> getSensorDatastreams(String id) {
-        ResultList<Datastream> list = new ResultList<>(null, null,
-                List.of(getSensorDatastream(id, id)));
+        ResultList<Datastream> list = new ResultList<>(null, null, List.of(getSensorDatastream(id, id)));
         return list;
     }
 
@@ -51,8 +50,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
             throw new NotFoundException();
         }
 
-        return DtoMapper.toDatastream(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.DATASTREAMS));
+        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.DATASTREAMS));
     }
 
     @PaginationLimit(500)
@@ -72,8 +71,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
         }
         ResourceSnapshot resource = validateAndGetResourceSnapshot(id);
 
-        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), resource);
+        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), resource);
 
         if (!id.equals(o.id())) {
             throw new NotFoundException();
@@ -95,11 +94,12 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.THINGS), providerSnapshot);
+        Thing t = DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.THINGS), providerSnapshot);
         if (!provider.equals(t.id())) {
             throw new NotFoundException();
         }
         return t;
     }
+
 }

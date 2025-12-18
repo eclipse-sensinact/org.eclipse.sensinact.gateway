@@ -1,0 +1,99 @@
+/*********************************************************************
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
+
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.ws.rs.core.UriInfo;
+
+public interface IExtraUseCase<M extends Id, S> {
+
+    /**
+     * generic class for use case response
+     *
+     * @param <S>
+     */
+    public record ExtraUseCaseResponse<S>(String id, S snapshot, boolean success, RuntimeException e, String message) {
+        public ExtraUseCaseResponse(boolean success, RuntimeException e, String message) {
+            this(null, null, success, e, message);
+        }
+
+        public ExtraUseCaseResponse(boolean success, String message) {
+            this(null, null, success, null, message);
+        }
+
+        public ExtraUseCaseResponse(String id, S model) {
+            this(id, model, true, null, null);
+        }
+
+        public ExtraUseCaseResponse(String id) {
+            this(id, null, true, null, null);
+        }
+    }
+
+    /**
+     * generic class for use case request
+     *
+     * @param <M>
+     */
+    public record ExtraUseCaseRequest<M>(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
+            M model, String parentId) {
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id) {
+            this(session, mapper, uriInfo, id, null, null);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, M model,
+                String parentId) {
+            this(session, mapper, uriInfo, null, model, parentId);
+        }
+    }
+
+    /**
+     * create an EMF model (provider/service/resouces) for the corresponding DTO
+     *
+     * @param request
+     * @return
+     */
+    public ExtraUseCaseResponse<S> create(ExtraUseCaseRequest<M> request);
+
+    /**
+     * delete the EMF model (provider/service/resouces) for the corresponding DTO
+     *
+     * @param request
+     * @return
+     */
+    public ExtraUseCaseResponse<S> delete(ExtraUseCaseRequest<M> request);
+
+    public Class<M> getType();
+
+    /**
+     * update(patch) the EMF model (provider/service/resouces) for the corresponding
+     * DTO
+     *
+     * @param request
+     * @return
+     */
+    public ExtraUseCaseResponse<S> patch(ExtraUseCaseRequest<M> request);
+
+    /**
+     * update(put) the EMF model (provider/service/resouces) for the corresponding
+     * DTO
+     *
+     * @param request
+     * @return
+     */
+    public ExtraUseCaseResponse<S> update(ExtraUseCaseRequest<M> request);
+}

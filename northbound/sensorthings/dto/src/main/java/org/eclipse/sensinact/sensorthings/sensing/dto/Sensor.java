@@ -19,7 +19,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record Sensor(String selfLink, Object id, String name, String description,
-        String encodingType, Object metadata, @JsonInclude(NON_NULL) Map<String, Object> properties,
+public record Sensor(String selfLink, Object id, String name, String description, String encodingType, Object metadata,
+        @JsonInclude(NON_NULL) Map<String, Object> properties,
         @JsonProperty("Datastreams@iot.navigationLink") String datastreamsLink) implements NameDescription {
 }

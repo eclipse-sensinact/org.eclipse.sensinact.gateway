@@ -65,7 +65,7 @@ class HistoryResourceHelper {
             timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
 
             // Filtering happens at a lower level, so we may not use all the discovered history
-            List<Observation> observationList = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
+            List<Observation> observationList = DtoMapperGet.toObservationList(userSession, application, mapper, uriInfo,
                     expansions, filter, resourceSnapshot, timed);
             if (count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
                 count -= (timed.size() - observationList.size());
@@ -102,7 +102,7 @@ class HistoryResourceHelper {
             params.put("skip", skip);
 
             timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-            List<HistoricalLocation> historicalLocationList = DtoMapper.toHistoricalLocationList(userSession, application, mapper, uriInfo,
+            List<HistoricalLocation> historicalLocationList = DtoMapperGet.toHistoricalLocationList(userSession, application, mapper, uriInfo,
                     expansions, filter, provider, timed);
             if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
                 count -= (timed.size() - historicalLocationList.size());

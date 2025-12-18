@@ -18,7 +18,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -36,9 +36,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.ObservationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-
 import jakarta.ws.rs.NotFoundException;
 
 public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess {
@@ -46,7 +45,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     @Override
     public Observation getObservation(String id) {
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
-        Instant timestamp = DtoMapper.getTimestampFromId(id);
+        Instant timestamp = DtoMapperGet.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
         Optional<Observation> result = null;
@@ -58,22 +57,24 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                     String provider = resourceSnapshot.getService().getProvider().getName();
                     String service = resourceSnapshot.getService().getName();
                     String resource = resourceSnapshot.getName();
-                    // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000 (timestamp)
+                    // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
+                    // (timestamp)
                     Instant timestampPlusOneMilli = timestamp.plusMillis(1);
                     TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                            Map.of("provider", provider, "service", service, "resource", resource, "time", timestampPlusOneMilli));
+                            Map.of("provider", provider, "service", service, "resource", resource, "time",
+                                    timestampPlusOneMilli));
                     if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
-                        result = DtoMapper.toObservation(getSession(), application, getMapper(),
-                                uriInfo, getExpansions(), criterion, resourceSnapshot, Optional.of(t));
+                        result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), criterion, resourceSnapshot, Optional.of(t));
                     }
                 }
             } else if (timestamp.equals(milliTimestamp)) {
-                result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), criterion, resourceSnapshot);
+                result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        criterion, resourceSnapshot);
             }
         } else {
-            result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), criterion, resourceSnapshot, Optional.empty());
+            result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    criterion, resourceSnapshot, Optional.empty());
         }
 
         if (result.isEmpty()) {
@@ -86,8 +87,8 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     public Datastream getObservationDatastream(String id) {
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
 
-        Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), resourceSnapshot, parseFilter(DATASTREAMS));
+        Datastream d = DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                resourceSnapshot, parseFilter(DATASTREAMS));
 
         if (!id.startsWith(String.valueOf(d.id()))) {
             throw new NotFoundException();
@@ -106,16 +107,16 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     @Override
     public ObservedProperty getObservationDatastreamObservedProperty(String id) {
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
-        return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), resourceSnapshot);
+        return DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(OBSERVED_PROPERTIES), resourceSnapshot);
     }
 
     @Override
     public Sensor getObservationDatastreamSensor(String id) {
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
 
-        Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(SENSORS), resourceSnapshot);
+        Sensor s = DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(SENSORS), resourceSnapshot);
         if (!id.startsWith(String.valueOf(s.id()))) {
             throw new NotFoundException();
         }
@@ -127,8 +128,8 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(THINGS), providerSnapshot);
+        Thing t = DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), providerSnapshot);
         if (!provider.equals(t.id())) {
             throw new NotFoundException();
         }
@@ -139,8 +140,8 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     public FeatureOfInterest getObservationFeatureOfInterest(String id) {
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
+        return DtoMapperGet.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
     }
 
     // No history as it is *live* observation data not a data stream
@@ -150,14 +151,10 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
-        return new ResultList<>(null, null, providerSnapshot
-                .getServices().stream()
-                .flatMap(s -> s.getResources().stream())
-                .filter(ResourceSnapshot::isSet)
-                .map(r -> DtoMapper.toObservation(getSession(), application, getMapper(),
-                        uriInfo, getExpansions(), criterion, r))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList());
+        return new ResultList<>(null, null, providerSnapshot.getServices().stream()
+                .flatMap(s -> s.getResources().stream()).filter(ResourceSnapshot::isSet).map(r -> DtoMapperGet
+                        .toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
+                .filter(Optional::isPresent).map(Optional::get).toList());
     }
+
 }
