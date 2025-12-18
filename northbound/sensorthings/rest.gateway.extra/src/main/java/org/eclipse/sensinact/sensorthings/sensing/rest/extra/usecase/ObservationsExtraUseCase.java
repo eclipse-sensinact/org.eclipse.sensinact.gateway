@@ -20,32 +20,29 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * observation
  */
-@Component(service = IExtraUseCase.class)
 public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObservation, ServiceSnapshot> {
 
-    @Reference
-    IAccessResourceUseCase resourceUseCase;
+    private final IAccessServiceUseCase serviceUseCase;
 
-    @Reference
-    IAccessServiceUseCase serviceUseCase;
+    private final DataUpdate dataUpdate;
 
-    @Reference
-    DataUpdate dataUpdate;
+    private final FeatureOfInterestExtraUseCase featureOfInterestUseCase;
 
-    @Reference
-    IFeatureOfInterestExtraUseCase featureOfInterestUseCase;
+    public ObservationsExtraUseCase(Providers providers) {
+        dataUpdate = resolve(providers, DataUpdate.class);
+        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
+    }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedObservation> request) {
         String observationId = getId(request.model());

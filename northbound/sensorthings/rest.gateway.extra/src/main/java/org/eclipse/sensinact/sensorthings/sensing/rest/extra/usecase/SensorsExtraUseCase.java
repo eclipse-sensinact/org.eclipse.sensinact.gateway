@@ -16,28 +16,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * sensor
  */
-@Component(service = { IExtraUseCase.class, ISensorExtraUseCase.class })
-public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, ExpandedSensor>
-        implements ISensorExtraUseCase {
-
-    @Reference
-    DataUpdate dataUpdate;
-
-    @Reference
-    IAccessResourceUseCase resourceUseCase;
+public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, ExpandedSensor> {
 
     Map<String, ExpandedSensor> sensorById = new HashMap<String, ExpandedSensor>();
+
+    public SensorsExtraUseCase(Providers providers) { }
 
     public ExtraUseCaseResponse<ExpandedSensor> create(ExtraUseCaseRequest<ExpandedSensor> request) {
         ExpandedSensor sensor = request.model();
@@ -76,12 +68,10 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ex
         return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
     }
 
-    @Override
     public ExpandedSensor getInMemorySensor(String id) {
         return sensorById.get(id);
     }
 
-    @Override
     public ExpandedSensor removeInMemorySensor(String id) {
         return sensorById.remove(id);
     }
