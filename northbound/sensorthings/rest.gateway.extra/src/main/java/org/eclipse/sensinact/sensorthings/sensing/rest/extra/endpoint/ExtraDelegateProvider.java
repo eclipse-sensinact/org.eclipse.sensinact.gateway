@@ -27,14 +27,14 @@ public class ExtraDelegateProvider implements ContextResolver<IExtraDelegate> {
 
     @Context
     Providers providers;
-    
+
     private ExtraDelegateImpl extraDelegateImpl;
 
     @Override
     public IExtraDelegate getContext(Class<?> type) {
         IExtraDelegate result;
         synchronized (this) {
-            if(extraDelegateImpl == null) {
+            if (extraDelegateImpl == null) {
                 extraDelegateImpl = new ExtraDelegateImpl(providers);
             }
             result = extraDelegateImpl;

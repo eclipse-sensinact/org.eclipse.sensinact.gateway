@@ -35,13 +35,14 @@ import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
 
 /**
- * Provides access to {@link IExtraUseCase} services in a Jakarta REST application.
+ * Provides access to {@link IExtraUseCase} services in a Jakarta REST
+ * application.
  * <p>
- * The Context type is used to determine which implementation to return. It should
- * be one of:
+ * The Context type is used to determine which implementation to return. It
+ * should be one of:
  * <ul>
- *   <li>The type of the service</li>
- *   <li>The handled type (i.e. first type parameter) for the service</li>
+ * <li>The type of the service</li>
+ * <li>The handled type (i.e. first type parameter) for the service</li>
  * </ul>
  */
 @SuppressWarnings("rawtypes")
@@ -51,27 +52,25 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
     @Context
     Providers providers;
 
-    private final List<Class<? extends AbstractExtraUseCase<?, ?>>> knownExtras = List.of(
-            DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class, LocationsExtraUseCase.class,
-            ObservationsExtraUseCase.class, ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class,
-            ThingsExtraUseCase.class);
+    private final List<Class<? extends AbstractExtraUseCase<?, ?>>> knownExtras = List.of(DatastreamsExtraUseCase.class,
+            FeatureOfInterestExtraUseCase.class, LocationsExtraUseCase.class, ObservationsExtraUseCase.class,
+            ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class, ThingsExtraUseCase.class);
 
     private final Map<Class<? extends AbstractExtraUseCase<?, ?>>, IExtraUseCase<? extends Id, ?>> useCases = new ConcurrentHashMap<>();
 
     @Override
     @SuppressWarnings("unchecked")
-    public IExtraUseCase<?,?> getContext(Class<?> type) {
+    public IExtraUseCase<?, ?> getContext(Class<?> type) {
         Class<? extends AbstractExtraUseCase<?, ?>> cacheKey;
-        if(!AbstractExtraUseCase.class.isAssignableFrom(type)) {
-            cacheKey = knownExtras.stream()
-                .filter(c -> AbstractExtraUseCase.getUseCaseTypeParameter(c).equals(type))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Type " + type + " is not a suitable Extra Use Case type"));
+        if (!AbstractExtraUseCase.class.isAssignableFrom(type)) {
+            cacheKey = knownExtras.stream().filter(c -> AbstractExtraUseCase.getUseCaseTypeParameter(c).equals(type))
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException(
+                            "Type " + type + " is not a suitable Extra Use Case type"));
         } else {
             cacheKey = (Class<? extends AbstractExtraUseCase<?, ?>>) type;
         }
 
-        return (AbstractExtraUseCase<?, ?>) useCases.computeIfAbsent(cacheKey, c -> {
+        return useCases.computeIfAbsent(cacheKey, c -> {
             try {
                 return c.getConstructor(Providers.class).newInstance(providers);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
@@ -81,5 +80,4 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
         });
     }
 
-    
 }

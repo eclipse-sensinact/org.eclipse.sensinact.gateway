@@ -43,11 +43,12 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     /**
      * Get the type parameter
+     *
      * @param superclass
      */
     @SuppressWarnings("unchecked")
     private static <T> Class<T> internalGetUseCaseTypeParameter(Class<?> clazz) {
-        if(AbstractExtraUseCase.class.equals(clazz) || !AbstractExtraUseCase.class.isAssignableFrom(clazz)) {
+        if (AbstractExtraUseCase.class.equals(clazz) || !AbstractExtraUseCase.class.isAssignableFrom(clazz)) {
             throw new IllegalArgumentException("Not a suitable class to check");
         }
         var superclass = clazz.getGenericSuperclass();
@@ -79,7 +80,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     /**
      * Quickly resolve a context object where the context type is unimportant
-     * 
+     *
      * @param <T>
      * @param providers
      * @param type
@@ -91,7 +92,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     /**
      * Resolve a context object of the given type for the supplied context
-     * 
+     *
      * @param <T>
      * @param providers
      * @param type
@@ -100,7 +101,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
      */
     protected <T> T resolve(Providers providers, Class<T> type, Class<?> contextType) {
         ContextResolver<T> resolver = providers.getContextResolver(type, MediaType.WILDCARD_TYPE);
-        if(resolver == null) {
+        if (resolver == null) {
             throw new WebApplicationException("Unable to resolve a provider for " + type);
         } else {
             return resolver.getContext(contextType);
@@ -109,13 +110,14 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     /**
      * Quickly resolve a Use Case provider of the supplied type
+     *
      * @param <T>
      * @param providers
      * @param type
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T extends AbstractExtraUseCase<?,?>> T resolveUseCase(Providers providers, Class<T> type) {
+    protected <T extends AbstractExtraUseCase<?, ?>> T resolveUseCase(Providers providers, Class<T> type) {
         return (T) resolve(providers, IExtraUseCase.class, type);
     }
 }
