@@ -18,6 +18,11 @@ import java.util.List;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Providers;
+
 /**
  * abstract use case
  *
@@ -28,11 +33,25 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     private Class<M> type;
 
-    @SuppressWarnings("unchecked")
     public AbstractExtraUseCase() {
-        var superclass = getClass().getGenericSuperclass();
-        var param = ((ParameterizedType) superclass).getActualTypeArguments()[0];
-        this.type = (Class<M>) param;
+        this.type = internalGetUseCaseTypeParameter(getClass());
+    }
+
+    public static Class<?> getUseCaseTypeParameter(Class<? extends AbstractExtraUseCase<?, ?>> c) {
+        return internalGetUseCaseTypeParameter(c);
+    }
+
+    /**
+     * Get the type parameter
+     * @param superclass
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> internalGetUseCaseTypeParameter(Class<?> clazz) {
+        if(AbstractExtraUseCase.class.equals(clazz) || !AbstractExtraUseCase.class.isAssignableFrom(clazz)) {
+            throw new IllegalArgumentException("Not a suitable class to check");
+        }
+        var superclass = clazz.getGenericSuperclass();
+        return (Class<T>) ((ParameterizedType) superclass).getActualTypeArguments()[0];
     }
 
     /**
@@ -58,4 +77,45 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
      */
     protected abstract List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<M> request);
 
+    /**
+     * Quickly resolve a context object where the context type is unimportant
+     * 
+     * @param <T>
+     * @param providers
+     * @param type
+     * @return
+     */
+    protected <T> T resolve(Providers providers, Class<T> type) {
+        return resolve(providers, type, type);
+    }
+
+    /**
+     * Resolve a context object of the given type for the supplied context
+     * 
+     * @param <T>
+     * @param providers
+     * @param type
+     * @param contextType
+     * @return
+     */
+    protected <T> T resolve(Providers providers, Class<T> type, Class<?> contextType) {
+        ContextResolver<T> resolver = providers.getContextResolver(type, MediaType.WILDCARD_TYPE);
+        if(resolver == null) {
+            throw new WebApplicationException("Unable to resolve a provider for " + type);
+        } else {
+            return resolver.getContext(contextType);
+        }
+    }
+
+    /**
+     * Quickly resolve a Use Case provider of the supplied type
+     * @param <T>
+     * @param providers
+     * @param type
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    protected <T extends AbstractExtraUseCase<?,?>> T resolveUseCase(Providers providers, Class<T> type) {
+        return (T) resolve(providers, IExtraUseCase.class, type);
+    }
 }

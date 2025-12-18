@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -24,6 +25,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.StandardCharsets;
+import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -32,13 +35,15 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IFeatureOfInterestExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IObservedPropertyExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ISensorExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservedPropertiesExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
@@ -55,7 +60,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Providers;
 
 @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", properties = {
         @Property(key = "test.class", source = ValueSource.TestClass),
@@ -69,6 +80,46 @@ public class AbstractIntegrationTest {
     static final HttpClient client = HttpClient.newHttpClient();
     protected static final ObjectMapper mapper = new ObjectMapper();
 
+    @Path("test")
+    public static class TestTypeExfiltrator {
+        public FeatureOfInterestExtraUseCase foiUseCase;
+        public ObservedPropertiesExtraUseCase observedPropertyUseCase;
+        public SensorsExtraUseCase sensorUseCase;
+
+        @GET
+        public void exfiltrate(@Context Providers providers) {
+            @SuppressWarnings("rawtypes")
+            ContextResolver<IExtraUseCase> resolver = providers.getContextResolver(IExtraUseCase.class, MediaType.WILDCARD_TYPE);
+            sensorUseCase = (SensorsExtraUseCase) resolver.getContext(SensorsExtraUseCase.class);
+            observedPropertyUseCase = (ObservedPropertiesExtraUseCase) resolver.getContext(ObservedPropertiesExtraUseCase.class);
+            foiUseCase = (FeatureOfInterestExtraUseCase) resolver.getContext(FeatureOfInterestExtraUseCase.class);
+        }
+    }
+
+    @BeforeEach
+    void setupUseCases(@InjectBundleContext BundleContext ctx) throws IOException, InterruptedException {
+        TestTypeExfiltrator exfiltrator = new TestTypeExfiltrator();
+        ctx.registerService(TestTypeExfiltrator.class, exfiltrator,
+                new Hashtable<>(Map.of("osgi.jakartars.resource", true,
+                        "osgi.jakartars.application.select", "(osgi.jakartars.name=sensorthings)")));
+
+        boolean success = false;
+        HttpResponse<String> result;
+        for(int i = 0; i < 5; i++) {
+            result = queryGet("http://localhost:8185/test");
+            if(result.statusCode() == 204) {
+                this.sensorUseCase = exfiltrator.sensorUseCase;
+                this.observedPropertyUseCase = exfiltrator.observedPropertyUseCase;
+                this.foiUseCase = exfiltrator.foiUseCase;
+                success = true;
+                break;
+            } else {
+                Thread.sleep(250);
+            }
+        }
+        assertTrue(success, "Unable to get the necessary providers");
+    }
+
     protected JsonNode getJsonResponseFromGet(String url) throws IOException, InterruptedException {
         HttpResponse<String> response = queryGet(url);
         return mapper.readTree(response.body());
@@ -78,7 +129,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPost(SubUrl, dto);
         // Then
-        assertEquals(response.statusCode(), expectedStatus);
+        assertEquals(expectedStatus, response.statusCode());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -90,13 +141,13 @@ public class AbstractIntegrationTest {
     protected GatewayThread thread;
 
     @InjectService
-    protected ISensorExtraUseCase sensorUseCase;
+    protected JakartarsServiceRuntime jakartarsRuntime;
 
-    @InjectService
-    protected IObservedPropertyExtraUseCase observedPropertyUseCase;
+    protected SensorsExtraUseCase sensorUseCase;
 
-    @InjectService
-    protected IFeatureOfInterestExtraUseCase foiUseCase;
+    protected ObservedPropertiesExtraUseCase observedPropertyUseCase;
+
+    protected FeatureOfInterestExtraUseCase foiUseCase;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {
         // Normalize URI

@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -23,22 +24,24 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-@Component(service = IExtraUseCase.class)
 public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation, ServiceSnapshot> {
-    @Reference
-    IAccessProviderUseCase providerUseCase;
 
-    @Reference
-    DataUpdate dataUpdate;
+    private IAccessProviderUseCase providerUseCase;
+
+    private DataUpdate dataUpdate;
+
+    public LocationsExtraUseCase(Providers providers) {
+        dataUpdate = resolve(providers, DataUpdate.class);
+        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
+    }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = toDtos(request);

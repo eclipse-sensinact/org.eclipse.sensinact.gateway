@@ -16,28 +16,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * FeatureOfInterest
  */
-@Component(service = { IExtraUseCase.class, IFeatureOfInterestExtraUseCase.class })
-public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureOfInterest, FeatureOfInterest>
-        implements IFeatureOfInterestExtraUseCase {
-
-    @Reference
-    DataUpdate dataUpdate;
-
-    @Reference
-    IAccessResourceUseCase resourceUseCase;
+public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureOfInterest, FeatureOfInterest> {
 
     Map<String, FeatureOfInterest> featureOfInterestById = new ConcurrentHashMap<String, FeatureOfInterest>();
+
+    public FeatureOfInterestExtraUseCase(Providers providers) {}
 
     public ExtraUseCaseResponse<FeatureOfInterest> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
         String id = getId(request.model());
@@ -82,7 +74,6 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
 
     }
 
-    @Override
     public FeatureOfInterest getInMemoryFeatureOfInterest(String id) {
         return featureOfInterestById.get(id);
     }

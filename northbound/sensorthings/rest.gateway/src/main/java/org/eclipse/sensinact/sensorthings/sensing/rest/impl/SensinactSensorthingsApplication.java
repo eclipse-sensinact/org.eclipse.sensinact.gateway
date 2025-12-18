@@ -19,12 +19,13 @@ import java.util.Set;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
-import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServiceUseCaseProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
 
@@ -54,16 +55,14 @@ public class SensinactSensorthingsApplication extends Application {
     @Activate
     Config config;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
-    IExtraDelegate extraDelegate;
-
     @Override
     public Set<Class<?>> getClasses() {
 
         Set<Class<?>> listResource = new HashSet<Class<?>>(Set.of(
                 // Features/extensions
                 SensorThingsFeature.class, SensinactSessionProvider.class, SensorthingsFilterProvider.class,
-
+                AccessProviderUseCaseProvider.class, AccessResourceUseCaseProvider.class,
+                AccessServiceUseCaseProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections

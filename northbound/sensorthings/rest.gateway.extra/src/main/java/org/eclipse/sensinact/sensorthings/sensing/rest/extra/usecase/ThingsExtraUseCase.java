@@ -22,22 +22,23 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing Thing
  */
-@Component(service = IExtraUseCase.class)
 public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, ProviderSnapshot> {
 
-    @Reference
-    DataUpdate dataUpdate;
+    private DataUpdate dataUpdate;
 
-    @Reference
-    IAccessProviderUseCase providerUseCase;
+    private IAccessProviderUseCase providerUseCase;
+
+    public ThingsExtraUseCase(Providers providers) {
+        dataUpdate = resolve(providers, DataUpdate.class);
+        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
+    }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
         String id = getId(request.model());

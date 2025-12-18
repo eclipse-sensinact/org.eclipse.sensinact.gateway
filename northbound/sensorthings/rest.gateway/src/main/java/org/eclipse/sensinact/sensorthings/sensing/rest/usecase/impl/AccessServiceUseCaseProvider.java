@@ -12,26 +12,34 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 
+import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
+
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Providers;
 
 /**
- * use case service to get the service
+ * Provides access to Service snapshots via a {@link ContextResolver}
  */
-@Component(service = IAccessServiceUseCase.class, immediate = true)
-public class AccessServiceUseCase implements IAccessServiceUseCase {
+@Provider
+public class AccessServiceUseCaseProvider implements ContextResolver<IAccessServiceUseCase> {
 
-    @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    IAccessProviderUseCase accessProviderUserCase;
+    @Context
+    Providers providers;
 
     @Override
+    public IAccessServiceUseCase getContext(Class<?> type) {
+        return this::read;
+    }
+
     public ServiceSnapshot read(SensiNactSession session, String providerId, String serviceId) {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
@@ -43,8 +51,18 @@ public class AccessServiceUseCase implements IAccessServiceUseCase {
         return serviceSnapshot;
     }
 
+    /**
+     * Get hold of the provider snapshot via a {@link ContextResolver}
+     * @param session
+     * @param providerId
+     * @return
+     */
     private ProviderSnapshot validateAndGetProvider(SensiNactSession session, String providerId) {
-        return accessProviderUserCase.read(session, providerId);
+        ContextResolver<IAccessProviderUseCase> cr = providers.getContextResolver(IAccessProviderUseCase.class,
+                MediaType.WILDCARD_TYPE);
+        if(cr == null) {
+            throw new InternalServerErrorException("Unable to locate the provider access service");
+        }
+        return cr.getContext(Object.class).read(session, providerId);
     }
-
 }

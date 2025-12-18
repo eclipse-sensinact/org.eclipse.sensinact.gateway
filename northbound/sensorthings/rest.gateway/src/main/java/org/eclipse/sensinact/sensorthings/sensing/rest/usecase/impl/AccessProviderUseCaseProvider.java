@@ -12,28 +12,21 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 
-import java.util.Optional;
-
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
-import org.osgi.service.component.annotations.Component;
+
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Provider;
 
 /**
- * service that allow to get the provider
+ * Provides access to Provider snapshots via a {@link ContextResolver}
  */
-@Component(service = IAccessProviderUseCase.class, immediate = true)
-public class AccessProviderUseCase implements IAccessProviderUseCase {
+@Provider
+public class AccessProviderUseCaseProvider implements ContextResolver<IAccessProviderUseCase> {
 
     @Override
-    public ProviderSnapshot read(SensiNactSession session, String providerId) {
-
-        Optional<ProviderSnapshot> providerSnapshot = DtoMapper.getProviderSnapshot(session, providerId);
-        if (providerSnapshot.isEmpty()) {
-            return null;
-        }
-        return providerSnapshot.get();
+    public IAccessProviderUseCase getContext(Class<?> type) {
+        return (session, id) -> DtoMapper.getProviderSnapshot(session, id).orElse(null);
     }
 
 }

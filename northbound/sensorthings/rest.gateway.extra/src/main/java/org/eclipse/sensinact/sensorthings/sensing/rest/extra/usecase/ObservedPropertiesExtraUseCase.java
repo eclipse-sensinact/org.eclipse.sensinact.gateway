@@ -16,29 +16,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * observedProperty
  */
-@Component(service = { IExtraUseCase.class, IObservedPropertyExtraUseCase.class })
 public class ObservedPropertiesExtraUseCase
-        extends AbstractExtraUseCase<ExpandedObservedProperty, ExpandedObservedProperty>
-        implements IObservedPropertyExtraUseCase {
-
-    @Reference
-    DataUpdate dataUpdate;
-
-    @Reference
-    IAccessServiceUseCase serviceUseCase;
+        extends AbstractExtraUseCase<ExpandedObservedProperty, ExpandedObservedProperty> {
 
     Map<String, ExpandedObservedProperty> observedPropertyById = new HashMap<String, ExpandedObservedProperty>();
+
+    public ObservedPropertiesExtraUseCase(Providers providers) { }
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> create(
             ExtraUseCaseRequest<ExpandedObservedProperty> request) {
@@ -81,12 +73,10 @@ public class ObservedPropertiesExtraUseCase
 
     }
 
-    @Override
     public ExpandedObservedProperty getInMemoryObservedProperty(String id) {
         return observedPropertyById.get(id);
     }
 
-    @Override
     public ExpandedObservedProperty removeInMemoryObservedProperty(String id) {
         return observedPropertyById.remove(id);
     }
