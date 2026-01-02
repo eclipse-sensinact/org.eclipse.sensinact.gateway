@@ -22,6 +22,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCa
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -122,6 +123,33 @@ public class ExtraDelegateImpl implements IExtraDelegate {
         ExtraUseCaseRequest<RefId> request = new ExtraUseCaseRequest<RefId>(session, mapper, uriInfo, method, dto,
                 parentId, clazzModel, clazzRef);
         ExtraUseCaseResponse<S> result = useCase.create(request);
+        if (!result.success()) {
+            throw new UnsupportedOperationException(result.message(), result.e());
+        }
+        return result.snapshot();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <D extends Id, S> S delete(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
+            Class<D> clazz) {
+        IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(clazz);
+        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, HttpMethod.DELETE, id);
+        ExtraUseCaseResponse<S> result = useCase.delete(request);
+        if (!result.success()) {
+            throw new UnsupportedOperationException(result.message(), result.e());
+        }
+        return result.snapshot();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+            String parentId, Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef) {
+        IExtraUseCase<RefId, S> useCase = (IExtraUseCase<RefId, S>) getExtraUseCase(RefId.class);
+        ExtraUseCaseRequest<RefId> request = new ExtraUseCaseRequest<RefId>(session, mapper, uriInfo, method, parentId,
+                clazzUseCase, clazzRef);
+        ExtraUseCaseResponse<S> result = useCase.delete(request);
         if (!result.success()) {
             throw new UnsupportedOperationException(result.message(), result.e());
         }

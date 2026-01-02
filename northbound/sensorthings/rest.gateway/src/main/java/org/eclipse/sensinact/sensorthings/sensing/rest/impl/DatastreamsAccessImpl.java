@@ -273,7 +273,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Response deleteDatastream(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, id, ExpandedDataStream.class);
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class);
 
         return Response.noContent().build();
     }

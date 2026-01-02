@@ -119,8 +119,9 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Response deleteObservedProperty(String id) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedObservedProperty.class);
+
+        return Response.noContent().build();
     }
 
 }

@@ -119,8 +119,9 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Response deleteSensor(String id) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedSensor.class);
+
+        return Response.noContent().build();
     }
 
 }

@@ -143,7 +143,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
 
     @Override
     public Response deleteFeatureOfInterest(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, id, FeatureOfInterest.class);
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, FeatureOfInterest.class);
 
         return Response.noContent().build();
     }

@@ -183,7 +183,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public Response deleteObservation(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, id, FeatureOfInterest.class);
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class);
 
         return Response.noContent().build();
     }

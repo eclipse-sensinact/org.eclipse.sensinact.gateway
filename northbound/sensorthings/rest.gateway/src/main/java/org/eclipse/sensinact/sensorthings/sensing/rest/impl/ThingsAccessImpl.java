@@ -358,20 +358,25 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Response deleteThing(String id) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class);
+
+        return Response.noContent().build();
     }
 
     @Override
     public Response deleteDatastreamRef(String id) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedThing.class,
+                ExpandedDataStream.class);
+
+        return Response.noContent().build();
     }
 
     @Override
     public Response deleteLocationRef(String id, String id2) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedThing.class,
+                ExpandedLocation.class);
+
+        return Response.noContent().build();
     }
 
 }
