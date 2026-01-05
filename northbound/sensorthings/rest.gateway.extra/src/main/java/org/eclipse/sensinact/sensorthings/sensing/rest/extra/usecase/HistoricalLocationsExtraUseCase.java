@@ -67,7 +67,7 @@ public class HistoricalLocationsExtraUseCase extends AbstractExtraUseCase<Histor
 
     @Override
     public String getId(HistoricalLocation dto) {
-        return DtoMapper.sanitizeId(dto.id() != null ? dto.id() : dto.time());
+        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.time());
     }
 
 }

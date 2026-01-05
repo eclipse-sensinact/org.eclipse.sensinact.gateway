@@ -5,7 +5,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -21,7 +21,7 @@ public class AccessServiceUseCase implements IAccessServiceUseCase {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
 
-        String service = DtoMapper.extractFirstIdSegment(serviceId);
+        String service = DtoMapperGet.extractFirstIdSegment(serviceId);
 
         ServiceSnapshot serviceSnapshot = providerSnapshot.getService(service);
 
