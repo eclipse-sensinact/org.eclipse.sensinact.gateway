@@ -47,6 +47,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
@@ -68,6 +69,12 @@ public class DtoMapper {
 
     public static ServiceSnapshot getServiceSnapshot(ProviderSnapshot provider, String name) {
         return provider.getServices().stream().filter(s -> name.equals(s.getName())).findFirst().get();
+    }
+
+    public static void validatedProviderId(String id) {
+        if (id.contains("~")) {
+            throw new BadRequestException("Multi-segments ID found");
+        }
     }
 
     public static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
@@ -396,7 +403,8 @@ public class DtoMapper {
         if (provider == null) {
             throw new NotFoundException();
         }
-        return provider.getServices().stream()
+        // TODO refacto model to have a provider datastream ?
+        return provider.getServices().stream().filter(s -> !ADMIN.equals(s.getName()) && !"thing".equals(s.getName()))
                 .map(s -> toDatastream(userSession, application, mapper, uriInfo, expansions, filter, s)).toList();
 
     }

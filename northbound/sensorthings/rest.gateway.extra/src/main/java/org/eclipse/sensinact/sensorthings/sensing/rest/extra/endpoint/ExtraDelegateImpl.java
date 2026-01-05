@@ -34,8 +34,8 @@ import jakarta.ws.rs.ext.Providers;
 public class ExtraDelegateImpl implements IExtraDelegate {
 
     /**
-     * Used to access the various Extra Use Case services through
-     * a {@link ContextResolver}
+     * Used to access the various Extra Use Case services through a
+     * {@link ContextResolver}
      */
     private final Providers providers;
 
@@ -44,11 +44,11 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, D dto,
-            String parentId) {
+    public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+            D dto, String parentId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
 
-        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, dto, parentId);
+        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.create(request);
         if (!result.success()) {
             throw new UnsupportedOperationException(result.message(), result.e());
@@ -57,15 +57,16 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     }
 
-    public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, D dto) {
-        return create(session, mapper, uriInfo, dto, null);
+    public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+            D dto) {
+        return create(session, mapper, uriInfo, method, dto, null);
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends Id, S> S delete(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
-            Class<D> clazz) {
+    public <D extends Id, S> S delete(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+            String id, Class<D> clazz) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(clazz);
-        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id);
+        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, id);
         ExtraUseCaseResponse<S> result = useCase.create(request);
         if (!result.success()) {
             throw result.e();
@@ -79,10 +80,11 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @SuppressWarnings("unchecked")
-    public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id, D dto,
-            String parentId) {
+    public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+            String id, D dto, String parentId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
-        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, id, dto, parentId);
+        ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, id, dto,
+                parentId);
         ExtraUseCaseResponse<S> result = useCase.update(request);
         if (!result.success()) {
             throw new UnsupportedOperationException(result.message(), result.e());
@@ -91,9 +93,9 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @Override
-    public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
-            D dto) {
-        return update(session, mapper, uriInfo, id, dto, null);
+    public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+            String id, D dto) {
+        return update(session, mapper, uriInfo, method, id, dto, null);
     }
 
 }

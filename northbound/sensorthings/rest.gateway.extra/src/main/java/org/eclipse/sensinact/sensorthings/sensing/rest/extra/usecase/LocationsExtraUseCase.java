@@ -28,8 +28,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
 
-import jakarta.ws.rs.InternalServerErrorException;
-
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
@@ -56,7 +54,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
-                String locationId = getId(request.model());
+                String locationId = getId(request);
                 return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService("locations"));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
@@ -73,18 +71,13 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> patch(ExtraUseCaseRequest<ExpandedLocation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
-
-    }
-
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
         ExpandedLocation location = request.model();
-        DtoToModelMapper.checkRequireField(location);
+        checkRequireField(request);
 
-        List<SensorThingsUpdate> listUpdates = DtoToModelMapper.toLocationUpdates(request.model());
+        List<SensorThingsUpdate> listUpdates = DtoToModelMapper.toLocationUpdates(request.model(), request.id());
         if (location.things() != null && location.things().size() >= 0 || request.parentId() != null) {
             List<String> listThingIds = new ArrayList<String>();
 
@@ -106,7 +99,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
                 @SuppressWarnings("unchecked")
                 List<String> ids = (List<String>) resource.getValue().getValue();
 
-                ids.add(getId(location));
+                ids.add(getId(request));
 
                 return new ThingUpdate(providerId, null, null, providerId, null, ids);
             }).forEach(listUpdates::add);
@@ -123,7 +116,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
-                String locationId = getId(request.model());
+                String locationId = getId(request);
                 return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService(locationId));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
@@ -135,8 +128,10 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
     }
 
     @Override
-    public String getId(ExpandedLocation dto) {
-        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    public String getId(ExtraUseCaseRequest<ExpandedLocation> request) {
+        return request.id() != null ? request.id()
+                : DtoToModelMapper
+                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
 }

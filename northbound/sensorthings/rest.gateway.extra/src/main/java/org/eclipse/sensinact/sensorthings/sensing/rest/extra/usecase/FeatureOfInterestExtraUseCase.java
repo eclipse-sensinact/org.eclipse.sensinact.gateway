@@ -29,31 +29,29 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
 
     Map<String, FeatureOfInterest> featureOfInterestById = new ConcurrentHashMap<String, FeatureOfInterest>();
 
-    public FeatureOfInterestExtraUseCase(Providers providers) {}
+    public FeatureOfInterestExtraUseCase(Providers providers) {
+    }
 
     public ExtraUseCaseResponse<FeatureOfInterest> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        String id = getId(request.model());
         FeatureOfInterest featureOfInterest = request.model();
-        DtoToModelMapper.checkRequireField(featureOfInterest);
-        String featureOfInterestId = getId(featureOfInterest);
-        FeatureOfInterest createFoi = new FeatureOfInterest(featureOfInterest.selfLink(), id, featureOfInterest.name(),
-                featureOfInterest.description(), featureOfInterest.encodingType(), featureOfInterest.feature(), null);
+        checkRequireField(request);
+        String featureOfInterestId = getId(request);
+        FeatureOfInterest createFoi = new FeatureOfInterest(featureOfInterest.selfLink(), featureOfInterestId,
+                featureOfInterest.name(), featureOfInterest.description(), featureOfInterest.encodingType(),
+                featureOfInterest.feature(), null);
         featureOfInterestById.put(featureOfInterestId, createFoi);
-        return new ExtraUseCaseResponse<FeatureOfInterest>(id, createFoi);
+        return new ExtraUseCaseResponse<FeatureOfInterest>(featureOfInterestId, createFoi);
 
     }
 
     @Override
-    public String getId(FeatureOfInterest dto) {
-        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    public String getId(ExtraUseCaseRequest<FeatureOfInterest> request) {
+        return request.id() != null ? request.id()
+                : DtoToModelMapper
+                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
     public ExtraUseCaseResponse<FeatureOfInterest> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "not implemented");
-
-    }
-
-    public ExtraUseCaseResponse<FeatureOfInterest> patch(ExtraUseCaseRequest<FeatureOfInterest> request) {
         return new ExtraUseCaseResponse<FeatureOfInterest>(false, "not implemented");
 
     }

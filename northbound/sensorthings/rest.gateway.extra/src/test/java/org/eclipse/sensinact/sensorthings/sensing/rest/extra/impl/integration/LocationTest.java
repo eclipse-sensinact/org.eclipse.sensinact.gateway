@@ -112,7 +112,8 @@ public class LocationTest extends AbstractIntegrationTest {
         ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
         json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
         // then
-
+        json = getJsonResponseFromGet(String.format("Locations(%s)", idLocation), 200);
+        UtilsAssert.assertLocation(dtoLocationUpdate, json);
     }
 
 }

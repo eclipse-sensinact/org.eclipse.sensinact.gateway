@@ -29,14 +29,18 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.FeaturesOfInterestAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.FeaturesOfInterestUpdate;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-public class FeaturesOfInterestAccessImpl extends AbstractAccess implements FeaturesOfInterestAccess {
+public class FeaturesOfInterestAccessImpl extends AbstractAccess
+        implements FeaturesOfInterestAccess, FeaturesOfInterestUpdate {
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
@@ -122,6 +126,13 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess implements Feat
         }
 
         return d;
+    }
+
+    @Override
+    public Response updateFeaturesOfInterest(String id, FeatureOfInterest foi) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, foi);
+
+        return Response.noContent().build();
     }
 
 }

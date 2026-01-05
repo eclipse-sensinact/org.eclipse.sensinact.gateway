@@ -15,10 +15,9 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet;
-
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -41,12 +40,12 @@ public class AccessResourceUseCaseProvider implements ContextResolver<IAccessRes
     }
 
     public ResourceSnapshot read(SensiNactSession session, String id) {
-        String providerId = DtoMapperGet.extractFirstIdSegment(id);
+        String providerId = UtilIds.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
 
-        String service = DtoMapperGet.extractFirstIdSegment(id.substring(providerId.length() + 1));
-        String resource = DtoMapperGet.extractFirstIdSegment(id.substring(providerId.length() + service.length() + 2));
+        String service = UtilIds.extractSecondIdSegment(id);
+        String resource = UtilIds.extractThirdIdSegment(id);
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 
@@ -55,6 +54,7 @@ public class AccessResourceUseCaseProvider implements ContextResolver<IAccessRes
 
     /**
      * Get hold of the provider snapshot via a {@link ContextResolver}
+     *
      * @param session
      * @param providerId
      * @return
@@ -62,7 +62,7 @@ public class AccessResourceUseCaseProvider implements ContextResolver<IAccessRes
     private ProviderSnapshot validateAndGetProvider(SensiNactSession session, String providerId) {
         ContextResolver<IAccessProviderUseCase> cr = providers.getContextResolver(IAccessProviderUseCase.class,
                 MediaType.WILDCARD_TYPE);
-        if(cr == null) {
+        if (cr == null) {
             throw new InternalServerErrorException("Unable to locate the provider access service");
         }
         return cr.getContext(Object.class).read(session, providerId);

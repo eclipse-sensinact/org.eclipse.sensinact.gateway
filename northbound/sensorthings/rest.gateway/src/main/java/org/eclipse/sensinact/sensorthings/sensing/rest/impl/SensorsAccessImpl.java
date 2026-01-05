@@ -17,7 +17,6 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 import java.util.List;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -25,8 +24,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.SensorsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -36,8 +38,20 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
 
     @Override
     public Sensor getSensor(String id) {
-        return DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.SENSORS), validateAndGetResourceSnapshot(id));
+        String datastreamLink = getDatastreamLink(id);
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.SENSORS), validateAndGeService(id), datastreamLink);
+    }
+
+    private String getDatastreamLink(String id) {
+        String providerId = UtilIds.extractFirstIdSegment(id);
+        String serviceId = UtilIds.extractFirstIdSegment(id);
+        String datastreamLink = null;
+        if (serviceId != null) {
+            String thingLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Things{id}", providerId);
+            datastreamLink = DtoMapper.getLink(uriInfo, thingLink, "Datastreams({id})", serviceId);
+        }
+        return datastreamLink;
     }
 
     @Override
@@ -52,8 +66,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
             throw new NotFoundException();
         }
 
-        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.DATASTREAMS));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.DATASTREAMS), validateAndGeService(id));
     }
 
     @PaginationLimit(500)
@@ -71,10 +85,11 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        ResourceSnapshot resource = validateAndGetResourceSnapshot(id);
+        String datastreamLink = getDatastreamLink(id);
 
-        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), resource);
+        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), validateAndGeService(id),
+                datastreamLink);
 
         if (!id.equals(o.id())) {
             throw new NotFoundException();
@@ -105,9 +120,9 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
     }
 
     @Override
-    public Response updateSensor(String id, Sensor sensor) {
-        // TODO Auto-generated method stub
-        return null;
+    public Response updateSensor(String id, ExpandedSensor sensor) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, sensor);
+        return Response.noContent().build();
     }
 
 }

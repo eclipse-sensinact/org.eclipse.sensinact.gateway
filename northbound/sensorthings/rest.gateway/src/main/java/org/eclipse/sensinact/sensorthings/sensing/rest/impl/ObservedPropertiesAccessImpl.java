@@ -99,14 +99,15 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                validateAndGetProvider(provider));
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), validateAndGetProvider(provider));
     }
 
     @Override
     public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observedProperty);
+
+        return Response.noContent().build();
     }
 
 }

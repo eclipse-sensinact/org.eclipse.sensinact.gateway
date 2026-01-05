@@ -139,7 +139,7 @@ public class UtilsAssert {
                         assertLocation(dto.locations().get(i), locationsNode.get(i));
                     }
                 } else {
-                    assertEquals(dto.locations().get(0), locationsNode.get(0));
+                    assertLocation(dto.locations().get(0), locationsNode.get(0));
 
                 }
             }

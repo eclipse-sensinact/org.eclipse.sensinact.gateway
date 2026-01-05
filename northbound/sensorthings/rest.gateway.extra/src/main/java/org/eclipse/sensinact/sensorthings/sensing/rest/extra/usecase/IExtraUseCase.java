@@ -49,16 +49,19 @@ public interface IExtraUseCase<M extends Id, S> {
      *
      * @param <M>
      */
-    public record ExtraUseCaseRequest<M>(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id,
-            M model, String parentId) {
-        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id) {
-            this(session, mapper, uriInfo, id, null, null);
+    public record ExtraUseCaseRequest<M>(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+            String id, M model, String parentId) {
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                String id) {
+            this(session, mapper, uriInfo, method, id, null, null);
         }
 
-        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, M model,
-                String parentId) {
-            this(session, mapper, uriInfo, null, model, parentId);
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                M model, String parentId) {
+            this(session, mapper, uriInfo, method, null, model, parentId);
         }
+
     }
 
     /**
@@ -78,15 +81,6 @@ public interface IExtraUseCase<M extends Id, S> {
     public ExtraUseCaseResponse<S> delete(ExtraUseCaseRequest<M> request);
 
     public Class<M> getType();
-
-    /**
-     * update(patch) the EMF model (provider/service/resouces) for the corresponding
-     * DTO
-     *
-     * @param request
-     * @return
-     */
-    public ExtraUseCaseResponse<S> patch(ExtraUseCaseRequest<M> request);
 
     /**
      * update(put) the EMF model (provider/service/resouces) for the corresponding

@@ -20,6 +20,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 
 import jakarta.ws.rs.BadRequestException;
@@ -45,11 +46,8 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedObservation> request) {
-        String observationId = getId(request.model());
+        String observationId = getId(request);
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
-        String fullDatastreamId = request.parentId();
-        String thingId = DtoToModelMapper.extractFirstIdSegment(fullDatastreamId);
-        String datastreamId = fullDatastreamId.substring(thingId.length() + 1);
 
         // update/create provider
         try {
@@ -61,7 +59,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
 
         }
 
-        ServiceSnapshot service = serviceUseCase.read(request.session(), thingId, datastreamId);
+        ServiceSnapshot service = serviceUseCase.read(request.session(), request.parentId());
         if (service != null) {
             removeFeatureOfInterest(request.model());
             return new ExtraUseCaseResponse<ServiceSnapshot>(observationId, service);
@@ -71,11 +69,6 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
-
-    }
-
-    public ExtraUseCaseResponse<ServiceSnapshot> patch(ExtraUseCaseRequest<ExpandedObservation> request) {
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
@@ -91,23 +84,20 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedObservation> request) {
         // read thing for each location and update it
         ExpandedObservation observation = request.model();
-        DtoToModelMapper.checkRequireField(observation);
+        checkRequireField(request);
         // parent can be datastream or featureOfInterest TODO
-        String idFullDatastream = request.parentId();
-        String providerId = DtoToModelMapper.extractFirstIdSegment(idFullDatastream);
-        String idDatastream = idFullDatastream.substring(providerId.length() + 1);
-        if (idDatastream == null) {
-            throw new BadRequestException("can't find datastream parent ");
-        }
+
         FeatureOfInterest foi = getFeatureOfInterest(observation);
         if (foi != null) {
             DtoToModelMapper.checkRequireField(foi);
 
         }
-        checkRequireLink(serviceUseCase.read(request.session(), providerId, idDatastream));
+        String providerId = UtilIds.extractFirstIdSegment(request.parentId());
+        String serviceId = UtilIds.extractSecondIdSegment(request.parentId());
 
-        return List
-                .of(DtoToModelMapper.toDatastreamUpdate(providerId, idDatastream, null, null, null, observation, foi));
+        checkRequireLink(serviceUseCase.read(request.session(), providerId, serviceId));
+
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, serviceId, null, null, null, observation, foi));
     }
 
     private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {
@@ -142,8 +132,10 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
     }
 
     @Override
-    public String getId(ExpandedObservation dto) {
-        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.result());
+    public String getId(ExtraUseCaseRequest<ExpandedObservation> request) {
+        return request.id() != null ? request.id()
+                : DtoToModelMapper
+                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().result());
     }
 
 }

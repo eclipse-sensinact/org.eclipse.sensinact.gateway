@@ -36,11 +36,15 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import jakarta.ws.rs.NotFoundException;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservationsUpdate;
 
-public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess {
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+
+public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess, ObservationsUpdate {
 
     @Override
     public Observation getObservation(String id) {
@@ -155,6 +159,25 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                 .flatMap(s -> s.getResources().stream()).filter(ResourceSnapshot::isSet).map(r -> DtoMapperGet
                         .toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent).map(Optional::get).toList());
+    }
+
+    @Override
+    public Response updateObservation(String id, Observation observation) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observation);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateObservationDatastreamRef(String id, RefId datastream) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response updateObservationFeatureOfInterestRef(String id, RefId foi) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

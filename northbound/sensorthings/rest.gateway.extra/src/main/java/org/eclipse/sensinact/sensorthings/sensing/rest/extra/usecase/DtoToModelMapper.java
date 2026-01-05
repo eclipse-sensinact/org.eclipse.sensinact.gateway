@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -23,6 +22,7 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -80,6 +80,22 @@ public class DtoToModelMapper {
         }
         return id instanceof String ? (String) id : null;
 
+    }
+
+    public static void checkRequireField(Id dto) {
+        if (dto instanceof ExpandedThing) {
+            checkRequireField((ExpandedThing) dto);
+        } else if (dto instanceof ExpandedObservation) {
+            checkRequireField((ExpandedObservation) dto);
+        } else if (dto instanceof ExpandedLocation) {
+            checkRequireField((ExpandedLocation) dto);
+        } else if (dto instanceof ExpandedObservedProperty) {
+            checkRequireField((ExpandedObservedProperty) dto);
+        } else if (dto instanceof ExpandedSensor) {
+            checkRequireField((ExpandedSensor) dto);
+        } else if (dto instanceof ExpandedDataStream) {
+            checkRequireField((ExpandedDataStream) dto);
+        }
     }
 
     public static void checkRequireField(ExpandedSensor dto) {
@@ -170,6 +186,16 @@ public class DtoToModelMapper {
 
     }
 
+    public static void checkRequireLink(Object... links) {
+        for (int i = 0; i < links.length; i++) {
+            Object link = links[i];
+            if (link == null) {
+                throw new BadRequestException("linked entity is required");
+            }
+        }
+
+    }
+
     public static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider,
             String resource) {
         ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> ADMIN.equals(s.getName())).findFirst()
@@ -177,19 +203,33 @@ public class DtoToModelMapper {
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
-    public static String extractFirstIdSegment(String id) {
-        if (id.isEmpty()) {
-            throw new BadRequestException("Invalid id");
-        }
-
-        int idx = id.indexOf('~');
-        if (idx == -1) {
-            // No segment found, return the whole ID
+    public static String extractIdSegment(String id, int part) {
+        if (id.isEmpty())
+            return null;
+        String[] parts = id.split("~");
+        if (parts == null || parts.length == 0) {
             return id;
-        } else if (idx == 0 || idx == id.length() - 1) {
-            throw new BadRequestException("Invalid id");
         }
-        return id.substring(0, idx);
+        if (parts == null || parts.length == 0)
+            return id;
+        if (part < parts.length) {
+            return parts[part];
+        }
+        return null;
+    }
+
+    public static String extractFirstIdSegment(String id) {
+        return extractIdSegment(id, 0);
+    }
+
+    public static String extractSecondIdSegment(String id) {
+        return extractIdSegment(id, 1);
+
+    }
+
+    public static String extractThirdIdSegment(String id) {
+        return extractIdSegment(id, 1);
+
     }
 
     public static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider, String resource) {
@@ -228,9 +268,12 @@ public class DtoToModelMapper {
     }
 
     public static SensorThingsUpdate toLocationUpdate(String providerId, ExpandedLocation location) {
-        String idLocation = sanitizeId(location.id() == null ? location.name() : location.id());
-        return new LocationUpdate(providerId, idLocation, location.name(), location.description(),
+        return new LocationUpdate(providerId, providerId, location.name(), location.description(),
                 location.encodingType(), location.location());
+    }
+
+    public static SensorThingsUpdate toDatastreamUpdate(String providerId, String datastreamId, ExpandedSensor sensor) {
+        return toDatastreamUpdate(providerId, datastreamId, null, sensor, null, null, null, null);
     }
 
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, String datastreamId, ExpandedSensor sensor,
@@ -365,10 +408,14 @@ public class DtoToModelMapper {
         return null;
     }
 
-    public static List<SensorThingsUpdate> toUpdates(ExpandedThing thing, List<String> existingLocationIds) {
-        String providerIdThing = sanitizeId(thing.name() == null ? thing.id() : thing.name());
+    public static List<SensorThingsUpdate> toThingUpdates(ExpandedThing thing, List<String> existingLocationIds) {
+        return toThingUpdates(thing, null, existingLocationIds);
+    }
 
-        Object id = thing.id() == null ? providerIdThing : thing.id();
+    public static List<SensorThingsUpdate> toThingUpdates(ExpandedThing thing, String id,
+            List<String> existingLocationIds) {
+        String providerIdThing = id != null ? id : sanitizeId(thing.name() == null ? thing.id() : thing.name());
+
         List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
         Map<String, Object> thingProperties = null;
 
@@ -395,8 +442,8 @@ public class DtoToModelMapper {
             }
 
         }
-        ThingUpdate provider = new ThingUpdate(providerIdThing, thing.name(), thing.description(), id, thingProperties,
-                existingLocationIds);
+        ThingUpdate provider = new ThingUpdate(providerIdThing, thing.name(), thing.description(), providerIdThing,
+                thingProperties, existingLocationIds);
 
         listUpdate.add(provider);
 
@@ -407,13 +454,18 @@ public class DtoToModelMapper {
         return sanitizeId(l.id() != null ? (String) l.id() : l.name());
     }
 
-    public static List<SensorThingsUpdate> toLocationUpdates(ExpandedLocation location) {
+    public static List<SensorThingsUpdate> toLocationUpdates(ExpandedLocation location, String id) {
         List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
-        String locationId = sanitizeId(location.id() != null ? location.id() : location.name());
+
+        String locationId = id != null ? id : sanitizeId(location.id() != null ? location.id() : location.name());
 
         listUpdate.add(toLocationUpdate(locationId, location));
 
         return listUpdate;
+    }
+
+    public static List<SensorThingsUpdate> toLocationUpdates(ExpandedLocation location) {
+        return toLocationUpdates(location, null);
     }
 
     public static String getProperty(GeoJsonObject location, String propName) {

@@ -56,8 +56,8 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
         // unit
 
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitName,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitSymbol,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitDefinition,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitSymbol,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitDefinition,
         // observation
 
         @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observationId,

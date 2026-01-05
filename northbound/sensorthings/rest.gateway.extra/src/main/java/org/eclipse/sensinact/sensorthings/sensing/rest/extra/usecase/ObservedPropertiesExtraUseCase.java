@@ -30,13 +30,14 @@ public class ObservedPropertiesExtraUseCase
 
     Map<String, ExpandedObservedProperty> observedPropertyById = new HashMap<String, ExpandedObservedProperty>();
 
-    public ObservedPropertiesExtraUseCase(Providers providers) { }
+    public ObservedPropertiesExtraUseCase(Providers providers) {
+    }
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> create(
             ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         ExpandedObservedProperty observedProperty = request.model();
-        DtoToModelMapper.checkRequireField(observedProperty);
-        String observedPropertyId = getId(observedProperty);
+        checkRequireField(request);
+        String observedPropertyId = getId(request);
         ExpandedObservedProperty createExpandedProperty = new ExpandedObservedProperty(null, observedPropertyId,
                 observedProperty.name(), observedProperty.description(), observedProperty.definition(),
                 observedProperty.properties(), null);
@@ -47,17 +48,14 @@ public class ObservedPropertiesExtraUseCase
     }
 
     @Override
-    public String getId(ExpandedObservedProperty dto) {
-        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    public String getId(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+        return request.id() != null ? request.id()
+                : DtoToModelMapper
+                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
     public ExtraUseCaseResponse<ExpandedObservedProperty> delete(
             ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
-
-    }
-
-    public ExtraUseCaseResponse<ExpandedObservedProperty> patch(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
 
     }

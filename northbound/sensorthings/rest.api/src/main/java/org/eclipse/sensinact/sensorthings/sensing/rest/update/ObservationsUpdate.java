@@ -13,8 +13,11 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 
@@ -28,6 +31,29 @@ public interface ObservationsUpdate {
      * @return
      */
     @PUT
+    @PATCH
     public Response updateObservation(@PathParam("id") String id, Observation observation);
+
+    /**
+     * update observation
+     *
+     * @param id
+     * @param observation
+     * @return
+     */
+    @PUT
+    @Path("/Datastream/$ref")
+    public Response updateObservationDatastreamRef(@PathParam("id") String id, RefId datastream);
+
+    /**
+     * update observation
+     *
+     * @param id
+     * @param observation
+     * @return
+     */
+    @PUT
+    @Path("/FeatureOfInterest/$ref")
+    public Response updateObservationFeatureOfInterestRef(@PathParam("id") String id, RefId foi);
 
 }

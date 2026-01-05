@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -41,6 +42,14 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
         return internalGetUseCaseTypeParameter(c);
     }
 
+    protected abstract List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<M> request);
+
+    protected void checkRequireField(ExtraUseCaseRequest<M> request) {
+        if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
+            DtoToModelMapper.checkRequireField(request.model());
+        }
+    }
+
     /**
      * Get the type parameter
      *
@@ -61,7 +70,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
      * @param aDto
      * @return
      */
-    public abstract String getId(M aDto);
+    public abstract String getId(ExtraUseCaseRequest<M> request);
 
     /**
      * get generic type (dto) for use case
@@ -69,14 +78,6 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
     public Class<M> getType() {
         return type;
     }
-
-    /**
-     * return list of record update
-     *
-     * @param request
-     * @return
-     */
-    protected abstract List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<M> request);
 
     /**
      * Quickly resolve a context object where the context type is unimportant

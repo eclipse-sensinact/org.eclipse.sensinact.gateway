@@ -39,22 +39,25 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.ThingsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate {
+public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate, ThingsUpdate {
 
     @Override
     public Thing getThing(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), providerSnapshot);
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                providerSnapshot);
     }
 
     @Override
@@ -67,14 +70,15 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Datastream getThingDatastream(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
-
-        if (!id.equals(provider)) {
+        String providerId = extractFirstIdSegment(id2);
+        String idDatastream = id2.substring(providerId.length() + 1);
+        if (!id.equals(providerId)) {
             throw new NotFoundException();
         }
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
 
-        Datastream d = DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
+        Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), provider.getService(idDatastream));
 
         if (!id2.equals(d.id())) {
             throw new NotFoundException();
@@ -224,16 +228,16 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Location getThingLocation(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
+        String providerThing = id;
+        String providerLocation = id2;
 
-        if (!id.equals(provider)) {
-            throw new NotFoundException();
+        // check if thing exists
+        if (validateAndGetProvider(providerThing) == null) {
+            throw new NotFoundException(String.format("Thing identified by %s not found", id));
         }
-
-        getTimestampFromId(id2);
-
-        Location l = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(LOCATIONS), validateAndGetProvider(provider));
+        ProviderSnapshot provider = validateAndGetProvider(providerLocation);
+        Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(LOCATIONS), provider.getService("locations"));
 
         if (!id2.equals(l.id())) {
             throw new NotFoundException();
@@ -272,7 +276,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response createDatastream(String id, ExpandedDataStream datastream) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), datastream, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
@@ -285,7 +290,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response createLocation(String id, ExpandedLocation location) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), location, id);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
 
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -295,6 +301,39 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
         return Response.created(createdUri).entity(createDto).build();
 
+    }
+
+    @Override
+    public Response updateDatastream(String id, String id2, ExpandedDataStream datastream) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, datastream, id);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateLocation(String id, String id2, ExpandedLocation location) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, location, id);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateThing(String id, ExpandedThing thing) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, thing);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateLocationRef(String id, RefId location) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response updateDatastreamRef(String id, RefId datastream) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

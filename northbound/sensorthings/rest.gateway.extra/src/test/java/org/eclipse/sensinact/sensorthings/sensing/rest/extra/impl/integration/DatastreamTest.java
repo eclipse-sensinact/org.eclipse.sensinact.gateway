@@ -164,9 +164,10 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // when
         ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
 
-        json = getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
+        getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
         // then
-
+        json = getJsonResponseFromGet(String.format("Datastreams(%s)", idDatastream), 200);
+        UtilsAssert.assertDatastream(dtoDatastreamUpdate, json);
     }
 
     @Test

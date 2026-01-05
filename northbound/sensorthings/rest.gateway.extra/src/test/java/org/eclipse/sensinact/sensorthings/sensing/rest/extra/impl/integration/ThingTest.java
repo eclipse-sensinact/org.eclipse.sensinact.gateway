@@ -149,6 +149,8 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    @Test
+
     public void testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation() throws Exception {
         // Given
         String name = "testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
@@ -171,12 +173,14 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    @Test
+
     public void testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation()
             throws Exception {
         // Given
         String name = "testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
 
-        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name));
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "Location"));
 
         ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal(name);
         ExpandedDataStream datastream2 = DtoFactory.getDatastreamMinimal(name + "1");
@@ -235,9 +239,10 @@ public class ThingTest extends AbstractIntegrationTest {
         ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(name,
                 "testThing With Location and Datastream update",
                 Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), null);
-        json = getJsonResponseFromPut(dtoThingToUpdate, "/Things", 204);
+        getJsonResponseFromPut(dtoThingToUpdate, String.format("/Things(%s)", idJson), 204);
         // then
-
+        json = getJsonResponseFromGet(String.format("/Things(%s)", idJson), 200);
+        UtilsAssert.assertThing(dtoThingToUpdate, json);
     }
 
     @Test
@@ -246,7 +251,7 @@ public class ThingTest extends AbstractIntegrationTest {
         String name = "testUpdateThingLocation";
 
         List<ExpandedLocation> locationsCreate = List.of(DtoFactory.getLocation(name));
-        List<ExpandedLocation> locationsUpdate = List.of(DtoFactory.getLocation(name + "2"));
+        ExpandedLocation locationsUpdate = DtoFactory.getLocation(name + "2");
 
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name + "Thing", "testThing With 1 Location ",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locationsCreate);
@@ -260,13 +265,12 @@ public class ThingTest extends AbstractIntegrationTest {
         String idLocation = getIdFromJson(locationNode);
 
         // When
-        ExpandedThing dtoThingUpdateWithlocation = DtoFactory.getExpandedThingWithLocations(name + "Thing",
-                "testThing With 1 Location ", Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"),
-                locationsUpdate);
-        json = getJsonResponseFromPut(dtoThingUpdateWithlocation,
-                String.format("/Things(%s)/Locations(%s)", idThing, idLocation), 204);
-        // then
 
+        json = getJsonResponseFromPut(locationsUpdate, String.format("/Things(%s)/Locations(%s)", idThing, idLocation),
+                204);
+        // then
+        json = getJsonResponseFromGet(String.format("/Things(%s)/Locations(%s)", idThing, idLocation), 200);
+        UtilsAssert.assertLocation(locationsUpdate, json);
     }
 
     @Test
@@ -297,7 +301,8 @@ public class ThingTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPut(datastreamsUpdate,
                 String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 204);
         // then
-
+        json = getJsonResponseFromGet(String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 200);
+        UtilsAssert.assertDatastream(datastreamsUpdate, json);
     }
 
     @Test
@@ -383,7 +388,7 @@ public class ThingTest extends AbstractIntegrationTest {
         // When
         ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(null,
                 "testThing With Location and Datastream update", Map.of("installationDate update", "2025-12-25"), null);
-        json = getJsonResponseFromPatch(dtoThingToUpdate, "/Things ", 204);
+        json = getJsonResponseFromPatch(dtoThingToUpdate, String.format("Things(%s)", idJson), 204);
         // then
     }
 

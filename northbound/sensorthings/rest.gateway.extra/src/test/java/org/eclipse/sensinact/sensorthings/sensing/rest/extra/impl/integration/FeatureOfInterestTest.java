@@ -107,7 +107,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void createCreateObservationWithFeatureOfInterestThroughDatastream() throws Exception {
+    public void testCreateObservationWithFeatureOfInterestThroughDatastream() throws Exception {
         // given
         String name = "createCreateObservationsWithFeatureOfInterestThroughDatastream";
 
