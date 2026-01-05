@@ -190,7 +190,6 @@
       <artifactId>jakarta.json</artifactId>
       <scope>test</scope>
     </dependency>
-    
 
 
     <!-- Test Config Management -->
