@@ -24,9 +24,6 @@ import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.GeometryCollection;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
@@ -114,8 +111,16 @@ public class DtoMapper {
         Object observation;
         Map<String, Object> observationParameters;
 
-        observation = sanitizeId(obs.result());
+        observation = getObservationId(obs);
         Instant timestamp = obs.phenomenonTime();
+        observationParameters = getObservationParameters(obs);
+
+        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, observation, timestamp,
+                observationParameters, null, null, null, null, null, null);
+    }
+
+    private static Map<String, Object> getObservationParameters(ExpandedObservation obs) {
+        Map<String, Object> observationParameters;
         observationParameters = new HashMap<>();
         observationParameters.put("sensorthings.observation.id", String.valueOf(obs.id()));
         observationParameters.put("sensorthings.observation.resultQuality", obs.resultQuality());
@@ -123,9 +128,13 @@ public class DtoMapper {
             obs.parameters()
                     .forEach((k, v) -> observationParameters.put("sensorthings.observation.parameters." + k, v));
         }
+        return observationParameters;
+    }
 
-        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, observation, timestamp,
-                observationParameters, null, null, null, null, null, null);
+    private static Object getObservationId(ExpandedObservation obs) {
+        Object observation;
+        observation = sanitizeId(obs.result());
+        return observation;
     }
 
     public static DatastreamUpdate toObservedPropertyUpdate(String providerId, String idDatastream, String idSensor,
@@ -133,8 +142,15 @@ public class DtoMapper {
         String serviceName = idDatastream;
         // TODO check if sensor is the correct one
         Map<String, Object> observedPropertyMetadata;
-        String observedProperty = sanitizeId(obs.id() == null ? obs.name() : obs.id());
+        String observedProperty = getObservedPropertyId(obs);
 
+        observedPropertyMetadata = getObservedPropertyMetadata(obs);
+        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
+                null, null, observedProperty, observedPropertyMetadata);
+    }
+
+    private static Map<String, Object> getObservedPropertyMetadata(ExpandedObservedProperty obs) {
+        Map<String, Object> observedPropertyMetadata;
         observedPropertyMetadata = new HashMap<>();
         observedPropertyMetadata.put("sensorthings.observedProperty.name", obs.name());
         observedPropertyMetadata.put("sensorthings.observedProperty.description", obs.description());
@@ -143,17 +159,27 @@ public class DtoMapper {
             obs.properties().forEach(
                     (k, v) -> observedPropertyMetadata.put("sensorthings.observedProperty.properties." + k, v));
         }
-        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
-                null, null, observedProperty, observedPropertyMetadata);
+        return observedPropertyMetadata;
+    }
+
+    private static String getObservedPropertyId(ExpandedObservedProperty obs) {
+        String observedProperty = sanitizeId(obs.id() == null ? obs.name() : obs.id());
+        return observedProperty;
     }
 
     public static DatastreamUpdate toSensorUpdate(String providerId, String idDatastream, ExpandedSensor dsSensor) {
         String serviceName = idDatastream;
-        // TODO check if sensor is the correct one
-        String sensor;
         Map<String, Object> sensorMetadata;
 
-        sensor = sanitizeId(toString(dsSensor.id() == null ? dsSensor.name() : dsSensor.id()));
+        String sensor = getSensorId(dsSensor);
+        sensorMetadata = getSensorMetadata(dsSensor);
+        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
+                sensor, sensorMetadata, null, null);
+
+    }
+
+    private static Map<String, Object> getSensorMetadata(ExpandedSensor dsSensor) {
+        Map<String, Object> sensorMetadata;
         sensorMetadata = new HashMap<>();
         sensorMetadata.put("sensorthings.sensor.name", dsSensor.name());
         sensorMetadata.put("sensorthings.sensor.description", dsSensor.description());
@@ -162,9 +188,12 @@ public class DtoMapper {
         if (dsSensor.properties() != null) {
             dsSensor.properties().forEach((k, v) -> sensorMetadata.put("sensorthings.sensor.properties." + k, v));
         }
-        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
-                sensor, sensorMetadata, null, null);
+        return sensorMetadata;
+    }
 
+    private static String getSensorId(ExpandedSensor dsSensor) {
+        String sensor = sanitizeId(toString(dsSensor.id() == null ? dsSensor.name() : dsSensor.id()));
+        return sensor;
     }
 
     public static DatastreamUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds) {
@@ -177,16 +206,10 @@ public class DtoMapper {
             observation = Map.of();
             observationParameters = Map.of();
         } else {
-            Observation o = ds.observations().get(0);
-            observation = sanitizeId(o.result());
+            ExpandedObservation o = ds.observations().get(0);
+            observation = getObservationId(o);
             timestamp = o.phenomenonTime();
-            observationParameters = new HashMap<>();
-            observationParameters.put("sensorthings.observation.id", String.valueOf(o.id()));
-            observationParameters.put("sensorthings.observation.resultQuality", o.resultQuality());
-            if (o.parameters() != null) {
-                o.parameters()
-                        .forEach((k, v) -> observationParameters.put("sensorthings.observation.parameters." + k, v));
-            }
+            observationParameters = getObservationParameters(o);
         }
 
         String unit;
@@ -195,9 +218,8 @@ public class DtoMapper {
             unit = null;
             unitMetadata = null;
         } else {
-            unit = ds.unitOfMeasurement().symbol();
-            unitMetadata = Map.of("sensorthings.unit.name", String.valueOf(ds.unitOfMeasurement().name()),
-                    "sensorthings.unit.definition", String.valueOf(ds.unitOfMeasurement().definition()));
+            unit = getUnitId(ds);
+            unitMetadata = getUnitMetadata(ds);
         }
 
         String sensor;
@@ -206,17 +228,10 @@ public class DtoMapper {
             sensor = null;
             sensorMetadata = Map.of();
         } else {
-            Sensor dsSensor = ds.sensor();
-            sensor = sanitizeId(toString(dsSensor.id() == null ? dsSensor.name() : dsSensor.id()));
-            sensorMetadata = new HashMap<>();
-            sensorMetadata.put("sensorthings.sensor.name", ds.sensor().name());
-            sensorMetadata.put("sensorthings.sensor.description", ds.sensor().description());
-            sensorMetadata.put("sensorthings.sensor.metadata", ds.sensor().metadata());
-            sensorMetadata.put("sensorthings.sensor.encodingType", ds.sensor().encodingType());
-            if (ds.sensor().properties() != null) {
-                ds.sensor().properties()
-                        .forEach((k, v) -> sensorMetadata.put("sensorthings.sensor.properties." + k, v));
-            }
+            ExpandedSensor dsSensor = ds.sensor();
+            sensor = getSensorId(dsSensor);
+            sensorMetadata = getSensorMetadata(dsSensor);
+
         }
 
         String observedProperty;
@@ -225,24 +240,34 @@ public class DtoMapper {
             observedProperty = null;
             observedPropertyMetadata = Map.of();
         } else {
-            ObservedProperty dsOp = ds.observedProperty();
-            observedProperty = sanitizeId(dsOp.id() == null ? dsOp.name() : dsOp.id());
+            ExpandedObservedProperty dsOp = ds.observedProperty();
+            observedProperty = getObservedPropertyId(dsOp);
 
-            observedPropertyMetadata = new HashMap<>();
-            observedPropertyMetadata.put("sensorthings.observedProperty.name", ds.observedProperty().name());
-            observedPropertyMetadata.put("sensorthings.observedProperty.description",
-                    ds.observedProperty().description());
-            observedPropertyMetadata.put("sensorthings.observedProperty.definition",
-                    ds.observedProperty().definition());
-            if (ds.observedProperty().properties() != null) {
-                ds.observedProperty().properties().forEach(
-                        (k, v) -> observedPropertyMetadata.put("sensorthings.observedProperty.properties." + k, v));
-            }
+            observedPropertyMetadata = getObservedPropertyMetadata(dsOp);
+
         }
-        Object dataStreamId = sanitizeId(ds.id() == null ? ds.name() : ds.id());
+        Object dataStreamId = getDatastreamId(ds);
         return new DatastreamUpdate(providerId, serviceName, dataStreamId, ds.name(), ds.description(), observation,
                 timestamp, observationParameters, unit, unitMetadata, sensor, sensorMetadata, observedProperty,
                 observedPropertyMetadata);
+    }
+
+    private static Map<String, Object> getUnitMetadata(ExpandedDataStream ds) {
+        Map<String, Object> unitMetadata;
+        unitMetadata = Map.of("sensorthings.unit.name", String.valueOf(ds.unitOfMeasurement().name()),
+                "sensorthings.unit.definition", String.valueOf(ds.unitOfMeasurement().definition()));
+        return unitMetadata;
+    }
+
+    private static String getUnitId(ExpandedDataStream ds) {
+        String unit;
+        unit = ds.unitOfMeasurement().symbol();
+        return unit;
+    }
+
+    private static Object getDatastreamId(ExpandedDataStream ds) {
+        Object dataStreamId = sanitizeId(ds.id() == null ? ds.name() : ds.id());
+        return dataStreamId;
     }
 
     private static Feature toFeature(ExpandedLocation location) {
