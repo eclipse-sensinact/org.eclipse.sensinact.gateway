@@ -136,7 +136,7 @@ public abstract class AbstractAccess {
      */
     protected ServiceSnapshot validateAndGeService(String id) {
         String providerId = UtilIds.extractFirstIdSegment(id);
-        String serviceId = UtilIds.extractSecondIdSegment(id);
+        String serviceId = "datastream";
 
         Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(getSession(), providerId);
 

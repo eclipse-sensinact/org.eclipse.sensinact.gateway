@@ -281,6 +281,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), thing);
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
+
         Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
                 snapshot);
 

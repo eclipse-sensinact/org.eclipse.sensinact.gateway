@@ -104,9 +104,10 @@ public class DtoMapper {
                 locationsLink);
 
         if (expansions.shouldExpand("Datastreams", thing)) {
-
+            @SuppressWarnings("unchecked")
+            List<String> listDatastreamId = getResourceField(serviceThing, "datastreamIds", List.class);
             expansions.addExpansion("Datastreams", thing, toDatastreams(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Datastreams"), filter, provider));
+                    expansions.getExpansionSettings("Datastreams"), filter, listDatastreamId));
         }
 
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
@@ -401,12 +402,13 @@ public class DtoMapper {
 
     public static List<Datastream> toDatastreams(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider) {
-        if (provider == null) {
+            List<String> datastreamids) {
+        if (datastreamids == null) {
             throw new NotFoundException();
         }
-        // TODO refacto model to have a provider datastream ?
-        return provider.getServices().stream().filter(s -> !ADMIN.equals(s.getName()) && !"thing".equals(s.getName()))
+
+        return datastreamids.stream().map(datastreamId -> DtoMapper.getProviderSnapshot(userSession, datastreamId))
+                .flatMap(Optional::stream).map(provider -> provider.getService("datastream"))
                 .map(s -> toDatastream(userSession, application, mapper, uriInfo, expansions, filter, s)).toList();
 
     }
