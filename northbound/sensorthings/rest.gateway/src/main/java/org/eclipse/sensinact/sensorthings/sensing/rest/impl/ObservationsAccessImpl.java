@@ -180,4 +180,9 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
         return null;
     }
 
+    @Override
+    public Response patchObservation(String id, Observation observation) {
+        return updateObservation(id, observation);
+    }
+
 }

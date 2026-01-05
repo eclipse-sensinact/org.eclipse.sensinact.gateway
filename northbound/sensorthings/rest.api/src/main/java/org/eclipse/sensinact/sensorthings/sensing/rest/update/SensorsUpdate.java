@@ -28,7 +28,9 @@ public interface SensorsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     public Response updateSensor(@PathParam("id") String id, ExpandedSensor sensor);
+
+    @PATCH
+    public Response patchSensor(@PathParam("id") String id, ExpandedSensor sensor);
 
 }

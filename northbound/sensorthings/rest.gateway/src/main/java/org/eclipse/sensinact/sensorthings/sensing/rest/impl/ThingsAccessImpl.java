@@ -336,4 +336,19 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         return null;
     }
 
+    @Override
+    public Response patchDatastream(String id, String id2, ExpandedDataStream datastream) {
+        return updateDatastream(id, id2, datastream);
+    }
+
+    @Override
+    public Response patchLocation(String id, String id2, ExpandedLocation location) {
+        return updateLocation(id, id2, location);
+    }
+
+    @Override
+    public Response patchThing(String id, ExpandedThing thing) {
+        return updateThing(id, thing);
+    }
+
 }

@@ -110,4 +110,9 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
         return Response.noContent().build();
     }
 
+    @Override
+    public Response patchObservedProperties(String id, ObservedProperty observedProperty) {
+        return updateObservedProperties(id, observedProperty);
+    }
+
 }

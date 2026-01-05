@@ -151,4 +151,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         return Response.noContent().build();
     }
 
+    @Override
+    public Response patchLocation(String id, ExpandedLocation location) {
+        return updateLocation(id, location);
+    }
+
 }

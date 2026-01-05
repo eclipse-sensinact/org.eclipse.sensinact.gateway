@@ -31,8 +31,10 @@ public interface ObservationsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     public Response updateObservation(@PathParam("id") String id, Observation observation);
+
+    @PATCH
+    public Response patchObservation(@PathParam("id") String id, Observation observation);
 
     /**
      * update observation

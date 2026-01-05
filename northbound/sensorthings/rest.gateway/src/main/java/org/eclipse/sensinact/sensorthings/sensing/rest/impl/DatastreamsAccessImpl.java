@@ -63,8 +63,8 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getDatastream(String id) {
-        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id), parseFilter(DATASTREAMS));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), validateAndGeService(id));
     }
 
     @PaginationLimit(500)
@@ -246,5 +246,15 @@ public class DatastreamsAccessImpl extends AbstractAccess
     public Response updateDatastreamObservedPropertyRef(String id, RefId observedProperty) {
         // TODO
         return null;
+    }
+
+    @Override
+    public Response patchDatastreams(String id, ExpandedDataStream dataStream) {
+        return updateDatastreams(id, dataStream);
+    }
+
+    @Override
+    public Response patchDatastreamsObservation(String id, String id2, Observation observation) {
+        return updateDatastreamsObservation(id, id2, observation);
     }
 }

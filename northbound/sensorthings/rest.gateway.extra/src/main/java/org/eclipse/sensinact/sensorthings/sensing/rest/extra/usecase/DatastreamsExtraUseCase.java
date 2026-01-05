@@ -61,6 +61,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
         String idDatastream = getId(request);
+        String providerId = getProviderId(request);
+
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         // update/create provider
@@ -72,7 +74,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
                     e.getMessage());
         }
 
-        ServiceSnapshot snapshot = serviceUseCase.read(request.session(), request.id());
+        ServiceSnapshot snapshot = serviceUseCase.read(request.session(), providerId, idDatastream);
         if (snapshot != null) {
 
             removeCachedExpandedObservedProperty(request.model());
@@ -96,6 +98,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedDataStream> request) {
         // read thing for each location and update it
         ExpandedDataStream datastream = request.model();
+        String datastreamId = getId(request);
         String providerId = getProviderId(request);
 
         checkRequireField(request);
@@ -109,13 +112,13 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         checkRequireLink(request, sensor, observedProperty, unit, provider);
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
-            return datastream
-                    .observations().stream().map(obs -> DtoToModelMapper.toDatastreamUpdate(providerId, datastream,
-                            sensor, observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
+            return datastream.observations().stream()
+                    .map(obs -> DtoToModelMapper.toDatastreamUpdate(providerId, datastreamId, datastream, sensor,
+                            observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
                     .toList();
         } else {
-            return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, datastream, sensor, observedProperty, unit,
-                    null, null));
+            return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, datastreamId, datastream, sensor,
+                    observedProperty, unit, null, null));
         }
 
     }
@@ -268,7 +271,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedDataStream> request) {
         String id = getId(request);
-
+        String providerId = getProviderId(request);
         List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         // update/create provider
@@ -280,7 +283,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
                     e.getMessage());
         }
 
-        ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), id);
+        ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, id);
 
         removeCachedExpandedObservedProperty(request.model());
         removeCachedExpandedSensor(request.model());

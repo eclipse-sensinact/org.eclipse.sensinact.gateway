@@ -135,9 +135,12 @@ public abstract class AbstractAccess {
      */
     protected ServiceSnapshot validateAndGeService(String id) {
         String providerId = UtilIds.extractFirstIdSegment(id);
+        String serviceId = UtilIds.extractSecondIdSegment(id);
+
         Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(getSession(), providerId);
-        if (provider != null && provider.isPresent()) {
-            return DtoMapper.getServiceSnapshot(provider.get(), id);
+
+        if (provider != null && provider.isPresent() && serviceId != null) {
+            return DtoMapper.getServiceSnapshot(provider.get(), serviceId);
         }
         throw new NotFoundException(String.format("can't find model identified by %s", id));
     }

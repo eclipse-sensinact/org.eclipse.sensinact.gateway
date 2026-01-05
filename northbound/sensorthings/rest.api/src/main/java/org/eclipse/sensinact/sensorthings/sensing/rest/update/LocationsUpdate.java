@@ -28,7 +28,9 @@ public interface LocationsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     public Response updateLocation(@PathParam("id") String id, ExpandedLocation location);
+
+    @PATCH
+    public Response patchLocation(@PathParam("id") String id, ExpandedLocation location);
 
 }

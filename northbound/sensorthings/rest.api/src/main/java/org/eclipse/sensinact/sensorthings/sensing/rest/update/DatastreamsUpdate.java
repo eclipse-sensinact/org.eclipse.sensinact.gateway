@@ -32,8 +32,10 @@ public interface DatastreamsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     public Response updateDatastreams(@PathParam("id") String id, ExpandedDataStream dataStream);
+
+    @PATCH
+    public Response patchDatastreams(@PathParam("id") String id, ExpandedDataStream dataStream);
 
     /**
      * update observation link to thing and datastream
@@ -44,9 +46,13 @@ public interface DatastreamsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     @Path("/Observations({id2})")
     public Response updateDatastreamsObservation(@PathParam("id") String id, @PathParam("id2") String id2,
+            Observation observation);
+
+    @PATCH
+    @Path("/Observations({id2})")
+    public Response patchDatastreamsObservation(@PathParam("id") String id, @PathParam("id2") String id2,
             Observation observation);
 
     /**
