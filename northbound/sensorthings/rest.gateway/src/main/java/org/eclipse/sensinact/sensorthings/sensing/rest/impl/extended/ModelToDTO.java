@@ -2,15 +2,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended;
 
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION_SERVICE;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.DATA_STREAM_SERVICE;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVATION_QUALITY;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_SENSOR_ENCODING_TYPE;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_SENSOR_METADATA;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_UNIT_DEFINITION;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_UNIT_NAME;
-
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,7 +12,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -40,10 +31,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DatastreamsAccessImpl;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.RootResourceAccessImpl;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -63,7 +51,7 @@ public class ModelToDTO {
     private static final String NO_DESCRIPTION = "No description";
     private static final String NO_DEFINITION = "No definition";
 
-    private static ServiceSnapshot getServiceSnapshot(ProviderSnapshot provider, String name) {
+    public static ServiceSnapshot getServiceSnapshot(ProviderSnapshot provider, String name) {
         return provider.getServices().stream().filter(s -> name.equals(s.getName())).findFirst().get();
     }
 
@@ -162,12 +150,12 @@ public class ModelToDTO {
     }
 
     public static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot resource) {
-        if (resource == null) {
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
+        if (service == null) {
             throw new NotFoundException();
         }
 
-        Sensor sensor = null;
+        Sensor sensor = getResourceField(service, "sensor", Sensor.class);
 
         return sensor;
     }
@@ -176,7 +164,7 @@ public class ModelToDTO {
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ServiceSnapshot resource) {
 
-        ObservedProperty observedProperty = null;
+        ObservedProperty observedProperty = getResourceField(resource, "observedProperty", ObservedProperty.class);
 
         return observedProperty;
     }
@@ -312,7 +300,7 @@ public class ModelToDTO {
     }
 
     private static String getServiceType(ServiceSnapshot service) {
-        if (service.getResource(TYPE) == null) {
+        if (service != null && service.getResource(TYPE) == null) {
             return null;
         }
         return getResourceField(service, TYPE, String.class);
@@ -337,7 +325,7 @@ public class ModelToDTO {
             throw new NotFoundException();
         }
 
-        UnitOfMeasurement unit = null;
+        UnitOfMeasurement unit = getResourceField(service, "unit", UnitOfMeasurement.class);
 
         return unit;
     }
