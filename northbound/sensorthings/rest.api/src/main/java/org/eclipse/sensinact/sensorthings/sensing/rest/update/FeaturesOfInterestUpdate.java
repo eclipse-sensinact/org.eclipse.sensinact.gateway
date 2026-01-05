@@ -27,9 +27,7 @@ public interface FeaturesOfInterestUpdate {
      * @return
      */
     @PUT
-    public Response updateFeaturesOfInterest(@PathParam("id") String id, FeatureOfInterest foi);
-
     @PATCH
-    public Response patchFeaturesOfInterest(@PathParam("id") String id, FeatureOfInterest foi);
+    public Response updateFeaturesOfInterest(@PathParam("id") String id, FeatureOfInterest foi);
 
 }

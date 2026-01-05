@@ -227,6 +227,8 @@ public class SensorTest extends AbstractIntegrationTest {
 
     }
 
+    @Test
+
     public void testUpdateSensor() throws Exception {
         // given
         String name = "testCreateSensor";
@@ -236,8 +238,10 @@ public class SensorTest extends AbstractIntegrationTest {
         UtilsAssert.assertSensor(sensor, json);
         ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
         // when
-        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
-
+        getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
+        // then
+        json = getJsonResponseFromGet(String.format("/Sensors(%s)", idSensor), 200);
+        UtilsAssert.assertSensor(sensorUpdate, json);
     }
 
     @Test
@@ -267,8 +271,13 @@ public class SensorTest extends AbstractIntegrationTest {
         ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
         json = getJsonResponseFromPut(sensorUpdate, String.format("Sensor(%s)", sensorIdDatastream), 204);
         assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        // then
+        json = getJsonResponseFromGet(String.format("/Sensors(%s)", sensorIdDatastream), 200);
+        UtilsAssert.assertSensor(sensorUpdate, json);
 
     }
+
+    @Test
 
     public void testUpdatePatchSensor() throws Exception {
         // given
@@ -308,7 +317,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorUseCase.getInMemorySensor(sensorId));
         // when
         ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2", null, "testencodingType");
-        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensor(%s)", sensorIdDatastream), 204);
+        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
         assertNull(sensorUseCase.getInMemorySensor(sensorId));
         // then
     }

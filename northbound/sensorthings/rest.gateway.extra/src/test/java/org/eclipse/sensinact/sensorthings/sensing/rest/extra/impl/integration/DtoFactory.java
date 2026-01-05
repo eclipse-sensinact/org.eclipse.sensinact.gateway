@@ -82,17 +82,6 @@ public class DtoFactory {
 
     }
 
-    public static ExpandedDataStream getDatastreamMinimalWithThingObervedPropertySensor(String name, RefId thingId,
-            ExpandedSensor sensor, ExpandedObservedProperty op) {
-        // Required
-        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
-        Instant start = Instant.now();
-        Instant end = Instant.now();
-        TimeInterval interval = new TimeInterval(end, start);
-        return new ExpandedDataStream(null, null, name, "Measures temperature", null, uom, null, interval, interval,
-                null, null, null, null, null, null, op, sensor, null, thingId);
-    }
-
     public static ExpandedDataStream getDatastreamMinimalLinkThingLinkObservedProperty(String name, RefId thingId,
             RefId obId) {
         // Required
@@ -116,8 +105,9 @@ public class DtoFactory {
 
     public static ExpandedDataStream getDatastreamMinimal(String name, String descriptikon, String obsType) {
         // Required
+        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
-        return getDatastream(name, descriptikon, null, "obsType", null, null, null, null);
+        return getDatastream(name, descriptikon, uom, "obsType", null, null, null, null);
 
     }
 

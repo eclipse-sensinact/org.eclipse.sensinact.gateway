@@ -42,7 +42,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFi
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

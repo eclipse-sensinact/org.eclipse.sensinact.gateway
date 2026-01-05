@@ -140,4 +140,11 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
         return updateFeaturesOfInterest(id, foi);
     }
 
+    @Override
+    public Response updateFeaturesOfInterest(String id, FeatureOfInterest foi) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, foi);
+
+        return Response.noContent().build();
+    }
+
 }

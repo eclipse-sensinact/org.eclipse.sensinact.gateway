@@ -124,12 +124,16 @@ public class ObservationTest extends AbstractIntegrationTest {
         // when
         json = getJsonResponseFromPut(observsationUpdate, String.format("Observations(%s)", idObservation), 204);
         // then
+        json = getJsonResponseFromGet(String.format("/Observations(%s)", idObservation), 200);
+        UtilsAssert.assertObservation(observsationUpdate, json);
 
         observsationUpdate = DtoFactory.getObservation(name + "3");
         // when
         json = getJsonResponseFromPut(observsationUpdate,
                 String.format("Datastream(%s)/Observations(%s)", idDatastream, idObservation), 204);
         // then
+        json = getJsonResponseFromGet(String.format("/Observations(%s)", idObservation), 200);
+        UtilsAssert.assertObservation(observsationUpdate, json);
     }
 
     @Test

@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -22,20 +23,16 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
-
-import jakarta.ws.rs.InternalServerErrorException;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocation, ServiceSnapshot> {
+public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation, ServiceSnapshot> {
 
     private IAccessProviderUseCase providerUseCase;
 
@@ -47,7 +44,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
-        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
+        List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
@@ -57,8 +54,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
-                String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
+                String locationId = getId(request);
+                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService("locations"));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
 
@@ -75,7 +72,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
     }
 
     @Override
-    public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedLocation> request) {
+    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
         ExpandedLocation location = request.model();
         checkRequireField(request);
@@ -93,28 +90,25 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
             listThingIds.stream().filter(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
+                ResourceSnapshot resource = provider.getResource("thing", "locationsIds");
                 return resource != null && resource.getValue() != null;
             }).map(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
+                ResourceSnapshot resource = provider.getResource("thing", "locationsIds");
 
                 @SuppressWarnings("unchecked")
                 List<String> ids = (List<String>) resource.getValue().getValue();
-                String locationId = request.id();
-                if (!ids.contains(locationId)) {
-                    ids.add(locationId);
 
-                    return new ThingUpdate(providerId, null, null, providerId, null, ids, null);
-                }
-                return null;
-            }).filter(java.util.Objects::nonNull).forEach(listUpdates::add);
+                ids.add(getId(request));
+
+                return new ThingUpdate(providerId, null, null, providerId, null, ids);
+            }).forEach(listUpdates::add);
         }
         return listUpdates;
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedLocation> request) {
-        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
+        List<SensorThingsUpdate> listDtoModels = toDtos(request);
 
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
@@ -122,8 +116,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
-                String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
+                String locationId = getId(request);
+                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService(locationId));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
 
@@ -131,6 +125,13 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
         }
 
+    }
+
+    @Override
+    public String getId(ExtraUseCaseRequest<ExpandedLocation> request) {
+        return request.id() != null ? request.id()
+                : DtoToModelMapper
+                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
 }

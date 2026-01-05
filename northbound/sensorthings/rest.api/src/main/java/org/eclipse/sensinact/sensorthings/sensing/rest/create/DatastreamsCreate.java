@@ -33,16 +33,16 @@ public interface DatastreamsCreate {
     @Path("/Observations")
     public Response createDatastreamsObservation(@PathParam("id") String id, ExpandedObservation observation);
 
+    /**
+     * update thing link to datastream
+     *
+     * @param id
+     * @param id2
+     * @param observation
+     * @return
+     */
     @POST
-    @Path("/Sensor/$ref")
-    public Response createDatastreamsLinkThing(@PathParam("id") String id, RefId ref);
-
-    @POST
-    @Path("/Thing/$ref")
-    public Response createDatastreamsLinkSensor(@PathParam("id") String id, RefId ref);
-
-    @POST
-    @Path("/ObservedProperty/$ref")
-    public Response createDatastreamsLinkObservedProperty(@PathParam("id") String id, RefId ref);
+    @Path("/Observations/$ref")
+    public Response createObservationRef(@PathParam("id") String id, RefId observation);
 
 }

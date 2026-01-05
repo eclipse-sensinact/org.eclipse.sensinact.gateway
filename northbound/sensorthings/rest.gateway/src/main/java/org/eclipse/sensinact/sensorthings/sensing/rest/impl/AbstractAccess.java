@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
@@ -29,6 +30,8 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -122,6 +125,21 @@ public abstract class AbstractAccess {
             throw new NotFoundException("Unknown provider");
         }
         return providerSnapshot.get();
+    }
+
+    /**
+     * validate and get provider link to the id
+     *
+     * @param id
+     * @return
+     */
+    protected ServiceSnapshot validateAndGeService(String id) {
+        String providerId = UtilIds.extractFirstIdSegment(id);
+        Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(getSession(), providerId);
+        if (provider != null && provider.isPresent()) {
+            return DtoMapper.getServiceSnapshot(provider.get(), id);
+        }
+        throw new NotFoundException(String.format("can't find model identified by %s", id));
     }
 
     /**

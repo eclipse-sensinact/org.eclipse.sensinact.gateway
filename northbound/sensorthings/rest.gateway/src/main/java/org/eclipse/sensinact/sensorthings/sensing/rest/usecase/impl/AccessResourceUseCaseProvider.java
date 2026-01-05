@@ -15,7 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -40,12 +40,12 @@ public class AccessResourceUseCaseProvider implements ContextResolver<IAccessRes
     }
 
     public ResourceSnapshot read(SensiNactSession session, String id) {
-        String providerId = UtilDto.extractFirstIdSegment(id);
+        String providerId = UtilIds.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
 
-        String service = UtilDto.extractSecondIdSegment(id);
-        String resource = UtilDto.extractThirdIdSegment(id);
+        String service = UtilIds.extractSecondIdSegment(id);
+        String resource = UtilIds.extractThirdIdSegment(id);
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 

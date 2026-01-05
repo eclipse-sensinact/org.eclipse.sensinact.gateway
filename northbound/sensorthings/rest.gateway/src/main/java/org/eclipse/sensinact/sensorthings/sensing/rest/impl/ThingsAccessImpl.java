@@ -56,8 +56,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
     public Thing getThing(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), providerSnapshot);
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                providerSnapshot);
     }
 
     @Override
@@ -70,14 +70,15 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Datastream getThingDatastream(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
-
-        if (!id.equals(provider)) {
+        String providerId = extractFirstIdSegment(id2);
+        String idDatastream = id2.substring(providerId.length() + 1);
+        if (!id.equals(providerId)) {
             throw new NotFoundException();
         }
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
 
-        Datastream d = DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
+        Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), provider.getService(idDatastream));
 
         if (!id2.equals(d.id())) {
             throw new NotFoundException();
@@ -227,16 +228,16 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Location getThingLocation(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
+        String providerThing = id;
+        String providerLocation = id2;
 
-        if (!id.equals(provider)) {
-            throw new NotFoundException();
+        // check if thing exists
+        if (validateAndGetProvider(providerThing) == null) {
+            throw new NotFoundException(String.format("Thing identified by %s not found", id));
         }
-
-        getTimestampFromId(id2);
-
-        Location l = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(LOCATIONS), validateAndGetProvider(provider));
+        ProviderSnapshot provider = validateAndGetProvider(providerLocation);
+        Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(LOCATIONS), provider.getService("locations"));
 
         if (!id2.equals(l.id())) {
             throw new NotFoundException();
@@ -325,34 +326,14 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response updateLocationRef(String id, RefId location) {
-        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), location, id,
-                ExpandedThing.class, ExpandedLocation.class);
-
-        return Response.noContent().build();
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
     public Response updateDatastreamRef(String id, RefId datastream) {
-        RefId thingId = new RefId(id);
-        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), thingId,
-                (String) datastream.id(), ExpandedDataStream.class, ExpandedThing.class);
-
-        return Response.noContent().build();
-    }
-
-    @Override
-    public Response patchDatastream(String id, String id2, ExpandedDataStream datastream) {
-        return updateDatastream(id, id2, datastream);
-    }
-
-    @Override
-    public Response patchLocation(String id, String id2, ExpandedLocation location) {
-        return updateLocation(id, id2, location);
-    }
-
-    @Override
-    public Response patchThing(String id, ExpandedThing thing) {
-        return updateThing(id, thing);
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

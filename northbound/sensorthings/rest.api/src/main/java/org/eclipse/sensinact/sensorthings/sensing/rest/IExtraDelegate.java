@@ -14,124 +14,25 @@ package org.eclipse.sensinact.sensorthings.sensing.rest;
 
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.UriInfo;
 
 public interface IExtraDelegate {
-    /**
-     * create sensorthing model
-     *
-     * @param <D>
-     * @param <S>
-     * @param session
-     * @param mapper
-     * @param uriInfo
-     * @param method
-     * @param dto
-     * @param parentId
-     * @return
-     */
+
     public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             D dto, String parentId);
 
-    /**
-     * create sensorthing model
-     *
-     * @param <D>
-     * @param <S>
-     * @param session
-     * @param mapper
-     * @param uriInfo
-     * @param method
-     * @param dto
-     * @return
-     */
     public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             D dto);
 
-    /**
-     * delete sensorthing model
-     *
-     * @param <D>
-     * @param <S>
-     * @param session
-     * @param mapper
-     * @param uriInfo
-     * @param method
-     * @param id
-     * @param clazz
-     * @return
-     */
     public <D extends Id, S> S delete(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             String id, Class<D> clazz);
 
-    /**
-     * update sensorthing model
-     *
-     * @param <D>
-     * @param <S>
-     * @param session
-     * @param mapper
-     * @param uriInfo
-     * @param method
-     * @param id
-     * @param dto
-     * @return
-     */
     public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             String id, D dto);
 
-    /**
-     * update sensorthing model
-     *
-     * @param <D>
-     * @param <S>
-     * @param session
-     * @param mapper
-     * @param uriInfo
-     * @param method
-     * @param id
-     * @param dto
-     * @param parentId
-     * @return
-     */
     public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             String id, D dto, String parentId);
-
-    /**
-     * update reference between 2 sensorthing model
-     *
-     * @param <S>
-     * @param session
-     * @param mapper
-     * @param uriInfo
-     * @param method
-     * @param dto
-     * @param parentId
-     * @param clazzUseCase
-     * @param clazzRef
-     * @return
-     */
-    public <S> S updateRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method, RefId dto,
-            String parentId, Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef);
-
-    /**
-     * create ref between 2 sensorthing model
-     *
-     * @param <S>
-     * @param session
-     * @param mapper
-     * @param uriInfo
-     * @param method
-     * @param dto
-     * @param parentId
-     * @param clazzUseCase
-     * @param clazzRef
-     * @return
-     */
-    public <S> S createRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method, RefId dto,
-            String parentId, Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef);
 }
