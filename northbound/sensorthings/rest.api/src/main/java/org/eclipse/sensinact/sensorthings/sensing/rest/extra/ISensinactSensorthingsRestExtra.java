@@ -6,4 +6,6 @@ public interface ISensinactSensorthingsRestExtra {
 
     public Set<Class<?>> getExtraClasses();
 
+    public Set<Object> getExtraSingletons();
+
 }
