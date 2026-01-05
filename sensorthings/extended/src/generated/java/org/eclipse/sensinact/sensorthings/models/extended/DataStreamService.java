@@ -48,6 +48,7 @@ import org.osgi.annotation.versioning.ProviderType;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorProperties <em>Sensor Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyProperties <em>Observed Property Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation <em>Last Observation</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getThingId <em>Thing Id</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService()
@@ -473,5 +474,27 @@ public interface DataStreamService extends Service {
 	 * @generated
 	 */
 	void setLastObservation(Object value);
+
+	/**
+	 * Returns the value of the '<em><b>Thing Id</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Thing Id</em>' attribute.
+	 * @see #setThingId(String)
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ThingId()
+	 * @model
+	 * @generated
+	 */
+	String getThingId();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getThingId <em>Thing Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Thing Id</em>' attribute.
+	 * @see #getThingId()
+	 * @generated
+	 */
+	void setThingId(String value);
 
 } // DataStreamService
