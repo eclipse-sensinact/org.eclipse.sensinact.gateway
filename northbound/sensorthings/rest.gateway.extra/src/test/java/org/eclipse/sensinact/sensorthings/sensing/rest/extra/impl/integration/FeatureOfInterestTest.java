@@ -14,15 +14,19 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -128,7 +132,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
     }
 
-    public void createFeatureOfInterestMissingField() throws Exception {
+    public void testCreateFeatureOfInterestMissingField() throws Exception {
         String name = "createCreateObservationsWithFeatureOfInterestThroughDatastream";
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists2", "testThing existing Location",
@@ -177,6 +181,8 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 "application/vnd.geo+json", new Point(-122.4194, 37.7749));
 
         json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi), 204);
+        // then
+        assertEquals(name + "Update", foiCache.getDto(idFoi).name());
 
     }
 
@@ -219,6 +225,10 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPut(new RefId(idFoiUpdate),
                 String.format("Observations(%s)/FeatureOfInterest/$ref", idObservation), 204);
         // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        ExpandedObservation obs = UtilIds.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        assertEquals(idFoiUpdate, obs.featureOfInterest().id());
+
     }
 
 }

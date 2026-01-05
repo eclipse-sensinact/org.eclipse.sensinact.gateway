@@ -90,7 +90,7 @@ public class ServiceSnapshotMapper {
         String encodingType = UtilIds.getResourceField(service, "foiEncodingType", String.class);
         GeoJsonObject feature = UtilIds.getResourceField(service, "foiFeature", GeoJsonObject.class);
 
-        return new FeatureOfInterest(null, null, name, description, encodingType, feature);
+        return new FeatureOfInterest(null, null, name, description, encodingType, feature, null);
     }
 
     /*

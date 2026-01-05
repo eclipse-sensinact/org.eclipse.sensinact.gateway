@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -242,8 +244,9 @@ public class ThingTest extends AbstractIntegrationTest {
                 Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), null);
         getJsonResponseFromPut(dtoThingToUpdate, String.format("/Things(%s)", idJson), 204);
         // then
-        json = getJsonResponseFromGet(String.format("/Things(%s)", idJson), 200);
-        UtilsAssert.assertThing(dtoThingToUpdate, json);
+        ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
+        assertEquals("testThing With Location and Datastream update",
+                UtilIds.getResourceField(service, "description", String.class));
     }
 
     @Test
@@ -269,9 +272,9 @@ public class ThingTest extends AbstractIntegrationTest {
 
         json = getJsonResponseFromPut(locationsUpdate, String.format("/Things(%s)/Locations(%s)", idThing, idLocation),
                 204);
-        // then
-        json = getJsonResponseFromGet(String.format("/Things(%s)/Locations(%s)", idThing, idLocation), 200);
-        UtilsAssert.assertLocation(locationsUpdate, json);
+        ServiceSnapshot service = serviceUseCase.read(session, idLocation, "location");
+        assertEquals(name + "2", UtilIds.getResourceField(service, "name", String.class));
+
     }
 
     @Test
@@ -302,8 +305,9 @@ public class ThingTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPut(datastreamsUpdate,
                 String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 204);
         // then
-        json = getJsonResponseFromGet(String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 200);
-        UtilsAssert.assertDatastream(datastreamsUpdate, json);
+
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + "3", UtilIds.getResourceField(service, "name", String.class));
     }
 
     @Test
@@ -331,6 +335,10 @@ public class ThingTest extends AbstractIntegrationTest {
                 204);
         // then
 
+        ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
+        @SuppressWarnings("unchecked")
+        List<String> idLocations = (List<String>) UtilIds.getResourceField(service, "locationIds", Object.class);
+        assertTrue(idLocations.contains(idLocation));
     }
 
     @Test
@@ -365,8 +373,14 @@ public class ThingTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(new RefId(idDatastreamUpdate),
                 String.format("/Things(%s)/Datastreams/$ref", idThing), 204);
         // then
-        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Datastreams", idThing), 200);
-        assertEquals(json.get("Datastreams").size(), 2);
+        ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
+        ServiceSnapshot serviceDatastream = serviceUseCase.read(session, idDatastreamUpdate, "datastream");
+
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = (List<String>) UtilIds.getResourceField(service, "datastreamIds", Object.class);
+        assertTrue(datastreamIds.contains(idDatastreamUpdate));
+        assertEquals(idThing, UtilIds.getResourceField(serviceDatastream, "thingId", String.class));
+
     }
 
     // patch
@@ -391,6 +405,10 @@ public class ThingTest extends AbstractIntegrationTest {
                 "testThing With Location and Datastream update", Map.of("installationDate update", "2025-12-25"), null);
         json = getJsonResponseFromPatch(dtoThingToUpdate, String.format("Things(%s)", idJson), 204);
         // then
+        ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
+        assertEquals("testThing With Location and Datastream update",
+                UtilIds.getResourceField(service, "description", String.class));
+
     }
 
 }

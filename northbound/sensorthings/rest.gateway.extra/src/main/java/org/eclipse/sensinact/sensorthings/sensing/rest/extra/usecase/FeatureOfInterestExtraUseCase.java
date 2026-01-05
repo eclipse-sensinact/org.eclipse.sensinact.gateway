@@ -51,7 +51,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         String featureOfInterestId = request.id();
         FeatureOfInterest createFoi = new FeatureOfInterest(featureOfInterest.selfLink(), featureOfInterestId,
                 featureOfInterest.name(), featureOfInterest.description(), featureOfInterest.encodingType(),
-                featureOfInterest.feature());
+                featureOfInterest.feature(), null);
         cacheFoi.addDto(featureOfInterestId, createFoi);
         return new ExtraUseCaseResponse<Object>(featureOfInterestId, createFoi);
 
@@ -74,7 +74,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         FeatureOfInterest receiveFoi = request.model();
         checkRequireField(request);
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
-                receiveFoi.encodingType(), receiveFoi.feature());
+                receiveFoi.encodingType(), receiveFoi.feature(), null);
 
         return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, foiToUpdate));
 
@@ -86,7 +86,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
                 updateFoi.name() != null ? updateFoi.name() : foi.name(),
                 updateFoi.description() != null ? updateFoi.description() : foi.description(),
                 updateFoi.encodingType() != null ? updateFoi.encodingType() : foi.encodingType(),
-                updateFoi.feature() != null ? updateFoi.feature() : foi.feature());
+                updateFoi.feature() != null ? updateFoi.feature() : foi.feature(), null);
         cacheFoi.addDto(request.id(), createFoi);
         return createFoi;
     }

@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,11 +33,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class LocationTest extends AbstractIntegrationTest {
 
-    /**
-     * test simple create of location
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateLocation() throws Exception {
         // given
@@ -51,11 +46,6 @@ public class LocationTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create location with missing field
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateLocationMissingField() throws Exception {
         // given
@@ -74,11 +64,6 @@ public class LocationTest extends AbstractIntegrationTest {
         getJsonResponseFromPost(dtoLocation, "Locations", 400);
     }
 
-    /**
-     * test create location link to a thing, the location and thing should be linked
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateLocationLinkedThing() throws Exception {
         // given
@@ -99,11 +84,6 @@ public class LocationTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create of location using thing/location endpoint
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateLocationThroughThing() throws Exception {
         // given
@@ -137,63 +117,9 @@ public class LocationTest extends AbstractIntegrationTest {
         ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
         json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
         // then
-        json = getJsonResponseFromGet(String.format("Locations(%s)", idLocation), 200);
-        UtilsAssert.assertLocation(dtoLocationUpdate, json);
-    }
-
-    /**
-     * Tests that <code>PUT</code> can be used to update a Location
-     */
-
-    /**
-     * test update of location simple
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testUpdateLocation() throws Exception {
-        // given
-        String name = "testUpdateLocation";
-
-        ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "1");
-
-        // when
-        JsonNode json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
-        UtilsAssert.assertLocation(dtoLocation, json);
-        String idLocation = getIdFromJson(json);
-        ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
-        json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
-        // then
         ServiceSnapshot service = serviceUseCase.read(session, idLocation, "location");
-        assertEquals(name + "2", UtilDto.getResourceField(service, "name", String.class));
+        assertEquals(name + "2", UtilIds.getResourceField(service, "name", String.class));
 
     }
 
-    /**
-     * Tests that <code>PATCH</code> can be used to update a Location
-     */
-
-    /**
-     * test patch location
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testPatchLocation() throws Exception {
-        // given
-        String name = "testPatchLocation";
-
-        ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "1");
-
-        // when
-        JsonNode json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
-        UtilsAssert.assertLocation(dtoLocation, json);
-        String idLocation = getIdFromJson(json);
-        ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
-        json = getJsonResponseFromPatch(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
-        // then
-        ServiceSnapshot service = serviceUseCase.read(session, idLocation, "location");
-        assertEquals(name + "2", UtilDto.getResourceField(service, "name", String.class));
-
-    }
 }

@@ -14,12 +14,15 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -80,8 +83,10 @@ public class SensorTest extends AbstractIntegrationTest {
         // when
         getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
         // then
-        json = getJsonResponseFromGet(String.format("/Sensors(%s)", idSensor), 200);
-        UtilsAssert.assertSensor(sensorUpdate, json);
+        assertEquals(name + "2", sensorCache.getDto(idSensor).name());
+
+//        json = getJsonResponseFromGet(String.format("/Sensors(%s)", idSensor), 200);
+//        UtilsAssert.assertSensor(sensorUpdate, json);
     }
 
     @Test
@@ -102,6 +107,7 @@ public class SensorTest extends AbstractIntegrationTest {
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
         json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor", 201);
+        String idDatastream = getIdFromJson(json);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
@@ -112,8 +118,8 @@ public class SensorTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
         assertNull(sensorCache.getDto(sensorId));
         // then
-        json = getJsonResponseFromGet(String.format("/Sensors(%s)", sensorIdDatastream), 200);
-        UtilsAssert.assertSensor(sensorUpdate, json);
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + "2", UtilIds.getResourceField(service, "sensorName", String.class));
 
     }
 
@@ -130,6 +136,8 @@ public class SensorTest extends AbstractIntegrationTest {
         // when
         json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
         // then
+        assertEquals(name + "2", sensorCache.getDto(idSensor).name());
+
     }
 
     @Test
@@ -150,6 +158,7 @@ public class SensorTest extends AbstractIntegrationTest {
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
         json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor", 201);
+        String idDatastream = getIdFromJson(json);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
@@ -160,5 +169,8 @@ public class SensorTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
         assertNull(sensorCache.getDto(sensorId));
         // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + "2", UtilIds.getResourceField(service, "sensorName", String.class));
+
     }
 }

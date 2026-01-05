@@ -34,10 +34,11 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
-import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +78,6 @@ import jakarta.ws.rs.ext.Providers;
         @Property(key = "test.class", source = ValueSource.TestClass) })
 public class AbstractIntegrationTest {
 
-    private static final UserInfo USER = UserInfo.ANONYMOUS;
     static final HttpClient client = HttpClient.newHttpClient();
     protected static final ObjectMapper mapper = new ObjectMapper();
 
@@ -86,17 +86,22 @@ public class AbstractIntegrationTest {
         public IDtoMemoryCache<FeatureOfInterest> foiCache;
         public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
         public IDtoMemoryCache<ExpandedSensor> sensorCache;
+        public IAccessServiceUseCase serviceUseCase;
+        public SensiNactSession session;
 
         @SuppressWarnings("unchecked")
         @GET
         public void exfiltrate(@Context Providers providers) {
-
+            session = providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+            serviceUseCase = providers.getContextResolver(IAccessServiceUseCase.class, MediaType.WILDCARD_TYPE)
+                    .getContext(IAccessServiceUseCase.class);
             @SuppressWarnings("rawtypes")
             ContextResolver<IDtoMemoryCache> resolverCache = providers.getContextResolver(IDtoMemoryCache.class,
                     MediaType.WILDCARD_TYPE);
             sensorCache = resolverCache.getContext(ExpandedSensor.class);
             observedPropertyCache = resolverCache.getContext(ExpandedObservedProperty.class);
             foiCache = resolverCache.getContext(FeatureOfInterest.class);
+
         }
     }
 
@@ -114,7 +119,10 @@ public class AbstractIntegrationTest {
                 this.sensorCache = exfiltrator.sensorCache;
                 this.observedPropertyCache = exfiltrator.observedPropertyCache;
                 this.foiCache = exfiltrator.foiCache;
-                if (this.foiCache != null && this.observedPropertyCache != null && this.sensorCache != null) {
+                this.serviceUseCase = exfiltrator.serviceUseCase;
+                this.session = exfiltrator.session;
+                if (this.serviceUseCase != null && this.foiCache != null && this.observedPropertyCache != null
+                        && this.sensorCache != null) {
                     success = true;
                     break;
                 }
@@ -177,10 +185,12 @@ public class AbstractIntegrationTest {
 
     @InjectService
     protected JakartarsServiceRuntime jakartarsRuntime;
+    public IAccessServiceUseCase serviceUseCase;
 
     public IDtoMemoryCache<FeatureOfInterest> foiCache;
     public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
     public IDtoMemoryCache<ExpandedSensor> sensorCache;
+    public SensiNactSession session;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {
         // Normalize URI
