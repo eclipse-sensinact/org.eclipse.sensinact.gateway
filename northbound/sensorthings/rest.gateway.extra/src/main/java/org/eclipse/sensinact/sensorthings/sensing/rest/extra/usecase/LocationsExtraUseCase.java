@@ -92,11 +92,11 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
             listThingIds.stream().filter(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationsIds");
+                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
                 return resource != null && resource.getValue() != null;
             }).map(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationsIds");
+                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
 
                 @SuppressWarnings("unchecked")
                 List<String> ids = (List<String>) resource.getValue().getValue();

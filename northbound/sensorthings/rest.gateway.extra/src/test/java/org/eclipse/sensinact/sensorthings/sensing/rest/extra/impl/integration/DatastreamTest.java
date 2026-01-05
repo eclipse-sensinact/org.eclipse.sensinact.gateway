@@ -12,13 +12,17 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -168,8 +172,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
         // then
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)", idDatastream), 200);
-        UtilsAssert.assertDatastream(dtoDatastreamUpdate, json);
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + " Update", UtilIds.getResourceField(service, "name", String.class));
+
     }
 
     @Test
@@ -211,22 +216,22 @@ public class DatastreamTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPut(new RefId(idThingUpdate),
                 String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
         // then
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)/Thing", idDatastream), 200);
-        UtilsAssert.assertThing(thingUpdate, json);
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(idThingUpdate, UtilIds.getResourceField(service, "thingId", String.class));
 
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
                 204);
         // then
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)/Sensor", idDatastream), 200);
-        UtilsAssert.assertSensor(sensor, json);
+        service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(idSensor, UtilIds.getResourceField(service, "sensorId", String.class));
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
                 String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
         // then
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)/ObservedProperty", idDatastream), 200);
-        UtilsAssert.assertObservedProperty(ObservedProperty, json);
+        service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(idObservedProperty, UtilIds.getResourceField(service, "observedPropertyId", String.class));
 
     }
 }

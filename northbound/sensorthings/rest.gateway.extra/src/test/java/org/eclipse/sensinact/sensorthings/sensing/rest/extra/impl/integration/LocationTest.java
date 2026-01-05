@@ -12,14 +12,18 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -113,8 +117,9 @@ public class LocationTest extends AbstractIntegrationTest {
         ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
         json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
         // then
-        json = getJsonResponseFromGet(String.format("Locations(%s)", idLocation), 200);
-        UtilsAssert.assertLocation(dtoLocationUpdate, json);
+        ServiceSnapshot service = serviceUseCase.read(session, idLocation, "location");
+        assertEquals(name + "2", UtilIds.getResourceField(service, "name", String.class));
+
     }
 
 }

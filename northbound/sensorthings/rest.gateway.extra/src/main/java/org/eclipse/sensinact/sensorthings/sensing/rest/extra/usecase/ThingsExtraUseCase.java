@@ -22,7 +22,6 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.InternalServerErrorException;
@@ -36,15 +35,11 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
     private DataUpdate dataUpdate;
 
     private IAccessProviderUseCase providerUseCase;
-    private IAccessServiceUseCase serviceUseCase;
-
-    private DatastreamsExtraUseCase datastreamUseCase;
 
     public ThingsExtraUseCase(Providers providers) {
         dataUpdate = resolve(providers, DataUpdate.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
-        datastreamUseCase = resolveUseCase(providers, DatastreamsExtraUseCase.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {

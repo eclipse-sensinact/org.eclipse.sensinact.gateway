@@ -52,7 +52,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
         ExpandedObservedProperty createdProp = new ExpandedObservedProperty(null, request.id(),
                 updateProp.name() != null ? updateProp.name() : property.name(),
                 updateProp.description() != null ? updateProp.description() : property.description(),
-                updateProp.definition() != null ? property.definition() : property.definition(),
+                updateProp.definition() != null ? updateProp.definition() : property.definition(),
                 updateProp.properties() != null ? updateProp.properties() : property.properties(), null);
         cacheObservedProperty.addDto(request.id(), createdProp);
         return createdProp;
