@@ -137,6 +137,18 @@ public class AbstractIntegrationTest {
         return null;
     }
 
+    protected JsonNode getJsonResponseFromPut(Object dto, String SubUrl, int expectedStatus)
+            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+        HttpResponse<String> response = queryPut(SubUrl, dto);
+        // Then
+        assertEquals(response.statusCode(), expectedStatus);
+        if (response.statusCode() < 400) {
+            return mapper.readTree(response.body());
+
+        }
+        return null;
+    }
+
     @InjectService
     protected GatewayThread thread;
 
@@ -184,12 +196,11 @@ public class AbstractIntegrationTest {
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
     }
 
-    public HttpResponse<String> queryPut(final String path, String id, Id dto)
-            throws IOException, InterruptedException {
+    public HttpResponse<String> queryPut(final String path, Object dto) throws IOException, InterruptedException {
         // Normalize URI
         final URI targetUri;
         if (path.contains("://")) {
-            targetUri = URI.create(path + "/" + id);
+            targetUri = URI.create(path);
         } else if (path.startsWith("/")) {
             targetUri = URI.create("http://localhost:8185/v1.1" + path);
         } else {

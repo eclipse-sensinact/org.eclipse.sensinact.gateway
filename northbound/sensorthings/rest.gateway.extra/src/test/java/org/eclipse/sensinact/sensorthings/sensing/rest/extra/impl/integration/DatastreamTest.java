@@ -15,6 +15,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.junit.jupiter.api.Test;
@@ -139,6 +141,80 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams?$expand=Sensor,ObservedProperty", 201);
         UtilsAssert.assertDatastream(dtoDatastream, json, true);
+
+    }
+
+    // update
+    @Test
+    public void testUpdateDatastream() throws Exception {
+        // given
+        String nameThing = "testUpdateDatastream";
+        String name = "testUpdateDatastream";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idThing));
+
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        // when
+        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
+
+        json = getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+
+    }
+
+    @Test
+    public void testUpdateDatastreamRefs() throws Exception {
+        // given
+        String nameThing = "testUpdateDatastream";
+        String name = "testUpdateDatastream";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+
+        ExpandedThing thingUpdate = DtoFactory.getExpandedThing(nameThing + "update", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thingUpdate, "Things", 201);
+        String idThingUpdate = getIdFromJson(json);
+
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idThing));
+
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        UtilsAssert.assertSensor(sensor, json);
+
+        String idSensor = getIdFromJson(json);
+        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
+        UtilsAssert.assertObservedProperty(ObservedProperty, json);
+        String idObservedProperty = getIdFromJson(json);
+
+        // when
+        // thing
+
+        json = getJsonResponseFromPut(new RefId(idThingUpdate),
+                String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
+
+        // sensor
+        json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
+                204);
+
+        // observed property
+        json = getJsonResponseFromPut(new RefId(idObservedProperty),
+                String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
 
     }
 }

@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import static org.junit.Assert.assertTrue;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -210,6 +211,96 @@ public class ThingTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Locations", 201);
 
         UtilsAssert.assertThing(dtoThing, json, true);
+
+    }
+
+    // update
+    @Test
+    public void testUpdateThing() throws Exception {
+        // Given
+        String name = "testUpdateThing";
+
+        ExpandedLocation location1 = DtoFactory.getLocation(name + "1");
+        ExpandedLocation location2 = DtoFactory.getLocation(name + "2");
+        List<ExpandedLocation> locations = List.of(location1, location2);
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locations);
+
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Locations", 201);
+        String idJson = getIdFromJson(json);
+
+        UtilsAssert.assertThing(dtoThing, json, true);
+        // When
+        ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(name,
+                "testThing With Location and Datastream update",
+                Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), null);
+        ExpandedThing dtoExpectedThingToUpdate = DtoFactory.getExpandedThingWithLocations(name,
+                "testThing With Location and Datastream update",
+                Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), locations);
+        json = getJsonResponseFromPut(dtoThingToUpdate, "/Things?$expand=Locations", 201);
+        // then
+        UtilsAssert.assertThing(dtoExpectedThingToUpdate, json, true);
+
+    }
+
+    @Test
+    public void testUpdateThingLocation() throws Exception {
+        // Given
+        String name = "testUpdateThingLocation";
+
+        List<ExpandedLocation> locationsCreate = List.of(DtoFactory.getLocation(name));
+        List<ExpandedLocation> locationsUpdate = List.of(DtoFactory.getLocation(name + "2"));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name + "Thing", "testThing With 1 Location ",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locationsCreate);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Locations", 201);
+        String idThing = getIdFromJson(json);
+        UtilsAssert.assertThing(dtoThing, json);
+        JsonNode locationsNode = json.get("Locations");
+        assertTrue(locationsNode.size() > 0);
+
+        JsonNode locationNode = locationsNode.get(0);
+        String idLocation = getIdFromJson(locationNode);
+
+        // When
+        ExpandedThing dtoThingUpdateWithlocation = DtoFactory.getExpandedThingWithLocations(name + "Thing",
+                "testThing With 1 Location ", Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"),
+                locationsUpdate);
+        json = getJsonResponseFromPut(dtoThingUpdateWithlocation,
+                String.format("/Things(%s)/Locations(%s)", idThing, idLocation), 200);
+        UtilsAssert.assertThing(dtoThing, json);
+
+    }
+
+    @Test
+    public void testUpdateThingDatastream() throws Exception {
+        // Given
+        String name = "testUpdateThingDatastream";
+
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "1"));
+
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name + "2"));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
+
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastreams", 201);
+        String idThing = getIdFromJson(json);
+        JsonNode datastreamNode = json.get("Datastreams");
+        assertTrue(datastreamNode.size() > 0);
+
+        JsonNode datastreamJson = datastreamNode.get(0);
+        String idDatastream = getIdFromJson(datastreamJson);
+
+        UtilsAssert.assertThing(dtoThing, json);
+        // When
+        ExpandedDataStream datastreamsUpdate = DtoFactory.getDatastreamMinimal(name + "3");
+
+        json = getJsonResponseFromPut(datastreamsUpdate,
+                String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 200);
+        UtilsAssert.assertThing(dtoThing, json);
 
     }
 
