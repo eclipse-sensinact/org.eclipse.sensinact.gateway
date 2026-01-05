@@ -29,10 +29,13 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
-public class ObservedPropertiesAccessImpl extends AbstractAccess implements ObservedPropertiesAccess {
+public class ObservedPropertiesAccessImpl extends AbstractAccess
+        implements ObservedPropertiesAccess, ObservedPropertiesUpdate {
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
@@ -98,6 +101,12 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
         }
         return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 validateAndGetProvider(provider));
+    }
+
+    @Override
+    public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
