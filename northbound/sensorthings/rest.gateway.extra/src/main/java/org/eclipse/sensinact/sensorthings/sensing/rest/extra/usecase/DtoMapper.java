@@ -29,6 +29,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
@@ -59,10 +61,12 @@ public class DtoMapper {
         case 0:
             yield null;
         case 1:
+
             yield toFeature(locations.get(0));
         default:
             yield new FeatureCollection(locations.stream().map(DtoMapper::toFeature).toList(), null, null);
         };
+
     }
 
     public static String extractFirstIdSegment(String id) {
@@ -100,6 +104,46 @@ public class DtoMapper {
 
     public static String sanitizeId(Object object) {
         return String.valueOf(object).replaceAll("[^0-9a-zA-Z\\.\\-_]", "_");
+    }
+
+    public static DatastreamUpdate toObservationUpdate(String providerId, String idDatastream,
+            ExpandedObservation obs) {
+        String serviceName = idDatastream;
+
+        Object observation;
+        Map<String, Object> observationParameters;
+
+        observation = sanitizeId(obs.result());
+        Instant timestamp = obs.phenomenonTime();
+        observationParameters = new HashMap<>();
+        observationParameters.put("sensorthings.observation.id", String.valueOf(obs.id()));
+        observationParameters.put("sensorthings.observation.resultQuality", obs.resultQuality());
+        if (obs.parameters() != null) {
+            obs.parameters()
+                    .forEach((k, v) -> observationParameters.put("sensorthings.observation.parameters." + k, v));
+        }
+
+        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, observation, timestamp,
+                observationParameters, null, null, null, null, null, null);
+    }
+
+    public static DatastreamUpdate toObservedPropertyUpdate(String providerId, String idDatastream,
+            ExpandedObservedProperty obs) {
+        String serviceName = idDatastream;
+
+        Map<String, Object> observedPropertyMetadata;
+        String observedProperty = sanitizeId(obs.id() == null ? obs.name() : obs.id());
+
+        observedPropertyMetadata = new HashMap<>();
+        observedPropertyMetadata.put("sensorthings.observedProperty.name", obs.name());
+        observedPropertyMetadata.put("sensorthings.observedProperty.description", obs.description());
+        observedPropertyMetadata.put("sensorthings.observedProperty.definition", obs.definition());
+        if (obs.properties() != null) {
+            obs.properties().forEach(
+                    (k, v) -> observedPropertyMetadata.put("sensorthings.observedProperty.properties." + k, v));
+        }
+        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
+                null, null, observedProperty, observedPropertyMetadata);
     }
 
     public static DatastreamUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds) {
@@ -189,6 +233,7 @@ public class DtoMapper {
             case Feature:
                 yield (Feature) location.location();
             case FeatureCollection:
+
                 yield toFeature((FeatureCollection) location.location());
             case GeometryCollection:
             case LineString:
@@ -202,6 +247,7 @@ public class DtoMapper {
             default:
                 throw new IllegalArgumentException("Unknown GeoJSON object " + location.location().type());
             };
+
         } else {
             f = null;
         }
