@@ -20,6 +20,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -45,7 +46,9 @@ public class AccessServiceUseCaseProvider implements ContextResolver<IAccessServ
 
     public ServiceSnapshot read(SensiNactSession session, String providerId, String serviceId) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
-
+        if (providerSnapshot == null) {
+            throw new NotFoundException(String.format("provider for id %s not found", providerId));
+        }
         ServiceSnapshot serviceSnapshot = providerSnapshot.getService(serviceId);
 
         return serviceSnapshot;

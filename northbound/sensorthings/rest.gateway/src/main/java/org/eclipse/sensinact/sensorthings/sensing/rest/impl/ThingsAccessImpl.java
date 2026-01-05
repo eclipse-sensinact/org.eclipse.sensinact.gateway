@@ -358,7 +358,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Response deleteThing(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class);
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedThing.class);
 
         return Response.noContent().build();
     }
@@ -373,7 +373,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Response deleteLocationRef(String id, String id2) {
-        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedThing.class,
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedThing.class,
                 ExpandedLocation.class);
 
         return Response.noContent().build();
