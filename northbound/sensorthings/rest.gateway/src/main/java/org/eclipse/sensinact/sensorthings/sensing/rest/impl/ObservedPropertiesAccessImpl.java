@@ -34,6 +34,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimi
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
 public class ObservedPropertiesAccessImpl extends AbstractAccess
         implements ObservedPropertiesAccess, ObservedPropertiesUpdate {
@@ -114,6 +115,12 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     @Override
     public Response patchObservedProperties(String id, ExpandedObservedProperty observedProperty) {
         return updateObservedProperties(id, observedProperty);
+    }
+
+    @Override
+    public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

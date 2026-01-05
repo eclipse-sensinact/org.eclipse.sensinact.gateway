@@ -61,8 +61,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                                filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -90,8 +90,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         }
         String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), providerSnapshot);
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                providerSnapshot);
     }
 
     @Override
@@ -108,8 +108,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     public Thing getLocationThing(String id, String id2) {
         String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), providerSnapshot);
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                providerSnapshot);
     }
 
     @Override
@@ -129,8 +129,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                                filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -145,14 +145,14 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
 
     @Override
     public Response updateLocation(String id, ExpandedLocation location) {
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, location);
-
-        return Response.noContent().build();
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public Response patchLocation(String id, ExpandedLocation location) {
-        return updateLocation(id, location);
+    public Response updateLocationThingLink(String id, String id2, ExpandedLocation dto) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

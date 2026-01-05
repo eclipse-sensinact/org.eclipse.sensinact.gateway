@@ -30,10 +30,13 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.HistoricalLocationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
-public class HistoricalLocationsAccessImpl extends AbstractAccess implements HistoricalLocationsAccess {
+public class HistoricalLocationsAccessImpl extends AbstractAccess
+        implements HistoricalLocationsAccess, HistoricalLocationsUpdate {
 
     @Override
     public HistoricalLocation getHistoricalLocation(String id) {
@@ -163,6 +166,12 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
     @Override
     public ResultList<Location> getHistoricalLocationThingLocations(String id) {
         return getHistoricalLocationLocations(id);
+    }
+
+    @Override
+    public Response updateHistoricalLocation(String id, HistoricalLocation location) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
