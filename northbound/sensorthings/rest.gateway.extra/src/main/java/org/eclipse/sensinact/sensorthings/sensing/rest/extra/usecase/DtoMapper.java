@@ -246,8 +246,7 @@ public class DtoMapper {
             observedPropertyMetadata = getObservedPropertyMetadata(dsOp);
 
         }
-        Object dataStreamId = getDatastreamId(ds);
-        return new DatastreamUpdate(providerId, serviceName, dataStreamId, ds.name(), ds.description(), observation,
+        return new DatastreamUpdate(providerId, serviceName, ds.name(), ds.name(), ds.description(), observation,
                 timestamp, observationParameters, unit, unitMetadata, sensor, sensorMetadata, observedProperty,
                 observedPropertyMetadata);
     }
@@ -336,12 +335,14 @@ public class DtoMapper {
         }
         ThingUpdate provider = new ThingUpdate(providerId, thing.name(), thing.description(), location, id,
                 thingProperties);
+        Stream<SensorThingsUpdate> thingUpdate = Stream.of(provider);
 
         if (thing.datastreams() != null) {
-            return Stream.concat(Stream.of(provider),
-                    thing.datastreams().stream().map(d -> toDatastreamUpdate(providerId, d)));
+            Stream<SensorThingsUpdate> datastreamUpdate = thing.datastreams().stream()
+                    .map(d -> toDatastreamUpdate(providerId, d));
+            return Stream.concat(thingUpdate, datastreamUpdate);
         }
-        return Stream.of(provider);
+        return thingUpdate;
 
     }
 
@@ -350,8 +351,9 @@ public class DtoMapper {
         GeoJsonObject location = aggregate(locations);
 
         ThingUpdate provider = new ThingUpdate(providerId, null, null, location, thingId, null);
-
-        return Stream.concat(Stream.of(provider), datastreams.stream().map(d -> toDatastreamUpdate(providerId, d)));
+        Stream<SensorThingsUpdate> thingUpdate = Stream.of(provider);
+        Stream<SensorThingsUpdate> datastreamUpdate = datastreams.stream().map(d -> toDatastreamUpdate(providerId, d));
+        return Stream.concat(thingUpdate, datastreamUpdate);
     }
 
     public static String getProperty(GeoJsonObject location, String propName) {
