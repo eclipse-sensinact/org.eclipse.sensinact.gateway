@@ -2,7 +2,7 @@ package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
 import static org.eclipse.sensinact.core.annotation.dto.NullAction.UPDATE_IF_PRESENT;
-import static org.eclipse.sensinact.sensorthings.models.sensorthings.extended.SensorthingsExtendedPackage.Literals.FEATURE_OF_INTEREST_EXTENDED;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_FEATURE_OF_INTEREST;
 
 import java.time.Instant;
 
@@ -22,7 +22,7 @@ public record FeatureOfInterestUpdate(@Model EClass model,
 
     public FeatureOfInterestUpdate {
         if (model == null) {
-            model = FEATURE_OF_INTEREST_EXTENDED;
+            model = SENSOR_THING_FEATURE_OF_INTEREST;
         }
     }
 }
