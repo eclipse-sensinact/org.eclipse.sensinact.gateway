@@ -64,7 +64,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
         // update/create provider
         try {
-            dataUpdate.pushUpdate(listDtoModels.get(0)).getValue();
+            dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
