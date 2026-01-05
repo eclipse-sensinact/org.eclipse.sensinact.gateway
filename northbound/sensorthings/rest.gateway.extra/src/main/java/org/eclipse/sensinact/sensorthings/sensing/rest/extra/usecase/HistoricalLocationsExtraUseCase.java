@@ -17,12 +17,16 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = IExtraUseCase.class)
 public class HistoricalLocationsExtraUseCase extends AbstractExtraUseCase<HistoricalLocation, ProviderSnapshot> {
+    @Reference
+    IAccessProviderUseCase providerUseCase;
 
     @Reference
     DataUpdate dataUpdate;
 
-    @Reference
-    IAccessProviderUseCase providerUseCase;
+    @Override
+    protected IAccessProviderUseCase getProviderUseCase() {
+        return providerUseCase;
+    }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<HistoricalLocation> request) {
         try {

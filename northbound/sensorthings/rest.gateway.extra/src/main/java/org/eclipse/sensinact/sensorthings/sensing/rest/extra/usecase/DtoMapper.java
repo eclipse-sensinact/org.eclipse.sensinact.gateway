@@ -109,11 +109,11 @@ public class DtoMapper {
         Object observation;
         Map<String, Object> observationParameters;
         if (ds.observations() == null || ds.observations().isEmpty()) {
-            observation = null;
-            observationParameters = null;
+            observation = Map.of();
+            observationParameters = Map.of();
         } else {
             Observation o = ds.observations().get(0);
-            observation = o.result();
+            observation = sanitizeId(o.result());
             timestamp = o.phenomenonTime();
             observationParameters = new HashMap<>();
             observationParameters.put("sensorthings.observation.id", String.valueOf(o.id()));
@@ -135,14 +135,14 @@ public class DtoMapper {
                     "sensorthings.unit.definition", String.valueOf(ds.unitOfMeasurement().definition()));
         }
 
-        Object sensor;
+        String sensor;
         Map<String, Object> sensorMetadata;
         if (ds.sensor() == null) {
             sensor = null;
-            sensorMetadata = null;
+            sensorMetadata = Map.of();
         } else {
             Sensor dsSensor = ds.sensor();
-            sensor = Objects.toString(dsSensor.id());
+            sensor = sanitizeId(toString(dsSensor.id() == null ? dsSensor.name() : dsSensor.id()));
             sensorMetadata = new HashMap<>();
             sensorMetadata.put("sensorthings.sensor.name", ds.sensor().name());
             sensorMetadata.put("sensorthings.sensor.description", ds.sensor().description());
@@ -154,14 +154,15 @@ public class DtoMapper {
             }
         }
 
-        Object observedProperty;
+        String observedProperty;
         Map<String, Object> observedPropertyMetadata;
         if (ds.observedProperty() == null) {
             observedProperty = null;
-            observedPropertyMetadata = null;
+            observedPropertyMetadata = Map.of();
         } else {
             ObservedProperty dsOp = ds.observedProperty();
-            observedProperty = dsOp.id();
+            observedProperty = sanitizeId(dsOp.id() == null ? dsOp.name() : dsOp.id());
+
             observedPropertyMetadata = new HashMap<>();
             observedPropertyMetadata.put("sensorthings.observedProperty.name", ds.observedProperty().name());
             observedPropertyMetadata.put("sensorthings.observedProperty.description",
@@ -173,8 +174,8 @@ public class DtoMapper {
                         (k, v) -> observedPropertyMetadata.put("sensorthings.observedProperty.properties." + k, v));
             }
         }
-
-        return new DatastreamUpdate(providerId, serviceName, ds.id(), ds.name(), ds.description(), observation,
+        Object dataStreamId = sanitizeId(ds.id() == null ? ds.name() : ds.id());
+        return new DatastreamUpdate(providerId, serviceName, dataStreamId, ds.name(), ds.description(), observation,
                 timestamp, observationParameters, unit, unitMetadata, sensor, sensorMetadata, observedProperty,
                 observedPropertyMetadata);
     }
@@ -231,14 +232,25 @@ public class DtoMapper {
 
     public static Stream<SensorThingsUpdate> toUpdates(ExpandedThing thing) {
         String providerId = sanitizeId(thing.name() == null ? thing.id() : thing.name());
-        GeoJsonObject location = aggregate(thing.locations());
-        Map<String, Object> thingProperties = thing.properties().entrySet().stream()
-                .collect(toMap(e -> "sensorthings.thing." + e.getKey(), Entry::getValue));
-        ThingUpdate provider = new ThingUpdate(providerId, thing.name(), thing.description(), location, thing.id(),
+        Object id = thing.id() == null ? providerId : thing.id();
+        GeoJsonObject location = null;
+        if (thing.locations() != null) {
+            location = aggregate(thing.locations());
+        }
+        Map<String, Object> thingProperties = null;
+        if (thing.properties() != null) {
+            thingProperties = thing.properties().entrySet().stream()
+                    .collect(toMap(e -> "sensorthings.thing." + e.getKey(), Entry::getValue));
+        }
+        ThingUpdate provider = new ThingUpdate(providerId, thing.name(), thing.description(), location, id,
                 thingProperties);
 
-        return Stream.concat(Stream.of(provider),
-                thing.datastreams().stream().map(d -> toDatastreamUpdate(providerId, d)));
+        if (thing.datastreams() != null) {
+            return Stream.concat(Stream.of(provider),
+                    thing.datastreams().stream().map(d -> toDatastreamUpdate(providerId, d)));
+        }
+        return Stream.of(provider);
+
     }
 
     public static Stream<SensorThingsUpdate> toUpdates(String providerId, String thingId,
