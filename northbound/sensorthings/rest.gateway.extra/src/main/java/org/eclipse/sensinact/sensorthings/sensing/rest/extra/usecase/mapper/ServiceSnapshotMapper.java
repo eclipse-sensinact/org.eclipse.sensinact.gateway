@@ -28,6 +28,9 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
+/**
+ * provide method to get Dto object from provider/service/resource
+ */
 public class ServiceSnapshotMapper {
 
     /*

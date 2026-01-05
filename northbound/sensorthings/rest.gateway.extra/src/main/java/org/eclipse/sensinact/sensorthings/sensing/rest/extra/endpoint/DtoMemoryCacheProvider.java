@@ -24,6 +24,9 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
 
+/**
+ * Provider for Memory Dto repository
+ */
 @SuppressWarnings("rawtypes")
 @Provider
 public class DtoMemoryCacheProvider implements ContextResolver<IDtoMemoryCache> {
