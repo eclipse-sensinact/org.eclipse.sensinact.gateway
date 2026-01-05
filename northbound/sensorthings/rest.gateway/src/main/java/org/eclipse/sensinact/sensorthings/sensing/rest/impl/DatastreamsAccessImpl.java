@@ -42,6 +42,9 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
@@ -208,10 +211,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Response createObservationRef(String id, RefId observation) {
-        ExpandedObservation expandedObservation = new ExpandedObservation(null, observation.id(), null, null, null,
-                null, null, null, null, null, null, null, null);
-        getExtraDelegate().create(getSession(), getMapper(), uriInfo, requestContext.getMethod(), expandedObservation,
-                id);
+
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), observation, id,
+                ExpandedDataStream.class, ExpandedObservation.class);
 
         return Response.noContent().build();
     }
@@ -232,20 +234,28 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Response updateDatastreamThingRef(String id, RefId thing) {
-        // TODO
-        return null;
+        RefId datastreamRefId = new RefId(id);
+        String thingId = (String) thing.id();
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastreamRefId,
+                thingId, ExpandedThing.class, ExpandedDataStream.class);
+
+        return Response.noContent().build();
     }
 
     @Override
     public Response updateDatastreamSensorRef(String id, RefId sensor) {
-        // TODO
-        return null;
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), sensor, id,
+                ExpandedDataStream.class, ExpandedSensor.class);
+
+        return Response.noContent().build();
     }
 
     @Override
     public Response updateDatastreamObservedPropertyRef(String id, RefId observedProperty) {
-        // TODO
-        return null;
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), observedProperty,
+                id, ExpandedDataStream.class, ExpandedObservedProperty.class);
+
+        return Response.noContent().build();
     }
 
     @Override

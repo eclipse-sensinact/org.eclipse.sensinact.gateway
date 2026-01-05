@@ -15,12 +15,16 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
@@ -29,7 +33,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * FeatureOfInterest
  */
-public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureOfInterest, Object> {
+public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<FeatureOfInterest, Object> {
 
     private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
     private final DataUpdate dataUpdate;
@@ -67,7 +71,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
     }
 
     @Override
-    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<FeatureOfInterest> request) {
+    public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<FeatureOfInterest> request) {
         String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
         String datastreamId = DtoToModelMapper.extractSecondIdSegment(request.id());
         String observationId = DtoToModelMapper.extractThirdIdSegment(request.id());
@@ -104,8 +108,9 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
             FeatureOfInterest createdProperty = updateInMemoryFoi(request, property);
             return new ExtraUseCaseResponse<Object>(request.id(), createdProperty);
         } else {
+            String providerId = UtilIds.extractFirstIdSegment(request.id());
 
-            List<SensorThingsUpdate> listDtoModels = toDtos(request);
+            List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
             // update/create provider
             try {
@@ -114,7 +119,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
             } catch (InvocationTargetException | InterruptedException e) {
                 return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
             }
-            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), request.id());
+            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
             if (serviceSnapshot == null) {
                 return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
             }
@@ -132,4 +137,11 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
     public FeatureOfInterest getInMemoryFeatureOfInterest(String id) {
         return cacheFoi.getDto(id);
     }
+
+    @Override
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<FeatureOfInterest> request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

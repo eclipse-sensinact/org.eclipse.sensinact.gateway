@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.List;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
@@ -33,10 +34,20 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
 
     public abstract List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<M> request);
 
+    public abstract List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<M> request);
+
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
         if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
             DtoToModelMapper.checkRequireField(request.model());
         }
     }
 
+    /**
+     * get id field for EMF
+     *
+     * @param aDto
+     * @return
+     */
+
+    public abstract String getId(ExtraUseCaseRequest<M> request);
 }

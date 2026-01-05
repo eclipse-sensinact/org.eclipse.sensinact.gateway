@@ -1,5 +1,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+
 public class UtilIds {
 
     public static String extractIdSegment(String id, int part) {
@@ -19,6 +21,13 @@ public class UtilIds {
 
     public static String extractFirstIdSegment(String id) {
         return extractIdSegment(id, 0);
+    }
+
+    public static <T> T getResourceField(ServiceSnapshot service, String resourceName, Class<T> expectedType) {
+
+        return service.getResource(resourceName) != null && service.getResource(resourceName).getValue() != null
+                ? expectedType.cast(service.getResource(resourceName).getValue().getValue())
+                : null;
     }
 
     public static String extractSecondIdSegment(String id) {

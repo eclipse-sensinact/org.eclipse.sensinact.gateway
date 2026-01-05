@@ -34,6 +34,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
@@ -135,14 +137,18 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
 
     @Override
     public Response updateObservationDatastreamRef(String id, RefId datastream) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastream, id,
+                ExpandedObservation.class, ExpandedDataStream.class);
+
+        return Response.noContent().build();
     }
 
     @Override
     public Response updateObservationFeatureOfInterestRef(String id, RefId foi) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), foi, id,
+                ExpandedObservation.class, FeatureOfInterest.class);
+
+        return Response.noContent().build();
     }
 
 }

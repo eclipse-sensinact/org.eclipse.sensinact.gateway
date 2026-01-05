@@ -50,9 +50,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
     @Test
     public void testCreateMissingFieldDatastream() throws Exception {
         // given
-        String name = "testCreateMissingFieldDatastream";
+        String nameThing = "testCreateMissingFieldDatastreamThing";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         RefId refId = DtoFactory.getRefId(getIdFromJson(json));
@@ -97,8 +97,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
     public void testCreateDatastreamThroughThing() throws Exception {
         // given
         String name = "testCreateDatastreamThroughThing";
+        String nameThing = "testCreateDatastreamThroughThingThing";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         String thingId = getIdFromJson(json);
@@ -114,8 +115,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
     public void testCreateDatastreamWithSensorAndObservedProperty() throws Exception {
         // given
         String name = "testCreateDatastreamWithSensorAndObservedProperty";
+        String nameThing = "testCreateDatastreamWithSensorAndObservedPropertyThing";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedProperty(name,
@@ -131,8 +133,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
     public void testCreateDatastreamWithExpand() throws Exception {
         // given
         String name = "testCreateDatastreamWithExpand";
+        String nameThing = "testCreateDatastreamWithExpandThing";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedProperty(name,
@@ -148,7 +151,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
     @Test
     public void testUpdateDatastream() throws Exception {
         // given
-        String nameThing = "testUpdateDatastream";
+        String nameThing = "testUpdateDatastreamThing";
         String name = "testUpdateDatastream";
 
         ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
