@@ -177,7 +177,7 @@ public class Helpers {
         Feature f;
 
         if (location.location != null) {
-            String id = sanitizeId(location.id);
+            String id = sanitizeId(location.id != null ? location.id : location.name);
             f = switch (location.location.type()) {
             case Feature:
                 yield (Feature) location.location;
@@ -218,8 +218,8 @@ public class Helpers {
         }
         Map<String, Object> thingProperties = thing.properties.entrySet().stream()
                 .collect(toMap(e -> "sensorthings.thing." + e.getKey(), Entry::getValue));
-        ThingUpdate provider = new ThingUpdate(providerId, thing.name, thing.description, location, thing.id,
-                thingProperties);
+        ThingUpdate provider = new ThingUpdate(providerId, thing.name, thing.description, location,
+                thing.id != null ? thing.id : thing.name, thingProperties);
 
         Stream<SensorThingsUpdate> updates = Stream.of(provider);
         if (thing.datastreams != null && thing.datastreams.size() > 0) {

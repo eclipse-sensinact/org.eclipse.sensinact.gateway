@@ -50,9 +50,17 @@ public interface IDtoMapper {
     public Datastream toDatastream(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource, ICriterion filter);
 
+    public <M extends Datastream> M toDatastream(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource,
+            ICriterion filter, Class<M> clazz);
+
     public FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider);
+
+    public <M extends FeatureOfInterest> M toFeatureOfInterest(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ProviderSnapshot provider, Class<M> clazz);
 
     public Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
