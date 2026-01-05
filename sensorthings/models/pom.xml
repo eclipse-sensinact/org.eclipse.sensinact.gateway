@@ -85,7 +85,6 @@
                 <trigger>src/main/resources/model/sensorthings.extended.genmodel</trigger>
                 <generateCommand>geckoEMF</generateCommand>
                 <output>src/generated/java</output>
-                <clear>true</clear>
                 <properties>
                   <genmodel>src/main/resources/model/sensorthings.extended.genmodel</genmodel>
                 </properties>
