@@ -17,12 +17,11 @@ public class AccessServiceUseCase implements IAccessServiceUseCase {
     IAccessProviderUseCase accessProviderUserCase;
 
     @Override
-    public ServiceSnapshot read(SensiNactSession session, String id) {
-        String providerId = DtoMapper.extractFirstIdSegment(id);
+    public ServiceSnapshot read(SensiNactSession session, String providerId, String serviceId) {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
 
-        String service = DtoMapper.extractFirstIdSegment(id.substring(providerId.length() + 1));
+        String service = DtoMapper.extractFirstIdSegment(serviceId);
 
         ServiceSnapshot serviceSnapshot = providerSnapshot.getService(service);
 
