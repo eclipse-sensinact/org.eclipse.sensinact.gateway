@@ -176,7 +176,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
     @Test
     public void testUpdateDatastreamRefs() throws Exception {
         // given
-        String nameThing = "testUpdateDatastream";
+        String nameThing = "testUpdateDatastreamThing";
         String name = "testUpdateDatastream";
 
         ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
@@ -212,16 +212,19 @@ public class DatastreamTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPut(new RefId(idThingUpdate),
                 String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
         // then
-
+        json = getJsonResponseFromGet(String.format("Datastreams(%s)/Thing", idDatastream), 200);
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
                 204);
         // then
+        json = getJsonResponseFromGet(String.format("Datastreams(%s)/Sensor(%s)", idDatastream, idSensor), 200);
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
                 String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
         // then
+        json = getJsonResponseFromGet(
+                String.format("Datastreams(%s)/ObservedProperty(%s)", idDatastream, idObservedProperty), 200);
 
     }
 }

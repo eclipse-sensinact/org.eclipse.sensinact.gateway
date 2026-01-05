@@ -87,6 +87,7 @@ public class AbstractIntegrationTest {
         public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
         public IDtoMemoryCache<ExpandedSensor> sensorCache;
 
+        @SuppressWarnings("unchecked")
         @GET
         public void exfiltrate(@Context Providers providers) {
 
@@ -107,13 +108,13 @@ public class AbstractIntegrationTest {
 
         boolean success = false;
         HttpResponse<String> result;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             result = queryGet("http://localhost:8185/test");
             if (result.statusCode() == 204) {
                 this.sensorCache = exfiltrator.sensorCache;
                 this.observedPropertyCache = exfiltrator.observedPropertyCache;
                 this.foiCache = exfiltrator.foiCache;
-                if (this.foiCache != null && this.observedPropertyCache != null && this.foiCache != null) {
+                if (this.foiCache != null && this.observedPropertyCache != null && this.sensorCache != null) {
                     success = true;
                     break;
                 }

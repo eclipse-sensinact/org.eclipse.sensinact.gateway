@@ -19,8 +19,6 @@ import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotat
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_SENSOR_METADATA;
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_UNIT_DEFINITION;
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_UNIT_NAME;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.FeaturesOfInterestAccessImpl.getLiveObservations;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,13 +121,14 @@ public class DtoMapperGet {
         Thing thing = new Thing(selfLink, id, name, description, null, datastreamsLink, historicalLocationsLink,
                 locationsLink);
         if (expansions.shouldExpand("Datastreams", thing)) {
-            expansions.addExpansion("Datastreams", thing, DatastreamsAccessImpl.getDataStreams(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, provider));
+//            expansions.addExpansion("Datastreams", thing, DatastreamsAccessImpl.getDataStreams(userSession, application,
+//                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, provider));
         }
 
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
-            Optional<HistoricalLocation> historicalLocation = DtoMapperGet.toHistoricalLocation(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
+            Optional<HistoricalLocation> historicalLocation = DtoMapperGet.toHistoricalLocation(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter,
+                    provider);
             if (historicalLocation.isPresent()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", thing, list);
@@ -171,8 +170,9 @@ public class DtoMapperGet {
             expansions.addExpansion("Things", location, list);
         }
         if (expansions.shouldExpand("HistoricalLocations", location)) {
-            Optional<HistoricalLocation> historicalLocation = DtoMapperGet.toHistoricalLocation(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
+            Optional<HistoricalLocation> historicalLocation = DtoMapperGet.toHistoricalLocation(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter,
+                    provider);
             if (historicalLocation.isPresent()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", location, list);
@@ -272,9 +272,9 @@ public class DtoMapperGet {
         Sensor sensor = new Sensor(selfLink, id, name, description, encodingType, sensorMetadata, metadata,
                 datastreamsLink);
         if (expansions.shouldExpand("Datastreams", sensor)) {
-            expansions.addExpansion("Datastreams", sensor,
-                    DatastreamsAccessImpl.getDataStreams(userSession, application, mapper, uriInfo,
-                            expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
+//            expansions.addExpansion("Datastreams", sensor,
+//                    DatastreamsAccessImpl.getDataStreams(userSession, application, mapper, uriInfo,
+//                            expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
         }
 
         return sensor;
@@ -368,9 +368,9 @@ public class DtoMapperGet {
         ObservedProperty observedProperty = new ObservedProperty(selfLink, id, name, description, definition, metadata,
                 datastreamsLink);
         if (expansions.shouldExpand("Datastreams", observedProperty)) {
-            expansions.addExpansion("Datastreams", observedProperty,
-                    DatastreamsAccessImpl.getDataStreams(userSession, application, mapper, uriInfo,
-                            expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
+//            expansions.addExpansion("Datastreams", observedProperty,
+//                    DatastreamsAccessImpl.getDataStreams(userSession, application, mapper, uriInfo,
+//                            expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
         }
 
         return observedProperty;
@@ -397,8 +397,8 @@ public class DtoMapperGet {
         FeatureOfInterest featureOfInterest = new FeatureOfInterest(selfLink, id, name, description,
                 ENCODING_TYPE_VND_GEO_JSON, object, observationsLink);
         if (expansions.shouldExpand("Observations", featureOfInterest)) {
-            expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, provider));
+//            expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
+//                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, provider));
         }
 
         return featureOfInterest;
@@ -567,9 +567,9 @@ public class DtoMapperGet {
                 "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
                 metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
         if (expansions.shouldExpand("Observations", datastream)) {
-            expansions.addExpansion("Observations", datastream,
-                    RootResourceAccessImpl.getObservationList(userSession, application, mapper, uriInfo,
-                            expansions.getExpansionSettings("Observations"), resource, filter, 25));
+//            expansions.addExpansion("Observations", datastream,
+//                    RootResourceAccessImpl.getObservationList(userSession, application, mapper, uriInfo,
+//                            expansions.getExpansionSettings("Observations"), resource, filter, 25));
         }
 
         if (expansions.shouldExpand("ObservedProperty", datastream)) {

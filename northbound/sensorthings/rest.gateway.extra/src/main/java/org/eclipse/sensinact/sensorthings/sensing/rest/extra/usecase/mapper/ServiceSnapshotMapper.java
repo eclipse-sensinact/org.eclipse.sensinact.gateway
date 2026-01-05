@@ -40,7 +40,7 @@ public class ServiceSnapshotMapper {
         String id = UtilIds.getResourceField(service, "observedPropertyId", String.class);
         String name = UtilIds.getResourceField(service, "observedPropertyName", String.class);
         String description = UtilIds.getResourceField(service, "observedPropertyDescription", String.class);
-        String definition = UtilIds.getResourceField(service, "observedPropertyEncodingType", String.class);
+        String definition = UtilIds.getResourceField(service, "observedPropertyDefinition", String.class);
         @SuppressWarnings("unchecked")
         Map<String, Object> properties = UtilIds.getResourceField(service, "observedPropertyProperties", Map.class);
 

@@ -23,7 +23,6 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
@@ -328,36 +327,22 @@ public class DtoToModelMapper {
         String unitName = unit != null ? unit.name() : null;
         String unitSymbol = unit != null ? unit.symbol() : null;
         String unitDefinition = unit != null ? unit.definition() : null;
-
-        // --- Last Observation ---
-        String observationId = lastObservation != null ? sanitizeId(lastObservation.result()) : null;
-        Object observationResult = lastObservation != null ? lastObservation.result() : null;
-        Instant observationPhenomenonTime = lastObservation != null ? lastObservation.phenomenonTime() : null;
-        Instant observationResultTime = lastObservation != null ? lastObservation.resultTime() : null;
-        TimeInterval observationValidTime = lastObservation != null ? lastObservation.validTime() : null;
-        Object observationResultQuality = lastObservation != null ? lastObservation.resultQuality() : null;
-        Map<String, Object> observationParameters = lastObservation != null ? lastObservation.parameters() : null;
-        Map<String, Object> observationProperties = lastObservation != null ? lastObservation.properties() : null;
-
-        // --- FeatureOfInterest ---
-        String foiId = featureOfInterest != null
-                ? sanitizeId(
-                        featureOfInterest.id() != null ? (String) featureOfInterest.id() : featureOfInterest.name())
-                : null;
-        String foiName = featureOfInterest != null ? featureOfInterest.name() : null;
-        String foiEncodingType = featureOfInterest != null ? featureOfInterest.encodingType() : null;
-        String foiDescription = featureOfInterest != null ? featureOfInterest.description() : null;
-
-        GeoJsonObject foiFeature = featureOfInterest != null ? featureOfInterest.feature() : null;
-
+        // last observation
+        ExpandedObservation obs = null;
+        if (lastObservation != null) {
+            String observationId = lastObservation.id() != null ? (String) lastObservation.id()
+                    : String.format("%s-%d", lastObservation.result().toString(),
+                            String.valueOf(Instant.now().toEpochMilli()));
+            obs = new ExpandedObservation(null, observationId, lastObservation.phenomenonTime(),
+                    lastObservation.resultTime(), lastObservation.result(), lastObservation.resultQuality(),
+                    lastObservation.validTime(), lastObservation.parameters(), lastObservation.properties(), null, null,
+                    null, featureOfInterest);
+        }
         // --- Build DatastreamUpdate ---
         DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, datastreamId, name, description, timestamp,
                 thingId, sensorId, sensorName, sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties,
                 observedPropertyId, observedPropertyName, observedPropertyDescription, observedPropertyDefinition,
-                observedPropertyProperties, unitName, unitSymbol, unitDefinition, observationId, observationResult,
-                observationPhenomenonTime, observationResultTime, observationValidTime, observationResultQuality,
-                observationParameters, observationProperties, foiId, foiName, foiDescription, foiEncodingType,
-                foiFeature);
+                observedPropertyProperties, unitName, unitSymbol, unitDefinition, obs);
 
         return datastreamUpdate;
     }

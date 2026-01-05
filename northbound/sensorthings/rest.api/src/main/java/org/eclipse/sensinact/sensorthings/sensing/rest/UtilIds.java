@@ -4,6 +4,10 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 
 public class UtilIds {
 
+    public static String SERVICE_DATASTREAM = "datastream";
+    public static String SERVICE_THING = "thing";
+    public static String SERVICE_LOCATON = "location";
+
     public static String extractIdSegment(String id, int part) {
         if (id.isEmpty())
             return null;

@@ -91,8 +91,8 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
-        return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
+    private static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
+        return Optional.ofNullable(session.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
     /**
@@ -117,15 +117,19 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    protected ProviderSnapshot validateAndGetProvider(String id) {
+    protected static ProviderSnapshot validateAndGetProvider(SensiNactSession session, String id) {
         DtoMapperGet.validatedProviderId(id);
 
-        Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
+        Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(session, id);
 
         if (providerSnapshot.isEmpty()) {
             throw new NotFoundException("Unknown provider");
         }
         return providerSnapshot.get();
+    }
+
+    protected ProviderSnapshot validateAndGetProvider(String id) {
+        return validateAndGetProvider(getSession(), id);
     }
 
     /**
@@ -134,16 +138,20 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    protected ServiceSnapshot validateAndGeService(String id) {
+    protected ServiceSnapshot validateAndGeService(SensiNactSession session, String id) {
         String providerId = UtilIds.extractFirstIdSegment(id);
         String serviceId = "datastream";
 
-        Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(getSession(), providerId);
+        Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(session, providerId);
 
         if (provider != null && provider.isPresent() && serviceId != null) {
             return DtoMapper.getServiceSnapshot(provider.get(), serviceId);
         }
         throw new NotFoundException(String.format("can't find model identified by %s", id));
+    }
+
+    protected ServiceSnapshot validateAndGeService(String id) {
+        return validateAndGeService(getSession(), id);
     }
 
     /**
@@ -152,10 +160,10 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
+    protected ResourceSnapshot validateAndGetResourceSnapshot(SensiNactSession session, String id) {
         String provider = extractFirstIdSegment(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(session, provider);
 
         String service = extractFirstIdSegment(id.substring(provider.length() + 1));
         String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
@@ -166,6 +174,10 @@ public abstract class AbstractAccess {
             throw new NotFoundException();
         }
         return resourceSnapshot;
+    }
+
+    protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
+        return validateAndGetResourceSnapshot(getSession(), id);
     }
 
     /**

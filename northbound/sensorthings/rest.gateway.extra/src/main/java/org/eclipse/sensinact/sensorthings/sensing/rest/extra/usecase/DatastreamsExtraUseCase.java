@@ -28,6 +28,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
@@ -113,8 +114,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         ExpandedObservedProperty observedProperty = getCachedExpandedObservedProperty(request.model());
         UnitOfMeasurement unit = request.model().unitOfMeasurement();
 
-        String thingId = datastream.thing() == null ? request.parentId() : (String) datastream.thing().id();
-        // if datastream up date. check which thing is assign to and remove it
+        String thingId = getThingId(request, datastream, datastreamId);
         ProviderSnapshot providerThing = providerUseCase.read(request.session(), thingId);
 
         updateOldThingDatastreamIdIfNeeded(request, listUpdates, datastreamId, thingId);
@@ -133,13 +133,29 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     }
 
+    private String getThingId(ExtraUseCaseRequest<ExpandedDataStream> request, ExpandedDataStream datastream,
+            String datastreamId) {
+        String thingId = datastream.thing() == null ? request.parentId() : (String) datastream.thing().id();
+        // if datastream up date. check which thing is assign to and remove it
+        if (thingId == null) {
+            ProviderSnapshot providerDatastream = providerUseCase.read(request.session(), datastreamId);
+            if (providerDatastream != null) {
+                thingId = providerDatastream.getResource("datastream", "thingId").getValue() != null
+                        ? (String) providerDatastream.getResource("datastream", "thingId").getValue().getValue()
+                        : null;
+            }
+        }
+        return thingId;
+    }
+
     private void updateOldThingDatastreamIdIfNeeded(ExtraUseCaseRequest<ExpandedDataStream> request,
             List<SensorThingsUpdate> listUpdates, String datastreamId, String thingId) {
         ProviderSnapshot providerDatastream = providerUseCase.read(request.session(), datastreamId);
         if (providerDatastream == null) {
             return;
         }
-        String oldThingId = (String) providerDatastream.getResource("datastream", "thingId").getValue().getValue();
+        String oldThingId = UtilIds.getResourceField(providerDatastream.getService("datastream"), "thingId",
+                String.class);
         if (thingId != null && oldThingId != null && !oldThingId.equals(thingId)) {
 
             // need to remove link to this datastream in oldthing
@@ -155,9 +171,10 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     private void addDatastreamIdLinkToLinkThing(ExtraUseCaseRequest<ExpandedDataStream> request, String datastreamId,
             ProviderSnapshot providerThing, List<SensorThingsUpdate> listUpdates) {
-        ResourceSnapshot resource = providerThing.getResource("thing", "datastreamIds");
+        ServiceSnapshot serviceThing = providerThing.getService("thing");
+
         @SuppressWarnings("unchecked")
-        List<String> ids = (List<String>) resource.getValue().getValue();
+        List<String> ids = UtilIds.getResourceField(serviceThing, "datastreamIds", List.class);
         if (!ids.contains(datastreamId)) {
             ids.add(datastreamId);
             listUpdates.add(

@@ -106,8 +106,9 @@ public class DtoFactory {
     public static ExpandedDataStream getDatastreamMinimal(String name, String descriptikon, String obsType) {
         // Required
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
-
-        return getDatastream(name, descriptikon, uom, "obsType", null, null, null, null);
+        ExpandedSensor sensor = getSensor("test");
+        ExpandedObservedProperty op = getObservedProperty("Temperature");
+        return getDatastream(name, descriptikon, uom, "obsType", null, sensor, op, null);
 
     }
 

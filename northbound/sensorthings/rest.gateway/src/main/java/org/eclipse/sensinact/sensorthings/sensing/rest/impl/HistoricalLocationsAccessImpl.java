@@ -39,7 +39,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
         try {
             Optional<HistoricalLocation> historicalLocation = DtoMapperGet.toHistoricalLocation(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS),
@@ -58,7 +58,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
 
         ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapperGet.toLocation(getSession(),
                 application, getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), providerSnapshot)));
@@ -71,7 +71,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
 
         Location loc = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), providerSnapshot);
@@ -87,7 +87,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
 
         return new ResultList<>(null, null, List.of(DtoMapperGet.toThing(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(THINGS), providerSnapshot)));
@@ -99,7 +99,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         getTimestampFromId(id);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
@@ -117,7 +117,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
 
         Thing t;
         try {
@@ -136,9 +136,9 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
     public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
-
+        // TODO
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), validateAndGetProvider(provider));
+                parseFilter(DATASTREAMS), DatastreamsAccessImpl.getListDatastreamServices(getSession(), id));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         getTimestampFromId(id);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())

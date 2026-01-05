@@ -25,7 +25,6 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -47,6 +46,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
@@ -74,8 +74,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public ResultList<Observation> getDatastreamObservations(String id) {
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
+        // TODO //validateAndGetResourceSnapshot(id)
         ResultList<Observation> observationList = RootResourceAccessImpl.getObservationList(getSession(), application,
-                getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(id), filter);
+                getMapper(), uriInfo, requestContext, null, filter);
         return observationList;
     }
 
@@ -138,16 +139,35 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public Thing getDatastreamThing(String id) {
         String provider = extractFirstIdSegment(id);
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), validateAndGetProvider(provider));
+        ProviderSnapshot datastreamProvider = validateAndGetProvider(provider);
+        ServiceSnapshot serviceDatastream = datastreamProvider.getService("datastream");
+        String thingId = UtilIds.getResourceField(serviceDatastream, "thingId", String.class);
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                validateAndGetProvider(thingId));
     }
 
     @Override
     public ResultList<Datastream> getDatastreamThingDatastreams(String id) {
         String provider = extractFirstIdSegment(id);
-
+        ProviderSnapshot datastreamProvider = validateAndGetProvider(provider);
+        ServiceSnapshot serviceDatastream = datastreamProvider.getService("datastream");
+        String thingId = UtilIds.getResourceField(serviceDatastream, "thingId", String.class);
+        List<ServiceSnapshot> listServiceSnapshot = getListDatastreamServices(getSession(), thingId);
         return getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), validateAndGetProvider(provider));
+                parseFilter(DATASTREAMS), listServiceSnapshot);
+    }
+
+    public static List<ServiceSnapshot> getListDatastreamServices(SensiNactSession session, String thingId) {
+
+        ProviderSnapshot providerThing = validateAndGetProvider(session, thingId);
+        ServiceSnapshot serviceThing = providerThing.getService("thing");
+
+        @SuppressWarnings("unchecked")
+        List<String> listIdDatastream = UtilIds.getResourceField(serviceThing, "datastreamIds", List.class);
+        List<ServiceSnapshot> listServiceSnapshot = listIdDatastream.stream()
+                .map(idDatastream -> validateAndGetProvider(session, idDatastream))
+                .map(providerDatastream -> providerDatastream.getService("datastream")).toList();
+        return listServiceSnapshot;
     }
 
     @Override
@@ -185,9 +205,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     static ResultList<Datastream> getDataStreams(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot providerSnapshot) {
+            List<ServiceSnapshot> listServiceDatastreams) {
         return new ResultList<Datastream>(null, null,
-                providerSnapshot.getServices().stream().map(
+                listServiceDatastreams.stream().map(
                         s -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, filter, s))
                         .collect(toList()));
     }
@@ -200,7 +220,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
         String datastreamLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Datastreams({id})", id);
 
         Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot, datastreamLink);
+                getExpansions(), criterion, snapshot);
         if (createDto == null) {
             throw new BadRequestException("fail to create observation");
         }
@@ -234,10 +254,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Response updateDatastreamThingRef(String id, RefId thing) {
-        RefId datastreamRefId = new RefId(id);
-        String thingId = (String) thing.id();
-        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastreamRefId,
-                thingId, ExpandedThing.class, ExpandedDataStream.class);
+
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), thing, id,
+                ExpandedDataStream.class, ExpandedThing.class);
 
         return Response.noContent().build();
     }

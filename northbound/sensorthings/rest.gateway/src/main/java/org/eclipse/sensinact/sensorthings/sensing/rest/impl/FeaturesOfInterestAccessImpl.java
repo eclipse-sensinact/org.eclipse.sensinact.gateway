@@ -12,15 +12,16 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -52,7 +53,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
                     op.id(), op.name(), op.description(), op.encodingType(), op.feature(), null);
         } else {
             String provider = extractFirstIdSegment(id);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
 
             FeatureOfInterest foi;
             try {
@@ -72,18 +73,18 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
     @Override
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
         String provider = extractFirstIdSegment(id);
+        ProviderSnapshot providerDatastream = validateAndGetProvider(getSession(), provider);
 
         return getLiveObservations(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.OBSERVATIONS), validateAndGetProvider(provider));
+                parseFilter(EFilterContext.OBSERVATIONS), providerDatastream.getService("datastream"));
     }
 
     static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider) {
-        return new ResultList<>(null, null, provider.getServices().stream().flatMap(s -> s.getResources().stream())
-                .filter(ResourceSnapshot::isSet)
-                .map(r -> DtoMapperGet.toObservation(userSession, application, mapper, uriInfo, expansions, filter, r))
-                .filter(Optional::isPresent).map(Optional::get).collect(toList()));
+            ServiceSnapshot serviceSnapshot) {
+        // TODO
+        return new ResultList<>(null, null, List.of(DtoMapper.toObservation(userSession, application, mapper, uriInfo,
+                expansions, filter, serviceSnapshot)));
     }
 
     @Override
@@ -94,7 +95,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }
 
-        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id2);
+        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(getSession(), id2);
 
         Optional<Observation> o;
         try {
@@ -119,7 +120,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }
 
-        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id2);
+        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(getSession(), id2);
 
         Datastream d;
         try {

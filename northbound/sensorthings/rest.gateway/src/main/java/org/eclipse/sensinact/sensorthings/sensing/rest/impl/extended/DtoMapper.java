@@ -39,8 +39,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet;
@@ -165,12 +165,12 @@ public class DtoMapper {
                 metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
         if (expansions.shouldExpand("Observations", datastream)) {
             expansions.addExpansion("Observations", datastream, DtoMapper.toObservations(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, service, selfLink));
+                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, service));
         }
 
         if (expansions.shouldExpand("ObservedProperty", datastream)) {
             expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper,
-                    uriInfo, expansions.getExpansionSettings("ObservedProperty"), filter, service, selfLink));
+                    uriInfo, expansions.getExpansionSettings("ObservedProperty"), filter, service));
         }
 
         if (expansions.shouldExpand("Sensor", datastream)) {
@@ -221,8 +221,10 @@ public class DtoMapper {
 
     public static ObservedProperty toObservedProperty(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ServiceSnapshot service, String datastreamLink) {
+            ServiceSnapshot service) {
         String datastreamId = getResourceField(service, "id", String.class);
+        String thingLink = getLink(uriInfo, VERSION, getResourceField(service, "thingId", String.class));
+        String datastreamLink = getLink(uriInfo, thingLink, UtilIds.getResourceField(service, "id", String.class));
         String observedPropertyId = getResourceField(service, "observedPropertyId", String.class);
         String id = String.format("%s~%s", datastreamId, observedPropertyId);
         String observedPropertyName = getResourceField(service, "observedPropertyName", String.class);
@@ -241,44 +243,38 @@ public class DtoMapper {
     }
 
     public static Observation toObservation(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
-            String datastreamLink) {
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
 
-        String observationId = String.format("%s~%s", service.getProvider().getName(),
-                getResourceField(service, "observationId", String.class));
+        ExpandedObservation lastObservation = (ExpandedObservation) getResourceField(service, "lastObservation",
+                Object.class);
+        String idDatastream = getResourceField(service, "id", String.class);
+        String idThing = getResourceField(service, "thingId", String.class);
+        String thingLink = getLink(uriInfo, VERSION, "Things({id})", idThing);
+        String datastreamLink = getLink(uriInfo, thingLink, "Datastream({id})", idDatastream);
+        String selfLink = getLink(uriInfo, thingLink, "Observations({id})", (String) lastObservation.id());
 
-        String selfLink = datastreamLink != null
-                ? getLink(uriInfo, datastreamLink, "/Observations({id})", observationId)
-                : null;
-        Object observationResult = getResourceField(service, "observationResult", Object.class);
+        String foiLink = lastObservation.featureOfInterest() != null ? getLink(uriInfo, datastreamLink,
+                "FeatureOfInterests({id})", (String) lastObservation.featureOfInterest().id()) : null;
 
-        Instant observationPhenomenonTime = getResourceField(service, "observationPhenomenonTime", Instant.class);
-        Instant observationResultTime = getResourceField(service, "observationResultTime", Instant.class);
-        Object observationResultQuality = getResourceField(service, "observationResultQuality", Object.class);
-        TimeInterval observationValidTime = getResourceField(service, "observationValidTime", TimeInterval.class);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> observationpParameters = getResourceField(service, "observationpParameters", Map.class);
-        String foiId = getResourceField(service, "observationFOIId", String.class);
-        String observationFoiLink = foiId != null ? getLink(uriInfo, selfLink, "/FeatureOfInterest({id})", foiId)
-                : null;
+        Observation observation = new Observation(selfLink, lastObservation.id(), lastObservation.phenomenonTime(),
+                lastObservation.resultTime(), lastObservation.result(), lastObservation.resultQuality(),
+                lastObservation.validTime(), lastObservation.parameters(), datastreamLink, foiLink);
 
-        Observation observation = new Observation(selfLink, observationId, observationPhenomenonTime,
-                observationResultTime, observationResult, observationResultQuality, observationValidTime,
-                observationpParameters, datastreamLink, observationFoiLink);
-
-        if (expansions.shouldExpand("FeatureOfInterest", observation)) {
-            expansions.addExpansion("FeatureOfInterest", observation, toFeatureOfInterest(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("FeatureOfInterest"), filter, service, selfLink));
+        if (expansions.shouldExpand("FeatureOfInterest", observation) && lastObservation.featureOfInterest() != null) {
+            expansions.addExpansion("FeatureOfInterest", observation,
+                    toFeatureOfInterest(userSession, application, mapper, uriInfo,
+                            expansions.getExpansionSettings("FeatureOfInterest"), filter,
+                            lastObservation.featureOfInterest(), selfLink));
         }
         return observation;
     }
 
     public static List<Observation> toObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ServiceSnapshot service, String datastreamId) {
+            ServiceSnapshot service) {
 
-        List<Observation> observations = List.of(
-                toObservation(userSession, application, mapper, uriInfo, expansions, filter, service, datastreamId));
+        List<Observation> observations = List
+                .of(toObservation(userSession, application, mapper, uriInfo, expansions, filter, service));
 
         return observations;
     }
@@ -415,18 +411,12 @@ public class DtoMapper {
 
     public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ServiceSnapshot service, String observationLink) {
+            FeatureOfInterest foiReaded, String observationLink) {
 
-        String id = getResourceField(service, "observationFoiId", String.class);
-        String selfLink = getLink(uriInfo, observationLink, "FeatureOfInterests(%s)", id);
+        String selfLink = getLink(uriInfo, observationLink, "FeatureOfInterests(%s)", (String) foiReaded.id());
 
-        String name = getResourceField(service, "observationFoiName", String.class);
-        String description = getResourceField(service, "observationFoiDescription", String.class);
-        String encodingType = getResourceField(service, "observationFoiEncodingType", String.class);
-        GeoJsonObject feature = getResourceField(service, "observationFoiFeature", GeoJsonObject.class);
-
-        FeatureOfInterest foi = new FeatureOfInterest(selfLink, id, name, description, encodingType, feature,
-                observationLink);
+        FeatureOfInterest foi = new FeatureOfInterest(selfLink, foiReaded.id(), foiReaded.name(),
+                foiReaded.description(), foiReaded.encodingType(), foiReaded.feature(), observationLink);
 
         return foi;
     }
