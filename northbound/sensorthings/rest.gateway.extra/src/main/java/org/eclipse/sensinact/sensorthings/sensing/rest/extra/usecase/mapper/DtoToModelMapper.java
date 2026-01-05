@@ -1,10 +1,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper;
 
 import static java.util.stream.Collectors.toMap;
-import java.lang.reflect.RecordComponent;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,6 +32,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -351,45 +350,11 @@ public class DtoToModelMapper {
     }
 
     public static boolean isRecordOnlyField(Object record, String idFieldName) {
-        if (record == null || !record.getClass().isRecord()) {
-            return false;
-        }
-
-        RecordComponent[] components = record.getClass().getRecordComponents();
-
-        return Arrays.stream(components).allMatch(rc -> {
-            try {
-                Object value = rc.getAccessor().invoke(record);
-                if (rc.getName().equals(idFieldName)) {
-                    return value != null;
-                } else {
-                    return value == null;
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return UtilIds.isRecordOnlyField(record, idFieldName);
     }
 
     public static Object getRecordField(Object record, String fieldName) {
-        if (!record.getClass().isRecord()) {
-            throw new IllegalArgumentException("Ce n'est pas un record !");
-        }
-
-        RecordComponent[] components = record.getClass().getRecordComponents();
-
-        for (RecordComponent rc : components) {
-            if (rc.getName().equals(fieldName)) {
-                try {
-                    Object value = rc.getAccessor().invoke(record);
-
-                    return value;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return null;
+        return UtilIds.getRecordField(record, fieldName);
     }
 
     public static List<SensorThingsUpdate> toThingUpdates(ExpandedThing thing, String id,

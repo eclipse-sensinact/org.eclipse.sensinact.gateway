@@ -16,13 +16,11 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toHistoricalLocation;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
@@ -56,35 +54,6 @@ import jakarta.ws.rs.core.UriInfo;
 
 public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess, RootResourceCreate {
 
-    private List<ProviderSnapshot> listProviders(final ICriterion criterion) {
-        final SensiNactSession userSession = getSession();
-        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers
-                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
-                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-        } else {
-            return providers;
-        }
-    }
-
-    private List<ServiceSnapshot> listServices(final ICriterion criterion) {
-
-        final SensiNactSession userSession = getSession();
-        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .filter(r -> rcFilter.test(r.getService().getProvider(), List.of(r))).map(r -> r.getService())
-                    .collect(Collectors.toList());
-        } else {
-            return providers.stream().map(p -> p.getServices().stream()).flatMap(s -> s).toList();
-
-        }
-    }
-
     private static Optional<? extends ResourceSnapshot> getResource(final ProviderSnapshot provider,
             final String svcName, final String rcName) {
         return provider.getServices().stream().filter(s -> s.getName().equals(svcName))
@@ -108,18 +77,22 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Thing> getThings() {
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null, providers.stream().map(
-                p -> DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .toList());
+        return new ResultList<>(null, null,
+                providers.stream().map(p -> UtilIds.getThingService(p)).filter(Objects::nonNull).map(s -> DtoMapper
+                        .toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, s))
+                        .toList());
     }
 
     @Override
     public ResultList<Location> getLocations() {
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
+        ICriterion criterionThing = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProviders(criterion);
         return new ResultList<>(null, null,
-                providers.stream().map(p -> UtilIds.getLocationService(p)).map(s -> DtoMapper.toLocation(getSession(),
-                        application, getMapper(), uriInfo, getExpansions(), criterion, s)).toList());
+                providers.stream().map(p -> UtilIds.getLocationService(p)).filter(Objects::nonNull)
+                        .map(s -> DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                                criterion, s, criterionThing))
+                        .toList());
     }
 
     @Override
@@ -137,16 +110,19 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<Datastream> getDatastreams() {
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         List<ServiceSnapshot> serviceSnapshots = listServices(criterion);
-        return new ResultList<>(null, null, serviceSnapshots.stream().map(s -> DtoMapper.toDatastream(getSession(),
-                application, getMapper(), uriInfo, getExpansions(), criterion, s)).toList());
+        return new ResultList<>(null, null,
+                serviceSnapshots.stream().filter(s -> UtilIds.SERVICE_DATASTREAM.equals(s.getName())).map(s -> DtoMapper
+                        .toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, s))
+                        .toList());
     }
 
     @Override
     public ResultList<Sensor> getSensors() {
         ICriterion criterion = parseFilter(EFilterContext.SENSORS);
         List<ServiceSnapshot> servicesDatastreams = listServices(criterion);
-        return new ResultList<>(null, null, servicesDatastreams.stream().map(
-                s -> DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, s))
+        return new ResultList<>(null, null, servicesDatastreams
+                .stream().filter(s -> UtilIds.SERVICE_DATASTREAM.equals(s.getName())).map(s -> DtoMapper
+                        .toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, s))
                 .toList());
     }
 
@@ -156,8 +132,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
         List<ServiceSnapshot> services = listServices(criterion);
 
-        return new ResultList<>(null, null, services.stream().map(s -> DtoMapper.toObservation(getSession(),
-                application, getMapper(), uriInfo, getExpansions(), criterion, s)).toList());
+        return new ResultList<>(null, null,
+                services.stream().filter(s -> UtilIds.SERVICE_DATASTREAM.equals(s.getName())).map(s -> DtoMapper
+                        .toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, s))
+                        .toList());
     }
 
     @Override
@@ -165,16 +143,19 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
         List<ServiceSnapshot> services = listServices(criterion);
 
-        return new ResultList<>(null, null, services.stream().map(s -> DtoMapper.toObservedProperty(getSession(),
-                application, getMapper(), uriInfo, getExpansions(), criterion, s)).toList());
+        return new ResultList<>(null, null,
+                services.stream().filter(s -> UtilIds.SERVICE_DATASTREAM.equals(s.getName()))
+                        .map(s -> DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), criterion, s))
+                        .toList());
     }
 
     @Override
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
-        List<ProviderSnapshot> providers = listProviders(criterion);
+        List<ServiceSnapshot> providers = listServices(criterion);
         return new ResultList<>(null, null,
-                providers.stream().map(p -> UtilIds.getDatastreamService(p))
+                providers.stream().filter(s -> UtilIds.SERVICE_DATASTREAM.equals(s.getName())).filter(Objects::nonNull)
                         .map(s -> DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
                                 getExpansions(), criterion, s))
                         .toList());
@@ -195,11 +176,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<Observation> list = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
                 mapper, uriInfo, expansions, null, filter, localResultLimit);
 
-//        if (list.value().isEmpty() && resourceSnapshot.isSet()) {
-//            list = new ResultList<Observation>(null, null, DtoMapperGet
-//                    .toObservation(userSession, application, mapper, uriInfo, expansions, filter, serviceSnapshot)
-//                    .map(List::of).orElse(List.of()));
-//        }
+        if (list.value().isEmpty()) {
+            list = new ResultList<Observation>(null, null, List.of(DtoMapper.toObservation(userSession, application,
+                    mapper, uriInfo, expansions, filter, serviceSnapshot)));
+        }
 
         return list;
     }
@@ -233,8 +213,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), location);
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
+        ICriterion criterionThing = parseFilter(EFilterContext.THINGS);
+
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot);
+                criterion, snapshot, criterionThing);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -272,7 +254,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
 
         Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                snapshot);
+                UtilIds.getThingService(snapshot));
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

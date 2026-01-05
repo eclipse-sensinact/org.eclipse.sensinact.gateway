@@ -1,5 +1,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
+import java.lang.reflect.RecordComponent;
+import java.util.Arrays;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 
@@ -19,6 +22,48 @@ public class UtilIds {
 
     public static ServiceSnapshot getThingService(ProviderSnapshot providerDatastream) {
         return providerDatastream.getService(UtilIds.SERVICE_THING);
+    }
+
+    public static boolean isRecordOnlyField(Object record, String idFieldName) {
+        if (record == null || !record.getClass().isRecord()) {
+            return false;
+        }
+
+        RecordComponent[] components = record.getClass().getRecordComponents();
+
+        return Arrays.stream(components).allMatch(rc -> {
+            try {
+                Object value = rc.getAccessor().invoke(record);
+                if (rc.getName().equals(idFieldName)) {
+                    return value != null;
+                } else {
+                    return value == null;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public static Object getRecordField(Object record, String fieldName) {
+        if (!record.getClass().isRecord()) {
+            throw new IllegalArgumentException("Ce n'est pas un record !");
+        }
+
+        RecordComponent[] components = record.getClass().getRecordComponents();
+
+        for (RecordComponent rc : components) {
+            if (rc.getName().equals(fieldName)) {
+                try {
+                    Object value = rc.getAccessor().invoke(record);
+
+                    return value;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
     }
 
     public static String extractIdSegment(String id, int part) {
@@ -53,7 +98,7 @@ public class UtilIds {
     }
 
     public static String extractThirdIdSegment(String id) {
-        return extractIdSegment(id, 1);
+        return extractIdSegment(id, 2);
 
     }
 }

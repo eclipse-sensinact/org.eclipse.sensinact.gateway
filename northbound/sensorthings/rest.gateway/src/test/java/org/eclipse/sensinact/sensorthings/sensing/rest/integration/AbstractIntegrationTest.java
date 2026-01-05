@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -26,12 +28,15 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensinactSensorthingsApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +70,75 @@ public class AbstractIntegrationTest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     protected record AnyIdDTO(String selfLink, String id) implements Id, Self {
+    }
+
+    protected void createDatastream(String providerId) {
+        createDatastream(providerId, UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    }
+
+    protected void createDatastream(String providerId, String providerThingId, String sensorId,
+            String observedPropertyId) {
+        createDatastream(providerId, providerThingId, sensorId, observedPropertyId, UUID.randomUUID().toString(), 42);
+    }
+
+    protected void createDatastream(String providerId, String providerThingId, String sensorId,
+            String observedPropertyId, String idObservation, Object obsValue) {
+        createDatastream(providerId, providerThingId, sensorId, observedPropertyId, idObservation, null, obsValue);
+    }
+
+    protected void createDatastream(String providerId, String providerThingId, String sensorId,
+            String observedPropertyId, String idObservation) {
+        createDatastream(providerId, providerThingId, sensorId, observedPropertyId, idObservation, null, 42);
+    }
+
+    protected void createDatastream(String providerId, String providerThingId, String sensorId,
+            String observedPropertyId, String idObservation, String idFoi, Object obsValue) {
+        ExpandedObservation obs = null;
+        if (idObservation != null) {
+            obs = new ExpandedObservation(null, idObservation, Instant.now(), Instant.MIN, obsValue, null, null, null,
+                    null, null, null, null,
+                    idFoi != null ? new FeatureOfInterest(null, idFoi, "test", null, null, null, null) : null);
+            createResource(providerId, "datastream", "lastObservation", obs);
+
+        }
+        createResource(providerId, "datastream", "id", providerId);
+        createResource(providerId, "datastream", "sensorId", sensorId);
+        createResource(providerId, "datastream", "observedPropertyId", observedPropertyId);
+        createResource(providerId, "datastream", "observedPropertyName", "test");
+        createResource(providerId, "datastream", "sensorName", "test");
+        createResource(providerId, "datastream", "thingId", providerThingId);
+        createResource(providerId, "datastream", "name", "test");
+        createResource(providerId, "datastream", "unitSymbol", "test");
+        createResource(providerId, "datastream", "unitName", "test");
+        createResource(providerId, "datastream", "unitDefinition", "test");
+
+    }
+
+    protected void createLocation(String providerId) {
+        createResource(providerId, "location", "id", providerId);
+    }
+
+    protected void createLocation(String providerId, GeoJsonObject location) {
+        createResource(providerId, "location", "id", providerId);
+        createResource(providerId, "location", "location", location);
+
+    }
+
+    protected void createThing(String providerId, Object datastreamListId) {
+        createResource(providerId, "thing", "id", providerId);
+        createResource(providerId, "thing", "locationIds", List.of());
+        createResource(providerId, "thing", "datastreamIds", datastreamListId);
+        createResource(providerId, "thing", "name", "test");
+
+    }
+
+    protected void createThing(String providerId, Object datastreamListId, Object locationIds) {
+        createResource(providerId, "thing", "id", providerId);
+        createResource(providerId, "thing", "locationIds", locationIds);
+        createResource(providerId, "thing", "datastreamIds", datastreamListId);
+        createResource(providerId, "thing", "name", "test");
+
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -154,7 +228,7 @@ public class AbstractIntegrationTest {
         dto.provider = provider;
         dto.service = service;
         dto.resource = resource;
-        dto.type = value.getClass();
+        dto.type = value instanceof List ? Object.class : value.getClass();
         dto.value = value;
         dto.timestamp = instant;
         try {
