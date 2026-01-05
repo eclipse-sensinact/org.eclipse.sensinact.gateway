@@ -14,7 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
@@ -123,12 +122,6 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
 
     public void removeInMemorySensor(String id) {
         cacheSensor.removeDto(id);
-    }
-
-    @Override
-    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedSensor> request) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

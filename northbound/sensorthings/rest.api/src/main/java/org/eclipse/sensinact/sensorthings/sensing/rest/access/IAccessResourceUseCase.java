@@ -17,5 +17,13 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 public interface IAccessResourceUseCase {
 
+    /**
+     * return the resource snapshot identified by the id that is composed by
+     * providerId, serviceId, resourceName separate by ~
+     *
+     * @param session
+     * @param id
+     * @return
+     */
     public ResourceSnapshot read(SensiNactSession session, String id);
 }

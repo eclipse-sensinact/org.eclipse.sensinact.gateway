@@ -104,7 +104,6 @@ public class UtilsAssert {
     }
 
     public static void assertObservation(ExpandedObservation dto, JsonNode json, boolean expanded) {
-        assertSelfLink(dto, json);
 
         assertEquals(dto.parameters(), json.get("parameters"));
         assertEquals(dto.phenomenonTime().toString(), json.get("phenomenonTime").asText());

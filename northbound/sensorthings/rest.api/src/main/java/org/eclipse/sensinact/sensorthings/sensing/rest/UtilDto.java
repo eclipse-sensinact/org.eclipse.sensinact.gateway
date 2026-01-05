@@ -23,26 +23,35 @@ public class UtilDto {
     public static String SERVICE_DATASTREAM = "datastream";
     public static String SERVICE_THING = "thing";
     public static String SERVICE_LOCATON = "location";
+
     /**
      * get datastream service
      */
     public static ServiceSnapshot getDatastreamService(ProviderSnapshot providerDatastream) {
         return providerDatastream.getService(UtilDto.SERVICE_DATASTREAM);
     }
+
     /**
      * get location service
      */
     public static ServiceSnapshot getLocationService(ProviderSnapshot providerDatastream) {
         return providerDatastream.getService(UtilDto.SERVICE_LOCATON);
     }
+
     /**
      * get thing device service
      */
     public static ServiceSnapshot getThingService(ProviderSnapshot providerDatastream) {
         return providerDatastream.getService(UtilDto.SERVICE_THING);
     }
+
     /**
-     * return true of record is a record and the field exists and setted
+     * return false if the class is not a record or the field doesn't exists else
+     * true
+     *
+     * @param record
+     * @param idFieldName
+     * @return
      */
     public static boolean isRecordOnlyField(Object record, String idFieldName) {
         if (record == null || !record.getClass().isRecord()) {
@@ -64,9 +73,14 @@ public class UtilDto {
             }
         });
     }
+
     /**
-     * get the record field on the record ikf it's a record identified by fieldname else null
-     * throw exception  if record is not a record
+     * return exception if record is not a record class else return the value of
+     * field if it exists else null
+     *
+     * @param record
+     * @param fieldName
+     * @return
      */
     public static Object getRecordField(Object record, String fieldName) {
         if (!record.getClass().isRecord()) {

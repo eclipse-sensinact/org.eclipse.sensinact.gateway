@@ -32,6 +32,11 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class DatastreamTest extends AbstractIntegrationTest {
 
+    /**
+     * test simple datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastream() throws Exception {
         // given
@@ -50,6 +55,11 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test datastream with missing field
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateMissingFieldDatastream() throws Exception {
         // given
@@ -96,6 +106,11 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create datastream using thing/datastream endpoint
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastreamThroughThing() throws Exception {
         // given
@@ -114,6 +129,11 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create datastream with sennsor and observed property in payload
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastreamWithSensorAndObservedProperty() throws Exception {
         // given
@@ -132,6 +152,11 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create datastream with expand result expected
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastreamWithExpand() throws Exception {
         // given
@@ -150,7 +175,14 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
-    // update
+    /**
+     * Tests that <code>PUT</code> can be used to update a Datastream
+     */
+    /**
+     * test simple update datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdateDatastream() throws Exception {
         // given
@@ -177,6 +209,10 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * Tests that a Datastream can use id references to refer to existing other
+     * resources and will be linked to them
+     */
     @Test
     public void testUpdateDatastreamRefs() throws Exception {
         // given
@@ -232,6 +268,32 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // then
         service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(idObservedProperty, UtilDto.getResourceField(service, "observedPropertyId", String.class));
+
+    }
+
+    @Test
+    public void testPatchDatastream() throws Exception {
+        // given
+        String nameThing = "testPatchDatastream";
+        String name = "testPatchDatastream";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idThing));
+
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        // when
+        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
+
+        getJsonResponseFromPatch(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + " Update", UtilDto.getResourceField(service, "name", String.class));
 
     }
 }

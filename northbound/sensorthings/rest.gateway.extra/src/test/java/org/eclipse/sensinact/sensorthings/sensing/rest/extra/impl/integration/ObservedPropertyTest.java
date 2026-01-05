@@ -32,6 +32,12 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class ObservedPropertyTest extends AbstractIntegrationTest {
 
+    /**
+     * test endpoint create observed property that store the dto in cache memory as
+     * not link to datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateObservedProperty() throws Exception {
         // given
@@ -43,6 +49,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create observed with missing field
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateObservedPropertyMissingField() throws Exception {
         // given
@@ -57,6 +68,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create observed property link to datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastreamLinkObservedProperty() throws Exception {
         // given
@@ -82,7 +98,12 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
     }
 
-    // update
+    /**
+     * Tests that <code>PUT</code> can be used to update a ObservedPorperty
+     */
+    /*
+     * test simple update observed property that is store in memory cache
+     */
     @Test
     public void testUpdateObservedProperty() throws Exception {
         // given
@@ -99,6 +120,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test update observed property that is store in datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdateObservedPropertyLinkDatastream() throws Exception {
         // given
@@ -133,7 +159,14 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         assertEquals(name + "2", UtilDto.getResourceField(service, "observedPropertyName", String.class));
     }
 
-    // patch
+    /**
+     * Tests that <code>PATCH</code> can be used to update a ObservedPorperty
+     */
+    /**
+     * test patch observed property that is store in memory cache
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdatePatchObservedProperty() throws Exception {
         // given
@@ -150,6 +183,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test patch observed property that is link to a datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdatePatchObservedPropertyLinkDatastream() throws Exception {
         // given

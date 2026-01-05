@@ -15,7 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -147,12 +146,6 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
             return new ExtraUseCaseResponse<ServiceSnapshot>(observationId, service);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
-    }
-
-    @Override
-    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }
