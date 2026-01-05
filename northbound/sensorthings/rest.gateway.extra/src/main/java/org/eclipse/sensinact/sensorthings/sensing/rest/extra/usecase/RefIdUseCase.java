@@ -38,6 +38,9 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
 
+/**
+ * manage create , update or delete of $ref
+ */
 public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     private final IAccessProviderUseCase providerUseCase;
