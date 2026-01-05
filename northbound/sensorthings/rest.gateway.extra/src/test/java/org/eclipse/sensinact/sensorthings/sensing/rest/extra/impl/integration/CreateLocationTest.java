@@ -4,9 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,12 +41,16 @@ public class CreateLocationTest extends AbstractIntegrationTest {
     @Test
     public void testCreateLocation() throws Exception {
         // given
-        ExpandedLocation dtoLocation = new ExpandedLocation();
-        dtoLocation.name = "testCreateLocation";
-        dtoLocation.description = "testLocation creation";
+        String name = "testCreateLocation";
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
+        List<Id> listId = new ArrayList<Id>();
+        listId.add(thing);
+        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name, listId);
 
         // when
-        JsonNode json = getJsonResponseFromPost(dtoLocation, "/1.1/Locations", 201);
+        json = getJsonResponseFromPost(dtoLocation, "/1.1/Locations", 201);
         UtilsAssert.assertLocation(dtoLocation, json);
 
     }

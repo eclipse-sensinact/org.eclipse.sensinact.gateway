@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,19 +33,118 @@ public class CreateDatastreamTest extends AbstractIntegrationTest {
         // Then
         assertEquals(response.statusCode(), expectedStatus);
         JsonNode json = mapper.readTree(response.body());
+
         return json;
     }
 
     @Test
     public void testCreateDatastream() throws Exception {
         // given
-        ExpandedDataStream dtoDatastream = new ExpandedDataStream();
-        dtoDatastream.name = "testCreateLocation";
-        dtoDatastream.description = "testLocation creation";
+        String name = "testCreateDatastream";
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
+
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getIdThing(name));
 
         // when
-        JsonNode json = getJsonResponseFromPost(dtoDatastream, "/1.1/Datastreams", 201);
+        json = getJsonResponseFromPost(dtoDatastream, "/1.1/Datastreams", 201);
         UtilsAssert.assertDatastream(dtoDatastream, json);
+        json = getJsonResponseFromGet(String.format("/1.1/Datastreams(%s)", dtoDatastream.name()));
+        UtilsAssert.assertDatastream(dtoDatastream, json, true);
+
+    }
+
+    @Test
+    public void testCreateDatastreamWithSensor() throws Exception {
+        // given
+        String name = "testCreateDatastreamWithSensor";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensor(name,
+                DtoFactory.getIdThing(name));
+
+        // when
+        json = getJsonResponseFromPost(dtoDatastream, "/1.1/Datastreams", 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        json = getJsonResponseFromGet(String.format("/1.1/Datastreams(%s)", dtoDatastream.name()));
+        UtilsAssert.assertDatastream(dtoDatastream, json, true);
+
+    }
+
+    @Test
+    public void testCreateDatastreamThroughThikng() throws Exception {
+        // given
+        String name = "testCreateDatastreamWithSensor";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamWithSensor(name);
+
+        // when
+        json = getJsonResponseFromPost(dtoDatastream, String.format("/1.1/Things(%s)/Datastreams", name), 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        json = getJsonResponseFromGet(String.format("/1.1/Datastreams(%s)", dtoDatastream.name()));
+        UtilsAssert.assertDatastream(dtoDatastream, json, true);
+
+    }
+
+    @Test
+    public void testCreateDatastreamWithObservedProperty() throws Exception {
+        // given
+        String name = "testCreateDatastreamWithObservedProperty";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedProperty(name,
+                DtoFactory.getIdThing(name));
+
+        // when
+        json = getJsonResponseFromPost(dtoDatastream, "/1.1/Datastreams", 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        json = getJsonResponseFromGet(String.format("/1.1/Datastreams(%s)", dtoDatastream.name()));
+        UtilsAssert.assertDatastream(dtoDatastream, json, true);
+
+    }
+
+    @Test
+    public void testCreateDatastreamWithObservedPropertyObservations() throws Exception {
+        // given
+        String name = "testCreateDatastreamLinnkThingWithObservedPropertyObservations";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedPropertyObservation(name,
+                DtoFactory.getIdThing(name));
+
+        // when
+        json = getJsonResponseFromPost(dtoDatastream, "/1.1/Datastreams", 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        json = getJsonResponseFromGet(String.format("/1.1/Datastreams(%s)", dtoDatastream.name()));
+        UtilsAssert.assertDatastream(dtoDatastream, json, true);
+
+    }
+
+    @Test
+    public void testCreateDatastreamWithExpand() throws Exception {
+        // given
+        String name = "testCreateDatastreamWithExpand";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "/1.1/Things", 201);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedPropertyObservation(name,
+                DtoFactory.getIdThing(name));
+
+        // when
+        json = getJsonResponseFromPost(dtoDatastream, "/1.1/Datastreams?$expand(Sensor,ObservedProperty,Observations",
+                201);
+        UtilsAssert.assertDatastream(dtoDatastream, json, true);
 
     }
 }
