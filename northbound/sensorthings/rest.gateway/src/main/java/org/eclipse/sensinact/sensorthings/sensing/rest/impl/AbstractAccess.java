@@ -31,6 +31,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -194,5 +195,15 @@ public abstract class AbstractAccess {
         } catch (FilterParserException e) {
             throw new BadRequestException("Error parsing filter", e);
         }
+    }
+
+    protected IDtoMemoryCache<?> getCache(Class<?> dtoClass) {
+        IDtoMemoryCache<?> cache = providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
+                .getContext(dtoClass);
+        if (cache == null) {
+            throw new WebApplicationException(
+                    String.format("cache for class %s doesn't exists", dtoClass.getSimpleName()));
+        }
+        return cache;
     }
 }

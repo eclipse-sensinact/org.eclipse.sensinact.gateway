@@ -228,7 +228,12 @@ public class DtoToModelMapper {
     }
 
     public static String extractThirdIdSegment(String id) {
-        return extractIdSegment(id, 1);
+        return extractIdSegment(id, 2);
+
+    }
+
+    public static String extractFouthIdSegment(String id) {
+        return extractIdSegment(id, 3);
 
     }
 

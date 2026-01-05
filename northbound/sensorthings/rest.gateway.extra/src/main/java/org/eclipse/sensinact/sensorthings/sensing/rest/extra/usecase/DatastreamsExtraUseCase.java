@@ -26,6 +26,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
@@ -44,19 +45,20 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
     private final IAccessServiceUseCase serviceUseCase;
 
-    private final SensorsExtraUseCase sensorExtraUseCase;
+    private final IDtoMemoryCache<ExpandedSensor> sensorCache;
 
-    private final FeatureOfInterestExtraUseCase featureOfInterestUseCase;
+    private final IDtoMemoryCache<FeatureOfInterest> foiCache;
 
-    private final ObservedPropertiesExtraUseCase observedPropertyUseCase;
+    private final IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
 
+    @SuppressWarnings("unchecked")
     public DatastreamsExtraUseCase(Providers providers) {
         dataUpdate = resolve(providers, DataUpdate.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
         serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
-        sensorExtraUseCase = resolveUseCase(providers, SensorsExtraUseCase.class);
-        featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
-        observedPropertyUseCase = resolveUseCase(providers, ObservedPropertiesExtraUseCase.class);
+        sensorCache = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
+        foiCache = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
+        observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
@@ -159,7 +161,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
             if (DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
                 String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
 
-                sensor = sensorExtraUseCase.getInMemorySensor(idSensor);
+                sensor = sensorCache.getDto(idSensor);
                 if (sensor == null) {
                     throw new BadRequestException(String.format("sensor id %s doesn't exists", idSensor));
                 }
@@ -186,7 +188,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
 
                 String idFoi = DtoToModelMapper.getIdFromRecord(foi);
 
-                featureOfInterest = featureOfInterestUseCase.getInMemoryFeatureOfInterest(idFoi);
+                featureOfInterest = foiCache.getDto(idFoi);
                 if (featureOfInterest == null) {
                     throw new BadRequestException(String.format("Feature of interest id %s doesn't exists", idFoi));
                 }
@@ -208,7 +210,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
             String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
 
-            sensorExtraUseCase.removeInMemorySensor(idSensor);
+            sensorCache.removeDto(idSensor);
 
         }
 
@@ -227,7 +229,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         if (datastream.observedProperty() != null) {
             if (DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
                 String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
-                observedProperty = observedPropertyUseCase.getInMemoryObservedProperty(idObservedProperty);
+                observedProperty = observedPropertyCache.getDto(idObservedProperty);
                 if (observedProperty == null) {
                     throw new BadRequestException(
                             String.format("observedProperty id %s doesn't exists", idObservedProperty));
@@ -250,7 +252,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         if (datastream.observedProperty() != null
                 && DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
             String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
-            observedPropertyUseCase.removeInMemoryObservedProperty(idObservedProperty);
+            observedPropertyCache.removeDto(idObservedProperty);
         }
 
     }
@@ -264,7 +266,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCase<ExpandedDataSt
         // retrieve create observedPorperty
         if (foi != null && DtoToModelMapper.isRecordOnlyField(foi, "id")) {
             String idFoi = DtoToModelMapper.getIdFromRecord(foi);
-            featureOfInterestUseCase.removeInMemoryFeatureOfInterest(idFoi);
+            foiCache.removeDto(idFoi);
         }
 
     }

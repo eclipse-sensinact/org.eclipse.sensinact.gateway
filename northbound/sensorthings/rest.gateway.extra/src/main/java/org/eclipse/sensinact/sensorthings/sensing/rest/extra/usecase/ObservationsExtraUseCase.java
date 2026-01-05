@@ -90,10 +90,10 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCase<ExpandedObser
         FeatureOfInterest foi = getFeatureOfInterest(observation);
         if (foi != null) {
             DtoToModelMapper.checkRequireField(foi);
-
         }
-        String providerId = UtilIds.extractFirstIdSegment(request.parentId());
-        String serviceId = UtilIds.extractSecondIdSegment(request.parentId());
+        String id = request.parentId() != null ? request.parentId() : request.id();
+        String providerId = UtilIds.extractFirstIdSegment(id);
+        String serviceId = UtilIds.extractSecondIdSegment(id);
 
         checkRequireLink(serviceUseCase.read(request.session(), providerId, serviceId));
 

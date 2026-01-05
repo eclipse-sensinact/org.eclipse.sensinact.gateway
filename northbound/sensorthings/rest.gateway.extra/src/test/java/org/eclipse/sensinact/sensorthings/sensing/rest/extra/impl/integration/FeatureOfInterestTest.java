@@ -58,7 +58,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
         String foiId = getIdFromJson(json);
-        assertNotNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
+        assertNotNull(foiCache.getDto(foiId));
         // create datastream with observation
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -77,7 +77,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
 
         UtilsAssert.assertObservation(dtoObservation, json);
-        assertNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
+        assertNull(foiCache.getDto(foiId));
 
     }
 
@@ -169,13 +169,14 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 new Point(-122.4194, 37.7749));
 
         JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
+        String idFoi = getIdFromJson(json);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
 
         // when
         FeatureOfInterest dtoFeatureOfInterestUpdate = DtoFactory.getFeatureOfInterest(name + "Update",
                 "application/vnd.geo+json", new Point(-122.4194, 37.7749));
 
-        json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, "FeaturesOfInterest", 204);
+        json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi), 204);
 
     }
 
@@ -191,7 +192,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
         String foiId = getIdFromJson(json);
-        assertNotNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
+        assertNotNull(foiCache.getDto(foiId));
         // create datastream with observation
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -207,7 +208,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(dtoObservation,
                 String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
         UtilsAssert.assertObservation(dtoObservation, json);
-        assertNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
+        assertNull(foiCache.getDto(foiId));
         String idObservation = getIdFromJson(json);
         // when
         FeatureOfInterest foiUpdate = DtoFactory.getFeatureOfInterest(name + "Update", "application/vnd.geo+json",

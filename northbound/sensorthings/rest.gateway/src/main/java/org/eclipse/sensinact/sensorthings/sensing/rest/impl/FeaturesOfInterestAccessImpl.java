@@ -27,8 +27,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.FeaturesOfInterestAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.FeaturesOfInterestUpdate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,20 +46,26 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
-        String provider = extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        if (getCache(ExpandedObservedProperty.class).getDto(id) != null) {
+            FeatureOfInterest op = (FeatureOfInterest) getCache(FeatureOfInterest.class).getDto(id);
+            return new FeatureOfInterest(DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/FeatureOfInterests", id),
+                    op.id(), op.name(), op.description(), op.encodingType(), op.feature(), null);
+        } else {
+            String provider = extractFirstIdSegment(id);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        FeatureOfInterest foi;
-        try {
-            foi = DtoMapperGet.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException("No feature of interest with id");
+            FeatureOfInterest foi;
+            try {
+                foi = DtoMapperGet.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
+            } catch (IllegalArgumentException iae) {
+                throw new NotFoundException("No feature of interest with id");
+            }
+            if (!foi.id().equals(id)) {
+                throw new NotFoundException();
+            }
+            return foi;
         }
-        if (!foi.id().equals(id)) {
-            throw new NotFoundException();
-        }
-        return foi;
     }
 
     // No history as it is *live* observation data not a data stream
