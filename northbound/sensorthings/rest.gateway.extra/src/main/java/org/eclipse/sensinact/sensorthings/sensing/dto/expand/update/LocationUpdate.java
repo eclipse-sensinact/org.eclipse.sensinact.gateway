@@ -14,8 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
 import static org.eclipse.sensinact.core.annotation.dto.NullAction.UPDATE_IF_PRESENT;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION_SERVICE;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.annotation.dto.Data;
@@ -25,6 +23,8 @@ import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION_SERVICE;
 
 /**
  * Update record for the Location of a SensorThing / Device

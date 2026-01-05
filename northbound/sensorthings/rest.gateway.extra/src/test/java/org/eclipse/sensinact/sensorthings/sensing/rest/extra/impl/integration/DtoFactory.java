@@ -5,7 +5,7 @@
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
-* SPDX-License-Identifier: EPL-2.0
+* SPDX-License-RefIdentifier: EPL-2.0
 *
 * Contributors:
 *   Kentyou - initial implementation
@@ -53,53 +53,53 @@ public class DtoFactory {
     }
 
     public static ExpandedDataStream getDatastream(String name, String description, UnitOfMeasurement unit,
-            String observationType, RefId thingId, ExpandedSensor sensor, ExpandedObservedProperty op,
+            String observationType, RefId thingRefId, ExpandedSensor sensor, ExpandedObservedProperty op,
             List<ExpandedObservation> listObs) {
 
         Instant start = Instant.now();
         Instant end = Instant.now();
         TimeInterval interval = new TimeInterval(end, start);
         return new ExpandedDataStream(null, null, name, description, observationType, unit, null, interval, interval,
-                null, null, null, null, null, listObs, op, sensor, null, thingId);
+                null, null, null, null, null, listObs, op, sensor, null, thingRefId);
     }
 
-    public static ExpandedDataStream getDatastreamMinimalLinkThingWithObservations(String name, RefId thingId,
+    public static ExpandedDataStream getDatastreamMinimalLinkThingWithObservations(String name, RefId thingRefId,
             List<ExpandedObservation> listObs) {
         ExpandedSensor sensor = getSensor("sensor1");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         ExpandedObservedProperty op = getObservedProperty("obProp");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingId, sensor, op, listObs);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, listObs);
 
     }
 
-    public static ExpandedDataStream getDatastreamMinimalWithThingObervedPropertySensor(String name, RefId thingId,
+    public static ExpandedDataStream getDatastreamMinimalWithThingObervedPropertySensor(String name, RefId thingRefId,
             ExpandedSensor sensor, ExpandedObservedProperty op) {
         // Required
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingId, sensor, op, null);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
 
     }
 
-    public static ExpandedDataStream getDatastreamMinimalLinkThingLinkObservedProperty(String name, RefId thingId,
-            RefId obId) {
+    public static ExpandedDataStream getDatastreamMinimalLinkThingLinkObservedProperty(String name, RefId thingRefId,
+            RefId obRefId) {
         // Required
-        ExpandedObservedProperty op = new ExpandedObservedProperty(null, obId, null, null, null, null, null);
+        ExpandedObservedProperty op = new ExpandedObservedProperty(null, obRefId, null, null, null, null, null);
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         ExpandedSensor sensor = getSensor("sensor1");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingId, sensor, op, null);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
 
     }
 
-    public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, RefId thingId) {
+    public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, RefId thingRefId) {
         // Required
         ExpandedSensor sensor = getSensor("test");
         ExpandedObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingId, sensor, op, null);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
 
     }
 
@@ -112,14 +112,14 @@ public class DtoFactory {
 
     }
 
-    public static ExpandedDataStream getDatastreamMinimalLinkThingLinkSensor(String name, RefId thingId,
-            RefId sensorId) {
+    public static ExpandedDataStream getDatastreamMinimalLinkThingLinkSensor(String name, RefId thingRefId,
+            RefId sensorRefId) {
         // Required
-        ExpandedSensor sensor = new ExpandedSensor(null, sensorId, null, null, null, null, null, null);
+        ExpandedSensor sensor = new ExpandedSensor(null, sensorRefId, null, null, null, null, null, null);
         ExpandedObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingId, sensor, op, null);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
 
     }
 
@@ -128,14 +128,14 @@ public class DtoFactory {
     }
 
     public static ExpandedSensor getSensor(String name) {
-        return new ExpandedSensor(null, null, name, "Measures ambient humidity", "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null);
+        return new ExpandedSensor(null, null, name, "Measures ambient humRefIdity", "application/pdf",
+                "http://example.com/humRefIdity-sensor.pdf", null, null);
 
     }
 
     public static ExpandedSensor getSensor(String name, String descripton, String encodingType) {
         return new ExpandedSensor(null, null, name, descripton, "application/pdf",
-                "http://example.com/humidity-sensor.pdf", null, null);
+                "http://example.com/humRefIdity-sensor.pdf", null, null);
 
     }
 
@@ -149,24 +149,24 @@ public class DtoFactory {
 
     }
 
-    public static ExpandedObservation getObservationLinkDatastream(String name, RefId datastreamId) {
-        return getObservationLinkDatastream(name, datastreamId, null);
+    public static ExpandedObservation getObservationLinkDatastream(String name, RefId datastreamRefId) {
+        return getObservationLinkDatastream(name, datastreamRefId, null);
 
     }
 
-    public static ExpandedObservation getObservationLinkDatastream(String name, RefId datastreamId,
+    public static ExpandedObservation getObservationLinkDatastream(String name, RefId datastreamRefId,
             FeatureOfInterest featureOfInterest) {
 
         return new ExpandedObservation(null, "obs2", Instant.now(), Instant.now(), 5.0, "test", null, null, null, null,
-                null, datastreamId, featureOfInterest);
+                null, datastreamRefId, featureOfInterest);
 
     }
 
     public static ExpandedObservation getObservationLinkDatastream(String name, Object result, Instant PhenomTime,
-            RefId datastreamId, FeatureOfInterest featureOfInterest) {
+            RefId datastreamRefId, FeatureOfInterest featureOfInterest) {
 
         return new ExpandedObservation(null, "obs2", PhenomTime, null, result, "test", null, null, null, null, null,
-                datastreamId, featureOfInterest);
+                datastreamRefId, featureOfInterest);
 
     }
 
@@ -175,9 +175,9 @@ public class DtoFactory {
 
     }
 
-    public static ExpandedObservation getObservationLinkFeatureOfInterest(String name, String foiId) {
+    public static ExpandedObservation getObservationLinkFeatureOfInterest(String name, String foiRefId) {
         return getObservationWithFeatureOfInterest(name,
-                new FeatureOfInterest(null, getRefId(foiId), null, null, null, null, null));
+                new FeatureOfInterest(null, getRefId(foiRefId), null, null, null, null, null));
     }
 
     public static ExpandedObservation getObservationWithFeatureOfInterest(String name, FeatureOfInterest feature) {
@@ -185,20 +185,20 @@ public class DtoFactory {
 
     }
 
-    public static ExpandedLocation getIdLocation(Object id) {
+    public static ExpandedLocation getIdLocation(Object RefId) {
 
-        return new ExpandedLocation(null, id, null, null, null, null, null, null, null);
+        return new ExpandedLocation(null, RefId, null, null, null, null, null, null, null);
     }
 
-    public static ExpandedDataStream getIdDatastream(Object id) {
+    public static ExpandedDataStream getIdDatastream(Object RefId) {
 
-        return new ExpandedDataStream(null, id, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null);
+        return new ExpandedDataStream(null, RefId, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null);
     }
 
-    public static RefId getRefId(Object id) {
+    public static RefId getRefId(Object RefId) {
 
-        return new RefId(id);
+        return new RefId(RefId);
     }
 
     public static ExpandedDataStream getDatastreamLinkThingWithSensorObservedProperty(String name, RefId thing) {

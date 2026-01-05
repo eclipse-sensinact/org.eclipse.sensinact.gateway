@@ -140,7 +140,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         String idObservedProperty = getIdFromJson(json);
         ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
         json = getJsonResponseFromPatch(ObservedPropertyUpdate,
-                String.format("ObservedProperty(%s)", idObservedProperty), 204);
+                String.format("ObservedProperties(%s)", idObservedProperty), 204);
         // then
 
     }

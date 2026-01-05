@@ -109,7 +109,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorCache.getDto(sensorId));
         // when
         ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
-        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensor(%s)", sensorIdDatastream), 204);
+        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
         assertNull(sensorCache.getDto(sensorId));
         // then
         json = getJsonResponseFromGet(String.format("/Sensors(%s)", sensorIdDatastream), 200);

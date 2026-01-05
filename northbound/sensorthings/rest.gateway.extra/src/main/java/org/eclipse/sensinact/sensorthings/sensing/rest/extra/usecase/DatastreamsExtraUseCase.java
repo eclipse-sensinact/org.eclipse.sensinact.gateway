@@ -15,7 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -68,7 +67,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        String idDatastream = getId(request);
+        String idDatastream = request.id();
 
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
@@ -106,7 +105,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         List<SensorThingsUpdate> listUpdates = new ArrayList<SensorThingsUpdate>();
 
         ExpandedDataStream datastream = request.model();
-        String datastreamId = getId(request);
+        String datastreamId = request.id();
 
         checkRequireField(request);
 
@@ -316,7 +315,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        String id = getId(request);
+        String id = request.id();
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         // update/create provider
@@ -339,13 +338,6 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
         return new ExtraUseCaseResponse<ServiceSnapshot>(id, serviceSnapshot);
 
-    }
-
-    @Override
-    public String getId(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        return request.id() != null ? request.id()
-                : DtoToModelMapper
-                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
     @Override

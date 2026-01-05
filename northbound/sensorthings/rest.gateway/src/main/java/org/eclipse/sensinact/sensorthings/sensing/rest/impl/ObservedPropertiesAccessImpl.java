@@ -41,17 +41,6 @@ import jakarta.ws.rs.core.Response;
 public class ObservedPropertiesAccessImpl extends AbstractAccess
         implements ObservedPropertiesAccess, ObservedPropertiesUpdate {
 
-    private String getDatastreamLink(String id) {
-        String providerId = UtilIds.extractFirstIdSegment(id);
-        String serviceId = UtilIds.extractFirstIdSegment(id);
-        String datastreamLink = null;
-        if (serviceId != null) {
-            String thingLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Things{id}", providerId);
-            datastreamLink = DtoMapper.getLink(uriInfo, thingLink, "Datastreams({id})", serviceId);
-        }
-        return datastreamLink;
-    }
-
     @Override
     public ObservedProperty getObservedProperty(String id) {
         if (getCache(ExpandedObservedProperty.class).getDto(id) != null) {
@@ -90,7 +79,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
         }
         ProviderSnapshot provider = validateAndGetProvider(id);
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), provider.getService("datastream"), parseFilter(OBSERVATIONS), 0);
+                getExpansions(), UtilIds.getDatastreamService(provider), parseFilter(OBSERVATIONS), 0);
     }
 
     @Override

@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -316,7 +318,7 @@ public class ThingTest extends AbstractIntegrationTest {
         String idThing = getIdFromJson(json);
         UtilsAssert.assertThing(dtoThing, json);
 
-        ExpandedLocation dtoLocation = DtoFactory.getLocation(name);
+        ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "Location");
 
         // when
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
@@ -347,24 +349,24 @@ public class ThingTest extends AbstractIntegrationTest {
 
         List<ExpandedDataStream> datastreamsUpdate = List.of(DtoFactory.getDatastreamMinimal(name + "3"));
 
-        ExpandedThing dtoThingUpdate = DtoFactory.getExpandedThingWithDatastreams(name,
+        ExpandedThing dtoThingUpdate = DtoFactory.getExpandedThingWithDatastreams(name + "Update",
                 "testThing With Location and Datastream",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreamsUpdate);
 
         json = getJsonResponseFromPost(dtoThingUpdate, "/Things?$expand=Datastreams", 201);
-        String idThingUpdate = getIdFromJson(json);
         JsonNode datastreamNode = json.get("Datastreams");
-        assertTrue(datastreamNode.size() > 0);
+        assertEquals(datastreamNode.size(), 1);
         JsonNode datastreamJson = datastreamNode.get(0);
         String idDatastreamUpdate = getIdFromJson(datastreamJson);
 
-        UtilsAssert.assertThing(dtoThing, json);
+        UtilsAssert.assertThing(dtoThingUpdate, json);
         // When
 
-        json = getJsonResponseFromPut(new RefId(idDatastreamUpdate),
+        json = getJsonResponseFromPost(new RefId(idDatastreamUpdate),
                 String.format("/Things(%s)/Datastreams/$ref", idThing), 204);
         // then
-
+        json = getJsonResponseFromGet(String.format("/Things(%s)?$expand=Datastreams", idThing), 200);
+        assertEquals(json.get("Datastreams").size(), 2);
     }
 
     // patch

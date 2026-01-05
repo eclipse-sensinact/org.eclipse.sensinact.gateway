@@ -33,8 +33,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
  */
 @Service("admin")
 public record ThingUpdate(@Model EClass model, @Provider String providerId,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
+        @Service("thing") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String name,
+        @Service("thing") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
         @Service("thing") @Resource("id") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object thingId,
         @Service("thing") @Resource("id") @Metadata(onMap = {
                 USE_KEYS_AS_FIELDS }) Map<String, Object> properties,

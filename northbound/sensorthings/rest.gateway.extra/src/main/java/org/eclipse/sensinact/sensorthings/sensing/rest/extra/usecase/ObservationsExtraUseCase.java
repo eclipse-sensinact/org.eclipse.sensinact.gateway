@@ -48,7 +48,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedObservation> request) {
-        String observationId = getId(request);
+        String observationId = request.id();
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         // update/create provider
@@ -98,7 +98,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
         String serviceId = "datastream";
         checkRequireLink(serviceUseCase.read(request.session(), providerId, serviceId));
 
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, serviceId, null, null, null, observation, foi));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, observation, foi));
     }
 
     private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {
@@ -128,15 +128,25 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
+        String observationId = request.id();
+        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
-    }
+        // update/create provider
+        try {
+            dataUpdate.pushUpdate(listDtoModels).getValue();
 
-    @Override
-    public String getId(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return request.id() != null ? request.id()
-                : DtoToModelMapper
-                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().result());
+        } catch (InvocationTargetException | InterruptedException e) {
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
+                    e.getMessage());
+
+        }
+        String dataStreamId = UtilIds.extractFirstIdSegment(request.parentId());
+        ServiceSnapshot service = serviceUseCase.read(request.session(), dataStreamId, "datastream");
+        if (service != null) {
+            removeFeatureOfInterest(request.model());
+            return new ExtraUseCaseResponse<ServiceSnapshot>(observationId, service);
+        }
+        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
     }
 
     @Override

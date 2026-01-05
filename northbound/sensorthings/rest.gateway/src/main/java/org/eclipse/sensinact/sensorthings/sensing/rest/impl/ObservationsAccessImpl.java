@@ -20,7 +20,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
-import java.time.Instant;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -37,6 +36,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
@@ -50,14 +50,13 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     @Override
     public Observation getObservation(String id) {
         ServiceSnapshot serviceSnapshot = validateAndGeService(id);
-        Instant timestamp = DtoMapperGet.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
-        String thingLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Things({id})",
-                serviceSnapshot.getProvider().getName());
-        String datastreamLink = DtoMapper.getLink(uriInfo, thingLink, "/Datastreams({id})", serviceSnapshot.getName());
+
+        ExpandedObservation observation = (ExpandedObservation) UtilIds.getResourceField(serviceSnapshot,
+                "lastObservation", Object.class);
         return DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                serviceSnapshot);
+                serviceSnapshot, observation);
 
     }
 
@@ -80,7 +79,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
         ProviderSnapshot provider = validateAndGetProvider(id);
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), provider.getService("datastream"), parseFilter(OBSERVATIONS), 0);
+                getExpansions(), UtilIds.getDatastreamService(provider), parseFilter(OBSERVATIONS), 0);
     }
 
     @Override

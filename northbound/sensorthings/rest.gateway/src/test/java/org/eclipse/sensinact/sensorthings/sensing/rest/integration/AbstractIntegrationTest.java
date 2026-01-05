@@ -57,16 +57,14 @@ import jakarta.ws.rs.core.Application;
  */
 @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", properties = {
         @Property(key = "test.class", source = ValueSource.TestClass),
-        @Property(key = "sessionManager.target", value = "(test.class=%s)", templateArguments = @TemplateArgument(source = ValueSource.TestClass))
-})
+        @Property(key = "sessionManager.target", value = "(test.class=%s)", templateArguments = @TemplateArgument(source = ValueSource.TestClass)) })
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
         @Property(key = "auth.policy", value = "ALLOW_ALL"),
-        @Property(key = "test.class", source = ValueSource.TestClass)
-})
+        @Property(key = "test.class", source = ValueSource.TestClass) })
 public class AbstractIntegrationTest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    protected record AnyIdDTO(String selfLink, String id) implements Id {
+    protected record AnyIdDTO(String selfLink, String id) implements Id, Self {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -96,12 +94,13 @@ public class AbstractIntegrationTest {
     void start(@InjectBundleContext BundleContext bc, TestInfo info) throws Exception {
 
         Class<?> test = info.getTestClass().get();
-        while(test.isMemberClass()) {
+        while (test.isMemberClass()) {
             test = test.getEnclosingClass();
         }
 
         ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc,
-                bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"), null);
+                bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"),
+                null);
 
         tracker.open();
 

@@ -14,10 +14,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.ServiceSnapshotMapper;
 
 import jakarta.ws.rs.HttpMethod;
@@ -61,9 +61,9 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             new RefKey(ExpandedDataStream.class, ExpandedObservation.class), this::deleteDatastreamObservationRef);
 
     private final Map<RefKey, RefHandler> updateHandlers = new HashMap<RefIdUseCase.RefKey, RefIdUseCase.RefHandler>();
-
-    private final Map<RefKey, RefHandler> createHandlers = Map
-            .of(new RefKey(ExpandedDataStream.class, ExpandedObservation.class), this::createDatastreamObservationRef);
+    private final Map<RefKey, RefHandler> createHandlers = Map.of(
+            new RefKey(ExpandedDataStream.class, ExpandedThing.class), this::updateDatastreamThingRef,
+            new RefKey(ExpandedThing.class, ExpandedLocation.class), this::updateThingLocationRef);
 
     @SuppressWarnings("unchecked")
     public RefIdUseCase(Providers providers) {
@@ -101,9 +101,10 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
         RefHandler handler = createHandlers.get(key);
         if (handler == null) {
-            return new ExtraUseCaseResponse<>(false, "Unsupported $ref create: " + key);
+            return new ExtraUseCaseResponse<>(false, "Unsupported $ref delete: " + key);
         }
         return handler.handle(request);
+
     }
 
     /**
@@ -155,11 +156,6 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         return RefId.class;
     }
 
-    private ExtraUseCaseResponse<Object> createDatastreamObservationRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
-
-    }
-
     private ExtraUseCaseResponse<Object> updateDatastreamThingRef(ExtraUseCaseRequest<RefId> request) {
         // TODO how to keep observation history
         // update reference between thing and datastream
@@ -170,7 +166,6 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
         // create new datastream link to thing provider
         ExpandedDataStream newDatastream = ServiceSnapshotMapper.toDatastream(service);
-        String idNewDatastream = DtoToModelMapper.sanitizeId(newDatastream.id());
         ExtraUseCaseResponse<ServiceSnapshot> response = datastreamUseCase
                 .update(new ExtraUseCaseRequest<ExpandedDataStream>(request.session(), request.mapper(),
                         request.uriInfo(), HttpMethod.PATCH, newDatastream, idThing));
@@ -258,8 +253,8 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         if (providerThing == null) {
             throw new NotFoundException("Thing %s not found");
         }
-        ExpandedLocation locationUpdate = ServiceSnapshotMapper.toLocation(providerLocation.getService("locations"),
-                idThing);
+        ExpandedLocation locationUpdate = ServiceSnapshotMapper
+                .toLocation(providerLocation.getService(UtilIds.SERVICE_LOCATON), idThing);
         ExtraUseCaseResponse<ServiceSnapshot> result = locationUsecase.update(new ExtraUseCaseRequest<ExpandedLocation>(
                 request.session(), request.mapper(), request.uriInfo(), HttpMethod.PATCH, locationUpdate));
         return new ExtraUseCaseResponse<Object>(result.id(), result.snapshot());

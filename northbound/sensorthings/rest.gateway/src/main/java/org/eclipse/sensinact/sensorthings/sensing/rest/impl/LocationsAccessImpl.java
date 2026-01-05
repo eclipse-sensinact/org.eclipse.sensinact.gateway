@@ -29,6 +29,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.LocationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.LocationsUpdate;
@@ -43,7 +44,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(LOCATIONS), providerSnapshot.getService("location"));
+                parseFilter(LOCATIONS), providerSnapshot.getService(UtilIds.SERVICE_LOCATON));
 
         if (!id.equals(l.id())) {
             throw new NotFoundException();

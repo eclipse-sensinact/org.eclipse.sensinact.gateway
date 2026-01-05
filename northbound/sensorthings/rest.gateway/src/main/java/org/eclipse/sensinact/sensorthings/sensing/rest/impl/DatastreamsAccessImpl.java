@@ -106,13 +106,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getDatastreamObservedProperty(String id) {
-        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
+        return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(OBSERVED_PROPERTIES), validateAndGeService(id));
 
-        if (!id.equals(o.id())) {
-            throw new NotFoundException();
-        }
-        return o;
     }
 
     @Override
@@ -122,13 +118,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Sensor getDatastreamSensor(String id) {
-        Sensor s = DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), validateAndGetResourceSnapshot(id));
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(SENSORS), validateAndGeService(id));
 
-        if (!id.equals(s.id())) {
-            throw new NotFoundException();
-        }
-        return s;
     }
 
     @Override
@@ -140,7 +132,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
     public Thing getDatastreamThing(String id) {
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot datastreamProvider = validateAndGetProvider(provider);
-        ServiceSnapshot serviceDatastream = datastreamProvider.getService("datastream");
+        ServiceSnapshot serviceDatastream = UtilIds.getDatastreamService(datastreamProvider);
         String thingId = UtilIds.getResourceField(serviceDatastream, "thingId", String.class);
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 validateAndGetProvider(thingId));
@@ -150,7 +142,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
     public ResultList<Datastream> getDatastreamThingDatastreams(String id) {
         String provider = extractFirstIdSegment(id);
         ProviderSnapshot datastreamProvider = validateAndGetProvider(provider);
-        ServiceSnapshot serviceDatastream = datastreamProvider.getService("datastream");
+        ServiceSnapshot serviceDatastream = UtilIds.getDatastreamService(datastreamProvider);
         String thingId = UtilIds.getResourceField(serviceDatastream, "thingId", String.class);
         List<ServiceSnapshot> listServiceSnapshot = getListDatastreamServices(getSession(), thingId);
         return getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -166,7 +158,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
         List<String> listIdDatastream = UtilIds.getResourceField(serviceThing, "datastreamIds", List.class);
         List<ServiceSnapshot> listServiceSnapshot = listIdDatastream.stream()
                 .map(idDatastream -> validateAndGetProvider(session, idDatastream))
-                .map(providerDatastream -> providerDatastream.getService("datastream")).toList();
+                .map(providerDatastream -> UtilIds.getDatastreamService(providerDatastream)).toList();
         return listServiceSnapshot;
     }
 
@@ -217,10 +209,10 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), observation, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        String datastreamLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Datastreams({id})", id);
-
+        ExpandedObservation lastObservation = (ExpandedObservation) UtilIds.getResourceField(snapshot,
+                "lastObservation", Object.class);
         Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot);
+                getExpansions(), criterion, snapshot, lastObservation);
         if (createDto == null) {
             throw new BadRequestException("fail to create observation");
         }

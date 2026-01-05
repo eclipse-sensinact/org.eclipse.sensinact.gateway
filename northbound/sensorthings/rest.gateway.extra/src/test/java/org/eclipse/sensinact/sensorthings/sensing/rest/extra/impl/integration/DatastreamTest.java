@@ -37,9 +37,8 @@ public class DatastreamTest extends AbstractIntegrationTest {
         ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name,
-                DtoFactory.getRefId(nameThing));
+        String idJson = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idJson));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
@@ -213,18 +212,21 @@ public class DatastreamTest extends AbstractIntegrationTest {
                 String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
         // then
         json = getJsonResponseFromGet(String.format("Datastreams(%s)/Thing", idDatastream), 200);
+        UtilsAssert.assertThing(thingUpdate, json);
+
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
                 204);
         // then
-        json = getJsonResponseFromGet(String.format("Datastreams(%s)/Sensor(%s)", idDatastream, idSensor), 200);
+        json = getJsonResponseFromGet(String.format("Datastreams(%s)/Sensor", idDatastream), 200);
+        UtilsAssert.assertSensor(sensor, json);
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
                 String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
         // then
-        json = getJsonResponseFromGet(
-                String.format("Datastreams(%s)/ObservedProperty(%s)", idDatastream, idObservedProperty), 200);
+        json = getJsonResponseFromGet(String.format("Datastreams(%s)/ObservedProperty", idDatastream), 200);
+        UtilsAssert.assertObservedProperty(ObservedProperty, json);
 
     }
 }

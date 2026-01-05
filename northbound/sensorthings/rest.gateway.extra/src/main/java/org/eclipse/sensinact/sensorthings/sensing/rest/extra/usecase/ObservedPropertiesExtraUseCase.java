@@ -14,7 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -62,7 +61,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         ExpandedObservedProperty observedProperty = request.model();
         checkRequireField(request);
-        String observedPropertyId = getId(request);
+        String observedPropertyId = request.id();
         ExpandedObservedProperty createExpandedProperty = new ExpandedObservedProperty(null, observedPropertyId,
                 observedProperty.name(), observedProperty.description(), observedProperty.definition(),
                 observedProperty.properties(), null);
@@ -70,13 +69,6 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
 
         return new ExtraUseCaseResponse<Object>(observedPropertyId, createExpandedProperty);
 
-    }
-
-    @Override
-    public String getId(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return request.id() != null ? request.id()
-                : DtoToModelMapper
-                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
@@ -87,17 +79,15 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
-        String datastreamId = providerId;
         String sensorId = DtoToModelMapper.extractSecondIdSegment(request.id());
-        if (providerId == null || datastreamId == null || sensorId == null) {
+        if (providerId == null || sensorId == null) {
             throw new BadRequestException("bad id format");
         }
         ExpandedObservedProperty receivedOp = request.model();
         checkRequireField(request);
         ExpandedObservedProperty opToUpdate = new ExpandedObservedProperty(null, sensorId, receivedOp.name(),
                 receivedOp.description(), receivedOp.definition(), receivedOp.properties(), null);
-        return List
-                .of(DtoToModelMapper.toDatastreamUpdate(providerId, datastreamId, null, opToUpdate, null, null, null));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, opToUpdate, null, null, null));
 
     }
 

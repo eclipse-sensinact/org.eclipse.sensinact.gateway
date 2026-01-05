@@ -14,7 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -49,20 +48,13 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
         FeatureOfInterest featureOfInterest = request.model();
         checkRequireField(request);
-        String featureOfInterestId = getId(request);
+        String featureOfInterestId = request.id();
         FeatureOfInterest createFoi = new FeatureOfInterest(featureOfInterest.selfLink(), featureOfInterestId,
                 featureOfInterest.name(), featureOfInterest.description(), featureOfInterest.encodingType(),
                 featureOfInterest.feature(), null);
         cacheFoi.addDto(featureOfInterestId, createFoi);
         return new ExtraUseCaseResponse<Object>(featureOfInterestId, createFoi);
 
-    }
-
-    @Override
-    public String getId(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return request.id() != null ? request.id()
-                : DtoToModelMapper
-                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
@@ -73,11 +65,10 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<FeatureOfInterest> request) {
         String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
-        String datastreamId = DtoToModelMapper.extractSecondIdSegment(request.id());
-        String observationId = DtoToModelMapper.extractThirdIdSegment(request.id());
+        String observationId = DtoToModelMapper.extractSecondIdSegment(request.id());
         String foiId = DtoToModelMapper.extractFouthIdSegment(request.id());
 
-        if (providerId == null || datastreamId == null || observationId == null || foiId == null) {
+        if (providerId == null || observationId == null || foiId == null) {
             throw new BadRequestException("bad id format");
         }
         FeatureOfInterest receiveFoi = request.model();
@@ -85,8 +76,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
                 receiveFoi.encodingType(), receiveFoi.feature(), null);
 
-        return List
-                .of(DtoToModelMapper.toDatastreamUpdate(providerId, datastreamId, null, null, null, null, foiToUpdate));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, foiToUpdate));
 
     }
 

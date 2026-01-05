@@ -14,7 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -49,7 +48,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<ExpandedSensor> request) {
         ExpandedSensor sensor = request.model();
         checkRequireField(request);
-        String sensorId = getId(request);
+        String sensorId = request.id();
         ExpandedSensor createdSensor = new ExpandedSensor(null, sensorId, sensor.name(), sensor.description(),
                 sensor.encodingType(), sensor.metadata(), sensor.properties(), null);
         cacheSensor.addDto(sensorId, createdSensor);
@@ -65,9 +64,8 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedSensor> request) {
         String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
-        String datastreamId = "datastream";
         String sensorId = DtoToModelMapper.extractSecondIdSegment(request.id());
-        if (providerId == null || datastreamId == null || sensorId == null) {
+        if (providerId == null || sensorId == null) {
             throw new BadRequestException("bad id format");
         }
         ExpandedSensor receivedSensor = request.model();
@@ -75,8 +73,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
         ExpandedSensor sensorToUpdate = new ExpandedSensor(null, sensorId, receivedSensor.name(),
                 receivedSensor.description(), receivedSensor.encodingType(), receivedSensor.metadata(),
                 receivedSensor.properties(), null);
-        return List.of(
-                DtoToModelMapper.toDatastreamUpdate(providerId, datastreamId, sensorToUpdate, null, null, null, null));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, sensorToUpdate, null, null, null, null));
 
     }
 
@@ -118,13 +115,6 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
                 updateSensor.properties() != null ? updateSensor.properties() : sensor.properties(), null);
         cacheSensor.addDto(request.id(), createdSensor);
         return createdSensor;
-    }
-
-    @Override
-    public String getId(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return request.id() != null ? request.id()
-                : DtoToModelMapper
-                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
     public ExpandedSensor getInMemorySensor(String id) {
