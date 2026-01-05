@@ -22,17 +22,17 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorthingServiceExtended/description"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//SensorthingServiceExtended/dataStreamsExt"/>
     </genClasses>
-    <genClasses ecoreClass="sensorthings.extended.ecore#//DataStreamExtended">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamExtended/id"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamExtended/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamExtended/description"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamExtended/unitOfMeasurement"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamExtended/observationType"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamExtended/phenomenonTime"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamExtended/resultTime"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//DataStreamExtended/sensorExt"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//DataStreamExtended/observedPropertyExt"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//DataStreamExtended/observationsExt"/>
+    <genClasses ecoreClass="sensorthings.extended.ecore#//DataStreamServiceExtended">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamServiceExtended/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamServiceExtended/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamServiceExtended/description"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamServiceExtended/unitOfMeasurement"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamServiceExtended/observationType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamServiceExtended/phenomenonTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamServiceExtended/resultTime"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//DataStreamServiceExtended/sensorExt"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//DataStreamServiceExtended/observedPropertyExt"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//DataStreamServiceExtended/observationsExt"/>
     </genClasses>
     <genClasses ecoreClass="sensorthings.extended.ecore#//SensorExtended">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorExtended/id"/>

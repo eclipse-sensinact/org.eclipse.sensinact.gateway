@@ -1,19 +1,25 @@
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
+import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
+import static org.eclipse.sensinact.sensorthings.models.sensorthings.extended.SensorthingsExtendedPackage.Literals.OBSERVATION_EXTENDED;
+
 import java.time.Instant;
-import java.util.Map;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.Model;
-import org.eclipse.sensinact.core.annotation.dto.Provider;
-import org.eclipse.sensinact.core.annotation.dto.Service;
-import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
-import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.core.annotation.dto.Timestamp;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
-public record ObservationUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
-        @Service String serviceName, Object id, Instant phenomenonTime, Instant resultTime, Object result,
-        Object resultQuality, TimeInterval validTime, Map<String, Object> parameters, String datastreamLink,
-        String featureOfInterestLink, RefId datastream, RefId featureOfInterest) {
+public record ObservationUpdate(@Model EClass model, @Data(onDuplicate = UPDATE_IF_DIFFERENT) String id,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object result,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) Instant phenomenonTime,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) FeatureOfInterestUpdate featureOfInterest,
+        @Timestamp Instant timestamp) implements SensorThingsUpdate {
 
+    public ObservationUpdate {
+        if (model == null) {
+            model = OBSERVATION_EXTENDED;
+        }
+    }
 }
