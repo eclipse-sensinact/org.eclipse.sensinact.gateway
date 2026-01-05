@@ -128,14 +128,17 @@ public class DtoFactory {
     }
 
     public static ExpandedSensor getSensor(String name) {
-        return new ExpandedSensor(null, null, name, "Measures ambient humRefIdity", "application/pdf",
-                "http://example.com/humRefIdity-sensor.pdf", null, null);
+        return getSensor(name, "Measures ambient humRefIdity", "application/pdf");
 
     }
 
     public static ExpandedSensor getSensor(String name, String descripton, String encodingType) {
-        return new ExpandedSensor(null, null, name, descripton, "application/pdf",
-                "http://example.com/humRefIdity-sensor.pdf", null, null);
+        return getSensor(name, descripton, encodingType, "http://example.com/humRefIdity-sensor.pdf");
+
+    }
+
+    public static ExpandedSensor getSensor(String name, String descripton, String encodingType, Object metadata) {
+        return new ExpandedSensor(null, null, name, descripton, encodingType, metadata, null, null);
 
     }
 

@@ -49,6 +49,28 @@ public class SensorTest extends AbstractIntegrationTest {
     }
 
     /**
+     * test create sensor that will be in memory as not link to a datastream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCreateSensorWithMissingField() throws Exception {
+        // given
+        String name = "testCreateSensor";
+        // when empty name
+        ExpandedSensor sensor = DtoFactory.getSensor(null, "test description", "test encodingType", "test metadata");
+        getJsonResponseFromPost(sensor, "Sensors", 400);
+
+        // when empty encoding type
+        sensor = DtoFactory.getSensor(name, "test description", null, "test metadata");
+        getJsonResponseFromPost(sensor, "Sensors", 400);
+        // when empty metadata
+        sensor = DtoFactory.getSensor(name, "test description", "test encodingType", null);
+        getJsonResponseFromPost(sensor, "Sensors", 400);
+
+    }
+
+    /**
      * test create sensor link to a datastream
      *
      * @throws Exception
