@@ -249,33 +249,14 @@ public class DtoToModelMapper {
         return String.valueOf(object).replaceAll("[^0-9a-zA-Z\\.\\-_]", "_");
     }
 
-    public static SensorThingsUpdate toObservedPropertyUpdate(String providerId, ExpandedDataStream ds,
-            ExpandedObservedProperty observedProperty) {
-        return toDatastreamUpdate(providerId, null, ds, null, observedProperty, null, null, null);
-    }
-
-    public static SensorThingsUpdate toSensorUpdate(String providerId, ExpandedDataStream ds, ExpandedSensor sensor) {
-        return toDatastreamUpdate(providerId, null, ds, sensor, null, null, null, null);
-
-    }
-
     public static SensorThingsUpdate toFeatureOfInterestUpdate(String providerId, String datastreamId,
             FeatureOfInterest featureOfInterest) {
         return null;
     }
 
-    public static SensorThingsUpdate toUnitOfMeasureUpdate(String providerId, ExpandedDataStream ds,
-            UnitOfMeasurement unitOfMeasure) {
-        return toDatastreamUpdate(providerId, null, ds, null, null, unitOfMeasure, null, null);
-    }
-
     public static SensorThingsUpdate toLocationUpdate(String providerId, ExpandedLocation location) {
         return new LocationUpdate(providerId, providerId, location.name(), location.description(),
                 location.encodingType(), location.location());
-    }
-
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, ExpandedSensor sensor) {
-        return toDatastreamUpdate(providerId, null, null, sensor, null, null, null, null);
     }
 
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, ExpandedSensor sensor,
