@@ -114,6 +114,13 @@ public class DtoFactory {
 
     }
 
+    public static ExpandedDataStream getDatastreamMinimal(String name, String descriptikon, String obsType) {
+        // Required
+
+        return getDatastream(name, descriptikon, null, "obsType", null, null, null, null);
+
+    }
+
     public static ExpandedDataStream getDatastreamMinimalLinkThingLinkSensor(String name, RefId thingId,
             RefId sensorId) {
         // Required

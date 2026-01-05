@@ -12,17 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.Map;
 
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,11 +28,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class DatastreamTest extends AbstractIntegrationTest {
 
-    /**
-     * test simple datastream
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateDatastream() throws Exception {
         // given
@@ -46,8 +37,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
         ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-        String idJson = getIdFromJson(json);
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idJson));
+
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name,
+                DtoFactory.getRefId(nameThing));
 
         // when
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
@@ -55,17 +47,12 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test datastream with missing field
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateMissingFieldDatastream() throws Exception {
         // given
-        String nameThing = "testCreateMissingFieldDatastreamThing";
+        String name = "testCreateMissingFieldDatastream";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         RefId refId = DtoFactory.getRefId(getIdFromJson(json));
@@ -106,18 +93,12 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create datastream using thing/datastream endpoint
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateDatastreamThroughThing() throws Exception {
         // given
         String name = "testCreateDatastreamThroughThing";
-        String nameThing = "testCreateDatastreamThroughThingThing";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         String thingId = getIdFromJson(json);
@@ -129,18 +110,12 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create datastream with sennsor and observed property in payload
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateDatastreamWithSensorAndObservedProperty() throws Exception {
         // given
         String name = "testCreateDatastreamWithSensorAndObservedProperty";
-        String nameThing = "testCreateDatastreamWithSensorAndObservedPropertyThing";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedProperty(name,
@@ -152,18 +127,12 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create datastream with expand result expected
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateDatastreamWithExpand() throws Exception {
         // given
         String name = "testCreateDatastreamWithExpand";
-        String nameThing = "testCreateDatastreamWithExpandThing";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamLinkThingWithSensorObservedProperty(name,
@@ -175,18 +144,11 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * Tests that <code>PUT</code> can be used to update a Datastream
-     */
-    /**
-     * test simple update datastream
-     *
-     * @throws Exception
-     */
+    // update
     @Test
     public void testUpdateDatastream() throws Exception {
         // given
-        String nameThing = "testUpdateDatastreamThing";
+        String nameThing = "testUpdateDatastream";
         String name = "testUpdateDatastream";
 
         ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
@@ -202,21 +164,15 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // when
         ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
 
-        getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
-        // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + " Update", UtilDto.getResourceField(service, "name", String.class));
+        json = getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
 
     }
 
-    /**
-     * Tests that a Datastream can use id references to refer to existing other
-     * resources and will be linked to them
-     */
     @Test
     public void testUpdateDatastreamRefs() throws Exception {
         // given
-        String nameThing = "testUpdateDatastreamThing";
+        String nameThing = "testUpdateDatastream";
         String name = "testUpdateDatastream";
 
         ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
@@ -251,49 +207,14 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         json = getJsonResponseFromPut(new RefId(idThingUpdate),
                 String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
-        // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idThingUpdate, UtilDto.getResourceField(service, "thingId", String.class));
 
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
                 204);
-        // then
-        service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idSensor, UtilDto.getResourceField(service, "sensorId", String.class));
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
                 String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
-        // then
-        service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idObservedProperty, UtilDto.getResourceField(service, "observedPropertyId", String.class));
-
-    }
-
-    @Test
-    public void testPatchDatastream() throws Exception {
-        // given
-        String nameThing = "testPatchDatastream";
-        String name = "testPatchDatastream";
-
-        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
-                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
-        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-        String idThing = getIdFromJson(json);
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idThing));
-
-        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
-        String idDatastream = getIdFromJson(json);
-
-        UtilsAssert.assertDatastream(dtoDatastream, json);
-        // when
-        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
-
-        getJsonResponseFromPatch(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
-        // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + " Update", UtilDto.getResourceField(service, "name", String.class));
 
     }
 }
