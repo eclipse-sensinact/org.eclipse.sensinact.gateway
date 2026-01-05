@@ -15,8 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
 import static org.eclipse.sensinact.core.annotation.dto.NullAction.UPDATE_IF_PRESENT;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DATASTREAM;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.DATA_STREAM_SERVICE;
-
 import java.time.Instant;
 import java.util.Map;
 
@@ -25,7 +23,6 @@ import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Service;
-import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
@@ -34,7 +31,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
  * update record for datastream
  */
 @Service("admin")
-public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
+public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object id,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String name,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
@@ -70,12 +67,6 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
             throw new IllegalArgumentException(
                     "The model for the provider must be " + SENSOR_THING_DATASTREAM.getName());
         }
-        if (service == null) {
-            service = DATA_STREAM_SERVICE;
-        }
-        if (service != DATA_STREAM_SERVICE) {
-            throw new IllegalArgumentException("The model for the datastream must be " + DATA_STREAM_SERVICE.getName());
-        }
 
     }
 
@@ -87,9 +78,9 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
             String observedPropertyDefinition, Map<String, Object> observedPropertyProperties,
             // unit
             String unitName, String unitSymbol, String unitDefinition, ExpandedObservation lastObservsation) {
-        this(SENSOR_THING_DATASTREAM, DATA_STREAM_SERVICE, providerId, id, name, description, timestamp, thingId,
-                sensorId, sensorName, sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties,
-                observedPropertyId, observedPropertyName, observedPropertyDescription, observedPropertyDefinition,
+        this(SENSOR_THING_DATASTREAM, providerId, id, name, description, timestamp, thingId, sensorId, sensorName,
+                sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties, observedPropertyId,
+                observedPropertyName, observedPropertyDescription, observedPropertyDefinition,
                 observedPropertyProperties, unitName, unitSymbol, unitDefinition, lastObservsation);
     }
 
