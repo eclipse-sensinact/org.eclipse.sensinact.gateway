@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -40,6 +41,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -230,7 +232,7 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromThings() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "thing", "data", 42);
+        createResource(PROVIDER, "thing", "id", UUID.randomUUID().toString());
 
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
@@ -307,7 +309,7 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromLocations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "location", "data", 42);
+        createResource(PROVIDER, "location", "id", UUID.randomUUID().toString());
         createResource(PROVIDER, "location", "location", new Point(0., 0.));
         createResource(PROVIDER, "location", "description", "MyDescription");
 
@@ -338,9 +340,9 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromHistoricalLocations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "datastream", "data", 42);
+        createResource(PROVIDER, "location", "id", UUID.randomUUID().toString());
 
-        session.setResourceValue(PROVIDER, "admin", "location",
+        session.setResourceValue(PROVIDER, "location", "location",
                 "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}");
 
         // Get the new locations
@@ -370,8 +372,7 @@ public class LinksTest extends AbstractIntegrationTest {
      */
     @Test
     void testLinksFromDatastreams() throws IOException, InterruptedException {
-        // Add a resource
-        createResource(PROVIDER, "datastream", "data", 42);
+        createDatastream();
 
         // Get the new locations
         ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
@@ -423,8 +424,7 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromSensors() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "datastream", "data", 42);
-
+        createDatastream();
         // Get the new locations
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
         assertNotNull(sensors);
@@ -450,13 +450,25 @@ public class LinksTest extends AbstractIntegrationTest {
         }
     }
 
+    private void createDatastream() {
+        ExpandedObservation obs = new ExpandedObservation(null, UUID.randomUUID().toString(), null, null, null, null,
+                null, null, null, null, null, null,
+                new FeatureOfInterest(null, UUID.randomUUID().toString(), null, null, null, null, null));
+        createResource(PROVIDER, "datastream", "id", UUID.randomUUID().toString());
+        createResource(PROVIDER, "datastream", "sensorId", UUID.randomUUID().toString());
+        createResource(PROVIDER, "datastream", "observedPropertyId", UUID.randomUUID().toString());
+        createResource(PROVIDER, "datastream", "lastObservation", obs);
+        createResource(PROVIDER, "datastream", "ThingId", UUID.randomUUID().toString());
+
+    }
+
     /**
      * Check links returned by the Observations endpoint
      */
     @Test
     void testLinksFromObservations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "datastream", "data", 42);
+        createDatastream();
 
         // Get the new locations
         ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
@@ -486,7 +498,7 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromObservedProperties() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "datastream", "data", 42);
+        createDatastream();
 
         // Get the new locations
         ResultList<ObservedProperty> observedProperties = utils.queryJson("/ObservedProperties",
@@ -523,7 +535,7 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromFeaturesOfInterest() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "datastream", "data", 42);
+        createDatastream();
 
         // Get the new locations
         ResultList<FeatureOfInterest> features = utils.queryJson("/FeaturesOfInterest",
