@@ -29,6 +29,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoT
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
 
+import jakarta.ws.rs.InternalServerErrorException;
+
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
