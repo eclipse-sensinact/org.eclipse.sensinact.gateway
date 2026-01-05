@@ -31,6 +31,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
@@ -127,10 +128,10 @@ public class DtoMapper {
                 observationParameters, null, null, null, null, null, null);
     }
 
-    public static DatastreamUpdate toObservedPropertyUpdate(String providerId, String idDatastream,
+    public static DatastreamUpdate toObservedPropertyUpdate(String providerId, String idDatastream, String idSensor,
             ExpandedObservedProperty obs) {
         String serviceName = idDatastream;
-
+        // TODO check if sensor is the correct one
         Map<String, Object> observedPropertyMetadata;
         String observedProperty = sanitizeId(obs.id() == null ? obs.name() : obs.id());
 
@@ -144,6 +145,26 @@ public class DtoMapper {
         }
         return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
                 null, null, observedProperty, observedPropertyMetadata);
+    }
+
+    public static DatastreamUpdate toSensorUpdate(String providerId, String idDatastream, ExpandedSensor dsSensor) {
+        String serviceName = idDatastream;
+        // TODO check if sensor is the correct one
+        String sensor;
+        Map<String, Object> sensorMetadata;
+
+        sensor = sanitizeId(toString(dsSensor.id() == null ? dsSensor.name() : dsSensor.id()));
+        sensorMetadata = new HashMap<>();
+        sensorMetadata.put("sensorthings.sensor.name", dsSensor.name());
+        sensorMetadata.put("sensorthings.sensor.description", dsSensor.description());
+        sensorMetadata.put("sensorthings.sensor.metadata", dsSensor.metadata());
+        sensorMetadata.put("sensorthings.sensor.encodingType", dsSensor.encodingType());
+        if (dsSensor.properties() != null) {
+            dsSensor.properties().forEach((k, v) -> sensorMetadata.put("sensorthings.sensor.properties." + k, v));
+        }
+        return new DatastreamUpdate(providerId, serviceName, idDatastream, null, null, null, null, null, null, null,
+                sensor, sensorMetadata, null, null);
+
     }
 
     public static DatastreamUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds) {
