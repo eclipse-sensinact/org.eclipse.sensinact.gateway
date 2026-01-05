@@ -22,7 +22,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -173,7 +173,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
         getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + " Update", UtilIds.getResourceField(service, "name", String.class));
+        assertEquals(name + " Update", UtilDto.getResourceField(service, "name", String.class));
 
     }
 
@@ -217,21 +217,21 @@ public class DatastreamTest extends AbstractIntegrationTest {
                 String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idThingUpdate, UtilIds.getResourceField(service, "thingId", String.class));
+        assertEquals(idThingUpdate, UtilDto.getResourceField(service, "thingId", String.class));
 
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
                 204);
         // then
         service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idSensor, UtilIds.getResourceField(service, "sensorId", String.class));
+        assertEquals(idSensor, UtilDto.getResourceField(service, "sensorId", String.class));
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
                 String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
         // then
         service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idObservedProperty, UtilIds.getResourceField(service, "observedPropertyId", String.class));
+        assertEquals(idObservedProperty, UtilDto.getResourceField(service, "observedPropertyId", String.class));
 
     }
 }

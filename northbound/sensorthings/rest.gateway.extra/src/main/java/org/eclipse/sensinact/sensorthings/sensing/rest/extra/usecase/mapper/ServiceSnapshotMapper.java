@@ -26,7 +26,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
 public class ServiceSnapshotMapper {
 
@@ -34,13 +34,13 @@ public class ServiceSnapshotMapper {
      * ============================ Sensor ============================
      */
     public static ExpandedSensor toSensor(ServiceSnapshot service) {
-        String id = UtilIds.getResourceField(service, "sensorId", String.class);
-        String name = UtilIds.getResourceField(service, "sensorName", String.class);
-        String description = UtilIds.getResourceField(service, "sensorDescription", String.class);
-        String encodingType = UtilIds.getResourceField(service, "sensorEncodingType", String.class);
-        Object metadata = UtilIds.getResourceField(service, "sensorMetadata", Object.class);
+        String id = UtilDto.getResourceField(service, "sensorId", String.class);
+        String name = UtilDto.getResourceField(service, "sensorName", String.class);
+        String description = UtilDto.getResourceField(service, "sensorDescription", String.class);
+        String encodingType = UtilDto.getResourceField(service, "sensorEncodingType", String.class);
+        Object metadata = UtilDto.getResourceField(service, "sensorMetadata", Object.class);
         @SuppressWarnings("unchecked")
-        Map<String, Object> properties = UtilIds.getResourceField(service, "sensorProperties", Map.class);
+        Map<String, Object> properties = UtilDto.getResourceField(service, "sensorProperties", Map.class);
 
         return new ExpandedSensor(null, id, name, description, encodingType, metadata, properties, null);
     }
@@ -49,12 +49,12 @@ public class ServiceSnapshotMapper {
      * ============================ ObservedProperty ============================
      */
     public static ExpandedObservedProperty toObservedProperty(ServiceSnapshot service) {
-        String id = UtilIds.getResourceField(service, "observedPropertyId", String.class);
-        String name = UtilIds.getResourceField(service, "observedPropertyName", String.class);
-        String description = UtilIds.getResourceField(service, "observedPropertyDescription", String.class);
-        String definition = UtilIds.getResourceField(service, "observedPropertyDefinition", String.class);
+        String id = UtilDto.getResourceField(service, "observedPropertyId", String.class);
+        String name = UtilDto.getResourceField(service, "observedPropertyName", String.class);
+        String description = UtilDto.getResourceField(service, "observedPropertyDescription", String.class);
+        String definition = UtilDto.getResourceField(service, "observedPropertyDefinition", String.class);
         @SuppressWarnings("unchecked")
-        Map<String, Object> properties = UtilIds.getResourceField(service, "observedPropertyProperties", Map.class);
+        Map<String, Object> properties = UtilDto.getResourceField(service, "observedPropertyProperties", Map.class);
 
         return new ExpandedObservedProperty(null, id, name, description, definition, properties, null);
     }
@@ -63,9 +63,9 @@ public class ServiceSnapshotMapper {
      * ============================ UnitOfMeasurement ============================
      */
     public static UnitOfMeasurement toUnitOfMeasurement(ServiceSnapshot service) {
-        String name = UtilIds.getResourceField(service, "observedPropertyName", String.class);
-        String symbol = UtilIds.getResourceField(service, "observedPropertyDescription", String.class);
-        String definition = UtilIds.getResourceField(service, "observedPropertyEncodingType", String.class);
+        String name = UtilDto.getResourceField(service, "observedPropertyName", String.class);
+        String symbol = UtilDto.getResourceField(service, "observedPropertyDescription", String.class);
+        String definition = UtilDto.getResourceField(service, "observedPropertyEncodingType", String.class);
 
         return new UnitOfMeasurement(name, symbol, definition);
     }
@@ -74,16 +74,16 @@ public class ServiceSnapshotMapper {
      * ============================ Datastream ============================
      */
     public static ExpandedDataStream toDatastream(ServiceSnapshot service) {
-        String id = UtilIds.getResourceField(service, "id", String.class);
-        String name = UtilIds.getResourceField(service, "name", String.class);
-        String description = UtilIds.getResourceField(service, "description", String.class);
-        String observationType = UtilIds.getResourceField(service, "observationType", String.class);
+        String id = UtilDto.getResourceField(service, "id", String.class);
+        String name = UtilDto.getResourceField(service, "name", String.class);
+        String description = UtilDto.getResourceField(service, "description", String.class);
+        String observationType = UtilDto.getResourceField(service, "observationType", String.class);
 
-        Geometry observedArea = UtilIds.getResourceField(service, "observedArea", Geometry.class);
-        TimeInterval phenomenonTime = UtilIds.getResourceField(service, "phenomenonTime", TimeInterval.class);
-        TimeInterval resultTime = UtilIds.getResourceField(service, "resultTime", TimeInterval.class);
+        Geometry observedArea = UtilDto.getResourceField(service, "observedArea", Geometry.class);
+        TimeInterval phenomenonTime = UtilDto.getResourceField(service, "phenomenonTime", TimeInterval.class);
+        TimeInterval resultTime = UtilDto.getResourceField(service, "resultTime", TimeInterval.class);
         @SuppressWarnings("unchecked")
-        Map<String, Object> properties = UtilIds.getResourceField(service, "properties", Map.class);
+        Map<String, Object> properties = UtilDto.getResourceField(service, "properties", Map.class);
 
         UnitOfMeasurement uom = toUnitOfMeasurement(service);
         ExpandedObservedProperty observedProperty = toObservedProperty(service);
@@ -97,10 +97,10 @@ public class ServiceSnapshotMapper {
      * ============================ FeatureOfInterest ============================
      */
     public static FeatureOfInterest toFeatureOfInterest(ServiceSnapshot service) {
-        String name = UtilIds.getResourceField(service, "foiName", String.class);
-        String description = UtilIds.getResourceField(service, "foiDescription", String.class);
-        String encodingType = UtilIds.getResourceField(service, "foiEncodingType", String.class);
-        GeoJsonObject feature = UtilIds.getResourceField(service, "foiFeature", GeoJsonObject.class);
+        String name = UtilDto.getResourceField(service, "foiName", String.class);
+        String description = UtilDto.getResourceField(service, "foiDescription", String.class);
+        String encodingType = UtilDto.getResourceField(service, "foiEncodingType", String.class);
+        GeoJsonObject feature = UtilDto.getResourceField(service, "foiFeature", GeoJsonObject.class);
 
         return new FeatureOfInterest(null, null, name, description, encodingType, feature, null);
     }
@@ -110,7 +110,7 @@ public class ServiceSnapshotMapper {
      * ============================
      */
     public static ExpandedLocation toLocation(ServiceSnapshot serviceLocation, String thingId) {
-        String id = UtilIds.getResourceField(serviceLocation, "id", String.class);
+        String id = UtilDto.getResourceField(serviceLocation, "id", String.class);
 
         return new ExpandedLocation(null, id, null, null, null, null, null, null, List.of(new RefId(thingId)));
     }

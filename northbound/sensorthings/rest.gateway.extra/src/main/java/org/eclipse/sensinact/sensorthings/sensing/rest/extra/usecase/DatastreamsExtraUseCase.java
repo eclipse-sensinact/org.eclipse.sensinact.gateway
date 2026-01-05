@@ -27,7 +27,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
@@ -153,7 +153,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         if (providerDatastream == null) {
             return;
         }
-        String oldThingId = UtilIds.getResourceField(providerDatastream.getService("datastream"), "thingId",
+        String oldThingId = UtilDto.getResourceField(providerDatastream.getService("datastream"), "thingId",
                 String.class);
         if (thingId != null && oldThingId != null && !oldThingId.equals(thingId)) {
 
@@ -173,7 +173,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         ServiceSnapshot serviceThing = providerThing.getService("thing");
 
         @SuppressWarnings("unchecked")
-        List<String> ids = UtilIds.getResourceField(serviceThing, "datastreamIds", List.class);
+        List<String> ids = UtilDto.getResourceField(serviceThing, "datastreamIds", List.class);
         if (!ids.contains(datastreamId)) {
             ids.add(datastreamId);
             listUpdates.add(

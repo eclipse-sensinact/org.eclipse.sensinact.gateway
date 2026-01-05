@@ -45,7 +45,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.GenericResourceSnapshot;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -73,7 +73,7 @@ public class DtoMapper {
     }
 
     public static ServiceSnapshot validateAndGeService(SensiNactSession session, String id, String serviceName) {
-        String providerId = UtilIds.extractFirstIdSegment(id);
+        String providerId = UtilDto.extractFirstIdSegment(id);
 
         Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(session, providerId);
 
@@ -146,7 +146,7 @@ public class DtoMapper {
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
             ResultList<HistoricalLocation> list = new ResultList<>(null, null,
                     locationIds.stream().map(idLoc -> validateAndGetProvider(userSession, idLoc))
-                            .map(UtilIds::getLocationService).filter(Objects::nonNull)
+                            .map(UtilDto::getLocationService).filter(Objects::nonNull)
                             .map(s -> DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
                                     expansions.getExpansionSettings("HistoricalLocations"), filter, s))
                             .flatMap(Optional::stream).toList());
@@ -216,7 +216,7 @@ public class DtoMapper {
         if (expansions.shouldExpand("Thing", datastream)) {
             ProviderSnapshot providerThing = validateAndGetProvider(userSession, thingId);
             expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), filter, UtilIds.getThingService(providerThing)));
+                    expansions.getExpansionSettings("Thing"), filter, UtilDto.getThingService(providerThing)));
         }
 
         return datastream;
@@ -281,7 +281,7 @@ public class DtoMapper {
     public static Observation toObservation(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
         return toObservation(userSession, application, mapper, uriInfo, expansions, filter, service,
-                UtilIds.getResourceField(service, "lastObservation", ExpandedObservation.class));
+                UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
     }
 
     public static Observation toObservation(SensiNactSession userSession, Application application, ObjectMapper mapper,
@@ -311,7 +311,7 @@ public class DtoMapper {
     public static List<Observation> toObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ServiceSnapshot service) {
-        ExpandedObservation latestObservation = (ExpandedObservation) UtilIds.getResourceField(service,
+        ExpandedObservation latestObservation = (ExpandedObservation) UtilDto.getResourceField(service,
                 "lastObservation", Object.class);
         List<Observation> observations = latestObservation == null ? List.of()
                 : List.of(toObservation(userSession, application, mapper, uriInfo, expansions, filter, service,
@@ -374,7 +374,7 @@ public class DtoMapper {
 
     public static <T> T getResourceField(ServiceSnapshot service, String resourceName, Class<T> expectedType) {
 
-        return UtilIds.getResourceField(service, resourceName, expectedType);
+        return UtilDto.getResourceField(service, resourceName, expectedType);
     }
 
     public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
@@ -408,7 +408,7 @@ public class DtoMapper {
             ResultList<Thing> list = new ResultList<>(null, null,
                     listProviderThing.stream()
                             .map(p -> DtoMapper.toThing(userSession, application, mapper, uriInfo,
-                                    expansions.getExpansionSettings("Thing"), filter, UtilIds.getThingService(p)))
+                                    expansions.getExpansionSettings("Thing"), filter, UtilDto.getThingService(p)))
                             .toList());
             expansions.addExpansion("Things", location, list);
         }
@@ -491,7 +491,7 @@ public class DtoMapper {
         }
 
         return datastreamids.stream().map(datastreamId -> DtoMapper.getProviderSnapshot(userSession, datastreamId))
-                .flatMap(Optional::stream).map(provider -> UtilIds.getDatastreamService(provider))
+                .flatMap(Optional::stream).map(provider -> UtilDto.getDatastreamService(provider))
                 .map(s -> toDatastream(userSession, application, mapper, uriInfo, expansions, filter, s)).toList();
 
     }
@@ -499,9 +499,9 @@ public class DtoMapper {
     public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ServiceSnapshot serviceSnapshot) {
-        String idDatastream = UtilIds.getResourceField(serviceSnapshot, "id", String.class);
+        String idDatastream = UtilDto.getResourceField(serviceSnapshot, "id", String.class);
 
-        ExpandedObservation lastObservation = UtilIds.getResourceField(serviceSnapshot, "lastObservation",
+        ExpandedObservation lastObservation = UtilDto.getResourceField(serviceSnapshot, "lastObservation",
                 ExpandedObservation.class);
         if (lastObservation != null && lastObservation.featureOfInterest() != null) {
             FeatureOfInterest foiReaded = lastObservation.featureOfInterest();

@@ -26,7 +26,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
@@ -266,7 +266,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             throw new NotFoundException("Thing %s not found");
         }
         ExpandedLocation locationUpdate = ServiceSnapshotMapper
-                .toLocation(providerLocation.getService(UtilIds.SERVICE_LOCATON), idThing);
+                .toLocation(providerLocation.getService(UtilDto.SERVICE_LOCATON), idThing);
         ExtraUseCaseResponse<ServiceSnapshot> result = locationUsecase.update(new ExtraUseCaseRequest<ExpandedLocation>(
                 request.session(), request.mapper(), request.uriInfo(), HttpMethod.PATCH, locationUpdate));
         return new ExtraUseCaseResponse<Object>(result.id(), result.snapshot());

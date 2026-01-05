@@ -21,7 +21,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
@@ -94,7 +94,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
             DtoToModelMapper.checkRequireField(foi);
         }
         String id = request.parentId() != null ? request.parentId() : request.id();
-        String providerId = UtilIds.extractFirstIdSegment(id);
+        String providerId = UtilDto.extractFirstIdSegment(id);
         String serviceId = "datastream";
         checkRequireLink(serviceUseCase.read(request.session(), providerId, serviceId));
 
@@ -140,7 +140,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
                     e.getMessage());
 
         }
-        String dataStreamId = UtilIds.extractFirstIdSegment(request.parentId());
+        String dataStreamId = UtilDto.extractFirstIdSegment(request.parentId());
         ServiceSnapshot service = serviceUseCase.read(request.session(), dataStreamId, "datastream");
         if (service != null) {
             removeFeatureOfInterest(request.model());

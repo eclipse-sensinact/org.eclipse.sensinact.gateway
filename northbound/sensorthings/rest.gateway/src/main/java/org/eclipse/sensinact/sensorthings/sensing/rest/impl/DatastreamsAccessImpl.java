@@ -48,7 +48,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
@@ -200,7 +200,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), observation, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        ExpandedObservation lastObservation = (ExpandedObservation) UtilIds.getResourceField(snapshot,
+        ExpandedObservation lastObservation = (ExpandedObservation) UtilDto.getResourceField(snapshot,
                 "lastObservation", Object.class);
         Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), criterion, snapshot, lastObservation);

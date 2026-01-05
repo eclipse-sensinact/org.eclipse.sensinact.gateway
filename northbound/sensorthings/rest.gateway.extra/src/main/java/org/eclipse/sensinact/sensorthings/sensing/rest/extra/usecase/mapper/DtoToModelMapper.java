@@ -44,7 +44,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -349,11 +349,11 @@ public class DtoToModelMapper {
     }
 
     public static boolean isRecordOnlyField(Object record, String idFieldName) {
-        return UtilIds.isRecordOnlyField(record, idFieldName);
+        return UtilDto.isRecordOnlyField(record, idFieldName);
     }
 
     public static Object getRecordField(Object record, String fieldName) {
-        return UtilIds.getRecordField(record, fieldName);
+        return UtilDto.getRecordField(record, fieldName);
     }
 
     public static List<SensorThingsUpdate> toThingUpdates(ExpandedThing thing, String id,
