@@ -19,7 +19,7 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
@@ -84,7 +84,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
             ExpandedSensor createdSensor = updateInMemorySensor(request, sensor);
             return new ExtraUseCaseResponse<Object>(request.id(), createdSensor);
         } else {
-            String providerId = UtilIds.extractFirstIdSegment(request.id());
+            String providerId = UtilDto.extractFirstIdSegment(request.id());
 
             List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 

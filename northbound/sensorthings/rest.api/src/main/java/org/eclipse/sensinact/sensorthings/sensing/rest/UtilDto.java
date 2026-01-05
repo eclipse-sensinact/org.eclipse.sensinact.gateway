@@ -1,3 +1,15 @@
+/*********************************************************************
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
 import java.lang.reflect.RecordComponent;
@@ -6,22 +18,22 @@ import java.util.Arrays;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 
-public class UtilIds {
+public class UtilDto {
 
     public static String SERVICE_DATASTREAM = "datastream";
     public static String SERVICE_THING = "thing";
     public static String SERVICE_LOCATON = "location";
 
     public static ServiceSnapshot getDatastreamService(ProviderSnapshot providerDatastream) {
-        return providerDatastream.getService(UtilIds.SERVICE_DATASTREAM);
+        return providerDatastream.getService(UtilDto.SERVICE_DATASTREAM);
     }
 
     public static ServiceSnapshot getLocationService(ProviderSnapshot providerDatastream) {
-        return providerDatastream.getService(UtilIds.SERVICE_LOCATON);
+        return providerDatastream.getService(UtilDto.SERVICE_LOCATON);
     }
 
     public static ServiceSnapshot getThingService(ProviderSnapshot providerDatastream) {
-        return providerDatastream.getService(UtilIds.SERVICE_THING);
+        return providerDatastream.getService(UtilDto.SERVICE_THING);
     }
 
     public static boolean isRecordOnlyField(Object record, String idFieldName) {

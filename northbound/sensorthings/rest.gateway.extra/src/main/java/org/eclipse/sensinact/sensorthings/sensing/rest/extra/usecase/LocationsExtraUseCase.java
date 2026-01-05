@@ -23,7 +23,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
@@ -57,7 +57,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
                 String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilIds.getLocationService(provider));
+                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
 
@@ -122,7 +122,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
                 String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilIds.getLocationService(provider));
+                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
 

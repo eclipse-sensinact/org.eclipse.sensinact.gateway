@@ -22,7 +22,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -119,7 +119,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorCache.getDto(sensorId));
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + "2", UtilIds.getResourceField(service, "sensorName", String.class));
+        assertEquals(name + "2", UtilDto.getResourceField(service, "sensorName", String.class));
 
     }
 
@@ -170,7 +170,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorCache.getDto(sensorId));
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + "2", UtilIds.getResourceField(service, "sensorName", String.class));
+        assertEquals(name + "2", UtilDto.getResourceField(service, "sensorName", String.class));
 
     }
 }

@@ -22,7 +22,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -130,7 +130,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
                 String.format("ObservedProperties(%s)", idObservedProperty), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + "2", UtilIds.getResourceField(service, "observedPropertyName", String.class));
+        assertEquals(name + "2", UtilDto.getResourceField(service, "observedPropertyName", String.class));
     }
 
     // patch
@@ -181,6 +181,6 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
                 String.format("ObservedProperties(%s)", idObservedProperty), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals("test", UtilIds.getResourceField(service, "observedPropertyDefinition", String.class));
+        assertEquals("test", UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
     }
 }

@@ -16,7 +16,7 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -40,7 +40,7 @@ public class AccessServiceUseCaseProvider implements ContextResolver<IAccessServ
     }
 
     public ServiceSnapshot read(SensiNactSession session, String id) {
-        return read(session, UtilIds.extractFirstIdSegment(id), UtilIds.extractSecondIdSegment(id));
+        return read(session, UtilDto.extractFirstIdSegment(id), UtilDto.extractSecondIdSegment(id));
     }
 
     public ServiceSnapshot read(SensiNactSession session, String providerId, String serviceId) {
