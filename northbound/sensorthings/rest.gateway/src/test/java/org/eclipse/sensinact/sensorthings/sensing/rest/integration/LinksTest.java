@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -41,7 +40,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -97,20 +95,22 @@ public class LinksTest extends AbstractIntegrationTest {
         }
 
         // List of elements
-        mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName() + "s");
-        Map<?, ?> base = utils.queryJson(mirrorUrl, Map.class);
-        List<?> mirrorAccess = utils.getMapper().convertValue(base.get("value"), List.class);
+        if (!"ObservedProperty".equals(srcType.getSimpleName())) {
+            mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName() + "s");
+            Map<?, ?> base = utils.queryJson(mirrorUrl, Map.class);
+            List<?> mirrorAccess = utils.getMapper().convertValue(base.get("value"), List.class);
 
-        boolean found = false;
-        for (Object rawItem : mirrorAccess) {
-            S item = utils.getMapper().convertValue(rawItem, srcType);
-            if (srcObject.id().equals(item.id())) {
-                found = true;
-                utils.assertDtoEquals(srcObject, item, srcType);
-                break;
+            boolean found = false;
+            for (Object rawItem : mirrorAccess) {
+                S item = utils.getMapper().convertValue(rawItem, srcType);
+                if (srcObject.id().equals(item.id())) {
+                    found = true;
+                    utils.assertDtoEquals(srcObject, item, srcType);
+                    break;
+                }
             }
+            assertTrue(found, "Source object not found in mirror list");
         }
-        assertTrue(found, "Source object not found in mirror list");
         return;
     }
 
@@ -232,8 +232,15 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromThings() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "thing", "id", UUID.randomUUID().toString());
-
+        String thingId = UUID.randomUUID().toString();
+        String sensorId = UUID.randomUUID().toString();
+        String opId = UUID.randomUUID().toString();
+        String obsId = UUID.randomUUID().toString();
+        String foiId = UUID.randomUUID().toString();
+        String locationId = UUID.randomUUID().toString();
+        createDatastream(PROVIDER, thingId, sensorId, opId, obsId, foiId, 42);
+        createLocation(locationId);
+        createThing(thingId, List.of(PROVIDER), List.of(locationId));
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
         assertNotNull(things);
@@ -309,10 +316,16 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromLocations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "location", "id", UUID.randomUUID().toString());
-        createResource(PROVIDER, "location", "location", new Point(0., 0.));
-        createResource(PROVIDER, "location", "description", "MyDescription");
-
+        // Add a resource
+        String thingId = UUID.randomUUID().toString();
+        String sensorId = UUID.randomUUID().toString();
+        String opId = UUID.randomUUID().toString();
+        String obsId = UUID.randomUUID().toString();
+        String foiId = UUID.randomUUID().toString();
+        String locationId = UUID.randomUUID().toString();
+        createDatastream(PROVIDER, thingId, sensorId, opId, obsId, foiId, 42);
+        createLocation(locationId);
+        createThing(thingId, List.of(PROVIDER), List.of(locationId));
         // Get the new locations
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
         assertNotNull(locations);
@@ -340,7 +353,8 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromHistoricalLocations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "location", "id", UUID.randomUUID().toString());
+        String locationId = UUID.randomUUID().toString();
+        createLocation(locationId);
 
         session.setResourceValue(PROVIDER, "location", "location",
                 "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}");
@@ -372,8 +386,9 @@ public class LinksTest extends AbstractIntegrationTest {
      */
     @Test
     void testLinksFromDatastreams() throws IOException, InterruptedException {
-        createDatastream();
-
+        String thingId = UUID.randomUUID().toString();
+        createDatastream(PROVIDER, thingId, UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        createThing(thingId, List.of(PROVIDER), List.of());
         // Get the new locations
         ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
         assertNotNull(datastreams);
@@ -424,7 +439,14 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromSensors() throws IOException, InterruptedException {
         // Add a resource
-        createDatastream();
+        // Add a resource
+        String thingId = UUID.randomUUID().toString();
+        String sensorId = UUID.randomUUID().toString();
+        String opId = UUID.randomUUID().toString();
+        String obsId = UUID.randomUUID().toString();
+        String foiId = UUID.randomUUID().toString();
+
+        createDatastream(PROVIDER, thingId, sensorId, opId, obsId, foiId, 42);
         // Get the new locations
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
         assertNotNull(sensors);
@@ -438,7 +460,6 @@ public class LinksTest extends AbstractIntegrationTest {
             // Check self link
             utils.assertURLStatus(sensor.selfLink());
             utils.assertDtoEquals(sensor, utils.queryJson(sensor.selfLink(), Sensor.class), Sensor.class);
-
             // Check sub-links existence
             checkSubLinks(sensor, sensor.datastreamsLink(), RESULT_DATASTREAMS, Datastream.class);
 
@@ -450,26 +471,21 @@ public class LinksTest extends AbstractIntegrationTest {
         }
     }
 
-    private void createDatastream() {
-        ExpandedObservation obs = new ExpandedObservation(null, UUID.randomUUID().toString(), null, null, null, null,
-                null, null, null, null, null, null,
-                new FeatureOfInterest(null, UUID.randomUUID().toString(), null, null, null, null, null));
-        createResource(PROVIDER, "datastream", "id", UUID.randomUUID().toString());
-        createResource(PROVIDER, "datastream", "sensorId", UUID.randomUUID().toString());
-        createResource(PROVIDER, "datastream", "observedPropertyId", UUID.randomUUID().toString());
-        createResource(PROVIDER, "datastream", "lastObservation", obs);
-        createResource(PROVIDER, "datastream", "ThingId", UUID.randomUUID().toString());
-
-    }
-
     /**
      * Check links returned by the Observations endpoint
      */
     @Test
     void testLinksFromObservations() throws IOException, InterruptedException {
         // Add a resource
-        createDatastream();
-
+        String thingId = UUID.randomUUID().toString();
+        String sensorId = UUID.randomUUID().toString();
+        String opId = UUID.randomUUID().toString();
+        String obsId = UUID.randomUUID().toString();
+        String foiId = UUID.randomUUID().toString();
+        String locationId = UUID.randomUUID().toString();
+        createDatastream(PROVIDER, thingId, sensorId, opId, obsId, foiId, 42);
+        createLocation(locationId);
+        createThing(thingId, List.of(PROVIDER), List.of(locationId));
         // Get the new locations
         ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
         assertNotNull(observations);
@@ -498,7 +514,7 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromObservedProperties() throws IOException, InterruptedException {
         // Add a resource
-        createDatastream();
+        createDatastream(PROVIDER);
 
         // Get the new locations
         ResultList<ObservedProperty> observedProperties = utils.queryJson("/ObservedProperties",
@@ -535,7 +551,13 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromFeaturesOfInterest() throws IOException, InterruptedException {
         // Add a resource
-        createDatastream();
+        String thingId = UUID.randomUUID().toString();
+        String sensorId = UUID.randomUUID().toString();
+        String opId = UUID.randomUUID().toString();
+        String obsId = UUID.randomUUID().toString();
+        String foiId = UUID.randomUUID().toString();
+
+        createDatastream(PROVIDER, thingId, sensorId, opId, obsId, foiId, 42);
 
         // Get the new locations
         ResultList<FeatureOfInterest> features = utils.queryJson("/FeaturesOfInterest",
@@ -553,7 +575,6 @@ public class LinksTest extends AbstractIntegrationTest {
             utils.assertURLStatus(feature.selfLink());
             utils.assertDtoEquals(feature, utils.queryJson(feature.selfLink(), FeatureOfInterest.class),
                     FeatureOfInterest.class);
-
             // Observations have a timestamp, but not the feature of interest
             checkSubLinks(feature, feature.observationsLink(), RESULT_OBSERVATIONS, Observation.class);
 

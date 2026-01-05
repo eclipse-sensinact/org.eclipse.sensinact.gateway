@@ -56,8 +56,6 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
 
     private static final Instant TS_2012 = Instant.parse("2012-01-01T01:23:45.123456Z");
 
-
-
     private static JdbcDatabaseContainer<?> container;
 
     @BeforeAll
@@ -98,9 +96,9 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
         Hashtable<String, Object> newProps = new Hashtable<String, Object>();
         newProps.put("history.provider", "timescale-history");
 
-        Dictionary<String,Object> properties = sensorthingsConfig.getProperties();
+        Dictionary<String, Object> properties = sensorthingsConfig.getProperties();
         Enumeration<String> keys = properties.keys();
-        while(keys.hasMoreElements()) {
+        while (keys.hasMoreElements()) {
             String key = keys.nextElement();
             newProps.put(key, properties.get(key));
         }
@@ -131,7 +129,7 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
                 // Ignore
                 lastError = e;
             }
-        } while(!ready && System.currentTimeMillis() < timeout);
+        } while (!ready && System.currentTimeMillis() < timeout);
 
         assertTrue(ready, "History provider setup timed out: " + lastError);
     }
@@ -153,7 +151,7 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
                 // Ignore
                 lastError = e;
             }
-        } while(!ready && System.currentTimeMillis() < timeout);
+        } while (!ready && System.currentTimeMillis() < timeout);
 
         assertTrue(ready, "SensorThings API setup timed out: " + lastError);
     }
@@ -241,42 +239,42 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
     @Test
     void getThingHistoricalLocationsTest() throws Exception {
         for (int i = 0; i < 10; i++) {
-            createResource("fizz", "admin", "location", new Point(i,i), TS_2012.plus(ofDays(i)));
+            createResource("fizz", "admin", "location", new Point(i, i), TS_2012.plus(ofDays(i)));
         }
         // 10 updates
         waitForRowCount("sensinact.geo_data", 10);
 
-        ResultList<HistoricalLocation> o = utils.queryJson("/Things(fizz)/HistoricalLocations?$count=true", new TypeReference<ResultList<HistoricalLocation>>() {
-        });
+        ResultList<HistoricalLocation> o = utils.queryJson("/Things(fizz)/HistoricalLocations?$count=true",
+                new TypeReference<ResultList<HistoricalLocation>>() {
+                });
         assertEquals(o.count(), 10);
     }
 
     @Test
     void getThingLocationHistoricalLocationsTest() throws Exception {
         for (int i = 0; i < 10; i++) {
-            createResource("fizz", "admin", "location", new Point(i,i), TS_2012.plus(ofDays(i)));
+            createResource("fizz", "admin", "location", new Point(i, i), TS_2012.plus(ofDays(i)));
         }
         // 10 updates
         waitForRowCount("sensinact.geo_data", 10);
 
-        ResultList<HistoricalLocation> o = utils.queryJson("/Locations(fizz)/HistoricalLocations?$count=true", new TypeReference<ResultList<HistoricalLocation>>() {
-        });
+        ResultList<HistoricalLocation> o = utils.queryJson("/Locations(fizz)/HistoricalLocations?$count=true",
+                new TypeReference<ResultList<HistoricalLocation>>() {
+                });
         assertEquals(o.count(), 10);
     }
 
     @Test
     void getDataStreamHistoricalLocationsTest() throws Exception {
         for (int i = 0; i < 10; i++) {
-            createResource("fizz", "admin", "location", new Point(i, i), TS_2012.plus(ofDays(i)));
-            createResource("fizz", "buzz", "fizzbuzz", "test" + i, TS_2012.plus(ofDays(i)));
+            createLocation("fizz", new Point(i, i));
         }
         // 10 updates
         waitForRowCount("sensinact.geo_data", 10);
 
-        String id = String.format("%s~%s~%s", "fizz", "buzz", "fizzbuzz");
+        String id = "fizz";
 
-        ResultList<HistoricalLocation> o = utils.queryJson(
-                "/Datastreams(" + id + ")/Thing/HistoricalLocations?$count=true",
+        ResultList<HistoricalLocation> o = utils.queryJson("/Locations(" + id + ")/HistoricalLocations?$count=true",
                 new TypeReference<ResultList<HistoricalLocation>>() {
                 });
         assertEquals(o.count(), 10);

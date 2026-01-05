@@ -13,14 +13,15 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
-
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.api.FilterParserException;
@@ -30,14 +31,12 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
@@ -60,6 +59,36 @@ public abstract class AbstractAccess {
 
     @Context
     protected ContainerRequestContext requestContext;
+
+    protected List<ProviderSnapshot> listProviders(final ICriterion criterion) {
+        final SensiNactSession userSession = getSession();
+        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
+        if (criterion != null && criterion.getResourceValueFilter() != null) {
+            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
+            return providers
+                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
+                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
+                    .collect(Collectors.toList());
+        } else {
+            return providers;
+        }
+    }
+
+    protected List<ServiceSnapshot> listServices(final ICriterion criterion) {
+
+        final SensiNactSession userSession = getSession();
+        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
+        if (criterion != null && criterion.getResourceValueFilter() != null) {
+            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
+            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+                    .filter(r -> {
+                        return rcFilter.test(r.getService().getProvider(), List.of(r));
+                    }).map(r -> r.getService()).collect(Collectors.toList());
+        } else {
+            return providers.stream().map(p -> p.getServices().stream()).flatMap(s -> s).toList();
+
+        }
+    }
 
     /**
      * Returns a user session
@@ -117,19 +146,9 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    protected static ProviderSnapshot validateAndGetProvider(SensiNactSession session, String id) {
-        DtoMapperGet.validatedProviderId(id);
-
-        Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(session, id);
-
-        if (providerSnapshot.isEmpty()) {
-            throw new NotFoundException("Unknown provider");
-        }
-        return providerSnapshot.get();
-    }
 
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        return validateAndGetProvider(getSession(), id);
+        return DtoMapper.validateAndGetProvider(getSession(), id);
     }
 
     /**
@@ -138,20 +157,9 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    protected ServiceSnapshot validateAndGeService(SensiNactSession session, String id) {
-        String providerId = UtilIds.extractFirstIdSegment(id);
-        String serviceId = "datastream";
 
-        Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(session, providerId);
-
-        if (provider != null && provider.isPresent() && serviceId != null) {
-            return DtoMapper.getServiceSnapshot(provider.get(), serviceId);
-        }
-        throw new NotFoundException(String.format("can't find model identified by %s", id));
-    }
-
-    protected ServiceSnapshot validateAndGeService(String id) {
-        return validateAndGeService(getSession(), id);
+    protected ServiceSnapshot validateAndGeService(String id, String serviceName) {
+        return DtoMapper.validateAndGeService(getSession(), id, serviceName);
     }
 
     /**
@@ -160,24 +168,9 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    protected ResourceSnapshot validateAndGetResourceSnapshot(SensiNactSession session, String id) {
-        String provider = extractFirstIdSegment(id);
-
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(session, provider);
-
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
-
-        ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
-
-        if (resourceSnapshot == null) {
-            throw new NotFoundException();
-        }
-        return resourceSnapshot;
-    }
 
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        return validateAndGetResourceSnapshot(getSession(), id);
+        return DtoMapper.validateAndGetResourceSnapshot(getSession(), id);
     }
 
     /**
@@ -210,8 +203,13 @@ public abstract class AbstractAccess {
     }
 
     protected IDtoMemoryCache<?> getCache(Class<?> dtoClass) {
-        IDtoMemoryCache<?> cache = providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
-                .getContext(dtoClass);
+        @SuppressWarnings("rawtypes")
+        ContextResolver<IDtoMemoryCache> resolver = providers.getContextResolver(IDtoMemoryCache.class,
+                MediaType.WILDCARD_TYPE);
+        if (resolver == null) {
+            return null;
+        }
+        IDtoMemoryCache<?> cache = resolver.getContext(dtoClass);
         if (cache == null) {
             throw new WebApplicationException(
                     String.format("cache for class %s doesn't exists", dtoClass.getSimpleName()));

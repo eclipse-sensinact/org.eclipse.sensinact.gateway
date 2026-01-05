@@ -22,6 +22,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 import java.util.List;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -30,6 +31,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
@@ -43,15 +45,16 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
-        if (getCache(ExpandedObservedProperty.class).getDto(id) != null) {
+        IDtoMemoryCache<?> wCache = getCache(ExpandedObservedProperty.class);
+        if (wCache != null && wCache.getDto(id) != null) {
             ExpandedObservedProperty op = (ExpandedObservedProperty) getCache(ExpandedObservedProperty.class)
                     .getDto(id);
             return new ObservedProperty(DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/ObservedProperties", id),
                     op.id(), op.name(), op.description(), op.definition(), op.properties(), null);
         } else {
-
+            ProviderSnapshot provider = validateAndGetProvider(extractFirstIdSegment(id));
             return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(OBSERVED_PROPERTIES), validateAndGeService(id));
+                    parseFilter(OBSERVED_PROPERTIES), UtilIds.getDatastreamService(provider));
 
         }
     }
@@ -63,12 +66,15 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getObservedPropertyDatastream(String id, String id2) {
-        if (!id.equals(id2)) {
+        String idDatastream = extractFirstIdSegment(id);
+        ProviderSnapshot datastremProvider = validateAndGetProvider(idDatastream);
+
+        ServiceSnapshot service = UtilIds.getDatastreamService(datastremProvider);
+        if (service == null) {
             throw new NotFoundException();
         }
-
-        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), service);
     }
 
     @PaginationLimit(500)
@@ -77,7 +83,8 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        ProviderSnapshot provider = validateAndGetProvider(id);
+        String providerId = extractFirstIdSegment(id2);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), UtilIds.getDatastreamService(provider), parseFilter(OBSERVATIONS), 0);
     }
@@ -92,23 +99,29 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Sensor getObservedPropertyDatastreamSensor(String id, String id2) {
-        if (!id.equals(id2)) {
+        String idDatastream = extractFirstIdSegment(id);
+        if (!idDatastream.equals(id2)) {
             throw new NotFoundException();
         }
+        ProviderSnapshot datastremProvider = validateAndGetProvider(idDatastream);
 
-        return DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(SENSORS), UtilIds.getDatastreamService(datastremProvider));
     }
 
     @Override
     public Thing getObservedPropertyDatastreamThing(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
-        String provider2 = extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
+        String idDatastream = extractFirstIdSegment(id);
+        if (!idDatastream.equals(id2)) {
             throw new NotFoundException();
         }
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), validateAndGetProvider(provider));
+        ProviderSnapshot datastremProvider = validateAndGetProvider(idDatastream);
+        ServiceSnapshot service = UtilIds.getDatastreamService(datastremProvider);
+        String thingId = UtilIds.getResourceField(service, "thingId", String.class);
+        ProviderSnapshot thingProvider = validateAndGetProvider(thingId);
+
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                UtilIds.getThingService(thingProvider));
     }
 
     @Override

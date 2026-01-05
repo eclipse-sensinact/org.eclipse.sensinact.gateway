@@ -73,7 +73,6 @@
 	org.eclipse.sensinact.gateway.core.geo-json;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.models.provider;version='[0.0.2,0.0.3)',\
-	org.eclipse.sensinact.gateway.core.models.testdata;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.esri.geometry;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.filters.core;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.filters.resource.selector;version='[0.0.2,0.0.3)',\

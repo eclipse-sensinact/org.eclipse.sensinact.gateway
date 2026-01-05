@@ -272,6 +272,7 @@ public class DtoMapperGet {
         Sensor sensor = new Sensor(selfLink, id, name, description, encodingType, sensorMetadata, metadata,
                 datastreamsLink);
         if (expansions.shouldExpand("Datastreams", sensor)) {
+//
 //            expansions.addExpansion("Datastreams", sensor,
 //                    DatastreamsAccessImpl.getDataStreams(userSession, application, mapper, uriInfo,
 //                            expansions.getExpansionSettings("Datastreams"), filter, providerSnapshot));
@@ -392,10 +393,9 @@ public class DtoMapperGet {
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("FeaturesOfInterest({id})")
                 .resolveTemplate("id", id).build().toString();
-        String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build().toString();
 
         FeatureOfInterest featureOfInterest = new FeatureOfInterest(selfLink, id, name, description,
-                ENCODING_TYPE_VND_GEO_JSON, object, observationsLink);
+                ENCODING_TYPE_VND_GEO_JSON, object, null);
         if (expansions.shouldExpand("Observations", featureOfInterest)) {
 //            expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
 //                    mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, provider));
