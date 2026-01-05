@@ -92,15 +92,23 @@ public class AbstractIntegrationTest {
         @SuppressWarnings("unchecked")
         @GET
         public void exfiltrate(@Context Providers providers) {
-            session = providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
-            serviceUseCase = providers.getContextResolver(IAccessServiceUseCase.class, MediaType.WILDCARD_TYPE)
-                    .getContext(IAccessServiceUseCase.class);
+            ContextResolver<SensiNactSession> sessionResolver = providers.getContextResolver(SensiNactSession.class,
+                    MediaType.WILDCARD_TYPE);
+            session = sessionResolver != null ? sessionResolver.getContext(null) : null;
+            ContextResolver<IAccessServiceUseCase> serviceUseCaseResolver = providers
+                    .getContextResolver(IAccessServiceUseCase.class, MediaType.WILDCARD_TYPE);
+
+            serviceUseCase = serviceUseCaseResolver != null
+                    ? serviceUseCaseResolver.getContext(IAccessServiceUseCase.class)
+                    : null;
+
             @SuppressWarnings("rawtypes")
             ContextResolver<IDtoMemoryCache> resolverCache = providers.getContextResolver(IDtoMemoryCache.class,
                     MediaType.WILDCARD_TYPE);
-            sensorCache = resolverCache.getContext(ExpandedSensor.class);
-            observedPropertyCache = resolverCache.getContext(ExpandedObservedProperty.class);
-            foiCache = resolverCache.getContext(FeatureOfInterest.class);
+            sensorCache = resolverCache != null ? resolverCache.getContext(ExpandedSensor.class) : null;
+            observedPropertyCache = resolverCache != null ? resolverCache.getContext(ExpandedObservedProperty.class)
+                    : null;
+            foiCache = resolverCache != null ? resolverCache.getContext(FeatureOfInterest.class) : null;
 
         }
     }
@@ -113,7 +121,7 @@ public class AbstractIntegrationTest {
 
         boolean success = false;
         HttpResponse<String> result;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             result = queryGet("http://localhost:8185/test");
             if (result.statusCode() == 204) {
                 this.sensorCache = exfiltrator.sensorCache;
@@ -122,12 +130,12 @@ public class AbstractIntegrationTest {
                 this.serviceUseCase = exfiltrator.serviceUseCase;
                 this.session = exfiltrator.session;
                 if (this.serviceUseCase != null && this.foiCache != null && this.observedPropertyCache != null
-                        && this.sensorCache != null) {
+                        && this.sensorCache != null && this.session != null) {
                     success = true;
                     break;
                 }
             } else {
-                Thread.sleep(500);
+                Thread.sleep(250);
             }
         }
         assertTrue(success, "Unable to get the necessary providers");
