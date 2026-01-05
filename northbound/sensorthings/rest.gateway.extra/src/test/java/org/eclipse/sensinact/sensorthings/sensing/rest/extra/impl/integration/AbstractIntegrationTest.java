@@ -127,7 +127,7 @@ public class AbstractIntegrationTest {
                     break;
                 }
             } else {
-                Thread.sleep(250);
+                Thread.sleep(500);
             }
         }
         assertTrue(success, "Unable to get the necessary providers");
