@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest;
+package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.CountFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.ExpandFilter;

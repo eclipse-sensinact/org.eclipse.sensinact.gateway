@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest;
+package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 
 public interface IFilterConstants {
 
