@@ -12,6 +12,8 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended;
 
+import org.eclipse.emf.common.util.EList;
+
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -25,7 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingDatastream#getDatastream <em>Datastream</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingDatastream#getDataStreams <em>Data Streams</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingDatastream()
@@ -35,25 +37,15 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface SensorThingDatastream extends DynamicProvider {
 	/**
-	 * Returns the value of the '<em><b>Datastream</b></em>' containment reference.
+	 * Returns the value of the '<em><b>Data Streams</b></em>' containment reference list.
+	 * The list contents are of type {@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService}.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Datastream</em>' containment reference.
-	 * @see #setDatastream(DataStreamService)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingDatastream_Datastream()
+	 * @return the value of the '<em>Data Streams</em>' containment reference list.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingDatastream_DataStreams()
 	 * @model containment="true"
 	 * @generated
 	 */
-	DataStreamService getDatastream();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingDatastream#getDatastream <em>Datastream</em>}' containment reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Datastream</em>' containment reference.
-	 * @see #getDatastream()
-	 * @generated
-	 */
-	void setDatastream(DataStreamService value);
+	EList<DataStreamService> getDataStreams();
 
 } // SensorThingDatastream
