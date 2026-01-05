@@ -38,6 +38,11 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class ThingTest extends AbstractIntegrationTest {
 
+    /**
+     * test create thing with existing location
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateThingExistingLocation() throws Exception {
         // Given
@@ -65,6 +70,11 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create thing with existing datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateThingExistsDatastream() throws Exception {
         // Given
@@ -92,6 +102,11 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create simple thing
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateThingSimple() throws Exception {
         // Given
@@ -106,6 +121,11 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create thing with missing mandatory field
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateThingSimpleMissingField() throws Exception {
         // Given
@@ -118,6 +138,11 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create create thing with one location
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateThingWith1Location() throws Exception {
         // Given
@@ -134,6 +159,11 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create thing with location and datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateThingWithLocationAndDatastream() throws Exception {
         // Given
@@ -154,8 +184,13 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create thing that include in payload location, datastream, sensor,
+     * observed property
+     *
+     * @throws Exception
+     */
     @Test
-
     public void testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation() throws Exception {
         // Given
         String name = "testCreateThingWithLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
@@ -204,6 +239,11 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create thing with multiple location
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateThingWithMultipleLocation() throws Exception {
         // Given
