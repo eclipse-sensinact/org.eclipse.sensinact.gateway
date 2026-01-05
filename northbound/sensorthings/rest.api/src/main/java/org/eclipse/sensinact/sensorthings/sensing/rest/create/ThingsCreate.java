@@ -46,27 +46,14 @@ public interface ThingsCreate {
     public Response createLocation(@PathParam("id") String id, ExpandedLocation location);
 
     /**
-     * update location ref
+     * create location link to thing using ref
      *
      * @param id
-     * @param id2
      * @param location
      * @return
      */
     @POST
     @Path("/Locations/$ref")
-    public Response updateLocationRef(@PathParam("id") String id, RefId location);
-
-    /**
-     * update datastream ref
-     *
-     * @param id
-     * @param id2
-     * @param location
-     * @return
-     */
-    @POST
-    @Path("/Datastreams/$ref")
-    public Response updateDatastreamRef(@PathParam("id") String id, RefId datastream);
+    public Response createLocationRef(@PathParam("id") String id, RefId location);
 
 }

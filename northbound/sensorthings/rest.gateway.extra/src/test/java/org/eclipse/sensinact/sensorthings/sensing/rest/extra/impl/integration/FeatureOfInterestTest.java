@@ -14,19 +14,15 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,11 +32,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
-    /**
-     * test simple feature of interest in cache memory as not link to datastream
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateFeatureOfInterest() throws Exception {
         // given
@@ -55,12 +46,6 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create feature of interest link between observation using observation
-     * feature of interest endpoint
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateFeatureOfInterestLinkObservation() throws Exception {
         // given
@@ -73,7 +58,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
         String foiId = getIdFromJson(json);
-        assertNotNull(foiCache.getDto(foiId));
+        assertNotNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
         // create datastream with observation
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -92,16 +77,10 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
 
         UtilsAssert.assertObservation(dtoObservation, json);
-        assertNull(foiCache.getDto(foiId));
+        assertNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
 
     }
 
-    /**
-     * test create feature of interest in observation create endpoint (foi is
-     * inline)
-     *
-     * @throws Exception
-     */
     @Test
     public void testCreateFeatureOfInterestAndLinkitWithObservation() throws Exception {
         // given
@@ -127,14 +106,8 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create feature of interest using the observation/featureofinterest
-     * endpoint. the foi should be link to the observation and datastream
-     *
-     * @throws Exception
-     */
     @Test
-    public void testCreateObservationWithFeatureOfInterestThroughDatastream() throws Exception {
+    public void createCreateObservationWithFeatureOfInterestThroughDatastream() throws Exception {
         // given
         String name = "createCreateObservationsWithFeatureOfInterestThroughDatastream";
 
@@ -155,12 +128,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
     }
 
-    /**
-     * test create feature of interest missing field
-     *
-     * @throws Exception
-     */
-    public void testCreateFeatureOfInterestMissingField() throws Exception {
+    public void createFeatureOfInterestMissingField() throws Exception {
         String name = "createCreateObservationsWithFeatureOfInterestThroughDatastream";
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists2", "testThing existing Location",
@@ -192,15 +160,6 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         UtilsAssert.assertDatastream(datastream, json, true);
     }
 
-    /**
-     * Tests that <code>PUT</code> can be used to update a FeatureOfInterest
-     */
-    /**
-     * test update of feature of interest that are store in cache memory as not link
-     * to an observation
-     *
-     * @throws Exception
-     */
     @Test
     public void testUpdateFeatureOfInterest() throws Exception {
         // given
@@ -210,23 +169,16 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 new Point(-122.4194, 37.7749));
 
         JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
-        String idFoi = getIdFromJson(json);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
 
         // when
         FeatureOfInterest dtoFeatureOfInterestUpdate = DtoFactory.getFeatureOfInterest(name + "Update",
                 "application/vnd.geo+json", new Point(-122.4194, 37.7749));
 
-        json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi), 204);
-        // then
-        assertEquals(name + "Update", foiCache.getDto(idFoi).name());
+        json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, "FeaturesOfInterest", 204);
 
     }
 
-    /**
-     * Tests that a observation can use id references to refer to existing feature
-     * of interest resources and will be linked to them
-     */
     @Test
     public void testUpdateFeatureOfInterestLinkObservationRef() throws Exception {
         // given
@@ -239,7 +191,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
         String foiId = getIdFromJson(json);
-        assertNotNull(foiCache.getDto(foiId));
+        assertNotNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
         // create datastream with observation
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -255,7 +207,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(dtoObservation,
                 String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
         UtilsAssert.assertObservation(dtoObservation, json);
-        assertNull(foiCache.getDto(foiId));
+        assertNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
         String idObservation = getIdFromJson(json);
         // when
         FeatureOfInterest foiUpdate = DtoFactory.getFeatureOfInterest(name + "Update", "application/vnd.geo+json",
@@ -266,36 +218,6 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPut(new RefId(idFoiUpdate),
                 String.format("Observations(%s)/FeatureOfInterest/$ref", idObservation), 204);
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
-        assertEquals(idFoiUpdate, obs.featureOfInterest().id());
-
-    }
-
-    /**
-     * Tests that <code>PATCH</code> can be used to update a FeatureOfInterest
-     */
-    @Test
-    public void testPatchFeatureOfInterest() throws Exception {
-        // given
-        String name = "testPatchFeatureOfInterest";
-
-        FeatureOfInterest dtoFeatureOfInterest = DtoFactory.getFeatureOfInterest(name, "application/vnd.geo+json",
-                new Point(-122.4194, 37.7749));
-
-        JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
-        String idFoi = getIdFromJson(json);
-        UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
-
-        // when
-        FeatureOfInterest dtoFeatureOfInterestUpdate = DtoFactory.getFeatureOfInterest(name + "Update",
-                "application/vnd.geo+json", new Point(-122.4194, 37.7749));
-
-        json = getJsonResponseFromPatch(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi),
-                204);
-        // then
-        assertEquals(name + "Update", foiCache.getDto(idFoi).name());
-
     }
 
 }

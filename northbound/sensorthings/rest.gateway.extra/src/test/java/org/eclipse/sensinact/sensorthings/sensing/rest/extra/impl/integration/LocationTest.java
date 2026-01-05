@@ -121,6 +121,24 @@ public class LocationTest extends AbstractIntegrationTest {
         UtilsAssert.assertLocation(dtoLocation, json);
 
     }
+    // update
+
+    @Test
+    public void testUpdateLocation() throws Exception {
+        // given
+        String name = "testUpdateLocation";
+
+        ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "1");
+
+        // when
+        JsonNode json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        UtilsAssert.assertLocation(dtoLocation, json);
+        String idLocation = getIdFromJson(json);
+        ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
+        json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
+        // then
+
+    }
 
     /**
      * Tests that <code>PUT</code> can be used to update a Location

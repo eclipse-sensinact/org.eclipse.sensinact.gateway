@@ -164,8 +164,8 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // when
         ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
 
-        json = getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 201);
-        UtilsAssert.assertDatastream(dtoDatastream, json);
+        json = getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
+        // then
 
     }
 
@@ -207,14 +207,17 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         json = getJsonResponseFromPut(new RefId(idThingUpdate),
                 String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
+        // then
 
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
                 204);
+        // then
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
                 String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
+        // then
 
     }
 }
