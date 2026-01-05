@@ -22,6 +22,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -157,6 +158,66 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 400);
 
         UtilsAssert.assertDatastream(datastream, json, true);
+    }
+
+    @Test
+    public void testUpdateFeatureOfInterest() throws Exception {
+        // given
+        String name = "testUpdateFeatureOfInterest";
+
+        FeatureOfInterest dtoFeatureOfInterest = DtoFactory.getFeatureOfInterest(name, "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749));
+
+        JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
+        UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
+
+        // when
+        FeatureOfInterest dtoFeatureOfInterestUpdate = DtoFactory.getFeatureOfInterest(name + "Update",
+                "application/vnd.geo+json", new Point(-122.4194, 37.7749));
+
+        json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, "FeaturesOfInterest", 204);
+
+    }
+
+    @Test
+    public void testUpdateFeatureOfInterestLinkObservationRef() throws Exception {
+        // given
+        String name = "testUpdateFeatureOfInterestLinkObservationRef";
+
+        FeatureOfInterest dtoFeatureOfInterest = DtoFactory.getFeatureOfInterest(name, "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749));
+
+        // when
+        JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
+        UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
+        String foiId = getIdFromJson(json);
+        assertNotNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
+        // create datastream with observation
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
+                DtoFactory.getRefId(idThing));
+
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        ExpandedObservation dtoObservation = DtoFactory.getObservationLinkFeatureOfInterest(name + "2", foiId);
+        json = getJsonResponseFromPost(dtoObservation,
+                String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
+        UtilsAssert.assertObservation(dtoObservation, json);
+        assertNull(foiUseCase.getInMemoryFeatureOfInterest(foiId));
+        String idObservation = getIdFromJson(json);
+        // when
+        FeatureOfInterest foiUpdate = DtoFactory.getFeatureOfInterest(name + "Update", "application/vnd.geo+json",
+                new Point(-22.4194, 47.7749));
+        json = getJsonResponseFromPost(foiUpdate, "FeaturesOfInterest", 201);
+        String idFoiUpdate = getIdFromJson(json);
+
+        json = getJsonResponseFromPut(new RefId(idFoiUpdate),
+                String.format("Observations(%s)/FeatureOfInterest/$ref", idObservation), 204);
+        // then
     }
 
 }

@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.create;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -43,5 +44,16 @@ public interface ThingsCreate {
     @POST
     @Path("/Locations")
     public Response createLocation(@PathParam("id") String id, ExpandedLocation location);
+
+    /**
+     * create location link to thing using ref
+     *
+     * @param id
+     * @param location
+     * @return
+     */
+    @POST
+    @Path("/Locations/$ref")
+    public Response createLocationRef(@PathParam("id") String id, RefId location);
 
 }

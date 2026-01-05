@@ -235,12 +235,8 @@ public class ThingTest extends AbstractIntegrationTest {
         ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(name,
                 "testThing With Location and Datastream update",
                 Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), null);
-        ExpandedThing dtoExpectedThingToUpdate = DtoFactory.getExpandedThingWithLocations(name,
-                "testThing With Location and Datastream update",
-                Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), locations);
-        json = getJsonResponseFromPut(dtoThingToUpdate, "/Things?$expand=Locations", 201);
+        json = getJsonResponseFromPut(dtoThingToUpdate, "/Things?$expand=Locations", 204);
         // then
-        UtilsAssert.assertThing(dtoExpectedThingToUpdate, json, true);
 
     }
 
@@ -268,8 +264,8 @@ public class ThingTest extends AbstractIntegrationTest {
                 "testThing With 1 Location ", Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"),
                 locationsUpdate);
         json = getJsonResponseFromPut(dtoThingUpdateWithlocation,
-                String.format("/Things(%s)/Locations(%s)", idThing, idLocation), 200);
-        UtilsAssert.assertThing(dtoThing, json);
+                String.format("/Things(%s)/Locations(%s)", idThing, idLocation), 204);
+        // then
 
     }
 
@@ -299,9 +295,71 @@ public class ThingTest extends AbstractIntegrationTest {
         ExpandedDataStream datastreamsUpdate = DtoFactory.getDatastreamMinimal(name + "3");
 
         json = getJsonResponseFromPut(datastreamsUpdate,
-                String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 200);
-        UtilsAssert.assertThing(dtoThing, json);
+                String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 204);
+        // then
 
     }
 
+    @Test
+    public void testUpdateThingLocationRef() throws Exception {
+        // Given
+        String name = "testUpdateThingLocationRef";
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThing(name, "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
+        String idThing = getIdFromJson(json);
+        UtilsAssert.assertThing(dtoThing, json);
+
+        ExpandedLocation dtoLocation = DtoFactory.getLocation(name);
+
+        // when
+        json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        String idLocation = getIdFromJson(json);
+
+        UtilsAssert.assertLocation(dtoLocation, json);
+        // When
+
+        json = getJsonResponseFromPost(new RefId(idLocation), String.format("/Things(%s)/Locations/$ref", idThing),
+                204);
+        // then
+
+    }
+
+    @Test
+    public void testUpdateThingDatastreamRef() throws Exception {
+        // Given
+        String name = "testUpdateThingDatastreamRef";
+
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name + "2"));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreams(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams);
+
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastreams", 201);
+        String idThing = getIdFromJson(json);
+
+        List<ExpandedDataStream> datastreamsUpdate = List.of(DtoFactory.getDatastreamMinimal(name + "3"));
+
+        ExpandedThing dtoThingUpdate = DtoFactory.getExpandedThingWithDatastreams(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreamsUpdate);
+
+        json = getJsonResponseFromPost(dtoThingUpdate, "/Things?$expand=Datastreams", 201);
+        String idThingUpdate = getIdFromJson(json);
+        JsonNode datastreamNode = json.get("Datastreams");
+        assertTrue(datastreamNode.size() > 0);
+        JsonNode datastreamJson = datastreamNode.get(0);
+        String idDatastreamUpdate = getIdFromJson(datastreamJson);
+
+        UtilsAssert.assertThing(dtoThing, json);
+        // When
+
+        json = getJsonResponseFromPut(new RefId(idDatastreamUpdate),
+                String.format("/Things(%s)/Datastreams/$ref", idThing), 204);
+        // then
+
+    }
 }

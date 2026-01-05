@@ -66,4 +66,47 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorUseCase.getInMemorySensor(sensorId));
 
     }
+
+    public void testUpdateSensor() throws Exception {
+        // given
+        String name = "testCreateSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        String idSensor = getIdFromJson(json);
+        UtilsAssert.assertSensor(sensor, json);
+        ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
+        // when
+        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
+
+    }
+
+    @Test
+    public void testUpdateDatastreamLinkSensor() throws Exception {
+        // given
+        String name = "testUpdateDatastreamLinkSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        String sensorId = getIdFromJson(json);
+        UtilsAssert.assertSensor(sensor, json);
+        assertNotNull(sensorUseCase.getInMemorySensor(sensorId));
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor", 201);
+        ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
+                name + "1", DtoFactory.getRefId(thingId), sensor, null);
+        String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
+        UtilsAssert.assertDatastream(expectedDatastream, json, true);
+        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        // when
+        ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
+        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensor(%s)", sensorIdDatastream), 204);
+        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+
+    }
 }
