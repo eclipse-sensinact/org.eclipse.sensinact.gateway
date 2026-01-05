@@ -23,11 +23,6 @@ public class HistoricalLocationsExtraUseCase extends AbstractExtraUseCase<Histor
     @Reference
     DataUpdate dataUpdate;
 
-    @Override
-    protected IAccessProviderUseCase getProviderUseCase() {
-        return providerUseCase;
-    }
-
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<HistoricalLocation> request) {
         // TODO what is the id if not setted ?
         String id = getId(request.model());
