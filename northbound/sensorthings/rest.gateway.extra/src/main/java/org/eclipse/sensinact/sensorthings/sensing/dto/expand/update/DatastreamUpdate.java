@@ -27,8 +27,7 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
 /**
@@ -59,21 +58,7 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitSymbol,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitDefinition,
 // observation
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observationId,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object observationResult,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Instant observationPhenomenonTime,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Instant observationResultTime,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) TimeInterval observationValidTime,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Object observationResultQuality,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Map<String, Object> observationParameters,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) Map<String, Object> observationProperties,
-
-// observation feature of interest
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observationFoiId,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observationFoiName,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observationFoiDescription,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String observationFoiEncodingType,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) GeoJsonObject observationFoiFeature
+        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) ExpandedObservation lastObservation
 
 ) implements SensorThingsUpdate {
 
@@ -101,16 +86,11 @@ public record DatastreamUpdate(@Model EClass model, @ServiceModel EClass service
             String observedPropertyId, String observedPropertyName, String observedPropertyDescription,
             String observedPropertyDefinition, Map<String, Object> observedPropertyProperties,
             // unit
-            String unitName, String unitSymbol, String unitDefinition, String obsId, Object obsResult,
-            Instant obsPheTime, Instant obsResTime, TimeInterval obsValidTime, Object obsResultQuality,
-            Map<String, Object> obsParameters, Map<String, Object> obsProperties, String obsFoiId, String obsFoiName,
-            String obsFoiDescription, String obsFoiEncodingType, GeoJsonObject obsFoiFeature) {
+            String unitName, String unitSymbol, String unitDefinition, ExpandedObservation lastObservsation) {
         this(SENSOR_THING_DATASTREAM, DATA_STREAM_SERVICE, providerId, id, name, description, timestamp, thingId,
                 sensorId, sensorName, sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties,
                 observedPropertyId, observedPropertyName, observedPropertyDescription, observedPropertyDefinition,
-                observedPropertyProperties, unitName, unitSymbol, unitDefinition, obsId, obsResult, obsPheTime,
-                obsResTime, obsValidTime, obsResultQuality, obsParameters, obsProperties, obsFoiId, obsFoiName,
-                obsFoiDescription, obsFoiEncodingType, obsFoiFeature);
+                observedPropertyProperties, unitName, unitSymbol, unitDefinition, lastObservsation);
     }
 
 }

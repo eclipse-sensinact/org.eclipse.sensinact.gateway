@@ -55,7 +55,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Thing getThing(String id) {
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), id);
 
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 providerSnapshot);
@@ -63,23 +63,21 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public ResultList<Datastream> getThingDatastreams(String id) {
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
-
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), providerSnapshot);
+                parseFilter(DATASTREAMS), DatastreamsAccessImpl.getListDatastreamServices(getSession(), id));
     }
 
     @Override
     public Datastream getThingDatastream(String id, String id2) {
 
-        ProviderSnapshot providerThing = validateAndGetProvider(id);
+        ProviderSnapshot providerThing = validateAndGetProvider(getSession(), id);
         ServiceSnapshot serviceThing = providerThing.getService("thing");
         @SuppressWarnings("unchecked")
         List<String> listDatastream = UtilIds.getResourceField(serviceThing, "datastreamIds", List.class);
         if (listDatastream == null || !listDatastream.contains(id2)) {
             throw new NotFoundException(String.format("datastream %s not exists in %s", id2, id));
         }
-        ProviderSnapshot providerDatastream = validateAndGetProvider(id2);
+        ProviderSnapshot providerDatastream = validateAndGetProvider(getSession(), id2);
 
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(DATASTREAMS), providerDatastream.getService("datastream"));
@@ -98,9 +96,9 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         if (!id.equals(provider)) {
             throw new NotFoundException();
         }
-
+        // TODO validateAndGetResourceSnapshot(getSession(), id2)
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                requestContext, validateAndGetResourceSnapshot(id2), parseFilter(OBSERVATIONS));
+                requestContext, null, parseFilter(OBSERVATIONS));
     }
 
     @Override
@@ -112,7 +110,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         }
 
         ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id2));
+                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(getSession(), id2));
 
         if (!id2.equals(o.id())) {
             throw new NotFoundException();
@@ -130,7 +128,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         }
 
         Sensor s = DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
+                parseFilter(SENSORS), validateAndGetResourceSnapshot(getSession(), id2));
 
         if (!id2.equals(s.id())) {
             throw new NotFoundException();
@@ -152,11 +150,11 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public ResultList<HistoricalLocation> getThingHistoricalLocations(String id) {
-        String provider = extractFirstIdSegment(id);
+        String providerId = extractFirstIdSegment(id);
 
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), providerId);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
@@ -182,7 +180,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
         try {
             Optional<HistoricalLocation> hl = DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(),
-                    uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), validateAndGetProvider(provider));
+                    uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS),
+                    validateAndGetProvider(getSession(), provider));
             if (hl.isEmpty()) {
                 throw new NotFoundException();
             }
@@ -214,7 +213,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
         ResultList<Location> list = new ResultList<>(null, null,
                 List.of(DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        parseFilter(LOCATIONS), validateAndGetProvider(provider))));
+                        parseFilter(LOCATIONS), validateAndGetProvider(getSession(), provider))));
 
         return list;
     }
@@ -225,7 +224,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
         ResultList<Location> list = new ResultList<>(null, null,
                 List.of(DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        parseFilter(LOCATIONS), validateAndGetProvider(provider))));
+                        parseFilter(LOCATIONS), validateAndGetProvider(getSession(), provider))));
 
         return list;
     }
@@ -236,10 +235,10 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         String providerLocation = id2;
 
         // check if thing exists
-        if (validateAndGetProvider(providerThing) == null) {
+        if (validateAndGetProvider(getSession(), providerThing) == null) {
             throw new NotFoundException(String.format("Thing identified by %s not found", id));
         }
-        ProviderSnapshot provider = validateAndGetProvider(providerLocation);
+        ProviderSnapshot provider = validateAndGetProvider(getSession(), providerLocation);
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), provider.getService("location"));
 
@@ -264,7 +263,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         String provider = extractFirstIdSegment(id2);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {

@@ -57,7 +57,7 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
                 serviceSnapshot.getProvider().getName());
         String datastreamLink = DtoMapper.getLink(uriInfo, thingLink, "/Datastreams({id})", serviceSnapshot.getName());
         return DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                serviceSnapshot, datastreamLink);
+                serviceSnapshot);
 
     }
 
@@ -78,8 +78,9 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     @PaginationLimit(500)
     @Override
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
+        ProviderSnapshot provider = validateAndGetProvider(id);
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
+                getExpansions(), provider.getService("datastream"), parseFilter(OBSERVATIONS), 0);
     }
 
     @Override

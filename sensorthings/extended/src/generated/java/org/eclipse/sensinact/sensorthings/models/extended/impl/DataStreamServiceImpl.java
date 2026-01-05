@@ -22,8 +22,6 @@ import org.eclipse.emf.ecore.EClass;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-
 import org.eclipse.sensinact.model.core.provider.impl.ServiceImpl;
 
 import org.eclipse.sensinact.sensorthings.models.extended.DataStreamService;
@@ -55,20 +53,8 @@ import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getSensorId <em>Sensor Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getSensorProperties <em>Sensor Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservedPropertyProperties <em>Observed Property Properties</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationResultTime <em>Observation Result Time</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationResult <em>Observation Result</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationPhenomenonTime <em>Observation Phenomenon Time</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationFoiName <em>Observation Foi Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationFoiEncodingType <em>Observation Foi Encoding Type</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationFoiId <em>Observation Foi Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationId <em>Observation Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationResultQuality <em>Observation Result Quality</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationValidTime <em>Observation Valid Time</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationParameters <em>Observation Parameters</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationProperties <em>Observation Properties</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationFoiFeature <em>Observation Foi Feature</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationFoiDescription <em>Observation Foi Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getThingId <em>Thing Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getLastObservation <em>Last Observation</em>}</li>
  * </ul>
  *
  * @generated
@@ -415,246 +401,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	protected Map<?, ?> observedPropertyProperties;
 
 	/**
-	 * The default value of the '{@link #getObservationResultTime() <em>Observation Result Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationResultTime()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final Instant OBSERVATION_RESULT_TIME_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationResultTime() <em>Observation Result Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationResultTime()
-	 * @generated
-	 * @ordered
-	 */
-	protected Instant observationResultTime = OBSERVATION_RESULT_TIME_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationResult() <em>Observation Result</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationResult()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final Object OBSERVATION_RESULT_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationResult() <em>Observation Result</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationResult()
-	 * @generated
-	 * @ordered
-	 */
-	protected Object observationResult = OBSERVATION_RESULT_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationPhenomenonTime() <em>Observation Phenomenon Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationPhenomenonTime()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final Instant OBSERVATION_PHENOMENON_TIME_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationPhenomenonTime() <em>Observation Phenomenon Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationPhenomenonTime()
-	 * @generated
-	 * @ordered
-	 */
-	protected Instant observationPhenomenonTime = OBSERVATION_PHENOMENON_TIME_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationFoiName() <em>Observation Foi Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiName()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String OBSERVATION_FOI_NAME_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationFoiName() <em>Observation Foi Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiName()
-	 * @generated
-	 * @ordered
-	 */
-	protected String observationFoiName = OBSERVATION_FOI_NAME_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationFoiEncodingType() <em>Observation Foi Encoding Type</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiEncodingType()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String OBSERVATION_FOI_ENCODING_TYPE_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationFoiEncodingType() <em>Observation Foi Encoding Type</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiEncodingType()
-	 * @generated
-	 * @ordered
-	 */
-	protected String observationFoiEncodingType = OBSERVATION_FOI_ENCODING_TYPE_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationFoiId() <em>Observation Foi Id</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiId()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String OBSERVATION_FOI_ID_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationFoiId() <em>Observation Foi Id</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiId()
-	 * @generated
-	 * @ordered
-	 */
-	protected String observationFoiId = OBSERVATION_FOI_ID_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationId() <em>Observation Id</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationId()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String OBSERVATION_ID_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationId() <em>Observation Id</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationId()
-	 * @generated
-	 * @ordered
-	 */
-	protected String observationId = OBSERVATION_ID_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationResultQuality() <em>Observation Result Quality</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationResultQuality()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String OBSERVATION_RESULT_QUALITY_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationResultQuality() <em>Observation Result Quality</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationResultQuality()
-	 * @generated
-	 * @ordered
-	 */
-	protected String observationResultQuality = OBSERVATION_RESULT_QUALITY_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationValidTime() <em>Observation Valid Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationValidTime()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final Object OBSERVATION_VALID_TIME_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationValidTime() <em>Observation Valid Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationValidTime()
-	 * @generated
-	 * @ordered
-	 */
-	protected Object observationValidTime = OBSERVATION_VALID_TIME_EDEFAULT;
-
-	/**
-	 * The cached value of the '{@link #getObservationParameters() <em>Observation Parameters</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationParameters()
-	 * @generated
-	 * @ordered
-	 */
-	protected Map<?, ?> observationParameters;
-
-	/**
-	 * The cached value of the '{@link #getObservationProperties() <em>Observation Properties</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationProperties()
-	 * @generated
-	 * @ordered
-	 */
-	protected Map<?, ?> observationProperties;
-
-	/**
-	 * The default value of the '{@link #getObservationFoiFeature() <em>Observation Foi Feature</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiFeature()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final GeoJsonObject OBSERVATION_FOI_FEATURE_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationFoiFeature() <em>Observation Foi Feature</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiFeature()
-	 * @generated
-	 * @ordered
-	 */
-	protected GeoJsonObject observationFoiFeature = OBSERVATION_FOI_FEATURE_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getObservationFoiDescription() <em>Observation Foi Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String OBSERVATION_FOI_DESCRIPTION_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getObservationFoiDescription() <em>Observation Foi Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getObservationFoiDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected String observationFoiDescription = OBSERVATION_FOI_DESCRIPTION_EDEFAULT;
-
-	/**
 	 * The default value of the '{@link #getThingId() <em>Thing Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -673,6 +419,26 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @ordered
 	 */
 	protected String thingId = THING_ID_EDEFAULT;
+
+	/**
+	 * The default value of the '{@link #getLastObservation() <em>Last Observation</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getLastObservation()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final Object LAST_OBSERVATION_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getLastObservation() <em>Last Observation</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getLastObservation()
+	 * @generated
+	 * @ordered
+	 */
+	protected Object lastObservation = LAST_OBSERVATION_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -1113,305 +879,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
-	public Instant getObservationResultTime() {
-		return observationResultTime;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationResultTime(Instant newObservationResultTime) {
-		Instant oldObservationResultTime = observationResultTime;
-		observationResultTime = newObservationResultTime;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME, oldObservationResultTime, observationResultTime));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Object getObservationResult() {
-		return observationResult;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationResult(Object newObservationResult) {
-		Object oldObservationResult = observationResult;
-		observationResult = newObservationResult;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT, oldObservationResult, observationResult));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Instant getObservationPhenomenonTime() {
-		return observationPhenomenonTime;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationPhenomenonTime(Instant newObservationPhenomenonTime) {
-		Instant oldObservationPhenomenonTime = observationPhenomenonTime;
-		observationPhenomenonTime = newObservationPhenomenonTime;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME, oldObservationPhenomenonTime, observationPhenomenonTime));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getObservationFoiName() {
-		return observationFoiName;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationFoiName(String newObservationFoiName) {
-		String oldObservationFoiName = observationFoiName;
-		observationFoiName = newObservationFoiName;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME, oldObservationFoiName, observationFoiName));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getObservationFoiEncodingType() {
-		return observationFoiEncodingType;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationFoiEncodingType(String newObservationFoiEncodingType) {
-		String oldObservationFoiEncodingType = observationFoiEncodingType;
-		observationFoiEncodingType = newObservationFoiEncodingType;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE, oldObservationFoiEncodingType, observationFoiEncodingType));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getObservationFoiId() {
-		return observationFoiId;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationFoiId(String newObservationFoiId) {
-		String oldObservationFoiId = observationFoiId;
-		observationFoiId = newObservationFoiId;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ID, oldObservationFoiId, observationFoiId));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getObservationId() {
-		return observationId;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationId(String newObservationId) {
-		String oldObservationId = observationId;
-		observationId = newObservationId;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_ID, oldObservationId, observationId));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getObservationResultQuality() {
-		return observationResultQuality;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationResultQuality(String newObservationResultQuality) {
-		String oldObservationResultQuality = observationResultQuality;
-		observationResultQuality = newObservationResultQuality;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY, oldObservationResultQuality, observationResultQuality));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Object getObservationValidTime() {
-		return observationValidTime;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationValidTime(Object newObservationValidTime) {
-		Object oldObservationValidTime = observationValidTime;
-		observationValidTime = newObservationValidTime;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME, oldObservationValidTime, observationValidTime));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Map<?, ?> getObservationParameters() {
-		return observationParameters;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationParameters(Map<?, ?> newObservationParameters) {
-		Map<?, ?> oldObservationParameters = observationParameters;
-		observationParameters = newObservationParameters;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS, oldObservationParameters, observationParameters));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Map<?, ?> getObservationProperties() {
-		return observationProperties;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationProperties(Map<?, ?> newObservationProperties) {
-		Map<?, ?> oldObservationProperties = observationProperties;
-		observationProperties = newObservationProperties;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES, oldObservationProperties, observationProperties));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public GeoJsonObject getObservationFoiFeature() {
-		return observationFoiFeature;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationFoiFeature(GeoJsonObject newObservationFoiFeature) {
-		GeoJsonObject oldObservationFoiFeature = observationFoiFeature;
-		observationFoiFeature = newObservationFoiFeature;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE, oldObservationFoiFeature, observationFoiFeature));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getObservationFoiDescription() {
-		return observationFoiDescription;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setObservationFoiDescription(String newObservationFoiDescription) {
-		String oldObservationFoiDescription = observationFoiDescription;
-		observationFoiDescription = newObservationFoiDescription;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION, oldObservationFoiDescription, observationFoiDescription));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public String getThingId() {
 		return thingId;
 	}
@@ -1427,6 +894,29 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		thingId = newThingId;
 		if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__THING_ID, oldThingId, thingId));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Object getLastObservation() {
+		return lastObservation;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setLastObservation(Object newLastObservation) {
+		Object oldLastObservation = lastObservation;
+		lastObservation = newLastObservation;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION, oldLastObservation, lastObservation));
 	}
 
 	/**
@@ -1473,34 +963,10 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return getSensorProperties();
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES:
 				return getObservedPropertyProperties();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME:
-				return getObservationResultTime();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT:
-				return getObservationResult();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME:
-				return getObservationPhenomenonTime();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME:
-				return getObservationFoiName();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE:
-				return getObservationFoiEncodingType();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ID:
-				return getObservationFoiId();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_ID:
-				return getObservationId();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY:
-				return getObservationResultQuality();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME:
-				return getObservationValidTime();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS:
-				return getObservationParameters();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES:
-				return getObservationProperties();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE:
-				return getObservationFoiFeature();
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
-				return getObservationFoiDescription();
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				return getThingId();
+			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
+				return getLastObservation();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -1567,47 +1033,11 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES:
 				setObservedPropertyProperties((Map<?, ?>)newValue);
 				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME:
-				setObservationResultTime((Instant)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT:
-				setObservationResult(newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME:
-				setObservationPhenomenonTime((Instant)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME:
-				setObservationFoiName((String)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE:
-				setObservationFoiEncodingType((String)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ID:
-				setObservationFoiId((String)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_ID:
-				setObservationId((String)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY:
-				setObservationResultQuality((String)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME:
-				setObservationValidTime(newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS:
-				setObservationParameters((Map<?, ?>)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES:
-				setObservationProperties((Map<?, ?>)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE:
-				setObservationFoiFeature((GeoJsonObject)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
-				setObservationFoiDescription((String)newValue);
-				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				setThingId((String)newValue);
+				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
+				setLastObservation(newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -1675,47 +1105,11 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES:
 				setObservedPropertyProperties((Map<?, ?>)null);
 				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME:
-				setObservationResultTime(OBSERVATION_RESULT_TIME_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT:
-				setObservationResult(OBSERVATION_RESULT_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME:
-				setObservationPhenomenonTime(OBSERVATION_PHENOMENON_TIME_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME:
-				setObservationFoiName(OBSERVATION_FOI_NAME_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE:
-				setObservationFoiEncodingType(OBSERVATION_FOI_ENCODING_TYPE_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ID:
-				setObservationFoiId(OBSERVATION_FOI_ID_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_ID:
-				setObservationId(OBSERVATION_ID_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY:
-				setObservationResultQuality(OBSERVATION_RESULT_QUALITY_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME:
-				setObservationValidTime(OBSERVATION_VALID_TIME_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS:
-				setObservationParameters((Map<?, ?>)null);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES:
-				setObservationProperties((Map<?, ?>)null);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE:
-				setObservationFoiFeature(OBSERVATION_FOI_FEATURE_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
-				setObservationFoiDescription(OBSERVATION_FOI_DESCRIPTION_EDEFAULT);
-				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				setThingId(THING_ID_EDEFAULT);
+				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
+				setLastObservation(LAST_OBSERVATION_EDEFAULT);
 				return;
 		}
 		super.eUnset(featureID);
@@ -1765,34 +1159,10 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return sensorProperties != null;
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES:
 				return observedPropertyProperties != null;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME:
-				return OBSERVATION_RESULT_TIME_EDEFAULT == null ? observationResultTime != null : !OBSERVATION_RESULT_TIME_EDEFAULT.equals(observationResultTime);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT:
-				return OBSERVATION_RESULT_EDEFAULT == null ? observationResult != null : !OBSERVATION_RESULT_EDEFAULT.equals(observationResult);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME:
-				return OBSERVATION_PHENOMENON_TIME_EDEFAULT == null ? observationPhenomenonTime != null : !OBSERVATION_PHENOMENON_TIME_EDEFAULT.equals(observationPhenomenonTime);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME:
-				return OBSERVATION_FOI_NAME_EDEFAULT == null ? observationFoiName != null : !OBSERVATION_FOI_NAME_EDEFAULT.equals(observationFoiName);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE:
-				return OBSERVATION_FOI_ENCODING_TYPE_EDEFAULT == null ? observationFoiEncodingType != null : !OBSERVATION_FOI_ENCODING_TYPE_EDEFAULT.equals(observationFoiEncodingType);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_ID:
-				return OBSERVATION_FOI_ID_EDEFAULT == null ? observationFoiId != null : !OBSERVATION_FOI_ID_EDEFAULT.equals(observationFoiId);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_ID:
-				return OBSERVATION_ID_EDEFAULT == null ? observationId != null : !OBSERVATION_ID_EDEFAULT.equals(observationId);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY:
-				return OBSERVATION_RESULT_QUALITY_EDEFAULT == null ? observationResultQuality != null : !OBSERVATION_RESULT_QUALITY_EDEFAULT.equals(observationResultQuality);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME:
-				return OBSERVATION_VALID_TIME_EDEFAULT == null ? observationValidTime != null : !OBSERVATION_VALID_TIME_EDEFAULT.equals(observationValidTime);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS:
-				return observationParameters != null;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES:
-				return observationProperties != null;
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE:
-				return OBSERVATION_FOI_FEATURE_EDEFAULT == null ? observationFoiFeature != null : !OBSERVATION_FOI_FEATURE_EDEFAULT.equals(observationFoiFeature);
-			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
-				return OBSERVATION_FOI_DESCRIPTION_EDEFAULT == null ? observationFoiDescription != null : !OBSERVATION_FOI_DESCRIPTION_EDEFAULT.equals(observationFoiDescription);
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				return THING_ID_EDEFAULT == null ? thingId != null : !THING_ID_EDEFAULT.equals(thingId);
+			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
+				return LAST_OBSERVATION_EDEFAULT == null ? lastObservation != null : !LAST_OBSERVATION_EDEFAULT.equals(lastObservation);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -1843,34 +1213,10 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		result.append(sensorProperties);
 		result.append(", observedPropertyProperties: ");
 		result.append(observedPropertyProperties);
-		result.append(", observationResultTime: ");
-		result.append(observationResultTime);
-		result.append(", observationResult: ");
-		result.append(observationResult);
-		result.append(", observationPhenomenonTime: ");
-		result.append(observationPhenomenonTime);
-		result.append(", observationFoiName: ");
-		result.append(observationFoiName);
-		result.append(", observationFoiEncodingType: ");
-		result.append(observationFoiEncodingType);
-		result.append(", observationFoiId: ");
-		result.append(observationFoiId);
-		result.append(", observationId: ");
-		result.append(observationId);
-		result.append(", observationResultQuality: ");
-		result.append(observationResultQuality);
-		result.append(", observationValidTime: ");
-		result.append(observationValidTime);
-		result.append(", observationParameters: ");
-		result.append(observationParameters);
-		result.append(", observationProperties: ");
-		result.append(observationProperties);
-		result.append(", observationFoiFeature: ");
-		result.append(observationFoiFeature);
-		result.append(", observationFoiDescription: ");
-		result.append(observationFoiDescription);
 		result.append(", thingId: ");
 		result.append(thingId);
+		result.append(", lastObservation: ");
+		result.append(lastObservation);
 		result.append(')');
 		return result.toString();
 	}

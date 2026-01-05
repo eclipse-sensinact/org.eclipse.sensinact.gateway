@@ -65,8 +65,8 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedSensor> request) {
         String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
-        String datastreamId = DtoToModelMapper.extractSecondIdSegment(request.id());
-        String sensorId = DtoToModelMapper.extractThirdIdSegment(request.id());
+        String datastreamId = "datastream";
+        String sensorId = DtoToModelMapper.extractSecondIdSegment(request.id());
         if (providerId == null || datastreamId == null || sensorId == null) {
             throw new BadRequestException("bad id format");
         }

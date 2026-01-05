@@ -16,8 +16,6 @@ import java.time.Instant;
 
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-
 import org.eclipse.sensinact.model.core.provider.Service;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -49,20 +47,8 @@ import org.osgi.annotation.versioning.ProviderType;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorId <em>Sensor Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorProperties <em>Sensor Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyProperties <em>Observed Property Properties</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultTime <em>Observation Result Time</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResult <em>Observation Result</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationPhenomenonTime <em>Observation Phenomenon Time</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiName <em>Observation Foi Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiEncodingType <em>Observation Foi Encoding Type</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiId <em>Observation Foi Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationId <em>Observation Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultQuality <em>Observation Result Quality</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationValidTime <em>Observation Valid Time</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationParameters <em>Observation Parameters</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationProperties <em>Observation Properties</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiFeature <em>Observation Foi Feature</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiDescription <em>Observation Foi Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getThingId <em>Thing Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation <em>Last Observation</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService()
@@ -468,292 +454,6 @@ public interface DataStreamService extends Service {
 	void setObservedPropertyProperties(Map<?, ?> value);
 
 	/**
-	 * Returns the value of the '<em><b>Observation Result Time</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Result Time</em>' attribute.
-	 * @see #setObservationResultTime(Instant)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationResultTime()
-	 * @model dataType="org.eclipse.sensinact.model.core.provider.EInstant"
-	 * @generated
-	 */
-	Instant getObservationResultTime();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultTime <em>Observation Result Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Result Time</em>' attribute.
-	 * @see #getObservationResultTime()
-	 * @generated
-	 */
-	void setObservationResultTime(Instant value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Result</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Result</em>' attribute.
-	 * @see #setObservationResult(Object)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationResult()
-	 * @model
-	 * @generated
-	 */
-	Object getObservationResult();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResult <em>Observation Result</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Result</em>' attribute.
-	 * @see #getObservationResult()
-	 * @generated
-	 */
-	void setObservationResult(Object value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Phenomenon Time</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Phenomenon Time</em>' attribute.
-	 * @see #setObservationPhenomenonTime(Instant)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationPhenomenonTime()
-	 * @model dataType="org.eclipse.sensinact.model.core.provider.EInstant"
-	 * @generated
-	 */
-	Instant getObservationPhenomenonTime();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationPhenomenonTime <em>Observation Phenomenon Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Phenomenon Time</em>' attribute.
-	 * @see #getObservationPhenomenonTime()
-	 * @generated
-	 */
-	void setObservationPhenomenonTime(Instant value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Foi Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Foi Name</em>' attribute.
-	 * @see #setObservationFoiName(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationFoiName()
-	 * @model
-	 * @generated
-	 */
-	String getObservationFoiName();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiName <em>Observation Foi Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Foi Name</em>' attribute.
-	 * @see #getObservationFoiName()
-	 * @generated
-	 */
-	void setObservationFoiName(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Foi Encoding Type</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Foi Encoding Type</em>' attribute.
-	 * @see #setObservationFoiEncodingType(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationFoiEncodingType()
-	 * @model
-	 * @generated
-	 */
-	String getObservationFoiEncodingType();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiEncodingType <em>Observation Foi Encoding Type</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Foi Encoding Type</em>' attribute.
-	 * @see #getObservationFoiEncodingType()
-	 * @generated
-	 */
-	void setObservationFoiEncodingType(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Foi Id</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Foi Id</em>' attribute.
-	 * @see #setObservationFoiId(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationFoiId()
-	 * @model
-	 * @generated
-	 */
-	String getObservationFoiId();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiId <em>Observation Foi Id</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Foi Id</em>' attribute.
-	 * @see #getObservationFoiId()
-	 * @generated
-	 */
-	void setObservationFoiId(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Id</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Id</em>' attribute.
-	 * @see #setObservationId(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationId()
-	 * @model
-	 * @generated
-	 */
-	String getObservationId();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationId <em>Observation Id</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Id</em>' attribute.
-	 * @see #getObservationId()
-	 * @generated
-	 */
-	void setObservationId(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Result Quality</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Result Quality</em>' attribute.
-	 * @see #setObservationResultQuality(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationResultQuality()
-	 * @model
-	 * @generated
-	 */
-	String getObservationResultQuality();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultQuality <em>Observation Result Quality</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Result Quality</em>' attribute.
-	 * @see #getObservationResultQuality()
-	 * @generated
-	 */
-	void setObservationResultQuality(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Valid Time</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Valid Time</em>' attribute.
-	 * @see #setObservationValidTime(Object)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationValidTime()
-	 * @model
-	 * @generated
-	 */
-	Object getObservationValidTime();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationValidTime <em>Observation Valid Time</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Valid Time</em>' attribute.
-	 * @see #getObservationValidTime()
-	 * @generated
-	 */
-	void setObservationValidTime(Object value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Parameters</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Parameters</em>' attribute.
-	 * @see #setObservationParameters(Map)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationParameters()
-	 * @model transient="true"
-	 * @generated
-	 */
-	Map<?, ?> getObservationParameters();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationParameters <em>Observation Parameters</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Parameters</em>' attribute.
-	 * @see #getObservationParameters()
-	 * @generated
-	 */
-	void setObservationParameters(Map<?, ?> value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Properties</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Properties</em>' attribute.
-	 * @see #setObservationProperties(Map)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationProperties()
-	 * @model transient="true"
-	 * @generated
-	 */
-	Map<?, ?> getObservationProperties();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationProperties <em>Observation Properties</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Properties</em>' attribute.
-	 * @see #getObservationProperties()
-	 * @generated
-	 */
-	void setObservationProperties(Map<?, ?> value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Foi Feature</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Foi Feature</em>' attribute.
-	 * @see #setObservationFoiFeature(GeoJsonObject)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationFoiFeature()
-	 * @model dataType="org.eclipse.sensinact.model.core.provider.EGeoJsonObject"
-	 * @generated
-	 */
-	GeoJsonObject getObservationFoiFeature();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiFeature <em>Observation Foi Feature</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Foi Feature</em>' attribute.
-	 * @see #getObservationFoiFeature()
-	 * @generated
-	 */
-	void setObservationFoiFeature(GeoJsonObject value);
-
-	/**
-	 * Returns the value of the '<em><b>Observation Foi Description</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observation Foi Description</em>' attribute.
-	 * @see #setObservationFoiDescription(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationFoiDescription()
-	 * @model
-	 * @generated
-	 */
-	String getObservationFoiDescription();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiDescription <em>Observation Foi Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observation Foi Description</em>' attribute.
-	 * @see #getObservationFoiDescription()
-	 * @generated
-	 */
-	void setObservationFoiDescription(String value);
-
-	/**
 	 * Returns the value of the '<em><b>Thing Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -774,5 +474,27 @@ public interface DataStreamService extends Service {
 	 * @generated
 	 */
 	void setThingId(String value);
+
+	/**
+	 * Returns the value of the '<em><b>Last Observation</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Last Observation</em>' attribute.
+	 * @see #setLastObservation(Object)
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_LastObservation()
+	 * @model
+	 * @generated
+	 */
+	Object getLastObservation();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation <em>Last Observation</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Last Observation</em>' attribute.
+	 * @see #getLastObservation()
+	 * @generated
+	 */
+	void setLastObservation(Object value);
 
 } // DataStreamService

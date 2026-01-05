@@ -439,130 +439,22 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	int DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES = ProviderPackage.SERVICE_FEATURE_COUNT + 17;
 
 	/**
-	 * The feature id for the '<em><b>Observation Result Time</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME = ProviderPackage.SERVICE_FEATURE_COUNT + 18;
-
-	/**
-	 * The feature id for the '<em><b>Observation Result</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_RESULT = ProviderPackage.SERVICE_FEATURE_COUNT + 19;
-
-	/**
-	 * The feature id for the '<em><b>Observation Phenomenon Time</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME = ProviderPackage.SERVICE_FEATURE_COUNT + 20;
-
-	/**
-	 * The feature id for the '<em><b>Observation Foi Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME = ProviderPackage.SERVICE_FEATURE_COUNT + 21;
-
-	/**
-	 * The feature id for the '<em><b>Observation Foi Encoding Type</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE = ProviderPackage.SERVICE_FEATURE_COUNT + 22;
-
-	/**
-	 * The feature id for the '<em><b>Observation Foi Id</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_FOI_ID = ProviderPackage.SERVICE_FEATURE_COUNT + 23;
-
-	/**
-	 * The feature id for the '<em><b>Observation Id</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_ID = ProviderPackage.SERVICE_FEATURE_COUNT + 24;
-
-	/**
-	 * The feature id for the '<em><b>Observation Result Quality</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY = ProviderPackage.SERVICE_FEATURE_COUNT + 25;
-
-	/**
-	 * The feature id for the '<em><b>Observation Valid Time</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME = ProviderPackage.SERVICE_FEATURE_COUNT + 26;
-
-	/**
-	 * The feature id for the '<em><b>Observation Parameters</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS = ProviderPackage.SERVICE_FEATURE_COUNT + 27;
-
-	/**
-	 * The feature id for the '<em><b>Observation Properties</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES = ProviderPackage.SERVICE_FEATURE_COUNT + 28;
-
-	/**
-	 * The feature id for the '<em><b>Observation Foi Feature</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE = ProviderPackage.SERVICE_FEATURE_COUNT + 29;
-
-	/**
-	 * The feature id for the '<em><b>Observation Foi Description</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION = ProviderPackage.SERVICE_FEATURE_COUNT + 30;
-
-	/**
 	 * The feature id for the '<em><b>Thing Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int DATA_STREAM_SERVICE__THING_ID = ProviderPackage.SERVICE_FEATURE_COUNT + 31;
+	int DATA_STREAM_SERVICE__THING_ID = ProviderPackage.SERVICE_FEATURE_COUNT + 18;
+
+	/**
+	 * The feature id for the '<em><b>Last Observation</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int DATA_STREAM_SERVICE__LAST_OBSERVATION = ProviderPackage.SERVICE_FEATURE_COUNT + 19;
 
 	/**
 	 * The number of structural features of the '<em>Data Stream Service</em>' class.
@@ -571,7 +463,7 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int DATA_STREAM_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 32;
+	int DATA_STREAM_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 20;
 
 	/**
 	 * The operation id for the '<em>EIs Set</em>' operation.
@@ -1169,149 +1061,6 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	EAttribute getDataStreamService_ObservedPropertyProperties();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultTime <em>Observation Result Time</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Result Time</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultTime()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationResultTime();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResult <em>Observation Result</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Result</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResult()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationResult();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationPhenomenonTime <em>Observation Phenomenon Time</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Phenomenon Time</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationPhenomenonTime()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationPhenomenonTime();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiName <em>Observation Foi Name</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Foi Name</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiName()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationFoiName();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiEncodingType <em>Observation Foi Encoding Type</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Foi Encoding Type</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiEncodingType()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationFoiEncodingType();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiId <em>Observation Foi Id</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Foi Id</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiId()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationFoiId();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationId <em>Observation Id</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Id</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationId()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationId();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultQuality <em>Observation Result Quality</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Result Quality</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationResultQuality()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationResultQuality();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationValidTime <em>Observation Valid Time</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Valid Time</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationValidTime()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationValidTime();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationParameters <em>Observation Parameters</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Parameters</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationParameters()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationParameters();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationProperties <em>Observation Properties</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Properties</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationProperties()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationProperties();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiFeature <em>Observation Foi Feature</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Foi Feature</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiFeature()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationFoiFeature();
-
-	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiDescription <em>Observation Foi Description</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Observation Foi Description</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationFoiDescription()
-	 * @see #getDataStreamService()
-	 * @generated
-	 */
-	EAttribute getDataStreamService_ObservationFoiDescription();
-
-	/**
 	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getThingId <em>Thing Id</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1321,6 +1070,17 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	 * @generated
 	 */
 	EAttribute getDataStreamService_ThingId();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation <em>Last Observation</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Last Observation</em>'.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation()
+	 * @see #getDataStreamService()
+	 * @generated
+	 */
+	EAttribute getDataStreamService_LastObservation();
 
 	/**
 	 * Returns the meta object for class '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService <em>Sensor Thing Service</em>}'.
@@ -1686,116 +1446,20 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 		EAttribute DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES = eINSTANCE.getDataStreamService_ObservedPropertyProperties();
 
 		/**
-		 * The meta object literal for the '<em><b>Observation Result Time</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME = eINSTANCE.getDataStreamService_ObservationResultTime();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Result</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_RESULT = eINSTANCE.getDataStreamService_ObservationResult();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Phenomenon Time</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME = eINSTANCE.getDataStreamService_ObservationPhenomenonTime();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Foi Name</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME = eINSTANCE.getDataStreamService_ObservationFoiName();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Foi Encoding Type</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE = eINSTANCE.getDataStreamService_ObservationFoiEncodingType();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Foi Id</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_FOI_ID = eINSTANCE.getDataStreamService_ObservationFoiId();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Id</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_ID = eINSTANCE.getDataStreamService_ObservationId();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Result Quality</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY = eINSTANCE.getDataStreamService_ObservationResultQuality();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Valid Time</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME = eINSTANCE.getDataStreamService_ObservationValidTime();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Parameters</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS = eINSTANCE.getDataStreamService_ObservationParameters();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Properties</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES = eINSTANCE.getDataStreamService_ObservationProperties();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Foi Feature</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE = eINSTANCE.getDataStreamService_ObservationFoiFeature();
-
-		/**
-		 * The meta object literal for the '<em><b>Observation Foi Description</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION = eINSTANCE.getDataStreamService_ObservationFoiDescription();
-
-		/**
 		 * The meta object literal for the '<em><b>Thing Id</b></em>' attribute feature.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
 		 * @generated
 		 */
 		EAttribute DATA_STREAM_SERVICE__THING_ID = eINSTANCE.getDataStreamService_ThingId();
+
+		/**
+		 * The meta object literal for the '<em><b>Last Observation</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute DATA_STREAM_SERVICE__LAST_OBSERVATION = eINSTANCE.getDataStreamService_LastObservation();
 
 		/**
 		 * The meta object literal for the '{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl <em>Sensor Thing Service</em>}' class.

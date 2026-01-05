@@ -193,24 +193,24 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
-            ResourceSnapshot resourceSnapshot, ICriterion filter) {
+            ServiceSnapshot serviceSnapshot, ICriterion filter) {
         ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,
+        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, serviceSnapshot,
                 filter, 0);
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ServiceSnapshot serviceSnapshot,
             ICriterion filter, int localResultLimit) {
-
+        // TODO
         ResultList<Observation> list = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
-                mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
+                mapper, uriInfo, expansions, null, filter, localResultLimit);
 
-        if (list.value().isEmpty() && resourceSnapshot.isSet()) {
-            list = new ResultList<Observation>(null, null, DtoMapperGet
-                    .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
-                    .map(List::of).orElse(List.of()));
-        }
+//        if (list.value().isEmpty() && resourceSnapshot.isSet()) {
+//            list = new ResultList<Observation>(null, null, DtoMapperGet
+//                    .toObservation(userSession, application, mapper, uriInfo, expansions, filter, serviceSnapshot)
+//                    .map(List::of).orElse(List.of()));
+//        }
 
         return list;
     }

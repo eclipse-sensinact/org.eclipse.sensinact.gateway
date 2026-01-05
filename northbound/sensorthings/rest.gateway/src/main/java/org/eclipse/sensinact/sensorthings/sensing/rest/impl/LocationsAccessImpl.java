@@ -41,7 +41,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     @Override
     public Location getLocation(String id) {
         String provider = DtoMapperGet.extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), providerSnapshot.getService("location"));
 
@@ -57,7 +57,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         String provider = extractFirstIdSegment(id);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
@@ -74,7 +74,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     @Override
     public HistoricalLocation getLocationHistoricalLocation(String id, String id2) {
         String provider = DtoMapperGet.extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
         Optional<HistoricalLocation> hl = DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
 
@@ -90,7 +90,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
             throw new NotFoundException();
         }
         String provider = DtoMapperGet.extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
         return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(THINGS), providerSnapshot);
     }
@@ -108,16 +108,16 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     @Override
     public Thing getLocationThing(String id, String id2) {
         String provider = DtoMapperGet.extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
         return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(THINGS), providerSnapshot);
     }
 
     @Override
     public ResultList<Datastream> getLocationThingDatastreams(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), validateAndGetProvider(provider));
+                parseFilter(DATASTREAMS), DatastreamsAccessImpl.getListDatastreamServices(getSession(), id2));
     }
 
     @Override
@@ -125,7 +125,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         String provider = extractFirstIdSegment(id);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(getSession(), provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {

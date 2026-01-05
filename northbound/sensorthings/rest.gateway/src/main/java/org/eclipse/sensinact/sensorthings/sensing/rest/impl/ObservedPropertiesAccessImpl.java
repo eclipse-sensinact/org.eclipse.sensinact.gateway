@@ -21,6 +21,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 
 import java.util.List;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -59,10 +60,9 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
             return new ObservedProperty(DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/ObservedProperties", id),
                     op.id(), op.name(), op.description(), op.definition(), op.properties(), null);
         } else {
-            String datastreamLink = getDatastreamLink(id);
 
             return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(OBSERVED_PROPERTIES), validateAndGeService(id), datastreamLink);
+                    parseFilter(OBSERVED_PROPERTIES), validateAndGeService(id));
 
         }
     }
@@ -88,8 +88,9 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
+        ProviderSnapshot provider = validateAndGetProvider(id);
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
+                getExpansions(), provider.getService("datastream"), parseFilter(OBSERVATIONS), 0);
     }
 
     @Override

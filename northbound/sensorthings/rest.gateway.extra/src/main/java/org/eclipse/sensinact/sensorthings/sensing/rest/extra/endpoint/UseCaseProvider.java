@@ -25,6 +25,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCa
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.LocationsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservationsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservedPropertiesExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.RefIdUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ThingsExtraUseCase;
 
@@ -53,7 +54,8 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
 
     private final List<Class<? extends AbstractExtraUseCase<?, ?>>> knownExtras = List.of(DatastreamsExtraUseCase.class,
             FeatureOfInterestExtraUseCase.class, LocationsExtraUseCase.class, ObservationsExtraUseCase.class,
-            ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class, ThingsExtraUseCase.class);
+            ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class, ThingsExtraUseCase.class,
+            RefIdUseCase.class);
 
     private final Map<Class<? extends AbstractExtraUseCase<?, ?>>, IExtraUseCase<?, ?>> useCases = new ConcurrentHashMap<>();
 
