@@ -69,11 +69,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
 
     }
 
-    public ExtraUseCaseResponse<ProviderSnapshot> patch(ExtraUseCaseRequest<ExpandedThing> request) {
-        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
-
-    }
-
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedThing> request) {
         // check if Thing already exists with location get locations
