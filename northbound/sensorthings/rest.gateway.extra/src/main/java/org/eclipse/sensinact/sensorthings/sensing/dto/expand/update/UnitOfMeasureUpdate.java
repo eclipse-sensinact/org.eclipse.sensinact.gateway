@@ -1,15 +1,12 @@
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
-import java.util.Map;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.ServiceModel;
 
-public record ObservedPropertyUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
-        @Service String serviceName, Object id, String name, String description, String definition,
-        Map<String, Object> properties) {
+public record UnitOfMeasureUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
+        @Service String serviceName, String name, String symbol, String definition) {
 
 }
