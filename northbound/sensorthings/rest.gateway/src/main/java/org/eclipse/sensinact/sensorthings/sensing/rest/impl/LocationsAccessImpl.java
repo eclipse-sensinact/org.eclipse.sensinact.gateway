@@ -43,7 +43,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(LOCATIONS), providerSnapshot.getService("locations"));
+                parseFilter(LOCATIONS), providerSnapshot.getService("location"));
 
         if (!id.equals(l.id())) {
             throw new NotFoundException();

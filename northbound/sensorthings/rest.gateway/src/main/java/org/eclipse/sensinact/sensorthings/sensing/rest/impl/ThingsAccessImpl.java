@@ -41,6 +41,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
@@ -70,15 +71,18 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Datastream getThingDatastream(String id, String id2) {
-        String providerId = extractFirstIdSegment(id2);
-        String idDatastream = id2.substring(providerId.length() + 1);
-        if (!id.equals(providerId)) {
-            throw new NotFoundException();
+
+        ProviderSnapshot providerThing = validateAndGetProvider(id);
+        ServiceSnapshot serviceThing = providerThing.getService("thing");
+        @SuppressWarnings("unchecked")
+        List<String> listDatastream = UtilIds.getResourceField(serviceThing, "datastreamIds", List.class);
+        if (listDatastream == null || !listDatastream.contains(id2)) {
+            throw new NotFoundException(String.format("datastream %s not exists in %s", id2, id));
         }
-        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        ProviderSnapshot providerDatastream = validateAndGetProvider(id2);
 
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), provider.getService(idDatastream));
+                parseFilter(DATASTREAMS), providerDatastream.getService("datastream"));
 
         if (!id2.equals(d.id())) {
             throw new NotFoundException();
@@ -237,7 +241,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         }
         ProviderSnapshot provider = validateAndGetProvider(providerLocation);
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(LOCATIONS), provider.getService("locations"));
+                parseFilter(LOCATIONS), provider.getService("location"));
 
         if (!id2.equals(l.id())) {
             throw new NotFoundException();
