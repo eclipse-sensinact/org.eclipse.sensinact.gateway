@@ -14,12 +14,16 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -29,7 +33,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * sensor
  */
-public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Object> {
+public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor, Object> {
 
     private final DataUpdate dataUpdate;
     private final IAccessServiceUseCase serviceUseCase;
@@ -59,7 +63,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ob
     }
 
     @Override
-    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedSensor> request) {
+    public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedSensor> request) {
         String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
         String datastreamId = DtoToModelMapper.extractSecondIdSegment(request.id());
         String sensorId = DtoToModelMapper.extractThirdIdSegment(request.id());
@@ -83,8 +87,9 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ob
             ExpandedSensor createdSensor = updateInMemorySensor(request, sensor);
             return new ExtraUseCaseResponse<Object>(request.id(), createdSensor);
         } else {
+            String providerId = UtilIds.extractFirstIdSegment(request.id());
 
-            List<SensorThingsUpdate> listDtoModels = toDtos(request);
+            List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
             // update/create provider
             try {
@@ -93,7 +98,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ob
             } catch (InvocationTargetException | InterruptedException e) {
                 return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
             }
-            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), request.id());
+            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
             if (serviceSnapshot == null) {
                 return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
             }
@@ -128,6 +133,12 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ob
 
     public void removeInMemorySensor(String id) {
         cacheSensor.removeDto(id);
+    }
+
+    @Override
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedSensor> request) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

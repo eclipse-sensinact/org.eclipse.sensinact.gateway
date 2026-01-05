@@ -17,10 +17,10 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/description"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/encodingType"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/location"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/sensorThingId"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/id"/>
     </genClasses>
     <genClasses ecoreClass="sensorthings.extended.ecore#//DataStreamService">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/sensorThingId"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/id"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/description"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/timestamp"/>
@@ -51,17 +51,21 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/observationProperties"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/observationFoiFeature"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/observationFoiDescription"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/thingId"/>
     </genClasses>
     <genClasses ecoreClass="sensorthings.extended.ecore#//SensorThingService">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//SensorThingService/dataStreams"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingService/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingService/description"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingService/properties"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingService/id"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingService/locationIds"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingService/datastreamIds"/>
     </genClasses>
     <genClasses ecoreClass="sensorthings.extended.ecore#//SensorThingLocation">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//SensorThingLocation/locations"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//SensorThingLocation/location"/>
+    </genClasses>
+    <genClasses ecoreClass="sensorthings.extended.ecore#//SensorThingDatastream">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//SensorThingDatastream/datastream"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

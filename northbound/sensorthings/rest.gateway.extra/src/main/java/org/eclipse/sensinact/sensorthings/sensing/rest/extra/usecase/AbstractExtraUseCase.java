@@ -13,12 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.List;
-
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-
-import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -30,7 +24,7 @@ import jakarta.ws.rs.ext.Providers;
  * @param <M>
  * @param <S>
  */
-public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUseCase<M, S> {
+public abstract class AbstractExtraUseCase<M, S> implements IExtraUseCase<M, S> {
 
     private Class<M> type;
 
@@ -40,14 +34,6 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     public static Class<?> getUseCaseTypeParameter(Class<? extends AbstractExtraUseCase<?, ?>> c) {
         return internalGetUseCaseTypeParameter(c);
-    }
-
-    protected abstract List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<M> request);
-
-    protected void checkRequireField(ExtraUseCaseRequest<M> request) {
-        if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
-            DtoToModelMapper.checkRequireField(request.model());
-        }
     }
 
     /**
@@ -63,14 +49,6 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
         var superclass = clazz.getGenericSuperclass();
         return (Class<T>) ((ParameterizedType) superclass).getActualTypeArguments()[0];
     }
-
-    /**
-     * get id field for EMF
-     *
-     * @param aDto
-     * @return
-     */
-    public abstract String getId(ExtraUseCaseRequest<M> request);
 
     /**
      * get generic type (dto) for use case

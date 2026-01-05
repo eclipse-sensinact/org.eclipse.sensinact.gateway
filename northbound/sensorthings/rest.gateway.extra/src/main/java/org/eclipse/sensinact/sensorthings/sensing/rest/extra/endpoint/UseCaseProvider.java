@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.sensinact.core.annotation.dto.Provider;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.AbstractExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.DatastreamsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
@@ -56,7 +55,7 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
             FeatureOfInterestExtraUseCase.class, LocationsExtraUseCase.class, ObservationsExtraUseCase.class,
             ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class, ThingsExtraUseCase.class);
 
-    private final Map<Class<? extends AbstractExtraUseCase<?, ?>>, IExtraUseCase<? extends Id, ?>> useCases = new ConcurrentHashMap<>();
+    private final Map<Class<? extends AbstractExtraUseCase<?, ?>>, IExtraUseCase<?, ?>> useCases = new ConcurrentHashMap<>();
 
     @Override
     @SuppressWarnings("unchecked")

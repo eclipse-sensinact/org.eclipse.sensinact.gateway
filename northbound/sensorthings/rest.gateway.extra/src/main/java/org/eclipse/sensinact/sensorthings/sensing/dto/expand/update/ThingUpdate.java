@@ -38,7 +38,9 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
         @Service("thing") @Resource("id") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object thingId,
         @Service("thing") @Resource("id") @Metadata(onMap = {
                 USE_KEYS_AS_FIELDS }) Map<String, Object> properties,
-        @Service("thing") @Resource("locationIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> locationIds)
+        // link to thing
+        @Service("thing") @Resource("locationIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> locationIds,
+        @Service("thing") @Resource("datastreamIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> datastreamIds)
         implements SensorThingsUpdate{
 
     public ThingUpdate {
@@ -55,8 +57,9 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
     }
 
     public ThingUpdate(String providerId, String friendlyName, String description, Object thingId,
-            Map<String, Object> properties, List<String> locationIds) {
-        this(SENSOR_THING_DEVICE, providerId, friendlyName, description, thingId, properties, locationIds);
+            Map<String, Object> properties, List<String> locationIds, List<String> datastreamIds) {
+        this(SENSOR_THING_DEVICE, providerId, friendlyName, description, thingId, properties, locationIds,
+                datastreamIds);
     }
 
 }

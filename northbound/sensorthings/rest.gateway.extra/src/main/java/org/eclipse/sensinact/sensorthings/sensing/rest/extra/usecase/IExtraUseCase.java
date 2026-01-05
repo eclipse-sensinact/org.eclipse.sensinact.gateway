@@ -14,12 +14,11 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.UriInfo;
 
-public interface IExtraUseCase<M extends Id, S> {
+public interface IExtraUseCase<M, S> {
 
     /**
      * generic class for use case response
@@ -50,16 +49,31 @@ public interface IExtraUseCase<M extends Id, S> {
      * @param <M>
      */
     public record ExtraUseCaseRequest<M>(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
-            String id, M model, String parentId) {
+            String id, M model, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 String id) {
-            this(session, mapper, uriInfo, method, id, null, null);
+            this(session, mapper, uriInfo, method, id, null, null, null, null);
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 M model, String parentId) {
-            this(session, mapper, uriInfo, method, null, model, parentId);
+            this(session, mapper, uriInfo, method, null, model, parentId, null, null);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                M model, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
+            this(session, mapper, uriInfo, method, null, model, parentId, clazzModel, clazzRef);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                String id, M model, String parentId) {
+            this(session, mapper, uriInfo, method, id, model, parentId, null, null);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                M model) {
+            this(session, mapper, uriInfo, method, null, model, null, null, null);
         }
 
     }

@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest;
 
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,4 +36,10 @@ public interface IExtraDelegate {
 
     public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             String id, D dto, String parentId);
+
+    public <S> S updateRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method, RefId dto,
+            String parentId, Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef);
+
+    public <S> S createRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method, RefId dto,
+            String parentId, Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef);
 }

@@ -25,7 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocation#getLocations <em>Locations</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocation#getLocation <em>Location</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocation()
@@ -35,25 +35,25 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface SensorThingLocation extends DynamicProvider {
 	/**
-	 * Returns the value of the '<em><b>Locations</b></em>' reference.
+	 * Returns the value of the '<em><b>Location</b></em>' reference.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Locations</em>' reference.
-	 * @see #setLocations(SensorThingLocationService)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocation_Locations()
+	 * @return the value of the '<em>Location</em>' reference.
+	 * @see #setLocation(SensorThingLocationService)
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocation_Location()
 	 * @model
 	 * @generated
 	 */
-	SensorThingLocationService getLocations();
+	SensorThingLocationService getLocation();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocation#getLocations <em>Locations</em>}' reference.
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocation#getLocation <em>Location</em>}' reference.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Locations</em>' reference.
-	 * @see #getLocations()
+	 * @param value the new value of the '<em>Location</em>' reference.
+	 * @see #getLocation()
 	 * @generated
 	 */
-	void setLocations(SensorThingLocationService value);
+	void setLocation(SensorThingLocationService value);
 
 } // SensorThingLocation

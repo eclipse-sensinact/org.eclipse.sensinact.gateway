@@ -42,6 +42,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -103,6 +104,7 @@ public class DtoMapper {
                 locationsLink);
 
         if (expansions.shouldExpand("Datastreams", thing)) {
+
             expansions.addExpansion("Datastreams", thing, toDatastreams(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Datastreams"), filter, provider));
         }
@@ -137,7 +139,7 @@ public class DtoMapper {
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
 
         String providerName = service.getProvider().getName();
-        String id = String.format("%s~%s", providerName, service.getName());
+        String id = String.format("%s", providerName);
 
         String name = getResourceField(service, FRIENDLY_NAME, String.class);
         String description = getResourceField(service, DESCRIPTION, String.class);
@@ -186,7 +188,7 @@ public class DtoMapper {
     public static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
             String datastreamLink) {
-        String sensorId = String.format("%s~%s~%s", service.getProvider().getName(), service.getName(),
+        String sensorId = String.format("%s~%s", service.getProvider().getName(),
                 getResourceField(service, "sensorId", String.class));
         String sensorName = getResourceField(service, "sensorName", String.class);
         String sensorDescription = getResourceField(service, "sensorDescription", String.class);
@@ -219,7 +221,9 @@ public class DtoMapper {
     public static ObservedProperty toObservedProperty(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ServiceSnapshot service, String datastreamLink) {
+        String datastreamId = getResourceField(service, "id", String.class);
         String observedPropertyId = getResourceField(service, "observedPropertyId", String.class);
+        String id = String.format("%s~%s", datastreamId, observedPropertyId);
         String observedPropertyName = getResourceField(service, "observedPropertyName", String.class);
         String observedPropertyDescription = getResourceField(service, "observedPropertyDescription", String.class);
         String observedPropertyDefinition = getResourceField(service, "observedPropertyDefinition", String.class);
@@ -227,11 +231,10 @@ public class DtoMapper {
         Map<String, Object> observedPropertyProperty = getResourceField(service, "observedPropertyProperties",
                 Map.class);
 
-        String observedPropertyLink = getLink(uriInfo, datastreamLink, "/ObservedProperty({id})", observedPropertyId);
+        String observedPropertyLink = getLink(uriInfo, datastreamLink, "/ObservedProperty({id})", id);
 
-        ObservedProperty observedProperty = new ObservedProperty(observedPropertyLink, observedPropertyId,
-                observedPropertyName, observedPropertyDescription, observedPropertyDefinition, observedPropertyProperty,
-                datastreamLink);
+        ObservedProperty observedProperty = new ObservedProperty(observedPropertyLink, id, observedPropertyName,
+                observedPropertyDescription, observedPropertyDefinition, observedPropertyProperty, datastreamLink);
 
         return observedProperty;
     }
@@ -240,7 +243,7 @@ public class DtoMapper {
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
             String datastreamLink) {
 
-        String observationId = String.format("%s~%s~%s", service.getProvider().getName(), service.getName(),
+        String observationId = String.format("%s~%s", service.getProvider().getName(),
                 getResourceField(service, "observationId", String.class));
 
         String selfLink = datastreamLink != null
@@ -331,11 +334,9 @@ public class DtoMapper {
         return new DefaultTimedValue<>(parsedLocation, time);
     }
 
-    private static <T> T getResourceField(ServiceSnapshot service, String resourceName, Class<T> expectedType) {
+    public static <T> T getResourceField(ServiceSnapshot service, String resourceName, Class<T> expectedType) {
 
-        return service.getResource(resourceName) != null && service.getResource(resourceName).getValue() != null
-                ? expectedType.cast(service.getResource(resourceName).getValue().getValue())
-                : null;
+        return UtilIds.getResourceField(service, resourceName, expectedType);
     }
 
     public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
@@ -343,10 +344,9 @@ public class DtoMapper {
         // check service is container correct type
 
         final TimedValue<GeoJsonObject> rcLocation = getLocation(service, mapper, false);
-        final Instant time = rcLocation.getTimestamp();
         final GeoJsonObject object = rcLocation.getValue();
 
-        String id = getResourceField(service, "sensorThingId", String.class);
+        String id = getResourceField(service, "id", String.class);
 
         String name = Objects.requireNonNullElse(getResourceField(service, FRIENDLY_NAME, String.class), "");
 

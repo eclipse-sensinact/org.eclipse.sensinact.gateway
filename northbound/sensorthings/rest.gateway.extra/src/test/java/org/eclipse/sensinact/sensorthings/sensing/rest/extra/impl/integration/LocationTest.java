@@ -64,6 +64,7 @@ public class LocationTest extends AbstractIntegrationTest {
     public void testCreateLocationLinkedThing() throws Exception {
         // given
         String name = "testCreateLocationLinkedThing";
+
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);

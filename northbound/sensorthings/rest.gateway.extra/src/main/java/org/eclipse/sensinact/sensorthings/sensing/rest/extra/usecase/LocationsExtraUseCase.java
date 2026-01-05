@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -24,6 +25,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
@@ -32,7 +34,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation, ServiceSnapshot> {
+public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocation, ServiceSnapshot> {
 
     private IAccessProviderUseCase providerUseCase;
 
@@ -44,7 +46,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
-        List<SensorThingsUpdate> listDtoModels = toDtos(request);
+        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
@@ -55,7 +57,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
                 String locationId = getId(request);
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService("locations"));
+                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, provider.getService("location"));
             }
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
 
@@ -72,7 +74,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
     }
 
     @Override
-    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedLocation> request) {
+    public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
         ExpandedLocation location = request.model();
         checkRequireField(request);
@@ -98,17 +100,20 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
 
                 @SuppressWarnings("unchecked")
                 List<String> ids = (List<String>) resource.getValue().getValue();
+                String locationId = getId(request);
+                if (!ids.contains(locationId)) {
+                    ids.add(locationId);
 
-                ids.add(getId(request));
-
-                return new ThingUpdate(providerId, null, null, providerId, null, ids);
-            }).forEach(listUpdates::add);
+                    return new ThingUpdate(providerId, null, null, providerId, null, ids, null);
+                }
+                return null;
+            }).filter(java.util.Objects::nonNull).forEach(listUpdates::add);
         }
         return listUpdates;
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedLocation> request) {
-        List<SensorThingsUpdate> listDtoModels = toDtos(request);
+        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
@@ -132,6 +137,12 @@ public class LocationsExtraUseCase extends AbstractExtraUseCase<ExpandedLocation
         return request.id() != null ? request.id()
                 : DtoToModelMapper
                         .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
+    }
+
+    @Override
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedLocation> request) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

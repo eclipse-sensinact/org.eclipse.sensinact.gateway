@@ -31,7 +31,7 @@ import org.osgi.annotation.versioning.ProviderType;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getEncodingType <em>Encoding Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getLocation <em>Location</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getSensorThingId <em>Sensor Thing Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getId <em>Id</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService()
@@ -129,25 +129,25 @@ public interface SensorThingLocationService extends Service {
 	void setLocation(GeoJsonObject value);
 
 	/**
-	 * Returns the value of the '<em><b>Sensor Thing Id</b></em>' attribute.
+	 * Returns the value of the '<em><b>Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Sensor Thing Id</em>' attribute.
-	 * @see #setSensorThingId(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService_SensorThingId()
+	 * @return the value of the '<em>Id</em>' attribute.
+	 * @see #setId(String)
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService_Id()
 	 * @model
 	 * @generated
 	 */
-	String getSensorThingId();
+	String getId();
 
 	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getSensorThingId <em>Sensor Thing Id</em>}' attribute.
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getId <em>Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Sensor Thing Id</em>' attribute.
-	 * @see #getSensorThingId()
+	 * @param value the new value of the '<em>Id</em>' attribute.
+	 * @see #getId()
 	 * @generated
 	 */
-	void setSensorThingId(String value);
+	void setId(String value);
 
 } // SensorThingLocationService

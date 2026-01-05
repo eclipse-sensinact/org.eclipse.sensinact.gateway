@@ -12,8 +12,6 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended;
 
-import org.eclipse.emf.common.util.EList;
-
 import org.eclipse.sensinact.model.core.provider.Service;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -27,12 +25,12 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDataStreams <em>Data Streams</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getName <em>Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getProperties <em>Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getLocationIds <em>Location Ids</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDatastreamIds <em>Datastream Ids</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingService()
@@ -41,18 +39,6 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface SensorThingService extends Service {
-	/**
-	 * Returns the value of the '<em><b>Data Streams</b></em>' containment reference list.
-	 * The list contents are of type {@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Data Streams</em>' containment reference list.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingService_DataStreams()
-	 * @model containment="true"
-	 * @generated
-	 */
-	EList<DataStreamService> getDataStreams();
-
 	/**
 	 * Returns the value of the '<em><b>Name</b></em>' attribute.
 	 * <!-- begin-user-doc -->
@@ -162,5 +148,27 @@ public interface SensorThingService extends Service {
 	 * @generated
 	 */
 	void setLocationIds(Object value);
+
+	/**
+	 * Returns the value of the '<em><b>Datastream Ids</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Datastream Ids</em>' attribute.
+	 * @see #setDatastreamIds(Object)
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingService_DatastreamIds()
+	 * @model
+	 * @generated
+	 */
+	Object getDatastreamIds();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDatastreamIds <em>Datastream Ids</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Datastream Ids</em>' attribute.
+	 * @see #getDatastreamIds()
+	 * @generated
+	 */
+	void setDatastreamIds(Object value);
 
 } // SensorThingService

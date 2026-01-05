@@ -70,7 +70,7 @@ public class ThingTest extends AbstractIntegrationTest {
         // When
         JsonNode json = getJsonResponseFromPost(dtoExistsThingFromDataStream, "/Things", 201);
         String idExistsThing = getIdFromJson(json);
-        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name,
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
                 DtoFactory.getRefId(idExistsThing));
         json = getJsonResponseFromPost(datastream, "/Datastreams", 201);
 
@@ -157,9 +157,9 @@ public class ThingTest extends AbstractIntegrationTest {
 
         List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "location"));
 
-        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal(name);
-        ExpandedDataStream datastream2 = DtoFactory.getDatastreamMinimal(name + "1");
-        ExpandedDataStream datastream3 = DtoFactory.getDatastreamMinimal(name + "2");
+        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal(name + "1");
+        ExpandedDataStream datastream2 = DtoFactory.getDatastreamMinimal(name + "2");
+        ExpandedDataStream datastream3 = DtoFactory.getDatastreamMinimal(name + "3");
 
         List<ExpandedDataStream> datastreams = List.of(datastream1, datastream2, datastream3);
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,

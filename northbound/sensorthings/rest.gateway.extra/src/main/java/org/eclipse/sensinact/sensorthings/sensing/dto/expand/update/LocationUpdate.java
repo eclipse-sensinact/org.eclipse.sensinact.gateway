@@ -31,11 +31,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
  */
 @Service("admin")
 public record LocationUpdate(@Model EClass model, @ServiceModel EClass service, @Provider String providerId,
-        @Service("locations") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorThingId,
-        @Service("locations") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String name,
-        @Service("locations") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
-        @Service("locations") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String encodingType,
-        @Service("locations") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) GeoJsonObject location)
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object id,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String name,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String encodingType,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) GeoJsonObject location)
         implements SensorThingsUpdate {
 
     public LocationUpdate {
@@ -54,9 +54,9 @@ public record LocationUpdate(@Model EClass model, @ServiceModel EClass service, 
         }
     }
 
-    public LocationUpdate(String providerId, Object sensorThingsId, String name, String description,
-            String encodingType, GeoJsonObject location) {
-        this(SENSOR_THING_LOCATION, SENSOR_THING_LOCATION_SERVICE, providerId, sensorThingsId, name, description,
-                encodingType, location);
+    public LocationUpdate(String providerId, Object id, String name, String description, String encodingType,
+            GeoJsonObject location) {
+        this(SENSOR_THING_LOCATION, SENSOR_THING_LOCATION_SERVICE, providerId, id, name, description, encodingType,
+                location);
     }
 }

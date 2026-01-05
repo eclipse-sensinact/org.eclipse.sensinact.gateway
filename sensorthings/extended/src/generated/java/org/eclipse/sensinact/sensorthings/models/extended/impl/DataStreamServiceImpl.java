@@ -37,7 +37,7 @@ import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getSensorThingId <em>Sensor Thing Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getName <em>Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getTimestamp <em>Timestamp</em>}</li>
@@ -68,30 +68,31 @@ import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationProperties <em>Observation Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationFoiFeature <em>Observation Foi Feature</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationFoiDescription <em>Observation Foi Description</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getThingId <em>Thing Id</em>}</li>
  * </ul>
  *
  * @generated
  */
 public class DataStreamServiceImpl extends ServiceImpl implements DataStreamService {
 	/**
-	 * The default value of the '{@link #getSensorThingId() <em>Sensor Thing Id</em>}' attribute.
+	 * The default value of the '{@link #getId() <em>Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getSensorThingId()
+	 * @see #getId()
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String SENSOR_THING_ID_EDEFAULT = null;
+	protected static final String ID_EDEFAULT = null;
 
 	/**
-	 * The cached value of the '{@link #getSensorThingId() <em>Sensor Thing Id</em>}' attribute.
+	 * The cached value of the '{@link #getId() <em>Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getSensorThingId()
+	 * @see #getId()
 	 * @generated
 	 * @ordered
 	 */
-	protected String sensorThingId = SENSOR_THING_ID_EDEFAULT;
+	protected String id = ID_EDEFAULT;
 
 	/**
 	 * The default value of the '{@link #getName() <em>Name</em>}' attribute.
@@ -654,6 +655,26 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	protected String observationFoiDescription = OBSERVATION_FOI_DESCRIPTION_EDEFAULT;
 
 	/**
+	 * The default value of the '{@link #getThingId() <em>Thing Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getThingId()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String THING_ID_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getThingId() <em>Thing Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getThingId()
+	 * @generated
+	 * @ordered
+	 */
+	protected String thingId = THING_ID_EDEFAULT;
+
+	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -678,8 +699,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
-	public String getSensorThingId() {
-		return sensorThingId;
+	public String getId() {
+		return id;
 	}
 
 	/**
@@ -688,11 +709,11 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
-	public void setSensorThingId(String newSensorThingId) {
-		String oldSensorThingId = sensorThingId;
-		sensorThingId = newSensorThingId;
+	public void setId(String newId) {
+		String oldId = id;
+		id = newId;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__SENSOR_THING_ID, oldSensorThingId, sensorThingId));
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__ID, oldId, id));
 	}
 
 	/**
@@ -1391,10 +1412,33 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
+	public String getThingId() {
+		return thingId;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setThingId(String newThingId) {
+		String oldThingId = thingId;
+		thingId = newThingId;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__THING_ID, oldThingId, thingId));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case ExtendedPackage.DATA_STREAM_SERVICE__SENSOR_THING_ID:
-				return getSensorThingId();
+			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
+				return getId();
 			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
 				return getName();
 			case ExtendedPackage.DATA_STREAM_SERVICE__DESCRIPTION:
@@ -1455,6 +1499,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return getObservationFoiFeature();
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
 				return getObservationFoiDescription();
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				return getThingId();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -1467,8 +1513,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case ExtendedPackage.DATA_STREAM_SERVICE__SENSOR_THING_ID:
-				setSensorThingId((String)newValue);
+			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
+				setId((String)newValue);
 				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
 				setName((String)newValue);
@@ -1560,6 +1606,9 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
 				setObservationFoiDescription((String)newValue);
 				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				setThingId((String)newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -1572,8 +1621,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.DATA_STREAM_SERVICE__SENSOR_THING_ID:
-				setSensorThingId(SENSOR_THING_ID_EDEFAULT);
+			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
+				setId(ID_EDEFAULT);
 				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
 				setName(NAME_EDEFAULT);
@@ -1665,6 +1714,9 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
 				setObservationFoiDescription(OBSERVATION_FOI_DESCRIPTION_EDEFAULT);
 				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				setThingId(THING_ID_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -1677,8 +1729,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.DATA_STREAM_SERVICE__SENSOR_THING_ID:
-				return SENSOR_THING_ID_EDEFAULT == null ? sensorThingId != null : !SENSOR_THING_ID_EDEFAULT.equals(sensorThingId);
+			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
+				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
 			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
 				return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
 			case ExtendedPackage.DATA_STREAM_SERVICE__DESCRIPTION:
@@ -1739,6 +1791,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return OBSERVATION_FOI_FEATURE_EDEFAULT == null ? observationFoiFeature != null : !OBSERVATION_FOI_FEATURE_EDEFAULT.equals(observationFoiFeature);
 			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION:
 				return OBSERVATION_FOI_DESCRIPTION_EDEFAULT == null ? observationFoiDescription != null : !OBSERVATION_FOI_DESCRIPTION_EDEFAULT.equals(observationFoiDescription);
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				return THING_ID_EDEFAULT == null ? thingId != null : !THING_ID_EDEFAULT.equals(thingId);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -1753,8 +1807,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		if (eIsProxy()) return super.toString();
 
 		StringBuilder result = new StringBuilder(super.toString());
-		result.append(" (sensorThingId: ");
-		result.append(sensorThingId);
+		result.append(" (id: ");
+		result.append(id);
 		result.append(", name: ");
 		result.append(name);
 		result.append(", description: ");
@@ -1815,6 +1869,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		result.append(observationFoiFeature);
 		result.append(", observationFoiDescription: ");
 		result.append(observationFoiDescription);
+		result.append(", thingId: ");
+		result.append(thingId);
 		result.append(')');
 		return result.toString();
 	}

@@ -326,14 +326,18 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response updateLocationRef(String id, RefId location) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), location, id,
+                ExpandedThing.class, ExpandedLocation.class);
+
+        return Response.noContent().build();
     }
 
     @Override
     public Response updateDatastreamRef(String id, RefId datastream) {
-        // TODO Auto-generated method stub
-        return null;
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastream, id,
+                ExpandedThing.class, ExpandedDataStream.class);
+
+        return Response.noContent().build();
     }
 
     @Override

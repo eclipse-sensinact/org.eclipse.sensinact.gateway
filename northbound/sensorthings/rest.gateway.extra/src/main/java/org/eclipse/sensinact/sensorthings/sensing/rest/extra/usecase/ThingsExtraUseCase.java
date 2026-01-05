@@ -16,12 +16,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
@@ -29,20 +32,25 @@ import jakarta.ws.rs.ext.Providers;
 /**
  * UseCase that manage the create, update, delete use case for sensorthing Thing
  */
-public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, ProviderSnapshot> {
+public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, ProviderSnapshot> {
 
     private DataUpdate dataUpdate;
 
     private IAccessProviderUseCase providerUseCase;
+    private IAccessServiceUseCase serviceUseCase;
+
+    private DatastreamsExtraUseCase datastreamUseCase;
 
     public ThingsExtraUseCase(Providers providers) {
         dataUpdate = resolve(providers, DataUpdate.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
+        datastreamUseCase = resolveUseCase(providers, DatastreamsExtraUseCase.class);
+        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
         String id = getId(request);
-        List<SensorThingsUpdate> listDtoModels = toDtos(request);
+        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         // update/create provider
         try {
@@ -79,26 +87,43 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
 
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedThing> request) {
+    public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedThing> request) {
         // check if Thing already exists with location get locations
         List<String> locationIds = new ArrayList<String>();
+        List<String> datastreamIds = new ArrayList<String>();
+
         checkRequireField(request);
         String id = getId(request);
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
         if (provider != null) {
-            ResourceSnapshot resource = provider.getResource("thing", "locationIds");
-            if (resource.getValue() != null)
-                locationIds.addAll((List<String>) resource.getValue().getValue());
+            locationIds = getLocationIds(provider);
+            datastreamIds = getDatastreamIds(provider);
         }
 
-        return DtoToModelMapper.toThingUpdates(request.model(), request.id(), locationIds);
+        return DtoToModelMapper.toThingUpdates(request.model(), request.id(), locationIds, datastreamIds);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getLocationIds(ProviderSnapshot provider) {
+        ResourceSnapshot resource = provider.getResource("thing", "locationIds");
+        if (resource.getValue() != null)
+            return (List<String>) resource.getValue().getValue();
+        return List.of();
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getDatastreamIds(ProviderSnapshot provider) {
+        ResourceSnapshot resource;
+        resource = provider.getResource("thing", "datastreamIds");
+        if (resource.getValue() != null)
+            return (List<String>) resource.getValue().getValue();
+        return List.of();
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {
 
-        List<SensorThingsUpdate> listDtoModels = toDtos(request);
+        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         // update/create provider
         try {
@@ -115,6 +140,12 @@ public class ThingsExtraUseCase extends AbstractExtraUseCase<ExpandedThing, Prov
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
+    }
+
+    @Override
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

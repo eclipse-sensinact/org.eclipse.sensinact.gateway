@@ -80,6 +80,15 @@ public interface ExtendedFactory extends EFactory {
 	SensorThingLocation createSensorThingLocation();
 
 	/**
+	 * Returns a new object of class '<em>Sensor Thing Datastream</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Sensor Thing Datastream</em>'.
+	 * @generated
+	 */
+	SensorThingDatastream createSensorThingDatastream();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
