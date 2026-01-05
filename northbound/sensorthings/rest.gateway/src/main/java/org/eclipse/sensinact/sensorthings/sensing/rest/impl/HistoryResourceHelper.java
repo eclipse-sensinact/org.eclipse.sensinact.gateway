@@ -42,10 +42,9 @@ class HistoryResourceHelper {
     }
 
     @SuppressWarnings("unchecked")
-    static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, int localResultLimit) {
-        // TODO review
+    static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ResourceSnapshot resourceSnapshot, ICriterion filter, int localResultLimit) {
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
 
         if (historyProvider == null) {
@@ -65,10 +64,9 @@ class HistoryResourceHelper {
 
             timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
 
-            // Filtering happens at a lower level, so we may not use all the discovered
-            // history
-            List<Observation> observationList = DtoMapperGet.toObservationList(userSession, application, mapper,
-                    uriInfo, expansions, filter, resourceSnapshot, timed);
+            // Filtering happens at a lower level, so we may not use all the discovered history
+            List<Observation> observationList = DtoMapperGet.toObservationList(userSession, application, mapper, uriInfo,
+                    expansions, filter, resourceSnapshot, timed);
             if (count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
                 count -= (timed.size() - observationList.size());
             }
@@ -79,14 +77,14 @@ class HistoryResourceHelper {
             skip += timed.size();
             // Keep going until the list is as full as count, or it hits maxResults
         } while ((count == null || values.size() < count) && values.size() < maxResults);
-        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue(),
-                null, values);
+        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ?
+                Integer.MAX_VALUE : count.intValue(), null, values);
     }
 
     @SuppressWarnings("unchecked")
-    static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider, int localResultLimit) {
+    static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot provider, int localResultLimit) {
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
         if (historyProvider == null) {
             return new ResultList<>(null, null, List.of());
@@ -104,8 +102,8 @@ class HistoryResourceHelper {
             params.put("skip", skip);
 
             timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-            List<HistoricalLocation> historicalLocationList = DtoMapperGet.toHistoricalLocationList(userSession,
-                    application, mapper, uriInfo, expansions, filter, provider, timed);
+            List<HistoricalLocation> historicalLocationList = DtoMapperGet.toHistoricalLocationList(userSession, application, mapper, uriInfo,
+                    expansions, filter, provider, timed);
             if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
                 count -= (timed.size() - historicalLocationList.size());
             }
@@ -116,8 +114,8 @@ class HistoryResourceHelper {
             skip += timed.size();
 
         } while ((count == null || values.size() < count) && values.size() < maxResults);
-        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue(),
-                null, values);
+        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ?
+                Integer.MAX_VALUE : count.intValue(), null, values);
     }
 
     private static Integer getMaxResult(Application application, int localResultLimit) {

@@ -20,20 +20,16 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.getTimestampFromId;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocationsAccess;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import jakarta.ws.rs.NotFoundException;
 
@@ -41,16 +37,13 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
     @Override
     public HistoricalLocation getHistoricalLocation(String id) {
+        String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
-        ServiceSnapshot service = UtilIds.getLocationService(providerSnapshot);
-        if (service == null) {
-            throw new NotFoundException();
-        }
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         try {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application,
-                    getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), service);
+            Optional<HistoricalLocation> historicalLocation = DtoMapperGet.toHistoricalLocation(getSession(), application,
+                    getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
             if (historicalLocation.isEmpty() || !historicalLocation.get().id().equals(id)) {
                 throw new NotFoundException();
             }
@@ -62,24 +55,26 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
     @Override
     public ResultList<Location> getHistoricalLocationLocations(String id) {
+        String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
-        ServiceSnapshot serviceLocation = UtilIds.getLocationService(providerSnapshot);
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), serviceLocation)));
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
+        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapperGet.toLocation(getSession(), application,
+                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), providerSnapshot)));
 
         return list;
     }
 
     @Override
     public Location getHistoricalLocationLocation(String id, String id2) {
+        String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
-        ServiceSnapshot serviceLocation = UtilIds.getLocationService(providerSnapshot);
-        Location loc = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(LOCATIONS), serviceLocation);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
+        Location loc = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(LOCATIONS), providerSnapshot);
 
         if (!id2.equals(loc.id())) {
             throw new NotFoundException();
@@ -89,17 +84,13 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
     @Override
     public ResultList<Thing> getHistoricalLocationLocationThings(String id, String id2) {
+        String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        List<ProviderSnapshot> listProviders = listProviders(parseFilter(THINGS));
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        return new ResultList<>(null, null,
-                listProviders.stream().map(UtilIds::getThingService).filter(Objects::nonNull).filter(s -> {
-                    @SuppressWarnings("unchecked")
-                    List<String> locationIds = (List<String>) UtilIds.getResourceField(s, "locatonIds", Object.class);
-                    return locationIds.contains(id2);
-                }).map(s -> DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        parseFilter(THINGS), s)).toList());
+        return new ResultList<>(null, null, List.of(DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(THINGS), providerSnapshot)));
     }
 
     @Override
@@ -109,12 +100,12 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-            ServiceSnapshot service = UtilIds.getLocationService(providerSnapshot);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application,
-                        getMapper(), uriInfo, getExpansions(), filter, service).map(List::of).orElse(List.of()));
+                list = new ResultList<>(null, null,
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                                filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -123,27 +114,31 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
 
     @Override
     public Thing getHistoricalLocationThing(String id) {
+        String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        Optional<Thing> t = listProviders(parseFilter(THINGS)).stream().map(UtilIds::getThingService)
-                .filter(Objects::nonNull).map(s -> DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                        getExpansions(), parseFilter(THINGS), s))
-                .findFirst();
-        if (t.isEmpty())
-            throw new NotFoundException("No feature of interest with id");
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        if (!t.get().id().equals(id))
+        Thing t;
+        try {
+            t = DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                    providerSnapshot);
+        } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
-
-        return t.get();
+        }
+        if (!t.id().equals(provider)) {
+            throw new NotFoundException();
+        }
+        return t;
     }
 
     @Override
     public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
+        String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
-        // TODO
+
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), DatastreamsAccessImpl.getListDatastreamServices(getSession(), id));
+                parseFilter(DATASTREAMS), validateAndGetProvider(provider));
     }
 
     @Override
@@ -153,14 +148,12 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess implements His
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-            ServiceSnapshot serviceSnapshot = UtilIds.getLocationService(providerSnapshot);
-
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
                 list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, serviceSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                                filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

@@ -16,8 +16,9 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 
 import java.util.List;
 
+import jakarta.ws.rs.core.Response;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -26,34 +27,18 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.SensorsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response;
 
 public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, SensorsUpdate {
 
     @Override
     public Sensor getSensor(String id) {
-        IDtoMemoryCache<?> wCache = getCache(ExpandedSensor.class);
-        if (wCache != null && wCache.getDto(id) != null) {
-            ExpandedSensor sensor = (ExpandedSensor) getCache(ExpandedSensor.class).getDto(id);
-            String sensorLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Sensors", id);
-            String datastreamLink = DtoMapper.getLink(uriInfo, sensorLink, "/Datastreams", id);
-            return new Sensor(sensorLink, sensor.id(), sensor.name(), sensor.description(), sensor.encodingType(),
-                    sensor.metadata(), sensor.properties(), datastreamLink);
-        } else {
-
-            ProviderSnapshot provider = validateAndGetProvider(extractFirstIdSegment(id));
-            return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(EFilterContext.SENSORS), UtilIds.getDatastreamService(provider));
-        }
-
+        return DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.SENSORS), validateAndGetResourceSnapshot(id));
     }
 
     @Override
@@ -67,14 +52,9 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        ProviderSnapshot provider = validateAndGetProvider(extractFirstIdSegment(id));
 
-        Datastream datastream = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.DATASTREAMS), UtilIds.getDatastreamService(provider));
-        if (!id2.equals(datastream.id())) {
-            throw new NotFoundException();
-        }
-        return datastream;
+        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.DATASTREAMS));
     }
 
     @PaginationLimit(500)
@@ -83,9 +63,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        // TODO validateAndGetResourceSnapshot(id)
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), null, parseFilter(EFilterContext.OBSERVATIONS), 0);
+                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.OBSERVATIONS), 0);
     }
 
     @Override
@@ -93,9 +72,10 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        ServiceSnapshot serviceDatastream = UtilIds.getDatastreamService(validateAndGetProvider(id2));
-        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), serviceDatastream);
+        ResourceSnapshot resource = validateAndGetResourceSnapshot(id);
+
+        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), resource);
 
         if (!id.equals(o.id())) {
             throw new NotFoundException();
