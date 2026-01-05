@@ -2,6 +2,8 @@ package org.eclipse.sensinact.gateway.northbound.sensorthings.rest.extra;
 
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.northbound.sensorthings.rest.extra.endpoint.ThingsCreateImpl;
+import org.eclipse.sensinact.gateway.northbound.sensorthings.rest.extra.endpoint.ThingsDeleteImpl;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.ISensinactSensorthingsRestExtra;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationSelect;
@@ -14,7 +16,7 @@ public class SensinactSensorthingRestExtra implements ISensinactSensorthingsRest
 
     @Override
     public Set<Class<?>> getExtraClasses() {
-        return null;
+        return Set.of(ThingsCreateImpl.class, ThingsDeleteImpl.class);
     }
 
 }

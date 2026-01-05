@@ -2,6 +2,8 @@ package org.eclipse.sensinact.gateway.northbound.sensorthings.rest.extra.endpoin
 
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.ThingsCreate;
 
-public class ThingsCreateImpl implements ThingsCreate {
+@Path("")
+public class FeaturesOfInterestsExtraImpl implements ThingsCreate {
 
+    @POST
 }
