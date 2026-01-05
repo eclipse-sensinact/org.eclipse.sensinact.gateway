@@ -135,4 +135,9 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
         return Response.noContent().build();
     }
 
+    @Override
+    public Response patchFeaturesOfInterest(String id, FeatureOfInterest foi) {
+        return updateFeaturesOfInterest(id, foi);
+    }
+
 }

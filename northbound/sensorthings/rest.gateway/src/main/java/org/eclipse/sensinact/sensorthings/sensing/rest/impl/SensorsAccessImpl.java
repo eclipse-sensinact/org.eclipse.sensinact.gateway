@@ -125,4 +125,9 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
         return Response.noContent().build();
     }
 
+    @Override
+    public Response patchSensor(String id, ExpandedSensor sensor) {
+        return updateSensor(id, sensor);
+    }
+
 }

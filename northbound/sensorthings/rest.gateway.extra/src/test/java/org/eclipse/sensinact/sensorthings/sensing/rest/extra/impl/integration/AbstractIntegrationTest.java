@@ -161,7 +161,7 @@ public class AbstractIntegrationTest {
 
     protected JsonNode getJsonResponseFromPatch(Object dto, String SubUrl, int expectedStatus)
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
-        HttpResponse<String> response = queryPut(SubUrl, dto);
+        HttpResponse<String> response = queryPatch(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode());
         if (response.statusCode() < 400) {

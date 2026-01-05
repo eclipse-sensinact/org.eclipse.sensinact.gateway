@@ -28,7 +28,9 @@ public interface ObservedPropertiesUpdate {
      * @return
      */
     @PUT
-    @PATCH
     public Response updateObservedProperties(@PathParam("id") String id, ObservedProperty observedProperty);
+
+    @PATCH
+    public Response patchObservedProperties(@PathParam("id") String id, ObservedProperty observedProperty);
 
 }
