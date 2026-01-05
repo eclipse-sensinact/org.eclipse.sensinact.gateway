@@ -137,7 +137,13 @@ public class DtoFactory {
     }
 
     public static ExpandedSensor getSensor(String name) {
-        return new ExpandedSensor(null, null, "Humidity Sensor", "Measures ambient humidity", "application/pdf",
+        return new ExpandedSensor(null, null, name, "Measures ambient humidity", "application/pdf",
+                "http://example.com/humidity-sensor.pdf", null, null);
+
+    }
+
+    public static ExpandedSensor getSensor(String name, String descripton, String encodingType) {
+        return new ExpandedSensor(null, null, name, descripton, "application/pdf",
                 "http://example.com/humidity-sensor.pdf", null, null);
 
     }

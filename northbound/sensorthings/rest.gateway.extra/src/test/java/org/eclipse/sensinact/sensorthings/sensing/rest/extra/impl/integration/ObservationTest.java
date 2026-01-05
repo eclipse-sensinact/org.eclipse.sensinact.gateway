@@ -116,12 +116,44 @@ public class ObservationTest extends AbstractIntegrationTest {
                 DtoFactory.getRefId(thingId), List.of(observsation1));
 
         json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,ObservedProperty", 201);
+        String idDatastream = getIdFromJson(json);
+        UtilsAssert.assertDatastream(datastream, json, true);
+        assertTrue(json.get("Observations").size() > 0);
+        String idObservation = getIdFromJson(json.get("Observations").get(0));
+        ExpandedObservation observsationUpdate = DtoFactory.getObservation(name + "2");
+        // when
+        json = getJsonResponseFromPut(observsationUpdate, String.format("Observations(%s)", idObservation), 204);
+        // then
+
+        observsationUpdate = DtoFactory.getObservation(name + "3");
+        // when
+        json = getJsonResponseFromPut(observsationUpdate,
+                String.format("Datastream(%s)/Observations(%s)", idDatastream, idObservation), 204);
+        // then
+    }
+
+    @Test
+    public void testUpdatePatchObservation() throws Exception {
+        // given
+        String name = "createUpdateObservation";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists2", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedObservation observsation1 = DtoFactory.getObservation(name + "1");
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingWithObservations(name + "Datastream",
+                DtoFactory.getRefId(thingId), List.of(observsation1));
+
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,ObservedProperty", 201);
 
         UtilsAssert.assertDatastream(datastream, json, true);
         assertTrue(json.get("Observations").size() > 0);
         String idObservation = getIdFromJson(json.get("Observations").get(0));
         // when
-        json = getJsonResponseFromPut(datastream, String.format("Observations(%s)", idObservation), 204);
+        json = getJsonResponseFromPatch(datastream, String.format("Observations(%s)", idObservation), 204);
 
     }
 

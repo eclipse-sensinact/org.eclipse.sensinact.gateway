@@ -235,7 +235,7 @@ public class ThingTest extends AbstractIntegrationTest {
         ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(name,
                 "testThing With Location and Datastream update",
                 Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), null);
-        json = getJsonResponseFromPut(dtoThingToUpdate, "/Things?$expand=Locations", 204);
+        json = getJsonResponseFromPut(dtoThingToUpdate, "/Things", 204);
         // then
 
     }
@@ -362,4 +362,29 @@ public class ThingTest extends AbstractIntegrationTest {
         // then
 
     }
+
+    // patch
+    @Test
+    public void testUpdatePatchThing() throws Exception {
+        // Given
+        String name = "testUpdatePatchThing";
+
+        ExpandedLocation location1 = DtoFactory.getLocation(name + "1");
+        ExpandedLocation location2 = DtoFactory.getLocation(name + "2");
+        List<ExpandedLocation> locations = List.of(location1, location2);
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locations);
+
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Locations", 201);
+        String idJson = getIdFromJson(json);
+
+        UtilsAssert.assertThing(dtoThing, json, true);
+        // When
+        ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(null,
+                "testThing With Location and Datastream update", Map.of("installationDate update", "2025-12-25"), null);
+        json = getJsonResponseFromPatch(dtoThingToUpdate, "/Things ", 204);
+        // then
+    }
+
 }
