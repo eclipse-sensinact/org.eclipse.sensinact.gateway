@@ -34,6 +34,10 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/observedPropertyId"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/observedPropertyDescription"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/observedPropertyDefinition"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/sensorMetadata"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/sensorId"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/sensorProperties"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//DataStreamService/observedPropertyProperties"/>
     </genClasses>
     <genClasses ecoreClass="sensorthings.extended.ecore#//SensorThingService">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference sensorthings.extended.ecore#//SensorThingService/dataStreams"/>
