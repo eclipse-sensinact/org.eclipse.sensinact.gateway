@@ -27,8 +27,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -37,16 +40,31 @@ import jakarta.ws.rs.core.Response;
 public class ObservedPropertiesAccessImpl extends AbstractAccess
         implements ObservedPropertiesAccess, ObservedPropertiesUpdate {
 
+    private String getDatastreamLink(String id) {
+        String providerId = UtilIds.extractFirstIdSegment(id);
+        String serviceId = UtilIds.extractFirstIdSegment(id);
+        String datastreamLink = null;
+        if (serviceId != null) {
+            String thingLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Things{id}", providerId);
+            datastreamLink = DtoMapper.getLink(uriInfo, thingLink, "Datastreams({id})", serviceId);
+        }
+        return datastreamLink;
+    }
+
     @Override
     public ObservedProperty getObservedProperty(String id) {
-        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
+        if (getCache(ExpandedObservedProperty.class).getDto(id) != null) {
+            ExpandedObservedProperty op = (ExpandedObservedProperty) getCache(ExpandedObservedProperty.class)
+                    .getDto(id);
+            return new ObservedProperty(DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/ObservedProperties", id),
+                    op.id(), op.name(), op.description(), op.definition(), op.properties(), null);
+        } else {
+            String datastreamLink = getDatastreamLink(id);
 
-        if (!id.equals(o.id())) {
-            throw new NotFoundException();
+            return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    parseFilter(OBSERVED_PROPERTIES), validateAndGeService(id), datastreamLink);
+
         }
-
-        return o;
     }
 
     @Override
@@ -104,14 +122,14 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     }
 
     @Override
-    public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
+    public Response updateObservedProperties(String id, ExpandedObservedProperty observedProperty) {
         getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observedProperty);
 
         return Response.noContent().build();
     }
 
     @Override
-    public Response patchObservedProperties(String id, ObservedProperty observedProperty) {
+    public Response patchObservedProperties(String id, ExpandedObservedProperty observedProperty) {
         return updateObservedProperties(id, observedProperty);
     }
 

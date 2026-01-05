@@ -35,10 +35,10 @@ import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservedPropertiesExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -83,19 +83,19 @@ public class AbstractIntegrationTest {
 
     @Path("test")
     public static class TestTypeExfiltrator {
-        public FeatureOfInterestExtraUseCase foiUseCase;
-        public ObservedPropertiesExtraUseCase observedPropertyUseCase;
-        public SensorsExtraUseCase sensorUseCase;
+        public IDtoMemoryCache<FeatureOfInterest> foiCache;
+        public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
+        public IDtoMemoryCache<ExpandedSensor> sensorCache;
 
         @GET
         public void exfiltrate(@Context Providers providers) {
+
             @SuppressWarnings("rawtypes")
-            ContextResolver<IExtraUseCase> resolver = providers.getContextResolver(IExtraUseCase.class,
+            ContextResolver<IDtoMemoryCache> resolverCache = providers.getContextResolver(IDtoMemoryCache.class,
                     MediaType.WILDCARD_TYPE);
-            sensorUseCase = (SensorsExtraUseCase) resolver.getContext(SensorsExtraUseCase.class);
-            observedPropertyUseCase = (ObservedPropertiesExtraUseCase) resolver
-                    .getContext(ObservedPropertiesExtraUseCase.class);
-            foiUseCase = (FeatureOfInterestExtraUseCase) resolver.getContext(FeatureOfInterestExtraUseCase.class);
+            sensorCache = resolverCache.getContext(ExpandedSensor.class);
+            observedPropertyCache = resolverCache.getContext(ExpandedObservedProperty.class);
+            foiCache = resolverCache.getContext(FeatureOfInterest.class);
         }
     }
 
@@ -110,10 +110,10 @@ public class AbstractIntegrationTest {
         for (int i = 0; i < 5; i++) {
             result = queryGet("http://localhost:8185/test");
             if (result.statusCode() == 204) {
-                this.sensorUseCase = exfiltrator.sensorUseCase;
-                this.observedPropertyUseCase = exfiltrator.observedPropertyUseCase;
-                this.foiUseCase = exfiltrator.foiUseCase;
-                if (this.foiUseCase != null && this.observedPropertyUseCase != null && this.sensorUseCase != null) {
+                this.sensorCache = exfiltrator.sensorCache;
+                this.observedPropertyCache = exfiltrator.observedPropertyCache;
+                this.foiCache = exfiltrator.foiCache;
+                if (this.foiCache != null && this.observedPropertyCache != null && this.foiCache != null) {
                     success = true;
                     break;
                 }
@@ -177,11 +177,9 @@ public class AbstractIntegrationTest {
     @InjectService
     protected JakartarsServiceRuntime jakartarsRuntime;
 
-    protected SensorsExtraUseCase sensorUseCase;
-
-    protected ObservedPropertiesExtraUseCase observedPropertyUseCase;
-
-    protected FeatureOfInterestExtraUseCase foiUseCase;
+    public IDtoMemoryCache<FeatureOfInterest> foiCache;
+    public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
+    public IDtoMemoryCache<ExpandedSensor> sensorCache;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {
         // Normalize URI

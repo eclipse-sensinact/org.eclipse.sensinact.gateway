@@ -21,14 +21,12 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -39,6 +37,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -48,43 +47,16 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
 
     @Override
     public Observation getObservation(String id) {
-        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
+        ServiceSnapshot serviceSnapshot = validateAndGeService(id);
         Instant timestamp = DtoMapperGet.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
-        Optional<Observation> result = null;
-        if (resourceSnapshot.isSet()) {
-            Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
-            if (timestamp.isBefore(milliTimestamp)) {
-                String history = (String) application.getProperties().get("sensinact.history.provider");
-                if (history != null) {
-                    String provider = resourceSnapshot.getService().getProvider().getName();
-                    String service = resourceSnapshot.getService().getName();
-                    String resource = resourceSnapshot.getName();
-                    // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
-                    // (timestamp)
-                    Instant timestampPlusOneMilli = timestamp.plusMillis(1);
-                    TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                            Map.of("provider", provider, "service", service, "resource", resource, "time",
-                                    timestampPlusOneMilli));
-                    if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
-                        result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo,
-                                getExpansions(), criterion, resourceSnapshot, Optional.of(t));
-                    }
-                }
-            } else if (timestamp.equals(milliTimestamp)) {
-                result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        criterion, resourceSnapshot);
-            }
-        } else {
-            result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    criterion, resourceSnapshot, Optional.empty());
-        }
+        String thingLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Things({id})",
+                serviceSnapshot.getProvider().getName());
+        String datastreamLink = DtoMapper.getLink(uriInfo, thingLink, "/Datastreams({id})", serviceSnapshot.getName());
+        return DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                serviceSnapshot, datastreamLink);
 
-        if (result.isEmpty()) {
-            throw new NotFoundException();
-        }
-        return result.get();
     }
 
     @Override
@@ -162,13 +134,6 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     }
 
     @Override
-    public Response updateObservation(String id, Observation observation) {
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observation);
-
-        return Response.noContent().build();
-    }
-
-    @Override
     public Response updateObservationDatastreamRef(String id, RefId datastream) {
         // TODO Auto-generated method stub
         return null;
@@ -178,11 +143,6 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     public Response updateObservationFeatureOfInterestRef(String id, RefId foi) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public Response patchObservation(String id, Observation observation) {
-        return updateObservation(id, observation);
     }
 
 }

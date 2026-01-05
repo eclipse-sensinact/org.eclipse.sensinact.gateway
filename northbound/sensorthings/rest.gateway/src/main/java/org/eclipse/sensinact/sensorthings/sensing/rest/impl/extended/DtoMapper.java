@@ -240,9 +240,11 @@ public class DtoMapper {
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
             String datastreamLink) {
 
-        Object observationId = getResourceField(service, "observationId", String.class);
+        String observationId = String.format("%s~%s~%s", service.getProvider().getName(), service.getName(),
+                getResourceField(service, "observationId", String.class));
+
         String selfLink = datastreamLink != null
-                ? getLink(uriInfo, datastreamLink, "/Observations({id})", (String) observationId)
+                ? getLink(uriInfo, datastreamLink, "/Observations({id})", observationId)
                 : null;
         Object observationResult = getResourceField(service, "observationResult", Object.class);
 

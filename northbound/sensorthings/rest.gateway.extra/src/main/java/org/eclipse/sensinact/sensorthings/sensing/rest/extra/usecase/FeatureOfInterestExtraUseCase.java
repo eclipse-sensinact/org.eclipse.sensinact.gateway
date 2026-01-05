@@ -12,35 +12,45 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * FeatureOfInterest
  */
-public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureOfInterest, FeatureOfInterest> {
+public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureOfInterest, Object> {
 
-    Map<String, FeatureOfInterest> featureOfInterestById = new ConcurrentHashMap<String, FeatureOfInterest>();
+    private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
+    private final DataUpdate dataUpdate;
+    private final IAccessServiceUseCase serviceUseCase;
 
+    @SuppressWarnings("unchecked")
     public FeatureOfInterestExtraUseCase(Providers providers) {
+        cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
+        dataUpdate = resolve(providers, DataUpdate.class);
+        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
     }
 
-    public ExtraUseCaseResponse<FeatureOfInterest> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
+    public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
         FeatureOfInterest featureOfInterest = request.model();
         checkRequireField(request);
         String featureOfInterestId = getId(request);
         FeatureOfInterest createFoi = new FeatureOfInterest(featureOfInterest.selfLink(), featureOfInterestId,
                 featureOfInterest.name(), featureOfInterest.description(), featureOfInterest.encodingType(),
                 featureOfInterest.feature(), null);
-        featureOfInterestById.put(featureOfInterestId, createFoi);
-        return new ExtraUseCaseResponse<FeatureOfInterest>(featureOfInterestId, createFoi);
+        cacheFoi.addDto(featureOfInterestId, createFoi);
+        return new ExtraUseCaseResponse<Object>(featureOfInterestId, createFoi);
 
     }
 
@@ -51,28 +61,75 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCase<FeatureO
                         .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
     }
 
-    public ExtraUseCaseResponse<FeatureOfInterest> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "not implemented");
+    public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
+        return new ExtraUseCaseResponse<Object>(false, "not implemented");
 
     }
 
     @Override
     protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        // read thing for each location and update it
-        return null;
+        String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
+        String datastreamId = DtoToModelMapper.extractSecondIdSegment(request.id());
+        String observationId = DtoToModelMapper.extractThirdIdSegment(request.id());
+        String foiId = DtoToModelMapper.extractFouthIdSegment(request.id());
+
+        if (providerId == null || datastreamId == null || observationId == null || foiId == null) {
+            throw new BadRequestException("bad id format");
+        }
+        FeatureOfInterest receiveFoi = request.model();
+        checkRequireField(request);
+        FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
+                receiveFoi.encodingType(), receiveFoi.feature(), null);
+
+        return List
+                .of(DtoToModelMapper.toDatastreamUpdate(providerId, datastreamId, null, null, null, null, foiToUpdate));
+
     }
 
-    public ExtraUseCaseResponse<FeatureOfInterest> update(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<FeatureOfInterest>(false, "not implemented");
+    private FeatureOfInterest updateInMemoryFoi(ExtraUseCaseRequest<FeatureOfInterest> request, FeatureOfInterest foi) {
+        FeatureOfInterest updateFoi = request.model();
+        FeatureOfInterest createFoi = new FeatureOfInterest(null, request.id(),
+                updateFoi.name() != null ? updateFoi.name() : foi.name(),
+                updateFoi.description() != null ? updateFoi.description() : foi.description(),
+                updateFoi.encodingType() != null ? updateFoi.encodingType() : foi.encodingType(),
+                updateFoi.feature() != null ? updateFoi.feature() : foi.feature(), null);
+        cacheFoi.addDto(request.id(), createFoi);
+        return createFoi;
+    }
+
+    public ExtraUseCaseResponse<Object> update(ExtraUseCaseRequest<FeatureOfInterest> request) {
+        // check if sensor is in cached map
+        FeatureOfInterest property = cacheFoi.getDto(request.id());
+        if (property != null) {
+            FeatureOfInterest createdProperty = updateInMemoryFoi(request, property);
+            return new ExtraUseCaseResponse<Object>(request.id(), createdProperty);
+        } else {
+
+            List<SensorThingsUpdate> listDtoModels = toDtos(request);
+
+            // update/create provider
+            try {
+                dataUpdate.pushUpdate(listDtoModels).getValue();
+
+            } catch (InvocationTargetException | InterruptedException e) {
+                return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
+            }
+            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), request.id());
+            if (serviceSnapshot == null) {
+                return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
+            }
+            return new ExtraUseCaseResponse<Object>(request.id(), serviceSnapshot);
+
+        }
 
     }
 
-    public FeatureOfInterest removeInMemoryFeatureOfInterest(String id) {
-        return featureOfInterestById.remove(id);
+    public void removeInMemoryFeatureOfInterest(String id) {
+        cacheFoi.removeDto(id);
 
     }
 
     public FeatureOfInterest getInMemoryFeatureOfInterest(String id) {
-        return featureOfInterestById.get(id);
+        return cacheFoi.getDto(id);
     }
 }

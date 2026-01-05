@@ -13,15 +13,13 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -33,25 +31,25 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Object> {
 
-    Map<String, ExpandedSensor> sensorById = new HashMap<String, ExpandedSensor>();
-
     private final DataUpdate dataUpdate;
     private final IAccessServiceUseCase serviceUseCase;
+    private final IDtoMemoryCache<ExpandedSensor> cacheSensor;
 
+    @SuppressWarnings("unchecked")
     public SensorsExtraUseCase(Providers providers) {
         dataUpdate = resolve(providers, DataUpdate.class);
         serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        cacheSensor = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
     }
 
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<ExpandedSensor> request) {
         ExpandedSensor sensor = request.model();
         checkRequireField(request);
-        String observedPropertyId = getId(request);
-        ExpandedSensor createdSensor = new ExpandedSensor(null, observedPropertyId, sensor.name(), sensor.description(),
+        String sensorId = getId(request);
+        ExpandedSensor createdSensor = new ExpandedSensor(null, sensorId, sensor.name(), sensor.description(),
                 sensor.encodingType(), sensor.metadata(), sensor.properties(), null);
-        sensorById.put(observedPropertyId, createdSensor);
-
-        return new ExtraUseCaseResponse<Object>(observedPropertyId, createdSensor);
+        cacheSensor.addDto(sensorId, createdSensor);
+        return new ExtraUseCaseResponse<Object>(sensorId, createdSensor);
 
     }
 
@@ -113,7 +111,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ob
                 updateSensor.encodingType() != null ? updateSensor.encodingType() : sensor.encodingType(),
                 updateSensor.metadata() != null ? updateSensor.metadata() : sensor.metadata(),
                 updateSensor.properties() != null ? updateSensor.properties() : sensor.properties(), null);
-        sensorById.put(request.id(), createdSensor);
+        cacheSensor.addDto(request.id(), createdSensor);
         return createdSensor;
     }
 
@@ -125,11 +123,11 @@ public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, Ob
     }
 
     public ExpandedSensor getInMemorySensor(String id) {
-        return sensorById.get(id);
+        return cacheSensor.getDto(id);
     }
 
-    public ExpandedSensor removeInMemorySensor(String id) {
-        return sensorById.remove(id);
+    public void removeInMemorySensor(String id) {
+        cacheSensor.removeDto(id);
     }
 
 }

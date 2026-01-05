@@ -48,7 +48,7 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -63,7 +63,7 @@ public class SensorTest extends AbstractIntegrationTest {
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         // then
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNull(sensorCache.getDto(sensorId));
 
     }
 
@@ -92,7 +92,7 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -106,11 +106,11 @@ public class SensorTest extends AbstractIntegrationTest {
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNull(sensorCache.getDto(sensorId));
         // when
         ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
         json = getJsonResponseFromPut(sensorUpdate, String.format("Sensor(%s)", sensorIdDatastream), 204);
-        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNull(sensorCache.getDto(sensorId));
         // then
         json = getJsonResponseFromGet(String.format("/Sensors(%s)", sensorIdDatastream), 200);
         UtilsAssert.assertSensor(sensorUpdate, json);
@@ -140,7 +140,7 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -154,11 +154,11 @@ public class SensorTest extends AbstractIntegrationTest {
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNull(sensorCache.getDto(sensorId));
         // when
         ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2", null, "testencodingType");
         json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
-        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNull(sensorCache.getDto(sensorId));
         // then
     }
 }

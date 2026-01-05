@@ -38,9 +38,16 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
 
     @Override
     public Sensor getSensor(String id) {
-        String datastreamLink = getDatastreamLink(id);
-        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.SENSORS), validateAndGeService(id), datastreamLink);
+        if (getCache(ExpandedSensor.class).getDto(id) != null) {
+            ExpandedSensor sensor = (ExpandedSensor) getCache(ExpandedSensor.class).getDto(id);
+            return new Sensor(DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Sensors", id), sensor.id(), sensor.name(),
+                    sensor.description(), sensor.encodingType(), sensor.metadata(), sensor.properties(), null);
+        } else {
+            String datastreamLink = getDatastreamLink(id);
+            return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    parseFilter(EFilterContext.SENSORS), validateAndGeService(id), datastreamLink);
+        }
+
     }
 
     private String getDatastreamLink(String id) {
