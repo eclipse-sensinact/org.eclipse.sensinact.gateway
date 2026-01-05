@@ -10,9 +10,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper;
 import org.osgi.service.component.annotations.Component;
 
-import jakarta.ws.rs.NotFoundException;
-
-@Component(service = IAccessProviderUseCase.class)
+@Component(service = IAccessProviderUseCase.class, immediate = true)
 public class AccessProviderUseCase implements IAccessProviderUseCase {
 
     private Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
@@ -20,13 +18,12 @@ public class AccessProviderUseCase implements IAccessProviderUseCase {
     }
 
     @Override
-    public ProviderSnapshot execute(SensiNactSession session, String providerId) {
+    public ProviderSnapshot read(SensiNactSession session, String providerId) {
         DtoMapper.validatedProviderId(providerId);
 
         Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(session, providerId);
-
         if (providerSnapshot.isEmpty()) {
-            throw new NotFoundException("Unknown provider");
+            return null;
         }
         return providerSnapshot.get();
     }
