@@ -28,6 +28,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -177,30 +178,31 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
-    // @Test
-//TODO    public void testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation()
-//            throws Exception {
-//        // Given
-//        String name = "testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
-//
-//        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "Location"));
-//
-//        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal(name);
-//        ExpandedDataStream datastream2 = DtoFactory.getDatastreamMinimal(name + "1");
-//        ExpandedDataStream datastream3 = DtoFactory.getDatastreamMinimal(name + "2");
-//
-//        List<ExpandedDataStream> datastreams = List.of(datastream1, datastream2, datastream3);
-//        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
-//                "testThing With Location and Datastream",
-//                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
-//        // When
-//
-//        JsonNode json = getJsonResponseFromPost(dtoThing,
-//                "/Things?$expand=Locations,Datastreams($expand=Sensor,ObservedProperty,Observations)", 201);
-//
-//        UtilsAssert.assertThing(dtoThing, json, true);
-//
-//    }
+    @Ignore
+    // FixMe expand multi level
+    public void testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation()
+            throws Exception {
+        // Given
+        String name = "testCreateThingWithExpandLocationAndDatastreamIncludeSensorObservedPropertyhObservation";
+
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "Location"));
+
+        ExpandedDataStream datastream1 = DtoFactory.getDatastreamMinimal(name);
+        ExpandedDataStream datastream2 = DtoFactory.getDatastreamMinimal(name + "1");
+        ExpandedDataStream datastream3 = DtoFactory.getDatastreamMinimal(name + "2");
+
+        List<ExpandedDataStream> datastreams = List.of(datastream1, datastream2, datastream3);
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
+        // When
+
+        JsonNode json = getJsonResponseFromPost(dtoThing,
+                "/Things?$expand=Locations,Datastreams($expand=Sensor,ObservedProperty,Observations)", 201);
+
+        UtilsAssert.assertThing(dtoThing, json, true);
+
+    }
 
     @Test
     public void testCreateThingWithMultipleLocation() throws Exception {
@@ -221,7 +223,12 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
-    // update
+    /**
+     * Tests that <code>PATCH</code> can be used to update a Thing
+     */
+    /*
+     * test simple update thing
+     */
     @Test
     public void testUpdateThing() throws Exception {
         // Given
@@ -249,6 +256,11 @@ public class ThingTest extends AbstractIntegrationTest {
                 UtilDto.getResourceField(service, "description", String.class));
     }
 
+    /**
+     * test update location through thing endpoint
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdateThingLocation() throws Exception {
         // Given
@@ -277,6 +289,11 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test update datastream through thing endpoint
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdateThingDatastream() throws Exception {
         // Given
@@ -310,6 +327,12 @@ public class ThingTest extends AbstractIntegrationTest {
         assertEquals(name + "3", UtilDto.getResourceField(service, "name", String.class));
     }
 
+    /**
+     * test add location link between existing thing and existing location using
+     * $ref endpoint the location should be linked to thing
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdateThingLocationRef() throws Exception {
         // Given
@@ -341,6 +364,11 @@ public class ThingTest extends AbstractIntegrationTest {
         assertTrue(idLocations.contains(idLocation));
     }
 
+    /**
+     * test create link between existing datastream and thing to have the thing be
+     * link to the existing datastream. the datastream should move the one thing to
+     * another using the $ref endpoint
+     */
     @Test
     public void testUpdateThingDatastreamRef() throws Exception {
         // Given
@@ -383,7 +411,14 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
-    // patch
+    /**
+     * Tests that <code>PATCH</code> can be used to update a Thing
+     */
+    /**
+     * test simple patch thing endpoint
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdatePatchThing() throws Exception {
         // Given

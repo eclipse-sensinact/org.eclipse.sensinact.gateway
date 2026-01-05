@@ -14,7 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
@@ -125,12 +124,6 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
 
     public void removeInMemoryObservedProperty(String id) {
         cacheObservedProperty.removeDto(id);
-    }
-
-    @Override
-    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

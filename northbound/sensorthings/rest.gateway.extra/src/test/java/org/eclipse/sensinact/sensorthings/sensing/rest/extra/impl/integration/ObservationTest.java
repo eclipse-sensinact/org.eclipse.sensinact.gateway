@@ -28,6 +28,11 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class ObservationTest extends AbstractIntegrationTest {
 
+    /**
+     * test create observation through datastream observation endpoint
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateObservationThroughDatastream() throws Exception {
         // given
@@ -50,6 +55,11 @@ public class ObservationTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test observation with missing mandatory field
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateObservationMissingField() throws Exception {
         // given
@@ -76,6 +86,11 @@ public class ObservationTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * create observation using datastream endpoint
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateObservationsInDatastream() throws Exception {
         // given

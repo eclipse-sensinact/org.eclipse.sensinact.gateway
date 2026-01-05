@@ -19,8 +19,7 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.IdSelf;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -37,5 +36,5 @@ public record ExpandedObservation(String selfLink, Object id, @JsonFormat(shape 
         @JsonProperty("Datastream@iot.navigationLink") String datastreamLink,
         @JsonProperty("FeatureOfInterest@iot.navigationLink") String featureOfInterestLink,
         @JsonProperty("Datastream") RefId datastream,
-        @JsonProperty("FeatureOfInterest") FeatureOfInterest featureOfInterest) implements Id, Self {
+        @JsonProperty("FeatureOfInterest") FeatureOfInterest featureOfInterest) implements IdSelf {
 }

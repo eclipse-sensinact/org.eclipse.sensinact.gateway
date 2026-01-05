@@ -15,7 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -122,12 +121,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
-    }
-
-    @Override
-    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

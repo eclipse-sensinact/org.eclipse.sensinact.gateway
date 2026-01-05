@@ -32,6 +32,11 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class SensorTest extends AbstractIntegrationTest {
 
+    /**
+     * test create sensor that will be in memory as not link to a datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateSensor() throws Exception {
         // given
@@ -43,6 +48,11 @@ public class SensorTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create sensor link to a datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastreamLinkSensor() throws Exception {
         // given
@@ -70,8 +80,15 @@ public class SensorTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * Tests that <code>PUT</code> can be used to update a Sensor
+     */
+    /**
+     * test update sensor cached in memory
+     *
+     * @throws Exception
+     */
     @Test
-
     public void testUpdateSensor() throws Exception {
         // given
         String name = "testCreateSensor";
@@ -84,11 +101,13 @@ public class SensorTest extends AbstractIntegrationTest {
         getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
         // then
         assertEquals(name + "2", sensorCache.getDto(idSensor).name());
-
-//        json = getJsonResponseFromGet(String.format("/Sensors(%s)", idSensor), 200);
-//        UtilsAssert.assertSensor(sensorUpdate, json);
     }
 
+    /**
+     * test update sensor that are link to a datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdateDatastreamLinkSensor() throws Exception {
         // given
@@ -123,8 +142,15 @@ public class SensorTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * Tests that <code>PATCH</code> can be used to update a Sensor
+     */
+    /**
+     * test patch sensor cached in memory
+     *
+     * @throws Exception
+     */
     @Test
-
     public void testUpdatePatchSensor() throws Exception {
         // given
         String name = "testUpdatePatchSensor";
@@ -140,6 +166,11 @@ public class SensorTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test patch sensor that are link to a datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testUpdatePatchDatastreamLinkSensor() throws Exception {
         // given
