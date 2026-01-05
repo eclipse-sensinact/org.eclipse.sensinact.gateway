@@ -33,7 +33,7 @@ public class HistoricalLocationsExtraUseCase extends AbstractExtraUseCase<Histor
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, e, "fail to create");
 
         }
 
