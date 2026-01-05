@@ -15,7 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -49,7 +48,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
-        String id = getId(request);
+        String id = request.id();
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         // update/create provider
@@ -70,13 +69,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
 
     }
 
-    @Override
-    public String getId(ExtraUseCaseRequest<ExpandedThing> request) {
-        return request.id() != null ? request.id()
-                : DtoToModelMapper
-                        .sanitizeId(request.model().id() != null ? request.model().id() : request.model().name());
-    }
-
     public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
@@ -94,14 +86,14 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
         List<String> datastreamIds = new ArrayList<String>();
 
         checkRequireField(request);
-        String id = getId(request);
+        String id = request.id();
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
         if (provider != null) {
             locationIds = getLocationIds(provider);
             datastreamIds = getDatastreamIds(provider);
         }
 
-        return DtoToModelMapper.toThingUpdates(request.model(), request.id(), locationIds, datastreamIds);
+        return DtoToModelMapper.toThingUpdates(request.model(), id, locationIds, datastreamIds);
     }
 
     @SuppressWarnings("unchecked")

@@ -44,22 +44,10 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
             return new Sensor(DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Sensors", id), sensor.id(), sensor.name(),
                     sensor.description(), sensor.encodingType(), sensor.metadata(), sensor.properties(), null);
         } else {
-            String datastreamLink = getDatastreamLink(id);
             return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(EFilterContext.SENSORS), validateAndGeService(id), datastreamLink);
+                    parseFilter(EFilterContext.SENSORS), validateAndGeService(id));
         }
 
-    }
-
-    private String getDatastreamLink(String id) {
-        String providerId = UtilIds.extractFirstIdSegment(id);
-        String serviceId = UtilIds.extractFirstIdSegment(id);
-        String datastreamLink = null;
-        if (serviceId != null) {
-            String thingLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Things{id}", providerId);
-            datastreamLink = DtoMapper.getLink(uriInfo, thingLink, "Datastreams({id})", serviceId);
-        }
-        return datastreamLink;
     }
 
     @Override
@@ -94,7 +82,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, 
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
-        ServiceSnapshot serviceDatastream = validateAndGetProvider(id2).getService("datastream");
+        ServiceSnapshot serviceDatastream = UtilIds.getDatastreamService(validateAndGetProvider(id2));
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), serviceDatastream);
 

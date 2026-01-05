@@ -13,6 +13,9 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.ParameterizedType;
+
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -24,7 +27,7 @@ import jakarta.ws.rs.ext.Providers;
  * @param <M>
  * @param <S>
  */
-public abstract class AbstractExtraUseCase<M, S> implements IExtraUseCase<M, S> {
+public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUseCase<M, S> {
 
     private Class<M> type;
 

@@ -29,7 +29,7 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
-import org.eclipse.sensinact.sensorthings.sensing.dto.IdSelf;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensinactSensorthingsApplication;
@@ -64,7 +64,7 @@ import jakarta.ws.rs.core.Application;
 public class AbstractIntegrationTest {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    protected record AnyIdDTO(String selfLink, String id) implements IdSelf {
+    protected record AnyIdDTO(String selfLink, String id) implements Id, Self {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

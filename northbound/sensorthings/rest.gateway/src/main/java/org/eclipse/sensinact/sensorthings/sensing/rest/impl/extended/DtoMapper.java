@@ -61,12 +61,9 @@ public class DtoMapper {
     private static final String DESCRIPTION = "description";
     private static final String FRIENDLY_NAME = "name";
     private static final String LOCATION = "location";
-    private static final String DEFAULT_ENCODING_TYPE = "text/plain";
     private static final String ENCODING_TYPE_VND_GEO_JSON = "application/vnd.geo+json";
     public static final String VERSION = "v1.1";
-    private static final String TYPE = "type";
     private static final String NO_DESCRIPTION = "No description";
-    private static final String NO_DEFINITION = "No definition";
 
     public static ServiceSnapshot getServiceSnapshot(ProviderSnapshot provider, String name) {
         return provider.getServices().stream().filter(s -> name.equals(s.getName())).findFirst().get();
@@ -86,13 +83,10 @@ public class DtoMapper {
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         String id = provider.getName();
 
-        ServiceSnapshot serviceAdmin = getServiceSnapshot(provider, ADMIN);
-        ServiceSnapshot serviceThing = getServiceSnapshot(provider, "thing");
-        String name = Objects.requireNonNullElse(getResourceField(serviceAdmin, FRIENDLY_NAME, String.class),
-                provider.getName());
+        ServiceSnapshot serviceThing = UtilIds.getThingService(provider);
+        String name = getResourceField(serviceThing, "name", String.class);
 
-        String description = Objects.requireNonNullElse(getResourceField(serviceAdmin, DESCRIPTION, String.class),
-                NO_DESCRIPTION);
+        String description = getResourceField(serviceThing, "description", String.class);
 
         String selfLink = getLink(uriInfo, VERSION, "Things({id})", id);
         String datastreamsLink = getLink(uriInfo, selfLink, "Datastreams");
@@ -175,7 +169,7 @@ public class DtoMapper {
 
         if (expansions.shouldExpand("Sensor", datastream)) {
             expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Sensor"), filter, service, selfLink));
+                    expansions.getExpansionSettings("Sensor"), filter, service));
         }
 
         if (expansions.shouldExpand("Thing", datastream)) {
@@ -187,17 +181,21 @@ public class DtoMapper {
     }
 
     public static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
-            String datastreamLink) {
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
         String sensorId = String.format("%s~%s", service.getProvider().getName(),
                 getResourceField(service, "sensorId", String.class));
         String sensorName = getResourceField(service, "sensorName", String.class);
         String sensorDescription = getResourceField(service, "sensorDescription", String.class);
         String sensorEncodingType = getResourceField(service, "sensorEncodingType", String.class);
         Object sensorMetadata = getResourceField(service, "sensorMetadata", Object.class);
+        String thingId = getResourceField(service, "thingId", String.class);
+        String datastreamId = getResourceField(service, "id", String.class);
+
         @SuppressWarnings("unchecked")
         Map<String, Object> sensorProperty = getResourceField(service, "sensorProperty", Map.class);
+        String thingLink = getLink(uriInfo, VERSION, "Thing({id})", thingId);
 
+        String datastreamLink = getLink(uriInfo, thingLink, "Datastreams({id})", datastreamId);
         String sensorLink = getLink(uriInfo, datastreamLink, "/Sensor({id})", sensorId);
 
         Sensor sensor = new Sensor(sensorLink, sensorId, sensorName, sensorDescription, sensorEncodingType,
@@ -213,7 +211,7 @@ public class DtoMapper {
 
     public static String getLink(UriInfo uriInfo, String baseUri, String path, String id) {
         if (id == null) {
-            return null;
+            return "null";
         }
         String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", id).build().toString();
         return link;
@@ -244,9 +242,14 @@ public class DtoMapper {
 
     public static Observation toObservation(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
+        return toObservation(userSession, application, mapper, uriInfo, expansions, filter, service,
+                UtilIds.getResourceField(service, "lastObservation", ExpandedObservation.class));
+    }
 
-        ExpandedObservation lastObservation = (ExpandedObservation) getResourceField(service, "lastObservation",
-                Object.class);
+    public static Observation toObservation(SensiNactSession userSession, Application application, ObjectMapper mapper,
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
+            ExpandedObservation lastObservation) {
+
         String idDatastream = getResourceField(service, "id", String.class);
         String idThing = getResourceField(service, "thingId", String.class);
         String thingLink = getLink(uriInfo, VERSION, "Things({id})", idThing);
@@ -255,8 +258,8 @@ public class DtoMapper {
 
         String foiLink = lastObservation.featureOfInterest() != null ? getLink(uriInfo, datastreamLink,
                 "FeatureOfInterests({id})", (String) lastObservation.featureOfInterest().id()) : null;
-
-        Observation observation = new Observation(selfLink, lastObservation.id(), lastObservation.phenomenonTime(),
+        String observationId = String.format("%s~%s", idDatastream, lastObservation.id());
+        Observation observation = new Observation(selfLink, observationId, lastObservation.phenomenonTime(),
                 lastObservation.resultTime(), lastObservation.result(), lastObservation.resultQuality(),
                 lastObservation.validTime(), lastObservation.parameters(), datastreamLink, foiLink);
 
@@ -272,9 +275,11 @@ public class DtoMapper {
     public static List<Observation> toObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ServiceSnapshot service) {
-
-        List<Observation> observations = List
-                .of(toObservation(userSession, application, mapper, uriInfo, expansions, filter, service));
+        ExpandedObservation latestObservation = (ExpandedObservation) UtilIds.getResourceField(service,
+                "lastObservation", Object.class);
+        List<Observation> observations = latestObservation == null ? List.of()
+                : List.of(toObservation(userSession, application, mapper, uriInfo, expansions, filter, service,
+                        latestObservation));
 
         return observations;
     }
@@ -404,9 +409,32 @@ public class DtoMapper {
         }
 
         return datastreamids.stream().map(datastreamId -> DtoMapper.getProviderSnapshot(userSession, datastreamId))
-                .flatMap(Optional::stream).map(provider -> provider.getService("datastream"))
+                .flatMap(Optional::stream).map(provider -> UtilIds.getDatastreamService(provider))
                 .map(s -> toDatastream(userSession, application, mapper, uriInfo, expansions, filter, s)).toList();
 
+    }
+
+    public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ServiceSnapshot serviceSnapshot) {
+        String idThing = UtilIds.getResourceField(serviceSnapshot, "thingId", String.class);
+        String idDatastream = UtilIds.getResourceField(serviceSnapshot, "id", String.class);
+
+        ExpandedObservation lastObservation = UtilIds.getResourceField(serviceSnapshot, "lastObservation",
+                ExpandedObservation.class);
+        if (lastObservation != null && lastObservation.featureOfInterest() != null) {
+            FeatureOfInterest foiReaded = lastObservation.featureOfInterest();
+            String thingLink = getLink(uriInfo, VERSION, "Things({id})", idThing);
+            String datastreamLink = getLink(uriInfo, thingLink, "Datastream({id})", idDatastream);
+            String observationLink = getLink(uriInfo, datastreamLink, "Observations({id})",
+                    (String) lastObservation.id());
+            String selfLink = getLink(uriInfo, observationLink, "FeatureOfInterests({id})", (String) foiReaded.id());
+
+            FeatureOfInterest foi = new FeatureOfInterest(selfLink, foiReaded.id(), foiReaded.name(),
+                    foiReaded.description(), foiReaded.encodingType(), foiReaded.feature(), selfLink);
+            return foi;
+        }
+        return null;
     }
 
     public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,

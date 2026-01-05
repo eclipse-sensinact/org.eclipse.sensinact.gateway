@@ -80,7 +80,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         ProviderSnapshot providerDatastream = validateAndGetProvider(getSession(), id2);
 
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), providerDatastream.getService("datastream"));
+                parseFilter(DATASTREAMS), UtilIds.getDatastreamService(providerDatastream));
 
         if (!id2.equals(d.id())) {
             throw new NotFoundException();
@@ -240,7 +240,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
         }
         ProviderSnapshot provider = validateAndGetProvider(getSession(), providerLocation);
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(LOCATIONS), provider.getService("location"));
+                parseFilter(LOCATIONS), UtilIds.getLocationService(provider));
 
         if (!id2.equals(l.id())) {
             throw new NotFoundException();
@@ -337,8 +337,9 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response updateDatastreamRef(String id, RefId datastream) {
-        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastream, id,
-                ExpandedThing.class, ExpandedDataStream.class);
+        RefId thingId = new RefId(id);
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), thingId,
+                (String) datastream.id(), ExpandedDataStream.class, ExpandedThing.class);
 
         return Response.noContent().build();
     }

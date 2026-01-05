@@ -28,8 +28,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilIds;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.FeaturesOfInterestAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.FeaturesOfInterestUpdate;
@@ -76,15 +78,16 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
         ProviderSnapshot providerDatastream = validateAndGetProvider(getSession(), provider);
 
         return getLiveObservations(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.OBSERVATIONS), providerDatastream.getService("datastream"));
+                parseFilter(EFilterContext.OBSERVATIONS), UtilIds.getDatastreamService(providerDatastream));
     }
 
     static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ServiceSnapshot serviceSnapshot) {
-        // TODO
+        ExpandedObservation observation = (ExpandedObservation) UtilIds.getResourceField(serviceSnapshot,
+                "lastObservation", Object.class);
         return new ResultList<>(null, null, List.of(DtoMapper.toObservation(userSession, application, mapper, uriInfo,
-                expansions, filter, serviceSnapshot)));
+                expansions, filter, serviceSnapshot, observation)));
     }
 
     @Override

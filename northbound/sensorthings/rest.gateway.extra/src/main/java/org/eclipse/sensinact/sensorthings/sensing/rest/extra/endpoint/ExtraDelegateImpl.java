@@ -76,7 +76,7 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     }
 
     @SuppressWarnings("unchecked")
-    protected <D, S> IExtraUseCase<D, S> getExtraUseCase(Class<D> clazz) {
+    protected <D extends Id, S> IExtraUseCase<D, S> getExtraUseCase(Class<D> clazz) {
         return providers.getContextResolver(IExtraUseCase.class, MediaType.WILDCARD_TYPE).getContext(clazz);
     }
 

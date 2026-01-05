@@ -42,12 +42,4 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
         }
     }
 
-    /**
-     * get id field for EMF
-     *
-     * @param aDto
-     * @return
-     */
-
-    public abstract String getId(ExtraUseCaseRequest<M> request);
 }
