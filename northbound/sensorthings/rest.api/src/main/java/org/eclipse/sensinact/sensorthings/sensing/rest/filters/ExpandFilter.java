@@ -13,7 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
 import static jakarta.ws.rs.Priorities.USER;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.access.IFilterConstants.EXPAND_SETTINGS_STRING;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants.EXPAND_SETTINGS_STRING;
 
 import java.io.IOException;
 import java.util.Arrays;
