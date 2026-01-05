@@ -431,6 +431,16 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
+	public EAttribute getDataStreamService_ThingId() {
+		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(19);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public EClass getSensorThingService() {
 		return sensorThingServiceEClass;
 	}
@@ -511,7 +521,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EReference getSensorThingLocation_Locations() {
+	public EReference getSensorThingLocation_Location() {
 		return (EReference)sensorThingLocationEClass.getEStructuralFeatures().get(0);
 	}
 
@@ -531,7 +541,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EReference getSensorThingDatastream_DataStreams() {
+	public EReference getSensorThingDatastream_Datastream() {
 		return (EReference)sensorThingDatastreamEClass.getEStructuralFeatures().get(0);
 	}
 
@@ -594,6 +604,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__SENSOR_PROPERTIES);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__LAST_OBSERVATION);
+		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__THING_ID);
 
 		sensorThingServiceEClass = createEClass(SENSOR_THING_SERVICE);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__NAME);
@@ -604,10 +615,10 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__DATASTREAM_IDS);
 
 		sensorThingLocationEClass = createEClass(SENSOR_THING_LOCATION);
-		createEReference(sensorThingLocationEClass, SENSOR_THING_LOCATION__LOCATIONS);
+		createEReference(sensorThingLocationEClass, SENSOR_THING_LOCATION__LOCATION);
 
 		sensorThingDatastreamEClass = createEClass(SENSOR_THING_DATASTREAM);
-		createEReference(sensorThingDatastreamEClass, SENSOR_THING_DATASTREAM__DATA_STREAMS);
+		createEReference(sensorThingDatastreamEClass, SENSOR_THING_DATASTREAM__DATASTREAM);
 	}
 
 	/**
@@ -689,6 +700,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		g1.getETypeArguments().add(g2);
 		initEAttribute(getDataStreamService_ObservedPropertyProperties(), g1, "observedPropertyProperties", null, 0, 1, DataStreamService.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_LastObservation(), ecorePackage.getEJavaObject(), "lastObservation", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getDataStreamService_ThingId(), ecorePackage.getEString(), "thingId", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingServiceEClass, SensorThingService.class, "SensorThingService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getSensorThingService_Name(), ecorePackage.getEString(), "name", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -699,10 +711,10 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		initEAttribute(getSensorThingService_DatastreamIds(), ecorePackage.getEJavaObject(), "datastreamIds", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingLocationEClass, SensorThingLocation.class, "SensorThingLocation", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEReference(getSensorThingLocation_Locations(), this.getSensorThingLocationService(), null, "locations", null, 0, 1, SensorThingLocation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getSensorThingLocation_Location(), this.getSensorThingLocationService(), null, "location", null, 0, 1, SensorThingLocation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingDatastreamEClass, SensorThingDatastream.class, "SensorThingDatastream", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEReference(getSensorThingDatastream_DataStreams(), this.getDataStreamService(), null, "dataStreams", null, 0, -1, SensorThingDatastream.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getSensorThingDatastream_Datastream(), this.getDataStreamService(), null, "datastream", null, 0, 1, SensorThingDatastream.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);

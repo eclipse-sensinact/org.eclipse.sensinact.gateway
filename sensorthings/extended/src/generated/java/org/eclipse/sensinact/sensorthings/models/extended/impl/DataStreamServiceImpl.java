@@ -54,6 +54,7 @@ import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getSensorProperties <em>Sensor Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservedPropertyProperties <em>Observed Property Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getLastObservation <em>Last Observation</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getThingId <em>Thing Id</em>}</li>
  * </ul>
  *
  * @generated
@@ -418,6 +419,26 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @ordered
 	 */
 	protected Object lastObservation = LAST_OBSERVATION_EDEFAULT;
+
+	/**
+	 * The default value of the '{@link #getThingId() <em>Thing Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getThingId()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String THING_ID_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getThingId() <em>Thing Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getThingId()
+	 * @generated
+	 * @ordered
+	 */
+	protected String thingId = THING_ID_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -881,6 +902,29 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
+	public String getThingId() {
+		return thingId;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setThingId(String newThingId) {
+		String oldThingId = thingId;
+		thingId = newThingId;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__THING_ID, oldThingId, thingId));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
 			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
@@ -921,6 +965,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return getObservedPropertyProperties();
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				return getLastObservation();
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				return getThingId();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -989,6 +1035,9 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				setLastObservation(newValue);
+				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				setThingId((String)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -1059,6 +1108,9 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				setLastObservation(LAST_OBSERVATION_EDEFAULT);
 				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				setThingId(THING_ID_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -1109,6 +1161,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return observedPropertyProperties != null;
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				return LAST_OBSERVATION_EDEFAULT == null ? lastObservation != null : !LAST_OBSERVATION_EDEFAULT.equals(lastObservation);
+			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
+				return THING_ID_EDEFAULT == null ? thingId != null : !THING_ID_EDEFAULT.equals(thingId);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -1161,6 +1215,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		result.append(observedPropertyProperties);
 		result.append(", lastObservation: ");
 		result.append(lastObservation);
+		result.append(", thingId: ");
+		result.append(thingId);
 		result.append(')');
 		return result.toString();
 	}

@@ -12,17 +12,13 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended.impl;
 
-import java.util.Collection;
-
+import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
-
-import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
 
-import org.eclipse.emf.ecore.util.EObjectContainmentEList;
-import org.eclipse.emf.ecore.util.InternalEList;
+import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.eclipse.sensinact.model.core.provider.impl.DynamicProviderImpl;
 
@@ -38,21 +34,21 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingDatastream;
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingDatastreamImpl#getDataStreams <em>Data Streams</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingDatastreamImpl#getDatastream <em>Datastream</em>}</li>
  * </ul>
  *
  * @generated
  */
 public class SensorThingDatastreamImpl extends DynamicProviderImpl implements SensorThingDatastream {
 	/**
-	 * The cached value of the '{@link #getDataStreams() <em>Data Streams</em>}' containment reference list.
+	 * The cached value of the '{@link #getDatastream() <em>Datastream</em>}' containment reference.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getDataStreams()
+	 * @see #getDatastream()
 	 * @generated
 	 * @ordered
 	 */
-	protected EList<DataStreamService> dataStreams;
+	protected DataStreamService datastream;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -79,11 +75,43 @@ public class SensorThingDatastreamImpl extends DynamicProviderImpl implements Se
 	 * @generated
 	 */
 	@Override
-	public EList<DataStreamService> getDataStreams() {
-		if (dataStreams == null) {
-			dataStreams = new EObjectContainmentEList<DataStreamService>(DataStreamService.class, this, ExtendedPackage.SENSOR_THING_DATASTREAM__DATA_STREAMS);
+	public DataStreamService getDatastream() {
+		return datastream;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public NotificationChain basicSetDatastream(DataStreamService newDatastream, NotificationChain msgs) {
+		DataStreamService oldDatastream = datastream;
+		datastream = newDatastream;
+		if (eNotificationRequired()) {
+			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM, oldDatastream, newDatastream);
+			if (msgs == null) msgs = notification; else msgs.add(notification);
 		}
-		return dataStreams;
+		return msgs;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setDatastream(DataStreamService newDatastream) {
+		if (newDatastream != datastream) {
+			NotificationChain msgs = null;
+			if (datastream != null)
+				msgs = ((InternalEObject)datastream).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM, null, msgs);
+			if (newDatastream != null)
+				msgs = ((InternalEObject)newDatastream).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM, null, msgs);
+			msgs = basicSetDatastream(newDatastream, msgs);
+			if (msgs != null) msgs.dispatch();
+		}
+		else if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM, newDatastream, newDatastream));
 	}
 
 	/**
@@ -94,8 +122,8 @@ public class SensorThingDatastreamImpl extends DynamicProviderImpl implements Se
 	@Override
 	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATA_STREAMS:
-				return ((InternalEList<?>)getDataStreams()).basicRemove(otherEnd, msgs);
+			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM:
+				return basicSetDatastream(null, msgs);
 		}
 		return super.eInverseRemove(otherEnd, featureID, msgs);
 	}
@@ -108,8 +136,8 @@ public class SensorThingDatastreamImpl extends DynamicProviderImpl implements Se
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATA_STREAMS:
-				return getDataStreams();
+			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM:
+				return getDatastream();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -119,13 +147,11 @@ public class SensorThingDatastreamImpl extends DynamicProviderImpl implements Se
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATA_STREAMS:
-				getDataStreams().clear();
-				getDataStreams().addAll((Collection<? extends DataStreamService>)newValue);
+			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM:
+				setDatastream((DataStreamService)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -139,8 +165,8 @@ public class SensorThingDatastreamImpl extends DynamicProviderImpl implements Se
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATA_STREAMS:
-				getDataStreams().clear();
+			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM:
+				setDatastream((DataStreamService)null);
 				return;
 		}
 		super.eUnset(featureID);
@@ -154,8 +180,8 @@ public class SensorThingDatastreamImpl extends DynamicProviderImpl implements Se
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATA_STREAMS:
-				return dataStreams != null && !dataStreams.isEmpty();
+			case ExtendedPackage.SENSOR_THING_DATASTREAM__DATASTREAM:
+				return datastream != null;
 		}
 		return super.eIsSet(featureID);
 	}
