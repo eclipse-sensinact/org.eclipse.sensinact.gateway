@@ -13,16 +13,14 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
+
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
@@ -31,12 +29,11 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
@@ -59,36 +56,6 @@ public abstract class AbstractAccess {
 
     @Context
     protected ContainerRequestContext requestContext;
-
-    protected List<ProviderSnapshot> listProviders(final ICriterion criterion) {
-        final SensiNactSession userSession = getSession();
-        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers
-                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
-                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-        } else {
-            return providers;
-        }
-    }
-
-    protected List<ServiceSnapshot> listServices(final ICriterion criterion) {
-
-        final SensiNactSession userSession = getSession();
-        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .filter(r -> {
-                        return rcFilter.test(r.getService().getProvider(), List.of(r));
-                    }).map(r -> r.getService()).collect(Collectors.toList());
-        } else {
-            return providers.stream().map(p -> p.getServices().stream()).flatMap(s -> s).toList();
-
-        }
-    }
 
     /**
      * Returns a user session
@@ -120,8 +87,8 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-    private static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
-        return Optional.ofNullable(session.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
+    private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
+        return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
     /**
@@ -146,20 +113,15 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        return DtoMapper.validateAndGetProvider(getSession(), id);
-    }
+        DtoMapperGet.validatedProviderId(id);
 
-    /**
-     * validate and get provider link to the id
-     *
-     * @param id
-     * @return
-     */
+        Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
 
-    protected ServiceSnapshot validateAndGeService(String id, String serviceName) {
-        return DtoMapper.validateAndGeService(getSession(), id, serviceName);
+        if (providerSnapshot.isEmpty()) {
+            throw new NotFoundException("Unknown provider");
+        }
+        return providerSnapshot.get();
     }
 
     /**
@@ -168,9 +130,20 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
-
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        return DtoMapper.validateAndGetResourceSnapshot(getSession(), id);
+        String provider = extractFirstIdSegment(id);
+
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
+        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
+        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+
+        ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
+
+        if (resourceSnapshot == null) {
+            throw new NotFoundException();
+        }
+        return resourceSnapshot;
     }
 
     /**
@@ -200,20 +173,5 @@ public abstract class AbstractAccess {
         } catch (FilterParserException e) {
             throw new BadRequestException("Error parsing filter", e);
         }
-    }
-
-    protected IDtoMemoryCache<?> getCache(Class<?> dtoClass) {
-        @SuppressWarnings("rawtypes")
-        ContextResolver<IDtoMemoryCache> resolver = providers.getContextResolver(IDtoMemoryCache.class,
-                MediaType.WILDCARD_TYPE);
-        if (resolver == null) {
-            return null;
-        }
-        IDtoMemoryCache<?> cache = resolver.getContext(dtoClass);
-        if (cache == null) {
-            throw new WebApplicationException(
-                    String.format("cache for class %s doesn't exists", dtoClass.getSimpleName()));
-        }
-        return cache;
     }
 }
