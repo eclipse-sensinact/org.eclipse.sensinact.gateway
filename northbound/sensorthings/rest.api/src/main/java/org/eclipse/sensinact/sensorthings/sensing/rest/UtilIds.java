@@ -1,5 +1,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 
 public class UtilIds {
@@ -7,6 +8,18 @@ public class UtilIds {
     public static String SERVICE_DATASTREAM = "datastream";
     public static String SERVICE_THING = "thing";
     public static String SERVICE_LOCATON = "location";
+
+    public static ServiceSnapshot getDatastreamService(ProviderSnapshot providerDatastream) {
+        return providerDatastream.getService(UtilIds.SERVICE_DATASTREAM);
+    }
+
+    public static ServiceSnapshot getLocationService(ProviderSnapshot providerDatastream) {
+        return providerDatastream.getService(UtilIds.SERVICE_LOCATON);
+    }
+
+    public static ServiceSnapshot getThingService(ProviderSnapshot providerDatastream) {
+        return providerDatastream.getService(UtilIds.SERVICE_THING);
+    }
 
     public static String extractIdSegment(String id, int part) {
         if (id.isEmpty())

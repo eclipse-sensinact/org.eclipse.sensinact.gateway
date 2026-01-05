@@ -211,7 +211,7 @@ public class DtoMapper {
 
     public static String getLink(UriInfo uriInfo, String baseUri, String path, String id) {
         if (id == null) {
-            return "null";
+            id = "null";
         }
         String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", id).build().toString();
         return link;

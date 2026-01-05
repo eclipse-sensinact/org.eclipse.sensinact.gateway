@@ -22,13 +22,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record Observation(String selfLink, Object id,
-        @JsonFormat(shape = STRING) Instant phenomenonTime,
-        @JsonFormat(shape = STRING) Instant resultTime,
-        Object result, @JsonInclude(NON_NULL) Object resultQuality,
-        @JsonInclude(NON_NULL)
-        @JsonFormat(shape = STRING) TimeInterval validTime,
+public record Observation(String selfLink, Object id, @JsonFormat(shape = STRING) Instant phenomenonTime,
+        @JsonFormat(shape = STRING) Instant resultTime, Object result, @JsonInclude(NON_NULL) Object resultQuality,
+        @JsonInclude(NON_NULL) @JsonFormat(shape = STRING) TimeInterval validTime,
         @JsonInclude(NON_NULL) Map<String, Object> parameters,
         @JsonProperty("Datastream@iot.navigationLink") String datastreamLink,
-        @JsonProperty("FeatureOfInterest@iot.navigationLink") String featureOfInterestLink) implements Id {
+        @JsonProperty("FeatureOfInterest@iot.navigationLink") String featureOfInterestLink) implements IdSelf {
 }

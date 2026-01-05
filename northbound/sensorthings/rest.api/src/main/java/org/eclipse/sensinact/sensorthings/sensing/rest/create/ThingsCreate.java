@@ -54,7 +54,7 @@ public interface ThingsCreate {
      * @return
      */
     @POST
-    @Path("/Locations/$ref)")
+    @Path("/Locations/$ref")
     public Response updateLocationRef(@PathParam("id") String id, RefId location);
 
     /**
@@ -66,7 +66,7 @@ public interface ThingsCreate {
      * @return
      */
     @POST
-    @Path("/Datastreams/$ref)")
+    @Path("/Datastreams/$ref")
     public Response updateDatastreamRef(@PathParam("id") String id, RefId datastream);
 
 }

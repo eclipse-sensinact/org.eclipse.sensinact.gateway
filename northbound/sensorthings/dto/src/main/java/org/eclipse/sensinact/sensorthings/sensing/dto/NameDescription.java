@@ -12,7 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
-public interface NameDescription extends Id {
+public interface NameDescription extends IdSelf {
 
     public String name();
 
