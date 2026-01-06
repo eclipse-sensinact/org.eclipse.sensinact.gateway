@@ -144,16 +144,21 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
-            String parentId, Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef) {
+    public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id, String parentId,
+            Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef) {
         IExtraUseCase<RefId, S> useCase = (IExtraUseCase<RefId, S>) getExtraUseCase(RefId.class);
-        ExtraUseCaseRequest<RefId> request = new ExtraUseCaseRequest<RefId>(session, mapper, uriInfo, method, parentId,
-                clazzUseCase, clazzRef);
+        ExtraUseCaseRequest<RefId> request = new ExtraUseCaseRequest<RefId>(session, mapper, uriInfo, HttpMethod.DELETE,
+                id, parentId, clazzUseCase, clazzRef);
         ExtraUseCaseResponse<S> result = useCase.delete(request);
         if (!result.success()) {
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
+    }
+
+    public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String parentId,
+            Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef) {
+        return deleteRef(session, mapper, uriInfo, parentId, clazzUseCase, clazzRef);
     }
 
 }

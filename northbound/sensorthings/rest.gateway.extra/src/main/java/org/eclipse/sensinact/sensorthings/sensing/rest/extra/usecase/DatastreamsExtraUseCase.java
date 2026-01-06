@@ -30,7 +30,6 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.SensinactService;
-import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -53,7 +52,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * datastream
  */
-public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDataStream, ServiceSnapshot> {
+public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedDataStream, ServiceSnapshot> {
 
     private final IDtoMemoryCache<ExpandedSensor> sensorCache;
 
@@ -96,20 +95,6 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
             return new ExtraUseCaseResponse<ServiceSnapshot>(idDatastream, snapshot);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
-
-    }
-
-    public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        try {
-            List<AbstractSensinactCommand<?>> commands = dtoToDelete(request);
-
-            IndependentCommands<?> multiCommand = new IndependentCommands<>(commands);
-            gatewayThread.execute(multiCommand).getValue();
-        } catch (InvocationTargetException | InterruptedException e) {
-            // TODO Auto-generated catch block
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to delete");
-        }
-        return new ExtraUseCaseResponse<ServiceSnapshot>(true, "datastream deleted");
 
     }
 
@@ -378,34 +363,32 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
                 return pf.resolved(null);
             }
         });
-        // update thing to remove datastreamIds
+        ServiceSnapshot serviceThing = serviceUseCase.read(request.session(), thingId, "thing");
 
-        list.add(new AbstractTwinCommand<Void>() {
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                try {
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = (List<String>) UtilDto.getResourceField(serviceThing, "datastreamIds",
+                Object.class);
+        if (datastreamIds != null && datastreamIds.contains(request.id())) {
+            datastreamIds.remove(request.id());
+            list.add(new AbstractTwinCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                    try {
 
-                    SensinactService service = twin.getService(thingId, "thing");
-                    Map<String, ? extends SensinactResource> mapRes = service.getResources();
-                    SensinactResource resource = mapRes.get("datastreamIds");
-                    if (resource != null && resource.getValue() != null && resource.getValue().getValue() != null) {
-                        TimedValue<?> value = resource.getValue().getValue();
-
-                        if (value.getValue() instanceof List) {
-                            @SuppressWarnings("unchecked")
-                            List<String> datastreamIds = (List<String>) value.getValue();
-                            if (datastreamIds.contains(request.id())) {
-                                datastreamIds.remove(request.id());
-                                resource.setValue(datastreamIds);
-                            }
+                        SensinactService service = twin.getService(thingId, "thing");
+                        Map<String, ? extends SensinactResource> mapRes = service.getResources();
+                        SensinactResource resource = mapRes.get("datastreamIds");
+                        if (resource != null) {
+                            resource.setValue(datastreamIds).getValue();
                         }
+                        return pf.resolved(null);
+                    } catch (InvocationTargetException | InterruptedException e) {
+                        return pf.failed(e);
                     }
-                    return pf.resolved(null);
-                } catch (InvocationTargetException | InterruptedException e) {
-                    return pf.failed(e);
                 }
-            }
-        });
+            });
+        }
+
         return list;
     }
 

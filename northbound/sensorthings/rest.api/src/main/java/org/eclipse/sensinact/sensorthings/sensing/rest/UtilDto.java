@@ -14,6 +14,9 @@ package org.eclipse.sensinact.sensorthings.sensing.rest;
 
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -81,6 +84,7 @@ public class UtilDto {
      * @param record
      * @param fieldName
      * @return
+     * 
      */
     public static Object getRecordField(Object record, String fieldName) {
         if (!record.getClass().isRecord()) {
@@ -124,9 +128,21 @@ public class UtilDto {
 
     public static <T> T getResourceField(ServiceSnapshot service, String resourceName, Class<T> expectedType) {
 
-        return service.getResource(resourceName) != null && service.getResource(resourceName).getValue() != null
-                ? expectedType.cast(service.getResource(resourceName).getValue().getValue())
-                : null;
+        var resource = service.getResource(resourceName);
+
+        if (resource != null && resource.getValue() != null) {
+            return expectedType.cast(resource.getValue().getValue());
+        }
+
+        if (Collection.class.isAssignableFrom(expectedType)) {
+            return expectedType.cast(Collections.emptyList());
+        }
+
+        if (Map.class.isAssignableFrom(expectedType)) {
+            return expectedType.cast(Collections.emptyMap());
+        }
+
+        return null;
     }
 
     public static String extractSecondIdSegment(String id) {

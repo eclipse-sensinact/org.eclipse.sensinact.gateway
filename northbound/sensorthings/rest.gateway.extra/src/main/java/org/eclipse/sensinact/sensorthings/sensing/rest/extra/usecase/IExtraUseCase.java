@@ -73,9 +73,9 @@ public interface IExtraUseCase<M extends Id, S> {
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
-                String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
+                String id, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
 
-            this(session, mapper, uriInfo, method, null, null, parentId, clazzModel, clazzRef);
+            this(session, mapper, uriInfo, method, id, null, parentId, clazzModel, clazzRef);
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,

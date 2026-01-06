@@ -20,7 +20,6 @@ import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
-import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -39,7 +38,7 @@ import jakarta.ws.rs.ext.Providers;
 /**
  * UseCase that manage the create, update, delete use case for sensorthing Thing
  */
-public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, ProviderSnapshot> {
+public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedThing, ProviderSnapshot> {
 
     public ThingsExtraUseCase(Providers providers) {
         super(providers);
@@ -139,11 +138,12 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
                 return pf.resolved(null);
             }
         });
+        // delete associate
         list.add(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                 datastreamIds.stream().forEach(idDatastream -> {
-                    SensinactProvider sp = twin.getProvider(request.id());
+                    SensinactProvider sp = twin.getProvider(idDatastream);
                     if (sp != null) {
                         sp.delete();
                     }
@@ -151,6 +151,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
                 return pf.resolved(null);
             }
         });
+        return list;
     }
 
 }

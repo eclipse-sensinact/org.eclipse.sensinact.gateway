@@ -64,15 +64,8 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     private final Map<RefKey, RefHandler> deleteHandlers = Map.of(
             new RefKey(ExpandedDataStream.class, ExpandedThing.class), this::deleteDatastreamThingRef,
 
-            new RefKey(ExpandedObservation.class, FeatureOfInterest.class),
-            this::deleteObservationFeratureOfInterestRef,
-
             new RefKey(ExpandedThing.class, ExpandedLocation.class), this::deleteThingLocationRef,
 
-            new RefKey(ExpandedDataStream.class, ExpandedObservedProperty.class),
-            this::deleteDatastreamObservedPropertyRef,
-
-            new RefKey(ExpandedDataStream.class, ExpandedSensor.class), this::deleteDatastreamSensorRef,
             new RefKey(ExpandedDataStream.class, ExpandedObservation.class), this::deleteDatastreamObservationRef);
 
     private final Map<RefKey, RefHandler> updateHandlers = new HashMap<RefIdUseCase.RefKey, RefIdUseCase.RefHandler>();
@@ -136,22 +129,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         return handler.handle(request);
     }
 
-    private ExtraUseCaseResponse<Object> deleteDatastreamSensorRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
-
-    }
-
-    private ExtraUseCaseResponse<Object> deleteDatastreamObservedPropertyRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
-
-    }
-
     private ExtraUseCaseResponse<Object> deleteThingLocationRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
-
-    }
-
-    private ExtraUseCaseResponse<Object> deleteObservationFeratureOfInterestRef(ExtraUseCaseRequest<RefId> request) {
         return new ExtraUseCaseResponse<Object>(false, "not implemented");
 
     }

@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.http.HttpResponse;
@@ -33,6 +34,8 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Unit test for simple App.
@@ -497,10 +500,10 @@ public class ThingTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
         String thingId = getIdFromJson(json);
         UtilsAssert.assertThing(dtoThing, json);
-        // When
+        // WhenIllegalArgumentException
         getJsonResponseFromDelete(String.format("Things(%s)", thingId), 204);
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, thingId, "thing");
         });
 
@@ -518,7 +521,7 @@ public class ThingTest extends AbstractIntegrationTest {
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
                 "testThing With Location and Datastream",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
-        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastream", 201);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastreams", 201);
 
         String thingId = getIdFromJson(json);
         JsonNode datastreamNode = json.get("Datastreams");
@@ -530,12 +533,46 @@ public class ThingTest extends AbstractIntegrationTest {
         // When
         getJsonResponseFromDelete(String.format("Things(%s)", thingId), 204);
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, thingId, "thing");
         });
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, idDatastream, "datastream");
         });
+    }
+
+    public void testDeleteThingDatastreamRef() throws Exception {
+        // given
+        String name = "testDeleteThingDatastreamRef";
+
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "1"));
+
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name + "2"));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastreams", 201);
+
+        String thingId = getIdFromJson(json);
+        JsonNode datastreamNode = json.get("Datastreams");
+        assertEquals(datastreamNode.size(), 1);
+        JsonNode datastreamJson = datastreamNode.get(0);
+        String idDatastream = getIdFromJson(datastreamJson);
+
+        UtilsAssert.assertThing(dtoThing, json);
+        // when
+        getJsonResponseFromDelete(String.format("/Things(%s)/Datastreams/$ref?$id=%s", thingId, idDatastream), 204);
+        // then
+        ServiceSnapshot serviceThing = serviceUseCase.read(session, thingId, "things");
+        assertFalse(UtilDto.getResourceField(serviceThing, "datastreamIds", List.class).contains(idDatastream));
+        assertThrows(NotFoundException.class, () -> {
+            serviceUseCase.read(session, idDatastream, "datastream");
+        });
+    }
+
+    public void testDeleteThingLocationRef() {
+
     }
 
 }

@@ -38,7 +38,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * observation
  */
-public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedObservation, ServiceSnapshot> {
+public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedObservation, ServiceSnapshot> {
 
     private final FeatureOfInterestExtraUseCase featureOfInterestUseCase;
 
@@ -67,11 +67,6 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
             return new ExtraUseCaseResponse<ServiceSnapshot>(observationId, service);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
-
-    }
-
-    public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
 

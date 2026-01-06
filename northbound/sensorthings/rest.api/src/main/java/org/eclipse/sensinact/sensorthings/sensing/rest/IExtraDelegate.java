@@ -81,8 +81,23 @@ public interface IExtraDelegate {
      * @param clazz
      * @return
      */
-    public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
-            String parentId, Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef);
+    public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id, String parentId,
+            Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef);
+
+    /**
+     * delete the ref between 2 entities in parameter
+     *
+     * @param <S>
+     * @param session
+     * @param mapper
+     * @param uriInfo
+     * @param parentId
+     * @param clazzUseCase
+     * @param clazzRef
+     * @return
+     */
+    public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String parentId,
+            Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef);
 
     /**
      * update sensorthing model

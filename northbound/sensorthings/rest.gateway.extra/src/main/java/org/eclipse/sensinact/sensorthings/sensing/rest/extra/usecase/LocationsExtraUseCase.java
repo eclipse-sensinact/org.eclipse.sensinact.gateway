@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
@@ -38,7 +40,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocation, ServiceSnapshot> {
+public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ServiceSnapshot> {
 
     public LocationsExtraUseCase(Providers providers) {
         super(providers);
@@ -67,11 +69,6 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedLocation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
-
-    }
-
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
@@ -91,11 +88,11 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
             listThingIds.stream().filter(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
+                ResourceSnapshot resource = provider.getResource(UtilDto.SERVICE_THING, "locationIds");
                 return resource != null && resource.getValue() != null;
             }).map(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
+                ResourceSnapshot resource = provider.getResource(UtilDto.SERVICE_THING, "locationIds");
 
                 @SuppressWarnings("unchecked")
                 List<String> ids = (List<String>) resource.getValue().getValue();
@@ -145,7 +142,36 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
                 return pf.resolved(null);
             }
         });
+
         // update thing to remove locationIds
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+
+                List<ProviderSnapshot> providersSnapshot = twin.filteredSnapshot(null, null, s -> {
+                    if (!UtilDto.SERVICE_THING.equals(s.getName())) {
+                        return false;
+                    }
+                    return true;
+                }, r -> "locationIds".equals(r.getName()));
+
+                providersSnapshot.stream().forEach(p -> {
+                    ServiceSnapshot service = UtilDto.getThingService(p);
+
+                    @SuppressWarnings("unchecked")
+                    List<String> locationIds = (List<String>) UtilDto.getResourceField(service, "locationIds",
+                            Object.class);
+                    locationIds.remove(request.id());
+                    SensinactResource res = twin.getProvider(p.getName()).getResource("thing", "locationIds");
+                    try {
+                        res.setValue(locationIds).getValue();
+                    } catch (InvocationTargetException | InterruptedException e) {
+                        pf.failed(e);
+                    }
+                });
+                return pf.resolved(null);
+            }
+        });
         return list;
     }
 

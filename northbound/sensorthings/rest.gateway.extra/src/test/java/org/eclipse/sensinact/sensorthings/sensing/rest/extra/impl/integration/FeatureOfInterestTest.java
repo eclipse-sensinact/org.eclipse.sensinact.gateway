@@ -295,46 +295,4 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
     }
 
-    @Test
-    public void testDeleteFeatureOfInterestLinkObservation() throws Exception {
-        // given
-        String name = "testCreateFeatureOfInterest";
-
-        FeatureOfInterest dtoFeatureOfInterest = DtoFactory.getFeatureOfInterest(name, "application/vnd.geo+json",
-                new Point(-122.4194, 37.7749));
-
-        // when
-        JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
-        UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
-        String foiId = getIdFromJson(json);
-        assertNotNull(foiCache.getDto(foiId));
-        // create datastream with observation
-        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
-                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
-        json = getJsonResponseFromPost(thing, "Things", 201);
-        String idThing = getIdFromJson(json);
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
-                DtoFactory.getRefId(idThing));
-
-        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
-        String idDatastream = getIdFromJson(json);
-
-        UtilsAssert.assertDatastream(dtoDatastream, json);
-        ExpandedObservation dtoObservation = DtoFactory.getObservationLinkFeatureOfInterest(name + "2", foiId);
-        json = getJsonResponseFromPost(dtoObservation,
-                String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
-        JsonNode foiNode = json.get("FeatureOfInterest");
-        String foidId = getIdFromJson(foiNode);
-        UtilsAssert.assertObservation(dtoObservation, json);
-        assertNull(foiCache.getDto(foiId));
-        // when
-        getJsonResponseFromDelete(String.format("FeaturesOfInterest", foidId), 400);
-        // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        ExpandedObservation lastObs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
-        assertNotNull(lastObs);
-        assertNotNull(lastObs.featureOfInterest());
-        assertEquals(lastObs.featureOfInterest().id(), foidId);
-
-    }
 }

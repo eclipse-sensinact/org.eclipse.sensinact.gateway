@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
@@ -53,7 +54,14 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+
+        if (cacheFoi.getDto(request.id()) != null) {
+            cacheFoi.removeDto(request.id());
+            return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
+
+        } else {
+            throw new BadRequestException("can't delete feature of interest assign to observation and datastream");
+        }
 
     }
 

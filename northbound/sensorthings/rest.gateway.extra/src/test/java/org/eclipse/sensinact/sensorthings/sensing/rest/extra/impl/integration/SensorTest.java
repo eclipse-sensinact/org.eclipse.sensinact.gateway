@@ -123,7 +123,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNotNull(UtilDto.getResourceField(service, "sensorDescription", String.class));
         assertNotNull(UtilDto.getResourceField(service, "sensorEncodingType", String.class));
         assertNotNull(UtilDto.getResourceField(service, "sensorMetadata", Object.class));
-        assertNotNull(UtilDto.getResourceField(service, "sensorProperties", Object.class));
+        assertNotNull(UtilDto.getResourceField(service, "sensorProperties", Map.class));
 
     }
 

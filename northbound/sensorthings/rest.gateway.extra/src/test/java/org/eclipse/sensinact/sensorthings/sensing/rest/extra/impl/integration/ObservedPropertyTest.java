@@ -102,7 +102,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyName", String.class));
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyDescription", String.class));
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyProperties", Object.class));
+        assertNotNull(UtilDto.getResourceField(service, "observedPropertyProperties", Map.class));
 
     }
 

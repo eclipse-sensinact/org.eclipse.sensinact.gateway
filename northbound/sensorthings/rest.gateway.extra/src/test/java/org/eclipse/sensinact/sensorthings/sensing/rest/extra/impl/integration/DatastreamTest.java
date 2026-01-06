@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import jakarta.ws.rs.NotFoundException;
+
 /**
  * Unit test for simple App.
  */
@@ -299,7 +301,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         getJsonResponseFromDelete(String.format("Datastreams(%s)", idDatastream), 204);
         // then
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, idDatastream, "datastream");
         });
         ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
