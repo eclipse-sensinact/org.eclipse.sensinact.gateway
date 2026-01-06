@@ -322,7 +322,10 @@ public class ResourceSelectionCriterion {
 
             final List<Object> rcValues = extractResourceValues(v);
             return modeAwareCheck(rcValues, regexPredicates, (rc, pred) -> pred,
-                    (rc, pred) -> pred.test(rc.toString()), negate,
+                    (rc, pred) -> Optional.ofNullable(rc)
+                            .map(nonNullRc -> pred.test(nonNullRc.toString()))
+                            .orElse(false),
+                    negate,
                     valueSelectionMode);
         };
     }
