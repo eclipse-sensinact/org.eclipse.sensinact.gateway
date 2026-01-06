@@ -15,21 +15,14 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
-import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.command.IndependentCommands;
-import org.eclipse.sensinact.core.push.DataUpdate;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
-import org.eclipse.sensinact.core.twin.SensinactService;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -363,31 +356,26 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                 return pf.resolved(null);
             }
         });
-        ServiceSnapshot serviceThing = serviceUseCase.read(request.session(), thingId, "thing");
 
-        @SuppressWarnings("unchecked")
-        List<String> datastreamIds = (List<String>) UtilDto.getResourceField(serviceThing, "datastreamIds",
-                Object.class);
-        if (datastreamIds != null && datastreamIds.contains(request.id())) {
-            datastreamIds.remove(request.id());
-            list.add(new AbstractTwinCommand<Void>() {
-                @Override
-                protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                    try {
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                try {
 
-                        SensinactService service = twin.getService(thingId, "thing");
-                        Map<String, ? extends SensinactResource> mapRes = service.getResources();
-                        SensinactResource resource = mapRes.get("datastreamIds");
-                        if (resource != null) {
+                    SensinactResource resource = twin.getResource(thingId, "thing", "datastreamIds");
+                    if (resource != null) {
+                        List<?> datastreamIds = resource.getMultiValue(List.class).getValue().getValue();
+                        if (datastreamIds.contains(request.id())) {
+                            datastreamIds.remove(request.id());
                             resource.setValue(datastreamIds).getValue();
                         }
-                        return pf.resolved(null);
-                    } catch (InvocationTargetException | InterruptedException e) {
-                        return pf.failed(e);
                     }
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
                 }
-            });
-        }
+            }
+        });
 
         return list;
     }

@@ -16,6 +16,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -23,7 +25,6 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
-import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
@@ -145,30 +146,26 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
 
         // update thing to remove locationIds
         list.add(new AbstractTwinCommand<Void>() {
+            @SuppressWarnings("unlikely-arg-type")
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
 
-                List<ProviderSnapshot> providersSnapshot = twin.filteredSnapshot(null, null, s -> {
-                    if (!UtilDto.SERVICE_THING.equals(s.getName())) {
-                        return false;
-                    }
-                    return true;
-                }, r -> "locationIds".equals(r.getName()));
-
-                providersSnapshot.stream().forEach(p -> {
-                    ServiceSnapshot service = UtilDto.getThingService(p);
-
-                    @SuppressWarnings("unchecked")
-                    List<String> locationIds = (List<String>) UtilDto.getResourceField(service, "locationIds",
-                            Object.class);
-                    locationIds.remove(request.id());
-                    SensinactResource res = twin.getProvider(p.getName()).getResource("thing", "locationIds");
-                    try {
-                        res.setValue(locationIds).getValue();
-                    } catch (InvocationTargetException | InterruptedException e) {
-                        pf.failed(e);
-                    }
-                });
+                twin.getProviders(eNS_URI, SENSOR_THING_DEVICE.getName()).stream()
+                        .map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds")).filter(r -> {
+                            try {
+                                return r.getMultiValue(List.class).getValue().getValue().contains(request.id());
+                            } catch (InvocationTargetException | InterruptedException e) {
+                                return false;
+                            }
+                        }).forEach(r -> {
+                            try {
+                                List<?> locationIds = r.getMultiValue(List.class).getValue().getValue();
+                                locationIds.remove(request.id());
+                                r.setValue(locationIds).getValue();
+                            } catch (InvocationTargetException | InterruptedException e) {
+                                pf.failed(e);
+                            }
+                        });
                 return pf.resolved(null);
             }
         });

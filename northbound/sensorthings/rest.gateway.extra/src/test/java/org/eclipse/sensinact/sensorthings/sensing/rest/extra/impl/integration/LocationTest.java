@@ -125,6 +125,8 @@ public class LocationTest extends AbstractIntegrationTest {
         assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, idLocation, "location");
         });
+        ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
+        assertFalse(UtilDto.getResourceField(service, "locationIds", List.class).contains(idLocation));
     }
 
     /**
