@@ -52,6 +52,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.DatastreamsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.DatastreamsUpdate;
 
@@ -64,7 +65,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 public class DatastreamsAccessImpl extends AbstractAccess
-        implements DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
+        implements DatastreamsDelete, DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
 
     @Override
     public Datastream getDatastream(String id) {
@@ -268,5 +269,12 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public Response patchDatastreamsObservation(String id, String id2, Observation observation) {
         return updateDatastreamsObservation(id, id2, observation);
+    }
+
+    @Override
+    public Response deleteDatastream(String id) {
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, id, ExpandedDataStream.class);
+
+        return Response.noContent().build();
     }
 }

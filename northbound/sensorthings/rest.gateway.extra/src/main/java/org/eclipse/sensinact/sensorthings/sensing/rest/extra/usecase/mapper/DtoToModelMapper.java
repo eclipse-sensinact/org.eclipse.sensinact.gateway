@@ -162,7 +162,7 @@ public class DtoToModelMapper {
             throw new BadRequestException("encodingType not found in  Payload");
         }
         if (dto.feature() == null) {
-            throw new BadRequestException("feature ot found in  Payload");
+            throw new BadRequestException("feature not found in  Payload");
         }
 
     }

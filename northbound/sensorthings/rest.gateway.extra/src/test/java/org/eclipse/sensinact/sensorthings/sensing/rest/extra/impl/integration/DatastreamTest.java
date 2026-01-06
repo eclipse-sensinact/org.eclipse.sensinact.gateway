@@ -275,44 +275,23 @@ public class DatastreamTest extends AbstractIntegrationTest {
     }
 
     @Test
-<<<<<<< HEAD
-    public void testPatchDatastream() throws Exception {
-        // given
-        String nameThing = "testPatchDatastream";
-        String name = "testPatchDatastream";
-=======
     public void testDeleteDatastream() throws Exception {
         // given
         String nameThing = "testDeleteDatastreamThing";
         String name = "testDeleteDatastream";
->>>>>>> db85d4609 (add test delete)
 
         ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-<<<<<<< HEAD
-        String idThing = getIdFromJson(json);
-        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idThing));
 
-=======
         String idJson = getIdFromJson(json);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idJson));
->>>>>>> db85d4609 (add test delete)
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
         String idDatastream = getIdFromJson(json);
 
         UtilsAssert.assertDatastream(dtoDatastream, json);
         // when
-<<<<<<< HEAD
-        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
 
-        getJsonResponseFromPatch(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
-        // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + " Update", UtilDto.getResourceField(service, "name", String.class));
-
-    }
-=======
         getJsonResponseFromDelete(String.format("Datastreams(%s)", idDatastream), 204);
         // then
         assertThrows(IllegalArgumentException.class, () -> {
@@ -324,5 +303,4 @@ public class DatastreamTest extends AbstractIntegrationTest {
         assertFalse(datastreamIds.contains(idDatastream));
     }
 
->>>>>>> db85d4609 (add test delete)
 }

@@ -15,12 +15,13 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-<<<<<<< HEAD
-=======
+
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
->>>>>>> db85d4609 (add test delete)
+import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.push.DataUpdate;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -35,8 +36,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
@@ -53,29 +52,19 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDataStream, ServiceSnapshot> {
 
-    private final DataUpdate dataUpdate;
-
-    private final IAccessProviderUseCase providerUseCase;
-
-    private final IAccessServiceUseCase serviceUseCase;
-
     private final IDtoMemoryCache<ExpandedSensor> sensorCache;
 
     private final IDtoMemoryCache<FeatureOfInterest> foiCache;
 
     private final IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
 
-    private final GatewayThread gatewayThread;
-
     @SuppressWarnings("unchecked")
     public DatastreamsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        super(providers);
+
         sensorCache = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
         foiCache = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
         observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
-        gatewayThread = resolve(providers, GatewayThread.class);
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
@@ -108,7 +97,17 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
+        try {
+            List<AbstractSensinactCommand<?>> commands = dtoToDelete(request);
+
+            IndependentCommands<?> multiCommand = new IndependentCommands<>(commands);
+            gatewayThread.execute(multiCommand).getValue();
+        } catch (InvocationTargetException | InterruptedException e) {
+            // TODO Auto-generated catch block
+            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to delete");
+        }
+        return new ExtraUseCaseResponse<ServiceSnapshot>(true, "datastream deleted");
+
     }
 
     @Override
@@ -361,11 +360,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     }
 
-<<<<<<< HEAD
-=======
     @Override
-    public List<AbstractTwinCommand<Void>> dtoToDelete(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        List<AbstractTwinCommand<Void>> list = new ArrayList<AbstractTwinCommand<Void>>();
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedDataStream> request) {
+        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
         // delete datastream
         String thingId = getThingId(request);
         list.add(new AbstractTwinCommand<Void>() {
@@ -408,5 +405,4 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         return list;
     }
 
->>>>>>> db85d4609 (add test delete)
 }

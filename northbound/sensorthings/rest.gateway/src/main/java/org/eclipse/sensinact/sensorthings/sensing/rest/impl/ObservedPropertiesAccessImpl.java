@@ -31,12 +31,13 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ObservedPropertiesDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 
 public class ObservedPropertiesAccessImpl extends AbstractAccess
-        implements ObservedPropertiesAccess, ObservedPropertiesUpdate {
+        implements ObservedPropertiesDelete, ObservedPropertiesAccess, ObservedPropertiesUpdate {
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
@@ -114,6 +115,12 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     @Override
     public Response patchObservedProperties(String id, ExpandedObservedProperty observedProperty) {
         return updateObservedProperties(id, observedProperty);
+    }
+
+    @Override
+    public Response deleteObservedProperty(String id) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

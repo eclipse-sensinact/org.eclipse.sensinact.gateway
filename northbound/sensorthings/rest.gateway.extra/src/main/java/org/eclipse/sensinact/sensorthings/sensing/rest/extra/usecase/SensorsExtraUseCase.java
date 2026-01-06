@@ -14,12 +14,10 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
@@ -33,14 +31,11 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor, Object> {
 
-    private final DataUpdate dataUpdate;
-    private final IAccessServiceUseCase serviceUseCase;
     private final IDtoMemoryCache<ExpandedSensor> cacheSensor;
 
     @SuppressWarnings("unchecked")
     public SensorsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        super(providers);
         cacheSensor = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
     }
 

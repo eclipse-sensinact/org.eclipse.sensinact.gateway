@@ -15,12 +15,14 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.InternalServerErrorException;
@@ -31,14 +33,8 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, ProviderSnapshot> {
 
-    private DataUpdate dataUpdate;
-
-    private IAccessProviderUseCase providerUseCase;
-
     public ThingsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
-
+        super(providers);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
@@ -60,11 +56,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
             return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "failed to create Thing");
-
-    }
-
-    public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
-        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
     }
 

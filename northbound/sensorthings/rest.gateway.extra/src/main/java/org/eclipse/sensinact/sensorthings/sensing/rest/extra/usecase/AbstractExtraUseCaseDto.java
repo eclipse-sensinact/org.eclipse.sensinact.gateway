@@ -14,15 +14,16 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.List;
 
-<<<<<<< HEAD
-=======
-import org.eclipse.sensinact.core.command.AbstractTwinCommand;
->>>>>>> db85d4609 (add test delete)
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * abstract use case
@@ -32,20 +33,23 @@ import jakarta.ws.rs.HttpMethod;
  */
 public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractExtraUseCase<M, S> {
 
-    public AbstractExtraUseCaseDto() {
-    }
-
     public abstract List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<M> request);
 
-<<<<<<< HEAD
-=======
-    public abstract List<AbstractTwinCommand<Void>> dtoToDelete(ExtraUseCaseRequest<M> request);
+    protected final DataUpdate dataUpdate;
+    protected final IAccessProviderUseCase providerUseCase;
+    protected final IAccessServiceUseCase serviceUseCase;
+    protected final GatewayThread gatewayThread;
 
->>>>>>> db85d4609 (add test delete)
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
         if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
             DtoToModelMapper.checkRequireField(request.model());
         }
     }
 
+    public AbstractExtraUseCaseDto(Providers providers) {
+        dataUpdate = resolve(providers, DataUpdate.class);
+        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
+        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        gatewayThread = resolve(providers, GatewayThread.class);
+    }
 }

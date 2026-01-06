@@ -15,13 +15,11 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.BadRequestException;
@@ -34,15 +32,10 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedObservation, ServiceSnapshot> {
 
-    private final IAccessServiceUseCase serviceUseCase;
-
-    private final DataUpdate dataUpdate;
-
     private final FeatureOfInterestExtraUseCase featureOfInterestUseCase;
 
     public ObservationsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        super(providers);
         featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
     }
 

@@ -14,12 +14,10 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
@@ -34,14 +32,12 @@ import jakarta.ws.rs.ext.Providers;
 public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<FeatureOfInterest, Object> {
 
     private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
-    private final DataUpdate dataUpdate;
-    private final IAccessServiceUseCase serviceUseCase;
 
     @SuppressWarnings("unchecked")
     public FeatureOfInterestExtraUseCase(Providers providers) {
+        super(providers);
         cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+
     }
 
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<FeatureOfInterest> request) {

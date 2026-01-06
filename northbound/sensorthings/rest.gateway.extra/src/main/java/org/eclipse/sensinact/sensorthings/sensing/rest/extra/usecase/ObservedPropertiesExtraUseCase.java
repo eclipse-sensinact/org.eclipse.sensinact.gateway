@@ -14,12 +14,10 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
@@ -35,14 +33,11 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
 
     private final IDtoMemoryCache<ExpandedObservedProperty> cacheObservedProperty;
 
-    private final DataUpdate dataUpdate;
-    private final IAccessServiceUseCase serviceUseCase;
-
     @SuppressWarnings("unchecked")
     public ObservedPropertiesExtraUseCase(Providers providers) {
+        super(providers);
         cacheObservedProperty = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+
     }
 
     private ExpandedObservedProperty updateInMemoryObservedProperty(
