@@ -571,7 +571,33 @@ public class ThingTest extends AbstractIntegrationTest {
         });
     }
 
-    public void testDeleteThingLocationRef() {
+    public void testDeleteThingLocationRef() throws Exception {
+        String name = "testDeleteThingLocationRef";
+
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "1"));
+
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name + "2"),
+                DtoFactory.getDatastreamMinimal(name + "3"));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastreams", 201);
+
+        String thingId = getIdFromJson(json);
+        JsonNode datastreamNode = json.get("Datastreams");
+        assertEquals(datastreamNode.size(), 1);
+        JsonNode datastreamJson = datastreamNode.get(0);
+        String idDatastream = getIdFromJson(datastreamJson);
+        UtilsAssert.assertThing(dtoThing, json);
+        // when
+        getJsonResponseFromDelete(String.format("/Things(%s)/Datastreams/$ref?$id=%s", thingId, idDatastream), 204);
+        // then
+        assertThrows(NotFoundException.class, () -> {
+            serviceUseCase.read(session, idDatastream, "datastream");
+        });
+        ServiceSnapshot service = serviceUseCase.read(session, thingId, "thing");
+        assertFalse(UtilDto.getResourceField(service, "datastreamIds", List.class).contains(idDatastream));
 
     }
 
