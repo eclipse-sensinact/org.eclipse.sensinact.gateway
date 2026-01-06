@@ -95,7 +95,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
         assertNull(observedPropertyCache.getDto(observedPropertyId));
         // when
-        getJsonResponseFromDelete(String.format("ObservedProperties(%s)", observedPropertyIdDatastream), 400);
+        getJsonResponseFromDelete(String.format("ObservedProperties(%s)", observedPropertyIdDatastream), 409);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyId", String.class));

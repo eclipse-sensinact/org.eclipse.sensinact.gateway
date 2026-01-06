@@ -174,7 +174,9 @@ public class DtoFactory {
     }
 
     public static ExpandedObservation getObservation(String name) {
-        return getObservationLinkDatastream(name, null, null);
+        FeatureOfInterest foi = new FeatureOfInterest(null, null, name, "test", "test", new Point(-122.4194, 37.7749),
+                null);
+        return getObservationLinkDatastream(name, null, foi);
 
     }
 

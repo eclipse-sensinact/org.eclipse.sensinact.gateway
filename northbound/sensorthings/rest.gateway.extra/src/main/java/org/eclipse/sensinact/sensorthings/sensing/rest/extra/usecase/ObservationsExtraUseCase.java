@@ -91,9 +91,12 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         String id = request.parentId() != null ? request.parentId() : request.id();
         String providerId = UtilDto.extractFirstIdSegment(id);
         String serviceId = "datastream";
-        checkRequireLink(serviceUseCase.read(request.session(), providerId, serviceId));
-
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, observation, foi));
+        ServiceSnapshot serviceDatastream = serviceUseCase.read(request.session(), providerId, serviceId);
+        checkRequireLink(serviceDatastream);
+        ExpandedObservation existingObservation = UtilDto.getResourceField(serviceDatastream, "lastObservation",
+                ExpandedObservation.class);
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, existingObservation,
+                observation, foi));
     }
 
     private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {

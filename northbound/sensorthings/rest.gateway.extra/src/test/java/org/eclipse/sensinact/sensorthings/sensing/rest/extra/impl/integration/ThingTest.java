@@ -582,22 +582,22 @@ public class ThingTest extends AbstractIntegrationTest {
         ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
                 "testThing With Location and Datastream",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
-        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastreams", 201);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastreams,Locations", 201);
 
         String thingId = getIdFromJson(json);
-        JsonNode datastreamNode = json.get("Datastreams");
-        assertEquals(datastreamNode.size(), 1);
-        JsonNode datastreamJson = datastreamNode.get(0);
-        String idDatastream = getIdFromJson(datastreamJson);
+        JsonNode locationsNode = json.get("Locations");
+        assertEquals(locationsNode.size(), 1);
+        JsonNode locationJson = locationsNode.get(0);
+        String idLocation = getIdFromJson(locationJson);
         UtilsAssert.assertThing(dtoThing, json);
         // when
-        getJsonResponseFromDelete(String.format("/Things(%s)/Datastreams/$ref?$id=%s", thingId, idDatastream), 204);
+        getJsonResponseFromDelete(String.format("/Things(%s)/Locations(%s)/$ref", thingId, idLocation), 204);
         // then
         assertThrows(NotFoundException.class, () -> {
-            serviceUseCase.read(session, idDatastream, "datastream");
+            serviceUseCase.read(session, idLocation, "datastream");
         });
         ServiceSnapshot service = serviceUseCase.read(session, thingId, "thing");
-        assertFalse(UtilDto.getResourceField(service, "datastreamIds", List.class).contains(idDatastream));
+        assertFalse(UtilDto.getResourceField(service, "locationIds", List.class).contains(idLocation));
 
     }
 

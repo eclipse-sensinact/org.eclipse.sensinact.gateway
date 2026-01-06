@@ -24,6 +24,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoT
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -60,7 +62,8 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
             return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
 
         } else {
-            throw new BadRequestException("can't delete feature of interest assign to observation and datastream");
+            throw new WebApplicationException("FeatureOfInterest is mandatory for Observation",
+                    Response.Status.CONFLICT);
         }
 
     }
@@ -79,7 +82,8 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
                 receiveFoi.encodingType(), receiveFoi.feature(), null);
 
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, foiToUpdate));
+        return List.of(
+                DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, null, null, null, foiToUpdate));
 
     }
 

@@ -115,7 +115,7 @@ public class SensorTest extends AbstractIntegrationTest {
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
         assertNull(sensorCache.getDto(sensorId));
         // when
-        getJsonResponseFromDelete(String.format("Sensors(%s)", isSensorDatastream), 400);
+        getJsonResponseFromDelete(String.format("Sensors(%s)", isSensorDatastream), 409);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertNotNull(UtilDto.getResourceField(service, "sensorId", String.class));

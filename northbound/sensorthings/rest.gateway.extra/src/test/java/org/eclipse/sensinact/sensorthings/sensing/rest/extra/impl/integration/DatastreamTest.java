@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
@@ -276,6 +277,11 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * delete daqtastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testDeleteDatastream() throws Exception {
         // given
@@ -308,6 +314,84 @@ public class DatastreamTest extends AbstractIntegrationTest {
         @SuppressWarnings("unchecked")
         List<String> datastreamIds = (List<String>) UtilDto.getResourceField(service, "datastreamIds", Object.class);
         assertFalse(datastreamIds.contains(idDatastream));
+    }
+
+    /**
+     * delete sensor $ref to datastream should return 409
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testDeleteDatastreamSensorRef() throws Exception {
+        // given
+        String nameThing = "testDeleteDatastreamSenosorRef";
+        String name = "testDeleteDatastreamSenosorRef";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+
+        String idJson = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idJson));
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+
+        ExpandedDataStream dtoDatastream2 = DtoFactory.getDatastreamMinimalLinkThing(name + "2",
+                DtoFactory.getRefId(idJson));
+        json = getJsonResponseFromPost(dtoDatastream2, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+        UtilsAssert.assertDatastream(dtoDatastream2, json);
+
+        // when
+
+        getJsonResponseFromDelete(String.format("Datastreams(%s)/Sensor/$ref", idDatastream), 409);
+        // then
+
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertNotNull(UtilDto.getResourceField(service, "sensorId", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "sensorName", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "sensorMetadata", Object.class));
+        assertNotNull(UtilDto.getResourceField(service, "sensorProperties", Map.class));
+
+    }
+
+    /**
+     * delete observedProperty $ref to datastream should return 409
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testDeleteDatastreamObservedPropertyRef() throws Exception {
+        // given
+        String nameThing = "testDeleteDatastreamObservedPropertyRef";
+        String name = "testDeleteDatastreamObservedPropertyRef";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+
+        String idJson = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idJson));
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+
+        ExpandedDataStream dtoDatastream2 = DtoFactory.getDatastreamMinimalLinkThing(name + "2",
+                DtoFactory.getRefId(idJson));
+        json = getJsonResponseFromPost(dtoDatastream2, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+        UtilsAssert.assertDatastream(dtoDatastream2, json);
+
+        // when
+
+        getJsonResponseFromDelete(String.format("/Datastreams(%s)/ObservedProperty/$ref", idDatastream), 409);
+        // then
+
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertNotNull(UtilDto.getResourceField(service, "observedPropertyId", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "observedPropertyName", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "observedPropertyProperties", Map.class));
+        assertNotNull(UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
+
     }
 
 }

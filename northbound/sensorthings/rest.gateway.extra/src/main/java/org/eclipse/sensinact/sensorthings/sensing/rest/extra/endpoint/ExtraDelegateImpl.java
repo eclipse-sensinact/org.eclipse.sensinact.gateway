@@ -158,7 +158,7 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String parentId,
             Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef) {
-        return deleteRef(session, mapper, uriInfo, parentId, clazzUseCase, clazzRef);
+        return deleteRef(session, mapper, uriInfo, null, parentId, clazzUseCase, clazzRef);
     }
 
 }

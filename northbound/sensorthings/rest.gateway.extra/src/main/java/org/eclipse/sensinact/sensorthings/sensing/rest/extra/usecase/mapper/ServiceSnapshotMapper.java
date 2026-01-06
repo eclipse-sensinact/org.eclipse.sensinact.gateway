@@ -23,6 +23,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
@@ -46,6 +47,14 @@ public class ServiceSnapshotMapper {
         Map<String, Object> properties = UtilDto.getResourceField(service, "sensorProperties", Map.class);
 
         return new ExpandedSensor(null, id, name, description, encodingType, metadata, properties, null);
+    }
+
+    /*
+     * ============================ Observation ============================
+     */
+    public static ExpandedObservation toObservation(ServiceSnapshot service) {
+        return UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+
     }
 
     /*

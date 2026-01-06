@@ -23,6 +23,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoT
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -71,7 +73,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
             return new ExtraUseCaseResponse<Object>(true, "observed property deleted");
 
         } else {
-            throw new BadRequestException("can't delete sensor assign to datastream");
+            throw new WebApplicationException("ObservedProperty is mandatory for Datastream", Response.Status.CONFLICT);
         }
     }
 
@@ -86,7 +88,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
         checkRequireField(request);
         ExpandedObservedProperty opToUpdate = new ExpandedObservedProperty(null, sensorId, receivedOp.name(),
                 receivedOp.description(), receivedOp.definition(), receivedOp.properties(), null);
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, opToUpdate, null, null, null));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, opToUpdate, null, null, null, null));
 
     }
 

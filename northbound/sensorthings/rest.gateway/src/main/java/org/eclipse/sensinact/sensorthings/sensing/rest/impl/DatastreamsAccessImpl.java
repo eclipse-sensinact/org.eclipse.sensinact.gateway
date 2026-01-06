@@ -60,6 +60,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -203,6 +204,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         ExpandedObservation lastObservation = (ExpandedObservation) UtilDto.getResourceField(snapshot,
                 "lastObservation", Object.class);
+        if (lastObservation == null) {
+            throw new WebApplicationException("fail to create observation", 500);
+        }
         Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), criterion, snapshot, lastObservation);
         if (createDto == null) {
@@ -274,6 +278,22 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public Response deleteDatastream(String id) {
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteDatastreamSensorRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class,
+                ExpandedSensor.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteDatastreamObservedPropertyRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class,
+                ExpandedObservedProperty.class);
 
         return Response.noContent().build();
     }

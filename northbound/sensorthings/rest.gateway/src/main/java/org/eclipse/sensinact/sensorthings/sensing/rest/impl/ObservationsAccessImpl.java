@@ -188,4 +188,12 @@ public class ObservationsAccessImpl extends AbstractAccess
         return Response.noContent().build();
     }
 
+    @Override
+    public Response deleteObservationFeatureOfInterest(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class,
+                FeatureOfInterest.class);
+
+        return Response.noContent().build();
+    }
+
 }
