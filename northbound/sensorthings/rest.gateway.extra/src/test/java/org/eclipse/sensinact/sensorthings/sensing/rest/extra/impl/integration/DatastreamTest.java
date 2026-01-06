@@ -287,9 +287,14 @@ public class DatastreamTest extends AbstractIntegrationTest {
         String idJson = getIdFromJson(json);
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idJson));
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
-        String idDatastream = getIdFromJson(json);
-
         UtilsAssert.assertDatastream(dtoDatastream, json);
+
+        ExpandedDataStream dtoDatastream2 = DtoFactory.getDatastreamMinimalLinkThing(name + "2",
+                DtoFactory.getRefId(idJson));
+        json = getJsonResponseFromPost(dtoDatastream2, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+        UtilsAssert.assertDatastream(dtoDatastream2, json);
+
         // when
 
         getJsonResponseFromDelete(String.format("Datastreams(%s)", idDatastream), 204);

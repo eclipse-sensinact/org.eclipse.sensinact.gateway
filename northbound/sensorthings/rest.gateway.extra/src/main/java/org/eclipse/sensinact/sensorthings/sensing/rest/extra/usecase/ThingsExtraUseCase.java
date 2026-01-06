@@ -19,11 +19,19 @@ import java.util.List;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
@@ -112,6 +120,37 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
+    }
+
+    @Override
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
+        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
+        ServiceSnapshot service = serviceUseCase.read(request.session(), request.id(), "thing");
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = (List<String>) UtilDto.getResourceField(service, "datastreamIds", Object.class);
+
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider sp = twin.getProvider(request.id());
+                if (sp != null) {
+                    sp.delete();
+                }
+                return pf.resolved(null);
+            }
+        });
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                datastreamIds.stream().forEach(idDatastream -> {
+                    SensinactProvider sp = twin.getProvider(request.id());
+                    if (sp != null) {
+                        sp.delete();
+                    }
+                });
+                return pf.resolved(null);
+            }
+        });
     }
 
 }

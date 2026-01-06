@@ -74,8 +74,7 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>impl</artifactId>
-      <version>${sensinact.core.version}</version>
-      <scope>test</scope>
+      <version>0.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core.models</groupId>

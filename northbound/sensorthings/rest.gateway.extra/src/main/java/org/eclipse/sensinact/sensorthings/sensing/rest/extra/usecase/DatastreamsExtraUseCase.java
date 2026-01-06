@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
@@ -28,6 +29,8 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.SensinactService;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -376,20 +379,21 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
             }
         });
         // update thing to remove datastreamIds
+
         list.add(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                 try {
 
-                    SensinactProvider sp = twin.getProvider(thingId);
-                    SensinactResource resource = sp.getResource("thing", "datastreamIds");
+                    SensinactService service = twin.getService(thingId, "thing");
+                    Map<String, ? extends SensinactResource> mapRes = service.getResources();
+                    SensinactResource resource = mapRes.get("datastreamIds");
                     if (resource != null && resource.getValue() != null && resource.getValue().getValue() != null) {
-                        Object value;
-                        value = resource.getValue().getValue().getValue();
+                        TimedValue<?> value = resource.getValue().getValue();
 
-                        if (value instanceof List) {
+                        if (value.getValue() instanceof List) {
                             @SuppressWarnings("unchecked")
-                            List<String> datastreamIds = (List<String>) value;
+                            List<String> datastreamIds = (List<String>) value.getValue();
                             if (datastreamIds.contains(request.id())) {
                                 datastreamIds.remove(request.id());
                                 resource.setValue(datastreamIds);

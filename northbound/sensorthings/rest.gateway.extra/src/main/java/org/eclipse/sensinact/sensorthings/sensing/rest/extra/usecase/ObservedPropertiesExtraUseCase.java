@@ -66,8 +66,13 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+        if (cacheObservedProperty.getDto(request.id()) != null) {
+            cacheObservedProperty.removeDto(request.id());
+            return new ExtraUseCaseResponse<Object>(true, "observed property deleted");
 
+        } else {
+            throw new BadRequestException("can't delete sensor assign to datastream");
+        }
     }
 
     @Override

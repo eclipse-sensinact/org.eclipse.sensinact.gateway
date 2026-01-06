@@ -20,7 +20,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
-
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
@@ -51,7 +50,14 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+
+        if (cacheSensor.getDto(request.id()) != null) {
+            cacheSensor.removeDto(request.id());
+            return new ExtraUseCaseResponse<Object>(true, "sensor deleted");
+
+        } else {
+            throw new BadRequestException("can't delete sensor assign to datastream");
+        }
 
     }
 

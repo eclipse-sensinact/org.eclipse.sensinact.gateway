@@ -90,7 +90,7 @@ public interface IExtraUseCase<M extends Id, S> {
         }
 
         public ExtraUseCaseRequest {
-            if (id == null) {
+            if (id == null && model != null) {
                 id = DtoToModelMapper.sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString());
             }
         }
