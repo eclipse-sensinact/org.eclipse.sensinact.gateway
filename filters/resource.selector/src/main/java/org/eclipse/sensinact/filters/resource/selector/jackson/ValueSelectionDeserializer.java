@@ -31,20 +31,35 @@ public class ValueSelectionDeserializer extends AbstractSelectionDeserializer<Va
 
     @Override
     public ValueSelection convert(JsonNode root, DeserializationContext ctxt) throws IOException {
-        return switch(root.getNodeType()) {
-            case OBJECT: yield new ValueSelection(toString(root, "value", ctxt),
-                    root.has("operation") ? ctxt.readTreeAsValue(root.get("operation"), OperationType.class) : null,
-                    toBoolean(root, "negate", ctxt),
-                    root.has("checkType") ? ctxt.readTreeAsValue(root.get("checkType"), CheckType.class) : null);
+        return switch (root.getNodeType()) {
+            case OBJECT:
+                yield new ValueSelection(
+                        toListOfString(root.get("value"), ctxt),
+                        root.has("operation") ? ctxt.readTreeAsValue(root.get("operation"), OperationType.class)
+                                : null,
+                        toBoolean(root, "negate", ctxt),
+                        root.has("checkType") ? ctxt.readTreeAsValue(root.get("checkType"), CheckType.class) : null,
+                        root.has("mode") ? ctxt.readTreeAsValue(root.get("mode"),
+                                ValueSelection.ValueSelectionMode.class) : null);
+            case ARRAY:
+                yield new ValueSelection(
+                        toListOfString(root, ctxt),
+                        null,
+                        false,
+                        null,
+                        null);
             case STRING:
             case NUMBER:
-            case BOOLEAN: yield new ValueSelection(toString(root, ctxt), null, false, null);
-            case NULL: yield null;
+            case BOOLEAN:
+                yield new ValueSelection(toString(root, ctxt), null, false, null);
+            case NULL:
+                yield null;
             default:
-                ctxt.reportBadCoercion(this, ValueSelection.class, root, "ValueSelection must be one of [Object, String, Number, Boolean, null] but was %s", root.getNodeType());
+                ctxt.reportBadCoercion(this, ValueSelection.class, root,
+                        "ValueSelection must be one of [Object, String, Number, Boolean, null] but was %s",
+                        root.getNodeType());
                 // Never reached
                 yield null;
         };
     }
 }
-

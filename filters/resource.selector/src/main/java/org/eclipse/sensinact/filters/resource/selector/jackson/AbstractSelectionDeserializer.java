@@ -12,6 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.jackson;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -62,6 +66,22 @@ public abstract class AbstractSelectionDeserializer<T> extends StdNodeBasedDeser
             };
         }
         return result;
+    }
+
+    protected List<String> toListOfString(JsonNode value, DeserializationContext ctxt) throws IOException {
+        if (value == null || value.isNull()) {
+            return null;
+        }
+
+        if (value.isArray()) {
+            final List<String> result = new ArrayList<>();
+            for (int i = 0; i < value.size(); i++) {
+                result.add(toString(value.get(i), ctxt));
+            }
+            return result;
+        } else {
+            return List.of(toString(value, ctxt));
+        }
     }
 
     protected boolean toBoolean(JsonNode root, String key, DeserializationContext ctxt) throws JsonMappingException {
