@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,15 @@ public class ResourceSelectorTest {
         return makeResource(svcName, rcName, value, false);
     }
 
+    ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, Instant timestamp) {
+        return makeResource(svcName, rcName, value, false, timestamp);
+    }
+
     ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, boolean unset) {
+        return makeResource(svcName, rcName, value, unset, Instant.now());
+    }
+
+    ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, boolean unset, Instant timestamp) {
         return new ResourceSnapshot() {
             @Override
             public String getName() {
@@ -73,7 +82,7 @@ public class ResourceSelectorTest {
 
             @Override
             public TimedValue<?> getValue() {
-                return unset ? new DefaultTimedValue<>() : new DefaultTimedValue<>(value);
+                return unset ? new DefaultTimedValue<>() : new DefaultTimedValue<>(value, timestamp);
             }
 
             @Override
@@ -236,10 +245,6 @@ public class ResourceSelectorTest {
 
     private ValueSelection makeValueSelection(OperationType operation, ValueSelectionMode mode, String... values) {
         return new ValueSelection(Arrays.asList(values), operation, false, CheckType.VALUE, mode);
-    }
-
-    private ValueSelection makeValueSelection(List<String> value, CheckType check, OperationType operation, boolean negate, ValueSelectionMode mode) {
-        return new ValueSelection(value, operation, negate, check, mode);
     }
 
     private ResourceSelector updateValueTest(ResourceSelector rs, ValueSelection vs) {
@@ -661,6 +666,32 @@ public class ResourceSelectorTest {
         assertQueryFalse(rs, rc);
         rs = updateValueTest(rs, makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION, true));
         assertQueryFalse(rs, rc);
+    }
+
+    @Test
+    void testAge() {
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant tenMinutesAgo = now.minusSeconds(10 * 60);
+
+        ResourceSnapshot rcRecent = makeResource("test", "value", 42, now);
+        ResourceSnapshot rcTenMinutesAgo = makeResource("test", "value", 42, tenMinutesAgo);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
+
+        rs = updateValueTest(rs, makeValueSelection("500", CheckType.AGE_MS, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("2", CheckType.AGE_S, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("10000", CheckType.AGE_MS, OperationType.GREATER_THAN));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("10", CheckType.AGE_S, OperationType.GREATER_THAN));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
     }
 
     @Nested

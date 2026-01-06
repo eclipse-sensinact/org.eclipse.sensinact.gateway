@@ -41,13 +41,11 @@ public record ValueSelection(
          *
          * <ul>
          * <li>Checks that require a non null value (i.e. all except
-         * {@link OperationType#IS_SET}
-         * and {@link OperationType#IS_NOT_NULL}) will still require a non-null value,
-         * continuing
-         * to return false in this case</li>
-         * <li>Checks that require a set value (i.e. all except
-         * {@link OperationType#IS_SET} will
-         * still require a set resource, continuing to return false in this case
+         * {@link OperationType#IS_SET} and {@link OperationType#IS_NOT_NULL}) will
+         * still require a non-null value, continuing to return false in this case</li>
+         * <li>Checks that require a set value (i.e. all except*
+         * {@link OperationType#IS_SET} will still require a set resource, continuing to
+         * return false in this case</li>
          * </ul>
          */
         boolean negate,
@@ -70,7 +68,7 @@ public record ValueSelection(
             valueSelectionMode = ValueSelectionMode.ANY_MATCH;
         }
 
-        if(value != null) {
+        if (value != null) {
             // Make the list immutable
             // Let it fail with an NPE if null values are found inside
             value = List.copyOf(value);
@@ -175,14 +173,16 @@ public record ValueSelection(
         REGEX_REGION,
         /**
          * The value and check type will be ignored, and only the presence of a value
-         * will be
-         * checked, i.e. the resource has a timestamp. N.B. the value <em>may</em> be
-         * <code>null</code>
+         * will be checked, i.e. the resource has a timestamp.
+         * <p>
+         * <strong>N.B.</strong> the value <em>may</em> be <code>null</code>
          */
         IS_SET,
         /**
          * The value and check type will be ignored, and the value will be compared with
-         * <code>null</code>. N.B. the resource <em>must</em> be set to null. If it is
+         * <code>null</code>.
+         * <p>
+         * <strong>N.B.</strong> the resource <em>must</em> be set to null. If it is
          * unset then this check will return <code>false</code>
          */
         IS_NOT_NULL,
@@ -196,18 +196,28 @@ public record ValueSelection(
          */
         VALUE,
         /**
-         * If true then the test will be applied against the size
-         * of the resource value. For arrays, collections and maps
-         * this is the number of elements. For Strings this is the
-         * length of the string. For numbers it is the absolute
+         * The test will be applied against the size of the resource value.
+         * For arrays, collections and maps, this is the number of elements.
+         * For Strings this is the length of the string. For numbers it is the absolute
          * magnitude of the number.
          */
         SIZE,
         /**
-         * If true then the test will be applied against the timestamp
-         * of the resource value.
+         * Test will be applied against the timestamp of the resource value.
          */
-        TIMESTAMP;
+        TIMESTAMP,
+        /**
+         * Test will be applied against the age of the resource value in milliseconds,
+         * i.e. the difference between the current system time and the timestamp of the
+         * resource value, in milliseconds.
+         */
+        AGE_MS,
+        /**
+         * Test will be applied against the age of the resource value in seconds,
+         * i.e. the difference between the current system time and the timestamp of the
+         * resource value.
+         */
+        AGE_S
     }
 
     public static enum ValueSelectionMode {
