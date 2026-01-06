@@ -69,6 +69,12 @@ public record ValueSelection(
         if (valueSelectionMode == null) {
             valueSelectionMode = ValueSelectionMode.ANY_MATCH;
         }
+
+        if(value != null) {
+            // Make the list immutable
+            // Let it fail with an NPE if null values are found inside
+            value = List.copyOf(value);
+        }
     }
 
     /**
