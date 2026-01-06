@@ -364,16 +364,14 @@ public class ResourceSelectionCriterion {
                 }
 
                 boolean anyMatch = false;
-                for (Object rcValue : rcValues) {
+
+                outerLoop: for (Object rcValue : rcValues) {
                     for (S selectionValue : selectionValues) {
                         W selectionObj = selectionValueConverter.apply(rcValue, selectionValue);
                         if (selectionObj != null && check.test(rcValue, selectionObj)) {
                             anyMatch = true;
-                            break;
+                            break outerLoop;
                         }
-                    }
-                    if (anyMatch) {
-                        break;
                     }
                 }
                 return negate ^ anyMatch;
