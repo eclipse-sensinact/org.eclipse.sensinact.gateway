@@ -17,7 +17,6 @@ import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelec
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.fromSelection;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -223,6 +222,12 @@ public class ResourceSelectionCriterion {
     }
 
     /**
+     * Cache key for converted selection values
+     */
+    private static record SelectionCacheKey(int hash, Class<?> targetClass) {
+    }
+
+    /**
      * Prepares a predicate that compares resource values against selection values
      *
      * @param getterFunction     Resource value getter
@@ -240,7 +245,7 @@ public class ResourceSelectionCriterion {
             final ValueSelectionMode valueSelectionMode) {
 
         final Converter converter = Converters.standardConverter();
-        final Map<Class<?>, Object> conversionCache = new WeakHashMap<>();
+        final Map<SelectionCacheKey, Object> conversionCache = new WeakHashMap<>();
 
         return t -> {
             if (!CHECK_IS_SET.test(t)) {
@@ -253,14 +258,16 @@ public class ResourceSelectionCriterion {
                 return false;
             }
 
-            final BiFunction<Object, String, Object> valueConverter = (rcValue, value) -> Optional.ofNullable(rcValue)
-                    .map(nonNullVal -> conversionCache
-                            .computeIfAbsent(nonNullVal.getClass(), k -> {
+            final BiFunction<Object, String, Object> valueConverter = (rcValue, value) -> Optional
+                    .ofNullable(rcValue)
+                    .map(nonNullVal -> conversionCache.computeIfAbsent(
+                            new SelectionCacheKey(value.hashCode(), nonNullVal.getClass()),
+                            k -> {
                                 try {
-                                    return converter.convert(value).to(k);
+                                    return converter.convert(value).to(k.targetClass());
                                 } catch (Exception e) {
                                     LOG.debug("Unable to convert the value {} to target {} when selecting resources",
-                                            value, k);
+                                            value, k.targetClass());
                                     return null;
                                 }
                             }))
@@ -385,19 +392,15 @@ public class ResourceSelectionCriterion {
                 }
 
                 boolean allMatch = true;
-                for (Object rcValue : rcValues) {
-                    boolean rcValueMatched = false;
+                outer: for (Object rcValue : rcValues) {
                     for (S selectionValue : selectionValues) {
                         W selectionObj = selectionValueConverter.apply(rcValue, selectionValue);
                         if (selectionObj != null && check.test(rcValue, selectionObj)) {
-                            rcValueMatched = true;
-                            break;
+                            continue outer;
                         }
                     }
-                    if (!rcValueMatched) {
-                        allMatch = false;
-                        break;
-                    }
+                    allMatch = false;
+                    break;
                 }
                 return negate ^ allMatch;
             }
@@ -429,20 +432,16 @@ public class ResourceSelectionCriterion {
                 // Every selection value must have a match in the resource values,
                 // but some resources might not be a match
                 boolean superSet = true;
-                for (S selectionValue : selectionValues) {
-                    boolean selectionValueMatched = false;
+                outer: for (S selectionValue : selectionValues) {
                     for (Object rcValue : rcValues) {
                         W selectionObj = selectionValueConverter.apply(rcValue, selectionValue);
                         if (selectionObj != null && check.test(rcValue, selectionObj)) {
-                            selectionValueMatched = true;
-                            break;
+                            continue outer;
                         }
                     }
 
-                    if (!selectionValueMatched) {
-                        superSet = false;
-                        break;
-                    }
+                    superSet = false;
+                    break;
                 }
 
                 return negate ^ superSet;
