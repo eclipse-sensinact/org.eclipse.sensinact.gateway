@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 
+import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -32,15 +33,18 @@ import jakarta.ws.rs.core.FeatureContext;
 public class SensorThingsExtraFeature implements Feature {
 
     private final DataUpdate dataUpdate;
+    private final GatewayThread gatewayThread;
 
     @Activate
-    public SensorThingsExtraFeature(@Reference DataUpdate dataUpdate) {
+    public SensorThingsExtraFeature(@Reference DataUpdate dataUpdate, @Reference GatewayThread gatewayThread) {
         this.dataUpdate = dataUpdate;
+        this.gatewayThread = gatewayThread;
     }
 
     @Override
     public boolean configure(FeatureContext context) {
         context.register(new DataUpdateProvider(dataUpdate));
+        context.register(new GatewayThreadProvider(this.gatewayThread));
         context.register(ExtraDelegateProvider.class);
         context.register(UseCaseProvider.class);
         context.register(DtoMemoryCacheProvider.class);

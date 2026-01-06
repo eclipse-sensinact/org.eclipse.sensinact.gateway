@@ -152,6 +152,18 @@ public class AbstractIntegrationTest {
         return null;
     }
 
+    protected JsonNode getJsonResponseFromDelete(String url, int expectedStatus)
+            throws IOException, InterruptedException {
+        HttpResponse<String> response = queryDelete(url);
+        // Then
+        assertEquals(expectedStatus, response.statusCode());
+        if (response.statusCode() < 400) {
+            return mapper.readTree(response.body());
+
+        }
+        return null;
+    }
+
     protected JsonNode getJsonResponseFromPost(Object dto, String SubUrl, int expectedStatus)
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPost(SubUrl, dto);
@@ -206,6 +218,15 @@ public class AbstractIntegrationTest {
         targetUri = getTargetUri(path);
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
+        return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+    }
+
+    public HttpResponse<String> queryDelete(final String path) throws IOException, InterruptedException {
+        // Normalize URI
+        final URI targetUri;
+        targetUri = getTargetUri(path);
+
+        final HttpRequest req = getHttpBuilder(targetUri).DELETE().build();
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
     }
 

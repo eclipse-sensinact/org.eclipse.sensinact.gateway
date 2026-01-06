@@ -15,10 +15,18 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+<<<<<<< HEAD
+=======
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+>>>>>>> db85d4609 (add test delete)
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -31,6 +39,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
@@ -55,6 +65,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     private final IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
 
+    private final GatewayThread gatewayThread;
+
     @SuppressWarnings("unchecked")
     public DatastreamsExtraUseCase(Providers providers) {
         dataUpdate = resolve(providers, DataUpdate.class);
@@ -63,6 +75,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         sensorCache = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
         foiCache = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
         observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
+        gatewayThread = resolve(providers, GatewayThread.class);
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
@@ -131,9 +144,18 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     }
 
+    private String getThingId(ExtraUseCaseRequest<ExpandedDataStream> request) {
+        return getThingId(request, request.id());
+    }
+
+    private String getThingId(ExtraUseCaseRequest<ExpandedDataStream> request, String datastreamId) {
+        return getThingId(request, null, datastreamId);
+    }
+
     private String getThingId(ExtraUseCaseRequest<ExpandedDataStream> request, ExpandedDataStream datastream,
             String datastreamId) {
-        String thingId = datastream.thing() == null ? request.parentId() : (String) datastream.thing().id();
+        String thingId = datastream == null || datastream.thing() == null ? request.parentId()
+                : (String) datastream.thing().id();
         // if datastream up date. check which thing is assign to and remove it
         if (thingId == null) {
             ProviderSnapshot providerDatastream = providerUseCase.read(request.session(), datastreamId);
@@ -339,4 +361,52 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     }
 
+<<<<<<< HEAD
+=======
+    @Override
+    public List<AbstractTwinCommand<Void>> dtoToDelete(ExtraUseCaseRequest<ExpandedDataStream> request) {
+        List<AbstractTwinCommand<Void>> list = new ArrayList<AbstractTwinCommand<Void>>();
+        // delete datastream
+        String thingId = getThingId(request);
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider sp = twin.getProvider(request.id());
+                if (sp != null) {
+                    sp.delete();
+                }
+                return pf.resolved(null);
+            }
+        });
+        // update thing to remove datastreamIds
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                try {
+
+                    SensinactProvider sp = twin.getProvider(thingId);
+                    SensinactResource resource = sp.getResource("thing", "datastreamIds");
+                    if (resource != null && resource.getValue() != null && resource.getValue().getValue() != null) {
+                        Object value;
+                        value = resource.getValue().getValue().getValue();
+
+                        if (value instanceof List) {
+                            @SuppressWarnings("unchecked")
+                            List<String> datastreamIds = (List<String>) value;
+                            if (datastreamIds.contains(request.id())) {
+                                datastreamIds.remove(request.id());
+                                resource.setValue(datastreamIds);
+                            }
+                        }
+                    }
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
+            }
+        });
+        return list;
+    }
+
+>>>>>>> db85d4609 (add test delete)
 }

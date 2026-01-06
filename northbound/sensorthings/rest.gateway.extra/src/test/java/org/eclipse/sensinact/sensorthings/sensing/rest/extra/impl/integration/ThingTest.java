@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -484,6 +485,57 @@ public class ThingTest extends AbstractIntegrationTest {
         assertEquals("testThing With Location and Datastream update",
                 UtilDto.getResourceField(service, "description", String.class));
 
+    }
+
+    @Test
+    public void testDeleteThingSimple() throws Exception {
+        // Given
+        String name = "testDeleteThingSimple";
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThing(name, "testThing",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things", 201);
+        String thingId = getIdFromJson(json);
+        UtilsAssert.assertThing(dtoThing, json);
+        // When
+        getJsonResponseFromDelete(String.format("Things(%s)", thingId), 204);
+        // then
+        assertThrows(IllegalArgumentException.class, () -> {
+            serviceUseCase.read(session, thingId, "thing");
+        });
+
+    }
+
+    @Test
+    public void testDeleteThingWithLocationAndDatastream() throws Exception {
+        // Given
+        String name = "testDeleteThingWithLocationAndDatastream";
+
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "1"));
+
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name + "2"));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Datastream", 201);
+
+        String thingId = getIdFromJson(json);
+        JsonNode datastreamNode = json.get("Datastreams");
+        assertEquals(datastreamNode.size(), 1);
+        JsonNode datastreamJson = datastreamNode.get(0);
+        String idDatastream = getIdFromJson(datastreamJson);
+
+        UtilsAssert.assertThing(dtoThing, json);
+        // When
+        getJsonResponseFromDelete(String.format("Things(%s)", thingId), 204);
+        // then
+        assertThrows(IllegalArgumentException.class, () -> {
+            serviceUseCase.read(session, thingId, "thing");
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            serviceUseCase.read(session, idDatastream, "datastream");
+        });
     }
 
 }

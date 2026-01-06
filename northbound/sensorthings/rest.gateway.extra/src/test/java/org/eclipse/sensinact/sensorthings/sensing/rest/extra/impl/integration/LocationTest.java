@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,24 @@ public class LocationTest extends AbstractIntegrationTest {
      * @throws Exception
      */
     @Test
+    public void testDeleteLocation() throws Exception {
+        // given
+        String name = "testDeleteLocation";
+
+        ExpandedLocation dtoLocation = DtoFactory.getLocation(name);
+
+        JsonNode json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        String idLocation = getIdFromJson(json);
+        UtilsAssert.assertLocation(dtoLocation, json);
+        // when
+        getJsonResponseFromDelete(String.format("Locations(%s)", idLocation), 204);
+        // then
+        assertThrows(IllegalArgumentException.class, () -> {
+            serviceUseCase.read(session, idLocation, "location");
+        });
+    }
+
+    @Test
     public void testCreateLocationMissingField() throws Exception {
         // given
         String name = "testCreateLocation";
@@ -93,10 +113,15 @@ public class LocationTest extends AbstractIntegrationTest {
         ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name + "1", "application/vnd.geo+json",
                 new Point(-122.4194, 37.7749), listId);
 
-        // when
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        String idLocation = getIdFromJson(json);
         UtilsAssert.assertLocation(dtoLocation, json);
-
+        // when
+        getJsonResponseFromDelete(String.format("Locations(%s)", idLocation), 204);
+        // then
+        assertThrows(IllegalArgumentException.class, () -> {
+            serviceUseCase.read(session, idLocation, "location");
+        });
     }
 
     /**
@@ -105,7 +130,7 @@ public class LocationTest extends AbstractIntegrationTest {
      * @throws Exception
      */
     @Test
-    public void testCreateLocationThroughThing() throws Exception {
+    public void testDeleteLocationThroughThing() throws Exception {
         // given
         String name = "testCreateLocationThroughThing";
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
@@ -116,9 +141,16 @@ public class LocationTest extends AbstractIntegrationTest {
 
         // when
         json = getJsonResponseFromPost(dtoLocation, String.format("Things(%s)/Locations", idThing), 201);
-        // then
-
+        String idLocation = getIdFromJson(json);
         UtilsAssert.assertLocation(dtoLocation, json);
+        // then
+        assertThrows(IllegalArgumentException.class, () -> {
+            serviceUseCase.read(session, idLocation, "location");
+        });
+        ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
+        @SuppressWarnings("unchecked")
+        List<String> locationIds = (List<String>) UtilDto.getResourceField(service, "locationIds", Object.class);
+        assertFalse(locationIds.contains(idLocation));
 
     }
 

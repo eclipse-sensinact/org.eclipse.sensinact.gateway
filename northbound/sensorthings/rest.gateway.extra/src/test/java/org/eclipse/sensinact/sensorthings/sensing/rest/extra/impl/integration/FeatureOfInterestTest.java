@@ -272,6 +272,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
     }
 
+<<<<<<< HEAD
     /**
      * Tests that <code>PATCH</code> can be used to update a FeatureOfInterest
      */
@@ -279,11 +280,18 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
     public void testPatchFeatureOfInterest() throws Exception {
         // given
         String name = "testPatchFeatureOfInterest";
+=======
+    @Test
+    public void testDeleteInMemoryFeatureOfInterest() throws Exception {
+        // given
+        String name = "testCreateFeatureOfInterest";
+>>>>>>> db85d4609 (add test delete)
 
         FeatureOfInterest dtoFeatureOfInterest = DtoFactory.getFeatureOfInterest(name, "application/vnd.geo+json",
                 new Point(-122.4194, 37.7749));
 
         JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
+<<<<<<< HEAD
         String idFoi = getIdFromJson(json);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
 
@@ -298,4 +306,57 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
 
     }
 
+=======
+        String foiId = getIdFromJson(json);
+        UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
+        // when
+        getJsonResponseFromDelete(String.format("FeaturesOfInterest(%s)", foiId), 204);
+        // then
+        assertNull(foiCache.getDto(foiId));
+
+    }
+
+    @Test
+    public void testDeleteFeatureOfInterestLinkObservation() throws Exception {
+        // given
+        String name = "testCreateFeatureOfInterest";
+
+        FeatureOfInterest dtoFeatureOfInterest = DtoFactory.getFeatureOfInterest(name, "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749));
+
+        // when
+        JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
+        UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
+        String foiId = getIdFromJson(json);
+        assertNotNull(foiCache.getDto(foiId));
+        // create datastream with observation
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
+                DtoFactory.getRefId(idThing));
+
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        ExpandedObservation dtoObservation = DtoFactory.getObservationLinkFeatureOfInterest(name + "2", foiId);
+        json = getJsonResponseFromPost(dtoObservation,
+                String.format("Datastreams(%s)/Observations?$expand=FeatureOfInterest", idDatastream), 201);
+        JsonNode foiNode = json.get("FeatureOfInterest");
+        String foidId = getIdFromJson(foiNode);
+        UtilsAssert.assertObservation(dtoObservation, json);
+        assertNull(foiCache.getDto(foiId));
+        // when
+        getJsonResponseFromDelete(String.format("FeaturesOfInterest", foidId), 400);
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        ExpandedObservation lastObs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        assertNotNull(lastObs);
+        assertNotNull(lastObs.featureOfInterest());
+        assertEquals(lastObs.featureOfInterest().id(), foidId);
+
+    }
+>>>>>>> db85d4609 (add test delete)
 }

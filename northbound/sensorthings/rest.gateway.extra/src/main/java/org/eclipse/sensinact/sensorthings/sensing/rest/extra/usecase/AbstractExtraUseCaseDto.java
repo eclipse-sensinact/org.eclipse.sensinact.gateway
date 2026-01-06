@@ -14,6 +14,10 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.List;
 
+<<<<<<< HEAD
+=======
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+>>>>>>> db85d4609 (add test delete)
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
@@ -33,6 +37,11 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
 
     public abstract List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<M> request);
 
+<<<<<<< HEAD
+=======
+    public abstract List<AbstractTwinCommand<Void>> dtoToDelete(ExtraUseCaseRequest<M> request);
+
+>>>>>>> db85d4609 (add test delete)
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
         if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
             DtoToModelMapper.checkRequireField(request.model());
