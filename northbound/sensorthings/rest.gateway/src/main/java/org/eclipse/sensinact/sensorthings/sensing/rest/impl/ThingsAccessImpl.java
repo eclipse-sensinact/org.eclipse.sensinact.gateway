@@ -364,10 +364,10 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
     }
 
     @Override
-    public Response deleteDatastreamRef(String id) {
-//        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedThing.class,
-//                ExpandedDataStream.class);
-//
+    public Response deleteDatastreamRef(String id, String id2) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedThing.class,
+                ExpandedDataStream.class);
+
         return Response.noContent().build();
     }
 

@@ -87,7 +87,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(observedPropertyId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
         String idDatastream = getIdFromJson(json);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
@@ -143,7 +143,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(ObservedPropertyId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
@@ -195,7 +195,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(ObservedPropertyId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
         String idDatastream = getIdFromJson(json);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
@@ -259,7 +259,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(ObservedPropertyId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
         String idDatastream = getIdFromJson(json);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
@@ -274,5 +274,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals("test", UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
+
     }
 }

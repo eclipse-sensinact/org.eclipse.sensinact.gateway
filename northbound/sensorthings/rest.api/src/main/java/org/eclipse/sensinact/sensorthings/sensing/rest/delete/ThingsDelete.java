@@ -11,7 +11,7 @@ public interface ThingsDelete {
 
     @DELETE
     @Path("/Datastreams/$ref")
-    public Response deleteDatastreamRef(@PathParam("id") String id);
+    public Response deleteDatastreamRef(@PathParam("id") String id, @PathParam("id2") String id2);
 
     @DELETE
     @Path("/Locations({id2})/$ref")

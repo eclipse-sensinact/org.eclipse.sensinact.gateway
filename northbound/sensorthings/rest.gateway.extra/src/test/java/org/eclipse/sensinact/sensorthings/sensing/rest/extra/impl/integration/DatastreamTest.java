@@ -12,9 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
@@ -212,6 +213,42 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(name + " Update", UtilDto.getResourceField(service, "name", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
+
+    }
+
+    /**
+     * Tests that <code>PUT</code> can be used to update a Datastream
+     */
+    /**
+     * test simple update datastream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testPatchDatastream() throws Exception {
+        // given
+        String nameThing = "testPatchDatastream";
+        String name = "testPatchDatastream";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(nameThing, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        ExpandedDataStream dtoDatastream = DtoFactory.getDatastreamMinimalLinkThing(name, DtoFactory.getRefId(idThing));
+
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 201);
+        String idDatastream = getIdFromJson(json);
+
+        UtilsAssert.assertDatastream(dtoDatastream, json);
+        // when
+        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(null, "Update", "Update");
+
+        getJsonResponseFromPatch(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals("Update", UtilDto.getResourceField(service, "description", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
 
     }
 
