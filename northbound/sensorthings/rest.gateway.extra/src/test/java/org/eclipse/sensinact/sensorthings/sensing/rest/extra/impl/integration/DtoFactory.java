@@ -88,8 +88,8 @@ public class DtoFactory {
         ExpandedObservedProperty op = new ExpandedObservedProperty(null, obRefId, null, null, null, null, null);
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         ExpandedSensor sensor = getSensor("sensor1");
-
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
+        ExpandedObservation lastObs = getObservation("observation");
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, List.of(lastObs));
 
     }
 

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
@@ -209,6 +210,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(name + "2", UtilDto.getResourceField(service, "observedPropertyName", String.class));
+        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
     }
 
     /**
