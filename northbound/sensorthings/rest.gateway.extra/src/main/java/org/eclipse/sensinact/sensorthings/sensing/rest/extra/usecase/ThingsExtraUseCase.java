@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.push.DataUpdate;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -135,22 +134,16 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
                 if (sp != null) {
                     sp.delete();
                 }
-                return pf.resolved(null);
-            }
-        });
-        // delete associate
-        list.add(new AbstractTwinCommand<Void>() {
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                 datastreamIds.stream().forEach(idDatastream -> {
-                    SensinactProvider sp = twin.getProvider(idDatastream);
-                    if (sp != null) {
-                        sp.delete();
+                    SensinactProvider spDatastream = twin.getProvider(idDatastream);
+                    if (spDatastream != null) {
+                        spDatastream.delete();
                     }
                 });
                 return pf.resolved(null);
             }
         });
+     
         return list;
     }
 

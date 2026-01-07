@@ -93,6 +93,9 @@ public class ObservationTest extends AbstractIntegrationTest {
         assertNull(lastObs);
     }
 
+    /**
+     *  test create observation with missing required field
+     */
     @Test
     public void testCreateObservationMissingField() throws Exception {
         // given

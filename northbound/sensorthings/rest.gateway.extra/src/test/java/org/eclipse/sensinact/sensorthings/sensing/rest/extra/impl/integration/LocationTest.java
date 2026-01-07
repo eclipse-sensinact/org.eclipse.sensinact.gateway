@@ -154,6 +154,9 @@ public class LocationTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test delete location through endpoint /Things
+     */
     @Test
     public void testDeleteLocationThroughThing() throws Exception {
         // given

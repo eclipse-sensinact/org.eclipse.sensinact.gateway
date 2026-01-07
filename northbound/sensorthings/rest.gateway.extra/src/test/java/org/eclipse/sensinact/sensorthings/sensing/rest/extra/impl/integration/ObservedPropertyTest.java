@@ -106,7 +106,9 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyProperties", Map.class));
 
     }
-
+    /**
+     * test create observed property with missing required field
+     */
     @Test
     public void testCreateObservedPropertyMissingField() throws Exception {
         // given

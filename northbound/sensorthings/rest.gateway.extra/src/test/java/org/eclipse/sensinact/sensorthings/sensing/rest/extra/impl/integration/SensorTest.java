@@ -90,6 +90,9 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorCache.getDto(sensorId));
     }
 
+    /**
+     * test delete sensor using Datastream endpoint - return 409
+     */
     @Test
     public void testDeleteDatastreamLinkSensor() throws Exception {
         // given
@@ -129,6 +132,9 @@ public class SensorTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create sensor link to a datastream
+     */
     @Test
     public void testCreateDatastreamLinkSensor() throws Exception {
         // given

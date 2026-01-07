@@ -250,11 +250,8 @@ public class DtoToModelMapper {
         return String.valueOf(object).replaceAll("[^0-9a-zA-Z\\.\\-_]", "_");
     }
 
-    public static SensorThingsUpdate toFeatureOfInterestUpdate(String providerId, String datastreamId,
-            FeatureOfInterest featureOfInterest) {
-        return null;
-    }
 
+   
     public static SensorThingsUpdate toLocationUpdate(String providerId, ExpandedLocation location) {
         return new LocationUpdate(providerId, providerId, location.name(), location.description(),
                 location.encodingType(), location.location());

@@ -140,15 +140,6 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                 if (sp != null) {
                     sp.delete();
                 }
-                return pf.resolved(null);
-            }
-        });
-
-        // update thing to remove locationIds
-        list.add(new AbstractTwinCommand<Void>() {
-            @SuppressWarnings("unlikely-arg-type")
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
 
                 twin.getProviders(eNS_URI, SENSOR_THING_DEVICE.getName()).stream()
                         .map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds")).filter(r -> {
@@ -169,6 +160,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                 return pf.resolved(null);
             }
         });
+
+      
         return list;
     }
 

@@ -489,7 +489,9 @@ public class ThingTest extends AbstractIntegrationTest {
                 UtilDto.getResourceField(service, "description", String.class));
 
     }
-
+    /**
+     * test delete thing without link to locations and datastream
+     */
     @Test
     public void testDeleteThingSimple() throws Exception {
         // Given
@@ -540,7 +542,9 @@ public class ThingTest extends AbstractIntegrationTest {
             serviceUseCase.read(session, idDatastream, "datastream");
         });
     }
-
+    /**
+     * test delete thing datastream ref 
+     */
     public void testDeleteThingDatastreamRef() throws Exception {
         // given
         String name = "testDeleteThingDatastreamRef";
@@ -571,6 +575,9 @@ public class ThingTest extends AbstractIntegrationTest {
         });
     }
 
+    /**
+     * test delete thing location ref 
+     */
     public void testDeleteThingLocationRef() throws Exception {
         String name = "testDeleteThingLocationRef";
 

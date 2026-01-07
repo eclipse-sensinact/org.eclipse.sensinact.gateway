@@ -275,6 +275,31 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
     /**
      * Tests that <code>PATCH</code> can be used to update a FeatureOfInterest
      */
+    @Test
+    public void testPatchFeatureOfInterest() throws Exception {
+        // given
+        String name = "testPatchFeatureOfInterest";
+
+        FeatureOfInterest dtoFeatureOfInterest = DtoFactory.getFeatureOfInterest(name, "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749));
+
+        JsonNode json = getJsonResponseFromPost(dtoFeatureOfInterest, "FeaturesOfInterest", 201);
+        String idFoi = getIdFromJson(json);
+        UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
+
+        // when
+        FeatureOfInterest dtoFeatureOfInterestUpdate = DtoFactory.getFeatureOfInterest(name + "Update",
+                "application/vnd.geo+json", new Point(-122.4194, 37.7749));
+
+        json = getJsonResponseFromPatch(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi),
+                204);
+        // then
+        assertEquals(name + "Update", foiCache.getDto(idFoi).name());
+
+    }
+    /**
+     * Tests that <code>DELETE</code> can be used to update a FeatureOfInterest
+     */
 
     @Test
     public void testDeleteInMemoryFeatureOfInterest() throws Exception {

@@ -349,34 +349,28 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         list.add(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                try {
+
                 SensinactProvider sp = twin.getProvider(request.id());
                 if (sp != null) {
                     sp.delete();
                 }
-                return pf.resolved(null);
-            }
-        });
-
-        list.add(new AbstractTwinCommand<Void>() {
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                try {
-
-                    SensinactResource resource = twin.getResource(thingId, "thing", "datastreamIds");
-                    if (resource != null) {
-                        List<?> datastreamIds = resource.getMultiValue(List.class).getValue().getValue();
-                        if (datastreamIds.contains(request.id())) {
-                            datastreamIds.remove(request.id());
-                            resource.setValue(datastreamIds).getValue();
-                        }
+                SensinactResource resource = twin.getResource(thingId, "thing", "datastreamIds");
+                if (resource != null) {
+                    List<?> datastreamIds = resource.getMultiValue(List.class).getValue().getValue();
+                    if (datastreamIds.contains(request.id())) {
+                        datastreamIds.remove(request.id());
+                        resource.setValue(datastreamIds).getValue();
                     }
-                    return pf.resolved(null);
-                } catch (InvocationTargetException | InterruptedException e) {
-                    return pf.failed(e);
                 }
+                return pf.resolved(null);
+            } catch (InvocationTargetException | InterruptedException e) {
+                return pf.failed(e);
+            }
             }
         });
 
+      
         return list;
     }
 
