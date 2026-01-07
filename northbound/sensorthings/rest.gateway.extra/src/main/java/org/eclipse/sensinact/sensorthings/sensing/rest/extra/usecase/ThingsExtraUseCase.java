@@ -143,7 +143,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
                 return pf.resolved(null);
             }
         });
-     
+
         return list;
     }
 

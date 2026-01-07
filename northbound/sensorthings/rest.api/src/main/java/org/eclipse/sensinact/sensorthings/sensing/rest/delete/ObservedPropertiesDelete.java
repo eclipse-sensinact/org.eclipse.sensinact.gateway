@@ -18,7 +18,9 @@ import jakarta.ws.rs.core.Response;
 
 public interface ObservedPropertiesDelete {
     /**
-     * delete observed property if not link to datastream - return 204 else return 409, 404 if not found
+     * delete observed property if not link to datastream - return 204 else return
+     * 409, 404 if not found
+     *
      * @param id : id of observed property
      */
     @DELETE

@@ -84,7 +84,7 @@ public class UtilDto {
      * @param record
      * @param fieldName
      * @return
-     * 
+     *
      */
     public static Object getRecordField(Object record, String fieldName) {
         if (!record.getClass().isRecord()) {

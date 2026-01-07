@@ -19,6 +19,7 @@ import jakarta.ws.rs.core.Response;
 public interface LocationsDelete {
     /**
      * delete location and the link between location and thing if exists
+     *
      * @param id : id of location
      */
     @DELETE

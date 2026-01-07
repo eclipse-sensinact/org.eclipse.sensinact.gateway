@@ -18,7 +18,9 @@ import jakarta.ws.rs.core.Response;
 
 public interface FeaturesOfInterestDelete {
     /**
-     * delete feature of interest if not linked to observation - return 204 else return 409
+     * delete feature of interest if not linked to observation - return 204 else
+     * return 409
+     *
      * @param id : id of a feature of interest
      */
     @DELETE

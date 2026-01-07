@@ -21,6 +21,7 @@ public interface DatastreamsDelete {
 
     /**
      * delete datastream
+     *
      * @param id : id of a datastream
      */
     @DELETE
@@ -28,6 +29,7 @@ public interface DatastreamsDelete {
 
     /**
      * delete datastream sensor ref - return 409
+     *
      * @param id : id of a datastream
      */
     @DELETE
@@ -36,8 +38,9 @@ public interface DatastreamsDelete {
 
     /**
      * delete datastream observed property ref - return 409
+     *
      * @param id : id of a datastream
-
+     *
      */
     @DELETE
     @Path("/ObservedProperty/$ref")

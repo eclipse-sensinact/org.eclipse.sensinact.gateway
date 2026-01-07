@@ -161,7 +161,6 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
             }
         });
 
-      
         return list;
     }
 

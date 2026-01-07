@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
@@ -351,26 +351,25 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                 try {
 
-                SensinactProvider sp = twin.getProvider(request.id());
-                if (sp != null) {
-                    sp.delete();
-                }
-                SensinactResource resource = twin.getResource(thingId, "thing", "datastreamIds");
-                if (resource != null) {
-                    List<?> datastreamIds = resource.getMultiValue(List.class).getValue().getValue();
-                    if (datastreamIds.contains(request.id())) {
-                        datastreamIds.remove(request.id());
-                        resource.setValue(datastreamIds).getValue();
+                    SensinactProvider sp = twin.getProvider(request.id());
+                    if (sp != null) {
+                        sp.delete();
                     }
+                    SensinactResource resource = twin.getResource(thingId, "thing", "datastreamIds");
+                    if (resource != null) {
+                        List<?> datastreamIds = resource.getMultiValue(List.class).getValue().getValue();
+                        if (datastreamIds.contains(request.id())) {
+                            datastreamIds.remove(request.id());
+                            resource.setValue(datastreamIds).getValue();
+                        }
+                    }
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
                 }
-                return pf.resolved(null);
-            } catch (InvocationTargetException | InterruptedException e) {
-                return pf.failed(e);
-            }
             }
         });
 
-      
         return list;
     }
 

@@ -19,7 +19,8 @@ import jakarta.ws.rs.core.Response;
 
 public interface ObservationsDelete {
     /**
-     * delete observation 
+     * delete observation
+     *
      * @param id : id of observation
      */
     @DELETE
@@ -27,6 +28,7 @@ public interface ObservationsDelete {
 
     /**
      * delete feature of interest observation ref - return 409
+     *
      * @param id : id of feature of interest
      */
     @DELETE

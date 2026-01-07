@@ -18,8 +18,10 @@ import jakarta.ws.rs.core.Response;
 
 public interface SensorsDelete {
     /**
-     * delete sensor if not link to datastream and exists - return 204 else return 409. 404 if not found
-     * @param id : id of sensor 
+     * delete sensor if not link to datastream and exists - return 204 else return
+     * 409. 404 if not found
+     *
+     * @param id : id of sensor
      */
     @DELETE
     public Response deleteSensor(@PathParam("id") String id);

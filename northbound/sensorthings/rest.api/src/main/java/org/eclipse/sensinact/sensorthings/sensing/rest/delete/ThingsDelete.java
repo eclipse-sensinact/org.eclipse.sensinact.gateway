@@ -20,15 +20,17 @@ import jakarta.ws.rs.core.Response;
 
 public interface ThingsDelete {
     /**
-     * delete thing and linked entities 
+     * delete thing and linked entities
+     *
      * @param id : id of thing
      */
     @DELETE
     public Response deleteThing(@PathParam("id") String id);
 
     /**
-     * delete datastream thing ref 
-     * @param id : id of a thing
+     * delete datastream thing ref
+     *
+     * @param id  : id of a thing
      * @param id2 : id of a datastream
      */
     @DELETE
@@ -36,7 +38,8 @@ public interface ThingsDelete {
     public Response deleteDatastreamRef(@PathParam("id") String id, @QueryParam("id2") String id2);
 
     /**
-     * delete location thing ref 
+     * delete location thing ref
+     *
      * @param id : id of thing
      * @param id 2 : id of location
      */
