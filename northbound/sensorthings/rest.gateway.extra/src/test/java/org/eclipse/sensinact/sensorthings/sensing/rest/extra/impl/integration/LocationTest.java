@@ -183,12 +183,12 @@ public class LocationTest extends AbstractIntegrationTest {
     }
 
     /**
-     * test delete location through endpoint /Things
+     * test delete historicalLocation
      */
     @Test
-    public void testDeleteHistocalLocationThroughThing() throws Exception {
+    public void testDeleteHistocalLocation() throws Exception {
         // given
-        String name = "testDeleteHistocalLocationThroughThing";
+        String name = "testDeleteHistocalLocation";
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
