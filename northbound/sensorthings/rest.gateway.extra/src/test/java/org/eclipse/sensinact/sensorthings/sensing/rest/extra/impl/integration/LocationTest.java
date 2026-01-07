@@ -237,6 +237,39 @@ public class LocationTest extends AbstractIntegrationTest {
     }
 
     /**
+     * test delete a specific thing association ($ref) to a location
+     */
+    @Test
+    public void testDeleteLocationThing() throws Exception {
+        // given
+        String name = "testDeleteLocationThing";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+
+        ExpandedThing thing2 = DtoFactory.getExpandedThing(name + "2", "testThing existing 2 Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing2, "Things", 201);
+        String idThing2 = getIdFromJson(json);
+
+        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name + "1", "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749), List.of(new RefId(idThing), new RefId(idThing2)));
+
+        json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        String idLocation = getIdFromJson(json);
+        // when
+        getJsonResponseFromDelete(String.format("/Locations(%s)/Things(%s)/$ref", idLocation, idThing), 204);
+        // then
+        ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, UtilDto.SERVICE_THING);
+        ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, UtilDto.SERVICE_THING);
+        assertEquals(0, UtilDto.getResourceField(thingService1, "locationIds", List.class).size());
+        assertEquals(1, UtilDto.getResourceField(thingService2, "locationIds", List.class).size());
+
+    }
+
+    /**
      * Tests that <code>PUT</code> can be used to update a Location
      */
 
