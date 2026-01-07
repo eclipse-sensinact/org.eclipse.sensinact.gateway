@@ -610,4 +610,33 @@ public class ThingTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test delete location association ($ref) to a thing
+     */
+    @Test
+    public void testDeleteLocationThings() throws Exception {
+        // given
+        String name = "testDeleteLocationThings";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+
+        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name + "1", "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749), List.of(new RefId(idThing)));
+
+        json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        dtoLocation = DtoFactory.getLocationLinkThing(name + "1", "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749), List.of(new RefId(idThing)));
+
+        json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        // when
+        getJsonResponseFromDelete(String.format("/Things(%s)/Locations/$ref", idThing), 204);
+        // then
+        ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, UtilDto.SERVICE_THING);
+        assertEquals(0, UtilDto.getResourceField(thingService1, "locationIds", List.class).size());
+
+    }
+
 }

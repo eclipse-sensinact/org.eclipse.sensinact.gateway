@@ -46,4 +46,13 @@ public interface ThingsDelete {
     @DELETE
     @Path("/Locations({id2})/$ref")
     public Response deleteLocationRef(@PathParam("id") String id, @PathParam("id2") String id2);
+
+    /**
+     * delete locations thing ref
+     *
+     * @param id : id of thing
+     */
+    @DELETE
+    @Path("/Locations/$ref")
+    public Response deleteLocationsRef(@PathParam("id") String id);
 }

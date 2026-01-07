@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
@@ -25,6 +26,7 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
@@ -129,6 +131,42 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
 
     }
 
+    @SuppressWarnings("unlikely-arg-type")
+    public void removeLocationIdsInThings(String locationId, List<String> idThings, SensinactDigitalTwin twin,
+            PromiseFactory pf) {
+        Stream<? extends SensinactProvider> providers = null;
+        if (idThings == null || idThings.size() == 0) {
+            providers = twin.getProviders(eNS_URI, SENSOR_THING_DEVICE.getName()).stream();
+        } else {
+            providers = idThings.stream().map(idThing -> twin.getProvider(idThing));
+        }
+        Stream<SensinactResource> resources = providers.map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds"))
+                .filter(r -> {
+                    try {
+                        return locationId == null
+                                || r.getMultiValue(List.class).getValue().getValue().contains(locationId);
+                    } catch (InvocationTargetException | InterruptedException e) {
+                        return false;
+                    }
+                });
+        resources.forEach(r -> {
+            try {
+                if (locationId == null) {
+                    // if no locationId in parameter we delete all locationIds
+                    r.setValue(List.of()).getValue();
+
+                } else {
+                    List<?> locationIds = r.getMultiValue(List.class).getValue().getValue();
+                    locationIds.remove(locationId);
+                    r.setValue(locationIds).getValue();
+                }
+            } catch (InvocationTargetException | InterruptedException e) {
+                pf.failed(e);
+            }
+        });
+
+    }
+
     @Override
     public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
@@ -140,25 +178,10 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                 if (sp != null) {
                     sp.delete();
                 }
-
-                twin.getProviders(eNS_URI, SENSOR_THING_DEVICE.getName()).stream()
-                        .map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds")).filter(r -> {
-                            try {
-                                return r.getMultiValue(List.class).getValue().getValue().contains(request.id());
-                            } catch (InvocationTargetException | InterruptedException e) {
-                                return false;
-                            }
-                        }).forEach(r -> {
-                            try {
-                                List<?> locationIds = r.getMultiValue(List.class).getValue().getValue();
-                                locationIds.remove(request.id());
-                                r.setValue(locationIds).getValue();
-                            } catch (InvocationTargetException | InterruptedException e) {
-                                pf.failed(e);
-                            }
-                        });
+                removeLocationIdsInThings(request.id(), null, twin, pf);
                 return pf.resolved(null);
             }
+
         });
 
         return list;

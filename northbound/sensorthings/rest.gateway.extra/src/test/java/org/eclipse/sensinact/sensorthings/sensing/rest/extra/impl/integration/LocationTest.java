@@ -15,7 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -180,6 +179,60 @@ public class LocationTest extends AbstractIntegrationTest {
         @SuppressWarnings("unchecked")
         List<String> locationIds = (List<String>) UtilDto.getResourceField(service, "locationIds", Object.class);
         assertFalse(locationIds.contains(idLocation));
+
+    }
+
+    /**
+     * test delete location through endpoint /Things
+     */
+    @Test
+    public void testDeleteHistocalLocationThroughThing() throws Exception {
+        // given
+        String name = "testDeleteHistocalLocationThroughThing";
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+        ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "1");
+
+        json = getJsonResponseFromPost(dtoLocation, String.format("Things(%s)/Locations", idThing), 201);
+        String idLocation = getIdFromJson(json);
+        UtilsAssert.assertLocation(dtoLocation, json);
+        // when
+        getJsonResponseFromDelete(String.format("/HistoricalLocations(%s)", idLocation), 409);
+
+    }
+
+    /**
+     * test delete things association ($ref) to a location
+     */
+    @Test
+    public void testDeleteLocationThings() throws Exception {
+        // given
+        String name = "testDeleteLocationThings";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String idThing = getIdFromJson(json);
+
+        ExpandedThing thing2 = DtoFactory.getExpandedThing(name + "2", "testThing existing 2 Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing2, "Things", 201);
+        String idThing2 = getIdFromJson(json);
+
+        ExpandedLocation dtoLocation = DtoFactory.getLocationLinkThing(name + "1", "application/vnd.geo+json",
+                new Point(-122.4194, 37.7749), List.of(new RefId(idThing), new RefId(idThing2)));
+
+        json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
+        String idLocation = getIdFromJson(json);
+        // when
+        getJsonResponseFromDelete(String.format("/Locations(%s)/Things/$ref", idLocation), 204);
+        // then
+        ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, UtilDto.SERVICE_THING);
+        ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, UtilDto.SERVICE_THING);
+        assertEquals(0, UtilDto.getResourceField(thingService1, "locationIds", List.class).size());
+        assertEquals(0, UtilDto.getResourceField(thingService2, "locationIds", List.class).size());
 
     }
 

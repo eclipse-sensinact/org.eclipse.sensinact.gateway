@@ -297,4 +297,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
         return Response.noContent().build();
     }
+
+    @Override
+    public Response deleteDatastreamObservationsRef(String id) {
+        return Response.status(409).build();
+    }
 }

@@ -29,6 +29,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.LocationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.LocationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.LocationsUpdate;
@@ -159,6 +160,22 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
     @Override
     public Response deleteLocation(String id) {
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedLocation.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteThingsRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedLocation.class,
+                ExpandedThing.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteThingRef(String id, String id2) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedLocation.class,
+                ExpandedThing.class);
 
         return Response.noContent().build();
     }

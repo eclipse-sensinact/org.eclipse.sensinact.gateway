@@ -379,4 +379,12 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
         return Response.noContent().build();
     }
 
+    @Override
+    public Response deleteLocationsRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedThing.class,
+                ExpandedLocation.class);
+
+        return Response.noContent().build();
+    }
+
 }

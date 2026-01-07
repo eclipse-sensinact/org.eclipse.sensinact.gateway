@@ -46,4 +46,14 @@ public interface DatastreamsDelete {
     @Path("/ObservedProperty/$ref")
     public Response deleteDatastreamObservedPropertyRef(@PathParam("id") String id);
 
+    /**
+     * delete datastream last observation ref - return 409
+     *
+     * @param id : id of a datastream
+     *
+     */
+    @DELETE
+    @Path("/Datastreams({id})/Observations/$ref")
+    public Response deleteDatastreamObservationsRef(@PathParam("id") String id);
+
 }
