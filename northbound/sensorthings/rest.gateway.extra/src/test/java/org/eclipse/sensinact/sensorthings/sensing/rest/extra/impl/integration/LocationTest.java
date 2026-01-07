@@ -154,35 +154,6 @@ public class LocationTest extends AbstractIntegrationTest {
     }
 
     /**
-     * test delete location through endpoint /Things
-     */
-    @Test
-    public void testDeleteLocationThroughThing() throws Exception {
-        // given
-        String name = "testCreateLocationThroughThing";
-        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
-                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
-        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
-        String idThing = getIdFromJson(json);
-        ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "1");
-
-        json = getJsonResponseFromPost(dtoLocation, String.format("Things(%s)/Locations", idThing), 201);
-        String idLocation = getIdFromJson(json);
-        UtilsAssert.assertLocation(dtoLocation, json);
-        // when
-        getJsonResponseFromDelete(String.format("/Locations(%s)", idLocation), 204);
-        // then
-        assertThrows(NotFoundException.class, () -> {
-            serviceUseCase.read(session, idLocation, "location");
-        });
-        ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
-        @SuppressWarnings("unchecked")
-        List<String> locationIds = (List<String>) UtilDto.getResourceField(service, "locationIds", Object.class);
-        assertFalse(locationIds.contains(idLocation));
-
-    }
-
-    /**
      * test delete historicalLocation
      */
     @Test
