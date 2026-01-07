@@ -17,5 +17,12 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 public interface IAccessProviderUseCase {
 
-    public ProviderSnapshot read(SensiNactSession sessin, String providerId);
+    /**
+     * return the provider snapshot identified by the providerId.
+     *
+     * @param session
+     * @param providerId
+     * @return
+     */
+    public ProviderSnapshot read(SensiNactSession session, String providerId);
 }

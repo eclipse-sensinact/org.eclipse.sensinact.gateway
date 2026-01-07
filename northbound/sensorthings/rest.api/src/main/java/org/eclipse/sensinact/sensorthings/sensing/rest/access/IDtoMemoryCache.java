@@ -12,18 +12,40 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 
-public interface IAccessResourceUseCase {
+/**
+ * memory repository cache for storing dto that are not assign to datastream
+ *
+ * @param <M>
+ */
+public interface IDtoMemoryCache<M extends Id> {
 
     /**
-     * return the resource snapshot identified by the id that is composed by
-     * providerId, serviceId, resourceName separate by ~
+     * add dto in cache on id
      *
-     * @param session
+     * @param id
+     * @param dto
+     */
+    public void addDto(String id, M dto);
+
+    /**
+     * remove dto by id if exists
+     *
+     * @param id
+     */
+    public void removeDto(String id);
+
+    /**
+     * get the dto by id
+     *
      * @param id
      * @return
      */
-    public ResourceSnapshot read(SensiNactSession session, String id);
+    public M getDto(String id);
+
+    /**
+     * get type of DTO to store in cache
+     */
+    public Class<M> getType();
 }

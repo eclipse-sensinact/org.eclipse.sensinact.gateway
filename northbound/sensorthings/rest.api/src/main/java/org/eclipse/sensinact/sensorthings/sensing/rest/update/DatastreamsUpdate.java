@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
@@ -31,8 +32,10 @@ public interface DatastreamsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     public Response updateDatastreams(@PathParam("id") String id, ExpandedDataStream dataStream);
+
+    @PATCH
+    public Response patchDatastreams(@PathParam("id") String id, ExpandedDataStream dataStream);
 
     /**
      * update observation link to thing and datastream
@@ -43,9 +46,49 @@ public interface DatastreamsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     @Path("/Observations({id2})")
     public Response updateDatastreamsObservation(@PathParam("id") String id, @PathParam("id2") String id2,
             Observation observation);
+
+    @PATCH
+    @Path("/Observations({id2})")
+    public Response patchDatastreamsObservation(@PathParam("id") String id, @PathParam("id2") String id2,
+            Observation observation);
+
+    /**
+     * update thing link to datastream
+     *
+     * @param id
+     * @param id2
+     * @param observation
+     * @return
+     */
+    @PUT
+    @Path("/Thing/$ref")
+    public Response updateDatastreamThingRef(@PathParam("id") String id, RefId thing);
+
+    /**
+     * update sensor link to datastream
+     *
+     * @param id
+     * @param id2
+     * @param observation
+     * @return
+     */
+    @PUT
+    @Path("/Sensor/$ref")
+    public Response updateDatastreamSensorRef(@PathParam("id") String id, RefId sensor);
+
+    /**
+     * update sensor link to datastream
+     *
+     * @param id
+     * @param id2
+     * @param observation
+     * @return
+     */
+    @PUT
+    @Path("/ObservedProperty/$ref")
+    public Response updateDatastreamObservedPropertyRef(@PathParam("id") String id, RefId observedProperty);
 
 }

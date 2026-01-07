@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.create;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -31,5 +32,17 @@ public interface DatastreamsCreate {
     @POST
     @Path("/Observations")
     public Response createDatastreamsObservation(@PathParam("id") String id, ExpandedObservation observation);
+
+    /**
+     * update thing link to datastream
+     *
+     * @param id
+     * @param id2
+     * @param observation
+     * @return
+     */
+    @POST
+    @Path("/Observations/$ref")
+    public Response createObservationRef(@PathParam("id") String id, RefId observation);
 
 }

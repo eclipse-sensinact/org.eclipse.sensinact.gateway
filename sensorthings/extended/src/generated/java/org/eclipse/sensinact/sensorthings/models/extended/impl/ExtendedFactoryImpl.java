@@ -71,6 +71,7 @@ public class ExtendedFactoryImpl extends EFactoryImpl implements ExtendedFactory
 			case ExtendedPackage.DATA_STREAM_SERVICE: return createDataStreamService();
 			case ExtendedPackage.SENSOR_THING_SERVICE: return createSensorThingService();
 			case ExtendedPackage.SENSOR_THING_LOCATION: return createSensorThingLocation();
+			case ExtendedPackage.SENSOR_THING_DATASTREAM: return createSensorThingDatastream();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -129,6 +130,17 @@ public class ExtendedFactoryImpl extends EFactoryImpl implements ExtendedFactory
 	public SensorThingLocation createSensorThingLocation() {
 		SensorThingLocationImpl sensorThingLocation = new SensorThingLocationImpl();
 		return sensorThingLocation;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public SensorThingDatastream createSensorThingDatastream() {
+		SensorThingDatastreamImpl sensorThingDatastream = new SensorThingDatastreamImpl();
+		return sensorThingDatastream;
 	}
 
 	/**

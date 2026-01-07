@@ -12,68 +12,116 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
-import java.util.HashMap;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
-
+import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * sensor
  */
-public class SensorsExtraUseCase extends AbstractExtraUseCase<ExpandedSensor, ExpandedSensor> {
+public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor, Object> {
 
-    Map<String, ExpandedSensor> sensorById = new HashMap<String, ExpandedSensor>();
+    private final DataUpdate dataUpdate;
+    private final IAccessServiceUseCase serviceUseCase;
+    private final IDtoMemoryCache<ExpandedSensor> cacheSensor;
 
-    public SensorsExtraUseCase(Providers providers) { }
+    @SuppressWarnings("unchecked")
+    public SensorsExtraUseCase(Providers providers) {
+        dataUpdate = resolve(providers, DataUpdate.class);
+        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        cacheSensor = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
+    }
 
-    public ExtraUseCaseResponse<ExpandedSensor> create(ExtraUseCaseRequest<ExpandedSensor> request) {
+    public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<ExpandedSensor> request) {
         ExpandedSensor sensor = request.model();
-        DtoToModelMapper.checkRequireField(sensor);
-        String observedPropertyId = getId(sensor);
-        ExpandedSensor createdSensor = new ExpandedSensor(null, observedPropertyId, sensor.name(), sensor.description(),
+        checkRequireField(request);
+        String sensorId = request.id();
+        ExpandedSensor createdSensor = new ExpandedSensor(null, sensorId, sensor.name(), sensor.description(),
                 sensor.encodingType(), sensor.metadata(), sensor.properties(), null);
-        sensorById.put(observedPropertyId, createdSensor);
-
-        return new ExtraUseCaseResponse<ExpandedSensor>(observedPropertyId, createdSensor);
-
-    }
-
-    public ExtraUseCaseResponse<ExpandedSensor> delete(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<ExpandedSensor>(false, "not implemented");
+        cacheSensor.addDto(sensorId, createdSensor);
+        return new ExtraUseCaseResponse<Object>(sensorId, createdSensor);
 
     }
 
-    public ExtraUseCaseResponse<ExpandedSensor> patch(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<ExpandedSensor>(false, "not implemented");
+    public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ExpandedSensor> request) {
+        return new ExtraUseCaseResponse<Object>(false, "not implemented");
 
     }
 
     @Override
-    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return null;
+    public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedSensor> request) {
+        String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
+        String sensorId = DtoToModelMapper.extractSecondIdSegment(request.id());
+        if (providerId == null || sensorId == null) {
+            throw new BadRequestException("bad id format");
+        }
+        ExpandedSensor receivedSensor = request.model();
+        checkRequireField(request);
+        ExpandedSensor sensorToUpdate = new ExpandedSensor(null, sensorId, receivedSensor.name(),
+                receivedSensor.description(), receivedSensor.encodingType(), receivedSensor.metadata(),
+                receivedSensor.properties(), null);
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, sensorToUpdate, null, null, null, null));
+
     }
 
-    public ExtraUseCaseResponse<ExpandedSensor> update(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<ExpandedSensor>(false, "not implemented");
+    public ExtraUseCaseResponse<Object> update(ExtraUseCaseRequest<ExpandedSensor> request) {
+        // check if sensor is in cached map
+        ExpandedSensor sensor = getInMemorySensor(request.id());
+        if (sensor != null) {
+            ExpandedSensor createdSensor = updateInMemorySensor(request, sensor);
+            return new ExtraUseCaseResponse<Object>(request.id(), createdSensor);
+        } else {
+            String providerId = UtilDto.extractFirstIdSegment(request.id());
+
+            List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
+
+            // update/create provider
+            try {
+                dataUpdate.pushUpdate(listDtoModels).getValue();
+
+            } catch (InvocationTargetException | InterruptedException e) {
+                return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
+            }
+            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
+            if (serviceSnapshot == null) {
+                return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
+            }
+            return new ExtraUseCaseResponse<Object>(request.id(), serviceSnapshot);
+
+        }
 
     }
 
-    @Override
-    public String getId(ExpandedSensor dto) {
-        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    private ExpandedSensor updateInMemorySensor(ExtraUseCaseRequest<ExpandedSensor> request, ExpandedSensor sensor) {
+        ExpandedSensor updateSensor = request.model();
+        ExpandedSensor createdSensor = new ExpandedSensor(null, request.id(),
+                updateSensor.name() != null ? updateSensor.name() : sensor.name(),
+                updateSensor.description() != null ? updateSensor.description() : sensor.description(),
+                updateSensor.encodingType() != null ? updateSensor.encodingType() : sensor.encodingType(),
+                updateSensor.metadata() != null ? updateSensor.metadata() : sensor.metadata(),
+                updateSensor.properties() != null ? updateSensor.properties() : sensor.properties(), null);
+        cacheSensor.addDto(request.id(), createdSensor);
+        return createdSensor;
     }
 
     public ExpandedSensor getInMemorySensor(String id) {
-        return sensorById.get(id);
+        return cacheSensor.getDto(id);
     }
 
-    public ExpandedSensor removeInMemorySensor(String id) {
-        return sensorById.remove(id);
+    public void removeInMemorySensor(String id) {
+        cacheSensor.removeDto(id);
     }
 
 }

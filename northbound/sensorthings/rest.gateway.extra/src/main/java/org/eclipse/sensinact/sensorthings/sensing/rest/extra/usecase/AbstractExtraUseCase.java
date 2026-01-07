@@ -13,10 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -56,27 +54,11 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
     }
 
     /**
-     * get id field for EMF
-     *
-     * @param aDto
-     * @return
-     */
-    public abstract String getId(M aDto);
-
-    /**
      * get generic type (dto) for use case
      */
     public Class<M> getType() {
         return type;
     }
-
-    /**
-     * return list of record update
-     *
-     * @param request
-     * @return
-     */
-    protected abstract List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<M> request);
 
     /**
      * Quickly resolve a context object where the context type is unimportant

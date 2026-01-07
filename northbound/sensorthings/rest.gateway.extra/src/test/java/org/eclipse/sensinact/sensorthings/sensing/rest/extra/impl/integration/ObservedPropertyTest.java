@@ -14,12 +14,15 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +32,12 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class ObservedPropertyTest extends AbstractIntegrationTest {
 
+    /**
+     * test endpoint create observed property that store the dto in cache memory as
+     * not link to datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateObservedProperty() throws Exception {
         // given
@@ -40,6 +49,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create observed with missing field
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateObservedPropertyMissingField() throws Exception {
         // given
@@ -54,6 +68,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create observed property link to datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastreamLinkObservedProperty() throws Exception {
         // given
@@ -62,10 +81,10 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String ObservedPropertyId = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
-        assertNotNull(observedPropertyUseCase.getInMemoryObservedProperty(ObservedPropertyId));
+        assertNotNull(observedPropertyCache.getDto(ObservedPropertyId));
 
-        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
-                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        ExpandedThing thing = DtoFactory.getExpandedThing("testCreateDatastreamLinkObservedPropertyAlreadyExists",
+                "testThing existing Location", Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         json = getJsonResponseFromPost(thing, "Things", 201);
         String thingId = getIdFromJson(json);
 
@@ -75,7 +94,131 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(observedPropertyUseCase.getInMemoryObservedProperty(ObservedPropertyId));
+        assertNull(observedPropertyCache.getDto(ObservedPropertyId));
 
+    }
+
+    /**
+     * Tests that <code>PUT</code> can be used to update a ObservedPorperty
+     */
+    /*
+     * test simple update observed property that is store in memory cache
+     */
+    @Test
+    public void testUpdateObservedProperty() throws Exception {
+        // given
+        String name = "testUpdateObservedProperty";
+        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
+        UtilsAssert.assertObservedProperty(ObservedProperty, json);
+        String idObservedProperty = getIdFromJson(json);
+        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
+        json = getJsonResponseFromPut(ObservedPropertyUpdate,
+                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+        // then
+        assertEquals(name + "2", observedPropertyCache.getDto(idObservedProperty).name());
+
+    }
+
+    /**
+     * test update observed property that is store in datastream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdateObservedPropertyLinkDatastream() throws Exception {
+        // given
+        String name = "testUpdateObservedPropertyLinkDatastream";
+        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
+        String ObservedPropertyId = getIdFromJson(json);
+        UtilsAssert.assertObservedProperty(ObservedProperty, json);
+        assertNotNull(observedPropertyCache.getDto(ObservedPropertyId));
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(ObservedPropertyId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        String idDatastream = getIdFromJson(json);
+        ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
+                name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
+        UtilsAssert.assertDatastream(expectedDatastream, json, true);
+        assertNull(observedPropertyCache.getDto(ObservedPropertyId));
+        JsonNode observedPropertyNode = json.get("ObservedProperty");
+        String idObservedProperty = getIdFromJson(observedPropertyNode);
+        // when
+        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
+        json = getJsonResponseFromPut(ObservedPropertyUpdate,
+                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + "2", UtilDto.getResourceField(service, "observedPropertyName", String.class));
+    }
+
+    /**
+     * Tests that <code>PATCH</code> can be used to update a ObservedPorperty
+     */
+    /**
+     * test patch observed property that is store in memory cache
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdatePatchObservedProperty() throws Exception {
+        // given
+        String name = "testUpdateObservedProperty";
+        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
+        UtilsAssert.assertObservedProperty(ObservedProperty, json);
+        String idObservedProperty = getIdFromJson(json);
+        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
+        json = getJsonResponseFromPatch(ObservedPropertyUpdate,
+                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+        // then
+        assertEquals("test", observedPropertyCache.getDto(idObservedProperty).definition());
+
+    }
+
+    /**
+     * test patch observed property that is link to a datastream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdatePatchObservedPropertyLinkDatastream() throws Exception {
+        // given
+        String name = "testUpdateObservedPropertyLinkDatastream";
+        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
+        String ObservedPropertyId = getIdFromJson(json);
+        UtilsAssert.assertObservedProperty(ObservedProperty, json);
+        assertNotNull(observedPropertyCache.getDto(ObservedPropertyId));
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(ObservedPropertyId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        String idDatastream = getIdFromJson(json);
+        ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
+                name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
+        UtilsAssert.assertDatastream(expectedDatastream, json, true);
+        assertNull(observedPropertyCache.getDto(ObservedPropertyId));
+        JsonNode observedPropertyNode = json.get("ObservedProperty");
+        String idObservedProperty = getIdFromJson(observedPropertyNode);
+        // when
+        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
+        json = getJsonResponseFromPatch(ObservedPropertyUpdate,
+                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals("test", UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
     }
 }

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.StandardCharsets;
@@ -33,12 +34,12 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
-import org.eclipse.sensinact.northbound.security.api.UserInfo;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservedPropertiesExtraUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -61,6 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
@@ -76,43 +78,62 @@ import jakarta.ws.rs.ext.Providers;
         @Property(key = "test.class", source = ValueSource.TestClass) })
 public class AbstractIntegrationTest {
 
-    private static final UserInfo USER = UserInfo.ANONYMOUS;
     static final HttpClient client = HttpClient.newHttpClient();
     protected static final ObjectMapper mapper = new ObjectMapper();
 
     @Path("test")
     public static class TestTypeExfiltrator {
-        public FeatureOfInterestExtraUseCase foiUseCase;
-        public ObservedPropertiesExtraUseCase observedPropertyUseCase;
-        public SensorsExtraUseCase sensorUseCase;
+        public IDtoMemoryCache<FeatureOfInterest> foiCache;
+        public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
+        public IDtoMemoryCache<ExpandedSensor> sensorCache;
+        public IAccessServiceUseCase serviceUseCase;
+        public SensiNactSession session;
 
+        @SuppressWarnings("unchecked")
         @GET
         public void exfiltrate(@Context Providers providers) {
+            ContextResolver<SensiNactSession> sessionResolver = providers.getContextResolver(SensiNactSession.class,
+                    MediaType.WILDCARD_TYPE);
+            session = sessionResolver != null ? sessionResolver.getContext(null) : null;
+            ContextResolver<IAccessServiceUseCase> serviceUseCaseResolver = providers
+                    .getContextResolver(IAccessServiceUseCase.class, MediaType.WILDCARD_TYPE);
+
+            serviceUseCase = serviceUseCaseResolver != null
+                    ? serviceUseCaseResolver.getContext(IAccessServiceUseCase.class)
+                    : null;
+
             @SuppressWarnings("rawtypes")
-            ContextResolver<IExtraUseCase> resolver = providers.getContextResolver(IExtraUseCase.class, MediaType.WILDCARD_TYPE);
-            sensorUseCase = (SensorsExtraUseCase) resolver.getContext(SensorsExtraUseCase.class);
-            observedPropertyUseCase = (ObservedPropertiesExtraUseCase) resolver.getContext(ObservedPropertiesExtraUseCase.class);
-            foiUseCase = (FeatureOfInterestExtraUseCase) resolver.getContext(FeatureOfInterestExtraUseCase.class);
+            ContextResolver<IDtoMemoryCache> resolverCache = providers.getContextResolver(IDtoMemoryCache.class,
+                    MediaType.WILDCARD_TYPE);
+            sensorCache = resolverCache != null ? resolverCache.getContext(ExpandedSensor.class) : null;
+            observedPropertyCache = resolverCache != null ? resolverCache.getContext(ExpandedObservedProperty.class)
+                    : null;
+            foiCache = resolverCache != null ? resolverCache.getContext(FeatureOfInterest.class) : null;
+
         }
     }
 
     @BeforeEach
     void setupUseCases(@InjectBundleContext BundleContext ctx) throws IOException, InterruptedException {
         TestTypeExfiltrator exfiltrator = new TestTypeExfiltrator();
-        ctx.registerService(TestTypeExfiltrator.class, exfiltrator,
-                new Hashtable<>(Map.of("osgi.jakartars.resource", true,
-                        "osgi.jakartars.application.select", "(osgi.jakartars.name=sensorthings)")));
+        ctx.registerService(TestTypeExfiltrator.class, exfiltrator, new Hashtable<>(Map.of("osgi.jakartars.resource",
+                true, "osgi.jakartars.application.select", "(osgi.jakartars.name=sensorthings)")));
 
         boolean success = false;
         HttpResponse<String> result;
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 20; i++) {
             result = queryGet("http://localhost:8185/test");
-            if(result.statusCode() == 204) {
-                this.sensorUseCase = exfiltrator.sensorUseCase;
-                this.observedPropertyUseCase = exfiltrator.observedPropertyUseCase;
-                this.foiUseCase = exfiltrator.foiUseCase;
-                success = true;
-                break;
+            if (result.statusCode() == 204) {
+                this.sensorCache = exfiltrator.sensorCache;
+                this.observedPropertyCache = exfiltrator.observedPropertyCache;
+                this.foiCache = exfiltrator.foiCache;
+                this.serviceUseCase = exfiltrator.serviceUseCase;
+                this.session = exfiltrator.session;
+                if (this.serviceUseCase != null && this.foiCache != null && this.observedPropertyCache != null
+                        && this.sensorCache != null && this.session != null) {
+                    success = true;
+                    break;
+                }
             } else {
                 Thread.sleep(250);
             }
@@ -120,14 +141,44 @@ public class AbstractIntegrationTest {
         assertTrue(success, "Unable to get the necessary providers");
     }
 
-    protected JsonNode getJsonResponseFromGet(String url) throws IOException, InterruptedException {
+    protected JsonNode getJsonResponseFromGet(String url, int expectedStatus) throws IOException, InterruptedException {
         HttpResponse<String> response = queryGet(url);
-        return mapper.readTree(response.body());
+        // Then
+        assertEquals(expectedStatus, response.statusCode());
+        if (response.statusCode() < 400) {
+            return mapper.readTree(response.body());
+
+        }
+        return null;
     }
 
-    protected JsonNode getJsonResponseFromPost(Id dto, String SubUrl, int expectedStatus)
+    protected JsonNode getJsonResponseFromPost(Object dto, String SubUrl, int expectedStatus)
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPost(SubUrl, dto);
+        // Then
+        assertEquals(expectedStatus, response.statusCode());
+        if (response.statusCode() < 400) {
+            return mapper.readTree(response.body());
+
+        }
+        return null;
+    }
+
+    protected JsonNode getJsonResponseFromPut(Object dto, String SubUrl, int expectedStatus)
+            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+        HttpResponse<String> response = queryPut(SubUrl, dto);
+        // Then
+        assertEquals(expectedStatus, response.statusCode());
+        if (response.statusCode() < 400) {
+            return mapper.readTree(response.body());
+
+        }
+        return null;
+    }
+
+    protected JsonNode getJsonResponseFromPatch(Object dto, String SubUrl, int expectedStatus)
+            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+        HttpResponse<String> response = queryPatch(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode());
         if (response.statusCode() < 400) {
@@ -142,30 +193,51 @@ public class AbstractIntegrationTest {
 
     @InjectService
     protected JakartarsServiceRuntime jakartarsRuntime;
+    public IAccessServiceUseCase serviceUseCase;
 
-    protected SensorsExtraUseCase sensorUseCase;
-
-    protected ObservedPropertiesExtraUseCase observedPropertyUseCase;
-
-    protected FeatureOfInterestExtraUseCase foiUseCase;
+    public IDtoMemoryCache<FeatureOfInterest> foiCache;
+    public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
+    public IDtoMemoryCache<ExpandedSensor> sensorCache;
+    public SensiNactSession session;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {
         // Normalize URI
         final URI targetUri;
-        if (path.contains("://")) {
-            targetUri = URI.create(path);
-        } else if (path.startsWith("/")) {
-            targetUri = URI.create("http://localhost:8185/v1.1" + path);
-        } else {
-            targetUri = URI.create("http://localhost:8185/v1.1/" + path);
-        }
+        targetUri = getTargetUri(path);
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
     }
 
-    public HttpResponse<String> queryPost(final String path, Id dto) throws IOException, InterruptedException {
+    public HttpResponse<String> queryPost(final String path, Object dto) throws IOException, InterruptedException {
         // Normalize URI
+        final URI targetUri;
+        targetUri = getTargetUri(path);
+        String body = getRequestBody(dto);
+
+        final HttpRequest req = getHttpBuilder(targetUri).POST(HttpRequest.BodyPublishers.ofString(body)).build();
+        return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+    }
+
+    public HttpResponse<String> queryPatch(final String path, Object dto) throws IOException, InterruptedException {
+        // Normalize URI
+        final URI targetUri = getTargetUri(path);
+        String body = getRequestBody(dto);
+
+        final HttpRequest req = getHttpBuilder(targetUri)
+                .method(HttpMethod.PATCH, HttpRequest.BodyPublishers.ofString(body)).build();
+        return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+    }
+
+    private String getRequestBody(Object dto) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        String body = mapper.writeValueAsString(dto);
+        return body;
+    }
+
+    private URI getTargetUri(final String path) {
         final URI targetUri;
         if (path.contains("://")) {
             targetUri = URI.create(path);
@@ -174,33 +246,21 @@ public class AbstractIntegrationTest {
         } else {
             targetUri = URI.create("http://localhost:8185/v1.1/" + path);
         }
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        return targetUri;
+    }
 
-        String body = mapper.writeValueAsString(dto);
+    public HttpResponse<String> queryPut(final String path, Object dto) throws IOException, InterruptedException {
+        // Normalize URI
+        final URI targetUri;
+        targetUri = getTargetUri(path);
+        String body = getRequestBody(dto);
 
-        final HttpRequest req = HttpRequest.newBuilder(targetUri).uri(targetUri)
-                .header(CONTENT_TYPE, "application/json").POST(HttpRequest.BodyPublishers.ofString(body)).build();
+        final HttpRequest req = getHttpBuilder(targetUri).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
     }
 
-    public HttpResponse<String> queryPut(final String path, String id, Id dto)
-            throws IOException, InterruptedException {
-        // Normalize URI
-        final URI targetUri;
-        if (path.contains("://")) {
-            targetUri = URI.create(path + "/" + id);
-        } else if (path.startsWith("/")) {
-            targetUri = URI.create("http://localhost:8185/v1.1" + path);
-        } else {
-            targetUri = URI.create("http://localhost:8185/v1.1/" + path);
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        String body = mapper.writeValueAsString(dto);
-
-        final HttpRequest req = HttpRequest.newBuilder(targetUri).uri(targetUri)
-                .header(CONTENT_TYPE, "application/json").PUT(HttpRequest.BodyPublishers.ofString(body)).build();
-        return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+    private Builder getHttpBuilder(final URI targetUri) {
+        return HttpRequest.newBuilder(targetUri).uri(targetUri).header(CONTENT_TYPE, "application/json");
     }
 
     public static String getIdFromJson(JsonNode node) {

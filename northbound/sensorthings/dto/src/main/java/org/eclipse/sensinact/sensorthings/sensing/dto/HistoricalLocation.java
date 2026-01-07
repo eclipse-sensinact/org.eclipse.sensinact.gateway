@@ -17,8 +17,7 @@ import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record HistoricalLocation(String selfLink, Object id,
-        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant time,
+public record HistoricalLocation(String selfLink, Object id, @JsonFormat(shape = JsonFormat.Shape.STRING) Instant time,
         @JsonProperty("Locations@iot.navigationLink") String locationsLink,
-        @JsonProperty("Thing@iot.navigationLink") String thingLink) implements Id {
+        @JsonProperty("Thing@iot.navigationLink") String thingLink) implements IdSelf {
 }

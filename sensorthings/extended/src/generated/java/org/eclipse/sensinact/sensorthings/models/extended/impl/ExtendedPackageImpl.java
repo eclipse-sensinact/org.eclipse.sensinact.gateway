@@ -26,6 +26,7 @@ import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.sensorthings.models.extended.DataStreamService;
 import org.eclipse.sensinact.sensorthings.models.extended.ExtendedFactory;
 import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
+import org.eclipse.sensinact.sensorthings.models.extended.SensorThingDatastream;
 import org.eclipse.sensinact.sensorthings.models.extended.SensorThingDevice;
 import org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocation;
 import org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService;
@@ -72,6 +73,13 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	private EClass sensorThingLocationEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass sensorThingDatastreamEClass = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -213,7 +221,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingLocationService_SensorThingId() {
+	public EAttribute getSensorThingLocationService_Id() {
 		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(4);
 	}
 
@@ -233,7 +241,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_SensorThingId() {
+	public EAttribute getDataStreamService_Id() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(0);
 	}
 
@@ -413,7 +421,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ObservationResultTime() {
+	public EAttribute getDataStreamService_LastObservation() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(18);
 	}
 
@@ -423,118 +431,8 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ObservationResult() {
+	public EAttribute getDataStreamService_ThingId() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(19);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationPhenomenonTime() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(20);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationFoiName() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(21);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationFoiEncodingType() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(22);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationFoiId() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(23);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationId() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(24);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationResultQuality() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(25);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationValidTime() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(26);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationParameters() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(27);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationProperties() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(28);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationFoiFeature() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(29);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_ObservationFoiDescription() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(30);
 	}
 
 	/**
@@ -553,18 +451,8 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EReference getSensorThingService_DataStreams() {
-		return (EReference)sensorThingServiceEClass.getEStructuralFeatures().get(0);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public EAttribute getSensorThingService_Name() {
-		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(1);
+		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(0);
 	}
 
 	/**
@@ -574,7 +462,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 */
 	@Override
 	public EAttribute getSensorThingService_Description() {
-		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(2);
+		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(1);
 	}
 
 	/**
@@ -584,7 +472,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 */
 	@Override
 	public EAttribute getSensorThingService_Properties() {
-		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(3);
+		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(2);
 	}
 
 	/**
@@ -594,7 +482,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 */
 	@Override
 	public EAttribute getSensorThingService_Id() {
-		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(4);
+		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(3);
 	}
 
 	/**
@@ -604,6 +492,16 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 */
 	@Override
 	public EAttribute getSensorThingService_LocationIds() {
+		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(4);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getSensorThingService_DatastreamIds() {
 		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(5);
 	}
 
@@ -623,8 +521,28 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EReference getSensorThingLocation_Locations() {
+	public EReference getSensorThingLocation_Location() {
 		return (EReference)sensorThingLocationEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EClass getSensorThingDatastream() {
+		return sensorThingDatastreamEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EReference getSensorThingDatastream_Datastream() {
+		return (EReference)sensorThingDatastreamEClass.getEStructuralFeatures().get(0);
 	}
 
 	/**
@@ -664,10 +582,10 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__DESCRIPTION);
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE);
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__LOCATION);
-		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__SENSOR_THING_ID);
+		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__ID);
 
 		dataStreamServiceEClass = createEClass(DATA_STREAM_SERVICE);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__SENSOR_THING_ID);
+		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__ID);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__NAME);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__DESCRIPTION);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__TIMESTAMP);
@@ -685,30 +603,22 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__SENSOR_ID);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__SENSOR_PROPERTIES);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_RESULT_TIME);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_RESULT);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_PHENOMENON_TIME);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_FOI_NAME);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_FOI_ENCODING_TYPE);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_FOI_ID);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_ID);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_RESULT_QUALITY);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_VALID_TIME);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_PARAMETERS);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_PROPERTIES);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_FOI_FEATURE);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_FOI_DESCRIPTION);
+		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__LAST_OBSERVATION);
+		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__THING_ID);
 
 		sensorThingServiceEClass = createEClass(SENSOR_THING_SERVICE);
-		createEReference(sensorThingServiceEClass, SENSOR_THING_SERVICE__DATA_STREAMS);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__NAME);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__DESCRIPTION);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__PROPERTIES);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__ID);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__LOCATION_IDS);
+		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__DATASTREAM_IDS);
 
 		sensorThingLocationEClass = createEClass(SENSOR_THING_LOCATION);
-		createEReference(sensorThingLocationEClass, SENSOR_THING_LOCATION__LOCATIONS);
+		createEReference(sensorThingLocationEClass, SENSOR_THING_LOCATION__LOCATION);
+
+		sensorThingDatastreamEClass = createEClass(SENSOR_THING_DATASTREAM);
+		createEReference(sensorThingDatastreamEClass, SENSOR_THING_DATASTREAM__DATASTREAM);
 	}
 
 	/**
@@ -747,6 +657,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		dataStreamServiceEClass.getESuperTypes().add(theProviderPackage.getService());
 		sensorThingServiceEClass.getESuperTypes().add(theProviderPackage.getService());
 		sensorThingLocationEClass.getESuperTypes().add(theProviderPackage.getDynamicProvider());
+		sensorThingDatastreamEClass.getESuperTypes().add(theProviderPackage.getDynamicProvider());
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(sensorThingDeviceEClass, SensorThingDevice.class, "SensorThingDevice", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -757,10 +668,10 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		initEAttribute(getSensorThingLocationService_Description(), ecorePackage.getEString(), "description", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingLocationService_EncodingType(), ecorePackage.getEString(), "encodingType", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingLocationService_Location(), theProviderPackage.getEGeoJsonObject(), "location", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getSensorThingLocationService_SensorThingId(), ecorePackage.getEString(), "sensorThingId", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getSensorThingLocationService_Id(), ecorePackage.getEString(), "id", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(dataStreamServiceEClass, DataStreamService.class, "DataStreamService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEAttribute(getDataStreamService_SensorThingId(), ecorePackage.getEString(), "sensorThingId", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getDataStreamService_Id(), ecorePackage.getEString(), "id", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_Name(), ecorePackage.getEString(), "name", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_Description(), ecorePackage.getEString(), "description", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_Timestamp(), theProviderPackage.getEInstant(), "timestamp", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -788,40 +699,22 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		g2 = createEGenericType();
 		g1.getETypeArguments().add(g2);
 		initEAttribute(getDataStreamService_ObservedPropertyProperties(), g1, "observedPropertyProperties", null, 0, 1, DataStreamService.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationResultTime(), theProviderPackage.getEInstant(), "observationResultTime", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationResult(), ecorePackage.getEJavaObject(), "observationResult", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationPhenomenonTime(), theProviderPackage.getEInstant(), "observationPhenomenonTime", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationFoiName(), ecorePackage.getEString(), "observationFoiName", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationFoiEncodingType(), ecorePackage.getEString(), "observationFoiEncodingType", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationFoiId(), ecorePackage.getEString(), "observationFoiId", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationId(), ecorePackage.getEString(), "observationId", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationResultQuality(), ecorePackage.getEString(), "observationResultQuality", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationValidTime(), ecorePackage.getEJavaObject(), "observationValidTime", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		g1 = createEGenericType(ecorePackage.getEMap());
-		g2 = createEGenericType();
-		g1.getETypeArguments().add(g2);
-		g2 = createEGenericType();
-		g1.getETypeArguments().add(g2);
-		initEAttribute(getDataStreamService_ObservationParameters(), g1, "observationParameters", null, 0, 1, DataStreamService.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		g1 = createEGenericType(ecorePackage.getEMap());
-		g2 = createEGenericType();
-		g1.getETypeArguments().add(g2);
-		g2 = createEGenericType();
-		g1.getETypeArguments().add(g2);
-		initEAttribute(getDataStreamService_ObservationProperties(), g1, "observationProperties", null, 0, 1, DataStreamService.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationFoiFeature(), theProviderPackage.getEGeoJsonObject(), "observationFoiFeature", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_ObservationFoiDescription(), ecorePackage.getEString(), "observationFoiDescription", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getDataStreamService_LastObservation(), ecorePackage.getEJavaObject(), "lastObservation", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getDataStreamService_ThingId(), ecorePackage.getEString(), "thingId", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingServiceEClass, SensorThingService.class, "SensorThingService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEReference(getSensorThingService_DataStreams(), this.getDataStreamService(), null, "dataStreams", null, 0, -1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_Name(), ecorePackage.getEString(), "name", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_Description(), ecorePackage.getEString(), "description", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_Properties(), ecorePackage.getEJavaObject(), "properties", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_Id(), ecorePackage.getEString(), "id", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_LocationIds(), ecorePackage.getEJavaObject(), "locationIds", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getSensorThingService_DatastreamIds(), ecorePackage.getEJavaObject(), "datastreamIds", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingLocationEClass, SensorThingLocation.class, "SensorThingLocation", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEReference(getSensorThingLocation_Locations(), this.getSensorThingLocationService(), null, "locations", null, 0, 1, SensorThingLocation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getSensorThingLocation_Location(), this.getSensorThingLocationService(), null, "location", null, 0, 1, SensorThingLocation.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(sensorThingDatastreamEClass, SensorThingDatastream.class, "SensorThingDatastream", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEReference(getSensorThingDatastream_Datastream(), this.getDataStreamService(), null, "datastream", null, 0, 1, SensorThingDatastream.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);

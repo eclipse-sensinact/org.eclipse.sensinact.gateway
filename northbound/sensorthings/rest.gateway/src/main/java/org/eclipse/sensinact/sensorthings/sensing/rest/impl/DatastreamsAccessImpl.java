@@ -41,12 +41,19 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.DatastreamsUpdate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,7 +63,8 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-public class DatastreamsAccessImpl extends AbstractAccess implements DatastreamsAccess, DatastreamsCreate {
+public class DatastreamsAccessImpl extends AbstractAccess
+        implements DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
 
     @Override
     public Datastream getDatastream(String id) {
@@ -189,18 +197,76 @@ public class DatastreamsAccessImpl extends AbstractAccess implements Datastreams
 
     @Override
     public Response createDatastreamsObservation(String id, ExpandedObservation observation) {
-        // check if datastream exists
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, observation, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), observation, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        String datastreamLink = DtoMapper.getLink(uriInfo, DtoMapper.VERSION, "/Datastreams({id})", id);
-
+        ExpandedObservation lastObservation = (ExpandedObservation) UtilDto.getResourceField(snapshot,
+                "lastObservation", Object.class);
         Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot, datastreamLink);
+                getExpansions(), criterion, snapshot, lastObservation);
         if (createDto == null) {
             throw new BadRequestException("fail to create observation");
         }
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
         return Response.created(createdUri).entity(createDto).build();
+    }
+
+    @Override
+    public Response createObservationRef(String id, RefId observation) {
+
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), observation, id,
+                ExpandedDataStream.class, ExpandedObservation.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateDatastreams(String id, ExpandedDataStream dataStream) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, dataStream);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateDatastreamsObservation(String id, String id2, Observation observation) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, observation, id);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateDatastreamThingRef(String id, RefId thing) {
+
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), thing, id,
+                ExpandedDataStream.class, ExpandedThing.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateDatastreamSensorRef(String id, RefId sensor) {
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), sensor, id,
+                ExpandedDataStream.class, ExpandedSensor.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateDatastreamObservedPropertyRef(String id, RefId observedProperty) {
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), observedProperty,
+                id, ExpandedDataStream.class, ExpandedObservedProperty.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response patchDatastreams(String id, ExpandedDataStream dataStream) {
+        return updateDatastreams(id, dataStream);
+    }
+
+    @Override
+    public Response patchDatastreamsObservation(String id, String id2, Observation observation) {
+        return updateDatastreamsObservation(id, id2, observation);
     }
 }
