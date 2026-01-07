@@ -140,16 +140,15 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
         } else {
             providers = idThings.stream().map(idThing -> twin.getProvider(idThing));
         }
-        Stream<SensinactResource> resources = providers.map(p -> {
-            return p.getResource(UtilDto.SERVICE_THING, "locationIds");
-        }).filter(r -> {
-            try {
-                return r != null && (locationId == null
-                        || r.getMultiValue(List.class).getValue().getValue().contains(locationId));
-            } catch (InvocationTargetException | InterruptedException e) {
-                return false;
-            }
-        });
+        Stream<SensinactResource> resources = providers.map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds"))
+                .filter(r -> {
+                    try {
+                        return r != null && (locationId == null
+                                || r.getMultiValue(List.class).getValue().getValue().contains(locationId));
+                    } catch (InvocationTargetException | InterruptedException e) {
+                        return false;
+                    }
+                });
         resources.forEach(r -> {
             try {
                 if (locationId == null) {

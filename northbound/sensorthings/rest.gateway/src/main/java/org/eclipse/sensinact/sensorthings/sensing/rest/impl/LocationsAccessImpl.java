@@ -174,7 +174,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public Response deleteThingRef(String id, String id2) {
-        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedLocation.class,
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id2, id, ExpandedLocation.class,
                 ExpandedThing.class);
 
         return Response.noContent().build();
