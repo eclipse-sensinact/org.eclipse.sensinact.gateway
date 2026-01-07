@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static java.util.stream.Collectors.toList;
@@ -52,6 +52,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.DatastreamsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.DatastreamsUpdate;
 
@@ -59,12 +60,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 public class DatastreamsAccessImpl extends AbstractAccess
-        implements DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
+        implements DatastreamsDelete, DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
 
     @Override
     public Datastream getDatastream(String id) {
@@ -202,6 +204,9 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         ExpandedObservation lastObservation = (ExpandedObservation) UtilDto.getResourceField(snapshot,
                 "lastObservation", Object.class);
+        if (lastObservation == null) {
+            throw new WebApplicationException("fail to create observation", 500);
+        }
         Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), criterion, snapshot, lastObservation);
         if (createDto == null) {
@@ -268,5 +273,33 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public Response patchDatastreamsObservation(String id, String id2, Observation observation) {
         return updateDatastreamsObservation(id, id2, observation);
+    }
+
+    @Override
+    public Response deleteDatastream(String id) {
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteDatastreamSensorRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class,
+                ExpandedSensor.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteDatastreamObservedPropertyRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class,
+                ExpandedObservedProperty.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteDatastreamObservationsRef(String id) {
+        return Response.status(409).build();
     }
 }

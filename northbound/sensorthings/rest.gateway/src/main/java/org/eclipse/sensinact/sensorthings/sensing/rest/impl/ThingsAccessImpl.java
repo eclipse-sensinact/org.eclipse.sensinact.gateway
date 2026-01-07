@@ -44,13 +44,14 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ThingsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ThingsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate, ThingsUpdate {
+public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, ThingsAccess, ThingsCreate, ThingsUpdate {
 
     @Override
     public Thing getThing(String id) {
@@ -353,6 +354,37 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
     @Override
     public Response patchThing(String id, ExpandedThing thing) {
         return updateThing(id, thing);
+    }
+
+    @Override
+    public Response deleteThing(String id) {
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedThing.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteDatastreamRef(String id, String id2) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedThing.class,
+                ExpandedDataStream.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteLocationRef(String id, String id2) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedThing.class,
+                ExpandedLocation.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteLocationsRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedThing.class,
+                ExpandedLocation.class);
+
+        return Response.noContent().build();
     }
 
 }

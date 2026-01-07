@@ -33,6 +33,7 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
@@ -162,7 +163,7 @@ public class DtoToModelMapper {
             throw new BadRequestException("encodingType not found in  Payload");
         }
         if (dto.feature() == null) {
-            throw new BadRequestException("feature ot found in  Payload");
+            throw new BadRequestException("feature not found in  Payload");
         }
 
     }
@@ -249,29 +250,32 @@ public class DtoToModelMapper {
         return String.valueOf(object).replaceAll("[^0-9a-zA-Z\\.\\-_]", "_");
     }
 
-    public static SensorThingsUpdate toFeatureOfInterestUpdate(String providerId, String datastreamId,
-            FeatureOfInterest featureOfInterest) {
-        return null;
-    }
-
     public static SensorThingsUpdate toLocationUpdate(String providerId, ExpandedLocation location) {
         return new LocationUpdate(providerId, providerId, location.name(), location.description(),
                 location.encodingType(), location.location());
     }
 
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, ExpandedSensor sensor,
+    public static SensorThingsUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds, ExpandedSensor sensor,
             ExpandedObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
-            FeatureOfInterest featureOfInterest) {
-        return toDatastreamUpdate(providerId, null, null, sensor, observedProperty, unit, lastObservation,
-                featureOfInterest);
+            ExpandedObservation lastObservationReceived, FeatureOfInterest featureOfInterest) {
+        return toDatastreamUpdate(providerId, null, ds, sensor, observedProperty, unit, lastObservation,
+                lastObservationReceived, featureOfInterest);
     }
 
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, ExpandedDataStream ds,
             ExpandedSensor sensor, ExpandedObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, FeatureOfInterest featureOfInterest) {
+        return toDatastreamUpdate(providerId, thingId, ds, sensor, observedProperty, unit, lastObservation,
+                lastObservation, featureOfInterest);
+    }
 
-        Instant timestamp = lastObservation != null && lastObservation.phenomenonTime() != null
-                ? lastObservation.phenomenonTime()
+    public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, ExpandedDataStream ds,
+            ExpandedSensor sensor, ExpandedObservedProperty observedProperty, UnitOfMeasurement unit,
+            ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
+            FeatureOfInterest featureOfInterest) {
+
+        Instant timestamp = lastObservationReceived != null && lastObservationReceived.phenomenonTime() != null
+                ? lastObservationReceived.phenomenonTime()
                 : Instant.now();
 
         String name = ds != null ? ds.name() : null;
@@ -302,15 +306,34 @@ public class DtoToModelMapper {
         String unitSymbol = unit != null ? unit.symbol() : null;
         String unitDefinition = unit != null ? unit.definition() : null;
         // last observation
-        ExpandedObservation obs = null;
-        if (lastObservation != null) {
-            String observationId = lastObservation.id() != null ? (String) lastObservation.id()
-                    : String.format("%s-%d", lastObservation.result().toString(),
+        ExpandedObservation obs = lastObservationReceived;
+        if (lastObservationReceived != null && lastObservation != null) {
+
+            String observationId = lastObservationReceived.id() != null ? (String) lastObservationReceived.id()
+                    : String.format("%s-%d", lastObservationReceived.result().toString(),
                             String.valueOf(Instant.now().toEpochMilli()));
-            obs = new ExpandedObservation(null, observationId, lastObservation.phenomenonTime(),
-                    lastObservation.resultTime(), lastObservation.result(), lastObservation.resultQuality(),
-                    lastObservation.validTime(), lastObservation.parameters(), lastObservation.properties(), null, null,
-                    null, featureOfInterest);
+            Instant phenomenonTime = lastObservationReceived.phenomenonTime() != null
+                    ? lastObservationReceived.phenomenonTime()
+                    : lastObservation.phenomenonTime();
+            Instant resultTime = lastObservationReceived.resultTime() != null ? lastObservationReceived.resultTime()
+                    : lastObservation.resultTime();
+            Object result = lastObservationReceived.result() != null ? lastObservationReceived.result()
+                    : lastObservation.result();
+            Object resultQuality = lastObservationReceived.resultQuality() != null
+                    ? lastObservationReceived.resultQuality()
+                    : lastObservation.resultQuality();
+            TimeInterval validTime = lastObservationReceived.validTime() != null ? lastObservationReceived.validTime()
+                    : lastObservation.validTime();
+            Map<String, Object> parameters = lastObservationReceived.parameters() != null
+                    ? lastObservationReceived.parameters()
+                    : lastObservation.parameters();
+            Map<String, Object> properties = lastObservationReceived.properties() != null
+                    ? lastObservationReceived.properties()
+                    : lastObservation.properties();
+
+            obs = new ExpandedObservation(null, observationId, phenomenonTime, resultTime, result, resultQuality,
+                    validTime, parameters, properties, null, null, null, featureOfInterest);
+            DtoToModelMapper.checkRequireField(obs);
         }
         // --- Build DatastreamUpdate ---
         DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description, timestamp,
@@ -358,10 +381,10 @@ public class DtoToModelMapper {
                 String idDatastream = getDatastreamid(ds);
                 existingDatastreamIds.add(idDatastream);
                 if (ds.observations() != null && ds.observations().size() > 0) {
-                    listUpdate.addAll(ds.observations().stream()
-                            .map(obs -> toDatastreamUpdate(idDatastream, providerIdThing, ds, ds.sensor(),
-                                    ds.observedProperty(), ds.unitOfMeasurement(), obs, obs.featureOfInterest()))
-                            .toList());
+                    listUpdate.addAll(ds.observations().stream().map(obs -> {
+                        return toDatastreamUpdate(idDatastream, providerIdThing, ds, ds.sensor(), ds.observedProperty(),
+                                ds.unitOfMeasurement(), obs, obs.featureOfInterest());
+                    }).toList());
                 } else {
                     listUpdate.add(toDatastreamUpdate(idDatastream, providerIdThing, ds, ds.sensor(),
                             ds.observedProperty(), ds.unitOfMeasurement(), null, null));

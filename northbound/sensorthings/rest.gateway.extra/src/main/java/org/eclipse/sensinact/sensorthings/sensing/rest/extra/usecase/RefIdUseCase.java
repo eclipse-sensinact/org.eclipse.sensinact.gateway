@@ -12,11 +12,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -31,8 +39,11 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.ServiceSnapshotMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -46,12 +57,18 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     private final IAccessProviderUseCase providerUseCase;
     private final IAccessServiceUseCase serviceUseCase;
     private final DatastreamsExtraUseCase datastreamUseCase;
+    private final ThingsExtraUseCase thingUseCase;
 
     private final IDtoMemoryCache<ExpandedSensor> sensorCaches;
     private final IDtoMemoryCache<FeatureOfInterest> foiCaches;
     private final IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCaches;
     private final LocationsExtraUseCase locationUsecase;
     private final ObservationsExtraUseCase observationsExtraUseCase;
+    private final ObservedPropertiesExtraUseCase observedPropertyExtraUseCase;
+    private final SensorsExtraUseCase sensorExtraUseCase;
+    private final FeatureOfInterestExtraUseCase foiExtraUseCase;
+
+    private final GatewayThread gatewayThread;
 
     @FunctionalInterface
     interface RefHandler {
@@ -63,16 +80,14 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     private final Map<RefKey, RefHandler> deleteHandlers = Map.of(
             new RefKey(ExpandedDataStream.class, ExpandedThing.class), this::deleteDatastreamThingRef,
-
-            new RefKey(ExpandedObservation.class, FeatureOfInterest.class),
-            this::deleteObservationFeratureOfInterestRef,
+            new RefKey(ExpandedLocation.class, ExpandedThing.class), this::deleteLocationThingRef,
 
             new RefKey(ExpandedThing.class, ExpandedLocation.class), this::deleteThingLocationRef,
-
+            new RefKey(ExpandedDataStream.class, ExpandedSensor.class), this::deleteDatastreamSensor,
             new RefKey(ExpandedDataStream.class, ExpandedObservedProperty.class),
-            this::deleteDatastreamObservedPropertyRef,
+            this::deleteDatastreamObservedPropertyRef, new RefKey(ExpandedObservation.class, FeatureOfInterest.class),
+            this::deleteObservationFeatureOfInterest,
 
-            new RefKey(ExpandedDataStream.class, ExpandedSensor.class), this::deleteDatastreamSensorRef,
             new RefKey(ExpandedDataStream.class, ExpandedObservation.class), this::deleteDatastreamObservationRef);
 
     private final Map<RefKey, RefHandler> updateHandlers = new HashMap<RefIdUseCase.RefKey, RefIdUseCase.RefHandler>();
@@ -87,9 +102,15 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
         sensorCaches = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
         foiCaches = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
+        foiExtraUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
+
         observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
         locationUsecase = resolveUseCase(providers, LocationsExtraUseCase.class);
         observationsExtraUseCase = resolveUseCase(providers, ObservationsExtraUseCase.class);
+        observedPropertyExtraUseCase = resolveUseCase(providers, ObservedPropertiesExtraUseCase.class);
+        sensorExtraUseCase = resolveUseCase(providers, SensorsExtraUseCase.class);
+        gatewayThread = resolve(providers, GatewayThread.class);
+        thingUseCase = resolveUseCase(providers, ThingsExtraUseCase.class);
         initUpdateHandler();
     }
 
@@ -136,23 +157,94 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         return handler.handle(request);
     }
 
-    private ExtraUseCaseResponse<Object> deleteDatastreamSensorRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+    private ExtraUseCaseResponse<Object> deleteThingLocationRef(ExtraUseCaseRequest<RefId> request) {
+        String idThing = request.parentId();
+        String idLocation = request.id(); // can be null
+        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
+        // delete datastream
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                locationUsecase.removeLocationIdsInThings(idLocation, List.of(idThing), twin, pf);
+                return pf.resolved(null);
+            }
+        });
+        IndependentCommands<?> multiCommand = new IndependentCommands<>(list);
+        try {
+            gatewayThread.execute(multiCommand).getValue();
+        } catch (InvocationTargetException | InterruptedException e) {
+            return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), "fail to delete link");
+        }
+        return new ExtraUseCaseResponse<Object>(true, "link deleted");
 
+    }
+
+    private ExtraUseCaseResponse<Object> deleteLocationThingRef(ExtraUseCaseRequest<RefId> request) {
+        String idLocation = request.parentId();
+        String idThing = request.id();
+        return deleteLocationThingsLink(idLocation, idThing);
+
+    }
+
+    private ExtraUseCaseResponse<Object> deleteLocationThingsLink(String idLocation, String idThing) {
+        List<String> idThings = new ArrayList<String>();
+        if (idThing != null) {
+            // delete all thing link
+            idThings.add(idThing);
+        }
+        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
+        // delete datastream
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                locationUsecase.removeLocationIdsInThings(idLocation, idThings, twin, pf);
+                return pf.resolved(null);
+            }
+        });
+        IndependentCommands<?> multiCommand = new IndependentCommands<>(list);
+        try {
+            gatewayThread.execute(multiCommand).getValue();
+        } catch (InvocationTargetException | InterruptedException e) {
+            return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), "fail to delete link");
+        }
+        return new ExtraUseCaseResponse<Object>(true, "link deleted");
     }
 
     private ExtraUseCaseResponse<Object> deleteDatastreamObservedPropertyRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+        String idDatastream = request.parentId();
+        ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream, UtilDto.SERVICE_DATASTREAM);
+        ExpandedObservedProperty obsProp = ServiceSnapshotMapper.toObservedProperty(service);
+        ExtraUseCaseResponse<Object> response = observedPropertyExtraUseCase
+                .delete(new ExtraUseCaseRequest<ExpandedObservedProperty>(request.session(), request.mapper(),
+                        request.uriInfo(), HttpMethod.DELETE, obsProp));
+        return response;
+    }
+
+    private ExtraUseCaseResponse<Object> deleteDatastreamSensor(ExtraUseCaseRequest<RefId> request) {
+        String idDatastream = request.parentId();
+        ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream, UtilDto.SERVICE_DATASTREAM);
+        ExpandedSensor sensor = ServiceSnapshotMapper.toSensor(service);
+        ExtraUseCaseResponse<Object> response = sensorExtraUseCase.delete(new ExtraUseCaseRequest<ExpandedSensor>(
+                request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, sensor));
+        return response;
 
     }
 
-    private ExtraUseCaseResponse<Object> deleteThingLocationRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+    private ExtraUseCaseResponse<Object> deleteObservationFeatureOfInterest(ExtraUseCaseRequest<RefId> request) {
+        String idDatastream = UtilDto.extractFirstIdSegment(request.parentId());
+        ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream, UtilDto.SERVICE_DATASTREAM);
+        ExpandedObservation obs = ServiceSnapshotMapper.toObservation(service);
+        if (obs == null) {
+            throw new NotFoundException();
+        }
+        FeatureOfInterest foi = obs.featureOfInterest();
+        if (foi == null) {
+            throw new NotFoundException();
 
-    }
-
-    private ExtraUseCaseResponse<Object> deleteObservationFeratureOfInterestRef(ExtraUseCaseRequest<RefId> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+        }
+        ExtraUseCaseResponse<Object> response = foiExtraUseCase.delete(new ExtraUseCaseRequest<FeatureOfInterest>(
+                request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, foi));
+        return response;
 
     }
 

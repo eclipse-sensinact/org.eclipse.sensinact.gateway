@@ -78,7 +78,8 @@ public class DtoFactory {
         // Required
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op,
+                List.of(getObservation("test")));
 
     }
 
@@ -88,8 +89,8 @@ public class DtoFactory {
         ExpandedObservedProperty op = new ExpandedObservedProperty(null, obRefId, null, null, null, null, null);
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         ExpandedSensor sensor = getSensor("sensor1");
-
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
+        ExpandedObservation lastObs = getObservation("observation");
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, List.of(lastObs));
 
     }
 
@@ -99,7 +100,8 @@ public class DtoFactory {
         ExpandedObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op,
+                List.of(getObservation("test")));
 
     }
 
@@ -108,7 +110,7 @@ public class DtoFactory {
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         ExpandedSensor sensor = getSensor("test");
         ExpandedObservedProperty op = getObservedProperty("Temperature");
-        return getDatastream(name, descriptikon, uom, "obsType", null, sensor, op, null);
+        return getDatastream(name, descriptikon, uom, "obsType", null, sensor, op, List.of(getObservation("test")));
 
     }
 
@@ -119,7 +121,8 @@ public class DtoFactory {
         ExpandedObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
 
-        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op, null);
+        return getDatastream(name, "Measures temperature", uom, "obsType", thingRefId, sensor, op,
+                List.of(getObservation("test")));
 
     }
 
@@ -174,7 +177,9 @@ public class DtoFactory {
     }
 
     public static ExpandedObservation getObservation(String name) {
-        return getObservationLinkDatastream(name, null, null);
+        FeatureOfInterest foi = new FeatureOfInterest(null, null, name, "test", "test", new Point(-122.4194, 37.7749),
+                null);
+        return getObservationLinkDatastream(name, null, foi);
 
     }
 

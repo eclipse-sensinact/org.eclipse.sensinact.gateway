@@ -15,13 +15,21 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
+
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
@@ -29,16 +37,10 @@ import jakarta.ws.rs.ext.Providers;
 /**
  * UseCase that manage the create, update, delete use case for sensorthing Thing
  */
-public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, ProviderSnapshot> {
-
-    private DataUpdate dataUpdate;
-
-    private IAccessProviderUseCase providerUseCase;
+public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedThing, ProviderSnapshot> {
 
     public ThingsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
-
+        super(providers);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
@@ -60,11 +62,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
             return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "failed to create Thing");
-
-    }
-
-    public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ExpandedThing> request) {
-        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
     }
 
@@ -121,6 +118,33 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedThing, P
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
+    }
+
+    @Override
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
+        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
+        ServiceSnapshot service = serviceUseCase.read(request.session(), request.id(), "thing");
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = (List<String>) UtilDto.getResourceField(service, "datastreamIds", Object.class);
+
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider sp = twin.getProvider(request.id());
+                if (sp != null) {
+                    sp.delete();
+                }
+                datastreamIds.stream().forEach(idDatastream -> {
+                    SensinactProvider spDatastream = twin.getProvider(idDatastream);
+                    if (spDatastream != null) {
+                        spDatastream.delete();
+                    }
+                });
+                return pf.resolved(null);
+            }
+        });
+
+        return list;
     }
 
 }

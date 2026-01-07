@@ -12,19 +12,29 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
+import java.util.stream.Stream;
+
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
@@ -33,15 +43,10 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocation, ServiceSnapshot> {
-
-    private IAccessProviderUseCase providerUseCase;
-
-    private DataUpdate dataUpdate;
+public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ServiceSnapshot> {
 
     public LocationsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
+        super(providers);
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
@@ -67,11 +72,6 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedLocation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
-
-    }
-
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
@@ -91,11 +91,11 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
 
             listThingIds.stream().filter(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
+                ResourceSnapshot resource = provider.getResource(UtilDto.SERVICE_THING, "locationIds");
                 return resource != null && resource.getValue() != null;
             }).map(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-                ResourceSnapshot resource = provider.getResource("thing", "locationIds");
+                ResourceSnapshot resource = provider.getResource(UtilDto.SERVICE_THING, "locationIds");
 
                 @SuppressWarnings("unchecked")
                 List<String> ids = (List<String>) resource.getValue().getValue();
@@ -129,6 +129,62 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedLocat
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
         }
 
+    }
+
+    @SuppressWarnings("unlikely-arg-type")
+    public void removeLocationIdsInThings(String locationId, List<String> idThings, SensinactDigitalTwin twin,
+            PromiseFactory pf) {
+        Stream<? extends SensinactProvider> providers = null;
+        if (idThings == null || idThings.size() == 0) {
+            providers = twin.getProviders(eNS_URI, SENSOR_THING_DEVICE.getName()).stream();
+        } else {
+            providers = idThings.stream().map(idThing -> twin.getProvider(idThing));
+        }
+        Stream<SensinactResource> resources = providers.map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds"))
+                .filter(r -> {
+                    try {
+                        return r != null && (locationId == null
+                                || r.getMultiValue(List.class).getValue().getValue().contains(locationId));
+                    } catch (InvocationTargetException | InterruptedException e) {
+                        return false;
+                    }
+                });
+        resources.forEach(r -> {
+            try {
+                if (locationId == null) {
+                    // if no locationId in parameter we delete all locationIds
+                    r.setValue(List.of()).getValue();
+
+                } else {
+                    List<?> locationIds = r.getMultiValue(List.class).getValue().getValue();
+                    locationIds.remove(locationId);
+                    r.setValue(locationIds).getValue();
+                }
+            } catch (InvocationTargetException | InterruptedException e) {
+                pf.failed(e);
+            }
+        });
+
+    }
+
+    @Override
+    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedLocation> request) {
+        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
+        // delete datastream
+        list.add(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider sp = twin.getProvider(request.id());
+                if (sp != null) {
+                    sp.delete();
+                }
+                removeLocationIdsInThings(request.id(), null, twin, pf);
+                return pf.resolved(null);
+            }
+
+        });
+
+        return list;
     }
 
 }
