@@ -200,14 +200,14 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
                 filter, 0);
     }
 
-    static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
+    public static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
             ICriterion filter, int localResultLimit) {
 
         ResultList<Observation> list = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
                 mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
-        if (list.value().isEmpty() && resourceSnapshot.isSet()) {
+        if (list.value().isEmpty()) {
             list = new ResultList<Observation>(null, null, DtoMapperGet
                     .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
                     .map(List::of).orElse(List.of()));
