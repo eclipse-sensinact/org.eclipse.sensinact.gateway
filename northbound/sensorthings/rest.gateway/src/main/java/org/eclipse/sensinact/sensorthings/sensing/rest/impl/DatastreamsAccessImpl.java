@@ -70,8 +70,8 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getDatastream(String id) {
-        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id), parseFilter(DATASTREAMS));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), validateAndGetProvider(id));
     }
 
     @PaginationLimit(500)
@@ -85,9 +85,17 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Observation getDatastreamObservation(String id, String id2) {
+        String provider = UtilDto.extractFirstIdSegment(id);
+        String providerObs = UtilDto.extractFirstIdSegment(id2);
+        if (!provider.equals(providerObs)) {
+            throw new NotFoundException();
+        }
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        Optional<Observation> o = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), filter, validateAndGetResourceSnapshot(id));
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
+        ServiceSnapshot service = UtilDto.getDatastreamService(providerSnapshot);
+
+        Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), filter, service.getResource("lastObservation"), null);
 
         if (o.isEmpty() || !id2.equals(o.get().id())) {
             throw new NotFoundException();
@@ -102,15 +110,21 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public FeatureOfInterest getDatastreamObservationFeatureOfInterest(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
-        return DtoMapperGet.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        String provider = UtilDto.extractFirstIdSegment(id);
+        String providerFoi = UtilDto.extractFirstIdSegment(id2);
+        if (!providerFoi.equals(provider)) {
+            throw new NotFoundException();
+        }
+        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(FEATURES_OF_INTEREST), validateAndGetProvider(provider));
     }
 
     @Override
     public ObservedProperty getDatastreamObservedProperty(String id) {
-        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
+
+        String provider = UtilDto.extractFirstIdSegment(id);
+        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(provider));
 
         if (!id.equals(o.id())) {
             throw new NotFoundException();
@@ -125,8 +139,10 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Sensor getDatastreamSensor(String id) {
-        Sensor s = DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), validateAndGetResourceSnapshot(id));
+        String provider = UtilDto.extractFirstIdSegment(id);
+
+        Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(SENSORS), validateAndGetProvider(provider));
 
         if (!id.equals(s.id())) {
             throw new NotFoundException();
@@ -141,31 +157,31 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Thing getDatastreamThing(String id) {
-        String provider = extractFirstIdSegment(id);
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), validateAndGetProvider(provider));
+        String thingId = getThingIdFromDatastream(id);
+
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                validateAndGetProvider(thingId));
     }
 
     @Override
     public ResultList<Datastream> getDatastreamThingDatastreams(String id) {
-        String provider = extractFirstIdSegment(id);
 
         return getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), validateAndGetProvider(provider));
+                parseFilter(DATASTREAMS), id);
     }
 
     @Override
     public ResultList<HistoricalLocation> getDatastreamThingHistoricalLocations(String id) {
-        String provider = extractFirstIdSegment(id);
         try {
+            String thingId = getThingIdFromDatastream(id);
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
+            List<ProviderSnapshot> providerLocations = getLocationProvidersFromThing(thingId);
+
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerLocations, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(null, null, List.of());
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -174,27 +190,21 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Location> getDatastreamThingLocations(String id) {
-        String provider = extractFirstIdSegment(id);
 
-        Location hl;
-        try {
-            hl = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(LOCATIONS), validateAndGetProvider(provider));
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException();
-        }
+        List<Location> listLocation = List.of();
+        String thingId = getThingIdFromDatastream(id);
+        List<ProviderSnapshot> locationProviders = getLocationProvidersFromThing(thingId);
+        listLocation = locationProviders.stream().map(p -> DtoMapper.toLocation(getSession(), application, getMapper(),
+                uriInfo, getExpansions(), parseFilter(LOCATIONS), p)).toList();
 
-        return new ResultList<>(null, null, List.of(hl));
+        return new ResultList<>(null, null, listLocation);
     }
 
     static ResultList<Datastream> getDataStreams(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot providerSnapshot) {
-        return new ResultList<>(null, null, providerSnapshot.getServices().stream()
-                .flatMap(s -> s.getResources().stream())
-                .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
-                .map(r -> DtoMapperGet.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter))
-                .collect(toList()));
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, String thingId) {
+        List<ProviderSnapshot> datastreamProviders = getDatastreamProvidersFromThing(userSession, thingId);
+        return new ResultList<>(null, null, datastreamProviders.stream().map(provider -> DtoMapper
+                .toDatastream(userSession, application, mapper, uriInfo, expansions, filter, provider)).toList());
     }
 
     @Override
@@ -202,17 +212,13 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), observation, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        ExpandedObservation lastObservation = (ExpandedObservation) UtilDto.getResourceField(snapshot,
-                "lastObservation", Object.class);
-        if (lastObservation == null) {
-            throw new WebApplicationException("fail to create observation", 500);
-        }
-        Observation createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot, lastObservation);
-        if (createDto == null) {
+
+        Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot.getResource("lastObservation"), null);
+        if (createDto.isEmpty()) {
             throw new BadRequestException("fail to create observation");
         }
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.get().id())).build();
 
         return Response.created(createdUri).entity(createDto).build();
     }

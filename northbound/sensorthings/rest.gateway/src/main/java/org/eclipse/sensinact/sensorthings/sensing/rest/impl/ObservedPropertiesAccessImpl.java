@@ -31,7 +31,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ObservedPropertiesDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -41,8 +40,9 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
-        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
+        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(datastreamId));
 
         if (!id.equals(o.id())) {
             throw new NotFoundException();
@@ -58,22 +58,27 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getObservedPropertyDatastream(String id, String id2) {
-        if (!id.equals(id2)) {
+        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId2 = UtilDto.extractFirstIdSegment(id2);
+
+        if (!datastreamId.equals(datastreamId2)) {
             throw new NotFoundException();
         }
 
-        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id2), parseFilter(DATASTREAMS));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), validateAndGetProvider(datastreamId));
     }
 
     @PaginationLimit(500)
     @Override
     public ResultList<Observation> getObservedPropertyDatastreamObservations(String id, String id2) {
-        if (!id.equals(id2)) {
+        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId2 = UtilDto.extractFirstIdSegment(id2);
+        if (!datastreamId.equals(datastreamId2)) {
             throw new NotFoundException();
         }
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
+                getExpansions(), getObservationResourceSnapshot(datastreamId2), parseFilter(OBSERVATIONS), 0);
     }
 
     @Override
@@ -90,19 +95,19 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
             throw new NotFoundException();
         }
 
-        return DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(SENSORS), validateAndGetProvider(id2));
     }
 
     @Override
     public Thing getObservedPropertyDatastreamThing(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
-        String provider2 = extractFirstIdSegment(id2);
+        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider2 = UtilDto.extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(THINGS), validateAndGetProvider(provider));
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                validateAndGetProvider(provider));
     }
 
     @Override

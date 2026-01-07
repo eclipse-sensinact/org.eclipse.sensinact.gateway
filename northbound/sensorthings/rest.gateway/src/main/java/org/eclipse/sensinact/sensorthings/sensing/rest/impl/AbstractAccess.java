@@ -16,11 +16,13 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
@@ -29,6 +31,8 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,6 +60,57 @@ public abstract class AbstractAccess {
 
     @Context
     protected ContainerRequestContext requestContext;
+
+    protected List<ProviderSnapshot> getLocationProvidersFromThing(String thingId) {
+        return getLinkProvidersFromThing(getSession(), thingId, "locationIds");
+    }
+
+    protected ResourceSnapshot getObservationResourceSnapshot(String id) {
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(UtilDto.extractFirstIdSegment(id));
+        ServiceSnapshot serviceSnapshot = UtilDto.getDatastreamService(providerSnapshot);
+        ResourceSnapshot resourceSnapshot = serviceSnapshot.getResource("lastObservation");
+        return resourceSnapshot;
+    }
+
+    protected String getThingIdFromDatastream(String id) {
+        String provider = UtilDto.extractFirstIdSegment(id);
+        ProviderSnapshot providerDatastream = validateAndGetProvider(provider);
+        ServiceSnapshot serviceDatastream = UtilDto.getDatastreamService(providerDatastream);
+        String thingId = UtilDto.getResourceField(serviceDatastream, "thingId", String.class);
+        return thingId;
+    }
+
+    protected static List<ProviderSnapshot> getLinkProvidersFromThing(SensiNactSession session, String thingId,
+            String resourceField) {
+        ProviderSnapshot providerThing = validateAndGetProvider(session, thingId);
+        ServiceSnapshot serviceThing = UtilDto.getThingService(providerThing);
+        List<?> linkIds = UtilDto.getResourceField(serviceThing, resourceField, List.class);
+        List<ProviderSnapshot> providerLocations = linkIds.stream()
+                .map(linkId -> validateAndGetProvider(session, (String) linkId)).toList();
+        return providerLocations;
+    }
+
+    protected boolean isLinkProvidersFromThing(String thingId, String subLinkId, String resourceField) {
+        ProviderSnapshot providerThing = validateAndGetProvider(thingId);
+        ServiceSnapshot serviceThing = UtilDto.getThingService(providerThing);
+        return UtilDto.getResourceField(serviceThing, resourceField, List.class).contains(subLinkId);
+
+    }
+
+    protected boolean isLocationInThing(String thingId, String subLinkId) {
+        return isLinkProvidersFromThing(thingId, subLinkId, "locationIds");
+
+    }
+
+    protected boolean isDatastreamInThing(String thingId, String subLinkId) {
+        return isLinkProvidersFromThing(thingId, subLinkId, "datastreamIds");
+
+    }
+
+    protected static List<ProviderSnapshot> getDatastreamProvidersFromThing(SensiNactSession session, String thingId) {
+        return getLinkProvidersFromThing(session, thingId, "datastreamIds");
+
+    }
 
     /**
      * Returns a user session
@@ -91,6 +146,10 @@ public abstract class AbstractAccess {
         return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
+    private static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
+        return Optional.ofNullable(session.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
+    }
+
     /**
      * return the service ExtraDelegate that manage the extra (POST,PUT,DELETE) on
      * sensorthing entity
@@ -113,8 +172,19 @@ public abstract class AbstractAccess {
      * @param id
      * @return
      */
+    protected static ProviderSnapshot validateAndGetProvider(SensiNactSession session, String id) {
+        DtoMapper.validatedProviderId(id);
+
+        Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(session, id);
+
+        if (providerSnapshot.isEmpty()) {
+            throw new NotFoundException("Unknown provider");
+        }
+        return providerSnapshot.get();
+    }
+
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        DtoMapperGet.validatedProviderId(id);
+        DtoMapper.validatedProviderId(id);
 
         Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
 
@@ -156,6 +226,25 @@ public abstract class AbstractAccess {
     }
 
     /**
+     * return criterion for filtering regarding filterString
+     *
+     * @param FilterString
+     * @param context
+     * @return
+     * @throws WebApplicationException
+     */
+    protected ICriterion parseFilter(String filterString, final EFilterContext context) throws WebApplicationException {
+        if (filterString == null || filterString.isBlank()) {
+            return null;
+        }
+        try {
+            return getFilterParser().parseFilter(filterString, context);
+        } catch (FilterParserException e) {
+            throw new BadRequestException("Error parsing filter", e);
+        }
+    }
+
+    /**
      * return criterion for filtering regarding the context
      *
      * @param context
@@ -164,14 +253,6 @@ public abstract class AbstractAccess {
      */
     protected ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
         final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
-        if (filterString == null || filterString.isBlank()) {
-            return null;
-        }
-
-        try {
-            return getFilterParser().parseFilter(filterString, context);
-        } catch (FilterParserException e) {
-            throw new BadRequestException("Error parsing filter", e);
-        }
+        return parseFilter(filterString, context);
     }
 }

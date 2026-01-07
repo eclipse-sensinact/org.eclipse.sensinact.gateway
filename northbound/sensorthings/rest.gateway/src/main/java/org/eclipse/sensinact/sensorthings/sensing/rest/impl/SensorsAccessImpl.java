@@ -29,7 +29,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.delete.SensorsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.SensorsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -38,8 +37,9 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Sensor getSensor(String id) {
-        return DtoMapperGet.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.SENSORS), validateAndGetResourceSnapshot(id));
+        String providerId = UtilDto.extractFirstIdSegment(id);
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.SENSORS), validateAndGetProvider(providerId));
     }
 
     @Override
@@ -50,18 +50,23 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Datastream getSensorDatastream(String id, String id2) {
-        if (!id.equals(id2)) {
+        String providerId = UtilDto.extractFirstIdSegment(id);
+        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+
+        if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
         }
 
-        return DtoMapperGet.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetResourceSnapshot(id), parseFilter(EFilterContext.DATASTREAMS));
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.DATASTREAMS), validateAndGetProvider(providerId2));
     }
 
     @PaginationLimit(500)
     @Override
     public ResultList<Observation> getSensorDatastreamObservations(String id, String id2) {
-        if (!id.equals(id2)) {
+        String providerId = UtilDto.extractFirstIdSegment(id);
+        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+        if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
         }
         return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
@@ -70,13 +75,14 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public ObservedProperty getSensorDatastreamObservedProperty(String id, String id2) {
-        if (!id.equals(id2)) {
+        String providerId = UtilDto.extractFirstIdSegment(id);
+        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+        if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
         }
-        ResourceSnapshot resource = validateAndGetResourceSnapshot(id);
 
-        ObservedProperty o = DtoMapperGet.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), resource);
+        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), validateAndGetProvider(providerId2));
 
         if (!id.equals(o.id())) {
             throw new NotFoundException();
@@ -87,20 +93,23 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Sensor getSensorDatastreamSensor(String id, String id2) {
-        if (!id.equals(id2)) {
+        String providerId = UtilDto.extractFirstIdSegment(id);
+        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+        if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
         }
+
         return getSensor(id);
     }
 
     @Override
     public Thing getSensorDatastreamThing(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        String thingId = getThingIdFromDatastream(id);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(thingId);
 
-        Thing t = DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.THINGS), providerSnapshot);
-        if (!provider.equals(t.id())) {
+        if (!thingId.equals(t.id())) {
             throw new NotFoundException();
         }
         return t;
