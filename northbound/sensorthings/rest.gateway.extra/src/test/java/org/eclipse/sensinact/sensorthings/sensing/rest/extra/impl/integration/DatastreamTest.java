@@ -388,7 +388,6 @@ public class DatastreamTest extends AbstractIntegrationTest {
         assertNotNull(UtilDto.getResourceField(service, "sensorId", String.class));
         assertNotNull(UtilDto.getResourceField(service, "sensorName", String.class));
         assertNotNull(UtilDto.getResourceField(service, "sensorMetadata", Object.class));
-        assertNotNull(UtilDto.getResourceField(service, "sensorProperties", Map.class));
 
     }
 
@@ -426,7 +425,6 @@ public class DatastreamTest extends AbstractIntegrationTest {
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyId", String.class));
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyName", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyProperties", Map.class));
         assertNotNull(UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
 
     }

@@ -449,7 +449,7 @@ public class ThingTest extends AbstractIntegrationTest {
         ServiceSnapshot serviceDatastream = serviceUseCase.read(session, idDatastreamUpdate, "datastream");
 
         @SuppressWarnings("unchecked")
-        List<String> datastreamIds = (List<String>) UtilDto.getResourceField(service, "datastreamIds", Object.class);
+        List<String> datastreamIds = UtilDto.getResourceField(service, "datastreamIds", List.class);
         assertTrue(datastreamIds.contains(idDatastreamUpdate));
         assertEquals(idThing, UtilDto.getResourceField(serviceDatastream, "thingId", String.class));
 

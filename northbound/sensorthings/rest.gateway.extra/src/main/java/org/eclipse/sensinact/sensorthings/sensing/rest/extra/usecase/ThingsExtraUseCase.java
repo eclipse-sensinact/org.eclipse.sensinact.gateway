@@ -15,15 +15,15 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-
-import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
@@ -82,23 +82,6 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
         return DtoToModelMapper.toThingUpdates(request.model(), id, locationIds, datastreamIds);
     }
 
-    @SuppressWarnings("unchecked")
-    private List<String> getLocationIds(ProviderSnapshot provider) {
-        ResourceSnapshot resource = provider.getResource("thing", "locationIds");
-        if (resource.getValue() != null)
-            return (List<String>) resource.getValue().getValue();
-        return List.of();
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<String> getDatastreamIds(ProviderSnapshot provider) {
-        ResourceSnapshot resource;
-        resource = provider.getResource("thing", "datastreamIds");
-        if (resource.getValue() != null)
-            return (List<String>) resource.getValue().getValue();
-        return List.of();
-    }
-
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {
 
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
@@ -121,30 +104,67 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
     }
 
     @Override
-    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
-        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
-        ServiceSnapshot service = serviceUseCase.read(request.session(), request.id(), "thing");
-        @SuppressWarnings("unchecked")
-        List<String> datastreamIds = (List<String>) UtilDto.getResourceField(service, "datastreamIds", Object.class);
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
+        // get resource list of datastreamId
 
-        list.add(new AbstractTwinCommand<Void>() {
+        return new AbstractSensinactCommand<TimedValue<List<String>>>() {
+            // delete thing and datastream linked
             @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                SensinactProvider sp = twin.getProvider(request.id());
-                if (sp != null) {
-                    sp.delete();
-                }
-                datastreamIds.stream().forEach(idDatastream -> {
-                    SensinactProvider spDatastream = twin.getProvider(idDatastream);
-                    if (spDatastream != null) {
-                        spDatastream.delete();
-                    }
-                });
-                return pf.resolved(null);
-            }
-        });
+            protected Promise<TimedValue<List<String>>> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                    PromiseFactory pf) {
 
-        return list;
+                SensinactProvider sp = twin.getProvider(request.id());
+                return sp.getResource(UtilDto.SERVICE_THING, "datastreamIds").getMultiValue(String.class)
+                        .thenAccept(l -> l.getValue().stream().forEach(idDatastream -> {
+                            SensinactProvider spDatastream = twin.getProvider(idDatastream);
+                            if (spDatastream != null) {
+                                spDatastream.delete();
+                            }
+                        })).thenAccept(x -> sp.delete());
+            }
+        };
+
+    }
+
+    /**
+     * delete all link between thing and location. if idLocation is null we delete
+     * all link between thing and their locations
+     *
+     * @param idThing
+     * @param idLocation
+     * @return
+     */
+    public AbstractSensinactCommand<?> deleteThingLocationsRef(String idThing, String idLocation) {
+        ResourceCommand<TimedValue<List<String>>> listLocationIds = new ResourceCommand<TimedValue<List<String>>>(
+                idThing, UtilDto.SERVICE_THING, "locationIds") {
+
+            @Override
+            protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMultiValue(String.class);
+            }
+
+        };
+        return new DependentCommand<TimedValue<List<String>>, Void>(listLocationIds) {
+
+            @Override
+            protected Promise<Void> call(Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
+                try {
+                    List<String> locationIds = parentResult.getValue().getValue();
+                    if (locationIds != null) {
+                        List<String> newLocationIds = idLocation != null
+                                ? locationIds.stream().filter(id -> !id.equals(idLocation)).toList()
+                                : List.of();
+
+                        SensinactResource resource = twin.getResource(idThing, UtilDto.SERVICE_THING, "locationIds");
+                        return resource.setValue(newLocationIds);
+                    }
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
+            }
+        };
     }
 
 }

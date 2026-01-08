@@ -15,14 +15,18 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -113,14 +117,15 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         addDatastreamIdLinkToLinkThing(request, datastreamId, providerThing, listUpdates);
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
-            return datastream.observations().stream()
+            listUpdates.addAll(datastream.observations().stream()
                     .map(obs -> DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
                             observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
-                    .toList();
+                    .toList());
         } else {
-            return List.of(DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
+            listUpdates.add(DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
                     observedProperty, unit, null, null));
         }
+        return listUpdates;
 
     }
 
@@ -160,10 +165,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
             // need to remove link to this datastream in oldthing
             ProviderSnapshot providerThing = providerUseCase.read(request.session(), oldThingId);
-            ResourceSnapshot resource = providerThing.getResource("thing", "datastreamIds");
-            @SuppressWarnings("unchecked")
-            List<String> ids = (List<String>) resource.getValue().getValue();
-            ids.remove(datastreamId);
+            List<String> ids = getDatastreamIds(providerThing).stream().filter(id -> !datastreamId.equals(id)).toList();
+
             listUpdates.add(new ThingUpdate(thingId, null, null, thingId, null, null, ids));
 
         }
@@ -173,10 +176,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
             ProviderSnapshot providerThing, List<SensorThingsUpdate> listUpdates) {
         ServiceSnapshot serviceThing = providerThing.getService("thing");
 
-        @SuppressWarnings("unchecked")
-        List<String> ids = UtilDto.getResourceField(serviceThing, "datastreamIds", List.class);
+        List<String> ids = getDatastreamIds(serviceThing);
         if (!ids.contains(datastreamId)) {
-            ids.add(datastreamId);
+            ids = Stream.concat(ids.stream(), Stream.of(datastreamId)).toList();
             listUpdates.add(
                     new ThingUpdate(providerThing.getName(), null, null, providerThing.getName(), null, null, ids));
         }
@@ -342,35 +344,43 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
     }
 
     @Override
-    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedDataStream> request) {
         // delete datastream
+        // TODO Authorization
         String thingId = getThingId(request);
-        list.add(new AbstractTwinCommand<Void>() {
+        ResourceCommand<TimedValue<List<String>>> parentCommand = new ResourceCommand<TimedValue<List<String>>>(thingId,
+                UtilDto.SERVICE_THING, "datastreamIds") {
             @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                try {
+            protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMultiValue(String.class);
+            }
+        };
+        return new DependentCommand<TimedValue<List<String>>, Void>(parentCommand) {
 
-                    SensinactProvider sp = twin.getProvider(request.id());
-                    if (sp != null) {
-                        sp.delete();
-                    }
-                    SensinactResource resource = twin.getResource(thingId, "thing", "datastreamIds");
-                    if (resource != null) {
-                        List<?> datastreamIds = resource.getMultiValue(List.class).getValue().getValue();
-                        if (datastreamIds.contains(request.id())) {
-                            datastreamIds.remove(request.id());
-                            resource.setValue(datastreamIds).getValue();
-                        }
+            @Override
+            protected Promise<Void> call(Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
+
+                SensinactProvider sp = twin.getProvider(request.id());
+                if (sp != null) {
+                    sp.delete();
+                }
+                try {
+                    List<String> datastreamIds = parentResult.getValue().getValue();
+                    if (datastreamIds != null) {
+                        List<String> newDatastreamIds = datastreamIds.stream().filter(id -> !id.equals(request.id()))
+                                .toList();
+                        SensinactResource resource = twin.getResource(thingId, UtilDto.SERVICE_THING, "datastreamIds");
+                        return resource.setValue(newDatastreamIds);
                     }
                     return pf.resolved(null);
                 } catch (InvocationTargetException | InterruptedException e) {
                     return pf.failed(e);
                 }
             }
-        });
 
-        return list;
+        };
+
     }
 
 }

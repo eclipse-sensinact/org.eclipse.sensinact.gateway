@@ -12,11 +12,17 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended.impl;
 
+import java.util.Collection;
+
 import org.eclipse.emf.common.notify.Notification;
+
+import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EClass;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
+
+import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
 
 import org.eclipse.sensinact.model.core.provider.impl.ServiceImpl;
 
@@ -123,44 +129,24 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	protected String id = ID_EDEFAULT;
 
 	/**
-	 * The default value of the '{@link #getLocationIds() <em>Location Ids</em>}' attribute.
+	 * The cached value of the '{@link #getLocationIds() <em>Location Ids</em>}' attribute list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #getLocationIds()
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Object LOCATION_IDS_EDEFAULT = null;
+	protected EList<String> locationIds;
 
 	/**
-	 * The cached value of the '{@link #getLocationIds() <em>Location Ids</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getLocationIds()
-	 * @generated
-	 * @ordered
-	 */
-	protected Object locationIds = LOCATION_IDS_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getDatastreamIds() <em>Datastream Ids</em>}' attribute.
+	 * The cached value of the '{@link #getDatastreamIds() <em>Datastream Ids</em>}' attribute list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #getDatastreamIds()
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Object DATASTREAM_IDS_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getDatastreamIds() <em>Datastream Ids</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDatastreamIds()
-	 * @generated
-	 * @ordered
-	 */
-	protected Object datastreamIds = DATASTREAM_IDS_EDEFAULT;
+	protected EList<String> datastreamIds;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -279,7 +265,10 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	 * @generated
 	 */
 	@Override
-	public Object getLocationIds() {
+	public EList<String> getLocationIds() {
+		if (locationIds == null) {
+			locationIds = new EDataTypeUniqueEList<String>(String.class, this, ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS);
+		}
 		return locationIds;
 	}
 
@@ -289,34 +278,11 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	 * @generated
 	 */
 	@Override
-	public void setLocationIds(Object newLocationIds) {
-		Object oldLocationIds = locationIds;
-		locationIds = newLocationIds;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS, oldLocationIds, locationIds));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Object getDatastreamIds() {
+	public EList<String> getDatastreamIds() {
+		if (datastreamIds == null) {
+			datastreamIds = new EDataTypeUniqueEList<String>(String.class, this, ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS);
+		}
 		return datastreamIds;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setDatastreamIds(Object newDatastreamIds) {
-		Object oldDatastreamIds = datastreamIds;
-		datastreamIds = newDatastreamIds;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS, oldDatastreamIds, datastreamIds));
 	}
 
 	/**
@@ -348,6 +314,7 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
@@ -364,10 +331,12 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 				setId((String)newValue);
 				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS:
-				setLocationIds(newValue);
+				getLocationIds().clear();
+				getLocationIds().addAll((Collection<? extends String>)newValue);
 				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS:
-				setDatastreamIds(newValue);
+				getDatastreamIds().clear();
+				getDatastreamIds().addAll((Collection<? extends String>)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -394,10 +363,10 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 				setId(ID_EDEFAULT);
 				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS:
-				setLocationIds(LOCATION_IDS_EDEFAULT);
+				getLocationIds().clear();
 				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS:
-				setDatastreamIds(DATASTREAM_IDS_EDEFAULT);
+				getDatastreamIds().clear();
 				return;
 		}
 		super.eUnset(featureID);
@@ -420,9 +389,9 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 			case ExtendedPackage.SENSOR_THING_SERVICE__ID:
 				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
 			case ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS:
-				return LOCATION_IDS_EDEFAULT == null ? locationIds != null : !LOCATION_IDS_EDEFAULT.equals(locationIds);
+				return locationIds != null && !locationIds.isEmpty();
 			case ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS:
-				return DATASTREAM_IDS_EDEFAULT == null ? datastreamIds != null : !DATASTREAM_IDS_EDEFAULT.equals(datastreamIds);
+				return datastreamIds != null && !datastreamIds.isEmpty();
 		}
 		return super.eIsSet(featureID);
 	}

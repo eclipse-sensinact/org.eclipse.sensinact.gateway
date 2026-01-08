@@ -13,10 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import jakarta.ws.rs.ext.Providers;
 
@@ -28,7 +25,7 @@ import jakarta.ws.rs.ext.Providers;
  */
 public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends AbstractExtraUseCaseDto<M, S> {
 
-    public abstract List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<M> request);
+    public abstract AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<M> request);
 
     public AbstractExtraUseCaseDtoDelete(Providers providers) {
         super(providers);
@@ -36,10 +33,8 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
 
     public ExtraUseCaseResponse<S> delete(ExtraUseCaseRequest<M> request) {
         try {
-            List<AbstractSensinactCommand<?>> commands = dtoToDelete(request);
 
-            IndependentCommands<?> multiCommand = new IndependentCommands<>(commands);
-            gatewayThread.execute(multiCommand).getValue();
+            gatewayThread.execute(dtoToDelete(request)).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
             return new ExtraUseCaseResponse<S>(false, "fail to delete");
         }

@@ -13,15 +13,17 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.command.AbstractTwinCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
@@ -148,32 +150,44 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
     }
 
     @Override
-    public List<AbstractSensinactCommand<?>> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
-        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
         String datastreamId = UtilDto.extractFirstIdSegment(request.id());
-        String observationId = UtilDto.extractSecondIdSegment(request.id());
-        ServiceSnapshot service = serviceUseCase.read(request.session(), datastreamId, "datastream");
-        ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
-        if (observationId == null || !observationId.equals(obs.id())) {
-            throw new BadRequestException();
-        }
-
-        list.add(new AbstractTwinCommand<Void>() {
+        // get resource observation
+        ResourceCommand<TimedValue<ExpandedObservation>> parentCommand = new ResourceCommand<TimedValue<ExpandedObservation>>(
+                datastreamId, UtilDto.SERVICE_DATASTREAM, "lastObservation") {
             @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+            protected Promise<TimedValue<ExpandedObservation>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue(ExpandedObservation.class);
+            }
+        };
+        return new DependentCommand<TimedValue<ExpandedObservation>, Void>(parentCommand) {
+
+            @Override
+            protected Promise<Void> call(Promise<TimedValue<ExpandedObservation>> parentResult,
+                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
                 try {
-                    SensinactProvider sp = twin.getProvider(datastreamId);
-                    SensinactResource resource = sp.getResource("datastream", "lastObservation");
+                    if (parentResult.getFailure() == null) {
+                        ExpandedObservation obs = parentResult.getValue().getValue();
+                        String observationId = UtilDto.extractSecondIdSegment(request.id());
 
-                    resource.setValue(null).getValue();
+                        if (observationId == null || !observationId.equals(obs.id())) {
+                            return pf.failed(new BadRequestException());
 
+                        }
+                        String datastreamId = UtilDto.extractFirstIdSegment(request.id());
+
+                        SensinactProvider sp = twin.getProvider(datastreamId);
+                        SensinactResource resource = sp.getResource("datastream", "lastObservation");
+
+                        return resource.setValue(null);
+                    }
                     return pf.resolved(null);
                 } catch (InvocationTargetException | InterruptedException e) {
                     return pf.failed(e);
                 }
+
             }
-        });
-        return list;
+        };
     }
 
 }

@@ -14,8 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest;
 
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -133,15 +132,13 @@ public class UtilDto {
         if (resource != null && resource.getValue() != null) {
             return expectedType.cast(resource.getValue().getValue());
         }
-
-        if (Collection.class.isAssignableFrom(expectedType)) {
-            return expectedType.cast(Collections.emptyList());
+        if (List.class.isAssignableFrom(expectedType)) {
+            return expectedType.cast(List.of());
         }
 
         if (Map.class.isAssignableFrom(expectedType)) {
-            return expectedType.cast(Collections.emptyMap());
+            return expectedType.cast(Map.of());
         }
-
         return null;
     }
 

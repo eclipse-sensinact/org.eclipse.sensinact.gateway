@@ -13,18 +13,13 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -39,9 +34,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.ServiceSnapshotMapper;
-import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseFactory;
-
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
@@ -57,12 +49,13 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     private final IAccessProviderUseCase providerUseCase;
     private final IAccessServiceUseCase serviceUseCase;
     private final DatastreamsExtraUseCase datastreamUseCase;
-    private final ThingsExtraUseCase thingUseCase;
 
     private final IDtoMemoryCache<ExpandedSensor> sensorCaches;
     private final IDtoMemoryCache<FeatureOfInterest> foiCaches;
     private final IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCaches;
-    private final LocationsExtraUseCase locationUsecase;
+    private final LocationsExtraUseCase locationUseCase;
+    private final ThingsExtraUseCase thingExtraUseCase;
+
     private final ObservationsExtraUseCase observationsExtraUseCase;
     private final ObservedPropertiesExtraUseCase observedPropertyExtraUseCase;
     private final SensorsExtraUseCase sensorExtraUseCase;
@@ -105,12 +98,13 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         foiExtraUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
 
         observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
-        locationUsecase = resolveUseCase(providers, LocationsExtraUseCase.class);
+        locationUseCase = resolveUseCase(providers, LocationsExtraUseCase.class);
+        thingExtraUseCase = resolveUseCase(providers, ThingsExtraUseCase.class);
+
         observationsExtraUseCase = resolveUseCase(providers, ObservationsExtraUseCase.class);
         observedPropertyExtraUseCase = resolveUseCase(providers, ObservedPropertiesExtraUseCase.class);
         sensorExtraUseCase = resolveUseCase(providers, SensorsExtraUseCase.class);
         gatewayThread = resolve(providers, GatewayThread.class);
-        thingUseCase = resolveUseCase(providers, ThingsExtraUseCase.class);
         initUpdateHandler();
     }
 
@@ -159,19 +153,11 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     private ExtraUseCaseResponse<Object> deleteThingLocationRef(ExtraUseCaseRequest<RefId> request) {
         String idThing = request.parentId();
-        String idLocation = request.id(); // can be null
-        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
-        // delete datastream
-        list.add(new AbstractTwinCommand<Void>() {
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                locationUsecase.removeLocationIdsInThings(idLocation, List.of(idThing), twin, pf);
-                return pf.resolved(null);
-            }
-        });
-        IndependentCommands<?> multiCommand = new IndependentCommands<>(list);
+        String idLocation = request.id(); // can be null in that cas
+        // delete thing location ref
+        AbstractSensinactCommand<?> command = thingExtraUseCase.deleteThingLocationsRef(idThing, idLocation);
         try {
-            gatewayThread.execute(multiCommand).getValue();
+            gatewayThread.execute(command).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
             return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), "fail to delete link");
         }
@@ -186,24 +172,19 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     }
 
+    /**
+     * delete link between location and thing, thing can be null and we remove all
+     * link in that case
+     *
+     * @param idLocation
+     * @param idThing
+     * @return
+     */
     private ExtraUseCaseResponse<Object> deleteLocationThingsLink(String idLocation, String idThing) {
-        List<String> idThings = new ArrayList<String>();
-        if (idThing != null) {
-            // delete all thing link
-            idThings.add(idThing);
-        }
-        List<AbstractSensinactCommand<?>> list = new ArrayList<AbstractSensinactCommand<?>>();
-        // delete datastream
-        list.add(new AbstractTwinCommand<Void>() {
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                locationUsecase.removeLocationIdsInThings(idLocation, idThings, twin, pf);
-                return pf.resolved(null);
-            }
-        });
-        IndependentCommands<?> multiCommand = new IndependentCommands<>(list);
+
+        AbstractSensinactCommand<?> command = locationUseCase.deleteLocationThingsLink(idLocation, idThing);
         try {
-            gatewayThread.execute(multiCommand).getValue();
+            gatewayThread.execute(command).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
             return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), "fail to delete link");
         }
@@ -362,7 +343,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         }
         ExpandedLocation locationUpdate = ServiceSnapshotMapper
                 .toLocation(providerLocation.getService(UtilDto.SERVICE_LOCATON), idThing);
-        ExtraUseCaseResponse<ServiceSnapshot> result = locationUsecase.update(new ExtraUseCaseRequest<ExpandedLocation>(
+        ExtraUseCaseResponse<ServiceSnapshot> result = locationUseCase.update(new ExtraUseCaseRequest<ExpandedLocation>(
                 request.session(), request.mapper(), request.uriInfo(), HttpMethod.PATCH, locationUpdate));
         return new ExtraUseCaseResponse<Object>(result.id(), result.snapshot());
     }
