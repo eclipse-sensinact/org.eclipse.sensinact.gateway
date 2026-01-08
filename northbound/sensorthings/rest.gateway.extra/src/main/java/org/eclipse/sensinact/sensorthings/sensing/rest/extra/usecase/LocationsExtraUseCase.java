@@ -24,9 +24,9 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
@@ -132,10 +132,11 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedLocation> request) {
         // delete location with link between location and thing
         String locationId = request.id();
-        return new DependentCommand<Void, Void>(deleteLocationThingsLink(locationId, null)) {
+        ;
+        AbstractSensinactCommand<Void> deleteLocationCommand = new AbstractSensinactCommand<Void>() {
+
             @Override
-            protected Promise<Void> call(Promise<Void> parentResult, SensinactDigitalTwin twin,
-                    SensinactModelManager modelMgr, PromiseFactory pf) {
+            protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
                 SensinactProvider sp = twin.getProvider(locationId);
                 if (sp != null) {
                     sp.delete();
@@ -143,6 +144,10 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                 return pf.resolved(null);
             }
         };
+        List<AbstractSensinactCommand<?>> listCommand = List.of(deleteLocationThingsLink(locationId, null),
+                deleteLocationCommand);
+        return new IndependentCommands<>(listCommand);
+
     }
 
     /**
@@ -151,27 +156,27 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
      * @param locationIdsToDelete
      * @return
      */
-    public DependentCommand<Map<SensinactProvider, TimedValue<List<String>>>, Void> deleteLocationThingsLink(
-            String locationId, String thingId) {
-        AbstractSensinactCommand<Map<SensinactProvider, TimedValue<List<String>>>> thingsListProviderCommand = getCommandThingProviders(
+    public DependentCommand<Map<String, TimedValue<List<String>>>, Void> deleteLocationThingsLink(String locationId,
+            String thingId) {
+        AbstractSensinactCommand<Map<String, TimedValue<List<String>>>> thingsListProviderCommand = getCommandThingProviders(
                 thingId);
         // remove locationId in providerThing->thing->resource(locationIds)
-        return new DependentCommand<Map<SensinactProvider, TimedValue<List<String>>>, Void>(thingsListProviderCommand) {
+        return new DependentCommand<Map<String, TimedValue<List<String>>>, Void>(thingsListProviderCommand) {
 
             @Override
-            protected Promise<Void> call(Promise<Map<SensinactProvider, TimedValue<List<String>>>> parentResult,
+            protected Promise<Void> call(Promise<Map<String, TimedValue<List<String>>>> parentResult,
                     SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
 
                 try {
-                    Map<SensinactProvider, TimedValue<List<String>>> mapLocationIdsByProvider = parentResult.getValue();
+                    Map<String, TimedValue<List<String>>> mapLocationIdsByProvider = parentResult.getValue();
 
                     List<Promise<Void>> promises = mapLocationIdsByProvider.entrySet().stream().map(es -> {
                         TimedValue<List<String>> timedValue = es.getValue();
 
                         List<String> newLocationsList = timedValue.getValue().stream()
                                 .filter(id -> !id.equals(locationId)).toList();
-
-                        return es.getKey().getResource(UtilDto.SERVICE_THING, "locationIds").setValue(newLocationsList);
+                        return twin.getResource(es.getKey(), UtilDto.SERVICE_THING, "locationIds")
+                                .setValue(newLocationsList);
                     }).toList();
 
                     return pf.all(promises).map(l -> null);
@@ -191,20 +196,19 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
      * @param thingId
      * @return
      */
-    private AbstractSensinactCommand<Map<SensinactProvider, TimedValue<List<String>>>> getCommandThingProviders(
-            String thingId) {
-        AbstractSensinactCommand<Map<SensinactProvider, TimedValue<List<String>>>> thingsListProviderCommand = new AbstractTwinCommand<Map<SensinactProvider, TimedValue<List<String>>>>() {
+    private AbstractSensinactCommand<Map<String, TimedValue<List<String>>>> getCommandThingProviders(String thingId) {
+        AbstractSensinactCommand<Map<String, TimedValue<List<String>>>> thingsListProviderCommand = new AbstractTwinCommand<Map<String, TimedValue<List<String>>>>() {
             @Override
-            protected Promise<Map<SensinactProvider, TimedValue<List<String>>>> call(SensinactDigitalTwin twin,
+            protected Promise<Map<String, TimedValue<List<String>>>> call(SensinactDigitalTwin twin,
                     PromiseFactory pf) {
 
                 List<? extends SensinactProvider> providers = thingId == null
                         ? twin.getProviders(eNS_URI, SENSOR_THING_DEVICE.getName())
                         : List.of(twin.getProvider(thingId));
 
-                List<Promise<Map.Entry<SensinactProvider, TimedValue<List<String>>>>> promises = providers.stream()
+                List<Promise<Map.Entry<String, TimedValue<List<String>>>>> promises = providers.stream()
                         .map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds").getMultiValue(String.class)
-                                .map(tv -> Map.entry((SensinactProvider) p, tv)))
+                                .map(tv -> Map.entry(p.getName(), tv)))
                         .toList();
 
                 return pf.all(promises)
