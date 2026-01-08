@@ -13,17 +13,18 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toDatastream;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toFeatureOfInterest;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toHistoricalLocation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toLocation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toObservation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toObservedProperty;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toSensor;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.toThing;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toDatastream;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toFeatureOfInterest;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toHistoricalLocation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toLocation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toObservation;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toObservedProperty;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toSensor;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.toThing;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -139,29 +140,33 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<HistoricalLocation> getHistoricalLocations() {
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null,
-                providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
-                        .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                criterion, p))
-                        .filter(Optional::isPresent).map(Optional::get).toList());
+        List<ProviderSnapshot> providersLocation = providers.stream().filter(p -> UtilDto.getLocationService(p) != null)
+                .toList();
+        return toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                providersLocation);
     }
 
     @Override
     public ResultList<Datastream> getDatastreams() {
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        List<ResourceSnapshot> resources = listSetResources(criterion);
-        return new ResultList<>(null, null, resources.stream()
-                .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r, criterion))
+        List<ProviderSnapshot> providers = listProviders(criterion);
+        List<ProviderSnapshot> providersDatastreams = providers.stream()
+                .filter(p -> UtilDto.getDatastreamService(p) != null).toList();
+        return new ResultList<>(null, null, providersDatastreams.stream()
+                .map(p -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .toList());
     }
 
     @Override
     public ResultList<Sensor> getSensors() {
         ICriterion criterion = parseFilter(EFilterContext.SENSORS);
-        List<ResourceSnapshot> resources = listSetResources(criterion);
+        List<ProviderSnapshot> providers = listProviders(criterion);
+        List<ProviderSnapshot> providersDatastreams = providers.stream()
+                .filter(p -> UtilDto.getDatastreamService(p) != null).toList();
+
         return new ResultList<>(null, null,
-                resources.stream().map(
-                        r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
+                providersDatastreams.stream().map(
+                        p -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
     }
 
@@ -169,7 +174,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     @Override
     public ResultList<Observation> getObservations() {
         ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
-        List<ResourceSnapshot> resources = listSetResources(criterion);
+        List<ProviderSnapshot> providers = listProviders(criterion);
+        List<ResourceSnapshot> resources = providers.stream().map(p -> UtilDto.getDatastreamService(p))
+                .filter(Objects::nonNull).map(s -> s.getResource("lastObservation")).toList();
+
         return new ResultList<>(null, null, resources.stream()
                 .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent).map(Optional::get).toList());
@@ -178,8 +186,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     @Override
     public ResultList<ObservedProperty> getObservedProperties() {
         ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
-        List<ResourceSnapshot> resources = listSetResources(criterion);
-        return new ResultList<>(null, null, resources.stream().map(
+        List<ProviderSnapshot> providers = listProviders(criterion);
+        List<ProviderSnapshot> providersDatastreams = providers.stream()
+                .filter(p -> UtilDto.getDatastreamService(p) != null).toList();
+
+        return new ResultList<>(null, null, providersDatastreams.stream().map(
                 r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .toList());
     }
@@ -188,8 +199,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null, providers.stream().map(p -> toFeatureOfInterest(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), criterion, p)).toList());
+        List<ProviderSnapshot> providersDatastreams = providers.stream()
+                .filter(p -> UtilDto.getDatastreamService(p) != null).toList();
+
+        return new ResultList<>(null, null, providersDatastreams.stream().map(p -> toFeatureOfInterest(getSession(),
+                application, getMapper(), uriInfo, getExpansions(), criterion, p)).toList());
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,

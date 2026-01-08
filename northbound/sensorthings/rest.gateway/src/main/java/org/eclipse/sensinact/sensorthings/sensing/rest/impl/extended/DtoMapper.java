@@ -485,13 +485,25 @@ public class DtoMapper {
         return location;
     }
 
+    public static Instant getTimestampFromId(String id) {
+        int idx = id.lastIndexOf('~');
+        if (idx < 0 || idx == id.length() - 1) {
+            throw new BadRequestException("Invalid id");
+        }
+        try {
+            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid id");
+        }
+    }
+
     public static ResultList<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, List<ProviderSnapshot> providerLocations) {
-        return new ResultList<>(null, null,
-                providerLocations.stream().map(p -> UtilDto.getLocationService(p)).map(
-                        s -> toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, s))
- // TODO                       map(List::add).or.toList());
+        List<HistoricalLocation> list = providerLocations.stream().map(p -> UtilDto.getLocationService(p))
+                .map(s -> toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, s))
+                .filter(Optional::isPresent).map(Optional::get).toList();
+        return new ResultList<>(null, null, list);
     }
 
     public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,

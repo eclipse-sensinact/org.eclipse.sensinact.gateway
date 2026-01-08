@@ -144,7 +144,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
         getTimestampFromId(id);
 
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), validateAndGetProvider(provider));
+                parseFilter(DATASTREAMS), provider);
     }
 
     @Override
