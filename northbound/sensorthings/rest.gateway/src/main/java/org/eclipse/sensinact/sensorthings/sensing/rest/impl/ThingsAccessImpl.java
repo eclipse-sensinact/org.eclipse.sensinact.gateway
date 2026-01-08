@@ -145,9 +145,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, locationProviders, 0);
             if (list.value().isEmpty()) {
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, locationProviders).map(List::of).orElse(List.of()));
+                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, locationProviders);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -157,17 +156,14 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public HistoricalLocation getThingHistoricalLocation(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
-
-        if (!id.equals(provider)) {
-            throw new NotFoundException();
-        }
-
-        getTimestampFromId(id2);
+        String provider = UtilDto.extractFirstIdSegment(id2);
+        ProviderSnapshot providerLocation = validateAndGetProvider(provider);
+        ServiceSnapshot serviceLocation = UtilDto.getLocationService(providerLocation);
+        DtoMapper.getTimestampFromId(id2);
 
         try {
             Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
-                    uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), validateAndGetProvider(provider));
+                    uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), serviceLocation);
             if (hl.isEmpty()) {
                 throw new NotFoundException();
             }
@@ -179,23 +175,15 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Thing getThingHistoricalLocationsThing(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
-
-        if (!id.equals(provider)) {
-            throw new NotFoundException();
-        }
+        String provider = UtilDto.extractFirstIdSegment(id2);
         return getThing(id);
     }
 
     @Override
     public ResultList<Location> getThingHistoricalLocationLocations(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
+        String provider = UtilDto.extractFirstIdSegment(id2);
 
-        if (!id.equals(provider)) {
-            throw new NotFoundException();
-        }
-
-        getTimestampFromId(id2);
+        DtoMapper.getTimestampFromId(id2);
 
         ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
@@ -205,23 +193,23 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ResultList<Location> getThingLocations(String id) {
-        String provider = extractFirstIdSegment(id);
-
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
+        String provider = UtilDto.extractFirstIdSegment(id);
+        List<ProviderSnapshot> providersLocation = getLocationProvidersFromThing(provider);
+        ResultList<Location> list = new ResultList<>(null, null,
+                providersLocation.stream().map(p -> DtoMapper.toLocation(getSession(), application, getMapper(),
+                        uriInfo, getExpansions(), parseFilter(LOCATIONS), p)).toList());
 
         return list;
     }
 
     @Override
     public Location getThingLocation(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
-
-        if (!id.equals(provider)) {
+        String provider = UtilDto.extractFirstIdSegment(id2);
+        if (!isLocationInThing(id, id2)) {
             throw new NotFoundException();
         }
 
-        getTimestampFromId(id2);
+        DtoMapper.getTimestampFromId(id2);
 
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), validateAndGetProvider(provider));
