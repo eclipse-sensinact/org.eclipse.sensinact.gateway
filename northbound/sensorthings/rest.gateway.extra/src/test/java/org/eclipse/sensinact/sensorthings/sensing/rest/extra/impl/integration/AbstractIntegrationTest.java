@@ -144,7 +144,7 @@ public class AbstractIntegrationTest {
     protected JsonNode getJsonResponseFromGet(String url, int expectedStatus) throws IOException, InterruptedException {
         HttpResponse<String> response = queryGet(url);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -156,7 +156,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException {
         HttpResponse<String> response = queryDelete(url);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -168,7 +168,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPost(SubUrl, dto);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -180,7 +180,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPut(SubUrl, dto);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 

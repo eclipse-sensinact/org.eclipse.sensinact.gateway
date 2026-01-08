@@ -71,7 +71,7 @@ public class ExtraDelegateImpl implements IExtraDelegate {
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, id);
         ExtraUseCaseResponse<S> result = useCase.create(request);
         if (!result.success()) {
-            throw result.e();
+            throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
     }
