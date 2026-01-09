@@ -116,7 +116,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
 
         };
         return new DependentCommand<TimedValue<List<String>>, Void>(listDatastreamIds) {
-            // delete thing and datastream linked
+            // delete datastreams and thing
             @Override
             protected Promise<Void> call(Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
                     SensinactModelManager modelMgr, PromiseFactory pf) {
