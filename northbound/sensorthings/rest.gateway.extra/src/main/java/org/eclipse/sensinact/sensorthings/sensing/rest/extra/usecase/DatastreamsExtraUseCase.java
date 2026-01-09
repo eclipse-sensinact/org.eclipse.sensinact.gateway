@@ -76,8 +76,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
         }
 
         ServiceSnapshot snapshot = serviceUseCase.read(request.session(), idDatastream, "datastream");
@@ -326,8 +325,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
+
         }
 
         ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), id, "datastream");

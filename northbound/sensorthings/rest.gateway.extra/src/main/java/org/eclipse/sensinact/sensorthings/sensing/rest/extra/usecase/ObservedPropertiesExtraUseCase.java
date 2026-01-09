@@ -108,7 +108,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
                 dataUpdate.pushUpdate(listDtoModels).getValue();
 
             } catch (InvocationTargetException | InterruptedException e) {
-                return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
+                throw new InternalServerErrorException(e);
             }
             ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
             if (serviceSnapshot == null) {

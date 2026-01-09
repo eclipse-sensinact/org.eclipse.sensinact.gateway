@@ -52,8 +52,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
 
         }
 
@@ -91,7 +90,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to create");
+            throw new InternalServerErrorException(e);
 
         }
 

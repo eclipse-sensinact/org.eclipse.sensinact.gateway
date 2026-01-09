@@ -159,7 +159,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         try {
             gatewayThread.execute(command).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), "fail to delete link");
+            throw new InternalServerErrorException(e);
         }
         return new ExtraUseCaseResponse<Object>(true, "link deleted");
 
@@ -186,7 +186,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         try {
             gatewayThread.execute(command).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), "fail to delete link");
+            throw new InternalServerErrorException(e);
         }
         return new ExtraUseCaseResponse<Object>(true, "link deleted");
     }

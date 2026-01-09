@@ -15,6 +15,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -36,7 +38,7 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
 
             gatewayThread.execute(dtoToDelete(request)).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<S>(false, "fail to delete");
+            throw new InternalServerErrorException(e);
         }
         return new ExtraUseCaseResponse<S>(true, "datastream deleted");
 

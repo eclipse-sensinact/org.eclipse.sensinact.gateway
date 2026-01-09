@@ -70,8 +70,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
 
         } catch (Exception e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
+
         }
 
     }
@@ -123,7 +123,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
             return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
 
         } catch (Exception e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
+            throw new InternalServerErrorException(e);
         }
 
     }

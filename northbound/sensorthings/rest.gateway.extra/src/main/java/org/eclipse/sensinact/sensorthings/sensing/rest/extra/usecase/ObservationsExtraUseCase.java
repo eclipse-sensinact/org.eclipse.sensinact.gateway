@@ -58,8 +58,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
 
         }
 
@@ -136,8 +135,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
 
         }
         String dataStreamId = UtilDto.extractFirstIdSegment(request.parentId());
