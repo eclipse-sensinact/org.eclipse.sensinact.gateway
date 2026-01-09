@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -56,6 +57,14 @@ public class ValueTest extends AbstractIntegrationTest {
         final String rcName = "data";
         final int value = random.nextInt(1024);
         Instant valueSetInstant = Instant.now();
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
+
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider, value, valueSetInstant);
+        createLocation(providerLocation);
+
         createResource(PROVIDER, svcName, rcName, value, valueSetInstant);
         session.setResourceValue(PROVIDER, "admin", "location", LOCATION, valueSetInstant);
         session.setResourceValue(PROVIDER, "admin", "description", "Description", valueSetInstant);
