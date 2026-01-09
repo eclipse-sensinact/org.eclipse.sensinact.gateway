@@ -19,17 +19,14 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
-/**
- * Provides a suitable ObjectMapper for JSON serialization
- */
 @Provider
 public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
 
-    private static final Logger log = LoggerFactory.getLogger(SensinactSensorthingsApplication.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SensinactSensorthingsApplication.class);
 
     @Override
     public Response toResponse(Throwable e) {
-        log.error("Unhandled exception while processing request", e);
+        LOG.error("Unhandled exception while processing request", e);
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal server error").build();
     }
