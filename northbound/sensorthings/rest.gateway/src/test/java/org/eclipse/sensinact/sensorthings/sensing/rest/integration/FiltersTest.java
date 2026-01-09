@@ -76,7 +76,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
         for (NameUrl url : rootResponse.value()) {
             // No count by default
-            ResultList<AnyIdDTO> resultList = utils.queryJson(url.url(),  RESULT_ANY);
+            ResultList<AnyIdDTO> resultList = utils.queryJson(url.url(), RESULT_ANY);
             assertNull(resultList.count());
             assertNotNull(resultList.value());
 
@@ -102,7 +102,7 @@ public class FiltersTest extends AbstractIntegrationTest {
 
     private List<String> extractProviderIds(ResultList<AnyIdDTO> resultList, Predicate<String> filter) {
         return resultList.value().stream().map(item -> {
-            String rawId = (String) item.id();
+            String rawId = item.id();
             if (rawId == null) {
                 return null;
             } else {
@@ -114,8 +114,7 @@ public class FiltersTest extends AbstractIntegrationTest {
     @Test
     void testOrderBy() throws IOException, InterruptedException {
         final String prefix = "orderTester_";
-        final List<String> sortedProviderIds =
-                IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id)
+        final List<String> sortedProviderIds = IntStream.rangeClosed(0, 9).boxed().map(id -> prefix + id)
                 .sorted(Comparator.naturalOrder()).collect(Collectors.toList());
         final int nbProviders = sortedProviderIds.size();
 
@@ -123,11 +122,16 @@ public class FiltersTest extends AbstractIntegrationTest {
         Collections.reverse(reversedProviderIds);
 
         sortedProviderIds.stream().filter(id -> id.startsWith(prefix)).forEach(id -> {
-            createResource(id, "svcA", "rcA", id);
-            createResource(id, "svcB", "rcA", id + 256);
-            createResource(id, "svcA", "rcB", id);
-            createResource(id, "svcB", "rcB", id + 256);
-            createResource(id, "admin", "location", new Point(Coordinates.EMPTY, null, null));
+            String thingId = id + "-thing";
+            String locationId = id + "-location";
+            createDatastrem(id + "datastreamA", thingId);
+            createDatastrem(id + "datastreamA" + 256, thingId);
+            createDatastrem(id + "datastreamB", thingId);
+            createDatastrem(id + "datastreamB" + 256, thingId);
+            createLocation(locationId);
+            createThing(thingId, List.of(locationId), List.of(id + "datastreamA", id + "datastreamA" + 256,
+                    id + "datastreamB", id + "datastreamB" + 256));
+
         });
 
         final Predicate<String> filter = sortedProviderIds::contains;
@@ -135,7 +139,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         final RootResponse rootResponse = utils.queryJson("/", RootResponse.class);
         for (NameUrl url : rootResponse.value()) {
             // Order by ID by default
-            ResultList<AnyIdDTO> resultList = utils.queryJson(url.url(),  RESULT_ANY);
+            ResultList<AnyIdDTO> resultList = utils.queryJson(url.url(), RESULT_ANY);
             assertNull(resultList.count());
             assertEquals(sortedProviderIds, extractProviderIds(resultList, filter));
 
@@ -173,10 +177,11 @@ public class FiltersTest extends AbstractIntegrationTest {
 
     @Test
     void testRef() throws IOException, InterruptedException {
-        final String provider = "refTester";
-        final String svc = "sensor";
-        final String rc = "rc";
-        createResource(provider, svc, rc, 42);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+
+        createThing(provider, List.of(), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider, 42);
 
         // Parsing will fail if there is any other JSON property
         ResultList<? extends Self> resultList = utils.queryJson(String.format("/Things(%s)/Datastreams/$ref", provider),
@@ -184,7 +189,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         assertNull(resultList.count());
 
         List<Self> references = resultList.value().stream()
-                .filter(s -> s.selfLink().endsWith(String.format("Datastreams(%s)", String.join("~", provider, svc, rc))))
+                .filter(s -> s.selfLink().endsWith(String.format("Datastreams(%s)", providerDatastream)))
                 .collect(Collectors.toList());
         assertEquals(1, references.size());
 
@@ -192,7 +197,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         resultList = utils.queryJson(String.format("/Things(%s)/Datastreams/$ref?$count=true", provider), RESULT_SELF);
         assertEquals(resultList.value().size(), resultList.count());
         references = resultList.value().stream()
-                .filter(s -> s.selfLink().endsWith(String.format("Datastreams(%s)", String.join("~", provider, svc, rc))))
+                .filter(s -> s.selfLink().endsWith(String.format("Datastreams(%s)", providerDatastream)))
                 .collect(Collectors.toList());
         assertEquals(1, references.size());
     }
@@ -200,16 +205,18 @@ public class FiltersTest extends AbstractIntegrationTest {
     @Test
     void testProp() throws IOException, InterruptedException {
         final Instant creationTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-        final String provider = "propTester";
-        final String svc = "sensor";
-        final String rc = "rc";
+
         final int value = random.nextInt();
-        createResource(provider, svc, rc, value, creationTime);
+        final String provider = "propTester";
+        final String providerDatastream = "propTesterDatastream";
+        createThing(provider, List.of(), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider, 42);
 
         ResultList<? extends Self> observations = utils
                 .queryJson(String.format("/FeaturesOfInterest(%s)/Observations/$ref", provider), RESULT_SELF);
         String baseUrl = observations.value().stream()
-                .filter(s -> s.selfLink().contains(String.join("~", provider, svc, rc))).findFirst().get().selfLink();
+                .filter(s -> s.selfLink().contains(String.join("~", providerDatastream, "test", "test"))).findFirst()
+                .get().selfLink();
 
         String property = "resultTime";
         Map<?, ?> rawResult = utils.queryJson(baseUrl + "/" + property, Map.class);
@@ -255,7 +262,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         final ResultList<AnyIdDTO> allStreams = utils
                 .queryJson(String.format("/Things(%s)/Datastreams?$count=true", provider), RESULT_ANY);
         final int nbIds = allStreams.count();
-        final List<String> allIds = allStreams.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
+        final List<String> allIds = allStreams.value().stream().map(s -> s.id()).collect(Collectors.toList());
         assertTrue(allIds.size() >= nbRc);
         assertEquals(allIds.size(), nbIds);
 
@@ -263,33 +270,33 @@ public class FiltersTest extends AbstractIntegrationTest {
         int topVal = 2;
         ResultList<AnyIdDTO> subStreams = utils
                 .queryJson(String.format("/Things(%s)/Datastreams?$top=%d", provider, topVal), RESULT_ANY);
-        List<String> ids = subStreams.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
+        List<String> ids = subStreams.value().stream().map(s -> s.id()).collect(Collectors.toList());
         assertNull(subStreams.count());
         assertEquals(topVal, ids.size());
         assertEquals(allIds.subList(0, topVal), ids);
 
         subStreams = utils.queryJson(String.format("/Things(%s)/Datastreams?$top=%d&$count=true", provider, topVal),
                 RESULT_ANY);
-        assertEquals(ids, subStreams.value().stream().map(s -> (String) s.id()).collect(Collectors.toList()));
+        assertEquals(ids, subStreams.value().stream().map(s -> s.id()).collect(Collectors.toList()));
         assertEquals(nbIds, subStreams.count());
 
         // Test skip
         int skipVal = 2;
         subStreams = utils.queryJson(String.format("/Things(%s)/Datastreams?$skip=%d", provider, skipVal), RESULT_ANY);
-        ids = subStreams.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
+        ids = subStreams.value().stream().map(s -> s.id()).collect(Collectors.toList());
         assertNull(subStreams.count());
         assertEquals(nbIds - skipVal, ids.size());
         assertEquals(allIds.subList(skipVal, allIds.size()), ids);
 
         subStreams = utils.queryJson(String.format("/Things(%s)/Datastreams?$skip=%d&$count=true", provider, skipVal),
                 RESULT_ANY);
-        assertEquals(ids, subStreams.value().stream().map(s -> (String) s.id()).collect(Collectors.toList()));
+        assertEquals(ids, subStreams.value().stream().map(s -> s.id()).collect(Collectors.toList()));
         assertEquals(nbIds, subStreams.count());
 
         // Test both
         subStreams = utils.queryJson(
                 String.format("/Things(%s)/Datastreams?$top=%d&$skip=%d", provider, topVal, skipVal), RESULT_ANY);
-        ids = subStreams.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
+        ids = subStreams.value().stream().map(s -> s.id()).collect(Collectors.toList());
         assertNull(subStreams.count());
         assertEquals(topVal, ids.size());
         assertEquals(allIds.subList(skipVal, skipVal + topVal), ids);
@@ -297,7 +304,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         subStreams = utils.queryJson(
                 String.format("/Things(%s)/Datastreams?$top=%d&$skip=%d&$count=true", provider, topVal, skipVal),
                 RESULT_ANY);
-        assertEquals(ids, subStreams.value().stream().map(s -> (String) s.id()).collect(Collectors.toList()));
+        assertEquals(ids, subStreams.value().stream().map(s -> s.id()).collect(Collectors.toList()));
         assertEquals(nbIds, subStreams.count());
     }
 
@@ -583,11 +590,13 @@ public class FiltersTest extends AbstractIntegrationTest {
 
         @Test
         void testExpand() throws IOException, InterruptedException {
-            final String provider = "expandTester";
-            final String svc = "sensor";
-            final String rc = "rc";
-            createResource(provider, svc, rc + "_1", 42);
-            createResource(provider, svc, rc + "_2", 24);
+            final String provider = "expandTesterThing";
+            final String providerDatastream = "expandTesterDatastream";
+            final String providerDatastream2 = "expandTesterDatastream2";
+
+            createThing(provider, List.of(), List.of(providerDatastream, providerDatastream2));
+            createDatastrem(providerDatastream, provider);
+            createDatastrem(providerDatastream2, provider);
 
             Set<String> expandedFields = Set.of("Datastreams/Observations", "Locations");
             Map<?, ?> rawResultList = utils.queryJson("/Things/?$expand=" + String.join(",", expandedFields),
@@ -598,9 +607,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             assertFalse(items.isEmpty());
             assertEquals(1, items.size());
 
-            Map<?,?> rawThing = (Map<?, ?>) items.stream()
-                    .map(Map.class::cast)
-                    .filter(m -> !"sensiNact".equals(m.get("name")))
+            Map<?, ?> rawThing = items.stream().map(Map.class::cast).filter(m -> !"sensiNact".equals(m.get("name")))
                     .findFirst().get();
 
             // Two data streams (one per resource)
@@ -610,25 +617,21 @@ public class FiltersTest extends AbstractIntegrationTest {
             assertEquals(7, rawDatastreamsList.size());
 
             // One observation with the value
-            Map<?,?>  rawDatastream = (Map<?, ?>) rawDatastreamsList.stream()
-                    .map(Map.class::cast)
-                    .filter(m -> "expandTester~sensor~rc_1".equals(m.get("@iot.id")))
-                    .findFirst().get();
+            Map<?, ?> rawDatastream = rawDatastreamsList.stream().map(Map.class::cast)
+                    .filter(m -> providerDatastream.equals(m.get("@iot.id"))).findFirst().get();
 
             List<?> rawObservationsList = (List<?>) rawDatastream.get("Observations");
 
             assertNotNull(rawObservationsList);
             assertEquals(1, rawObservationsList.size());
 
-            Map<?,?> rawObservation = (Map<?, ?>) rawObservationsList.get(0);
+            Map<?, ?> rawObservation = (Map<?, ?>) rawObservationsList.get(0);
             assertNotNull(rawObservation);
             assertEquals(42, rawObservation.get("result"));
 
             // Check the second value
-            rawDatastream = (Map<?, ?>) rawDatastreamsList.stream()
-                    .map(Map.class::cast)
-                    .filter(m -> "expandTester~sensor~rc_2".equals(m.get("@iot.id")))
-                    .findFirst().get();
+            rawDatastream = rawDatastreamsList.stream().map(Map.class::cast)
+                    .filter(m -> "expandTester~sensor~rc_2".equals(m.get("@iot.id"))).findFirst().get();
 
             rawObservationsList = (List<?>) rawDatastream.get("Observations");
 
@@ -642,14 +645,15 @@ public class FiltersTest extends AbstractIntegrationTest {
 
         @Test
         void testExpandSingle() throws IOException, InterruptedException {
-            final String provider = "expandTester";
-            final String svc = "sensor";
-            final String rc = "rc";
-            createResource(provider, svc, rc + "_1", 42);
+            final String provider = "expandTesterThing";
+            final String providerDatastream = "expandTesterDatastream";
+
+            createThing(provider, List.of(), List.of(providerDatastream));
+            createDatastrem(providerDatastream, provider);
 
             Set<String> expandedFields = Set.of("Thing", "Sensor");
-            Map<?, ?> rawDatastream = utils.queryJson("/Datastreams(expandTester~sensor~rc_1)/?$expand=" + String.join(",", expandedFields),
-                    Map.class);
+            Map<?, ?> rawDatastream = utils.queryJson(
+                    "/Datastreams(" + providerDatastream + ")/?$expand=" + String.join(",", expandedFields), Map.class);
 
             Map<?, ?> rawThing = (Map<?, ?>) rawDatastream.get("Thing");
 
@@ -659,7 +663,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             Map<?, ?> rawSensor = (Map<?, ?>) rawDatastream.get("Sensor");
 
             assertNotNull(rawSensor);
-            assertEquals("expandTester~sensor~rc_1", rawSensor.get("@iot.id"));
+            assertEquals("expandTesterDatastream~test", rawSensor.get("@iot.id"));
         }
     }
 }

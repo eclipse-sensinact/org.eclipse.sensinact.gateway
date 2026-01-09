@@ -222,26 +222,27 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ResultList<Thing> getThingLocationThings(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
+        String providerThindId = UtilDto.extractFirstIdSegment(id);
+        String providerLocationId = UtilDto.extractFirstIdSegment(id2);
 
-        if (!id.equals(provider)) {
+        if (!isLocationInThing(providerThindId, providerLocationId)) {
             throw new NotFoundException();
         }
+        // TODO get all thing link to location
         return new ResultList<>(null, null, List.of(getThing(id)));
     }
 
     @Override
     public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(String id, String id2) {
-        String provider = extractFirstIdSegment(id2);
+        String provider = UtilDto.extractFirstIdSegment(id2);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerSnapshot), 0);
             if (list.value().isEmpty()) {
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, List.of(providerSnapshot));
             }
             return list;
         } catch (IllegalArgumentException iae) {

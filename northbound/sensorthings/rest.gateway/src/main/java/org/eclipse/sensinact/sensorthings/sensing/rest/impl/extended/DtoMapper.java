@@ -508,6 +508,13 @@ public class DtoMapper {
 
     public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot providerLocations) {
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter,
+                UtilDto.getLocationService(providerLocations));
+    }
+
+    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ServiceSnapshot serviceLocation) {
         final TimedValue<GeoJsonObject> location = getLocation(serviceLocation, mapper, true);
         return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, serviceLocation,

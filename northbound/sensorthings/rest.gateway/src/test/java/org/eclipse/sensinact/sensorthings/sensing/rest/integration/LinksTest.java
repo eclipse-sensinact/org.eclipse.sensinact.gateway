@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -230,9 +229,13 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromThings() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
-        createResource(PROVIDER, "admin", "location", new Point(0., 0.));
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
 
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider);
+        createLocation(providerLocation);
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
         assertNotNull(things);
@@ -308,9 +311,13 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromLocations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
-        createResource(PROVIDER, "admin", "location", new Point(0., 0.));
-        createResource(PROVIDER, "admin", "description", "MyDescription");
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
+
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider);
+        createLocation(providerLocation);
 
         // Get the new locations
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
@@ -339,7 +346,13 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromHistoricalLocations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
+
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider);
+        createLocation(providerLocation);
 
         session.setResourceValue(PROVIDER, "admin", "location",
                 "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}");
@@ -372,7 +385,13 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromDatastreams() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
+
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider);
+        createLocation(providerLocation);
 
         // Get the new locations
         ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
@@ -424,7 +443,11 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromSensors() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+
+        createThing(provider, List.of(), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider);
 
         // Get the new locations
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
@@ -457,7 +480,13 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromObservations() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
+
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider, 42);
+        createLocation(providerLocation);
 
         // Get the new locations
         ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
@@ -487,7 +516,13 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromObservedProperties() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
+
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider);
+        createLocation(providerLocation);
 
         // Get the new locations
         ResultList<ObservedProperty> observedProperties = utils.queryJson("/ObservedProperties",
@@ -524,8 +559,11 @@ public class LinksTest extends AbstractIntegrationTest {
     @Test
     void testLinksFromFeaturesOfInterest() throws IOException, InterruptedException {
         // Add a resource
-        createResource(PROVIDER, "sensor", "data", 42);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
 
+        createThing(provider, List.of(), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider);
         // Get the new locations
         ResultList<FeatureOfInterest> features = utils.queryJson("/FeaturesOfInterest",
                 new TypeReference<ResultList<FeatureOfInterest>>() {

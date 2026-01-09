@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.util.List;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -29,9 +30,13 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.IdSelf;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensinactSensorthingsApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -147,6 +152,46 @@ public class AbstractIntegrationTest {
 
     protected void createResource(String provider, String service, String resource, Object value) {
         createResource(provider, service, resource, value, null);
+    }
+
+    protected void createDatastrem(String provider, String thingId) {
+        createDatastrem(provider, thingId, 42);
+    }
+
+    private FeatureOfInterest getFeatureOfIKnterest(String foiRefId) {
+        return new FeatureOfInterest(null, foiRefId, null, null, null, null, null);
+    }
+
+    protected void createDatastrem(String provider, String thingId, int value) {
+        createDatastrem(provider, thingId, value);
+    }
+
+    protected void createDatastrem(String provider, String thingId, int value, Instant valueInstant) {
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "thingId", thingId, valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "id", provider, valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "sensorId", "test1", valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "observedPropertyId", "test2", valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "lastObservation",
+                getObservation("test", new RefId(provider), value, getFeatureOfIKnterest("test")), valueInstant);
+
+    }
+
+    public static ExpandedObservation getObservation(String name, RefId datastreamRefId, int result,
+            FeatureOfInterest foi) {
+
+        return new ExpandedObservation(null, "obs2", Instant.now(), Instant.now(), result, "test", null, null, null,
+                null, null, datastreamRefId, foi);
+
+    }
+
+    protected void createLocation(String provider) {
+        createResource(provider, UtilDto.SERVICE_THING, "id", provider, null);
+    }
+
+    protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds) {
+        createResource(provider, UtilDto.SERVICE_THING, "id", provider, null);
+        createResource(provider, UtilDto.SERVICE_THING, "locationIds", locationIds, null);
+        createResource(provider, UtilDto.SERVICE_THING, "datastreamIds", datastreamIds, null);
     }
 
     protected void createResource(String provider, String service, String resource, Object value, Instant instant) {
