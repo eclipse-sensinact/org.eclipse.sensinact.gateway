@@ -131,7 +131,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
 
                     if (datastreamIds != null) {
                         datastreamIds.forEach(id -> {
-                            SensinactProvider spDatastream = twin.getProvider(request.id());
+                            SensinactProvider spDatastream = twin.getProvider(id);
                             if (sp != null) {
                                 spDatastream.delete();
                             }

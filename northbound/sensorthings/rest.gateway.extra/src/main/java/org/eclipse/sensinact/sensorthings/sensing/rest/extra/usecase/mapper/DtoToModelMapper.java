@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -401,11 +403,11 @@ public class DtoToModelMapper {
     }
 
     private static String getLocationId(ExpandedLocation l) {
-        return sanitizeId(l.id() != null ? (String) l.id() : l.name());
+        return sanitizeId(l.id() != null ? (String) l.id() : UUID.randomUUID().toString());
     }
 
     private static String getDatastreamid(ExpandedDataStream l) {
-        return sanitizeId(l.id() != null ? (String) l.id() : l.name());
+        return sanitizeId(l.id() != null ? (String) l.id() : UUID.randomUUID().toString());
     }
 
     public static List<SensorThingsUpdate> toLocationUpdates(ExpandedLocation location, String id) {
