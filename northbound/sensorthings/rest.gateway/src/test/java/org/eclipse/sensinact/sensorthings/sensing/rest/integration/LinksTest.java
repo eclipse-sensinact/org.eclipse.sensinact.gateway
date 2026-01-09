@@ -354,7 +354,7 @@ public class LinksTest extends AbstractIntegrationTest {
         createDatastrem(providerDatastream, provider);
         createLocation(providerLocation);
 
-        session.setResourceValue(PROVIDER, "admin", "location",
+        session.setResourceValue(providerLocation, "location", "location",
                 "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}");
 
         // Get the new locations
