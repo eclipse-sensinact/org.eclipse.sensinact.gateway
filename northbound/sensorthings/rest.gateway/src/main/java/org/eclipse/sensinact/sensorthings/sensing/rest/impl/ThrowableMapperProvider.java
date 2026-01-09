@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -26,8 +27,12 @@ public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable e) {
+        if (e instanceof WebApplicationException webEx) {
+            // Log at WARN instead of ERROR
+            LOG.warn("WebApplicationException caught: status {}", webEx.getResponse().getStatus());
+            return webEx.getResponse(); // preserve original status
+        }
         LOG.error("Unhandled exception while processing request", e);
-
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal server error").build();
     }
 }
