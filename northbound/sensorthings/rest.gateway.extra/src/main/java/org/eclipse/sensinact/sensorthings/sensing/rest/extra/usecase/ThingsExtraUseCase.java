@@ -106,21 +106,41 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
     @Override
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
         // get resource list of datastreamId
+        ResourceCommand<TimedValue<List<String>>> listDatastreamIds = new ResourceCommand<TimedValue<List<String>>>(
+                request.id(), UtilDto.SERVICE_THING, "datastreamIds") {
 
-        return new AbstractSensinactCommand<TimedValue<List<String>>>() {
+            @Override
+            protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMultiValue(String.class);
+            }
+
+        };
+        return new DependentCommand<TimedValue<List<String>>, Void>(listDatastreamIds) {
             // delete thing and datastream linked
             @Override
-            protected Promise<TimedValue<List<String>>> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                    PromiseFactory pf) {
-
+            protected Promise<Void> call(Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
                 SensinactProvider sp = twin.getProvider(request.id());
-                return sp.getResource(UtilDto.SERVICE_THING, "datastreamIds").getMultiValue(String.class)
-                        .thenAccept(l -> l.getValue().stream().forEach(idDatastream -> {
-                            SensinactProvider spDatastream = twin.getProvider(idDatastream);
-                            if (spDatastream != null) {
+                if (sp != null) {
+                    sp.delete();
+                }
+
+                List<String> datastreamIds;
+                try {
+                    datastreamIds = parentResult.getValue().getValue();
+
+                    if (datastreamIds != null) {
+                        datastreamIds.forEach(id -> {
+                            SensinactProvider spDatastream = twin.getProvider(request.id());
+                            if (sp != null) {
                                 spDatastream.delete();
                             }
-                        })).thenAccept(x -> sp.delete());
+                        });
+                    }
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
             }
         };
 
