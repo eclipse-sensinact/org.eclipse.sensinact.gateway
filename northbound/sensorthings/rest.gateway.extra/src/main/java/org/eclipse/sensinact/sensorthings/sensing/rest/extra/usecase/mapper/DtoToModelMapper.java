@@ -374,9 +374,13 @@ public class DtoToModelMapper {
                     .collect(toMap(e -> "sensorthings.thing." + e.getKey(), Entry::getValue));
         }
         if (thing.locations() != null) {
-            thing.locations().stream().filter(l -> !isRecordOnlyField(l, "id"))
-                    .map(l -> toLocationUpdate(getLocationId(l), l)).forEach(listUpdate::add);
-            existingLocationIds.addAll(thing.locations().stream().map(l -> getLocationId(l)).toList());
+            for (ExpandedLocation l : thing.locations()) {
+                String locationId = getLocationId(l);
+                if (!isRecordOnlyField(l, "id")) {
+                    listUpdate.add(toLocationUpdate(locationId, l));
+                }
+                existingLocationIds.add(locationId);
+            }
         }
         if (thing.datastreams() != null) {
             for (ExpandedDataStream ds : thing.datastreams()) {
