@@ -109,9 +109,8 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerLocation), 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerLocation).map(List::of).orElse(List.of()));
+                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, List.of(providerLocation));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -159,9 +158,8 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerSnapshot), 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, List.of(providerSnapshot));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

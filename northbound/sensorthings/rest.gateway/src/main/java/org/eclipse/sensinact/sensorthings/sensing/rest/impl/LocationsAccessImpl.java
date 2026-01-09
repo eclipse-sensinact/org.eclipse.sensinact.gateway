@@ -60,9 +60,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerSnapshot), 0);
             if (list.value().isEmpty()) {
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, List.of(providerSnapshot));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -121,19 +120,14 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public ResultList<HistoricalLocation> getLocationThingHistoricalLocations(String id, String id2) {
-        String providerId = UtilDto.extractFirstIdSegment(id);
-        String providerIdThing = UtilDto.extractFirstIdSegment(id2);
 
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerLocation = validateAndGetProvider(providerId);
-            if( is)
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, getLocationProvidersFromThing(id2), 0);
             if (list.value().isEmpty()) {
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, getLocationProvidersFromThing(id2));
             }
             return list;
         } catch (IllegalArgumentException iae) {
