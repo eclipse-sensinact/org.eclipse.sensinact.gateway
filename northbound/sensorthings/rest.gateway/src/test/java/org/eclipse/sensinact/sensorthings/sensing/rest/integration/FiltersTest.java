@@ -663,7 +663,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             Map<?, ?> rawSensor = (Map<?, ?>) rawDatastream.get("Sensor");
 
             assertNotNull(rawSensor);
-            assertEquals("expandTesterDatastream~test", rawSensor.get("@iot.id"));
+            assertEquals("expandTesterDatastream~test1", rawSensor.get("@iot.id"));
         }
     }
 }

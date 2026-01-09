@@ -163,7 +163,7 @@ public class AbstractIntegrationTest {
     }
 
     protected void createDatastrem(String provider, String thingId, int value) {
-        createDatastrem(provider, thingId, value);
+        createDatastrem(provider, thingId, value, null);
     }
 
     protected void createDatastrem(String provider, String thingId, int value, Instant valueInstant) {

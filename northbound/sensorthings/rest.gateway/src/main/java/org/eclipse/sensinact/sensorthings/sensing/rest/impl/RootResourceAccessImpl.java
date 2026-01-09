@@ -121,7 +121,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProviders(criterion);
         return new ResultList<>(null, null,
-                providers.stream().map(
+                providers.stream().filter(p -> UtilDto.getThingService(p) != null).map(
                         p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
     }
@@ -131,7 +131,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
         return new ResultList<>(null, null,
-                providers.stream().filter(p -> hasResourceSet(p, "admin", "location")).map(
+                providers.stream().filter(p -> UtilDto.getLocationService(p) != null).map(
                         p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
     }
