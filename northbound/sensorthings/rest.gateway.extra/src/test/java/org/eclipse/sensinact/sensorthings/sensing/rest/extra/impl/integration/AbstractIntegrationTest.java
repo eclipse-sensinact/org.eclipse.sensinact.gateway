@@ -192,7 +192,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPatch(SubUrl, dto);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
