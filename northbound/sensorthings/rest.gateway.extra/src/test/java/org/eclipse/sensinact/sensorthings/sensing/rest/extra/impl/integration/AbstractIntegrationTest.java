@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -144,7 +144,19 @@ public class AbstractIntegrationTest {
     protected JsonNode getJsonResponseFromGet(String url, int expectedStatus) throws IOException, InterruptedException {
         HttpResponse<String> response = queryGet(url);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
+        if (response.statusCode() < 400) {
+            return mapper.readTree(response.body());
+
+        }
+        return null;
+    }
+
+    protected JsonNode getJsonResponseFromDelete(String url, int expectedStatus)
+            throws IOException, InterruptedException {
+        HttpResponse<String> response = queryDelete(url);
+        // Then
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -156,7 +168,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPost(SubUrl, dto);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -168,7 +180,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPut(SubUrl, dto);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -180,7 +192,7 @@ public class AbstractIntegrationTest {
             throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
         HttpResponse<String> response = queryPatch(SubUrl, dto);
         // Then
-        assertEquals(expectedStatus, response.statusCode());
+        assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
             return mapper.readTree(response.body());
 
@@ -206,6 +218,15 @@ public class AbstractIntegrationTest {
         targetUri = getTargetUri(path);
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).build();
+        return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
+    }
+
+    public HttpResponse<String> queryDelete(final String path) throws IOException, InterruptedException {
+        // Normalize URI
+        final URI targetUri;
+        targetUri = getTargetUri(path);
+
+        final HttpRequest req = getHttpBuilder(targetUri).DELETE().build();
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
     }
 

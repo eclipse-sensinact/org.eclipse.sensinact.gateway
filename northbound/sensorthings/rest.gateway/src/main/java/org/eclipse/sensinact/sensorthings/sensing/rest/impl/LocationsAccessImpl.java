@@ -29,13 +29,15 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.LocationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.LocationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.LocationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-public class LocationsAccessImpl extends AbstractAccess implements LocationsAccess, LocationsUpdate {
+public class LocationsAccessImpl extends AbstractAccess implements LocationsDelete, LocationsAccess, LocationsUpdate {
 
     @Override
     public Location getLocation(String id) {
@@ -153,6 +155,29 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     @Override
     public Response patchLocation(String id, ExpandedLocation location) {
         return updateLocation(id, location);
+    }
+
+    @Override
+    public Response deleteLocation(String id) {
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedLocation.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteThingsRef(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedLocation.class,
+                ExpandedThing.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteThingRef(String id, String id2) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id2, id, ExpandedLocation.class,
+                ExpandedThing.class);
+
+        return Response.noContent().build();
     }
 
 }

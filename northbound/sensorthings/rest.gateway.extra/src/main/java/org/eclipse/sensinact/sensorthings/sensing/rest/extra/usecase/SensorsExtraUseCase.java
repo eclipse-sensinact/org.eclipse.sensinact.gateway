@@ -14,17 +14,16 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
-
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -33,14 +32,11 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor, Object> {
 
-    private final DataUpdate dataUpdate;
-    private final IAccessServiceUseCase serviceUseCase;
     private final IDtoMemoryCache<ExpandedSensor> cacheSensor;
 
     @SuppressWarnings("unchecked")
     public SensorsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        super(providers);
         cacheSensor = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
     }
 
@@ -56,7 +52,14 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ExpandedSensor> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+
+        if (cacheSensor.getDto(request.id()) != null) {
+            cacheSensor.removeDto(request.id());
+            return new ExtraUseCaseResponse<Object>(true, "sensor deleted");
+
+        } else {
+            throw new WebApplicationException("Sensor is mandatory for Datastream", Response.Status.CONFLICT);
+        }
 
     }
 
@@ -72,7 +75,8 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
         ExpandedSensor sensorToUpdate = new ExpandedSensor(null, sensorId, receivedSensor.name(),
                 receivedSensor.description(), receivedSensor.encodingType(), receivedSensor.metadata(),
                 receivedSensor.properties(), null);
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, sensorToUpdate, null, null, null, null));
+        return List.of(
+                DtoToModelMapper.toDatastreamUpdate(providerId, null, sensorToUpdate, null, null, null, null, null));
 
     }
 
@@ -92,7 +96,7 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedSensor,
                 dataUpdate.pushUpdate(listDtoModels).getValue();
 
             } catch (InvocationTargetException | InterruptedException e) {
-                return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
+                throw new InternalServerErrorException(e);
             }
             ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
             if (serviceSnapshot == null) {

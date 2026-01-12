@@ -14,17 +14,18 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
+
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -34,14 +35,12 @@ import jakarta.ws.rs.ext.Providers;
 public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<FeatureOfInterest, Object> {
 
     private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
-    private final DataUpdate dataUpdate;
-    private final IAccessServiceUseCase serviceUseCase;
 
     @SuppressWarnings("unchecked")
     public FeatureOfInterestExtraUseCase(Providers providers) {
+        super(providers);
         cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+
     }
 
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
@@ -57,7 +56,15 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+
+        if (cacheFoi.getDto(request.id()) != null) {
+            cacheFoi.removeDto(request.id());
+            return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
+
+        } else {
+            throw new WebApplicationException("FeatureOfInterest is mandatory for Observation",
+                    Response.Status.CONFLICT);
+        }
 
     }
 
@@ -75,7 +82,8 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
                 receiveFoi.encodingType(), receiveFoi.feature(), null);
 
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, foiToUpdate));
+        return List.of(
+                DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, null, null, null, foiToUpdate));
 
     }
 
@@ -106,7 +114,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
                 dataUpdate.pushUpdate(listDtoModels).getValue();
 
             } catch (InvocationTargetException | InterruptedException e) {
-                return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
+                throw new InternalServerErrorException(e);
             }
             ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
             if (serviceSnapshot == null) {

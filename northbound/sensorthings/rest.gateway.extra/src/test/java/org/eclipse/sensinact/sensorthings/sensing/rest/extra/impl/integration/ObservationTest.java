@@ -12,13 +12,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -45,7 +51,7 @@ public class ObservationTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
                 DtoFactory.getRefId(thingId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
         UtilsAssert.assertDatastream(datastream, json, true);
         String datastreamId = getIdFromJson(json);
         ExpandedObservation observsation = DtoFactory.getObservation(name);
@@ -61,6 +67,36 @@ public class ObservationTest extends AbstractIntegrationTest {
      * @throws Exception
      */
     @Test
+    public void testDeleteObservation() throws Exception {
+        // given
+        String name = "testDeleteObservation";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
+                DtoFactory.getRefId(thingId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
+        UtilsAssert.assertDatastream(datastream, json, true);
+        String datastreamId = getIdFromJson(json);
+        ExpandedObservation observsation = DtoFactory.getObservation(name);
+        json = getJsonResponseFromPost(observsation, String.format("Datastreams(%s)/Observations", datastreamId), 201);
+        String idObservation = getIdFromJson(json);
+        UtilsAssert.assertObservation(observsation, json);
+        // when
+        getJsonResponseFromDelete(String.format("Observations(%s)", idObservation), 204);
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, datastreamId, "datastream");
+        ExpandedObservation lastObs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        assertNull(lastObs);
+    }
+
+    /**
+     *  test create observation with missing required field
+     */
+    @Test
     public void testCreateObservationMissingField() throws Exception {
         // given
         String name = "createCreateObservationMissingField";
@@ -72,7 +108,7 @@ public class ObservationTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
                 DtoFactory.getRefId(thingId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
         UtilsAssert.assertDatastream(datastream, json, true);
         String datastreamId = getIdFromJson(json);
         // result
@@ -110,6 +146,43 @@ public class ObservationTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,ObservedProperty", 201);
 
         UtilsAssert.assertDatastream(datastream, json, true);
+
+    }
+
+    /**
+     * create observation using datastream endpoint
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testDeleteFeatureOfInterestObservationsRef() throws Exception {
+        // given
+        String name = "testDeleteFeatureOfInterestObservationsRef";
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists2", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedObservation observsation1 = DtoFactory.getObservation(name + "1");
+        ExpandedObservation observsation2 = DtoFactory.getObservation(name + "2");
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingWithObservations(name + "Datastream",
+                DtoFactory.getRefId(thingId), List.of(observsation1, observsation2));
+
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,ObservedProperty", 201);
+        JsonNode observationsNode = json.get("Observations");
+        assertEquals(observationsNode.size(), 1);
+        String idObservation = getIdFromJson(observationsNode.get(0));
+        UtilsAssert.assertDatastream(datastream, json, true);
+        // when
+        getJsonResponseFromDelete(String.format("/Observations(%s)/FeatureOfInterest/$ref", idObservation), 409);
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, UtilDto.extractFirstIdSegment(idObservation),
+                "datastream");
+        ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        assertNotNull(obs);
+        assertNotNull(obs.featureOfInterest());
 
     }
 

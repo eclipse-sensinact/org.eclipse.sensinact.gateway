@@ -1,24 +1,32 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
+import java.util.stream.Stream;
+
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -27,10 +35,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
@@ -41,13 +49,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * datastream
  */
-public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDataStream, ServiceSnapshot> {
-
-    private final DataUpdate dataUpdate;
-
-    private final IAccessProviderUseCase providerUseCase;
-
-    private final IAccessServiceUseCase serviceUseCase;
+public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedDataStream, ServiceSnapshot> {
 
     private final IDtoMemoryCache<ExpandedSensor> sensorCache;
 
@@ -57,9 +59,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     @SuppressWarnings("unchecked")
     public DatastreamsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        super(providers);
+
         sensorCache = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
         foiCache = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
         observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
@@ -75,8 +76,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
         }
 
         ServiceSnapshot snapshot = serviceUseCase.read(request.session(), idDatastream, "datastream");
@@ -92,10 +92,6 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
 
-    }
-
-    public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedDataStream> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
     }
 
     @Override
@@ -120,20 +116,30 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         addDatastreamIdLinkToLinkThing(request, datastreamId, providerThing, listUpdates);
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
-            return datastream.observations().stream()
+            listUpdates.addAll(datastream.observations().stream()
                     .map(obs -> DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
                             observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
-                    .toList();
+                    .toList());
         } else {
-            return List.of(DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
+            listUpdates.add(DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
                     observedProperty, unit, null, null));
         }
+        return listUpdates;
 
+    }
+
+    private String getThingId(ExtraUseCaseRequest<ExpandedDataStream> request) {
+        return getThingId(request, request.id());
+    }
+
+    private String getThingId(ExtraUseCaseRequest<ExpandedDataStream> request, String datastreamId) {
+        return getThingId(request, null, datastreamId);
     }
 
     private String getThingId(ExtraUseCaseRequest<ExpandedDataStream> request, ExpandedDataStream datastream,
             String datastreamId) {
-        String thingId = datastream.thing() == null ? request.parentId() : (String) datastream.thing().id();
+        String thingId = datastream == null || datastream.thing() == null ? request.parentId()
+                : (String) datastream.thing().id();
         // if datastream up date. check which thing is assign to and remove it
         if (thingId == null) {
             ProviderSnapshot providerDatastream = providerUseCase.read(request.session(), datastreamId);
@@ -158,10 +164,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
             // need to remove link to this datastream in oldthing
             ProviderSnapshot providerThing = providerUseCase.read(request.session(), oldThingId);
-            ResourceSnapshot resource = providerThing.getResource("thing", "datastreamIds");
-            @SuppressWarnings("unchecked")
-            List<String> ids = (List<String>) resource.getValue().getValue();
-            ids.remove(datastreamId);
+            List<String> ids = getDatastreamIds(providerThing).stream().filter(id -> !datastreamId.equals(id)).toList();
+
             listUpdates.add(new ThingUpdate(thingId, null, null, thingId, null, null, ids));
 
         }
@@ -171,10 +175,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
             ProviderSnapshot providerThing, List<SensorThingsUpdate> listUpdates) {
         ServiceSnapshot serviceThing = providerThing.getService("thing");
 
-        @SuppressWarnings("unchecked")
-        List<String> ids = UtilDto.getResourceField(serviceThing, "datastreamIds", List.class);
+        List<String> ids = getDatastreamIds(serviceThing);
         if (!ids.contains(datastreamId)) {
-            ids.add(datastreamId);
+            ids = Stream.concat(ids.stream(), Stream.of(datastreamId)).toList();
             listUpdates.add(
                     new ThingUpdate(providerThing.getName(), null, null, providerThing.getName(), null, null, ids));
         }
@@ -322,8 +325,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
+
         }
 
         ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), id, "datastream");
@@ -336,6 +339,46 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         }
 
         return new ExtraUseCaseResponse<ServiceSnapshot>(id, serviceSnapshot);
+
+    }
+
+    @Override
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedDataStream> request) {
+        // delete datastream
+        // TODO Authorization
+        String thingId = getThingId(request);
+        ResourceCommand<TimedValue<List<String>>> parentCommand = new ResourceCommand<TimedValue<List<String>>>(thingId,
+                UtilDto.SERVICE_THING, "datastreamIds") {
+            @Override
+            protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMultiValue(String.class);
+            }
+        };
+        return new DependentCommand<TimedValue<List<String>>, Void>(parentCommand) {
+
+            @Override
+            protected Promise<Void> call(Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
+
+                SensinactProvider sp = twin.getProvider(request.id());
+                if (sp != null) {
+                    sp.delete();
+                }
+                try {
+                    List<String> datastreamIds = parentResult.getValue().getValue();
+                    if (datastreamIds != null) {
+                        List<String> newDatastreamIds = datastreamIds.stream().filter(id -> !id.equals(request.id()))
+                                .toList();
+                        SensinactResource resource = twin.getResource(thingId, UtilDto.SERVICE_THING, "datastreamIds");
+                        return resource.setValue(newDatastreamIds);
+                    }
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
+            }
+
+        };
 
     }
 

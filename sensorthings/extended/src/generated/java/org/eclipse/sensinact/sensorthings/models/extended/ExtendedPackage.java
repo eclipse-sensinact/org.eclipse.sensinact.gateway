@@ -539,7 +539,7 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	int SENSOR_THING_SERVICE__ID = ProviderPackage.SERVICE_FEATURE_COUNT + 3;
 
 	/**
-	 * The feature id for the '<em><b>Location Ids</b></em>' attribute.
+	 * The feature id for the '<em><b>Location Ids</b></em>' attribute list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -548,7 +548,7 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	int SENSOR_THING_SERVICE__LOCATION_IDS = ProviderPackage.SERVICE_FEATURE_COUNT + 4;
 
 	/**
-	 * The feature id for the '<em><b>Datastream Ids</b></em>' attribute.
+	 * The feature id for the '<em><b>Datastream Ids</b></em>' attribute list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -1137,10 +1137,10 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	EAttribute getSensorThingService_Id();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getLocationIds <em>Location Ids</em>}'.
+	 * Returns the meta object for the attribute list '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getLocationIds <em>Location Ids</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Location Ids</em>'.
+	 * @return the meta object for the attribute list '<em>Location Ids</em>'.
 	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getLocationIds()
 	 * @see #getSensorThingService()
 	 * @generated
@@ -1148,10 +1148,10 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	EAttribute getSensorThingService_LocationIds();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDatastreamIds <em>Datastream Ids</em>}'.
+	 * Returns the meta object for the attribute list '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDatastreamIds <em>Datastream Ids</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Datastream Ids</em>'.
+	 * @return the meta object for the attribute list '<em>Datastream Ids</em>'.
 	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDatastreamIds()
 	 * @see #getSensorThingService()
 	 * @generated
@@ -1504,7 +1504,7 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 		EAttribute SENSOR_THING_SERVICE__ID = eINSTANCE.getSensorThingService_Id();
 
 		/**
-		 * The meta object literal for the '<em><b>Location Ids</b></em>' attribute feature.
+		 * The meta object literal for the '<em><b>Location Ids</b></em>' attribute list feature.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
 		 * @generated
@@ -1512,7 +1512,7 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 		EAttribute SENSOR_THING_SERVICE__LOCATION_IDS = eINSTANCE.getSensorThingService_LocationIds();
 
 		/**
-		 * The meta object literal for the '<em><b>Datastream Ids</b></em>' attribute feature.
+		 * The meta object literal for the '<em><b>Datastream Ids</b></em>' attribute list feature.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
 		 * @generated

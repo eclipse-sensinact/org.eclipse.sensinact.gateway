@@ -42,11 +42,13 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ObservationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 
-public class ObservationsAccessImpl extends AbstractAccess implements ObservationsAccess, ObservationsUpdate {
+public class ObservationsAccessImpl extends AbstractAccess
+        implements ObservationsDelete, ObservationsAccess, ObservationsUpdate {
 
     @Override
     public Observation getObservation(String id) {
@@ -175,6 +177,21 @@ public class ObservationsAccessImpl extends AbstractAccess implements Observatio
     public Response updateObservationFeatureOfInterestRef(String id, RefId foi) {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), foi, id,
                 ExpandedObservation.class, FeatureOfInterest.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteObservation(String id) {
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response deleteObservationFeatureOfInterest(String id) {
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class,
+                FeatureOfInterest.class);
 
         return Response.noContent().build();
     }

@@ -15,14 +15,22 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -32,17 +40,12 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * observation
  */
-public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedObservation, ServiceSnapshot> {
-
-    private final IAccessServiceUseCase serviceUseCase;
-
-    private final DataUpdate dataUpdate;
+public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedObservation, ServiceSnapshot> {
 
     private final FeatureOfInterestExtraUseCase featureOfInterestUseCase;
 
     public ObservationsExtraUseCase(Providers providers) {
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        super(providers);
         featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
     }
 
@@ -55,8 +58,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
 
         }
 
@@ -66,11 +68,6 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
             return new ExtraUseCaseResponse<ServiceSnapshot>(observationId, service);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
-
-    }
-
-    public ExtraUseCaseResponse<ServiceSnapshot> delete(ExtraUseCaseRequest<ExpandedObservation> request) {
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "not implemented");
 
     }
 
@@ -95,9 +92,12 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
         String id = request.parentId() != null ? request.parentId() : request.id();
         String providerId = UtilDto.extractFirstIdSegment(id);
         String serviceId = "datastream";
-        checkRequireLink(serviceUseCase.read(request.session(), providerId, serviceId));
-
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, observation, foi));
+        ServiceSnapshot serviceDatastream = serviceUseCase.read(request.session(), providerId, serviceId);
+        checkRequireLink(serviceDatastream);
+        ExpandedObservation existingObservation = UtilDto.getResourceField(serviceDatastream, "lastObservation",
+                ExpandedObservation.class);
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, existingObservation,
+                observation, foi));
     }
 
     private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {
@@ -135,8 +135,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
         } catch (InvocationTargetException | InterruptedException e) {
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, new InternalServerErrorException(e),
-                    e.getMessage());
+            throw new InternalServerErrorException(e);
 
         }
         String dataStreamId = UtilDto.extractFirstIdSegment(request.parentId());
@@ -146,6 +145,47 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedOb
             return new ExtraUseCaseResponse<ServiceSnapshot>(observationId, service);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
+    }
+
+    @Override
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
+        String datastreamId = UtilDto.extractFirstIdSegment(request.id());
+        // get resource observation
+        ResourceCommand<TimedValue<ExpandedObservation>> parentCommand = new ResourceCommand<TimedValue<ExpandedObservation>>(
+                datastreamId, UtilDto.SERVICE_DATASTREAM, "lastObservation") {
+            @Override
+            protected Promise<TimedValue<ExpandedObservation>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue(ExpandedObservation.class);
+            }
+        };
+        return new DependentCommand<TimedValue<ExpandedObservation>, Void>(parentCommand) {
+
+            @Override
+            protected Promise<Void> call(Promise<TimedValue<ExpandedObservation>> parentResult,
+                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
+                try {
+                    if (parentResult.getFailure() == null) {
+                        ExpandedObservation obs = parentResult.getValue().getValue();
+                        String observationId = UtilDto.extractSecondIdSegment(request.id());
+
+                        if (observationId == null || !observationId.equals(obs.id())) {
+                            return pf.failed(new BadRequestException());
+
+                        }
+                        String datastreamId = UtilDto.extractFirstIdSegment(request.id());
+
+                        SensinactProvider sp = twin.getProvider(datastreamId);
+                        SensinactResource resource = sp.getResource("datastream", "lastObservation");
+
+                        return resource.setValue(null);
+                    }
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
+
+            }
+        };
     }
 
 }

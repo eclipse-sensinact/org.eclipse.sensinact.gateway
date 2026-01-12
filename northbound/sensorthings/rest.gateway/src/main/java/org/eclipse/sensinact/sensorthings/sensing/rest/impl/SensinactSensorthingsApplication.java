@@ -60,9 +60,9 @@ public class SensinactSensorthingsApplication extends Application {
 
         Set<Class<?>> listResource = new HashSet<Class<?>>(Set.of(
                 // Features/extensions
-                SensorThingsFeature.class, SensinactSessionProvider.class, SensorthingsFilterProvider.class,
-                AccessProviderUseCaseProvider.class, AccessResourceUseCaseProvider.class,
-                AccessServiceUseCaseProvider.class,
+                SensorThingsFeature.class, ThrowableMapperProvider.class, SensinactSessionProvider.class,
+                SensorthingsFilterProvider.class, AccessProviderUseCaseProvider.class,
+                AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections

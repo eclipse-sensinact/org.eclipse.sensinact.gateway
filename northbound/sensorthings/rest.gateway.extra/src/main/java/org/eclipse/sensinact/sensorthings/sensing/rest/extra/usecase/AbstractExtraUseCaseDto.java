@@ -1,24 +1,32 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.List;
 
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.ext.Providers;
 
 /**
  * abstract use case
@@ -28,10 +36,12 @@ import jakarta.ws.rs.HttpMethod;
  */
 public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractExtraUseCase<M, S> {
 
-    public AbstractExtraUseCaseDto() {
-    }
-
     public abstract List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<M> request);
+
+    protected final DataUpdate dataUpdate;
+    protected final IAccessProviderUseCase providerUseCase;
+    protected final IAccessServiceUseCase serviceUseCase;
+    protected final GatewayThread gatewayThread;
 
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
         if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
@@ -39,4 +49,31 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
         }
     }
 
+    public AbstractExtraUseCaseDto(Providers providers) {
+        dataUpdate = resolve(providers, DataUpdate.class);
+        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
+        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+        gatewayThread = resolve(providers, GatewayThread.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<String> getDatastreamIds(ServiceSnapshot serviceThing) {
+        return UtilDto.getResourceField(serviceThing, "datastreamIds", List.class);
+
+    }
+
+    protected List<String> getLocationIds(ProviderSnapshot provider) {
+        return getLocationIds(UtilDto.getThingService(provider));
+
+    }
+
+    protected List<String> getDatastreamIds(ProviderSnapshot provider) {
+        return getDatastreamIds(UtilDto.getThingService(provider));
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<String> getLocationIds(ServiceSnapshot serviceThing) {
+        return UtilDto.getResourceField(serviceThing, "locationIds", List.class);
+
+    }
 }

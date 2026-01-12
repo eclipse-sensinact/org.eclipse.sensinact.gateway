@@ -14,17 +14,17 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -35,14 +35,11 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
 
     private final IDtoMemoryCache<ExpandedObservedProperty> cacheObservedProperty;
 
-    private final DataUpdate dataUpdate;
-    private final IAccessServiceUseCase serviceUseCase;
-
     @SuppressWarnings("unchecked")
     public ObservedPropertiesExtraUseCase(Providers providers) {
+        super(providers);
         cacheObservedProperty = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
-        dataUpdate = resolve(providers, DataUpdate.class);
-        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+
     }
 
     private ExpandedObservedProperty updateInMemoryObservedProperty(
@@ -71,8 +68,13 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
     }
 
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<Object>(false, "not implemented");
+        if (cacheObservedProperty.getDto(request.id()) != null) {
+            cacheObservedProperty.removeDto(request.id());
+            return new ExtraUseCaseResponse<Object>(true, "observed property deleted");
 
+        } else {
+            throw new WebApplicationException("ObservedProperty is mandatory for Datastream", Response.Status.CONFLICT);
+        }
     }
 
     @Override
@@ -86,7 +88,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
         checkRequireField(request);
         ExpandedObservedProperty opToUpdate = new ExpandedObservedProperty(null, sensorId, receivedOp.name(),
                 receivedOp.description(), receivedOp.definition(), receivedOp.properties(), null);
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, opToUpdate, null, null, null));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, opToUpdate, null, null, null, null));
 
     }
 
@@ -106,7 +108,7 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Expa
                 dataUpdate.pushUpdate(listDtoModels).getValue();
 
             } catch (InvocationTargetException | InterruptedException e) {
-                return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
+                throw new InternalServerErrorException(e);
             }
             ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
             if (serviceSnapshot == null) {

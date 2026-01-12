@@ -73,6 +73,12 @@ public interface IExtraUseCase<M extends Id, S> {
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                String id, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
+
+            this(session, mapper, uriInfo, method, id, null, parentId, clazzModel, clazzRef);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 String id, M model, String parentId) {
 
             this(session, mapper, uriInfo, method, id, model, parentId, null, null);
@@ -84,7 +90,7 @@ public interface IExtraUseCase<M extends Id, S> {
         }
 
         public ExtraUseCaseRequest {
-            if (id == null) {
+            if (id == null && model != null) {
                 id = DtoToModelMapper.sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString());
             }
         }

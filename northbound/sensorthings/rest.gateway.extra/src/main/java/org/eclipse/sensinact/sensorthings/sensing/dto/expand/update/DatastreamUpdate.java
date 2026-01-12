@@ -55,7 +55,7 @@ public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitSymbol,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitDefinition,
 // observation
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) ExpandedObservation lastObservation
+        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) ExpandedObservation lastObservation
 
 ) implements SensorThingsUpdate {
 
