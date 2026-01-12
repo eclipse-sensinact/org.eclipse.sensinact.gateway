@@ -847,6 +847,98 @@ public class ResourceSelectorTest {
                 makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "10", "20", "40"));
             assertQueryFalse(rs, rc);
         }
+
+        @Test
+        void testDocumentationExamples() {
+            ResourceSnapshot answer = makeResource("test", "answer", 42);
+            ResourceSnapshot pool1 = makeResource("test", "pool-1", List.of(1, 2, 3));
+            ResourceSnapshot pool2 = makeResource("test", "pool-2", List.of(2, 10, 42));
+            ResourceSelector rs = makeBasicResourceSelector(null, null, null, null);
+
+            // First example: find resources with 42
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            // Second example: find resources with [1, 2, 3]
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            // Third example: find resources with 2
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            // Fourth example: find resources with [3, 42]
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "3", "42"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "3", "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "3", "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "3", "42"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+        }
     }
 
     @Nested

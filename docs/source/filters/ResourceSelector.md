@@ -191,7 +191,24 @@ Value Selections have the following form:
 ```json
 {
   "value": "17",
-  "operation": "EQUALS"
+  "operation": "GREATER_THAN",
+  "negate": false,
+  "check": "VALUE",
+  "mode": "ANY_MATCH"
+}
+```
+
+- `value`: the value(s) to test. This can be a single value or a list of values. The test behaviour depends on the [selection mode](#value-selection-mode)
+- `operation` (default: `EQUALS`): the [operation](#operation-types) to compare a resource value with a test value
+- `negate` (default: `false`): the filter is the negation of the selection
+- `check` (default: `VALUE`): which part of the resource must be [checked](#check-type)
+
+Relying on default value, the simple form of the same value selection can be:
+
+```json
+{
+  "value": "17",
+  "operation": "GREATER_THAN"
 }
 ```
 
@@ -199,17 +216,57 @@ Each Resource Selection may define multiple Value Selections. These are combined
 
 ### Operation Types
 
-The `operation` of a value selection is one of: `EQUALS`, `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUAL`, `GREATER_THAN_OR_EQUAL`, `REGEX`, `REGEX_REGION`, `IS_SET` or `IS_NOT_NULL`.
+The `operation` of a value selection is one of:
 
-Mathematical operators apply by converting `value` into the same type as the resource value being tested, and then either using `equals` or by treating the resource value as being `Comparable`. If the resource value *is not* `Comparable` then the operation returns `false`.
+- `EQUALS` (**default**), `LESS_THAN`, `GREATER_THAN`, `LESS_THAN_OR_EQUAL`, `GREATER_THAN_OR_EQUAL`
+  - Mathematical operators are applied by converting `value` into the same type as the resource value being tested, and then either using `equals` or by treating the resource value as being [`Comparable`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Comparable.html).
+  - If the resource value is **not `Comparable`** then the operation returns `false`.
+- `REGEX` and `REGEX_REGION`
+  - Behave as described for [Selections](#selections).
+- `IS_SET`
+  - A special operator which returns true if the resource has been set to a value.
+  - Note that the value may be `null`.
+- `IS_NOT_NULL`
+  - A special operator which returns true if the resource has been set to a non-null value.
 
-`REGEX` and `REGEX_REGION` behave as described for [Selections](#selections).
+### Check Type
 
-`IS_SET` is a special operator which returns true if the resource has been set to a value. Note that the value may be `null`.
+The `check` type of a value selection indicates what should be tested in the resource:
 
-`IS_NOT_NULL` is a special operator which returns true if the resource has been set to a non-null value.
+- `VALUE` (**default**): the test will be applied against the resource value.
+- `SIZE`: the test will be applied against the size of the resource value. For arrays, collections and maps, this is the number of elements. For strings, this is the length of the string. For numbers, it is the absolute magnitude of the number.
+- `TIMESTAMP`: the test will be applied against the timestamp of the resource value. The test value must be an [ISO-8601](https://www.iso8601.com/) string.
+- `AGE_S` or `AGE_MS`: the test will be applied against the age of the resource value, *i.e.* the difference between the resource timestamp and the test execution time. It can be compared in seconds (`AGE_S`) or milliseconds (`AGE_MS`).
 
-The default value for `operation` if left unspecified is `EQUALS`.
+### Value Selection Mode
+
+The `mode` of a value selection indicates how the test must be done when multiple test values are given and/or the tested resource value is a list.
+
+The mode can be one of:
+
+- `EXACT_MATCH`: the resources must exactly match the selection, including ordering.
+- `ANY_MATCH` (**default**): at least one of the resource value(s) must match any of the given selection. This implies that the resource value must be set.
+- `ALL_MATCH`: all of the resource value(s) must have a match in the selection. Order doesn't matter. The selection size may be different from the number of resource values.
+- `SUPER_SET`: all of the selection items must have a match in the resource value(s).
+
+#### Examples
+
+To demonstrate the value selection mode, we'll consider the following resources:
+
+- `answer` = `42`
+- `pool-1` = `[1, 2, 3]`
+- `pool-2` = `[2, 10, 42]`
+
+We will consider a value selection with check type `VALUE` and operation `EQUALS`.
+Here is the resulting match matrix from different selection values and mode.
+
+| Selection Value | `EXACT_MATCH` | `ANY_MATCH` | `ALL_MATCH` | `SUPER_SET` |
+|-----------------|---------------|-------------|-------------|-------------|
+| `42`            | `answer`      | `answer`; `pool-2` (`42` matches) | `answer` | `answer`; `pool-2` (selection value match on `42`) |
+| `[1, 2, 3]`     | `pool-1`      | `pool-1` (exact match); `pool-2` (`2` matches) | `pool-1` | `pool-1` (pool-2 doesn't match `1` and `3`) |
+| `2`             | No match      | `pool-1`; `pool-2` | No match | `pool-1` (selection value match on `2`); `pool-2` (selection value match on `2`) |
+| `[3, 42]`       | No match      | `answer` (`42` matches); `pool-1` (`3` matches); `pool-2` (`42` matches) | `answer` (`42` matches) | No match (`answer` and `pool-2` don't match `3`; `pool-1` doesn't match `42`) |
+
 
 ### Simple Value Selections
 
@@ -224,7 +281,7 @@ If you want to declare a simple `EQUALS` match then you can do this by using the
 }
 ```
 
-### Multiple Value Selections
+### Value Selections Combination
 
 Value selections may be provided singly, or in an array:
 
@@ -335,9 +392,9 @@ For example:
 
 Note that to reduce complexity radius calculations are not made using geodesics, and so are prone to distortion at high latitudes. The further from the equator that you travel the more distorted the radius will become, particularly along an East/West axis. If high accuracy is important to your use case then we recommend performing your own geodesic buffering and then submitting the resulting polygon as the value of your Location Selection.
 
-### Multiple Location Selections
+### Location Selections Combination
 
-Multiple Location Selections behave in the same way as [Multiple Value Selections](#multiple-value-selections) using an `AND` semantic when combining the tests.
+Combining Location Selections behave in the same way as [Combining Value Selections](#value-selections-combination) using an `AND` semantic when combining the tests.
 
 ### Advanced Location Selection Rules
 
