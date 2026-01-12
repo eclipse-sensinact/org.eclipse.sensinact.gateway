@@ -2,7 +2,7 @@
 * Copyright (c) 2022 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
+* available under the terms of the Eclipse private License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
@@ -103,7 +103,7 @@ public class DtoMapperGet {
         return o == null || o.isEmpty() ? null : String.valueOf(o.get());
     }
 
-    public static Thing toThing(SensiNactSession userSession, Application application, ObjectMapper mapper,
+    private static Thing toThing(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         String id = provider.getName();
 
@@ -145,7 +145,7 @@ public class DtoMapperGet {
         return thing;
     }
 
-    public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
+    private static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
         final String providerName = provider.getName();
         final TimedValue<GeoJsonObject> rcLocation = getLocation(provider, mapper, false);
@@ -184,7 +184,7 @@ public class DtoMapperGet {
         return location;
     }
 
-    public static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession,
+    private static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ProviderSnapshot provider, List<TimedValue<?>> historicalLocations) {
         if (provider == null) {
@@ -200,7 +200,7 @@ public class DtoMapperGet {
         return list;
     }
 
-    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+    private static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ProviderSnapshot provider, Optional<TimedValue<?>> t) {
         if (provider == null) {
@@ -241,7 +241,7 @@ public class DtoMapperGet {
         return Optional.of(historicalLocation);
     }
 
-    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+    private static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ProviderSnapshot provider) {
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
@@ -249,7 +249,7 @@ public class DtoMapperGet {
                 Optional.of(location));
     }
 
-    public static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
+    private static Sensor toSensor(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ResourceSnapshot resource) {
         if (resource == null) {
             throw new NotFoundException();
@@ -259,7 +259,7 @@ public class DtoMapperGet {
         final String provider = providerSnapshot.getName();
         final Map<String, Object> metadata = resource.getMetadata();
 
-        String id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
+        String id = String.format("%s~%s", provider, resource.getService().getName(), resource.getName());
 
         String name = toString(metadata.getOrDefault(FRIENDLY_NAME, resource.getName()));
         String description = toString(metadata.getOrDefault(DESCRIPTION, NO_DESCRIPTION));
@@ -282,7 +282,7 @@ public class DtoMapperGet {
         return sensor;
     }
 
-    public static List<Observation> toObservationList(SensiNactSession userSession, Application application,
+    private static List<Observation> toObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resourceSnapshot, List<TimedValue<?>> observations) {
         if (resourceSnapshot == null) {
@@ -298,14 +298,14 @@ public class DtoMapperGet {
         return list;
     }
 
-    public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
+    private static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource) {
         return toObservation(userSession, application, mapper, uriInfo, expansions, filter, resource,
                 Optional.ofNullable(resource.getValue()));
     }
 
-    public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
+    private static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource, Optional<TimedValue<?>> t) {
         if (resource == null) {
@@ -349,7 +349,7 @@ public class DtoMapperGet {
         return Optional.of(observation);
     }
 
-    public static ObservedProperty toObservedProperty(SensiNactSession userSession, Application application,
+    private static ObservedProperty toObservedProperty(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource) {
         final Map<String, Object> metadata = resource.getMetadata();
@@ -378,7 +378,7 @@ public class DtoMapperGet {
         return observedProperty;
     }
 
-    public static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
+    private static FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
         final String providerName = provider.getName();
@@ -406,7 +406,7 @@ public class DtoMapperGet {
         return featureOfInterest;
     }
 
-    public static String extractFirstIdSegment(String id) {
+    private static String extractFirstIdSegment(String id) {
         if (id.isEmpty()) {
             throw new BadRequestException("Invalid id");
         }
@@ -421,22 +421,10 @@ public class DtoMapperGet {
         return id.substring(0, idx);
     }
 
-    public static Instant getTimestampFromId(String id) {
-        int idx = id.lastIndexOf('~');
-        if (idx < 0 || idx == id.length() - 1) {
-            throw new BadRequestException("Invalid id");
-        }
-        try {
-            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
-        } catch (Exception e) {
-            throw new BadRequestException("Invalid id");
-        }
-    }
-
     /**
      * Ensure the given ID contains a single segment
      */
-    public static void validatedProviderId(String id) {
+    private static void validatedProviderId(String id) {
         if (id.contains("~")) {
             throw new BadRequestException("Multi-segments ID found");
         }
@@ -537,7 +525,7 @@ public class DtoMapperGet {
         return new DefaultTimedValue<>(parsedLocation, time);
     }
 
-    public static Datastream toDatastream(SensiNactSession userSession, Application application, ObjectMapper mapper,
+    private static Datastream toDatastream(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resource, ICriterion filter) {
         if (resource == null) {
             throw new NotFoundException();

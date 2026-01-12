@@ -176,6 +176,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
     @Override
     public Thing getThingHistoricalLocationsThing(String id, String id2) {
         String provider = UtilDto.extractFirstIdSegment(id2);
+        // check if the location exists
+        validateAndGetProvider(provider);
         return getThing(id);
     }
 
@@ -209,8 +211,6 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
             throw new NotFoundException();
         }
 
-        DtoMapper.getTimestampFromId(id2);
-
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), validateAndGetProvider(provider));
 
@@ -228,8 +228,9 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
         if (!isLocationInThing(providerThindId, providerLocationId)) {
             throw new NotFoundException();
         }
-        // TODO get all thing link to location
-        return new ResultList<>(null, null, List.of(getThing(id)));
+        return new ResultList<Thing>(null, null,
+                getLocationThingsProvider(id2).stream().map(p -> DtoMapper.toThing(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), parseFilter(THINGS), p)).toList());
     }
 
     @Override

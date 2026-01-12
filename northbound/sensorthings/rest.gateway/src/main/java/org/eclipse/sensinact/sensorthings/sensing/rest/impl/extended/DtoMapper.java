@@ -12,9 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended;
 
-import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVATION_QUALITY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -103,12 +100,12 @@ public class DtoMapper {
     }
 
     public static ResourceSnapshot validateAndGetResourceSnapshot(SensiNactSession session, String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = DtoMapper.validateAndGetProvider(session, provider);
 
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = UtilDto.extractFirstIdSegment(id.substring(provider.length() + 1));
+        String resource = UtilDto.extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 
@@ -330,6 +327,22 @@ public class DtoMapper {
                 Optional.ofNullable(resource.getValue()));
     }
 
+    public static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot provider, List<TimedValue<?>> historicalLocations) {
+        if (provider == null) {
+            throw new NotFoundException();
+        }
+
+        List<HistoricalLocation> list = new ArrayList<>(historicalLocations.size());
+        for (TimedValue<?> tv : historicalLocations) {
+            toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter,
+                    UtilDto.getLocationService(provider), Optional.of(tv)).ifPresent(list::add);
+        }
+
+        return list;
+    }
+
     public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource, Optional<TimedValue<?>> t) {
@@ -345,32 +358,34 @@ public class DtoMapper {
         }
 
         final Instant timestamp = t.map(TimedValue::getTimestamp).orElse(null);
+        Object obs = t.map(TimedValue::getValue).orElse(null);
+        Observation observation = null;
+        if (obs != null && obs instanceof ExpandedObservation) {
+            ExpandedObservation readObs = (ExpandedObservation) obs;
+            ProviderSnapshot providerSnapshot = resource.getService().getProvider();
+            String id = String.format("%s~%s~%s", providerSnapshot.getName(), readObs.id(),
+                    Long.toString(timestamp.toEpochMilli(), 16));
 
-        ProviderSnapshot providerSnapshot = resource.getService().getProvider();
-        String id = String.format("%s~%s~%s~%s", providerSnapshot.getName(), resource.getService().getName(),
-                resource.getName(), Long.toString(timestamp.toEpochMilli(), 16));
+            String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
+                    .resolveTemplate("id", id).build().toString();
+            String datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build().toString();
+            String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("FeatureOfInterest").build()
+                    .toString();
 
-        Object result = t.map(TimedValue::getValue).orElse(null);
-        Object resultQuality = resource.getMetadata().get(SENSORTHINGS_OBSERVATION_QUALITY);
+            observation = new Observation(selfLink, id, readObs.phenomenonTime(), readObs.resultTime(),
+                    readObs.result(), readObs.resultQuality(), readObs.validTime(), readObs.parameters(),
+                    datastreamLink, featureOfInterestLink);
+            if (expansions.shouldExpand("Datastream", observation)) {
+                expansions.addExpansion("Datastream", observation, toDatastream(userSession, application, mapper,
+                        uriInfo, expansions.getExpansionSettings("Datastream"), filter, resource.getService()));
+            }
 
-        String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})").resolveTemplate("id", id)
-                .build().toString();
-        String datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build().toString();
-        String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("FeatureOfInterest").build()
-                .toString();
-
-        Observation observation = new Observation(selfLink, id, timestamp, timestamp, result, resultQuality, null, null,
-                datastreamLink, featureOfInterestLink);
-        if (expansions.shouldExpand("Datastream", observation)) {
-            expansions.addExpansion("Datastream", observation, toDatastream(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Datastream"), filter, resource.getService()));
+            if (expansions.shouldExpand("FeatureOfInterest", observation)) {
+                expansions.addExpansion("FeatureOfInterest", observation,
+                        toFeatureOfInterest(userSession, application, mapper, uriInfo,
+                                expansions.getExpansionSettings("FeatureOfInterest"), filter, providerSnapshot));
+            }
         }
-
-        if (expansions.shouldExpand("FeatureOfInterest", observation)) {
-            expansions.addExpansion("FeatureOfInterest", observation, toFeatureOfInterest(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("FeatureOfInterest"), filter, providerSnapshot));
-        }
-
         return Optional.of(observation);
     }
 

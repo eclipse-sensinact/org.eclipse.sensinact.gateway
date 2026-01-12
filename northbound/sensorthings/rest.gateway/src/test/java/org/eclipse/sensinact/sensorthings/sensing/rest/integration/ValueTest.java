@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -36,6 +34,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -65,17 +64,16 @@ public class ValueTest extends AbstractIntegrationTest {
         createDatastrem(providerDatastream, provider, value, valueSetInstant);
         createLocation(providerLocation);
 
-        createResource(PROVIDER, svcName, rcName, value, valueSetInstant);
-        session.setResourceValue(PROVIDER, "admin", "location", LOCATION, valueSetInstant);
-        session.setResourceValue(PROVIDER, "admin", "description", "Description", valueSetInstant);
+        session.setResourceValue(providerLocation, UtilDto.SERVICE_LOCATON, "location", LOCATION, valueSetInstant);
+        session.setResourceValue(provider, UtilDto.SERVICE_THING, "description", "Description", valueSetInstant);
 
         // Check thing direct access
-        Thing thing = utils.queryJson("/Things(" + PROVIDER + ")", Thing.class);
+        Thing thing = utils.queryJson("/Things(" + provider + ")", Thing.class);
         assertNotNull(thing, "Thing not found");
         assertEquals(PROVIDER, thing.id());
 
         // Check sensor direct access
-        final String sensorId = String.join("~", PROVIDER, svcName, rcName);
+        final String sensorId = String.join("~", providerDatastream, rcName);
         Sensor sensor = utils.queryJson("/Sensors(" + sensorId + ")", Sensor.class);
         assertNotNull(sensor, "Sensor not found");
         assertEquals(sensorId, sensor.id());
@@ -101,7 +99,8 @@ public class ValueTest extends AbstractIntegrationTest {
         // Update the value
         final int newValue = value + random.nextInt(1024) + 1;
         Instant valueUpdateInstant = Instant.now();
-        session.setResourceValue(PROVIDER, svcName, rcName, newValue);
+        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "lastObservation",
+                getObservation("test", newValue, getFeatureOfInterest("test")), valueSetInstant);
 
         observations = utils.queryJson(stream.observationsLink(), new TypeReference<ResultList<Observation>>() {
         });
@@ -119,26 +118,33 @@ public class ValueTest extends AbstractIntegrationTest {
         final String svcName = "sensor";
         final String rcName = "rcWithUnit";
         final int value = random.nextInt(1024);
-        createResource(PROVIDER, svcName, rcName, value);
+        final String provider = "expandTesterThing";
+        final String providerDatastream = "expandTesterDatastream";
+        final String providerLocation = "expandTesterLocation";
+
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createDatastrem(providerDatastream, provider, value);
+        createLocation(providerLocation);
 
         // No unit by default
         Datastream ds = utils.queryJson(
-                String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", PROVIDER, svcName, rcName)),
+                String.format("/Things(%s)/Datastreams(%s)", provider, String.join("~", providerDatastream)),
                 Datastream.class);
-        assertNull(ds.unitOfMeasurement().name());
-        assertNull(ds.unitOfMeasurement().symbol());
-        assertNull(ds.unitOfMeasurement().definition());
+        assertEquals("test", ds.unitOfMeasurement().name());
+        assertEquals("test", ds.unitOfMeasurement().symbol());
+        assertEquals("test", ds.unitOfMeasurement().definition());
 
         // Set its unit
         final String unitName = "degree Celsius";
         final String unitSymbol = "°C";
         final String unitDefinition = "http://unitsofmeasure.org/ucum.html#para-30";
-        session.setResourceMetadata(PROVIDER, svcName, rcName, Map.of("unit", unitSymbol, "sensorthings.unit.name",
-                unitName, "sensorthings.unit.definition", unitDefinition));
+        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "unitName", unitName);
+        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "unitSymbol", unitSymbol);
+        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "unitDefinition", unitDefinition);
 
         // Check in datastream
         ds = utils.queryJson(
-                String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", PROVIDER, svcName, rcName)),
+                String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", provider, providerDatastream)),
                 Datastream.class);
         assertEquals(unitName, ds.unitOfMeasurement().name());
         assertEquals(unitSymbol, ds.unitOfMeasurement().symbol());

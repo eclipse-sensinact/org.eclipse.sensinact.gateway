@@ -78,8 +78,10 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public ResultList<Observation> getDatastreamObservations(String id) {
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
+        ProviderSnapshot provider = validateAndGetProvider(id);
         ResultList<Observation> observationList = RootResourceAccessImpl.getObservationList(getSession(), application,
-                getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(id), filter);
+                getMapper(), uriInfo, requestContext,
+                provider.getResource(UtilDto.SERVICE_DATASTREAM, "lastObservation"), filter);
         return observationList;
     }
 
@@ -95,7 +97,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ServiceSnapshot service = UtilDto.getDatastreamService(providerSnapshot);
 
         Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), filter, service.getResource("lastObservation"), null);
+                getExpansions(), filter, service.getResource("lastObservation"));
 
         if (o.isEmpty() || !id2.equals(o.get().id())) {
             throw new NotFoundException();
@@ -126,9 +128,6 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(provider));
 
-        if (!id.equals(o.id())) {
-            throw new NotFoundException();
-        }
         return o;
     }
 
@@ -144,9 +143,6 @@ public class DatastreamsAccessImpl extends AbstractAccess
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(SENSORS), validateAndGetProvider(provider));
 
-        if (!id.equals(s.id())) {
-            throw new NotFoundException();
-        }
         return s;
     }
 
@@ -214,7 +210,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
         Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), criterion, snapshot.getResource("lastObservation"), null);
+                getExpansions(), criterion, snapshot.getResource("lastObservation"));
         if (createDto.isEmpty()) {
             throw new BadRequestException("fail to create observation");
         }

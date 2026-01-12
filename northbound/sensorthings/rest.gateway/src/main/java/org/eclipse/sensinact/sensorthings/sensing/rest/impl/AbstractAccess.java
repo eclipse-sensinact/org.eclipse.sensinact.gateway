@@ -12,16 +12,18 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.api.FilterParserException;
@@ -35,7 +37,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
@@ -63,6 +65,55 @@ public abstract class AbstractAccess {
 
     protected List<ProviderSnapshot> getLocationProvidersFromThing(String thingId) {
         return getLinkProvidersFromThing(getSession(), thingId, "locationIds");
+    }
+
+    protected List<ResourceSnapshot> listSetResources(final ICriterion criterion) {
+        return listResources(criterion).stream().filter(ResourceSnapshot::isSet).collect(Collectors.toList());
+    }
+
+    protected List<ProviderSnapshot> getLocationThingsProvider(String id) {
+        // list of thing for this location
+        String filterLocationInThing = String.format("""
+                    {
+                       "providers": [{
+                          "model": "%s"
+                          "resources": {
+                            "service": "%s"
+                            "resource": "locationIds"
+                            "value": "%s"
+                          }
+                       }]
+                     }
+                """, SENSOR_THING_DEVICE.getName(), UtilDto.SERVICE_THING, id);
+        return listProviders(parseFilter(filterLocationInThing, THINGS));
+    }
+
+    protected List<ProviderSnapshot> listProviders(final ICriterion criterion) {
+        final SensiNactSession userSession = getSession();
+        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
+        if (criterion != null && criterion.getResourceValueFilter() != null) {
+            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
+            return providers
+                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
+                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
+                    .collect(Collectors.toList());
+        } else {
+            return providers;
+        }
+    }
+
+    protected List<ResourceSnapshot> listResources(final ICriterion criterion) {
+
+        final SensiNactSession userSession = getSession();
+        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
+        if (criterion != null && criterion.getResourceValueFilter() != null) {
+            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
+            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+                    .filter(r -> rcFilter.test(r.getService().getProvider(), List.of(r))).collect(Collectors.toList());
+        } else {
+            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
+                    .collect(Collectors.toList());
+        }
     }
 
     protected ResourceSnapshot getObservationResourceSnapshot(String id) {
@@ -201,12 +252,12 @@ public abstract class AbstractAccess {
      * @return
      */
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = UtilDto.extractFirstIdSegment(id.substring(provider.length() + 1));
+        String resource = UtilDto.extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 

@@ -16,8 +16,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.getTimestampFromId;
+import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper.getTimestampFromId;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +28,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocationsAccess;
 
 import jakarta.ws.rs.NotFoundException;
@@ -39,14 +39,13 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public HistoricalLocation getHistoricalLocation(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         try {
-            Optional<HistoricalLocation> historicalLocation = DtoMapperGet.toHistoricalLocation(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS),
-                    providerSnapshot);
+            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application,
+                    getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
             if (historicalLocation.isEmpty() || !historicalLocation.get().id().equals(id)) {
                 throw new NotFoundException();
             }
@@ -58,25 +57,25 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Location> getHistoricalLocationLocations(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapperGet.toLocation(getSession(),
-                application, getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), providerSnapshot)));
+        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
+                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), providerSnapshot)));
 
         return list;
     }
 
     @Override
     public Location getHistoricalLocationLocation(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        Location loc = DtoMapperGet.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Location loc = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), providerSnapshot);
 
         if (!id2.equals(loc.id())) {
@@ -87,18 +86,18 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Thing> getHistoricalLocationLocationThings(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        return new ResultList<>(null, null, List.of(DtoMapperGet.toThing(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), parseFilter(THINGS), providerSnapshot)));
+        return new ResultList<>(null, null, List.of(DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(THINGS), providerSnapshot)));
     }
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(String id, String id2) {
-        String providerId = extractFirstIdSegment(id2);
+        String providerId = UtilDto.extractFirstIdSegment(id2);
 
         getTimestampFromId(id);
         try {
@@ -119,15 +118,17 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public Thing getHistoricalLocationThing(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-
+        validateAndGetProvider(provider);
+        // TODO review manage of historical location we should store link
+        // location<->thing as historical location but don't get simple historical
+        ProviderSnapshot providerThing = getLocationThingsProvider(provider).stream().findFirst().get();
         Thing t;
         try {
-            t = DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(THINGS), providerSnapshot);
+            t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                    providerThing);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
         }
@@ -139,7 +140,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -148,7 +149,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
         // TODO find thing link to location then get locations providers
 
