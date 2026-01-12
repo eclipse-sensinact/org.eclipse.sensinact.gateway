@@ -245,10 +245,10 @@ The `mode` of a value selection indicates how the test must be done when multipl
 
 The mode can be one of:
 
-- `EXACT_MATCH`: the resources must exactly match the selection, including ordering.
-- `ANY_MATCH` (**default**): at least one of the resource value(s) must match any of the given selection. This implies that the resource value must be set.
+- `EXACT_MATCH`: the value of the resource must exactly match the value of the selection, including ordering when multiple values are present
+- `ANY_MATCH` (**default**): at least one of the resource value(s) must match any of the given selection value(s). This implies that the resource value must be set.
 - `ALL_MATCH`: all of the resource value(s) must have a match in the selection. Order doesn't matter. The selection size may be different from the number of resource values.
-- `SUPER_SET`: all of the selection items must have a match in the resource value(s).
+- `SUPER_SET`: all of the selection value(s) must be match by the resource value(s), but there may be one or more resource values which do not match.
 
 #### Examples
 
