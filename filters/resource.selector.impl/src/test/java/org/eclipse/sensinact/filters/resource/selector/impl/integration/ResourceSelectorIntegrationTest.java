@@ -46,6 +46,7 @@ import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.Prov
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
+import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.ValueSelectionMode;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,20 @@ public class ResourceSelectorIntegrationTest {
         return dto;
     }
 
+    private GenericDto makeRc(final String model, final String provider, final String service,
+            final String resource, final List<?> value, final Class<?> valueType) {
+        GenericDto dto = new GenericDto();
+        dto.modelPackageUri = null;
+        dto.model = model;
+        dto.provider = provider;
+        dto.service = service;
+        dto.resource = resource;
+        dto.value = value;
+        dto.type = valueType;
+        dto.timestamp = Instant.now();
+        return dto;
+    }
+
     @BeforeEach
     void setup() throws Exception {
         BulkGenericDto dtos = new BulkGenericDto();
@@ -103,6 +118,8 @@ public class ResourceSelectorIntegrationTest {
         dtos.dtos.add(makeRc("test", "test", "sensor", "O3", 4));
         dtos.dtos.add(makeRc("https://eclipse.org/sensinact/ldap/test", "naming1", "naming", "sensor-1", 0));
         dtos.dtos.add(makeRc("https://eclipse.org/sensinact/ldap/test", "naming2", "naming", "sensor_2", 0));
+        dtos.dtos.add(makeRc("multiple", "multiple-1", "multiple", "numbers", List.of(1, 2, 3, 4), Integer.class));
+        dtos.dtos.add(makeRc("multiple", "multiple-2", "multiple", "numbers", List.of(2, 10, 42), Integer.class));
         push.pushUpdate(dtos).getValue();
     }
 
@@ -168,6 +185,10 @@ public class ResourceSelectorIntegrationTest {
 
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation, boolean negate) {
         return new ValueSelection(value, operation, negate, check);
+    }
+
+    private ValueSelection makeValueSelection(List<String> value, CheckType check, OperationType operation, ValueSelectionMode mode) {
+        return new ValueSelection(value, operation, false, check, mode);
     }
 
     private ResourceSelector updateValueTest(ResourceSelector rs, ValueSelection vs) {
@@ -417,5 +438,40 @@ public class ResourceSelectorIntegrationTest {
         assertEquals(2, results.size());
         assertEquals("Temp1", results.get(0).getName());
         assertEquals("Temp3", results.get(1).getName());
+    }
+
+    @Test
+    void testMultiValue() throws Exception {
+        System.err.flush();
+
+        System.out.println("Starting testMultiValue");
+        System.out.flush();
+
+        Thread.sleep(100);
+
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "multiple", "numbers");
+        rs = updateValueTest(rs, makeValueSelection(List.of("1"), null, OperationType.IS_SET, ValueSelectionMode.ANY_MATCH));
+        List<ProviderSnapshot> results = applyFilter(rs);
+        assertEquals(2, results.size());
+        assertFindProviders(results, "multiple-1", "multiple-2");
+
+        rs = updateValueTest(rs, makeValueSelection(List.of("20"), null, OperationType.GREATER_THAN_OR_EQUAL, ValueSelectionMode.ANY_MATCH));
+        results = applyFilter(rs);
+        assertEquals(1, results.size());
+        assertFindProviders(results, "multiple-2");
+
+        rs = updateValueTest(rs, makeValueSelection(List.of("2", "10", "42"), null, OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH));
+        results = applyFilter(rs);
+        assertEquals(1, results.size());
+        assertFindProviders(results, "multiple-2");
+
+        rs = updateValueTest(rs, makeValueSelection(List.of("1", "10", "42"), null, OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH));
+        results = applyFilter(rs);
+        assertEquals(0, results.size());
+
+        rs = updateValueTest(rs, makeValueSelection(List.of("1", "10"), null, OperationType.EQUALS, ValueSelectionMode.ANY_MATCH));
+        results = applyFilter(rs);
+        assertEquals(2, results.size());
+        assertFindProviders(results, "multiple-1", "multiple-2");
     }
 }
