@@ -83,7 +83,10 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
-        if (!id.equals(id2)) {
+        String providerDatastream2 = UtilDto.extractFirstIdSegment(id2);
+        String providerDatastream = UtilDto.extractFirstIdSegment(id);
+
+        if (!providerDatastream.equals(providerDatastream2)) {
             throw new NotFoundException();
         }
         return getObservedProperty(id);

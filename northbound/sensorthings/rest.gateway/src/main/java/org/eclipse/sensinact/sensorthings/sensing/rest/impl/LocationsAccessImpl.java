@@ -100,15 +100,21 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public ResultList<Thing> getLocationThings(String id) {
-        return new ResultList<>(null, null, List.of(getLocationThing(id, id)));
+
+        getLocationThingsProvider(id).stream().map(p -> DtoMapper.toThing(getSession(), application, getMapper(),
+                uriInfo, getExpansions(), parseFilter(THINGS), p));
+        return new ResultList<>(null, null, List.of(getLocationThing(id, null)));
     }
 
     @Override
     public Thing getLocationThing(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        if (!isLocationInThing(id2, id)) {
+            throw new NotFoundException();
+        }
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(id2);
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 providerSnapshot);
+
     }
 
     @Override

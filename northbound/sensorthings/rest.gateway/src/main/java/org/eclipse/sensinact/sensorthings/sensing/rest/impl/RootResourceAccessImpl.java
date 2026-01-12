@@ -26,12 +26,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
@@ -64,38 +61,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
 public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess, RootResourceCreate {
-
-    private List<ProviderSnapshot> listProviders(final ICriterion criterion) {
-        final SensiNactSession userSession = getSession();
-        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers
-                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
-                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-        } else {
-            return providers;
-        }
-    }
-
-    private List<ResourceSnapshot> listSetResources(final ICriterion criterion) {
-        return listResources(criterion).stream().filter(ResourceSnapshot::isSet).collect(Collectors.toList());
-    }
-
-    private List<ResourceSnapshot> listResources(final ICriterion criterion) {
-
-        final SensiNactSession userSession = getSession();
-        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .filter(r -> rcFilter.test(r.getService().getProvider(), List.of(r))).collect(Collectors.toList());
-        } else {
-            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .collect(Collectors.toList());
-        }
-    }
 
     private static Optional<? extends ResourceSnapshot> getResource(final ProviderSnapshot provider,
             final String svcName, final String rcName) {
@@ -222,7 +187,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
                 mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
         if (list.value().isEmpty()) {
-            list = new ResultList<Observation>(null, null, DtoMapperGet
+            list = new ResultList<Observation>(null, null, DtoMapper
                     .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
                     .map(List::of).orElse(List.of()));
         }

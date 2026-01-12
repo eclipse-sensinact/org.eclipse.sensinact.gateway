@@ -37,8 +37,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.sensinact.gateway.geojson.Coordinates;
-import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -106,9 +104,9 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         Hashtable<String, Object> newProps = new Hashtable<String, Object>();
         newProps.put("history.provider", "timescale-history");
 
-        Dictionary<String,Object> properties = sensorthingsConfig.getProperties();
+        Dictionary<String, Object> properties = sensorthingsConfig.getProperties();
         Enumeration<String> keys = properties.keys();
-        while(keys.hasMoreElements()) {
+        while (keys.hasMoreElements()) {
             String key = keys.nextElement();
             newProps.put(key, properties.get(key));
         }
@@ -139,7 +137,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                 // Ignore
                 lastError = e;
             }
-        } while(!ready && System.currentTimeMillis() < timeout);
+        } while (!ready && System.currentTimeMillis() < timeout);
 
         assertTrue(ready, "History provider setup timed out: " + lastError);
     }
@@ -161,7 +159,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                 // Ignore
                 lastError = e;
             }
-        } while(!ready && System.currentTimeMillis() < timeout);
+        } while (!ready && System.currentTimeMillis() < timeout);
 
         assertTrue(ready, "SensorThings API setup timed out: " + lastError);
     }
@@ -254,8 +252,9 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         for (int i = 0; i < 4000; i++) {
             createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        // 1008: 1000 updates + history provider name & description & model & modelPackageUri + foo
-        // provider name & description &  modelUri
+        // 1008: 1000 updates + history provider name & description & model &
+        // modelPackageUri + foo
+        // provider name & description & modelUri
         waitForRowCount("sensinact.text_data", 1008);
         waitForRowCount("sensinact.numeric_data", 4000);
 
@@ -263,7 +262,8 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                 RESULT_OBSERVATIONS);
 
         assertEquals(1000, observations.count());
-        assertEquals(500, observations.value().size()); //Is this 500 because of https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
+        assertEquals(500, observations.value().size()); // Is this 500 because of
+                                                        // https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
         assertNotNull(observations.nextLink());
 
         for (int i = 0; i < 500; i++) {
@@ -298,9 +298,12 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
     @Test
     void getHistoricObservationTest() throws Exception {
+        String thingId = "navigateToObservationTest";
+        String datastreamId = thingId + "_datastream";
         for (int i = 0; i < 10; i++) {
-            createResource("fizz", "buzz", "fizzbuzz", String.valueOf(i), TS_2012.plus(ofDays(i)));
+            createDatastrem(datastreamId, thingId, i, TS_2012);
         }
+        createThing(thingId, List.of(), List.of(datastreamId));
         // 16: 10 updates + history provider name & model & modelPackageUri + fizz
         // provider name & modelUri
         waitForRowCount("sensinact.text_data", 18);
@@ -317,9 +320,12 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
     @Test
     void navigateToObservationTest() throws Exception {
+        String thingId = "navigateToObservationTest";
+        String datastreamId = thingId + "_datastream";
         for (int i = 0; i < 10; i++) {
-            createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
+            createDatastrem(datastreamId, thingId, i, TS_2012);
         }
+        createThing(thingId, List.of(), List.of(datastreamId));
         waitForRowCount("sensinact.text_data", 18);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
@@ -347,7 +353,10 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         };
 
         // Create two unique providers with different phenomenonTimes
-        String testProvider = "phenomenonTimeTestProvider";
+        String testProvider = "phenomenonTimeTestProvider_Datastream";
+        String testProviderThing = "phenomenonTimeTestProvider_Thing";
+        String testProviderLocation = "phenomenonTimeTestProvider_Location";
+
         String svc = "sensor";
         String rc = "temperature";
 
@@ -356,14 +365,13 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         Instant laterTime = ZonedDateTime.of(2020, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
 
         // Create resources with different timestamps
-        createResource(testProvider, svc, rc, 25.5, earlierTime);
-        createResource(testProvider, "admin", "location", new Point(Coordinates.EMPTY, null, null));
-        createResource(testProvider, svc, rc, 30.2, laterTime);
-
+        createDatastrem(testProvider, testProviderThing, 25.5, earlierTime);
+        createDatastrem(testProvider, testProviderThing, 30.2, laterTime);
+        createLocation(testProviderLocation);
+        createThing(testProviderThing, List.of(testProviderLocation), List.of(testProvider));
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
-                String.format(
-                        "/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
+                String.format("/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
                         URLEncoder.encode("phenomenonTime lt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
                 RESULT_OBSERVATIONS);
 
@@ -375,8 +383,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
         // Test phenomenonTime gt filter - should return only the later observation
         observations = utils.queryJson(
-                String.format(
-                        "/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
+                String.format("/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
                         URLEncoder.encode("phenomenonTime gt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
                 RESULT_OBSERVATIONS);
 
@@ -395,11 +402,13 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         }
         waitForRowCount("sensinact.numeric_data", 1000);
         // Test phenomenonTime lt filter - should return only the earlier observation
-        ResultList<Observation> observations = utils.queryJson(
-                String.format(
-                        "/Datastreams(foo~bar~foobar)/Observations?$filter=%s",
-                        URLEncoder.encode("phenomenonTime gt 2014-07-01T00:00:00Z and phenomenonTime lt 2014-07-10T00:00:00Z ", StandardCharsets.UTF_8)),
-                new TypeReference<>() {});
+        ResultList<Observation> observations = utils
+                .queryJson(String.format("/Datastreams(foo~bar~foobar)/Observations?$filter=%s",
+                        URLEncoder.encode(
+                                "phenomenonTime gt 2014-07-01T00:00:00Z and phenomenonTime lt 2014-07-10T00:00:00Z ",
+                                StandardCharsets.UTF_8)),
+                        new TypeReference<>() {
+                        });
         assertEquals(9, observations.value().size(), "Should find 9 observations between 1.7.2014 and 10.7.2014");
         Instant start = ZonedDateTime.of(2014, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC).toInstant();
         Instant end = ZonedDateTime.of(2014, 7, 10, 0, 0, 0, 0, ZoneOffset.UTC).toInstant();

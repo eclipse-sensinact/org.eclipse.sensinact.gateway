@@ -53,7 +53,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public Observation getObservation(String id) {
 
         ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
-        Instant timestamp = DtoMapperGet.getTimestampFromId(id);
+        Instant timestamp = DtoMapper.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
         Optional<Observation> result = null;
@@ -72,16 +72,16 @@ public class ObservationsAccessImpl extends AbstractAccess
                             Map.of("provider", provider, "service", service, "resource", resource, "time",
                                     timestampPlusOneMilli));
                     if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
-                        result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo,
+                        result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
                                 getExpansions(), criterion, resourceSnapshot, Optional.of(t));
                     }
                 }
             } else if (timestamp.equals(milliTimestamp)) {
-                result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                         criterion, resourceSnapshot);
             }
         } else {
-            result = DtoMapperGet.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                     criterion, resourceSnapshot, Optional.empty());
         }
 
@@ -130,9 +130,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(SENSORS), providerSnapshot);
-        if (!id.startsWith(String.valueOf(s.id()))) {
-            throw new NotFoundException();
-        }
+
         return s;
     }
 

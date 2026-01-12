@@ -68,14 +68,19 @@ public class LinksTest extends AbstractIntegrationTest {
     private static final TypeReference<ResultList<Thing>> RESULT_THINGS = new TypeReference<ResultList<Thing>>() {
     };
 
-    private static final String PROVIDER = "linkTester";
-
     private final Map<String, Class<? extends Id>> dtoClassCache = new HashMap<>();
 
     @AfterEach
     void clear() {
         dtoClassCache.clear();
         classFields.clear();
+    }
+
+    private String getNamePlural(String name) {
+        if (name.endsWith("y")) {
+            return name.substring(0, -1) + "ies";
+        }
+        return name + "s";
     }
 
     /**
@@ -94,7 +99,7 @@ public class LinksTest extends AbstractIntegrationTest {
         }
 
         // List of elements
-        mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName() + "s");
+        mirrorUrl = String.format("%s/%s", mirrorBaseUrl, getNamePlural(srcType.getSimpleName()));
         Map<?, ?> base = utils.queryJson(mirrorUrl, Map.class);
         List<?> mirrorAccess = utils.getMapper().convertValue(base.get("value"), List.class);
 

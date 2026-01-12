@@ -18,8 +18,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
@@ -27,6 +28,8 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
@@ -35,7 +38,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.IdSelf;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensinactSensorthingsApplication;
 import org.junit.jupiter.api.AfterEach;
@@ -158,48 +160,67 @@ public class AbstractIntegrationTest {
         createDatastrem(provider, thingId, 42);
     }
 
-    private FeatureOfInterest getFeatureOfIKnterest(String foiRefId) {
-        return new FeatureOfInterest(null, foiRefId, null, null, null, null, null);
+    protected FeatureOfInterest getFeatureOfInterest(String foiRefId) {
+        return new FeatureOfInterest(null, foiRefId, "test", null, null, null, null);
     }
 
     protected void createDatastrem(String provider, String thingId, int value) {
         createDatastrem(provider, thingId, value, null);
     }
 
-    protected void createDatastrem(String provider, String thingId, int value, Instant valueInstant) {
+    protected void createDatastrem(String provider, String thingId, Object value, Instant valueInstant) {
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "thingId", thingId, valueInstant);
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "id", provider, valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "name", "test", valueInstant);
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "sensorId", "test1", valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "sensorName", "test", valueInstant);
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "observedPropertyId", "test2", valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "observedPropertyName", "test", valueInstant);
+
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "unitName", "test", valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "unitSymbol", "test", valueInstant);
+        createResource(provider, UtilDto.SERVICE_DATASTREAM, "unitDefinition", "test", valueInstant);
+
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "lastObservation",
-                getObservation("test", new RefId(provider), value, getFeatureOfIKnterest("test")), valueInstant);
+                getObservation("test", value, getFeatureOfInterest("test")), valueInstant);
 
     }
 
-    public static ExpandedObservation getObservation(String name, RefId datastreamRefId, int result,
-            FeatureOfInterest foi) {
+    public static ExpandedObservation getObservation(String name, Object result, FeatureOfInterest foi) {
 
-        return new ExpandedObservation(null, "obs2", Instant.now(), Instant.now(), result, "test", null, null, null,
-                null, null, datastreamRefId, foi);
+        return new ExpandedObservation(null, name, Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null, null, null, null, null, foi);
 
     }
 
     protected void createLocation(String provider) {
-        createResource(provider, UtilDto.SERVICE_THING, "id", provider, null);
+        createResource(provider, UtilDto.SERVICE_LOCATON, "id", provider, null);
+        createResource(provider, UtilDto.SERVICE_LOCATON, "location", new Point(Coordinates.EMPTY, null, null), null);
+
     }
 
     protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds) {
         createResource(provider, UtilDto.SERVICE_THING, "id", provider, null);
+        createResource(provider, UtilDto.SERVICE_THING, "name", "test", null);
+
         createResource(provider, UtilDto.SERVICE_THING, "locationIds", locationIds, null);
         createResource(provider, UtilDto.SERVICE_THING, "datastreamIds", datastreamIds, null);
     }
 
     protected void createResource(String provider, String service, String resource, Object value, Instant instant) {
         GenericDto dto = new GenericDto();
+        if (value instanceof Collection<?>) {
+            dto.upperBound = -1;
+        }
         dto.provider = provider;
         dto.service = service;
         dto.resource = resource;
-        dto.type = value.getClass();
+        if (value instanceof Collection<?>) {
+            dto.type = String.class;
+
+        } else {
+            dto.type = value.getClass();
+        }
         dto.value = value;
         dto.timestamp = instant;
         try {
