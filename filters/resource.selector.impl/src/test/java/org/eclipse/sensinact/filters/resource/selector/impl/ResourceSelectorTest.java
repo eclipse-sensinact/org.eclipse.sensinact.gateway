@@ -669,6 +669,32 @@ public class ResourceSelectorTest {
     }
 
     @Test
+    void testTimestamp() {
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant tenMinutesAgo = now.minusSeconds(10 * 60);
+
+        ResourceSnapshot rcRecent = makeResource("test", "value", 42, now);
+        ResourceSnapshot rcTenMinutesAgo = makeResource("test", "value", 42, tenMinutesAgo);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
+
+        rs = updateValueTest(rs, makeValueSelection(now.toString(), CheckType.TIMESTAMP, OperationType.EQUALS));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection(now.toString(), CheckType.TIMESTAMP, OperationType.LESS_THAN_OR_EQUAL));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection(tenMinutesAgo.toString(), CheckType.TIMESTAMP, OperationType.EQUALS));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection(tenMinutesAgo.toString(), CheckType.TIMESTAMP, OperationType.GREATER_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+    }
+
+    @Test
     void testAge() {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Instant tenMinutesAgo = now.minusSeconds(10 * 60);
