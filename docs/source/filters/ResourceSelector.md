@@ -236,7 +236,8 @@ The `check` type of a value selection indicates what should be tested in the res
 - `VALUE` (**default**): the test will be applied against the resource value.
 - `SIZE`: the test will be applied against the size of the resource value. For arrays, collections and maps, this is the number of elements. For strings, this is the length of the string. For numbers, it is the absolute magnitude of the number.
 - `TIMESTAMP`: the test will be applied against the timestamp of the resource value. The test value must be an [ISO-8601](https://www.iso8601.com/) datetime string.
-- `AGE_S` or `AGE_MS`: the test will be applied against the age of the resource value, *i.e.* the difference between the resource timestamp and the test execution time. It can be compared in seconds (`AGE_S`) or milliseconds (`AGE_MS`).
+- `AGE`: the test will be applied against the age of the resource value, *i.e.* the difference between the resource timestamp and the test execution time. The selection value must be an [ISO-8601 duration](https://www.iso8601.com/#duration) string, *e.g.* `PT4h30M`.
+- `AGE_S` or `AGE_MS`: the test will be applied against the age of the resource value, *i.e.* the difference between the resource timestamp and the test execution time. The selection value must be a number of seconds (`AGE_S`) or milliseconds (`AGE_MS`).
 
 ### Value Selection Mode
 

@@ -207,6 +207,12 @@ public record ValueSelection(
          */
         TIMESTAMP,
         /**
+         * Test will be applied against the age of the resource value, i.e. the
+         * difference between the current system time and the timestamp of the
+         * resource value. The selection value must be a Duration string.
+         */
+        AGE,
+        /**
          * Test will be applied against the age of the resource value in milliseconds,
          * i.e. the difference between the current system time and the timestamp of the
          * resource value, in milliseconds.

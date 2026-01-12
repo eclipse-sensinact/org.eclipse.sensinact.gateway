@@ -17,6 +17,7 @@ import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelec
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.fromSelection;
 
 import java.lang.reflect.Array;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -134,6 +135,10 @@ public class ResourceSelectionCriterion {
                     yield ResourceSelectionCriterion::toSize;
                 case TIMESTAMP:
                     yield TimedValue::getTimestamp;
+                case AGE:
+                    yield t -> Optional.ofNullable(t.getTimestamp())
+                            .map(ts -> Duration.between(ts, Instant.now()))
+                            .orElse(null);
                 case AGE_MS:
                     yield t -> Optional.ofNullable(t.getTimestamp())
                             .map(ts -> ts.until(Instant.now(), ChronoUnit.MILLIS))

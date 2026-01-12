@@ -707,7 +707,15 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rcRecent);
         assertQueryFalse(rs, rcTenMinutesAgo);
 
+        rs = updateValueTest(rs, makeValueSelection("PT0.5S", CheckType.AGE, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
         rs = updateValueTest(rs, makeValueSelection("2", CheckType.AGE_S, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("PT2S", CheckType.AGE, OperationType.LESS_THAN));
         assertQueryTrue(rs, rcRecent);
         assertQueryFalse(rs, rcTenMinutesAgo);
 
@@ -716,6 +724,10 @@ public class ResourceSelectorTest {
         assertQueryTrue(rs, rcTenMinutesAgo);
 
         rs = updateValueTest(rs, makeValueSelection("10", CheckType.AGE_S, OperationType.GREATER_THAN));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("PT10S", CheckType.AGE, OperationType.GREATER_THAN));
         assertQueryFalse(rs, rcRecent);
         assertQueryTrue(rs, rcTenMinutesAgo);
     }
