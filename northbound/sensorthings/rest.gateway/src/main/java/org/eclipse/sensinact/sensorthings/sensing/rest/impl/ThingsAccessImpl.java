@@ -39,15 +39,18 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.ThingsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate {
+public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, ThingsCreate, ThingsUpdate {
 
     @Override
     public Thing getThing(String id) {
@@ -272,7 +275,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response createDatastream(String id, ExpandedDataStream datastream) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), datastream, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
@@ -285,7 +289,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
     @Override
     public Response createLocation(String id, ExpandedLocation location) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location, id);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), location, id);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
 
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -295,6 +300,59 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsAccess, Th
 
         return Response.created(createdUri).entity(createDto).build();
 
+    }
+
+    @Override
+    public Response updateDatastream(String id, String id2, ExpandedDataStream datastream) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, datastream, id);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateLocation(String id, String id2, ExpandedLocation location) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, location, id);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateThing(String id, ExpandedThing thing) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, thing);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateLocationRef(String id, RefId location) {
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), location, id,
+                ExpandedThing.class, ExpandedLocation.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response updateDatastreamRef(String id, RefId datastream) {
+        RefId thingId = new RefId(id);
+        getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), thingId,
+                (String) datastream.id(), ExpandedDataStream.class, ExpandedThing.class);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response patchDatastream(String id, String id2, ExpandedDataStream datastream) {
+        return updateDatastream(id, id2, datastream);
+    }
+
+    @Override
+    public Response patchLocation(String id, String id2, ExpandedLocation location) {
+        return updateLocation(id, id2, location);
+    }
+
+    @Override
+    public Response patchThing(String id, ExpandedThing thing) {
+        return updateThing(id, thing);
     }
 
 }

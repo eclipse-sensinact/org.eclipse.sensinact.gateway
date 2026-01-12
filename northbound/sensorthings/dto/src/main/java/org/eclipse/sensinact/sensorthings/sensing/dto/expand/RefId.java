@@ -12,12 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * record that define a link that can be set on creation/update to association 2
  * sensorthing entity
  */
-public record RefId(@JsonProperty("@iot.id") Object id) {
+public record RefId(@JsonProperty("@iot.id") Object id) implements Id {
 
 }

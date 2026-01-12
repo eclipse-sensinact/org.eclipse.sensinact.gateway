@@ -12,73 +12,118 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
-import java.util.HashMap;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
-
+import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * observedProperty
  */
-public class ObservedPropertiesExtraUseCase
-        extends AbstractExtraUseCase<ExpandedObservedProperty, ExpandedObservedProperty> {
+public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<ExpandedObservedProperty, Object> {
 
-    Map<String, ExpandedObservedProperty> observedPropertyById = new HashMap<String, ExpandedObservedProperty>();
+    private final IDtoMemoryCache<ExpandedObservedProperty> cacheObservedProperty;
 
-    public ObservedPropertiesExtraUseCase(Providers providers) { }
+    private final DataUpdate dataUpdate;
+    private final IAccessServiceUseCase serviceUseCase;
 
-    public ExtraUseCaseResponse<ExpandedObservedProperty> create(
-            ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+    @SuppressWarnings("unchecked")
+    public ObservedPropertiesExtraUseCase(Providers providers) {
+        cacheObservedProperty = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
+        dataUpdate = resolve(providers, DataUpdate.class);
+        serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
+    }
+
+    private ExpandedObservedProperty updateInMemoryObservedProperty(
+            ExtraUseCaseRequest<ExpandedObservedProperty> request, ExpandedObservedProperty property) {
+        ExpandedObservedProperty updateProp = request.model();
+        ExpandedObservedProperty createdProp = new ExpandedObservedProperty(null, request.id(),
+                updateProp.name() != null ? updateProp.name() : property.name(),
+                updateProp.description() != null ? updateProp.description() : property.description(),
+                updateProp.definition() != null ? updateProp.definition() : property.definition(),
+                updateProp.properties() != null ? updateProp.properties() : property.properties(), null);
+        cacheObservedProperty.addDto(request.id(), createdProp);
+        return createdProp;
+    }
+
+    public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
         ExpandedObservedProperty observedProperty = request.model();
-        DtoToModelMapper.checkRequireField(observedProperty);
-        String observedPropertyId = getId(observedProperty);
+        checkRequireField(request);
+        String observedPropertyId = request.id();
         ExpandedObservedProperty createExpandedProperty = new ExpandedObservedProperty(null, observedPropertyId,
                 observedProperty.name(), observedProperty.description(), observedProperty.definition(),
                 observedProperty.properties(), null);
-        observedPropertyById.put(observedPropertyId, createExpandedProperty);
+        cacheObservedProperty.addDto(observedPropertyId, createExpandedProperty);
 
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(observedPropertyId, createExpandedProperty);
+        return new ExtraUseCaseResponse<Object>(observedPropertyId, createExpandedProperty);
+
+    }
+
+    public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+        return new ExtraUseCaseResponse<Object>(false, "not implemented");
 
     }
 
     @Override
-    public String getId(ExpandedObservedProperty dto) {
-        return DtoToModelMapper.sanitizeId(dto.id() != null ? dto.id() : dto.name());
+    public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+        String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
+        String sensorId = DtoToModelMapper.extractSecondIdSegment(request.id());
+        if (providerId == null || sensorId == null) {
+            throw new BadRequestException("bad id format");
+        }
+        ExpandedObservedProperty receivedOp = request.model();
+        checkRequireField(request);
+        ExpandedObservedProperty opToUpdate = new ExpandedObservedProperty(null, sensorId, receivedOp.name(),
+                receivedOp.description(), receivedOp.definition(), receivedOp.properties(), null);
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, opToUpdate, null, null, null));
+
     }
 
-    public ExtraUseCaseResponse<ExpandedObservedProperty> delete(
-            ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
+    public ExtraUseCaseResponse<Object> update(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
+        // check if sensor is in cached map
+        ExpandedObservedProperty property = cacheObservedProperty.getDto(request.id());
+        if (property != null) {
+            ExpandedObservedProperty createdProperty = updateInMemoryObservedProperty(request, property);
+            return new ExtraUseCaseResponse<Object>(request.id(), createdProperty);
+        } else {
+            String providerId = UtilDto.extractFirstIdSegment(request.id());
 
-    }
+            List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
-    public ExtraUseCaseResponse<ExpandedObservedProperty> patch(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
+            // update/create provider
+            try {
+                dataUpdate.pushUpdate(listDtoModels).getValue();
 
-    }
+            } catch (InvocationTargetException | InterruptedException e) {
+                return new ExtraUseCaseResponse<Object>(false, new InternalServerErrorException(e), e.getMessage());
+            }
+            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
+            if (serviceSnapshot == null) {
+                return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
+            }
+            return new ExtraUseCaseResponse<Object>(request.id(), serviceSnapshot);
 
-    @Override
-    protected List<SensorThingsUpdate> toDtos(ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return null;
-    }
-
-    public ExtraUseCaseResponse<ExpandedObservedProperty> update(
-            ExtraUseCaseRequest<ExpandedObservedProperty> request) {
-        return new ExtraUseCaseResponse<ExpandedObservedProperty>(false, "not implemented");
+        }
 
     }
 
     public ExpandedObservedProperty getInMemoryObservedProperty(String id) {
-        return observedPropertyById.get(id);
+        return cacheObservedProperty.getDto(id);
     }
 
-    public ExpandedObservedProperty removeInMemoryObservedProperty(String id) {
-        return observedPropertyById.remove(id);
+    public void removeInMemoryObservedProperty(String id) {
+        cacheObservedProperty.removeDto(id);
     }
 
 }

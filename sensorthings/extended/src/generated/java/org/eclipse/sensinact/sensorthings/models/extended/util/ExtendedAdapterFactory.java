@@ -102,6 +102,10 @@ public class ExtendedAdapterFactory extends AdapterFactoryImpl {
 				return createSensorThingLocationAdapter();
 			}
 			@Override
+			public Adapter caseSensorThingDatastream(SensorThingDatastream object) {
+				return createSensorThingDatastreamAdapter();
+			}
+			@Override
 			public Adapter caseProvider(Provider object) {
 				return createProviderAdapter();
 			}
@@ -200,6 +204,20 @@ public class ExtendedAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createSensorThingLocationAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingDatastream <em>Sensor Thing Datastream</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingDatastream
+	 * @generated
+	 */
+	public Adapter createSensorThingDatastreamAdapter() {
 		return null;
 	}
 

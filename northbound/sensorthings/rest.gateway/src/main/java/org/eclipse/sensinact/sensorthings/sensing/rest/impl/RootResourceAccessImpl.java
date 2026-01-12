@@ -50,6 +50,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.RootResourceAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.RootResourceCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
@@ -217,7 +218,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createDatastream(ExpandedDataStream datastream) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, datastream);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), datastream);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
         Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -229,7 +231,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest) {
-        FeatureOfInterest createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo, featuresOfInterest);
+        FeatureOfInterest createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), featuresOfInterest);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -239,10 +242,13 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createLocation(ExpandedLocation location) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, location);
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), location);
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
+        ICriterion criterionThing = parseFilter(EFilterContext.THINGS);
+
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot);
+                criterion, snapshot, criterionThing);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -253,7 +259,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     @Override
     public Response createObservedProperties(ExpandedObservedProperty observedProperty) {
         ExpandedObservedProperty createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
-                observedProperty);
+                requestContext.getMethod(), observedProperty);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -263,7 +269,8 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createSensors(ExpandedSensor sensor) {
-        ExpandedSensor createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo, sensor);
+        ExpandedSensor createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), sensor);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -274,10 +281,12 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     @Override
     public Response createThing(ExpandedThing thing) {
 
-        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo, thing);
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), thing);
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
+
         Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                snapshot);
+                UtilDto.getThingService(snapshot));
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

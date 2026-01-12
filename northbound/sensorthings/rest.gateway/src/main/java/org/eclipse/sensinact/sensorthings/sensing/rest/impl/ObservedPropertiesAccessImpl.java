@@ -21,18 +21,22 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 
 import java.util.List;
 
+import jakarta.ws.rs.core.Response;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 
-public class ObservedPropertiesAccessImpl extends AbstractAccess implements ObservedPropertiesAccess {
+public class ObservedPropertiesAccessImpl extends AbstractAccess
+        implements ObservedPropertiesAccess, ObservedPropertiesUpdate {
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
@@ -96,8 +100,20 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess implements Obse
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                validateAndGetProvider(provider));
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), validateAndGetProvider(provider));
+    }
+
+    @Override
+    public Response updateObservedProperties(String id, ExpandedObservedProperty observedProperty) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observedProperty);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response patchObservedProperties(String id, ExpandedObservedProperty observedProperty) {
+        return updateObservedProperties(id, observedProperty);
     }
 
 }

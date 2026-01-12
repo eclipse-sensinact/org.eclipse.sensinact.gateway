@@ -14,12 +14,15 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.integration;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +32,11 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class SensorTest extends AbstractIntegrationTest {
 
+    /**
+     * test create sensor that will be in memory as not link to a datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateSensor() throws Exception {
         // given
@@ -40,6 +48,33 @@ public class SensorTest extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * test create sensor that will be in memory as not link to a datastream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCreateSensorWithMissingField() throws Exception {
+        // given
+        String name = "testCreateSensor";
+        // when empty name
+        ExpandedSensor sensor = DtoFactory.getSensor(null, "test description", "test encodingType", "test metadata");
+        getJsonResponseFromPost(sensor, "Sensors", 400);
+
+        // when empty encoding type
+        sensor = DtoFactory.getSensor(name, "test description", null, "test metadata");
+        getJsonResponseFromPost(sensor, "Sensors", 400);
+        // when empty metadata
+        sensor = DtoFactory.getSensor(name, "test description", "test encodingType", null);
+        getJsonResponseFromPost(sensor, "Sensors", 400);
+
+    }
+
+    /**
+     * test create sensor link to a datastream
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateDatastreamLinkSensor() throws Exception {
         // given
@@ -48,7 +83,7 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -63,7 +98,132 @@ public class SensorTest extends AbstractIntegrationTest {
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         // then
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorUseCase.getInMemorySensor(sensorId));
+        assertNull(sensorCache.getDto(sensorId));
+
+    }
+
+    /**
+     * Tests that <code>PUT</code> can be used to update a Sensor
+     */
+    /**
+     * test update sensor cached in memory
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdateSensor() throws Exception {
+        // given
+        String name = "testCreateSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        String idSensor = getIdFromJson(json);
+        UtilsAssert.assertSensor(sensor, json);
+        ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
+        // when
+        getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
+        // then
+        assertEquals(name + "2", sensorCache.getDto(idSensor).name());
+    }
+
+    /**
+     * test update sensor that are link to a datastream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdateDatastreamLinkSensor() throws Exception {
+        // given
+        String name = "testUpdateDatastreamLinkSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        String sensorId = getIdFromJson(json);
+        UtilsAssert.assertSensor(sensor, json);
+        assertNotNull(sensorCache.getDto(sensorId));
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor", 201);
+        String idDatastream = getIdFromJson(json);
+        ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
+                name + "1", DtoFactory.getRefId(thingId), sensor, null);
+        String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
+        UtilsAssert.assertDatastream(expectedDatastream, json, true);
+        assertNull(sensorCache.getDto(sensorId));
+        // when
+        ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
+        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
+        assertNull(sensorCache.getDto(sensorId));
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + "2", UtilDto.getResourceField(service, "sensorName", String.class));
+
+    }
+
+    /**
+     * Tests that <code>PATCH</code> can be used to update a Sensor
+     */
+    /**
+     * test patch sensor cached in memory
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdatePatchSensor() throws Exception {
+        // given
+        String name = "testUpdatePatchSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        String idSensor = getIdFromJson(json);
+        UtilsAssert.assertSensor(sensor, json);
+        ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2");
+        // when
+        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
+        // then
+        assertEquals(name + "2", sensorCache.getDto(idSensor).name());
+
+    }
+
+    /**
+     * test patch sensor that are link to a datastream
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdatePatchDatastreamLinkSensor() throws Exception {
+        // given
+        String name = "testUpdatePatchDatastreamLinkSensor";
+        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        String sensorId = getIdFromJson(json);
+        UtilsAssert.assertSensor(sensor, json);
+        assertNotNull(sensorCache.getDto(sensorId));
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor", 201);
+        String idDatastream = getIdFromJson(json);
+        ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
+                name + "1", DtoFactory.getRefId(thingId), sensor, null);
+        String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
+        UtilsAssert.assertDatastream(expectedDatastream, json, true);
+        assertNull(sensorCache.getDto(sensorId));
+        // when
+        ExpandedSensor sensorUpdate = DtoFactory.getSensor(name + "2", null, "testencodingType");
+        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
+        assertNull(sensorCache.getDto(sensorId));
+        // then
+        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
+        assertEquals(name + "2", UtilDto.getResourceField(service, "sensorName", String.class));
 
     }
 }

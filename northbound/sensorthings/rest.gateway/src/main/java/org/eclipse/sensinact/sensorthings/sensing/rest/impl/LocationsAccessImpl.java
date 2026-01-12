@@ -28,11 +28,14 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.LocationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.LocationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
-public class LocationsAccessImpl extends AbstractAccess implements LocationsAccess {
+public class LocationsAccessImpl extends AbstractAccess implements LocationsAccess, LocationsUpdate {
 
     @Override
     public Location getLocation(String id) {
@@ -58,8 +61,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -87,8 +90,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
         }
         String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                providerSnapshot);
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), providerSnapshot);
     }
 
     @Override
@@ -105,8 +108,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     public Thing getLocationThing(String id, String id2) {
         String provider = DtoMapperGet.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                providerSnapshot);
+        return DtoMapperGet.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), providerSnapshot);
     }
 
     @Override
@@ -126,8 +129,8 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
                 list = new ResultList<>(null, null,
-                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                        DtoMapperGet.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -138,6 +141,18 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsAcce
     @Override
     public ResultList<Location> getLocationThingLocations(String id, String id2) {
         return new ResultList<>(null, null, List.of(getLocation(id)));
+    }
+
+    @Override
+    public Response updateLocation(String id, ExpandedLocation location) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, location);
+
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response patchLocation(String id, ExpandedLocation location) {
+        return updateLocation(id, location);
     }
 
 }

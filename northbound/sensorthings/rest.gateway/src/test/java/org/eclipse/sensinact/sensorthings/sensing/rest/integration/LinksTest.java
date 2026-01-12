@@ -31,6 +31,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.IdSelf;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -81,7 +82,7 @@ public class LinksTest extends AbstractIntegrationTest {
     /**
      * Check if the mirror access works
      */
-    private <S extends Id> void checkMirror(String mirrorBaseUrl, S srcObject, Class<S> srcType)
+    private <S extends IdSelf> void checkMirror(String mirrorBaseUrl, S srcObject, Class<S> srcType)
             throws IOException, InterruptedException {
         // Single element
         String mirrorUrl = String.format("%s/%s", mirrorBaseUrl, srcType.getSimpleName());
@@ -146,7 +147,7 @@ public class LinksTest extends AbstractIntegrationTest {
     /**
      * Checks if the access to the data stream works
      */
-    private <S extends Id, T extends Id> void checkSubLinks(S srcObject, String listUrl,
+    private <S extends IdSelf, Self, T extends IdSelf> void checkSubLinks(S srcObject, String listUrl,
             TypeReference<ResultList<T>> resultListType, Class<T> resultType) throws IOException, InterruptedException {
         ResultList<T> results = utils.queryJson(listUrl, resultListType);
         assertNotNull(results);
@@ -187,7 +188,8 @@ public class LinksTest extends AbstractIntegrationTest {
 
                     Set<Object> allItemsIds = listIdsFromURL(kindOfLink);
                     assertTrue(allItemsIds.containsAll(linkedItemsIds),
-                            linkedItemsIds + " not a subset of " + allItemsIds + " (src=" + srcObject.id() + ", listUrl=" + listUrl + ", kindOfLink=" + kindOfLink + ")");
+                            linkedItemsIds + " not a subset of " + allItemsIds + " (src=" + srcObject.id()
+                                    + ", listUrl=" + listUrl + ", kindOfLink=" + kindOfLink + ")");
                 } else {
                     // Returns a single item
                     Class<? extends Id> linkType = getDTOType(kindOfLink);
@@ -195,9 +197,8 @@ public class LinksTest extends AbstractIntegrationTest {
                             utils.queryJson(String.format("%s/%s", directAccessItemUrl, kindOfLink), Map.class),
                             linkType);
 
-                    Id directDto = mapper.convertValue(
-                            utils.queryJson(String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id()), Map.class),
-                            linkType);
+                    Id directDto = mapper.convertValue(utils.queryJson(
+                            String.format("%s(%s)", toPluralLink(kindOfLink), linkedDto.id()), Map.class), linkType);
 
                     utils.assertDtoEquals(directDto, linkedDto, linkType);
                 }
@@ -248,7 +249,8 @@ public class LinksTest extends AbstractIntegrationTest {
 
             // Check sub-links existence
             checkSubLinks(thing, thing.datastreamsLink(), RESULT_DATASTREAMS, Datastream.class);
-            checkSubLinks(thing, thing.historicalLocationsLink(), RESULT_HISTORICAL_LOCATIONS, HistoricalLocation.class);
+            checkSubLinks(thing, thing.historicalLocationsLink(), RESULT_HISTORICAL_LOCATIONS,
+                    HistoricalLocation.class);
             checkSubLinks(thing, thing.locationsLink(), RESULT_LOCATIONS, Location.class);
 
             // Check mirrors
@@ -385,7 +387,8 @@ public class LinksTest extends AbstractIntegrationTest {
 
             // Check self link
             utils.assertURLStatus(datastream.selfLink());
-            utils.assertDtoEquals(datastream, utils.queryJson(datastream.selfLink(), Datastream.class), Datastream.class);
+            utils.assertDtoEquals(datastream, utils.queryJson(datastream.selfLink(), Datastream.class),
+                    Datastream.class);
 
             // Check sub-links
             checkSubLinks(datastream, datastream.observationsLink(), RESULT_OBSERVATIONS, Observation.class);

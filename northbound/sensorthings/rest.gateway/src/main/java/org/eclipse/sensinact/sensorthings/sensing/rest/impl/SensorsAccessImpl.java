@@ -16,6 +16,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.
 
 import java.util.List;
 
+import jakarta.ws.rs.core.Response;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
@@ -25,12 +26,14 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.SensorsUpdate;
 
 import jakarta.ws.rs.NotFoundException;
 
-public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
+public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess, SensorsUpdate {
 
     @Override
     public Sensor getSensor(String id) {
@@ -100,6 +103,17 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsAccess {
             throw new NotFoundException();
         }
         return t;
+    }
+
+    @Override
+    public Response updateSensor(String id, ExpandedSensor sensor) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, sensor);
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response patchSensor(String id, ExpandedSensor sensor) {
+        return updateSensor(id, sensor);
     }
 
 }

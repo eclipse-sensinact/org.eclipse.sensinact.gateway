@@ -23,8 +23,8 @@ import jakarta.ws.rs.core.Feature;
 import jakarta.ws.rs.core.FeatureContext;
 
 /**
- * Registers the SensorThings Extra implementation with the main
- * SensorThings application.
+ * Registers the SensorThings Extra implementation with the main SensorThings
+ * application.
  */
 @JakartarsApplicationSelect("(osgi.jakartars.name=sensorthings)")
 @JakartarsExtension
@@ -43,6 +43,7 @@ public class SensorThingsExtraFeature implements Feature {
         context.register(new DataUpdateProvider(dataUpdate));
         context.register(ExtraDelegateProvider.class);
         context.register(UseCaseProvider.class);
+        context.register(DtoMemoryCacheProvider.class);
         return true;
     }
 

@@ -12,11 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public interface Id {
-
-    @JsonProperty("@iot.id")
-    public Object id();
+public interface IdSelf extends Id, Self {
 
 }

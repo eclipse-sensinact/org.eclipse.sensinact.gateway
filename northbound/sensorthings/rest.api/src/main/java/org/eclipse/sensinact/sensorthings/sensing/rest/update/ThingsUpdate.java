@@ -15,7 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
-
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -32,9 +31,21 @@ public interface ThingsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     @Path("/Datastreams({id2})")
     public Response updateDatastream(@PathParam("id") String id, @PathParam("id2") String id2,
+            ExpandedDataStream datastream);
+
+    /**
+     * patch datastream
+     *
+     * @param id
+     * @param id2
+     * @param datastream
+     * @return
+     */
+    @PATCH
+    @Path("/Datastreams({id2})")
+    public Response patchDatastream(@PathParam("id") String id, @PathParam("id2") String id2,
             ExpandedDataStream datastream);
 
     /**
@@ -46,9 +57,12 @@ public interface ThingsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     @Path("/Locations({id2})")
     public Response updateLocation(@PathParam("id") String id, @PathParam("id2") String id2, ExpandedLocation location);
+
+    @PATCH
+    @Path("/Locations({id2})")
+    public Response patchLocation(@PathParam("id") String id, @PathParam("id2") String id2, ExpandedLocation location);
 
     /**
      * update thing
@@ -58,7 +72,16 @@ public interface ThingsUpdate {
      * @return
      */
     @PUT
-    @PATCH
     public Response updateThing(@PathParam("id") String id, ExpandedThing thing);
+
+    /**
+     * patch thing
+     *
+     * @param id
+     * @param thing
+     * @return
+     */
+    @PATCH
+    public Response patchThing(@PathParam("id") String id, ExpandedThing thing);
 
 }

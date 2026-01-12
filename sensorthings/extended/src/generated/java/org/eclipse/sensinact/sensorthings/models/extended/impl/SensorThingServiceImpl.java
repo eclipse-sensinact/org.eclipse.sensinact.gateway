@@ -12,24 +12,14 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended.impl;
 
-import java.util.Collection;
-
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.NotificationChain;
-
-import org.eclipse.emf.common.util.EList;
 
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
-import org.eclipse.emf.ecore.util.EObjectContainmentEList;
-import org.eclipse.emf.ecore.util.InternalEList;
-
 import org.eclipse.sensinact.model.core.provider.impl.ServiceImpl;
 
-import org.eclipse.sensinact.sensorthings.models.extended.DataStreamService;
 import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
 import org.eclipse.sensinact.sensorthings.models.extended.SensorThingService;
 
@@ -41,27 +31,17 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingService;
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getDataStreams <em>Data Streams</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getName <em>Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getProperties <em>Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getLocationIds <em>Location Ids</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getDatastreamIds <em>Datastream Ids</em>}</li>
  * </ul>
  *
  * @generated
  */
 public class SensorThingServiceImpl extends ServiceImpl implements SensorThingService {
-	/**
-	 * The cached value of the '{@link #getDataStreams() <em>Data Streams</em>}' containment reference list.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDataStreams()
-	 * @generated
-	 * @ordered
-	 */
-	protected EList<DataStreamService> dataStreams;
-
 	/**
 	 * The default value of the '{@link #getName() <em>Name</em>}' attribute.
 	 * <!-- begin-user-doc -->
@@ -163,6 +143,26 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	protected Object locationIds = LOCATION_IDS_EDEFAULT;
 
 	/**
+	 * The default value of the '{@link #getDatastreamIds() <em>Datastream Ids</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getDatastreamIds()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final Object DATASTREAM_IDS_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getDatastreamIds() <em>Datastream Ids</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getDatastreamIds()
+	 * @generated
+	 * @ordered
+	 */
+	protected Object datastreamIds = DATASTREAM_IDS_EDEFAULT;
+
+	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -179,19 +179,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	protected EClass eStaticClass() {
 		return ExtendedPackage.Literals.SENSOR_THING_SERVICE;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EList<DataStreamService> getDataStreams() {
-		if (dataStreams == null) {
-			dataStreams = new EObjectContainmentEList<DataStreamService>(DataStreamService.class, this, ExtendedPackage.SENSOR_THING_SERVICE__DATA_STREAMS);
-		}
-		return dataStreams;
 	}
 
 	/**
@@ -315,12 +302,21 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	 * @generated
 	 */
 	@Override
-	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
-		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__DATA_STREAMS:
-				return ((InternalEList<?>)getDataStreams()).basicRemove(otherEnd, msgs);
-		}
-		return super.eInverseRemove(otherEnd, featureID, msgs);
+	public Object getDatastreamIds() {
+		return datastreamIds;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setDatastreamIds(Object newDatastreamIds) {
+		Object oldDatastreamIds = datastreamIds;
+		datastreamIds = newDatastreamIds;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS, oldDatastreamIds, datastreamIds));
 	}
 
 	/**
@@ -331,8 +327,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__DATA_STREAMS:
-				return getDataStreams();
 			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
 				return getName();
 			case ExtendedPackage.SENSOR_THING_SERVICE__DESCRIPTION:
@@ -343,6 +337,8 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 				return getId();
 			case ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS:
 				return getLocationIds();
+			case ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS:
+				return getDatastreamIds();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -352,14 +348,9 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__DATA_STREAMS:
-				getDataStreams().clear();
-				getDataStreams().addAll((Collection<? extends DataStreamService>)newValue);
-				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
 				setName((String)newValue);
 				return;
@@ -375,6 +366,9 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 			case ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS:
 				setLocationIds(newValue);
 				return;
+			case ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS:
+				setDatastreamIds(newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -387,9 +381,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__DATA_STREAMS:
-				getDataStreams().clear();
-				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
 				setName(NAME_EDEFAULT);
 				return;
@@ -405,6 +396,9 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 			case ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS:
 				setLocationIds(LOCATION_IDS_EDEFAULT);
 				return;
+			case ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS:
+				setDatastreamIds(DATASTREAM_IDS_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -417,8 +411,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__DATA_STREAMS:
-				return dataStreams != null && !dataStreams.isEmpty();
 			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
 				return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
 			case ExtendedPackage.SENSOR_THING_SERVICE__DESCRIPTION:
@@ -429,6 +421,8 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
 			case ExtendedPackage.SENSOR_THING_SERVICE__LOCATION_IDS:
 				return LOCATION_IDS_EDEFAULT == null ? locationIds != null : !LOCATION_IDS_EDEFAULT.equals(locationIds);
+			case ExtendedPackage.SENSOR_THING_SERVICE__DATASTREAM_IDS:
+				return DATASTREAM_IDS_EDEFAULT == null ? datastreamIds != null : !DATASTREAM_IDS_EDEFAULT.equals(datastreamIds);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -453,6 +447,8 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 		result.append(id);
 		result.append(", locationIds: ");
 		result.append(locationIds);
+		result.append(", datastreamIds: ");
+		result.append(datastreamIds);
 		result.append(')');
 		return result.toString();
 	}

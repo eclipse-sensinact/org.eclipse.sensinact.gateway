@@ -117,6 +117,14 @@ public class ExtendedSwitch<T> extends Switch<T> {
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
+			case ExtendedPackage.SENSOR_THING_DATASTREAM: {
+				SensorThingDatastream sensorThingDatastream = (SensorThingDatastream)theEObject;
+				T result = caseSensorThingDatastream(sensorThingDatastream);
+				if (result == null) result = caseDynamicProvider(sensorThingDatastream);
+				if (result == null) result = caseProvider(sensorThingDatastream);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
 			default: return defaultCase(theEObject);
 		}
 	}
@@ -193,6 +201,21 @@ public class ExtendedSwitch<T> extends Switch<T> {
 	 * @generated
 	 */
 	public T caseSensorThingLocation(SensorThingLocation object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Sensor Thing Datastream</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Sensor Thing Datastream</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseSensorThingDatastream(SensorThingDatastream object) {
 		return null;
 	}
 

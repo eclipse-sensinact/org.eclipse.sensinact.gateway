@@ -37,7 +37,7 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationSer
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getEncodingType <em>Encoding Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getLocation <em>Location</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getSensorThingId <em>Sensor Thing Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getId <em>Id</em>}</li>
  * </ul>
  *
  * @generated
@@ -124,24 +124,24 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	protected GeoJsonObject location = LOCATION_EDEFAULT;
 
 	/**
-	 * The default value of the '{@link #getSensorThingId() <em>Sensor Thing Id</em>}' attribute.
+	 * The default value of the '{@link #getId() <em>Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getSensorThingId()
+	 * @see #getId()
 	 * @generated
 	 * @ordered
 	 */
-	protected static final String SENSOR_THING_ID_EDEFAULT = null;
+	protected static final String ID_EDEFAULT = null;
 
 	/**
-	 * The cached value of the '{@link #getSensorThingId() <em>Sensor Thing Id</em>}' attribute.
+	 * The cached value of the '{@link #getId() <em>Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getSensorThingId()
+	 * @see #getId()
 	 * @generated
 	 * @ordered
 	 */
-	protected String sensorThingId = SENSOR_THING_ID_EDEFAULT;
+	protected String id = ID_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -260,8 +260,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	 * @generated
 	 */
 	@Override
-	public String getSensorThingId() {
-		return sensorThingId;
+	public String getId() {
+		return id;
 	}
 
 	/**
@@ -270,11 +270,11 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	 * @generated
 	 */
 	@Override
-	public void setSensorThingId(String newSensorThingId) {
-		String oldSensorThingId = sensorThingId;
-		sensorThingId = newSensorThingId;
+	public void setId(String newId) {
+		String oldId = id;
+		id = newId;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__SENSOR_THING_ID, oldSensorThingId, sensorThingId));
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID, oldId, id));
 	}
 
 	/**
@@ -293,8 +293,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 				return getEncodingType();
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__LOCATION:
 				return getLocation();
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__SENSOR_THING_ID:
-				return getSensorThingId();
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
+				return getId();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -319,8 +319,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__LOCATION:
 				setLocation((GeoJsonObject)newValue);
 				return;
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__SENSOR_THING_ID:
-				setSensorThingId((String)newValue);
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
+				setId((String)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -346,8 +346,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__LOCATION:
 				setLocation(LOCATION_EDEFAULT);
 				return;
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__SENSOR_THING_ID:
-				setSensorThingId(SENSOR_THING_ID_EDEFAULT);
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
+				setId(ID_EDEFAULT);
 				return;
 		}
 		super.eUnset(featureID);
@@ -369,8 +369,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 				return ENCODING_TYPE_EDEFAULT == null ? encodingType != null : !ENCODING_TYPE_EDEFAULT.equals(encodingType);
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__LOCATION:
 				return LOCATION_EDEFAULT == null ? location != null : !LOCATION_EDEFAULT.equals(location);
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__SENSOR_THING_ID:
-				return SENSOR_THING_ID_EDEFAULT == null ? sensorThingId != null : !SENSOR_THING_ID_EDEFAULT.equals(sensorThingId);
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
+				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -393,8 +393,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 		result.append(encodingType);
 		result.append(", location: ");
 		result.append(location);
-		result.append(", sensorThingId: ");
-		result.append(sensorThingId);
+		result.append(", id: ");
+		result.append(id);
 		result.append(')');
 		return result.toString();
 	}

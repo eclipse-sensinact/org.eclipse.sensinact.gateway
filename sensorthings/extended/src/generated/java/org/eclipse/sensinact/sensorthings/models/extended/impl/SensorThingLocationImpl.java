@@ -33,21 +33,21 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationSer
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationImpl#getLocations <em>Locations</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationImpl#getLocation <em>Location</em>}</li>
  * </ul>
  *
  * @generated
  */
 public class SensorThingLocationImpl extends DynamicProviderImpl implements SensorThingLocation {
 	/**
-	 * The cached value of the '{@link #getLocations() <em>Locations</em>}' reference.
+	 * The cached value of the '{@link #getLocation() <em>Location</em>}' reference.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #getLocations()
+	 * @see #getLocation()
 	 * @generated
 	 * @ordered
 	 */
-	protected SensorThingLocationService locations;
+	protected SensorThingLocationService location;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -74,16 +74,16 @@ public class SensorThingLocationImpl extends DynamicProviderImpl implements Sens
 	 * @generated
 	 */
 	@Override
-	public SensorThingLocationService getLocations() {
-		if (locations != null && locations.eIsProxy()) {
-			InternalEObject oldLocations = (InternalEObject)locations;
-			locations = (SensorThingLocationService)eResolveProxy(oldLocations);
-			if (locations != oldLocations) {
+	public SensorThingLocationService getLocation() {
+		if (location != null && location.eIsProxy()) {
+			InternalEObject oldLocation = (InternalEObject)location;
+			location = (SensorThingLocationService)eResolveProxy(oldLocation);
+			if (location != oldLocation) {
 				if (eNotificationRequired())
-					eNotify(new ENotificationImpl(this, Notification.RESOLVE, ExtendedPackage.SENSOR_THING_LOCATION__LOCATIONS, oldLocations, locations));
+					eNotify(new ENotificationImpl(this, Notification.RESOLVE, ExtendedPackage.SENSOR_THING_LOCATION__LOCATION, oldLocation, location));
 			}
 		}
-		return locations;
+		return location;
 	}
 
 	/**
@@ -91,8 +91,8 @@ public class SensorThingLocationImpl extends DynamicProviderImpl implements Sens
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public SensorThingLocationService basicGetLocations() {
-		return locations;
+	public SensorThingLocationService basicGetLocation() {
+		return location;
 	}
 
 	/**
@@ -101,11 +101,11 @@ public class SensorThingLocationImpl extends DynamicProviderImpl implements Sens
 	 * @generated
 	 */
 	@Override
-	public void setLocations(SensorThingLocationService newLocations) {
-		SensorThingLocationService oldLocations = locations;
-		locations = newLocations;
+	public void setLocation(SensorThingLocationService newLocation) {
+		SensorThingLocationService oldLocation = location;
+		location = newLocation;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_LOCATION__LOCATIONS, oldLocations, locations));
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_LOCATION__LOCATION, oldLocation, location));
 	}
 
 	/**
@@ -116,9 +116,9 @@ public class SensorThingLocationImpl extends DynamicProviderImpl implements Sens
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATIONS:
-				if (resolve) return getLocations();
-				return basicGetLocations();
+			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATION:
+				if (resolve) return getLocation();
+				return basicGetLocation();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -131,8 +131,8 @@ public class SensorThingLocationImpl extends DynamicProviderImpl implements Sens
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATIONS:
-				setLocations((SensorThingLocationService)newValue);
+			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATION:
+				setLocation((SensorThingLocationService)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -146,8 +146,8 @@ public class SensorThingLocationImpl extends DynamicProviderImpl implements Sens
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATIONS:
-				setLocations((SensorThingLocationService)null);
+			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATION:
+				setLocation((SensorThingLocationService)null);
 				return;
 		}
 		super.eUnset(featureID);
@@ -161,8 +161,8 @@ public class SensorThingLocationImpl extends DynamicProviderImpl implements Sens
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATIONS:
-				return locations != null;
+			case ExtendedPackage.SENSOR_THING_LOCATION__LOCATION:
+				return location != null;
 		}
 		return super.eIsSet(featureID);
 	}
