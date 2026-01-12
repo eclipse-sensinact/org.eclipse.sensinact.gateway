@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
+import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.ValueSelectionMode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,7 +55,15 @@ public class ResourceSelectorTest {
         return makeResource(svcName, rcName, value, false);
     }
 
+    ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, Instant timestamp) {
+        return makeResource(svcName, rcName, value, false, timestamp);
+    }
+
     ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, boolean unset) {
+        return makeResource(svcName, rcName, value, unset, Instant.now());
+    }
+
+    ResourceSnapshot makeResource(final String svcName, final String rcName, final Object value, boolean unset, Instant timestamp) {
         return new ResourceSnapshot() {
             @Override
             public String getName() {
@@ -72,7 +82,7 @@ public class ResourceSelectorTest {
 
             @Override
             public TimedValue<?> getValue() {
-                return unset ? new DefaultTimedValue<>() : new DefaultTimedValue<>(value);
+                return unset ? new DefaultTimedValue<>() : new DefaultTimedValue<>(value, timestamp);
             }
 
             @Override
@@ -231,6 +241,10 @@ public class ResourceSelectorTest {
 
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation, boolean negate) {
         return new ValueSelection(value, operation, negate, check);
+    }
+
+    private ValueSelection makeValueSelection(OperationType operation, ValueSelectionMode mode, String... values) {
+        return new ValueSelection(Arrays.asList(values), operation, false, CheckType.VALUE, mode);
     }
 
     private ResourceSelector updateValueTest(ResourceSelector rs, ValueSelection vs) {
@@ -652,6 +666,317 @@ public class ResourceSelectorTest {
         assertQueryFalse(rs, rc);
         rs = updateValueTest(rs, makeValueSelection("ab+a+b", null, OperationType.REGEX_REGION, true));
         assertQueryFalse(rs, rc);
+    }
+
+    @Test
+    void testTimestamp() {
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant tenMinutesAgo = now.minusSeconds(10 * 60);
+
+        ResourceSnapshot rcRecent = makeResource("test", "value", 42, now);
+        ResourceSnapshot rcTenMinutesAgo = makeResource("test", "value", 42, tenMinutesAgo);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
+
+        rs = updateValueTest(rs, makeValueSelection(now.toString(), CheckType.TIMESTAMP, OperationType.EQUALS));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection(now.toString(), CheckType.TIMESTAMP, OperationType.LESS_THAN_OR_EQUAL));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection(tenMinutesAgo.toString(), CheckType.TIMESTAMP, OperationType.EQUALS));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection(tenMinutesAgo.toString(), CheckType.TIMESTAMP, OperationType.GREATER_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+    }
+
+    @Test
+    void testAge() {
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant tenMinutesAgo = now.minusSeconds(10 * 60);
+
+        ResourceSnapshot rcRecent = makeResource("test", "value", 42, now);
+        ResourceSnapshot rcTenMinutesAgo = makeResource("test", "value", 42, tenMinutesAgo);
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
+
+        rs = updateValueTest(rs, makeValueSelection("500", CheckType.AGE_MS, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("PT0.5S", CheckType.AGE, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("2", CheckType.AGE_S, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("PT2S", CheckType.AGE, OperationType.LESS_THAN));
+        assertQueryTrue(rs, rcRecent);
+        assertQueryFalse(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("10000", CheckType.AGE_MS, OperationType.GREATER_THAN));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("10", CheckType.AGE_S, OperationType.GREATER_THAN));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+
+        rs = updateValueTest(rs, makeValueSelection("PT10S", CheckType.AGE, OperationType.GREATER_THAN));
+        assertQueryFalse(rs, rcRecent);
+        assertQueryTrue(rs, rcTenMinutesAgo);
+    }
+
+    @Nested
+    class MultipleSelectionTests {
+        @Test
+        void testSingleResourceMultipleSelections() {
+            ResourceSnapshot rc = makeResource("test", "value", 42);
+            ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
+
+            for(ValueSelectionMode mode : ValueSelectionMode.values()) {
+                // These are always false, whatever the selection mode
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.EQUALS, mode, "10", "20"));
+                assertQueryFalse(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.LESS_THAN, mode, "10", "20"));
+                assertQueryFalse(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.LESS_THAN_OR_EQUAL, mode, "10", "20"));
+                assertQueryFalse(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.REGEX, mode, "10", "20"));
+                assertQueryFalse(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.REGEX_REGION, mode, "10", "20"));
+                assertQueryFalse(rs, rc);
+            }
+
+            for(ValueSelectionMode mode : Arrays.asList(ValueSelectionMode.ALL_MATCH, ValueSelectionMode.ANY_MATCH)) {
+                // These are always true
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.EQUALS, mode, "10", "20", "42"));
+                assertQueryTrue(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.GREATER_THAN_OR_EQUAL, mode, "10", "20", "42"));
+                assertQueryTrue(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.GREATER_THAN, mode, "10", "20", "42"));
+                assertQueryTrue(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.LESS_THAN_OR_EQUAL, mode, "10", "20", "42"));
+                assertQueryTrue(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.REGEX, mode, "10", "20", "42"));
+                assertQueryTrue(rs, rc);
+
+                rs = updateValueTest(rs,
+                    makeValueSelection(OperationType.REGEX_REGION, mode, "10", "20", "42"));
+                assertQueryTrue(rs, rc);
+            }
+
+            // Super set match if all selection values are matched
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.GREATER_THAN_OR_EQUAL, ValueSelectionMode.SUPER_SET, "10", "20", "42"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "42", "42"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "42"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "10", "20", "42"));
+            assertQueryFalse(rs, rc);
+
+            // Exact match should be false due to size mismatch
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.GREATER_THAN_OR_EQUAL, ValueSelectionMode.EXACT_MATCH, "10", "20", "42"));
+            assertQueryFalse(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "10"));
+            assertQueryFalse(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "42", "42"));
+            assertQueryFalse(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "42"));
+            assertQueryTrue(rs, rc);
+        }
+
+        @Test
+        void testMultipleValues() {
+            ResourceSnapshot rc = makeResource("test", "value", List.of(10, 20, 42));
+            ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "value");
+
+            // ANY_MATCH mode
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "42"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "10", "30"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "100"));
+            assertQueryFalse(rs, rc);
+
+            // ALL_MATCH mode
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "10", "20", "42"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "10", "20"));
+            assertQueryFalse(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "10", "30"));
+            assertQueryFalse(rs, rc);
+
+            // EXACT_MATCH mode
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "10", "20", "42"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "10", "20"));
+            assertQueryFalse(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "10", "20", "40"));
+            assertQueryFalse(rs, rc);
+
+            // SUPER_SET mode
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "10", "20", "42"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "10", "20"));
+            assertQueryTrue(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "10", "20", "42", "50"));
+            assertQueryFalse(rs, rc);
+
+            rs = updateValueTest(rs,
+                makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "10", "20", "40"));
+            assertQueryFalse(rs, rc);
+        }
+
+        @Test
+        void testDocumentationExamples() {
+            ResourceSnapshot answer = makeResource("test", "answer", 42);
+            ResourceSnapshot pool1 = makeResource("test", "pool-1", List.of(1, 2, 3));
+            ResourceSnapshot pool2 = makeResource("test", "pool-2", List.of(2, 10, 42));
+            ResourceSelector rs = makeBasicResourceSelector(null, null, null, null);
+
+            // First example: find resources with 42
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            // Second example: find resources with [1, 2, 3]
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "1", "2", "3"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            // Third example: find resources with 2
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "2"));
+            assertQueryFalse(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            // Fourth example: find resources with [3, 42]
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.EXACT_MATCH, "3", "42"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ANY_MATCH, "3", "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryTrue(rs, pool1);
+            assertQueryTrue(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.ALL_MATCH, "3", "42"));
+            assertQueryTrue(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+
+            rs = updateValueTest(rs, makeValueSelection(OperationType.EQUALS, ValueSelectionMode.SUPER_SET, "3", "42"));
+            assertQueryFalse(rs, answer);
+            assertQueryFalse(rs, pool1);
+            assertQueryFalse(rs, pool2);
+        }
     }
 
     @Nested

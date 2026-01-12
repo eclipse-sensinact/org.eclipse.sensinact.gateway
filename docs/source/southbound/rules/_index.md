@@ -11,3 +11,11 @@ For more information about how rules work in Eclipse sensinact you may wish to l
 Eclipse sensiNact provides out of the box integration with the following Rules Engines:
 
 * [Easy Rules](./easy-rules.md)
+
+
+```{toctree}
+:hidden:
+
+easy-rules
+rules-whiteboard
+```

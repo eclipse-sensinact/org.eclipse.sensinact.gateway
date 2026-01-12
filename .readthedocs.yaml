@@ -12,6 +12,9 @@ build:
   tools:
     python: "3.11"
 
+  apt_packages:
+    - librsvg2-bin
+
 sphinx:
   configuration: docs/source/conf.py
 
