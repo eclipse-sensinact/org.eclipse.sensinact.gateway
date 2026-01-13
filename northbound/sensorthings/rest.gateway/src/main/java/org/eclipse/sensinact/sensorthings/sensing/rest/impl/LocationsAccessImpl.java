@@ -57,11 +57,15 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ProviderSnapshot providerThing = null;// TODO
+            if (providerThing == null) {// TixME
+                return new ResultList<HistoricalLocation>(null, null, List.of());
+            }
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerSnapshot), 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
             if (list.value().isEmpty()) {
-                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, List.of(providerSnapshot));
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerThing);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -71,7 +75,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public HistoricalLocation getLocationHistoricalLocation(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id2);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
@@ -87,7 +91,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
         if (!id2.equals(id)) {
             throw new NotFoundException();
         }
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = UtilDto.extractFirstIdSegment(id2);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 providerSnapshot);
@@ -95,7 +99,10 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public ResultList<Location> getLocationHistoricalLocationLocations(String id, String id2) {
-        return new ResultList<>(null, null, List.of(getLocation(id)));
+        String thingId = UtilDto.extractFirstIdSegment(id2);
+        List<String> providerLocationIds = getLocationIdsFromThing(getSession(), thingId);
+        return new ResultList<>(null, null,
+                providerLocationIds.stream().map(idLocation -> getLocation(idLocation)).toList());
     }
 
     @Override
@@ -129,11 +136,12 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
+            ProviderSnapshot providerThing = validateAndGetProvider(id2);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, getLocationProvidersFromThing(id2), 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
             if (list.value().isEmpty()) {
-                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, getLocationProvidersFromThing(id2));
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerThing);
             }
             return list;
         } catch (IllegalArgumentException iae) {

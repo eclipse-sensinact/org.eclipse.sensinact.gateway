@@ -61,7 +61,7 @@ public class ValueTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider, value, valueSetInstant);
+        createDatastream(providerDatastream, provider, value, valueSetInstant);
         createLocation(providerLocation);
 
         session.setResourceValue(providerLocation, UtilDto.SERVICE_LOCATON, "location", LOCATION, valueSetInstant);
@@ -123,7 +123,7 @@ public class ValueTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider, value);
+        createDatastream(providerDatastream, provider, value);
         createLocation(providerLocation);
 
         // No unit by default
@@ -143,8 +143,7 @@ public class ValueTest extends AbstractIntegrationTest {
         session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "unitDefinition", unitDefinition);
 
         // Check in datastream
-        ds = utils.queryJson(
-                String.format("/Things(%s)/Datastreams(%s)", PROVIDER, String.join("~", provider, providerDatastream)),
+        ds = utils.queryJson(String.format("/Things(%s)/Datastreams(%s)", provider, providerDatastream),
                 Datastream.class);
         assertEquals(unitName, ds.unitOfMeasurement().name());
         assertEquals(unitSymbol, ds.unitOfMeasurement().symbol());

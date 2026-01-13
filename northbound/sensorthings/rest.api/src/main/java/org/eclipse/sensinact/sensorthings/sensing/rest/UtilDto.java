@@ -14,16 +14,22 @@ package org.eclipse.sensinact.sensorthings.sensing.rest;
 
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Optional;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 public class UtilDto {
 
     public static String SERVICE_DATASTREAM = "datastream";
     public static String SERVICE_THING = "thing";
+    public static String SERVICE_ADMIN = "admin";
+
     public static String SERVICE_LOCATON = "location";
 
     /**
@@ -31,6 +37,10 @@ public class UtilDto {
      */
     public static ServiceSnapshot getDatastreamService(ProviderSnapshot providerDatastream) {
         return providerDatastream.getService(UtilDto.SERVICE_DATASTREAM);
+    }
+
+    public static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
+        return Optional.ofNullable(session.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
     /**
@@ -45,6 +55,10 @@ public class UtilDto {
      */
     public static ServiceSnapshot getThingService(ProviderSnapshot providerDatastream) {
         return providerDatastream.getService(UtilDto.SERVICE_THING);
+    }
+
+    public static ServiceSnapshot getAdminService(ProviderSnapshot providerDatastream) {
+        return providerDatastream.getService(UtilDto.SERVICE_ADMIN);
     }
 
     /**

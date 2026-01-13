@@ -105,10 +105,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public ResultList<HistoricalLocation> getHistoricalLocations() {
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        List<ProviderSnapshot> providersLocation = providers.stream().filter(p -> UtilDto.getLocationService(p) != null)
-                .toList();
-        return toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                providersLocation);
+        return new ResultList<>(null, null, providers
+                .stream().filter(p -> UtilDto.getThingService(p) != null).map(p -> toHistoricalLocation(getSession(),
+                        application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                .filter(Optional::isPresent).map(Optional::get).toList());
+
     }
 
     @Override
@@ -227,7 +228,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ICriterion criterionThing = parseFilter(EFilterContext.THINGS);
 
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot, criterionThing);
+                criterion, snapshot.getProvider(), criterionThing);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
@@ -265,7 +266,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
 
         Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                UtilDto.getThingService(snapshot));
+                snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

@@ -139,14 +139,14 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
     @Override
     public ResultList<HistoricalLocation> getThingHistoricalLocations(String id) {
         String providerThingId = UtilDto.extractFirstIdSegment(id);
-        List<ProviderSnapshot> locationProviders = getLocationProvidersFromThing(providerThingId);
+        ProviderSnapshot providerThing = validateAndGetProvider(providerThingId);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, locationProviders, 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
             if (list.value().isEmpty()) {
-                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, locationProviders);
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerThing);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -157,13 +157,12 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
     @Override
     public HistoricalLocation getThingHistoricalLocation(String id, String id2) {
         String provider = UtilDto.extractFirstIdSegment(id2);
-        ProviderSnapshot providerLocation = validateAndGetProvider(provider);
-        ServiceSnapshot serviceLocation = UtilDto.getLocationService(providerLocation);
+        ProviderSnapshot providerThing = validateAndGetProvider(provider);
         DtoMapper.getTimestampFromId(id2);
 
         try {
             Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
-                    uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), serviceLocation);
+                    uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerThing);
             if (hl.isEmpty()) {
                 throw new NotFoundException();
             }
@@ -240,10 +239,10 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerSnapshot), 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
-                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, List.of(providerSnapshot));
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerSnapshot);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -272,7 +271,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
 
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot);
+                criterion, snapshot.getProvider());
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

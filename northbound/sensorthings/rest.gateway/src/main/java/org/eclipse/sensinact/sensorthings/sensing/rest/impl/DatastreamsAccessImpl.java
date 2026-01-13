@@ -172,10 +172,10 @@ public class DatastreamsAccessImpl extends AbstractAccess
             String thingId = getThingIdFromDatastream(id);
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
 
-            List<ProviderSnapshot> providerLocations = getLocationProvidersFromThing(thingId);
+            ProviderSnapshot providerThing = validateAndGetProvider(thingId);
 
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, providerLocations, 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
             if (list.value().isEmpty())
                 list = new ResultList<>(null, null, List.of());
             return list;

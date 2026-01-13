@@ -181,7 +181,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingLocationService_Name() {
+	public EAttribute getSensorThingLocationService_EncodingType() {
 		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(0);
 	}
 
@@ -191,7 +191,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingLocationService_Description() {
+	public EAttribute getSensorThingLocationService_Location() {
 		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(1);
 	}
 
@@ -201,28 +201,8 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingLocationService_EncodingType() {
-		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(2);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getSensorThingLocationService_Location() {
-		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(3);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public EAttribute getSensorThingLocationService_Id() {
-		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(4);
+		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(2);
 	}
 
 	/**
@@ -251,7 +231,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_Name() {
+	public EAttribute getDataStreamService_Timestamp() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(1);
 	}
 
@@ -261,7 +241,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_Description() {
+	public EAttribute getDataStreamService_SensorName() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(2);
 	}
 
@@ -271,7 +251,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_Timestamp() {
+	public EAttribute getDataStreamService_SensorDescription() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(3);
 	}
 
@@ -281,7 +261,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_SensorName() {
+	public EAttribute getDataStreamService_SensorEncodingType() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(4);
 	}
 
@@ -291,7 +271,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_SensorDescription() {
+	public EAttribute getDataStreamService_UnitName() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(5);
 	}
 
@@ -301,7 +281,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_SensorEncodingType() {
+	public EAttribute getDataStreamService_UnitSymbol() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(6);
 	}
 
@@ -311,7 +291,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_UnitName() {
+	public EAttribute getDataStreamService_UnitDefinition() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(7);
 	}
 
@@ -321,7 +301,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_UnitSymbol() {
+	public EAttribute getDataStreamService_ObservedPropertyName() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(8);
 	}
 
@@ -331,7 +311,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_UnitDefinition() {
+	public EAttribute getDataStreamService_ObservedPropertyId() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(9);
 	}
 
@@ -341,7 +321,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ObservedPropertyName() {
+	public EAttribute getDataStreamService_ObservedPropertyDescription() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(10);
 	}
 
@@ -351,7 +331,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ObservedPropertyId() {
+	public EAttribute getDataStreamService_ObservedPropertyDefinition() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(11);
 	}
 
@@ -361,7 +341,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ObservedPropertyDescription() {
+	public EAttribute getDataStreamService_SensorMetadata() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(12);
 	}
 
@@ -371,7 +351,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ObservedPropertyDefinition() {
+	public EAttribute getDataStreamService_SensorId() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(13);
 	}
 
@@ -381,7 +361,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_SensorMetadata() {
+	public EAttribute getDataStreamService_SensorProperties() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(14);
 	}
 
@@ -391,7 +371,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_SensorId() {
+	public EAttribute getDataStreamService_ObservedPropertyProperties() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(15);
 	}
 
@@ -401,7 +381,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_SensorProperties() {
+	public EAttribute getDataStreamService_LastObservation() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(16);
 	}
 
@@ -411,28 +391,8 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ObservedPropertyProperties() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(17);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getDataStreamService_LastObservation() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(18);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public EAttribute getDataStreamService_ThingId() {
-		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(19);
+		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(17);
 	}
 
 	/**
@@ -451,7 +411,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingService_Name() {
+	public EAttribute getSensorThingService_Properties() {
 		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(0);
 	}
 
@@ -461,7 +421,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingService_Description() {
+	public EAttribute getSensorThingService_Id() {
 		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(1);
 	}
 
@@ -471,7 +431,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingService_Properties() {
+	public EAttribute getSensorThingService_LocationIds() {
 		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(2);
 	}
 
@@ -481,28 +441,8 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingService_Id() {
-		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(3);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public EAttribute getSensorThingService_LocationIds() {
-		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(4);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public EAttribute getSensorThingService_DatastreamIds() {
-		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(5);
+		return (EAttribute)sensorThingServiceEClass.getEStructuralFeatures().get(3);
 	}
 
 	/**
@@ -578,16 +518,12 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		createEReference(sensorThingDeviceEClass, SENSOR_THING_DEVICE__THING);
 
 		sensorThingLocationServiceEClass = createEClass(SENSOR_THING_LOCATION_SERVICE);
-		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__NAME);
-		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__DESCRIPTION);
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE);
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__LOCATION);
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__ID);
 
 		dataStreamServiceEClass = createEClass(DATA_STREAM_SERVICE);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__ID);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__NAME);
-		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__DESCRIPTION);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__TIMESTAMP);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__SENSOR_NAME);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__SENSOR_DESCRIPTION);
@@ -607,8 +543,6 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__THING_ID);
 
 		sensorThingServiceEClass = createEClass(SENSOR_THING_SERVICE);
-		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__NAME);
-		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__DESCRIPTION);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__PROPERTIES);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__ID);
 		createEAttribute(sensorThingServiceEClass, SENSOR_THING_SERVICE__LOCATION_IDS);
@@ -664,16 +598,12 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		initEReference(getSensorThingDevice_Thing(), this.getSensorThingService(), null, "thing", null, 0, 1, SensorThingDevice.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingLocationServiceEClass, SensorThingLocationService.class, "SensorThingLocationService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEAttribute(getSensorThingLocationService_Name(), ecorePackage.getEString(), "name", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getSensorThingLocationService_Description(), ecorePackage.getEString(), "description", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingLocationService_EncodingType(), ecorePackage.getEString(), "encodingType", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingLocationService_Location(), theProviderPackage.getEGeoJsonObject(), "location", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingLocationService_Id(), ecorePackage.getEString(), "id", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(dataStreamServiceEClass, DataStreamService.class, "DataStreamService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getDataStreamService_Id(), ecorePackage.getEString(), "id", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_Name(), ecorePackage.getEString(), "name", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getDataStreamService_Description(), ecorePackage.getEString(), "description", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_Timestamp(), theProviderPackage.getEInstant(), "timestamp", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_SensorName(), ecorePackage.getEString(), "sensorName", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_SensorDescription(), ecorePackage.getEString(), "sensorDescription", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -703,8 +633,6 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		initEAttribute(getDataStreamService_ThingId(), ecorePackage.getEString(), "thingId", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingServiceEClass, SensorThingService.class, "SensorThingService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEAttribute(getSensorThingService_Name(), ecorePackage.getEString(), "name", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getSensorThingService_Description(), ecorePackage.getEString(), "description", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_Properties(), ecorePackage.getEJavaObject(), "properties", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_Id(), ecorePackage.getEString(), "id", null, 0, 1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingService_LocationIds(), ecorePackage.getEString(), "locationIds", null, 0, -1, SensorThingService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

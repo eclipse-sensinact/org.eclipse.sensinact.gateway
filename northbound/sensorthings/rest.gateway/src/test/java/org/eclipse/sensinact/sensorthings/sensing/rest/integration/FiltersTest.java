@@ -36,8 +36,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.eclipse.sensinact.gateway.geojson.Coordinates;
-import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
@@ -69,7 +67,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         // Create providers
         int nbProviders = 4;
         for (int i = 0; i < nbProviders; i++) {
-            createDatastrem("countTester_Datastream_" + (i + 1), "countTester_Thing_" + (i + 1));
+            createDatastream("countTester_Datastream_" + (i + 1), "countTester_Thing_" + (i + 1));
             createLocation("countTester_Location_" + (i + 1));
             createThing("countTester_Thing_" + (i + 1), List.of("countTester_Location_" + (i + 1)),
                     List.of("countTester_Datastream_" + (i + 1)));
@@ -130,10 +128,10 @@ public class FiltersTest extends AbstractIntegrationTest {
         sortedProviderIds.stream().filter(id -> id.startsWith(prefix)).forEach(id -> {
             String thingId = id + "-thing";
             String locationId = id + "-location";
-            createDatastrem(id + "-datastreamA", thingId);
-            createDatastrem(id + "-datastreamA" + 256, thingId);
-            createDatastrem(id + "-datastreamB", thingId);
-            createDatastrem(id + "-datastreamB" + 256, thingId);
+            createDatastream(id + "-datastreamA", thingId);
+            createDatastream(id + "-datastreamA" + 256, thingId);
+            createDatastream(id + "-datastreamB", thingId);
+            createDatastream(id + "-datastreamB" + 256, thingId);
             createLocation(locationId);
             createThing(thingId, List.of(locationId), List.of(id + "datastreamA", id + "datastreamA" + 256,
                     id + "datastreamB", id + "datastreamB" + 256));
@@ -187,7 +185,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         final String providerDatastream = "expandTesterDatastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider, 42);
+        createDatastream(providerDatastream, provider, 42);
 
         // Parsing will fail if there is any other JSON property
         ResultList<? extends Self> resultList = utils.queryJson(String.format("/Things(%s)/Datastreams/$ref", provider),
@@ -216,7 +214,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         final String provider = "propTester";
         final String providerDatastream = "propTesterDatastream";
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider, value);
+        createDatastream(providerDatastream, provider, value);
 
         ResultList<? extends Self> observations = utils
                 .queryJson(String.format("/FeaturesOfInterest(%s)/Observations/$ref",
@@ -243,7 +241,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         final String providerDatastream = "selectTester-datastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider, 42);
+        createDatastream(providerDatastream, provider, 42);
 
         Set<String> selectedFields = Set.of("result", "resultTime");
         Map<?, ?> rawResultList = utils.queryJson("/Observations/?$select=" + String.join(",", selectedFields),
@@ -267,7 +265,7 @@ public class FiltersTest extends AbstractIntegrationTest {
         for (int i = 0; i < nbRc; i++) {
             final String providerDatastream = "skipTopFilter-datastream-" + i;
             datastreamIds.add(providerDatastream);
-            createDatastrem(providerDatastream, provider, i);
+            createDatastream(providerDatastream, provider, i);
         }
         createThing(provider, List.of(), datastreamIds);
 
@@ -339,16 +337,28 @@ public class FiltersTest extends AbstractIntegrationTest {
             final String testMethodName = testInfo.getTestMethod().get().getName();
             provider1 = testMethodName + "_1";
             provider2 = testMethodName + "_2";
-            for (int i = 0; i < nbRc; i++) {
-                final String rcName = rcPrefix + i;
-                createResource(provider1, svc, rcName, i);
-                createResource(provider2, svc, rcName, 40 + i);
-                below40.add(String.join("~", provider1, svc, rcName));
-                above40.add(String.join("~", provider2, svc, rcName));
-            }
+            String thingId = testMethodName + "1_thing";
+            String thingId2 = testMethodName + "2_thing";
+            String locationId = testMethodName + "1_location";
+            String locationId2 = testMethodName + "2_location";
 
-            createResource(provider1, "admin", "location", new Point(Coordinates.EMPTY, null, null));
-            createResource(provider2, "admin", "location", new Point(Coordinates.EMPTY, null, null));
+            List<String> providerBelow40 = new ArrayList<String>();
+            List<String> providerAbove40 = new ArrayList<String>();
+            for (int i = 0; i < nbRc; i++) {
+                String providerBelow = provider1 + "_" + i;
+                String providerAbove = provider2 + "_" + i;
+
+                createDatastream(providerBelow, thingId, i);
+                createDatastream(providerAbove, thingId, 40 + i);
+                providerAbove40.add(providerAbove);
+                providerBelow40.add(providerBelow);
+                below40.add(String.join("~", providerBelow, "test"));
+                above40.add(String.join("~", providerAbove, "test"));
+            }
+            createLocation(locationId);
+            createLocation(locationId2);
+            createThing(thingId, List.of(locationId), List.of(provider1));
+            createThing(thingId2, List.of(locationId2), List.of(provider2));
         }
 
         @AfterEach
@@ -608,8 +618,8 @@ public class FiltersTest extends AbstractIntegrationTest {
             String providerDatastream1 = providerDatastream + "-" + 1;
             String providerDatastream2 = providerDatastream + "-" + 2;
 
-            createDatastrem(providerDatastream1 + "-" + 1, provider, 42);
-            createDatastrem(providerDatastream2 + "-" + 2, provider, 24);
+            createDatastream(providerDatastream1, provider, 42);
+            createDatastream(providerDatastream2, provider, 24);
 
             createThing(provider, List.of(), List.of(providerDatastream1, providerDatastream2));
 
@@ -625,7 +635,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             Map<?, ?> rawThing = items.stream().map(Map.class::cast).filter(m -> !"sensiNact".equals(m.get("name")))
                     .findFirst().get();
 
-            // Two data streams (one per resource)
+            // Two data streams
             List<?> rawDatastreamsList = (List<?>) rawThing.get("Datastreams");
 
             assertNotNull(rawDatastreamsList);
@@ -664,7 +674,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             final String providerDatastream = "expandTesterDatastream";
 
             createThing(provider, List.of(), List.of(providerDatastream));
-            createDatastrem(providerDatastream, provider);
+            createDatastream(providerDatastream, provider);
 
             Set<String> expandedFields = Set.of("Thing", "Sensor");
             Map<?, ?> rawDatastream = utils.queryJson(

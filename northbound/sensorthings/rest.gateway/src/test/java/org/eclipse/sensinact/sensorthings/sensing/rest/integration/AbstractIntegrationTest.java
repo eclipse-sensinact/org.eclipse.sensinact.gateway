@@ -156,19 +156,19 @@ public class AbstractIntegrationTest {
         createResource(provider, service, resource, value, null);
     }
 
-    protected void createDatastrem(String provider, String thingId) {
-        createDatastrem(provider, thingId, 42);
+    protected void createDatastream(String provider, String thingId) {
+        createDatastream(provider, thingId, 42);
     }
 
     protected FeatureOfInterest getFeatureOfInterest(String foiRefId) {
         return new FeatureOfInterest(null, foiRefId, "test", null, null, null, null);
     }
 
-    protected void createDatastrem(String provider, String thingId, int value) {
-        createDatastrem(provider, thingId, value, null);
+    protected void createDatastream(String provider, String thingId, int value) {
+        createDatastream(provider, thingId, value, null);
     }
 
-    protected void createDatastrem(String provider, String thingId, Object value, Instant valueInstant) {
+    protected void createDatastream(String provider, String thingId, Object value, Instant valueInstant) {
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "thingId", thingId, valueInstant);
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "id", provider, valueInstant);
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "name", "test", valueInstant);
@@ -188,7 +188,7 @@ public class AbstractIntegrationTest {
 
     public static ExpandedObservation getObservation(String name, Object result, FeatureOfInterest foi) {
 
-        return new ExpandedObservation(null, name, Instant.now().truncatedTo(ChronoUnit.SECONDS),
+        return new ExpandedObservation(name, name, Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null, null, null, null, null, foi);
 
     }
@@ -202,7 +202,7 @@ public class AbstractIntegrationTest {
     protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds) {
         createResource(provider, UtilDto.SERVICE_THING, "id", provider, null);
         createResource(provider, UtilDto.SERVICE_THING, "name", "test", null);
-
+        createResource(provider, UtilDto.SERVICE_ADMIN, "location", new Point(Coordinates.EMPTY, null, null), null);
         createResource(provider, UtilDto.SERVICE_THING, "locationIds", locationIds, null);
         createResource(provider, UtilDto.SERVICE_THING, "datastreamIds", datastreamIds, null);
     }

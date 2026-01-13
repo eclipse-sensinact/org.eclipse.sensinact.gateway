@@ -33,9 +33,9 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 @Service("admin")
 public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object id,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String name,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
-        @Timestamp Instant timestamp, @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String thingId,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description, @Timestamp Instant timestamp,
+        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String thingId,
 // sensor
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorId,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String sensorName,

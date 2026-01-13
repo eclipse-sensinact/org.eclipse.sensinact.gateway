@@ -60,10 +60,11 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
         String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        validateAndGetProvider(provider);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), providerSnapshot)));
+        ResultList<Location> list = new ResultList<>(null, null,
+                getLocationProvidersFromThing(provider).stream().map(p -> DtoMapper.toLocation(getSession(),
+                        application, getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p)).toList());
 
         return list;
     }
@@ -103,13 +104,13 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
 
-            ProviderSnapshot providerLocation = validateAndGetProvider(providerId);
+            ProviderSnapshot providerThing = validateAndGetProvider(providerId);
 
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerLocation), 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
             if (list.value().isEmpty())
-                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, List.of(providerLocation));
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerThing);
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -151,16 +152,15 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
         String provider = UtilDto.extractFirstIdSegment(id);
         getTimestampFromId(id);
-        // TODO find thing link to location then get locations providers
 
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, List.of(providerSnapshot), 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
-                list = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, List.of(providerSnapshot));
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerSnapshot);
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

@@ -78,7 +78,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
             datastreamIds = getDatastreamIds(provider);
         }
 
-        return DtoToModelMapper.toThingUpdates(request.model(), id, locationIds, datastreamIds);
+        return DtoToModelMapper.toThingUpdates(request, id, locationIds, datastreamIds);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {

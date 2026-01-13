@@ -31,6 +31,8 @@ import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
 import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.geojson.Geometry;
+import org.eclipse.sensinact.gateway.geojson.GeometryCollection;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -196,11 +198,9 @@ public class DtoToModelMapper {
 
     }
 
-    public static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider,
-            String resource) {
-        ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> ADMIN.equals(s.getName())).findFirst()
-                .get();
-        return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
+    public static Optional<? extends ResourceSnapshot> getProviderField(ServiceSnapshot service, String resource) {
+
+        return service.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
     public static String extractIdSegment(String id, int part) {
@@ -237,8 +237,8 @@ public class DtoToModelMapper {
 
     }
 
-    public static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider, String resource) {
-        Optional<? extends ResourceSnapshot> rc = getProviderAdminField(provider, resource);
+    public static Optional<Object> getProviderFieldValue(ServiceSnapshot service, String resource) {
+        Optional<? extends ResourceSnapshot> rc = getProviderField(service, resource);
         if (rc.isPresent()) {
             TimedValue<?> value = rc.get().getValue();
             if (value != null) {
@@ -362,10 +362,63 @@ public class DtoToModelMapper {
         return UtilDto.getRecordField(record, fieldName);
     }
 
-    public static List<SensorThingsUpdate> toThingUpdates(ExpandedThing thing, String id,
+    private static Feature toFeature(FeatureCollection fc) {
+        return switch (fc.features().size()) {
+        case 0:
+            yield null;
+        case 1:
+            yield fc.features().get(0);
+        default:
+            GeometryCollection gc = new GeometryCollection(
+                    fc.features().stream().map(fe -> fe.geometry()).filter(Objects::nonNull).toList(), null, null);
+            yield new Feature(fc.features().get(0).id() + ".combined", gc, null, null, null);
+        };
+    }
+
+    private static Feature toFeature(ExpandedLocation location) {
+        Feature f;
+
+        if (location.location() != null) {
+            String id = sanitizeId(location.id());
+            f = switch (location.location().type()) {
+            case Feature:
+                yield (Feature) location.location();
+            case FeatureCollection:
+                yield toFeature((FeatureCollection) location.location());
+            case GeometryCollection:
+            case LineString:
+            case MultiLineString:
+            case MultiPoint:
+            case MultiPolygon:
+            case Point:
+            case Polygon:
+                yield new Feature(id, (Geometry) location.location(), Map.of("sensorthings.location.description",
+                        location.description(), "sensorthings.location.name", location.name()), null, null);
+            default:
+                throw new IllegalArgumentException("Unknown GeoJSON object " + location.location().type());
+            };
+        } else {
+            f = null;
+        }
+
+        return f;
+    }
+
+    private static GeoJsonObject aggregate(List<ExpandedLocation> locations) {
+        return switch (locations.size()) {
+        case 0:
+            yield null;
+        case 1:
+            yield toFeature(locations.get(0));
+        default:
+            yield new FeatureCollection(locations.stream().map(DtoToModelMapper::toFeature).toList(), null, null);
+        };
+    }
+
+    public static List<SensorThingsUpdate> toThingUpdates(ExtraUseCaseRequest<ExpandedThing> request, String id,
             List<String> existingLocationIds, List<String> existingDatastreamIds) {
         String providerIdThing = id;
-
+        ExpandedThing thing = request.model();
         List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
         Map<String, Object> thingProperties = null;
 
@@ -373,6 +426,8 @@ public class DtoToModelMapper {
             thingProperties = thing.properties().entrySet().stream()
                     .collect(toMap(e -> "sensorthings.thing." + e.getKey(), Entry::getValue));
         }
+        GeoJsonObject geoLocationAggregate = null;
+
         if (thing.locations() != null) {
             for (ExpandedLocation l : thing.locations()) {
                 String locationId = getLocationId(l);
@@ -381,6 +436,10 @@ public class DtoToModelMapper {
                 }
                 existingLocationIds.add(locationId);
             }
+            thing.locations().stream().filter(l -> !isRecordOnlyField(l, "id"))
+                    .map(l -> toLocationUpdate(getLocationId(l), l)).forEach(listUpdate::add);
+            existingLocationIds.addAll(thing.locations().stream().map(l -> getLocationId(l)).toList());
+            geoLocationAggregate = getAggregateLocation(request, existingLocationIds);
         }
         if (thing.datastreams() != null) {
             for (ExpandedDataStream ds : thing.datastreams()) {
@@ -398,12 +457,19 @@ public class DtoToModelMapper {
             }
 
         }
-        ThingUpdate provider = new ThingUpdate(providerIdThing, thing.name(), thing.description(), providerIdThing,
-                thingProperties, existingLocationIds, existingDatastreamIds);
+        ThingUpdate provider = new ThingUpdate(providerIdThing, geoLocationAggregate, thing.name(), thing.description(),
+                providerIdThing, thingProperties, existingLocationIds, existingDatastreamIds);
 
         listUpdate.add(provider);
 
         return listUpdate;
+    }
+
+    public static GeoJsonObject getAggregateLocation(ExtraUseCaseRequest<?> request, List<String> existingLocationIds) {
+        return aggregate(existingLocationIds.stream()
+                .map(idLocation -> UtilDto.getProviderSnapshot(request.session(), idLocation))
+                .filter(Optional::isPresent).map(Optional::get)
+                .map(p -> toLocation(request.session(), request.mapper(), request.uriInfo(), p)).toList());
     }
 
     private static String getLocationId(ExpandedLocation l) {
@@ -443,7 +509,8 @@ public class DtoToModelMapper {
 
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             boolean allowNull) {
-        final Optional<? extends ResourceSnapshot> locationResource = getProviderAdminField(provider, LOCATION);
+        final Optional<? extends ResourceSnapshot> locationResource = getProviderField(
+                UtilDto.getLocationService(provider), LOCATION);
 
         final Instant time;
         final Object rawValue;
@@ -515,10 +582,11 @@ public class DtoToModelMapper {
 
         String id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
 
-        String name = Objects.requireNonNullElse(getProperty(object, "name"), providerName);
+        String name = UtilDto.getResourceField(UtilDto.getAdminService(provider), DtoToModelMapper.FRIENDLY_NAME,
+                String.class);
 
-        String description = Objects.requireNonNullElse(getProperty(object, DtoToModelMapper.DESCRIPTION),
-                DtoToModelMapper.NO_DESCRIPTION);
+        String description = UtilDto.getResourceField(UtilDto.getAdminService(provider), DtoToModelMapper.DESCRIPTION,
+                String.class);
 
         String selfLink = uriInfo.getBaseUriBuilder().path(DtoToModelMapper.VERSION).path("Locations({id})")
                 .resolveTemplate("id", id).build().toString();

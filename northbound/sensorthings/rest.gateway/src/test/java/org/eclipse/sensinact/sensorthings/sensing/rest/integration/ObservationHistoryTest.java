@@ -301,7 +301,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         String thingId = "navigateToObservationTest";
         String datastreamId = thingId + "_datastream";
         for (int i = 0; i < 10; i++) {
-            createDatastrem(datastreamId, thingId, i, TS_2012);
+            createDatastream(datastreamId, thingId, i, TS_2012);
         }
         createThing(thingId, List.of(), List.of(datastreamId));
         // 16: 10 updates + history provider name & model & modelPackageUri + fizz
@@ -323,7 +323,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         String thingId = "navigateToObservationTest";
         String datastreamId = thingId + "_datastream";
         for (int i = 0; i < 10; i++) {
-            createDatastrem(datastreamId, thingId, i, TS_2012);
+            createDatastream(datastreamId, thingId, i, TS_2012);
         }
         createThing(thingId, List.of(), List.of(datastreamId));
         waitForRowCount("sensinact.text_data", 18);
@@ -365,8 +365,8 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         Instant laterTime = ZonedDateTime.of(2020, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
 
         // Create resources with different timestamps
-        createDatastrem(testProvider, testProviderThing, 25.5, earlierTime);
-        createDatastrem(testProvider, testProviderThing, 30.2, laterTime);
+        createDatastream(testProvider, testProviderThing, 25.5, earlierTime);
+        createDatastream(testProvider, testProviderThing, 30.2, laterTime);
         createLocation(testProviderLocation);
         createThing(testProviderThing, List.of(testProviderLocation), List.of(testProvider));
         // Test phenomenonTime lt filter - should return only the earlier observation

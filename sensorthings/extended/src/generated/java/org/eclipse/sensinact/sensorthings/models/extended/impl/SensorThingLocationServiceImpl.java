@@ -33,8 +33,6 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationSer
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getEncodingType <em>Encoding Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getLocation <em>Location</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getId <em>Id</em>}</li>
@@ -43,46 +41,6 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationSer
  * @generated
  */
 public class SensorThingLocationServiceImpl extends ServiceImpl implements SensorThingLocationService {
-	/**
-	 * The default value of the '{@link #getName() <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getName()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String NAME_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getName() <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getName()
-	 * @generated
-	 * @ordered
-	 */
-	protected String name = NAME_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getDescription() <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String DESCRIPTION_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getDescription() <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected String description = DESCRIPTION_EDEFAULT;
-
 	/**
 	 * The default value of the '{@link #getEncodingType() <em>Encoding Type</em>}' attribute.
 	 * <!-- begin-user-doc -->
@@ -168,52 +126,6 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	 * @generated
 	 */
 	@Override
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setName(String newName) {
-		String oldName = name;
-		name = newName;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__NAME, oldName, name));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getDescription() {
-		return description;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setDescription(String newDescription) {
-		String oldDescription = description;
-		description = newDescription;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__DESCRIPTION, oldDescription, description));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public String getEncodingType() {
 		return encodingType;
 	}
@@ -285,10 +197,6 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__NAME:
-				return getName();
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__DESCRIPTION:
-				return getDescription();
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE:
 				return getEncodingType();
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__LOCATION:
@@ -307,12 +215,6 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__NAME:
-				setName((String)newValue);
-				return;
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__DESCRIPTION:
-				setDescription((String)newValue);
-				return;
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE:
 				setEncodingType((String)newValue);
 				return;
@@ -334,12 +236,6 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__NAME:
-				setName(NAME_EDEFAULT);
-				return;
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__DESCRIPTION:
-				setDescription(DESCRIPTION_EDEFAULT);
-				return;
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE:
 				setEncodingType(ENCODING_TYPE_EDEFAULT);
 				return;
@@ -361,10 +257,6 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__NAME:
-				return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
-			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__DESCRIPTION:
-				return DESCRIPTION_EDEFAULT == null ? description != null : !DESCRIPTION_EDEFAULT.equals(description);
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE:
 				return ENCODING_TYPE_EDEFAULT == null ? encodingType != null : !ENCODING_TYPE_EDEFAULT.equals(encodingType);
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__LOCATION:
@@ -385,11 +277,7 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 		if (eIsProxy()) return super.toString();
 
 		StringBuilder result = new StringBuilder(super.toString());
-		result.append(" (name: ");
-		result.append(name);
-		result.append(", description: ");
-		result.append(description);
-		result.append(", encodingType: ");
+		result.append(" (encodingType: ");
 		result.append(encodingType);
 		result.append(", location: ");
 		result.append(location);

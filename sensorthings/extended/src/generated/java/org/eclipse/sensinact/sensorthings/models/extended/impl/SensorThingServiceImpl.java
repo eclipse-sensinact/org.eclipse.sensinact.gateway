@@ -37,8 +37,6 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingService;
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getProperties <em>Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl#getLocationIds <em>Location Ids</em>}</li>
@@ -48,46 +46,6 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingService;
  * @generated
  */
 public class SensorThingServiceImpl extends ServiceImpl implements SensorThingService {
-	/**
-	 * The default value of the '{@link #getName() <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getName()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String NAME_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getName() <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getName()
-	 * @generated
-	 * @ordered
-	 */
-	protected String name = NAME_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getDescription() <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String DESCRIPTION_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getDescription() <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected String description = DESCRIPTION_EDEFAULT;
-
 	/**
 	 * The default value of the '{@link #getProperties() <em>Properties</em>}' attribute.
 	 * <!-- begin-user-doc -->
@@ -173,52 +131,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	 * @generated
 	 */
 	@Override
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setName(String newName) {
-		String oldName = name;
-		name = newName;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_SERVICE__NAME, oldName, name));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getDescription() {
-		return description;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setDescription(String newDescription) {
-		String oldDescription = description;
-		description = newDescription;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_SERVICE__DESCRIPTION, oldDescription, description));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public Object getProperties() {
 		return properties;
 	}
@@ -293,10 +205,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
-				return getName();
-			case ExtendedPackage.SENSOR_THING_SERVICE__DESCRIPTION:
-				return getDescription();
 			case ExtendedPackage.SENSOR_THING_SERVICE__PROPERTIES:
 				return getProperties();
 			case ExtendedPackage.SENSOR_THING_SERVICE__ID:
@@ -318,12 +226,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
-				setName((String)newValue);
-				return;
-			case ExtendedPackage.SENSOR_THING_SERVICE__DESCRIPTION:
-				setDescription((String)newValue);
-				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__PROPERTIES:
 				setProperties(newValue);
 				return;
@@ -350,12 +252,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
-				setName(NAME_EDEFAULT);
-				return;
-			case ExtendedPackage.SENSOR_THING_SERVICE__DESCRIPTION:
-				setDescription(DESCRIPTION_EDEFAULT);
-				return;
 			case ExtendedPackage.SENSOR_THING_SERVICE__PROPERTIES:
 				setProperties(PROPERTIES_EDEFAULT);
 				return;
@@ -380,10 +276,6 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case ExtendedPackage.SENSOR_THING_SERVICE__NAME:
-				return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
-			case ExtendedPackage.SENSOR_THING_SERVICE__DESCRIPTION:
-				return DESCRIPTION_EDEFAULT == null ? description != null : !DESCRIPTION_EDEFAULT.equals(description);
 			case ExtendedPackage.SENSOR_THING_SERVICE__PROPERTIES:
 				return PROPERTIES_EDEFAULT == null ? properties != null : !PROPERTIES_EDEFAULT.equals(properties);
 			case ExtendedPackage.SENSOR_THING_SERVICE__ID:
@@ -406,11 +298,7 @@ public class SensorThingServiceImpl extends ServiceImpl implements SensorThingSe
 		if (eIsProxy()) return super.toString();
 
 		StringBuilder result = new StringBuilder(super.toString());
-		result.append(" (name: ");
-		result.append(name);
-		result.append(", description: ");
-		result.append(description);
-		result.append(", properties: ");
+		result.append(" (properties: ");
 		result.append(properties);
 		result.append(", id: ");
 		result.append(id);
