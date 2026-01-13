@@ -30,8 +30,8 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 @Service("admin")
 public record LocationUpdate(@Model EClass model, @Provider String providerId,
         @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object id,
-        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String name,
-        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String friendlyName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
         @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String encodingType,
         @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) GeoJsonObject location)
         implements SensorThingsUpdate {

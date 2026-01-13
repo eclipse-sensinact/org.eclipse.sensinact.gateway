@@ -87,7 +87,7 @@ class HistoryResourceHelper {
     @SuppressWarnings("unchecked")
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            List<ProviderSnapshot> providerLocations, int localResultLimit) {
+            ProviderSnapshot providerThing, int localResultLimit) {
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
         if (historyProvider == null) {
             return new ResultList<>(null, null, List.of());
@@ -96,32 +96,30 @@ class HistoryResourceHelper {
         List<HistoricalLocation> values = new ArrayList<>();
 
         Integer maxResults = getMaxResult(application, localResultLimit);
-        providerLocations.stream().forEach(provider -> {
-            Map<String, Object> params = initParameter(provider);
-            // Get count for the full dataset (for pagination metadata)
-            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-            if (count != null)
-                totalCount.addAndGet(count);
-            int skip = 0;
+        Map<String, Object> params = initParameter(providerThing);
+        // Get count for the full dataset (for pagination metadata)
+        Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
+        if (count != null)
+            totalCount.addAndGet(count);
+        int skip = 0;
 
-            List<TimedValue<?>> timed;
-            do {
-                params.put("skip", skip);
+        List<TimedValue<?>> timed;
+        do {
+            params.put("skip", skip);
 
-                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-                List<HistoricalLocation> historicalLocationList = DtoMapper.toHistoricalLocationList(userSession,
-                        application, mapper, uriInfo, expansions, filter, provider, timed);
-                if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
-                    count -= (timed.size() - historicalLocationList.size());
-                }
-                values.addAll(0, historicalLocationList);
-                if (timed.isEmpty()) {
-                    break;
-                }
-                skip += timed.size();
+            timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
+            List<HistoricalLocation> historicalLocationList = DtoMapper.toHistoricalLocationList(userSession,
+                    application, mapper, uriInfo, expansions, filter, providerThing, timed);
+            if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
+                count -= (timed.size() - historicalLocationList.size());
+            }
+            values.addAll(0, historicalLocationList);
+            if (timed.isEmpty()) {
+                break;
+            }
+            skip += timed.size();
 
-            } while ((count == null || values.size() < count) && values.size() < maxResults);
-        });
+        } while ((count == null || values.size() < count) && values.size() < maxResults);
         return new ResultList<>(
                 totalCount == null ? null
                         : totalCount.get() > Integer.MAX_VALUE ? Integer.MAX_VALUE : totalCount.intValue(),

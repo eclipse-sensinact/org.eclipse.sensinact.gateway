@@ -100,7 +100,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                 String locationId = request.id();
                 if (!ids.contains(locationId)) {
                     ids = Stream.concat(ids.stream(), Stream.of(locationId)).toList();
-                    return new ThingUpdate(providerId, null, null, providerId, null, ids, null);
+                    return new ThingUpdate(providerId, DtoToModelMapper.getAggregateLocation(request, ids), null, null,
+                            providerId, null, ids, null);
                 }
                 return null;
             }).filter(java.util.Objects::nonNull).forEach(listUpdates::add);

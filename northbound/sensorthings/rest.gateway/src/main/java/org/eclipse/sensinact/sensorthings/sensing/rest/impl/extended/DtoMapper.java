@@ -14,7 +14,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +25,6 @@ import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
@@ -91,7 +89,7 @@ public class DtoMapper {
     public static ServiceSnapshot validateAndGeService(SensiNactSession session, String id, String serviceName) {
         String providerId = UtilDto.extractFirstIdSegment(id);
 
-        Optional<ProviderSnapshot> provider = DtoMapper.getProviderSnapshot(session, providerId);
+        Optional<ProviderSnapshot> provider = UtilDto.getProviderSnapshot(session, providerId);
 
         if (provider != null && provider.isPresent() && serviceName != null) {
             return DtoMapper.getServiceSnapshot(provider.get(), serviceName);
@@ -118,7 +116,7 @@ public class DtoMapper {
     public static ProviderSnapshot validateAndGetProvider(SensiNactSession session, String id) {
         DtoMapper.validatedProviderId(id);
 
-        Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(session, id);
+        Optional<ProviderSnapshot> providerSnapshot = UtilDto.getProviderSnapshot(session, id);
 
         if (providerSnapshot.isEmpty()) {
             throw new NotFoundException("Unknown provider");
@@ -132,24 +130,21 @@ public class DtoMapper {
         }
     }
 
-    public static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
-        return Optional.ofNullable(session.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
-    }
-
     public static Thing toThing(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
-        return toThing(userSession, application, mapper, uriInfo, expansions, filter,
-                UtilDto.getThingService(provider));
+        return toThing(userSession, application, mapper, uriInfo, expansions, filter, UtilDto.getThingService(provider),
+                UtilDto.getAdminService(provider));
     }
 
     @SuppressWarnings("unchecked")
     public static Thing toThing(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot serviceThing) {
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot serviceThing,
+            ServiceSnapshot adminService) {
         String id = serviceThing.getProvider().getName();
 
-        String name = getResourceField(serviceThing, "name", String.class);
+        String name = getResourceField(adminService, FRIENDLY_NAME, String.class);
 
-        String description = getResourceField(serviceThing, "description", String.class);
+        String description = getResourceField(adminService, DESCRIPTION, String.class);
 
         String selfLink = getLink(uriInfo, VERSION, "Things({id})", id);
         String datastreamsLink = getLink(uriInfo, selfLink, "Datastreams");
@@ -168,9 +163,9 @@ public class DtoMapper {
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
             ResultList<HistoricalLocation> list = new ResultList<>(null, null,
                     locationIds.stream().map(idLoc -> validateAndGetProvider(userSession, idLoc))
-                            .map(UtilDto::getLocationService).filter(Objects::nonNull)
-                            .map(s -> DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
-                                    expansions.getExpansionSettings("HistoricalLocations"), filter, s))
+                            .filter(Objects::nonNull)
+                            .map(p -> DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo,
+                                    expansions.getExpansionSettings("HistoricalLocations"), filter, p))
                             .flatMap(Optional::stream).toList());
             expansions.addExpansion("HistoricalLocations", thing, list);
 
@@ -178,11 +173,11 @@ public class DtoMapper {
         if (expansions.shouldExpand("Locations", thing)) {
             if (locationIds != null) {
 
-                List<ServiceSnapshot> services = locationIds.stream()
-                        .map(idLocation -> getProviderSnapshot(userSession, idLocation)).flatMap(Optional::stream)
-                        .map(p -> p.getServices()).flatMap(List::stream).toList();
-                List<Location> locations = services.stream().filter(service -> service.getName() != ADMIN)
-                        .map(s -> toLocation(userSession, application, mapper, uriInfo, expansions, filter, s))
+                List<ProviderSnapshot> providers = locationIds.stream()
+                        .map(idLocation -> UtilDto.getProviderSnapshot(userSession, idLocation))
+                        .flatMap(Optional::stream).toList();
+                List<Location> locations = providers.stream().filter(service -> service.getName() != ADMIN)
+                        .map(p -> toLocation(userSession, application, mapper, uriInfo, expansions, filter, p))
                         .toList();
                 ResultList<Location> list = new ResultList<>(null, null, locations);
                 expansions.addExpansion("Locations", thing, list);
@@ -245,7 +240,7 @@ public class DtoMapper {
         if (expansions.shouldExpand("Thing", datastream)) {
             ProviderSnapshot providerThing = validateAndGetProvider(userSession, thingId);
             expansions.addExpansion("Thing", datastream, toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), filter, UtilDto.getThingService(providerThing)));
+                    expansions.getExpansionSettings("Thing"), filter, providerThing));
         }
 
         return datastream;
@@ -336,8 +331,8 @@ public class DtoMapper {
 
         List<HistoricalLocation> list = new ArrayList<>(historicalLocations.size());
         for (TimedValue<?> tv : historicalLocations) {
-            toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter,
-                    UtilDto.getLocationService(provider), Optional.of(tv)).ifPresent(list::add);
+            toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider,
+                    Optional.of(tv)).ifPresent(list::add);
         }
 
         return list;
@@ -389,9 +384,9 @@ public class DtoMapper {
         return Optional.of(observation);
     }
 
-    private static TimedValue<GeoJsonObject> getLocation(ServiceSnapshot service, ObjectMapper mapper,
+    private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             boolean allowNull) {
-        final ResourceSnapshot locationResource = service.getResource(LOCATION);
+        final ResourceSnapshot locationResource = UtilDto.getAdminService(provider).getResource(LOCATION);
 
         final Instant time;
         final Object rawValue;
@@ -448,29 +443,24 @@ public class DtoMapper {
 
     public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
-        return toLocation(userSession, application, mapper, uriInfo, expansions, filter,
-                UtilDto.getLocationService(provider), null);
+        return toLocation(userSession, application, mapper, uriInfo, expansions, filter, provider, null);
     }
 
     public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service) {
-        return toLocation(userSession, application, mapper, uriInfo, expansions, filter, service, null);
-    }
-
-    public static Location toLocation(SensiNactSession userSession, Application application, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ServiceSnapshot service,
+            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider,
             ICriterion filterThing) {
         // check service is container correct type
 
-        final TimedValue<GeoJsonObject> rcLocation = getLocation(service, mapper, false);
+        final TimedValue<GeoJsonObject> rcLocation = getLocation(provider, mapper, false);
         final GeoJsonObject object = rcLocation.getValue();
 
-        String id = getResourceField(service, "id", String.class);
+        String id = getResourceField(UtilDto.getLocationService(provider), "id", String.class);
 
-        String name = Objects.requireNonNullElse(getResourceField(service, FRIENDLY_NAME, String.class), "");
+        String name = Objects.requireNonNullElse(
+                getResourceField(UtilDto.getAdminService(provider), FRIENDLY_NAME, String.class), "");
 
-        String description = Objects.requireNonNullElse(getResourceField(service, DESCRIPTION, String.class),
-                NO_DESCRIPTION);
+        String description = Objects.requireNonNullElse(
+                getResourceField(UtilDto.getAdminService(provider), DESCRIPTION, String.class), NO_DESCRIPTION);
 
         String selfLink = getLink(uriInfo, VERSION, "Locations({id})", id);
         String thingsLink = getLink(uriInfo, selfLink, "Things");
@@ -481,16 +471,14 @@ public class DtoMapper {
             List<ProviderSnapshot> listProviderThing = userSession.filteredSnapshot(filterThing);
 
             ResultList<Thing> list = new ResultList<>(null, null,
-                    listProviderThing.stream()
-                            .map(p -> DtoMapper.toThing(userSession, application, mapper, uriInfo,
-                                    expansions.getExpansionSettings("Thing"), filter, UtilDto.getThingService(p)))
-                            .toList());
+                    listProviderThing.stream().map(p -> DtoMapper.toThing(userSession, application, mapper, uriInfo,
+                            expansions.getExpansionSettings("Thing"), filter, p)).toList());
             expansions.addExpansion("Things", location, list);
         }
         if (expansions.shouldExpand("HistoricalLocations", location)) {
 
             Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, service);
+                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
             if (!historicalLocation.isEmpty()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", location, list);
@@ -512,37 +500,30 @@ public class DtoMapper {
         }
     }
 
-    public static ResultList<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+    public static ResultList<HistoricalLocation> toHistoricalLocations(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
-            ICriterion filter, List<ProviderSnapshot> providerLocations) {
-        List<HistoricalLocation> list = providerLocations.stream().map(p -> UtilDto.getLocationService(p))
-                .map(s -> toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, s))
-                .filter(Optional::isPresent).map(Optional::get).toList();
-        return new ResultList<>(null, null, list);
+            ICriterion filter, ProviderSnapshot providerThing) {
+        Optional<HistoricalLocation> optHl = toHistoricalLocation(userSession, application, mapper, uriInfo, expansions,
+                filter, providerThing);
+        return new ResultList<>(null, null, optHl.isEmpty() ? List.of() : List.of(optHl.get()));
+
     }
 
     public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
-            ICriterion filter, ProviderSnapshot providerLocations) {
-        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter,
-                UtilDto.getLocationService(providerLocations));
-    }
-
-    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
-            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
-            ICriterion filter, ServiceSnapshot serviceLocation) {
-        final TimedValue<GeoJsonObject> location = getLocation(serviceLocation, mapper, true);
-        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, serviceLocation,
+            ICriterion filter, ProviderSnapshot provider) {
+        final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider,
                 Optional.of(location));
     }
 
     public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
-            ICriterion filter, ServiceSnapshot service, Optional<TimedValue<?>> t) {
+            ICriterion filter, ProviderSnapshot provider, Optional<TimedValue<?>> t) {
 
         ResourceValueFilter rvf = filter == null ? null : filter.getResourceValueFilter();
         if (rvf != null) {
-            ResourceSnapshot locationResource = service.getResource(LOCATION);
+            ResourceSnapshot locationResource = UtilDto.getAdminService(provider).getResource(LOCATION);
 
             ResourceSnapshot rs = new GenericResourceSnapshot(locationResource, t.get());
             if (!rvf.test(rs.getService().getProvider(), List.of(rs))) {
@@ -552,7 +533,7 @@ public class DtoMapper {
 
         final Instant time = t.map(TimedValue::getTimestamp).orElse(Instant.EPOCH);
 
-        String id = String.format("%s~%s", service.getProvider().getName(), Long.toString(time.toEpochMilli(), 16));
+        String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("HistoricalLocations({id})")
                 .resolveTemplate("id", id).build().toString();
@@ -562,11 +543,11 @@ public class DtoMapper {
         HistoricalLocation historicalLocation = new HistoricalLocation(selfLink, id, time, locationsLink, thingLink);
         if (expansions.shouldExpand("Thing", historicalLocation)) {
             expansions.addExpansion("Thing", historicalLocation, toThing(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Thing"), filter, service));
+                    expansions.getExpansionSettings("Thing"), filter, provider));
         }
         if (expansions.shouldExpand("Locations", historicalLocation)) {
             ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(userSession,
-                    application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, service)));
+                    application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
         return Optional.of(historicalLocation);
@@ -593,7 +574,7 @@ public class DtoMapper {
             throw new NotFoundException();
         }
 
-        return datastreamids.stream().map(datastreamId -> DtoMapper.getProviderSnapshot(userSession, datastreamId))
+        return datastreamids.stream().map(datastreamId -> UtilDto.getProviderSnapshot(userSession, datastreamId))
                 .flatMap(Optional::stream)
                 .map(p -> toDatastream(userSession, application, mapper, uriInfo, expansions, filter, p)).toList();
 

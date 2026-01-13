@@ -49,7 +49,13 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * datastream
  */
-public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedDataStream, ServiceSnapshot> {
+public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDataStream, ServiceSnapshot> {
+
+    private final DataUpdate dataUpdate;
+
+    private final IAccessProviderUseCase providerUseCase;
+
+    private final IAccessServiceUseCase serviceUseCase;
 
     private final IDtoMemoryCache<ExpandedSensor> sensorCache;
 

@@ -239,7 +239,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider);
+        createDatastream(providerDatastream, provider);
         createLocation(providerLocation);
         // Get the new things
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
@@ -321,7 +321,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider);
+        createDatastream(providerDatastream, provider);
         createLocation(providerLocation);
 
         // Get the new locations
@@ -356,7 +356,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider);
+        createDatastream(providerDatastream, provider);
         createLocation(providerLocation);
 
         session.setResourceValue(providerLocation, "location", "location",
@@ -395,7 +395,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider);
+        createDatastream(providerDatastream, provider);
         createLocation(providerLocation);
 
         // Get the new locations
@@ -452,7 +452,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerDatastream = "expandTesterDatastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider);
+        createDatastream(providerDatastream, provider);
 
         // Get the new locations
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
@@ -490,7 +490,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider, 42);
+        createDatastream(providerDatastream, provider, 42);
         createLocation(providerLocation);
 
         // Get the new locations
@@ -526,7 +526,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider);
+        createDatastream(providerDatastream, provider);
         createLocation(providerLocation);
 
         // Get the new locations
@@ -568,7 +568,7 @@ public class LinksTest extends AbstractIntegrationTest {
         final String providerDatastream = "expandTesterDatastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastrem(providerDatastream, provider);
+        createDatastream(providerDatastream, provider);
         // Get the new locations
         ResultList<FeatureOfInterest> features = utils.queryJson("/FeaturesOfInterest",
                 new TypeReference<ResultList<FeatureOfInterest>>() {

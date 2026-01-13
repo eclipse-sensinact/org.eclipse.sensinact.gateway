@@ -18,7 +18,9 @@ import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
 public class SensorPathHandler {
 
@@ -34,15 +36,13 @@ public class SensorPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
+        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+        if (service == null) {
+            return null;
+        }
         if (parts.length == 1) {
-            switch (parts[0]) {
-            case "id":
-                // Provider~Service~Resource
-                return String.join("~", provider.getName(), resource.getService().getName(), resource.getName());
+            return getResourceLevelField(provider, service, parts[0]);
 
-            default:
-                return PathUtils.getResourceLevelField(provider, resource, parts[0]);
-            }
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
             if (handler == null) {
@@ -50,6 +50,35 @@ public class SensorPathHandler {
             }
             return handler.apply(String.join("/", Arrays.copyOfRange(parts, 1, parts.length)));
         }
+    }
+
+    public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
+            final String path) {
+        switch (path) {
+        case "id":
+            String id = UtilDto.getResourceField(service, "sensorId", String.class);
+            if (id != null)
+                return String.join("~", provider.getName(), id);
+            return null;
+
+        case "name":
+            return UtilDto.getResourceField(service, "sensorName", String.class);
+
+        case "description":
+            return UtilDto.getResourceField(service, "sensorDescription", String.class);
+        case "encodingType":
+            return UtilDto.getResourceField(service, "sensorEncodingType", String.class);
+
+        case "metadata":
+            return UtilDto.getResourceField(service, "sensorMetadata", Object.class);
+
+        case "properties":
+            return UtilDto.getResourceField(service, "sensorProperties", Map.class);
+
+        default:
+            throw new UnsupportedRuleException("Unexpected resource level field: " + path);
+        }
+
     }
 
     private Object subDatastreams(final String path) {

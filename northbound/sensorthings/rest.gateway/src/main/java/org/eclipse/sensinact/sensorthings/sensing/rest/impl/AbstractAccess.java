@@ -12,7 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 
 import java.util.EnumSet;
@@ -37,7 +36,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
@@ -72,20 +70,14 @@ public abstract class AbstractAccess {
     }
 
     protected List<ProviderSnapshot> getLocationThingsProvider(String id) {
-        // list of thing for this location
-        String filterLocationInThing = String.format("""
-                    {
-                       "providers": [{
-                          "model": "%s"
-                          "resources": {
-                            "service": "%s"
-                            "resource": "locationIds"
-                            "value": "%s"
-                          }
-                       }]
-                     }
-                """, SENSOR_THING_DEVICE.getName(), UtilDto.SERVICE_THING, id);
-        return listProviders(parseFilter(filterLocationInThing, THINGS));
+        /*
+         * / TODO list of thing for this location String filterLocationInThing =
+         * String.format(""" { "providers": [{ "model": "%s" "resources": { "service":
+         * "%s" "resource": "locationIds" "value": "%s" } }] } """,
+         * SENSOR_THING_DEVICE.getName(), UtilDto.SERVICE_THING, id); return
+         * listProviders(parseFilter(filterLocationInThing, THINGS));
+         */
+        return List.of();
     }
 
     protected List<ProviderSnapshot> listProviders(final ICriterion criterion) {
@@ -139,6 +131,19 @@ public abstract class AbstractAccess {
         List<ProviderSnapshot> providerLocations = linkIds.stream()
                 .map(linkId -> validateAndGetProvider(session, (String) linkId)).toList();
         return providerLocations;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static List<String> getLinkIdsFromThing(SensiNactSession session, String thingId, String resourceField) {
+        ProviderSnapshot providerThing = validateAndGetProvider(session, thingId);
+        ServiceSnapshot serviceThing = UtilDto.getThingService(providerThing);
+        return UtilDto.getResourceField(serviceThing, resourceField, List.class);
+
+    }
+
+    protected static List<String> getLocationIdsFromThing(SensiNactSession session, String thingId) {
+        return getLinkIdsFromThing(session, thingId, "locationIds");
+
     }
 
     protected boolean isLinkProvidersFromThing(String thingId, String subLinkId, String resourceField) {
