@@ -13,12 +13,15 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
@@ -75,14 +78,20 @@ public class LocationPathHandler extends AbstractPathHandler {
     }
 
     private Object subThings(final String path) {
-        // todo need to call from thing provider with reviewed path
-
-        return new ThingPathHandler(provider, session).handle(path);
+        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream().map(UtilDto::getThingService)
+                .filter(Objects::nonNull)
+                .filter(s -> UtilDto.getResourceField(s, "locationIds", List.class).contains(provider.getName()))
+                .map(s -> s.getProvider()).toList();
+        return new AnyMatch(thingProviders.stream().map(p -> new ThingPathHandler(p, session).handle(path)).toList());
     }
 
     private Object subHistoricalLocations(final String path) {
-        // todo need to call from thing provider with reviewed path
+        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream().map(UtilDto::getThingService)
+                .filter(Objects::nonNull)
+                .filter(s -> UtilDto.getResourceField(s, "locationIds", List.class).contains(provider.getName()))
+                .map(s -> s.getProvider()).toList();
+        return new AnyMatch(
+                thingProviders.stream().map(p -> new HistoricalLocationPathHandler(p, session).handle(path)).toList());
 
-        return new HistoricalLocationPathHandler(provider, session).handle(path);
     }
 }

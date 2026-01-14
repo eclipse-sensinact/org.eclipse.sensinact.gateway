@@ -75,6 +75,7 @@ public class SensinactSensorthingsApplication extends Application {
 
     @Override
     public Map<String, Object> getProperties() {
+
         Map<String, Object> properties = NOT_SET.equals(config.history_provider())
                 ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
                         "sensinact.history.result.limit", config.history_results_max()))

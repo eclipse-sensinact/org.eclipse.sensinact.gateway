@@ -315,14 +315,14 @@ public class DtoMapper {
 
     public static List<HistoricalLocation> toHistoricalLocationList(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
-            ICriterion filter, ProviderSnapshot provider, List<TimedValue<?>> historicalLocations) {
+            ICriterion filter, ProviderSnapshot provider, String locationId, List<TimedValue<?>> historicalLocations) {
         if (provider == null) {
             throw new NotFoundException();
         }
 
         List<HistoricalLocation> list = new ArrayList<>(historicalLocations.size());
         for (TimedValue<?> tv : historicalLocations) {
-            toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider,
+            toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider, locationId,
                     Optional.of(tv)).ifPresent(list::add);
         }
 
@@ -495,9 +495,21 @@ public class DtoMapper {
 
     public static ResultList<HistoricalLocation> toHistoricalLocations(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, List<ProviderSnapshot> providerThings, String locationId) {
+        List<HistoricalLocation> listHl = providerThings.stream().map(
+                p -> toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, p, locationId))
+                .filter(Optional::isPresent).map(hl -> hl.get()).toList();
+        return new ResultList<>(null, null, listHl);
+
+    }
+
+    public static ResultList<HistoricalLocation> toHistoricalLocations(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ProviderSnapshot providerThing) {
+        final TimedValue<GeoJsonObject> location = getLocation(providerThing, mapper, true);
+
         Optional<HistoricalLocation> optHl = toHistoricalLocation(userSession, application, mapper, uriInfo, expansions,
-                filter, providerThing);
+                filter, providerThing, Optional.of(location));
         return new ResultList<>(null, null, optHl.isEmpty() ? List.of() : List.of(optHl.get()));
 
     }
@@ -506,23 +518,34 @@ public class DtoMapper {
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ProviderSnapshot provider) {
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
-        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider,
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider, null,
                 Optional.of(location));
     }
 
     public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ICriterion filter, ProviderSnapshot provider, Optional<TimedValue<?>> t) {
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider, null, t);
+    }
 
-//        ResourceValueFilter rvf = filter == null ? null : filter.getResourceValueFilter();
-//        if (rvf != null) {
-//            ResourceSnapshot locationResource = UtilDto.getAdminService(provider).getResource(LOCATION);
-//
-//            ResourceSnapshot rs = new GenericResourceSnapshot(locationResource, t.get());
-//            if (!rvf.test(rs.getService().getProvider(), List.of(rs))) {
-//                return Optional.empty();
-//            }
-//        }
+    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot provider, String locationId) {
+        final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
+
+        return toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter, provider, locationId,
+                Optional.of(location));
+    }
+
+    public static Optional<HistoricalLocation> toHistoricalLocation(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
+            ICriterion filter, ProviderSnapshot provider, String locationId, Optional<TimedValue<?>> t) {
+        if (locationId != null) {
+            ServiceSnapshot serviceThing = UtilDto.getThingService(provider);
+            if (!UtilDto.getResourceField(serviceThing, "locationIds", List.class).contains(locationId)) {
+                return Optional.empty();
+            }
+        }
 
         final Instant time = t.map(TimedValue::getTimestamp).orElse(Instant.EPOCH);
 

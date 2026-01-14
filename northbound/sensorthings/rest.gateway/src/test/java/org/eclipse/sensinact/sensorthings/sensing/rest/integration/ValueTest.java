@@ -45,7 +45,6 @@ public class ValueTest extends AbstractIntegrationTest {
     @Test
     void testValueUpdate() throws IOException, InterruptedException {
         // Create resource
-        final String svcName = "sensor";
         final String rcName = "data";
         final int value = random.nextInt(1024);
         Instant valueSetInstant = Instant.now();
@@ -53,20 +52,17 @@ public class ValueTest extends AbstractIntegrationTest {
         final String providerDatastream = "expandTesterDatastream";
         final String providerLocation = "expandTesterLocation";
 
-        createThing(provider, List.of(providerLocation), List.of(providerDatastream));
+        createThing(provider, List.of(providerLocation), List.of(providerDatastream), valueSetInstant);
         createDatastream(providerDatastream, provider, value, valueSetInstant);
         createLocation(providerLocation);
-
-        session.setResourceValue(providerLocation, UtilDto.SERVICE_LOCATON, "location", LOCATION, valueSetInstant);
-        session.setResourceValue(provider, UtilDto.SERVICE_THING, "description", "Description", valueSetInstant);
 
         // Check thing direct access
         Thing thing = utils.queryJson("/Things(" + provider + ")", Thing.class);
         assertNotNull(thing, "Thing not found");
-        assertEquals(PROVIDER, thing.id());
+        assertEquals(provider, thing.id());
 
         // Check sensor direct access
-        final String sensorId = String.join("~", providerDatastream, rcName);
+        final String sensorId = String.join("~", providerDatastream, "test1");
         Sensor sensor = utils.queryJson("/Sensors(" + sensorId + ")", Sensor.class);
         assertNotNull(sensor, "Sensor not found");
         assertEquals(sensorId, sensor.id());
@@ -87,13 +83,14 @@ public class ValueTest extends AbstractIntegrationTest {
 
         assertEquals(value, obs.result());
         Instant firstResultTime = obs.resultTime();
-        assertFalse(valueSetInstant.isAfter(firstResultTime));
+        assertFalse(valueSetInstant.isAfter(firstResultTime), String.format("firstResult %s, setInstant %s",
+                firstResultTime.toEpochMilli(), valueSetInstant.toEpochMilli()));
 
         // Update the value
         final int newValue = value + random.nextInt(1024) + 1;
         Instant valueUpdateInstant = Instant.now();
         session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "lastObservation",
-                getObservation("test", newValue, getFeatureOfInterest("test")), valueSetInstant);
+                getObservation("test", newValue, getFeatureOfInterest("test")));
 
         observations = utils.queryJson(stream.observationsLink(), new TypeReference<ResultList<Observation>>() {
         });

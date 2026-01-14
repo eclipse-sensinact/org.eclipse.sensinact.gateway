@@ -157,9 +157,10 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Datastream> getDatastreamThingDatastreams(String id) {
+        String thingId = getThingIdFromDatastream(id);
 
         return getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), id);
+                parseFilter(DATASTREAMS), thingId);
     }
 
     @Override
@@ -173,7 +174,8 @@ public class DatastreamsAccessImpl extends AbstractAccess
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null, List.of());
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerThing);
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

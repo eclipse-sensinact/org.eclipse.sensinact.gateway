@@ -16,6 +16,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
@@ -70,28 +70,16 @@ public abstract class AbstractAccess {
     }
 
     protected List<ProviderSnapshot> getLocationThingsProvider(String id) {
-        /*
-         * / TODO list of thing for this location String filterLocationInThing =
-         * String.format(""" { "providers": [{ "model": "%s" "resources": { "service":
-         * "%s" "resource": "locationIds" "value": "%s" } }] } """,
-         * SENSOR_THING_DEVICE.getName(), UtilDto.SERVICE_THING, id); return
-         * listProviders(parseFilter(filterLocationInThing, THINGS));
-         */
-        return List.of();
+        return listProviders(parseFilter(EFilterContext.THINGS)).stream().map(UtilDto::getThingService)
+                .filter(Objects::nonNull)
+                .filter(s -> UtilDto.getResourceField(s, "locationIds", List.class).contains(id))
+                .map(s -> s.getProvider()).toList();
     }
 
     protected List<ProviderSnapshot> listProviders(final ICriterion criterion) {
         final SensiNactSession userSession = getSession();
-        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-//        if (criterion != null && criterion.getResourceValueFilter() != null) {
-//            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-//            return providers
-//                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
-//                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
-//                    .collect(Collectors.toList());
-//        } else {
-        return providers;
-        // }
+        return userSession.filteredSnapshot(criterion);
+
     }
 
     protected List<ResourceSnapshot> listResources(final ICriterion criterion) {

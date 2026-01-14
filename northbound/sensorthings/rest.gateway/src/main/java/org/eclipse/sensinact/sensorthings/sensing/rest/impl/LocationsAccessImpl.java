@@ -35,6 +35,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.delete.LocationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.LocationsUpdate;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
@@ -56,19 +57,17 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public ResultList<HistoricalLocation> getLocationHistoricalLocations(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-            ProviderSnapshot providerThing = null;// TODO
-            if (providerThing == null) {// TixME
+            List<ProviderSnapshot> providerThings = getLocationThingsProvider(id);
+            if (providerThings.size() == 0) {// TixME
                 return new ResultList<HistoricalLocation>(null, null, List.of());
             }
             ResultList<HistoricalLocation> list = HistoryResourceHelper.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerThings, id, 0);
             if (list.value().isEmpty()) {
                 list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, providerThing);
+                        filter, providerThings, id);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -111,9 +110,9 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
     @Override
     public ResultList<Thing> getLocationThings(String id) {
 
-        getLocationThingsProvider(id).stream().map(p -> DtoMapper.toThing(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), parseFilter(THINGS), p));
-        return new ResultList<>(null, null, List.of(getLocationThing(id, null)));
+        return new ResultList<>(null, null,
+                getLocationThingsProvider(id).stream().map(p -> DtoMapper.toThing(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), parseFilter(THINGS), p)).toList());
     }
 
     @Override
@@ -129,7 +128,11 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public ResultList<Datastream> getLocationThingDatastreams(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        if (!isLocationInThing(id2, id)) {
+            throw new BadRequestException();
+        }
+        String provider = UtilDto.extractFirstIdSegment(id2);
+
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(DATASTREAMS), provider);
     }
