@@ -195,22 +195,13 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	int SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE = ProviderPackage.SERVICE_FEATURE_COUNT + 0;
 
 	/**
-	 * The feature id for the '<em><b>Location</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int SENSOR_THING_LOCATION_SERVICE__LOCATION = ProviderPackage.SERVICE_FEATURE_COUNT + 1;
-
-	/**
 	 * The feature id for the '<em><b>Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int SENSOR_THING_LOCATION_SERVICE__ID = ProviderPackage.SERVICE_FEATURE_COUNT + 2;
+	int SENSOR_THING_LOCATION_SERVICE__ID = ProviderPackage.SERVICE_FEATURE_COUNT + 1;
 
 	/**
 	 * The number of structural features of the '<em>Sensor Thing Location Service</em>' class.
@@ -219,7 +210,7 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int SENSOR_THING_LOCATION_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 3;
+	int SENSOR_THING_LOCATION_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 2;
 
 	/**
 	 * The operation id for the '<em>EIs Set</em>' operation.
@@ -755,17 +746,6 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	EAttribute getSensorThingLocationService_EncodingType();
 
 	/**
-	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getLocation <em>Location</em>}'.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Location</em>'.
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getLocation()
-	 * @see #getSensorThingLocationService()
-	 * @generated
-	 */
-	EAttribute getSensorThingLocationService_Location();
-
-	/**
 	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getId <em>Id</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1138,14 +1118,6 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 		 * @generated
 		 */
 		EAttribute SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE = eINSTANCE.getSensorThingLocationService_EncodingType();
-
-		/**
-		 * The meta object literal for the '<em><b>Location</b></em>' attribute feature.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		EAttribute SENSOR_THING_LOCATION_SERVICE__LOCATION = eINSTANCE.getSensorThingLocationService_Location();
 
 		/**
 		 * The meta object literal for the '<em><b>Id</b></em>' attribute feature.

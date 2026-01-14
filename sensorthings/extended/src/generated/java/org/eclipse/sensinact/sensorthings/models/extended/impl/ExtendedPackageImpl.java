@@ -191,18 +191,8 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getSensorThingLocationService_Location() {
-		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(1);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
 	public EAttribute getSensorThingLocationService_Id() {
-		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(2);
+		return (EAttribute)sensorThingLocationServiceEClass.getEStructuralFeatures().get(1);
 	}
 
 	/**
@@ -519,7 +509,6 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 
 		sensorThingLocationServiceEClass = createEClass(SENSOR_THING_LOCATION_SERVICE);
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE);
-		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__LOCATION);
 		createEAttribute(sensorThingLocationServiceEClass, SENSOR_THING_LOCATION_SERVICE__ID);
 
 		dataStreamServiceEClass = createEClass(DATA_STREAM_SERVICE);
@@ -599,7 +588,6 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 
 		initEClass(sensorThingLocationServiceEClass, SensorThingLocationService.class, "SensorThingLocationService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getSensorThingLocationService_EncodingType(), ecorePackage.getEString(), "encodingType", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getSensorThingLocationService_Location(), theProviderPackage.getEGeoJsonObject(), "location", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getSensorThingLocationService_Id(), ecorePackage.getEString(), "id", null, 0, 1, SensorThingLocationService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(dataStreamServiceEClass, DataStreamService.class, "DataStreamService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);

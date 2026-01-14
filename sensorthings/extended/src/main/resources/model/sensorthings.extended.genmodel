@@ -14,7 +14,6 @@
     </genClasses>
     <genClasses ecoreClass="sensorthings.extended.ecore#//SensorThingLocationService">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/encodingType"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/location"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.extended.ecore#//SensorThingLocationService/id"/>
     </genClasses>
     <genClasses ecoreClass="sensorthings.extended.ecore#//DataStreamService">
