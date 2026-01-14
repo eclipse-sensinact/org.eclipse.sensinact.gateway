@@ -246,19 +246,21 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
     @Test
     void getDataStreamObservations() throws Exception {
+        String thingId = "getDataStreamObservations";
         for (int i = 0; i < 1000; i++) {
-            createResource("foo", "bar", "baz", String.valueOf(i), TS_2012.plus(ofDays(i)));
+            createDatastream("baz", thingId, String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
         for (int i = 0; i < 4000; i++) {
-            createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
+            createDatastream("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
+        createThing(thingId, List.of(), List.of("baz", "foobar"));
         // 1008: 1000 updates + history provider name & description & model &
         // modelPackageUri + foo
         // provider name & description & modelUri
         waitForRowCount("sensinact.text_data", 1008);
         waitForRowCount("sensinact.numeric_data", 4000);
 
-        ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",
+        ResultList<Observation> observations = utils.queryJson("/Datastreams(baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
 
         assertEquals(1000, observations.count());
@@ -284,7 +286,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
             assertEquals(String.valueOf(i + 500), observations.value().get(i).result());
         }
 
-        observations = utils.queryJson("/Datastreams(foo~bar~foobar)/Observations?$count=true", RESULT_OBSERVATIONS);
+        observations = utils.queryJson("/Datastreams(foobar)/Observations?$count=true", RESULT_OBSERVATIONS);
         assertEquals(4000, observations.count());
         assertEquals(500, observations.value().size());
         assertNotNull(observations.nextLink());
@@ -308,7 +310,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         // provider name & modelUri
         waitForRowCount("sensinact.text_data", 18);
 
-        String id = String.format("%s~%s~%s~%s", "fizz", "buzz", "fizzbuzz",
+        String id = String.format("%s~%s~%s", datastreamId, "test",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
 
         Observation o = utils.queryJson("/Observations(" + id + ")", new TypeReference<Observation>() {
@@ -332,7 +334,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         });
 
         assertFalse(streams.value().isEmpty());
-        Datastream datastream = streams.value().stream().filter(d -> "ding~dong~bell".equals(d.id())).findFirst().get();
+        Datastream datastream = streams.value().stream().filter(d -> datastreamId.equals(d.id())).findFirst().get();
 
         ResultList<Observation> observations = utils.queryJson(datastream.observationsLink(),
                 new TypeReference<ResultList<Observation>>() {
@@ -340,7 +342,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
         assertEquals(10, observations.value().size());
         Observation observation = observations.value().get(1);
-        String id = String.format("%s~%s~%s~%s", "ding", "dong", "bell",
+        String id = String.format("%s~%s~%s", datastreamId, "test",
                 Long.toString(TS_2012.plus(ofDays(1)).toEpochMilli(), 16));
         assertEquals(id, observation.id());
         assertEquals(TS_2012.plus(ofDays(1)), observation.resultTime());
@@ -357,9 +359,6 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         String testProviderThing = "phenomenonTimeTestProvider_Thing";
         String testProviderLocation = "phenomenonTimeTestProvider_Location";
 
-        String svc = "sensor";
-        String rc = "temperature";
-
         // Create timestamps - one in 2010, one in 2020
         Instant earlierTime = ZonedDateTime.of(2010, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
         Instant laterTime = ZonedDateTime.of(2020, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
@@ -371,7 +370,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         createThing(testProviderThing, List.of(testProviderLocation), List.of(testProvider));
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
-                String.format("/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
+                String.format("/Datastreams(" + testProvider + ")/Observations?$filter=%s",
                         URLEncoder.encode("phenomenonTime lt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
                 RESULT_OBSERVATIONS);
 
@@ -383,7 +382,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
         // Test phenomenonTime gt filter - should return only the later observation
         observations = utils.queryJson(
-                String.format("/Datastreams(phenomenonTimeTestProvider~sensor~temperature)/Observations?$filter=%s",
+                String.format("/Datastreams(" + testProvider + ")/Observations?$filter=%s",
                         URLEncoder.encode("phenomenonTime gt 2015-01-01T00:00:00Z", StandardCharsets.UTF_8)),
                 RESULT_OBSERVATIONS);
 
@@ -397,13 +396,15 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
 
     @Test
     void testFilterLargerThanBlocksize() throws Exception {
+        String thingId = "testFilterLargerThanBlocksize";
         for (int i = 0; i < 1000; i++) {
-            createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
+            createDatastream("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
+        createThing(thingId, List.of(), List.of(thingId));
         waitForRowCount("sensinact.numeric_data", 1000);
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils
-                .queryJson(String.format("/Datastreams(foo~bar~foobar)/Observations?$filter=%s",
+                .queryJson(String.format("/Datastreams(foobar)/Observations?$filter=%s",
                         URLEncoder.encode(
                                 "phenomenonTime gt 2014-07-01T00:00:00Z and phenomenonTime lt 2014-07-10T00:00:00Z ",
                                 StandardCharsets.UTF_8)),

@@ -29,6 +29,7 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
@@ -182,14 +183,21 @@ public class AbstractIntegrationTest {
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "unitDefinition", "test", valueInstant);
 
         createResource(provider, UtilDto.SERVICE_DATASTREAM, "lastObservation",
-                getObservation("test", value, getFeatureOfInterest("test")), valueInstant);
+                getObservation("test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
 
     }
 
     public static ExpandedObservation getObservation(String name, Object result, FeatureOfInterest foi) {
+        return getObservation(name, result, foi, null);
+    }
 
-        return new ExpandedObservation(name, name, Instant.now().truncatedTo(ChronoUnit.SECONDS),
-                Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null, null, null, null, null, foi);
+    public static ExpandedObservation getObservation(String name, Object result, FeatureOfInterest foi,
+            Instant instant) {
+
+        return new ExpandedObservation(name, name,
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
+                null, null, null, null, foi);
 
     }
 
@@ -200,11 +208,21 @@ public class AbstractIntegrationTest {
     }
 
     protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds) {
-        createResource(provider, UtilDto.SERVICE_THING, "id", provider, null);
-        createResource(provider, UtilDto.SERVICE_THING, "name", "test", null);
-        createResource(provider, UtilDto.SERVICE_ADMIN, "location", new Point(Coordinates.EMPTY, null, null), null);
-        createResource(provider, UtilDto.SERVICE_THING, "locationIds", locationIds, null);
-        createResource(provider, UtilDto.SERVICE_THING, "datastreamIds", datastreamIds, null);
+        createThing(provider, locationIds, datastreamIds, null, null);
+    }
+
+    protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds, Instant instant) {
+        createThing(provider, locationIds, datastreamIds, null, instant);
+    }
+
+    protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds,
+            GeoJsonObject location, Instant instant) {
+        createResource(provider, UtilDto.SERVICE_THING, "id", provider, instant);
+        createResource(provider, UtilDto.SERVICE_THING, "name", "test", instant);
+        createResource(provider, UtilDto.SERVICE_ADMIN, "location",
+                location != null ? location : new Point(Coordinates.EMPTY, null, null), instant);
+        createResource(provider, UtilDto.SERVICE_THING, "locationIds", locationIds, instant);
+        createResource(provider, UtilDto.SERVICE_THING, "datastreamIds", datastreamIds, instant);
     }
 
     protected void createResource(String provider, String service, String resource, Object value, Instant instant) {
