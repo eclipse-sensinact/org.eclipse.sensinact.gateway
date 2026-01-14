@@ -30,7 +30,6 @@ public class ObservationPathHandler extends AbstractPathHandler {
 
     public ObservationPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
         super(provider, session);
-
     }
 
     public Object handle(final String path) {
@@ -56,47 +55,32 @@ public class ObservationPathHandler extends AbstractPathHandler {
 
         ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
 
+        if (obs == null) {
+            return null;
+        }
         switch (path) {
         case "id":
         case "@iot.id":
 
-            if (obs != null) {
-                return obs.id();
-            }
-            return null;
+            return obs.id();
+
         case "result":
-            if (obs != null) {
-                return obs.result();
-            }
-            return null;
+            return obs.result();
 
         case "resulttime":
-            if (obs != null) {
-                return obs.resultTime();
-            }
-            return null;
+            return obs.resultTime();
+
         case "phenomenontime":
-            if (obs != null) {
-                return obs.phenomenonTime();
-            }
-            return null;
+            return obs.phenomenonTime();
 
         case "validtime":
-            if (obs != null) {
-                return obs.validTime();
-            }
-            return null;
+            return obs.validTime();
 
         case "resultquality":
-            if (obs != null) {
-                return obs.resultQuality();
-            }
-            return null;
+            return obs.resultQuality();
+
         case "properties":
-            if (obs != null) {
-                return obs.properties();
-            }
-            return null;
+            return obs.properties();
 
         default:
             throw new UnsupportedRuleException("Unexpected resource level field: " + path);
