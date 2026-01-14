@@ -18,10 +18,10 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.Response;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -40,8 +41,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ObservationsDelete;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;

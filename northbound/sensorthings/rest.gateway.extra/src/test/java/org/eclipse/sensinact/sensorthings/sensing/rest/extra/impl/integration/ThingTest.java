@@ -295,9 +295,10 @@ public class ThingTest extends AbstractIntegrationTest {
                 Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), null);
         getJsonResponseFromPut(dtoThingToUpdate, String.format("/Things(%s)", idJson), 204);
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idJson, "admin");
+
         assertEquals("testThing With Location and Datastream update",
-                UtilDto.getResourceField(service, "description", String.class));
+                UtilDto.getResourceField(serviceAdmin, "description", String.class));
     }
 
     /**
@@ -328,8 +329,9 @@ public class ThingTest extends AbstractIntegrationTest {
 
         json = getJsonResponseFromPut(locationsUpdate, String.format("/Things(%s)/Locations(%s)", idThing, idLocation),
                 204);
-        ServiceSnapshot service = serviceUseCase.read(session, idLocation, "location");
-        assertEquals(name + "2", UtilDto.getResourceField(service, "name", String.class));
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
+
+        assertEquals(name + "2", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
 
     }
 
@@ -367,8 +369,9 @@ public class ThingTest extends AbstractIntegrationTest {
                 String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 204);
         // then
 
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + "3", UtilDto.getResourceField(service, "name", String.class));
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
+
+        assertEquals(name + "3", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
     }
 
     /**
@@ -484,9 +487,10 @@ public class ThingTest extends AbstractIntegrationTest {
                 "testThing With Location and Datastream update", Map.of("installationDate update", "2025-12-25"), null);
         json = getJsonResponseFromPatch(dtoThingToUpdate, String.format("Things(%s)", idJson), 204);
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idJson, "admin");
+
         assertEquals("testThing With Location and Datastream update",
-                UtilDto.getResourceField(service, "description", String.class));
+                UtilDto.getResourceField(serviceAdmin, "description", String.class));
 
     }
 

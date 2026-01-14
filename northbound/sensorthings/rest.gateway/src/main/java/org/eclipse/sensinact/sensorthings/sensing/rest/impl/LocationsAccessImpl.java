@@ -16,7 +16,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +28,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.LocationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.LocationsDelete;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.LocationsUpdate;
 
 import jakarta.ws.rs.NotFoundException;

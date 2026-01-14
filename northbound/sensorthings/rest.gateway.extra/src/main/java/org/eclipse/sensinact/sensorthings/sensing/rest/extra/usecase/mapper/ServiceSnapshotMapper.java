@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Geometry;
@@ -85,10 +86,13 @@ public class ServiceSnapshotMapper {
     /*
      * ============================ Datastream ============================
      */
-    public static ExpandedDataStream toDatastream(ServiceSnapshot service) {
+    public static ExpandedDataStream toDatastream(ProviderSnapshot provider) {
+        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
+        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+
         String id = UtilDto.getResourceField(service, "id", String.class);
-        String name = UtilDto.getResourceField(service, "name", String.class);
-        String description = UtilDto.getResourceField(service, "description", String.class);
+        String name = UtilDto.getResourceField(serviceAdmin, "name", String.class);
+        String description = UtilDto.getResourceField(serviceAdmin, "description", String.class);
         String observationType = UtilDto.getResourceField(service, "observationType", String.class);
 
         Geometry observedArea = UtilDto.getResourceField(service, "observedArea", Geometry.class);
@@ -108,9 +112,12 @@ public class ServiceSnapshotMapper {
     /*
      * ============================ FeatureOfInterest ============================
      */
-    public static FeatureOfInterest toFeatureOfInterest(ServiceSnapshot service) {
-        String name = UtilDto.getResourceField(service, "foiName", String.class);
-        String description = UtilDto.getResourceField(service, "foiDescription", String.class);
+    public static FeatureOfInterest toFeatureOfInterest(ProviderSnapshot provider) {
+        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
+        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+
+        String name = UtilDto.getResourceField(serviceAdmin, "foiName", String.class);
+        String description = UtilDto.getResourceField(serviceAdmin, "foiDescription", String.class);
         String encodingType = UtilDto.getResourceField(service, "foiEncodingType", String.class);
         GeoJsonObject feature = UtilDto.getResourceField(service, "foiFeature", GeoJsonObject.class);
 

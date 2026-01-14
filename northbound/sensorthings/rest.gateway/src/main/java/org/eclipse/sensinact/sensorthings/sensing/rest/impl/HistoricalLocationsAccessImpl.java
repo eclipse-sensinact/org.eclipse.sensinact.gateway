@@ -30,6 +30,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.HistoricalLocationsDelete;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;

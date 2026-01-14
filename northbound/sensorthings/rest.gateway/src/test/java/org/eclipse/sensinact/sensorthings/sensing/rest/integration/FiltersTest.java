@@ -322,14 +322,16 @@ public class FiltersTest extends AbstractIntegrationTest {
     @Nested
     class FilterFilterTest {
 
-        final List<String> above40 = new ArrayList<>();
-        final List<String> below40 = new ArrayList<>();
+        final List<String> above40Prefix = new ArrayList<>();
+        final List<String> below40PRefix = new ArrayList<>();
 
         final int nbRc = 5;
         String provider1 = null;
         String provider2 = null;
-        final String svc = "sensor";
-        final String rcPrefix = "rc";
+        String thingId = null;
+        String thingId2 = null;
+        String locationId = null;
+        String locationId2 = null;
 
         @BeforeEach
         void setup(TestInfo testInfo) {
@@ -337,36 +339,37 @@ public class FiltersTest extends AbstractIntegrationTest {
             final String testMethodName = testInfo.getTestMethod().get().getName();
             provider1 = testMethodName + "_1";
             provider2 = testMethodName + "_2";
-            String thingId = testMethodName + "1_thing";
-            String thingId2 = testMethodName + "2_thing";
-            String locationId = testMethodName + "1_location";
-            String locationId2 = testMethodName + "2_location";
+            thingId = testMethodName + "1_thing";
+            thingId2 = testMethodName + "2_thing";
+            locationId = testMethodName + "1_location";
+            locationId2 = testMethodName + "2_location";
 
-            List<String> providerBelow40 = new ArrayList<String>();
-            List<String> providerAbove40 = new ArrayList<String>();
+            List<String> providerDatastreamBelow = new ArrayList<String>();
+            List<String> providerDatastreamAbove = new ArrayList<String>();
+
             for (int i = 0; i < nbRc; i++) {
                 String providerBelow = provider1 + "_" + i;
                 String providerAbove = provider2 + "_" + i;
 
                 createDatastream(providerBelow, thingId, i);
                 createDatastream(providerAbove, thingId, 40 + i);
-                providerAbove40.add(providerAbove);
-                providerBelow40.add(providerBelow);
-                below40.add(String.join("~", providerBelow, "test"));
-                above40.add(String.join("~", providerAbove, "test"));
+                providerDatastreamAbove.add(providerAbove);
+                providerDatastreamBelow.add(providerBelow);
+                below40PRefix.add(providerBelow);
+                above40Prefix.add(providerAbove);
             }
             createLocation(locationId);
             createLocation(locationId2);
-            createThing(thingId, List.of(locationId), List.of(provider1));
-            createThing(thingId2, List.of(locationId2), List.of(provider2));
+            createThing(thingId, List.of(locationId), providerDatastreamBelow);
+            createThing(thingId2, List.of(locationId2), providerDatastreamAbove);
         }
 
         @AfterEach
         void cleanup() {
             provider1 = null;
             provider2 = null;
-            above40.clear();
-            below40.clear();
+            above40Prefix.clear();
+            below40PRefix.clear();
         }
 
         @Test
@@ -381,30 +384,34 @@ public class FiltersTest extends AbstractIntegrationTest {
                     RESULT_THINGS);
             List<String> allIds = things.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= 1, "Not enough things returned");
-            assertTrue(allIds.contains(provider1), provider1 + " not in result");
-            assertFalse(allIds.contains(provider2), provider2 + " in result");
+            assertTrue(allIds.contains(thingId), thingId + " not in result");
+            assertFalse(allIds.contains(thingId2), thingId2 + " in result");
 
+            String idfoi = provider1 + "_2~test~test";
             // Loop back on provider ID
             things = utils.queryJson(String.format("/Things?$filter=%s", URLEncoder.encode(
-                    "Datastreams/Observations/FeatureOfInterest/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
+                    "Datastreams/Observations/FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
                     RESULT_THINGS);
             allIds = things.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= 1, "Not enough things returned");
-            assertTrue(allIds.contains(provider2), provider2 + " not in result");
-            assertFalse(allIds.contains(provider1), provider1 + " in result");
+            assertTrue(allIds.contains(thingId), thingId + " not in result");
+            assertFalse(allIds.contains(thingId2), thingId2 + " in result");
 
             // Sample query from the specifications
-            createResource("filterFOI_1", "some-service", "some-resource", 42,
+            createDatastream("filterFOI_1", thingId2, 42,
                     ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneOffset.UTC).toInstant());
+            idfoi = "filterFOI_1~test~test";
+            createThing("filterFOI_1_thing", List.of(), List.of("filterFOI_1"));
+
             things = utils.queryJson(String.format("/Things?$filter=%s",
                     URLEncoder.encode(
-                            "Datastreams/Observations/FeatureOfInterest/id eq 'filterFOI_1' "
+                            "Datastreams/Observations/FeatureOfInterest/id eq '" + idfoi + "'"
                                     + "and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z "
                                     + "and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z",
                             StandardCharsets.UTF_8)),
                     RESULT_THINGS);
             assertEquals(1, things.value().size(), "Not enough things returned");
-            assertEquals("filterFOI_1", things.value().get(0).id());
+            assertEquals("filterFOI_1_thing", things.value().get(0).id());
         }
 
         @Test
@@ -415,12 +422,12 @@ public class FiltersTest extends AbstractIntegrationTest {
             // Loop back on provider ID
             ResultList<Location> items = utils.queryJson(
                     String.format("/Locations?$filter=%s",
-                            URLEncoder.encode("Things/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
+                            URLEncoder.encode("Things/id eq '" + thingId + "'", StandardCharsets.UTF_8)),
                     RESULT_LOCATIONS);
             List<String> allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= 1, "Not enough locations returned");
             for (String id : allIds) {
-                assertTrue(id.startsWith(provider2 + "~"), "Found: " + id);
+                assertTrue(id.equals(locationId), "Found: " + id);
             }
         }
 
@@ -432,13 +439,20 @@ public class FiltersTest extends AbstractIntegrationTest {
             // Loop back on provider ID
             ResultList<HistoricalLocation> items = utils.queryJson(
                     String.format("/HistoricalLocations?$filter=%s",
-                            URLEncoder.encode("Things/id eq '" + provider2 + "'", StandardCharsets.UTF_8)),
+                            URLEncoder.encode("Things/id eq '" + thingId + "'", StandardCharsets.UTF_8)),
                     RESULT_HISTORICAL_LOCATIONS);
             List<String> allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= 1, "Not enough historical locations returned");
             for (String id : allIds) {
-                assertTrue(id.startsWith(provider2 + "~"), "Found: " + id);
+                assertTrue(id.startsWith(thingId + "~"), "Found: " + id);
             }
+            items = utils.queryJson(
+                    String.format("/HistoricalLocations?$filter=%s",
+                            URLEncoder.encode("Things/id eq 'null'", StandardCharsets.UTF_8)),
+                    RESULT_HISTORICAL_LOCATIONS);
+            allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
+            assertTrue(allIds.size() == 0, "some historical locations returned");
+
         }
 
         @Test
@@ -453,26 +467,28 @@ public class FiltersTest extends AbstractIntegrationTest {
                     RESULT_DATASTREAMS);
             List<String> allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= nbRc, "Not enough datastreams returned");
-            for (String below : below40) {
+            for (String below : below40PRefix) {
                 assertFalse(allIds.contains(below), below + " in result");
             }
-            for (String above : above40) {
+            for (String above : above40Prefix) {
                 assertTrue(allIds.contains(above), above + " not in result");
             }
 
             // Loop back on provider ID
+            String idfoi = provider1 + "_2~test~test";
+
             items = utils.queryJson(
-                    String.format("/Datastreams?$filter=%s", URLEncoder.encode(
-                            "Observations/FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                    String.format("/Datastreams?$filter=%s", URLEncoder
+                            .encode("Observations/FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
                     RESULT_DATASTREAMS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
-            assertTrue(allIds.size() >= nbRc, "Not enough datastreams returned");
+            assertTrue(allIds.size() >= 1, "Not enough datastreams returned");
             for (String id : allIds) {
-                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+                assertTrue(id.startsWith(provider1), "Found: " + id);
             }
 
             // Loop back on resource ID
-            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            final String expectedId = provider1 + "_1";
             items = utils.queryJson(
                     String.format("/Datastreams?$filter=%s",
                             URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)),
@@ -496,25 +512,27 @@ public class FiltersTest extends AbstractIntegrationTest {
                     RESULT_SENSORS);
             List<String> allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= nbRc, "Not enough sensors returned");
-            for (String below : below40) {
-                assertFalse(allIds.contains(below), below + " in result");
+            for (String below : below40PRefix) {
+                assertFalse(allIds.contains(below + "~test1"), below + " in result");
             }
-            for (String above : above40) {
-                assertTrue(allIds.contains(above), above + " not in result");
+            for (String above : above40Prefix) {
+                assertTrue(allIds.contains(above + "~test1"), above + " not in result");
             }
 
             // Loop back on provider ID
+            String idfoi = provider1 + "_2~test~test";
+
             items = utils.queryJson(String.format("/Sensors?$filter=%s", URLEncoder.encode(
-                    "Datastreams/Observations/FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                    "Datastreams/Observations/FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
                     RESULT_SENSORS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
-            assertTrue(allIds.size() >= nbRc, "Not enough sensors returned");
+            assertTrue(allIds.size() >= 1, "Not enough sensors returned");
             for (String id : allIds) {
-                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+                assertTrue(id.equals(provider1 + "_2~test1"), "Found: " + id);
             }
 
             // Loop back on resource ID
-            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            final String expectedId = String.join("~", provider1 + "_2", "test1");
             items = utils.queryJson(String.format("/Sensors?$filter=%s",
                     URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)), RESULT_SENSORS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
@@ -536,25 +554,26 @@ public class FiltersTest extends AbstractIntegrationTest {
                     RESULT_OBS_PROPS);
             List<String> allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= nbRc, "Not enough ObservedProperties returned");
-            for (String below : below40) {
-                assertFalse(allIds.contains(below), below + " in result");
+            for (String below : below40PRefix) {
+                assertFalse(allIds.contains(below + "~test2"), below + " in result");
             }
-            for (String above : above40) {
-                assertTrue(allIds.contains(above), above + " not in result");
+            for (String above : above40Prefix) {
+                assertTrue(allIds.contains(above + "~test2"), above + " not in result");
             }
 
             // Loop back on provider ID
+            String idfoi = provider1 + "_2~test~test";
             items = utils.queryJson(String.format("/ObservedProperties?$filter=%s", URLEncoder.encode(
-                    "Datastreams/Observations/FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                    "Datastreams/Observations/FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
                     RESULT_OBS_PROPS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
-            assertTrue(allIds.size() >= nbRc, "Not enough ObservedProperties returned");
+            assertTrue(allIds.size() == 1, "Not enough ObservedProperties returned");
             for (String id : allIds) {
-                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+                assertTrue(id.startsWith(provider1 + "_2~"), "Found: " + id);
             }
 
             // Loop back on resource ID
-            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            final String expectedId = String.join("~", provider1 + "_2", "test2");
             items = utils.queryJson(String.format("/ObservedProperties?$filter=%s",
                     URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)), RESULT_OBS_PROPS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
@@ -575,26 +594,28 @@ public class FiltersTest extends AbstractIntegrationTest {
             List<String> allIds = obs.value().stream().map(s -> (String) s.id())
                     .map(s -> s.substring(0, s.lastIndexOf('~'))).collect(Collectors.toList());
             assertTrue(allIds.size() >= nbRc, "Not enough observations returned");
-            for (String below : below40) {
+            for (String below : below40PRefix) {
                 assertFalse(allIds.contains(below), below + " in result");
             }
-            for (String above : above40) {
-                assertTrue(allIds.contains(above), above + " not in result");
+            for (String above : above40Prefix) {
+                assertTrue(allIds.contains(above + "~test"), above + " not in result");
             }
 
             // Loop back on provider ID
+            String idfoi = provider1 + "_2~test~test";
+
             obs = utils.queryJson(
                     String.format("/Observations?$filter=%s",
-                            URLEncoder.encode("FeatureOfInterest/id eq '" + provider1 + "'", StandardCharsets.UTF_8)),
+                            URLEncoder.encode("FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
                     RESULT_OBSERVATIONS);
             allIds = obs.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
-            assertTrue(allIds.size() >= nbRc, "Not enough observations returned");
+            assertTrue(allIds.size() >= 1, "Not enough observations returned");
             for (String id : allIds) {
-                assertTrue(id.startsWith(provider1 + "~"), "Found: " + id);
+                assertTrue(id.startsWith(provider1 + "_2~test~"), "Found: " + id);
             }
 
             // Loop back on resource ID
-            final String expectedId = String.join("~", provider1, svc, rcPrefix + 2);
+            final String expectedId = provider1 + "_2";
             obs = utils.queryJson(
                     String.format("/Observations?$filter=%s",
                             URLEncoder.encode("Datastream/id eq '" + expectedId + "'", StandardCharsets.UTF_8)),
@@ -603,7 +624,7 @@ public class FiltersTest extends AbstractIntegrationTest {
             assertTrue(allIds.size() >= 1, "Not enough observations returned");
             for (String id : allIds) {
                 // Ignore the timestamp
-                assertTrue(id.startsWith(expectedId + "~"), "Found: " + id);
+                assertTrue(id.startsWith(expectedId + "~test~"), "Found: " + id);
             }
         }
     }

@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 /**
  * Object given as input of filter predicates
@@ -28,6 +29,7 @@ public class ResourceValueFilterInputHolder {
     private final ProviderSnapshot provider;
     private final List<? extends ResourceSnapshot> resources;
     private final ResourceSnapshot resource;
+    private final SensiNactSession session;
 
     /**
      * Provider filter input
@@ -36,12 +38,14 @@ public class ResourceValueFilterInputHolder {
      * @param provider  Provider being filtered
      * @param resources Resources of the provider
      */
-    public ResourceValueFilterInputHolder(final EFilterContext context, final ProviderSnapshot provider,
-            final List<? extends ResourceSnapshot> resources) {
+    public ResourceValueFilterInputHolder(final EFilterContext context, SensiNactSession session,
+            final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
         this.context = context;
         this.provider = provider;
         this.resources = resources;
         this.resource = null;
+        this.session = session;
+
     }
 
     /**
@@ -51,12 +55,13 @@ public class ResourceValueFilterInputHolder {
      * @param provider Provider of the resource being filtered
      * @param resource Resource being filtered
      */
-    public ResourceValueFilterInputHolder(final EFilterContext context, final ProviderSnapshot provider,
-            final ResourceSnapshot resource) {
+    public ResourceValueFilterInputHolder(final EFilterContext context, SensiNactSession session,
+            final ProviderSnapshot provider, final ResourceSnapshot resource) {
         this.context = context;
         this.provider = provider;
         this.resources = List.of(resource);
         this.resource = resource;
+        this.session = session;
     }
 
     /**
@@ -65,8 +70,9 @@ public class ResourceValueFilterInputHolder {
      * @param context  Query context
      * @param resource Resource being filtered
      */
-    public ResourceValueFilterInputHolder(final EFilterContext context, final ResourceSnapshot resource) {
-        this(context, resource.getService().getProvider(), resource);
+    public ResourceValueFilterInputHolder(final EFilterContext context, SensiNactSession session,
+            final ResourceSnapshot resource) {
+        this(context, session, resource.getService().getProvider(), resource);
     }
 
     @Override
@@ -93,5 +99,9 @@ public class ResourceValueFilterInputHolder {
 
     public ResourceSnapshot getResource() {
         return resource;
+    }
+
+    public SensiNactSession getSession() {
+        return session;
     }
 }

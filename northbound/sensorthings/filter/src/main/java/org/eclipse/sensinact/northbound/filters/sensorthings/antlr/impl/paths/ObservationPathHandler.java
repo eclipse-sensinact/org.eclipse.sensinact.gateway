@@ -13,28 +13,24 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
-public class ObservationPathHandler {
-
-    private final ProviderSnapshot provider;
-    private final ResourceSnapshot resource;
+public class ObservationPathHandler extends AbstractPathHandler {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastream", this::subDatastream,
             "featureofinterest", this::subFeatureOfInterest);
 
-    public ObservationPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
-        this.provider = provider;
-        this.resource = resource;
+    public ObservationPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
+        super(provider, session);
+
     }
 
     public Object handle(final String path) {
@@ -109,10 +105,10 @@ public class ObservationPathHandler {
     }
 
     private Object subDatastream(final String path) {
-        return new DatastreamPathHandler(provider, resource).handle(path);
+        return new DatastreamPathHandler(provider, session).handle(path);
     }
 
     private Object subFeatureOfInterest(final String path) {
-        return new FeatureOfInterestPathHandler(provider, List.of(resource)).handle(path);
+        return new FeatureOfInterestPathHandler(provider, session).handle(path);
     }
 }

@@ -22,13 +22,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 
-import org.eclipse.sensinact.gateway.geojson.Coordinates;
-import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.model.core.provider.Admin;
-import org.eclipse.sensinact.model.core.provider.ProviderFactory;
-import org.eclipse.sensinact.model.core.testdata.TestSensor;
-import org.eclipse.sensinact.model.core.testdata.TestTemperatur;
-import org.eclipse.sensinact.model.core.testdata.TestdataFactory;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -150,75 +143,4 @@ public class ValueTest extends AbstractIntegrationTest {
         assertEquals(unitDefinition, ds.unitOfMeasurement().definition());
     }
 
-    @Test
-    void testEMFValueUpdate() throws IOException, InterruptedException {
-        // Create resource
-        final String value = "14 °C";
-        Instant valueSetInstant = Instant.now();
-        String id = PROVIDER + "10";
-        createResourceEMF(id, value);
-
-        // Check thing direct access
-        Thing thing = utils.queryJson("/Things(" + id + ")", Thing.class);
-        assertNotNull(thing, "Thing not found");
-        assertEquals(id, thing.id());
-        assertEquals("Foobar", thing.description());
-
-        // Check sensor direct access
-        final String sensorId = String.join("~", id, "temp", "v1");
-        Sensor sensor = utils.queryJson("/Sensors(" + sensorId + ")", Sensor.class);
-        assertNotNull(sensor, "Sensor not found");
-        assertEquals(sensorId, sensor.id());
-
-        // Get the data stream (should be a single one)
-        ResultList<Datastream> streams = utils.queryJson(sensor.datastreamsLink(),
-                new TypeReference<ResultList<Datastream>>() {
-                });
-        assertEquals(1, streams.value().size());
-        Datastream stream = streams.value().get(0);
-
-        // Get the observation
-        ResultList<Observation> observations = utils.queryJson(stream.observationsLink(),
-                new TypeReference<ResultList<Observation>>() {
-                });
-        assertEquals(1, observations.value().size());
-        Observation obs = observations.value().get(0);
-
-        assertEquals(value, obs.result());
-        Instant firstResultTime = obs.resultTime();
-        assertFalse(valueSetInstant.isAfter(firstResultTime));
-
-        // Update the value
-        final String newValue = "15 °C";
-        Instant valueUpdateInstant = Instant.now();
-        createResourceEMF(id, newValue);
-
-        observations = utils.queryJson(stream.observationsLink(), new TypeReference<ResultList<Observation>>() {
-        });
-        assertEquals(1, observations.value().size());
-        obs = observations.value().get(0);
-
-        assertEquals(newValue, obs.result());
-        assertTrue(valueUpdateInstant.isAfter(firstResultTime));
-        assertFalse(valueUpdateInstant.isAfter(obs.resultTime()));
-    }
-
-    protected TestSensor createResourceEMF(String provider, String value) {
-        TestSensor sensor = TestdataFactory.eINSTANCE.createTestSensor();
-        TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
-        Admin admin = ProviderFactory.eINSTANCE.createAdmin();
-        temp.setV1(value);
-        sensor.setTemp(temp);
-        sensor.setId(provider);
-        sensor.setAdmin(admin);
-        Point p = new Point(Coordinates.EMPTY, null, null);
-        admin.setLocation(p);
-        admin.setDescription("Foobar");
-        try {
-            push.pushUpdate(sensor).getValue();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return sensor;
-    }
 }

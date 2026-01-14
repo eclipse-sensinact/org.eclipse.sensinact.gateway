@@ -25,7 +25,6 @@ import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -252,7 +251,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Response createDatastream(String id, ExpandedDataStream datastream) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), datastream, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -266,12 +265,12 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Response createLocation(String id, ExpandedLocation location) {
-        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+        ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), location, id);
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
 
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot.getProvider());
+                criterion, snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 

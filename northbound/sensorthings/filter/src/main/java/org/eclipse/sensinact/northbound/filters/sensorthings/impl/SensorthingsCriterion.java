@@ -24,16 +24,19 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 public class SensorthingsCriterion implements ICriterion {
 
     private final EFilterContext context;
     private final Predicate<ResourceValueFilterInputHolder> predicate;
+    private SensiNactSession session;
 
-    public SensorthingsCriterion(final EFilterContext context,
+    public SensorthingsCriterion(final EFilterContext context, SensiNactSession session,
             final Predicate<ResourceValueFilterInputHolder> predicate) {
         this.context = context;
         this.predicate = predicate;
+        this.session = session;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class SensorthingsCriterion implements ICriterion {
             return new ResourceValueFilter() {
                 @Override
                 public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-                    return predicate.test(new ResourceValueFilterInputHolder(context, provider, resources));
+                    return predicate.test(new ResourceValueFilterInputHolder(context, session, provider, resources));
                 }
             };
 
@@ -77,7 +80,8 @@ public class SensorthingsCriterion implements ICriterion {
             return new ResourceValueFilter() {
                 @Override
                 public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-                    return resources.stream().map(r -> new ResourceValueFilterInputHolder(context, provider, r))
+                    return resources.stream()
+                            .map(r -> new ResourceValueFilterInputHolder(context, session, provider, r))
                             .anyMatch(predicate);
                 }
             };

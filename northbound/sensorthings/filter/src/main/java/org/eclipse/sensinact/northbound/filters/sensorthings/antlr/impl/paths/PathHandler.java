@@ -12,12 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
-import java.util.List;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 public class PathHandler {
 
@@ -29,27 +27,26 @@ public class PathHandler {
 
     public Object handle(final ResourceValueFilterInputHolder holder) {
         final ProviderSnapshot provider = holder.getProvider();
-        final List<? extends ResourceSnapshot> resources = holder.getResources();
-        final ResourceSnapshot resource = holder.getResource();
+        final SensiNactSession session = holder.getSession();
 
         switch (holder.getContext()) {
         case THINGS:
-            return new ThingPathHandler(provider, resources).handle(path);
+            return new ThingPathHandler(provider, session).handle(path);
         case FEATURES_OF_INTEREST:
-            return new FeatureOfInterestPathHandler(provider, resources).handle(path);
+            return new FeatureOfInterestPathHandler(provider, session).handle(path);
         case HISTORICAL_LOCATIONS:
-            return new HistoricalLocationPathHandler(provider, resources).handle(path);
+            return new HistoricalLocationPathHandler(provider, session).handle(path);
         case LOCATIONS:
-            return new LocationPathHandler(provider, resources).handle(path);
+            return new LocationPathHandler(provider, session).handle(path);
 
         case OBSERVATIONS:
-            return new ObservationPathHandler(provider, resource).handle(path);
+            return new ObservationPathHandler(provider, session).handle(path);
         case DATASTREAMS:
-            return new DatastreamPathHandler(provider, resource).handle(path);
+            return new DatastreamPathHandler(provider, session).handle(path);
         case OBSERVED_PROPERTIES:
-            return new ObservedPropertyPathHandler(provider, resource).handle(path);
+            return new ObservedPropertyPathHandler(provider, session).handle(path);
         case SENSORS:
-            return new SensorPathHandler(provider, resource).handle(path);
+            return new SensorPathHandler(provider, session).handle(path);
 
         default:
             throw new UnsupportedRuleException("Path of " + holder.getContext() + " is not yet supported");
