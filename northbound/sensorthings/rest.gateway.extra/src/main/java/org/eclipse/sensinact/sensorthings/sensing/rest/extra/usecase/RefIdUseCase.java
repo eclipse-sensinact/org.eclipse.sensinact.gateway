@@ -250,11 +250,11 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         String idThing = (String) request.model().id();
         String idDatastream = request.parentId();
         // read datastream
-        ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream, "datastream");
+        ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
 
         // create new datastream link to thing provider
-        ExpandedDataStream newDatastream = ServiceSnapshotMapper.toDatastream(service);
-        ExtraUseCaseResponse<ServiceSnapshot> response = datastreamUseCase
+        ExpandedDataStream newDatastream = ServiceSnapshotMapper.toDatastream(snapshot);
+        ExtraUseCaseResponse<ProviderSnapshot> response = datastreamUseCase
                 .update(new ExtraUseCaseRequest<ExpandedDataStream>(request.session(), request.mapper(),
                         request.uriInfo(), HttpMethod.PATCH, newDatastream, idThing));
 
@@ -299,7 +299,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             datastream = new ExpandedDataStream(null, parentId, null, null, null, null, null, null, null, null, null,
                     null, null, null, null, (ExpandedObservedProperty) dto, null, null, null);
         }
-        ExtraUseCaseResponse<ServiceSnapshot> response = useCase.update(new ExtraUseCaseRequest<>(request.session(),
+        ExtraUseCaseResponse<ProviderSnapshot> response = useCase.update(new ExtraUseCaseRequest<>(request.session(),
                 request.mapper(), request.uriInfo(), HttpMethod.PATCH, datastream, null));
         return new ExtraUseCaseResponse<Object>(response.id(), response.snapshot(), response.success(), response.e(),
                 response.message());
@@ -343,8 +343,9 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         }
         ExpandedLocation locationUpdate = ServiceSnapshotMapper
                 .toLocation(providerLocation.getService(UtilDto.SERVICE_LOCATON), idThing);
-        ExtraUseCaseResponse<ServiceSnapshot> result = locationUseCase.update(new ExtraUseCaseRequest<ExpandedLocation>(
-                request.session(), request.mapper(), request.uriInfo(), HttpMethod.PATCH, locationUpdate));
+        ExtraUseCaseResponse<ProviderSnapshot> result = locationUseCase
+                .update(new ExtraUseCaseRequest<ExpandedLocation>(request.session(), request.mapper(),
+                        request.uriInfo(), HttpMethod.PATCH, locationUpdate));
         return new ExtraUseCaseResponse<Object>(result.id(), result.snapshot());
     }
 

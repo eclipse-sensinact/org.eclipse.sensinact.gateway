@@ -83,15 +83,15 @@ public abstract class AbstractAccess {
     protected List<ProviderSnapshot> listProviders(final ICriterion criterion) {
         final SensiNactSession userSession = getSession();
         final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers
-                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
-                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-        } else {
-            return providers;
-        }
+//        if (criterion != null && criterion.getResourceValueFilter() != null) {
+//            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
+//            return providers
+//                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
+//                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
+//                    .collect(Collectors.toList());
+//        } else {
+        return providers;
+        // }
     }
 
     protected List<ResourceSnapshot> listResources(final ICriterion criterion) {

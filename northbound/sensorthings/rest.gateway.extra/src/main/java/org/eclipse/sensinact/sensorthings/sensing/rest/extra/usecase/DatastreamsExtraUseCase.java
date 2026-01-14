@@ -49,13 +49,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * datastream
  */
-public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDataStream, ServiceSnapshot> {
-
-    private final DataUpdate dataUpdate;
-
-    private final IAccessProviderUseCase providerUseCase;
-
-    private final IAccessServiceUseCase serviceUseCase;
+public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedDataStream, ProviderSnapshot> {
 
     private final IDtoMemoryCache<ExpandedSensor> sensorCache;
 
@@ -72,7 +66,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
+    public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
         String idDatastream = request.id();
 
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
@@ -85,7 +79,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
             throw new InternalServerErrorException(e);
         }
 
-        ServiceSnapshot snapshot = serviceUseCase.read(request.session(), idDatastream, "datastream");
+        ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
         if (snapshot != null) {
 
             removeCachedExpandedObservedProperty(request.model());
@@ -94,9 +88,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
                 request.model().observations().stream()
                         .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
             }
-            return new ExtraUseCaseResponse<ServiceSnapshot>(idDatastream, snapshot);
+            return new ExtraUseCaseResponse<ProviderSnapshot>(idDatastream, snapshot);
         }
-        return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
+        return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
 
     }
 
@@ -172,7 +166,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
             ProviderSnapshot providerThing = providerUseCase.read(request.session(), oldThingId);
             List<String> ids = getDatastreamIds(providerThing).stream().filter(id -> !datastreamId.equals(id)).toList();
 
-            listUpdates.add(new ThingUpdate(thingId, null, null, thingId, null, null, ids));
+            listUpdates.add(new ThingUpdate(thingId, null, null, null, thingId, null, null, ids));
 
         }
     }
@@ -184,8 +178,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
         List<String> ids = getDatastreamIds(serviceThing);
         if (!ids.contains(datastreamId)) {
             ids = Stream.concat(ids.stream(), Stream.of(datastreamId)).toList();
-            listUpdates.add(
-                    new ThingUpdate(providerThing.getName(), null, null, providerThing.getName(), null, null, ids));
+            listUpdates.add(new ThingUpdate(providerThing.getName(), null, null, null, providerThing.getName(), null,
+                    null, ids));
         }
     }
 
@@ -322,7 +316,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedDataStream> request) {
+    public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedDataStream> request) {
         String id = request.id();
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
@@ -335,7 +329,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
 
         }
 
-        ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), id, "datastream");
+        ProviderSnapshot provider = providerUseCase.read(request.session(), id);
 
         removeCachedExpandedObservedProperty(request.model());
         removeCachedExpandedSensor(request.model());
@@ -344,7 +338,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDto<ExpandedDat
                     .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
         }
 
-        return new ExtraUseCaseResponse<ServiceSnapshot>(id, serviceSnapshot);
+        return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
 
     }
 

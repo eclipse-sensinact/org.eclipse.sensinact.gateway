@@ -17,21 +17,18 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
-public class ObservedPropertyPathHandler {
-
-    private final ProviderSnapshot provider;
-    private final ResourceSnapshot resource;
+public class ObservedPropertyPathHandler extends AbstractPathHandler {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams);
 
-    public ObservedPropertyPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
-        this.provider = provider;
-        this.resource = resource;
+    public ObservedPropertyPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
+        super(provider, session);
+
     }
 
     public Object handle(final String path) {
@@ -83,6 +80,6 @@ public class ObservedPropertyPathHandler {
 
     private Object subDatastreams(final String path) {
         // Only one datastream per observed property
-        return new DatastreamPathHandler(provider, resource).handle(path);
+        return new DatastreamPathHandler(provider, session).handle(path);
     }
 }

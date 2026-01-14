@@ -263,8 +263,9 @@ public class LocationTest extends AbstractIntegrationTest {
         ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
         json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idLocation, "location");
-        assertEquals(name + "2", UtilDto.getResourceField(service, "name", String.class));
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
+
+        assertEquals(name + "2", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
 
     }
 
@@ -291,8 +292,9 @@ public class LocationTest extends AbstractIntegrationTest {
         ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
         json = getJsonResponseFromPatch(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idLocation, "location");
-        assertEquals(name + "2", UtilDto.getResourceField(service, "name", String.class));
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
+
+        assertEquals(name + "2", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
 
     }
 }

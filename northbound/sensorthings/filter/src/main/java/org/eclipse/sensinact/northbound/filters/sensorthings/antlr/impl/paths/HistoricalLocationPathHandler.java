@@ -13,34 +13,31 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
-public class HistoricalLocationPathHandler {
-
-    private final ProviderSnapshot provider;
-    private final List<? extends ResourceSnapshot> resources;
+public class HistoricalLocationPathHandler extends AbstractPathHandler {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("things", this::subThings, "locations",
             this::subLocations);
 
-    public HistoricalLocationPathHandler(final ProviderSnapshot provider,
-            final List<? extends ResourceSnapshot> resources) {
-        this.provider = provider;
-        this.resources = resources;
+    public HistoricalLocationPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
+        super(provider, session);
+
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot service = UtilDto.getThingService(provider);
+        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
+
         if (service == null) {
             return null; // not a historical location as it's not thing provider
         }
@@ -54,10 +51,9 @@ public class HistoricalLocationPathHandler {
 
             case "time":
                 // Get time from the HistoricalLocationResourceSnapshot TimedValue
-                final Optional<? extends ResourceSnapshot> resource = resources.stream().filter(this::isAdminLocation)
-                        .findFirst();
-                if (resource.isPresent()) {
-                    return getResourceLevelField(provider, resource.get(), parts[0]);
+                ResourceSnapshot resource = serviceAdmin.getResource("location");
+                if (resource != null) {
+                    return getResourceLevelField(provider, resource, parts[0]);
                 }
                 return null;
 
@@ -84,17 +80,13 @@ public class HistoricalLocationPathHandler {
 
     }
 
-    private boolean isAdminLocation(ResourceSnapshot r) {
-        return "admin".equals(r.getService().getName()) && "location".equals(r.getName());
-    }
-
     private Object subThings(final String path) {
-        return new ThingPathHandler(provider, resources).handle(path);
+        return new ThingPathHandler(provider, session).handle(path);
     }
 
     private Object subLocations(final String path) {
         // todo need to call from location provider with reviewed path
 
-        return new LocationPathHandler(provider, resources).handle(path);
+        return new LocationPathHandler(provider, session).handle(path);
     }
 }

@@ -13,84 +13,82 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
-public class ThingPathHandler {
-
-    private final ProviderSnapshot provider;
-    private final List<? extends ResourceSnapshot> resources;
+public class ThingPathHandler extends AbstractPathHandler {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams,
             "locations", this::subLocations);
 
-    public ThingPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-        this.provider = provider;
-        this.resources = resources;
+    public ThingPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
+        super(provider, session);
+
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot service = UtilDto.getThingService(provider);
+        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
+
         if (service == null) {
             return null;
         }
         if (parts.length == 1) {
-            return getResourceLevelField(provider, service, parts[0]);
+            switch (path) {
+            case "id":
+            case "@iot.id":
+
+                return provider.getName();
+            case "name":
+                return UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class);
+
+            case "description":
+                return UtilDto.getResourceField(serviceAdmin, "description", String.class);
+
+            case "properties":
+                return UtilDto.getResourceField(service, "properties", Map.class);
+
+            case "location":
+                return UtilDto.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+
+            default:
+                throw new UnsupportedRuleException("Unexpected resource level field: " + path);
+            }
 
         } else {
-            final Function<String, Object> handler = subPartHandlers.get(parts[0]);
-            if (handler == null) {
-                throw new UnsupportedRuleException("Unsupported path: " + path);
+            if (parts[0].equalsIgnoreCase("Locations") && parts[1].equalsIgnoreCase("location")) {
+                return UtilDto.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+            } else {
+                final Function<String, Object> handler = subPartHandlers.get(parts[0]);
+                if (handler == null) {
+                    throw new UnsupportedRuleException("Unsupported path: " + path);
+                }
+                return handler.apply(String.join("/", Arrays.copyOfRange(parts, 1, parts.length)));
             }
-            return handler.apply(String.join("/", Arrays.copyOfRange(parts, 1, parts.length)));
+
         }
-    }
-
-    public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
-            final String path) {
-        switch (path) {
-        case "id":
-        case "@iot.id":
-
-            return provider.getName();
-        case "name":
-            return UtilDto.getResourceField(service, "name", String.class);
-
-        case "description":
-            return UtilDto.getResourceField(service, "description", String.class);
-
-        case "properties":
-            return UtilDto.getResourceField(service, "properties", Map.class);
-
-        default:
-            throw new UnsupportedRuleException("Unexpected resource level field: " + path);
-        }
-
     }
 
     private Object subDatastreams(final String path) {
-        // todo need to call from datastream provider with reviewed path
-        if (resources.size() == 1) {
-            return new DatastreamPathHandler(provider, resources.get(0)).handle(path);
-        } else {
-            return new AnyMatch(resources.stream().map(r -> new DatastreamPathHandler(provider, r).handle(path))
-                    .collect(Collectors.toList()));
-        }
+
+        return new AnyMatch(getDatastreamsProviderFromThing(provider).stream()
+                .map(p -> new DatastreamPathHandler(p, session).handle(path)).collect(Collectors.toList()));
+
     }
 
     private Object subLocations(final String path) {
-        // todo need to call from location provider with reviewed path
 
-        return new LocationPathHandler(provider, resources).handle(path);
+        return new AnyMatch(getLocationsProviderFromThing(provider).stream()
+                .map(p -> new LocationPathHandler(p, session).handle(path)).collect(Collectors.toList()));
     }
 }

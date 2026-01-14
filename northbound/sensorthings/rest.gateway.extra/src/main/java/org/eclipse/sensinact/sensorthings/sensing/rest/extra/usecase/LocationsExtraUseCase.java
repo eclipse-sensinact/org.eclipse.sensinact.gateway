@@ -27,7 +27,6 @@ import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -47,13 +46,13 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ServiceSnapshot> {
+public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ProviderSnapshot> {
 
     public LocationsExtraUseCase(Providers providers) {
         super(providers);
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
+    public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
@@ -65,9 +64,9 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
                 String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
+                return new ExtraUseCaseResponse<ProviderSnapshot>(locationId, provider);
             }
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "failed to create Location");
 
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
@@ -109,7 +108,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
         return listUpdates;
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedLocation> request) {
+    public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
@@ -119,9 +118,9 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
                 String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
+                return new ExtraUseCaseResponse<ProviderSnapshot>(locationId, provider);
             }
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get providerProviderSnapshot");
 
         } catch (Exception e) {
             throw new InternalServerErrorException(e);

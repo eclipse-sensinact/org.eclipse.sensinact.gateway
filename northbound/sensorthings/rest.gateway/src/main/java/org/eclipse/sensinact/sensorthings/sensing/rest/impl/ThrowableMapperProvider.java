@@ -30,6 +30,7 @@ public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
         if (e instanceof WebApplicationException webEx) {
             // Log at WARN instead of ERROR
             LOG.warn("WebApplicationException caught: status {}", webEx.getResponse().getStatus());
+
             return webEx.getResponse(); // preserve original status
         }
         LOG.error("Unhandled exception while processing request", e);

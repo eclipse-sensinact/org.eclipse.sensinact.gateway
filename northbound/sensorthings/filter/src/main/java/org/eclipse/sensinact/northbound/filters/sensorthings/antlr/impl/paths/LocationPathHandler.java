@@ -13,37 +13,57 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
-public class LocationPathHandler {
-
-    private final ProviderSnapshot provider;
-    private final List<? extends ResourceSnapshot> resources;
+public class LocationPathHandler extends AbstractPathHandler {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("things", this::subThings,
             "historicallocations", this::subHistoricalLocations);
 
-    public LocationPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-        this.provider = provider;
-        this.resources = resources;
+    public LocationPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
+        super(provider, session);
+
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot service = UtilDto.getLocationService(provider);
+        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
+
         if (service == null) {
             return null;
         }
         if (parts.length == 1) {
-            return getResourceLevelField(provider, service, parts[0]);
+            switch (path) {
+            case "id":
+            case "@iot.id":
+
+                return provider.getName();
+            case "name":
+                return UtilDto.getResourceField(serviceAdmin, "name", String.class);
+
+            case "description":
+                return UtilDto.getResourceField(serviceAdmin, "description", String.class);
+
+            case "location":
+                return UtilDto.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+            case "encodingType":
+                return UtilDto.getResourceField(service, "encodingType", String.class);
+
+            case "properties":
+                return UtilDto.getResourceField(service, "properties", Map.class);
+
+            default:
+                throw new UnsupportedRuleException("Unexpected resource level field: " + path);
+            }
 
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
@@ -54,42 +74,15 @@ public class LocationPathHandler {
         }
     }
 
-    public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
-            final String path) {
-        switch (path) {
-        case "id":
-        case "@iot.id":
-
-            return provider.getName();
-        case "name":
-            return UtilDto.getResourceField(service, "name", String.class);
-
-        case "description":
-            return UtilDto.getResourceField(service, "description", String.class);
-
-        case "location":
-            return UtilDto.getResourceField(service, "location", String.class);
-        case "encodingType":
-            return UtilDto.getResourceField(service, "encodingType", String.class);
-
-        case "properties":
-            return UtilDto.getResourceField(service, "properties", Map.class);
-
-        default:
-            throw new UnsupportedRuleException("Unexpected resource level field: " + path);
-        }
-
-    }
-
     private Object subThings(final String path) {
         // todo need to call from thing provider with reviewed path
 
-        return new ThingPathHandler(provider, resources).handle(path);
+        return new ThingPathHandler(provider, session).handle(path);
     }
 
     private Object subHistoricalLocations(final String path) {
         // todo need to call from thing provider with reviewed path
 
-        return new HistoricalLocationPathHandler(provider, resources).handle(path);
+        return new HistoricalLocationPathHandler(provider, session).handle(path);
     }
 }

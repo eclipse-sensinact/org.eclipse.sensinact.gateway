@@ -212,7 +212,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
         getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + " Update", UtilDto.getResourceField(service, "name", String.class));
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
+
+        assertEquals(name + " Update", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
         assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
 
     }
@@ -247,7 +249,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
         getJsonResponseFromPatch(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals("Update", UtilDto.getResourceField(service, "description", String.class));
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
+
+        assertEquals("Update", UtilDto.getResourceField(serviceAdmin, "description", String.class));
         assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
 
     }

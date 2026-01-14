@@ -91,7 +91,8 @@ public interface IExtraUseCase<M extends Id, S> {
 
         public ExtraUseCaseRequest {
             if (id == null && model != null) {
-                id = DtoToModelMapper.sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString());
+                id = DtoToModelMapper
+                        .sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString().substring(0, 8));
             }
         }
 

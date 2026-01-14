@@ -13,37 +13,36 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 
-public class DatastreamPathHandler {
-
-    private final ProviderSnapshot provider;
-    private final ResourceSnapshot resource;
+public class DatastreamPathHandler extends AbstractPathHandler {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("observations", this::subObservations,
             "observedproperty", this::subObservedProperty, "sensor", this::subSensor, "thing", this::subThing);
 
-    public DatastreamPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
-        this.provider = provider;
-        this.resource = resource;
+    public DatastreamPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
+        super(provider, session);
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
+        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
         ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+
         if (service == null) {
-            return null;
+            return null; // not a historical location as it's not thing provider
         }
         if (parts.length == 1) {
-            return getResourceLevelField(provider, service, parts[0]);
+
+            return getResourceLevelField(provider, serviceAdmin, parts[0]);
 
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
@@ -62,11 +61,12 @@ public class DatastreamPathHandler {
             return provider.getName();
 
         case "name":
-            return UtilDto.getResourceField(service, "name", String.class);
+            return UtilDto.getResourceField(service, "friendlyName", String.class);
 
         case "description":
             return UtilDto.getResourceField(service, "description", String.class);
-
+        case "observedArea":
+            return UtilDto.getResourceField(service, "location", GeoJsonObject.class);
         default:
             throw new UnsupportedRuleException("Unexpected resource level field: " + path);
         }
@@ -74,20 +74,19 @@ public class DatastreamPathHandler {
     }
 
     private Object subObservations(final String path) {
-        return new ObservationPathHandler(provider, resource).handle(path);
+        return new ObservationPathHandler(provider, session).handle(path);
     }
 
     private Object subObservedProperty(final String path) {
-        return new ObservedPropertyPathHandler(provider, resource).handle(path);
+        return new ObservedPropertyPathHandler(provider, session).handle(path);
     }
 
     private Object subSensor(final String path) {
-        return new SensorPathHandler(provider, resource).handle(path);
+        return new SensorPathHandler(provider, session).handle(path);
     }
 
     private Object subThing(final String path) {
-        // todo need to call from thing provider with reviewed path
 
-        return new ThingPathHandler(provider, List.of(resource)).handle(path);
+        return new ThingPathHandler(getThingProviderFromDatastream(provider), session).handle(path);
     }
 }
