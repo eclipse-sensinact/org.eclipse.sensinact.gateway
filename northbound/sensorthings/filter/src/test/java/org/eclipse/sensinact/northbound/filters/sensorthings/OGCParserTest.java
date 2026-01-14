@@ -229,16 +229,12 @@ public class OGCParserTest {
 
     @Test
     void testThingsPath() throws Exception {
+
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         expectations.put("id eq 'testProviderThing'", true);
         expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'testProvider~test~test'", true);
-        expectations.put("Datastreams/Observations/result gt 10", true);
-        expectations.put("Datastreams/Observations/result gt 20", false);
-        final Map<String, Boolean> expectations2 = new LinkedHashMap<>();
-        expectations2.put("id eq 'testProviderThing'", true);
-        expectations2.put("Datastreams/Observations/FeatureOfInterest/id eq 'testProvider~test~test'", true);
-        expectations2.put("Datastreams/Observations/result lt 5", false);
-        expectations2.put("Datastreams/Observations/result le 5", true);
+        expectations.put("Datastreams/Observations/result lt 5", false);
+        expectations.put("Datastreams/Observations/result le 5", true);
 
         ProviderSnapshot providerThing = RcUtils.makeProvider("testProviderThing");
         ServiceSnapshot svcThing = RcUtils.addService(providerThing, UtilDto.SERVICE_THING);
@@ -246,10 +242,10 @@ public class OGCParserTest {
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, UtilDto.SERVICE_DATASTREAM);
-        ResourceSnapshot rc1 = RcUtils.addResource(svc, "lastObservation", getExpandedObservation(Instant.now(), 15.2));
+        ResourceSnapshot rc1 = RcUtils.addResource(svc, "lastObservation", getExpandedObservation(Instant.now(), 5));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), providerThing, List.of(rc1));
+                RcUtils.getSession(), providerThing, rc1);
         assertQueries(expectations, holder);
 
     }
