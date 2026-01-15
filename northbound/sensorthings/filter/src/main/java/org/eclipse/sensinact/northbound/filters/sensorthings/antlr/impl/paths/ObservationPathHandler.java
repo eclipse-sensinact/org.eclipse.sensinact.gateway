@@ -71,6 +71,7 @@ public class ObservationPathHandler extends AbstractPathHandler {
             return obs.resultTime();
 
         case "phenomenontime":
+
             return obs.phenomenonTime();
 
         case "validtime":

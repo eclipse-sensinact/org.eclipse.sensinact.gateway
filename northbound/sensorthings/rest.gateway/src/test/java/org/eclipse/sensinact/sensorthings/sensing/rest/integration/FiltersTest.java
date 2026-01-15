@@ -605,6 +605,12 @@ public class FiltersTest extends AbstractIntegrationTest {
             String idfoi = provider1 + "_2~test~test";
 
             obs = utils.queryJson(
+                    String.format("/Observations?$filter=%s", URLEncoder
+                            .encode("result eq 'test' or phenomenonTime le " + Instant.now(), StandardCharsets.UTF_8)),
+                    RESULT_OBSERVATIONS);
+            allIds = obs.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
+            System.out.println(allIds.size());
+            obs = utils.queryJson(
                     String.format("/Observations?$filter=%s",
                             URLEncoder.encode("FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
                     RESULT_OBSERVATIONS);

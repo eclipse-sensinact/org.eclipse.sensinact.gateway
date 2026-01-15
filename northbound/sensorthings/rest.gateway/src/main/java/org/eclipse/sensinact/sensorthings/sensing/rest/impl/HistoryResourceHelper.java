@@ -61,15 +61,16 @@ class HistoryResourceHelper {
         int skip = 0;
 
         List<TimedValue<?>> timed;
+
         do {
             params.put("skip", skip);
 
             timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-
             // Filtering happens at a lower level, so we may not use all the discovered
             // history
             List<Observation> observationList = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
                     expansions, filter, resourceSnapshot, timed);
+
             if (count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
                 count -= (timed.size() - observationList.size());
             }

@@ -12,21 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static java.time.temporal.ChronoUnit.DAYS;
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.startsWith;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import static java.time.temporal.ChronoUnit.DAYS;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +26,29 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
 import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFilterComponent;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,15 +90,24 @@ class HistoryResourceHelperTest {
     // Helper method to verify parameter maps contain expected basic parameters
     private Map<String, Object> hasBasicParams() {
         return argThat(params -> params != null && "testProvider".equals(params.get("provider"))
-                && "testService".equals(params.get("service")) && "testResource".equals(params.get("resource")));
+                && "lastObservation".equals(params.get("resource")));
+    }
+
+    private ExpandedObservation getObservation(String name, Object result, Instant instant) {
+
+        return new ExpandedObservation(name, name,
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
+                null, null, null, null, null);
+
     }
 
     private void setupResourceSnapshotMocks() {
         when(resourceSnapshot.getService()).thenReturn(serviceSnapshot);
         when(serviceSnapshot.getProvider()).thenReturn(providerSnapshot);
         when(providerSnapshot.getName()).thenReturn("testProvider");
-        when(serviceSnapshot.getName()).thenReturn("testService");
-        when(resourceSnapshot.getName()).thenReturn("testResource");
+        when(serviceSnapshot.getName()).thenReturn("datastream");
+        when(resourceSnapshot.getName()).thenReturn("lastObservation");
     }
 
     @Nested
@@ -108,8 +118,7 @@ class HistoryResourceHelperTest {
             when(uriInfo.getBaseUriBuilder()).thenReturn(uriBuilder);
             when(uriBuilder.path(anyString())).thenReturn(uriBuilder);
             when(uriBuilder.uri(anyString())).thenReturn(uriBuilder);
-            when(uriBuilder.resolveTemplate(eq("id"), startsWith("testProvider~testService~testResource~")))
-                    .thenReturn(uriBuilder);
+            when(uriBuilder.resolveTemplate(eq("id"), startsWith("testProvider~testResource~"))).thenReturn(uriBuilder);
             when(uriBuilder.build(any(Object[].class))).thenReturn(java.net.URI.create("http://test.com/test"));
             when(uriBuilder.build()).thenReturn(java.net.URI.create("http://test.com/test"));
         }
@@ -143,8 +152,9 @@ class HistoryResourceHelperTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(count);
 
-            List<TimedValue<?>> timedValues = Arrays.asList(new DefaultTimedValue<>("value1", now),
-                    new DefaultTimedValue<>("value2", now));
+            List<TimedValue<?>> timedValues = Arrays.asList(
+                    new DefaultTimedValue<>(getObservation("testResource", "value1", now), now),
+                    new DefaultTimedValue<>(getObservation("testResource", "value2", now), now));
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(timedValues);
 
@@ -196,21 +206,27 @@ class HistoryResourceHelperTest {
 
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(count);
-
-            ICriterion filter = new SensorthingsFilterComponent().parseFilter(
+            SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
+            filterComponent.setSession(userSession);
+            ICriterion filter = filterComponent.parseFilter(
                     String.format("result eq 'value1' or phenomenonTime lt %s", now.minus(1, DAYS)), OBSERVATIONS);
 
-            List<TimedValue<?>> timedValues = Arrays.asList(new DefaultTimedValue<>("value1", now),
-                    new DefaultTimedValue<>("value2", now));
+            List<TimedValue<?>> timedValues = Arrays.asList(
+                    new DefaultTimedValue<>(getObservation("testResource", "value1", now), now),
+                    new DefaultTimedValue<>(getObservation("testResource", "value2", now), now));
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(timedValues, timedValues, List.of(new DefaultTimedValue<>("value1", now.minus(3, DAYS)),
-                            new DefaultTimedValue<>("value3", now.minus(3, DAYS))), List.of());
+                    .thenReturn(timedValues, timedValues, List.of(
+                            new DefaultTimedValue<>(getObservation("testResource", "value1", now.minus(3, DAYS)),
+                                    now.minus(3, DAYS)),
+                            new DefaultTimedValue<>(getObservation("testResource", "value3", now.minus(3, DAYS)),
+                                    now.minus(3, DAYS))),
+                            List.of());
 
             ResultList<Observation> result = HistoryResourceHelper.loadHistoricalObservations(userSession, application,
                     mapper, uriInfo, expansions, resourceSnapshot, filter, 0);
 
             assertNotNull(result);
-            assertEquals(4, result.value().size());
+            assertEquals(4, result.value().size(), "resource size " + result.value().size());
             // Result batches come in reverse order
             assertEquals("value1", result.value().get(0).result());
             assertEquals("value3", result.value().get(1).result());
