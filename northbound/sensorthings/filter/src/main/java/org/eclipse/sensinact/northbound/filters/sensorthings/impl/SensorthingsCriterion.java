@@ -80,9 +80,10 @@ public class SensorthingsCriterion implements ICriterion {
             return new ResourceValueFilter() {
                 @Override
                 public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-                    return resources.stream()
-                            .map(r -> new ResourceValueFilterInputHolder(context, session, provider, r))
-                            .anyMatch(predicate);
+                    return resources.stream().map(r -> {
+                        System.out.println("resource " + r.getName() + " provider " + provider.getName());
+                        return new ResourceValueFilterInputHolder(context, session, provider, r);
+                    }).anyMatch(predicate);
                 }
             };
 

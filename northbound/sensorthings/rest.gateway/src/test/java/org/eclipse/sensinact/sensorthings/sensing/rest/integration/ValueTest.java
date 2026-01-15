@@ -90,7 +90,7 @@ public class ValueTest extends AbstractIntegrationTest {
         final int newValue = value + random.nextInt(1024) + 1;
         Instant valueUpdateInstant = Instant.now();
         session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "lastObservation",
-                getObservation("test", newValue, getFeatureOfInterest("test")));
+                getObservation("test", newValue, getFeatureOfInterest("test"), valueUpdateInstant));
 
         observations = utils.queryJson(stream.observationsLink(), new TypeReference<ResultList<Observation>>() {
         });

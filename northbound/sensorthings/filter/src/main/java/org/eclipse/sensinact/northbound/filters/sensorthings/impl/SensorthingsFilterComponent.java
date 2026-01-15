@@ -46,8 +46,17 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
     @Reference
     SensiNactSessionManager sessionManager;
 
+    SensiNactSession session;
+
     public SensiNactSession getSession() {
-        return sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
+        if (session == null) {
+            session = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
+        }
+        return session;
+    }
+
+    public void setSession(SensiNactSession session) {
+        this.session = session;
     }
 
     @Override
