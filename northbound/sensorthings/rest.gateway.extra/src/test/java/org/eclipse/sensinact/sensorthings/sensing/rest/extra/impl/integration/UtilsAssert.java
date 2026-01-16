@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -78,7 +78,7 @@ public class UtilsAssert {
 
     }
 
-    public static void assertSensor(ExpandedSensor dto, JsonNode json) {
+    public static void assertSensor(Sensor dto, JsonNode json) {
         assertSelfLink(dto, json);
         assertEquals(dto.name(), json.get("name").asText());
         assertEquals(dto.description(), json.get("description").asText());
@@ -93,7 +93,7 @@ public class UtilsAssert {
         // assertEquals(dto.selfLink(), json.get("selfLink").asText());
     }
 
-    public static void assertObservedProperty(ExpandedObservedProperty dto, JsonNode json) {
+    public static void assertObservedProperty(ObservedProperty dto, JsonNode json) {
         assertSelfLink(dto, json);
 
         assertEquals(dto.definition(), json.get("definition").asText());

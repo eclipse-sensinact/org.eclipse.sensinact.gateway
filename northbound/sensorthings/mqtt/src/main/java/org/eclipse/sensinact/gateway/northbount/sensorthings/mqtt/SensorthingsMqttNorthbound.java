@@ -221,14 +221,19 @@ public class SensorthingsMqttNorthbound extends AbstractInterceptHandler
         }
     }
 
+    Map<String, Object> lastPublishedMessageByTopic = new HashMap<String, Object>();
+
     private void notifyListeners(String topic, Object data) {
         try {
-            ByteBuf payload = Unpooled.wrappedBuffer(mapper.writeValueAsBytes(data));
+            if (data != null && !data.toString().equals(lastPublishedMessageByTopic.get(topic))) {
+                ByteBuf payload = Unpooled.wrappedBuffer(mapper.writeValueAsBytes(data));
 
-            MqttPublishMessage message = MqttMessageBuilders.publish().topicName(topic).qos(AT_MOST_ONCE)
-                    .retained(false).payload(payload).build();
+                MqttPublishMessage message = MqttMessageBuilders.publish().topicName(topic).qos(AT_MOST_ONCE)
+                        .retained(false).payload(payload).build();
 
-            mqttBroker.internalPublish(message, "sensinact.sensorthings");
+                mqttBroker.internalPublish(message, "sensinact.sensorthings");
+                lastPublishedMessageByTopic.put(topic, data.toString());
+            }
         } catch (JsonProcessingException e) {
             LOG.warn("An error occurred creating a notification for topic {}", topic, e);
         }

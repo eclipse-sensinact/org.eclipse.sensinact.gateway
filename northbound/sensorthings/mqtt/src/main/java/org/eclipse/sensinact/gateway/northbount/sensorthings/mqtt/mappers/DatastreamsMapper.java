@@ -15,49 +15,48 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DatastreamsMapper extends SensorthingsMapper<Datastream> {
 
-    public DatastreamsMapper(String topicFilter, ObjectMapper mapper, GatewayThread thread) {
+    public DatastreamsMapper(final String topicFilter, final ObjectMapper mapper, final GatewayThread thread) {
         super(topicFilter, mapper, thread);
     }
 
     @Override
-    public Promise<Stream<Datastream>> toPayload(LifecycleNotification notification) {
+    public Promise<Stream<Datastream>> toPayload(final LifecycleNotification notification) {
         if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
             // This is a resource appearing
-            return getDatastream(getResource(notification.provider(), notification.service(), notification.resource()));
+            return this.getDatastream(this.getProvider(notification.provider()));
         }
-        return emptyStream();
+        return this.emptyStream();
     }
 
     @Override
-    public Promise<Stream<Datastream>> toPayload(ResourceMetaDataNotification notification) {
-        return getDatastream(getResource(notification.provider(), notification.service(), notification.resource()));
+    public Promise<Stream<Datastream>> toPayload(final ResourceMetaDataNotification notification) {
+        return this.getDatastream(this.getProvider(notification.provider()));
     }
 
     @Override
-    public Promise<Stream<Datastream>> toPayload(ResourceDataNotification notification) {
-        if (isRelevantAdminResource(notification)) {
-            // These are used in all Datastreams for this provider so all have been updated
-            return mapProvider(getProvider(notification.provider()), this::getDatastream);
-        }
-        return emptyStream();
+    public Promise<Stream<Datastream>> toPayload(final ResourceDataNotification notification) {
+        // These are used in all Datastreams for this provider so all have been updated
+        return this.mapProviderIfProvider(this.getProvider(notification.provider()), DtoMapperSimple::isDatastream,
+                this::getDatastream, provider -> this.emptyStream());
+
     }
 
-    protected Promise<Stream<Datastream>> getDatastream(Promise<ResourceSnapshot> resourceSnapshot) {
-        return decorate(resourceSnapshot.map(r -> DtoMapper.toDatastream(jsonMapper, r)));
+    protected Promise<Stream<Datastream>> getDatastream(final Promise<ProviderSnapshot> providerSnapshot) {
+        return this.decorate(providerSnapshot.map(p -> DtoMapper.toDatastream(this.jsonMapper, p)));
     }
 
     @Override
@@ -65,7 +64,4 @@ public class DatastreamsMapper extends SensorthingsMapper<Datastream> {
         return Datastream.class;
     }
 
-    protected boolean isRelevantAdminResource(ResourceNotification notification) {
-        return "admin".equals(notification.service()) && "location".equals(notification.resource());
-    }
 }

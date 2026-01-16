@@ -21,6 +21,7 @@ import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,20 +29,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DatastreamMapper extends DatastreamsMapper {
 
     private final String provider;
-    private final String service;
-    private final String resource;
 
     public DatastreamMapper(String topicFilter, String id, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
-
-        String[] segments = id.split("~");
-
-        if (segments.length != 3) {
-            throw new IllegalArgumentException("The Datastream id " + id + " is not valid");
-        }
-        this.provider = segments[0];
-        this.service = segments[1];
-        this.resource = segments[2];
+        this.provider = id;
     }
 
     @Override
@@ -53,29 +44,28 @@ public class DatastreamMapper extends DatastreamsMapper {
     }
 
     private boolean isOurResource(ResourceNotification notification) {
-        return service.equals(notification.service()) && resource.equals(notification.resource());
+        return DtoMapperSimple.SERVICE_ADMIN.equals(notification.service())
+                || DtoMapperSimple.SERVICE_DATASTREAM.equals(notification.service());
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(LifecycleNotification notification) {
         // Force the required datastream when it appears
         return isOurResource(notification) && notification.status() == Status.RESOURCE_CREATED
-                ? getDatastream(getResource(provider, service, resource))
+                ? getDatastream(getProvider(provider))
                 : emptyStream();
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(ResourceDataNotification notification) {
         // Force the required datastream if a relevant admin topic changes
-        return isRelevantAdminResource(notification)
-                ? getDatastream(getResource(provider, service, resource))
-                : emptyStream();
+        return getDatastream(getProvider(provider));
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(ResourceMetaDataNotification notification) {
         // Force the required datastream
-        return isOurResource(notification) ? getDatastream(getResource(provider, service, resource)) : emptyStream();
+        return isOurResource(notification) ? getDatastream(getProvider(provider)) : emptyStream();
     }
 
 }

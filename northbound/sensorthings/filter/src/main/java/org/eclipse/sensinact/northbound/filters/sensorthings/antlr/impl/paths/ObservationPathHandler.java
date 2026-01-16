@@ -21,7 +21,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class ObservationPathHandler extends AbstractPathHandler {
 
@@ -34,7 +34,7 @@ public class ObservationPathHandler extends AbstractPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
         if (service == null) {
             return null;
         }
@@ -53,7 +53,8 @@ public class ObservationPathHandler extends AbstractPathHandler {
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
 
-        ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
+                ExpandedObservation.class);
 
         if (obs == null) {
             return null;

@@ -41,7 +41,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolComm
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 public class OGCParserTest {
@@ -143,8 +143,8 @@ public class OGCParserTest {
     }
 
     private ResourceSnapshot makeLocatedResource(final GeoJsonObject rect1, ProviderSnapshot provider) {
-        ServiceSnapshot svc = RcUtils.addService(provider, UtilDto.SERVICE_ADMIN);
-        RcUtils.addService(provider, UtilDto.SERVICE_THING);
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_ADMIN);
+        RcUtils.addService(provider, DtoMapperSimple.SERVICE_THING);
 
         ResourceSnapshot rc = RcUtils.addResource(svc, "location", rect1);
 
@@ -237,11 +237,11 @@ public class OGCParserTest {
         expectations.put("Datastreams/Observations/result le 5", true);
 
         ProviderSnapshot providerThing = RcUtils.makeProvider("testProviderThing");
-        ServiceSnapshot svcThing = RcUtils.addService(providerThing, UtilDto.SERVICE_THING);
+        ServiceSnapshot svcThing = RcUtils.addService(providerThing, DtoMapperSimple.SERVICE_THING);
         RcUtils.addResource(svcThing, "datastreamIds", List.of("testProvider"));
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
-        ServiceSnapshot svc = RcUtils.addService(provider, UtilDto.SERVICE_DATASTREAM);
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
         ResourceSnapshot rc1 = RcUtils.addResource(svc, "lastObservation", getExpandedObservation(Instant.now(), 5));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
@@ -258,7 +258,7 @@ public class OGCParserTest {
         expectations.put("FeatureOfInterest/id eq 'testProvider~test~test'", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("testProvider");
-        ServiceSnapshot svc = RcUtils.addService(provider, UtilDto.SERVICE_DATASTREAM);
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
         ResourceSnapshot rc = RcUtils.addResource(svc, "lastObservation", getExpandedObservation(Instant.now(), 5.0));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
@@ -291,7 +291,7 @@ public class OGCParserTest {
         expectations.put("time(resultTime) le 16:00:00", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("provider");
-        ServiceSnapshot svc = RcUtils.addService(provider, UtilDto.SERVICE_DATASTREAM);
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
         ResourceSnapshot rc = RcUtils.addResource(svc, "lastObservation",
                 getExpandedObservation(ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant(), 5.0));
 
@@ -311,7 +311,7 @@ public class OGCParserTest {
         expectations.put("2023-02-07T15:50:30Z sub 2023-02-07T15:40:00Z eq duration'PT10M30S'", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider("provider");
-        ServiceSnapshot svc = RcUtils.addService(provider, UtilDto.SERVICE_DATASTREAM);
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
         ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0,
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
 

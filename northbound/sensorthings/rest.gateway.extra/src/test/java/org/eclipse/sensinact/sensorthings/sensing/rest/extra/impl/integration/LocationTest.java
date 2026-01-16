@@ -24,7 +24,7 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -125,7 +125,7 @@ public class LocationTest extends AbstractIntegrationTest {
             serviceUseCase.read(session, idLocation, "location");
         });
         ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
-        assertFalse(UtilDto.getResourceField(service, "locationIds", List.class).contains(idLocation));
+        assertFalse(DtoMapperSimple.getResourceField(service, "locationIds", List.class).contains(idLocation));
     }
 
     /**
@@ -200,10 +200,10 @@ public class LocationTest extends AbstractIntegrationTest {
         // when
         getJsonResponseFromDelete(String.format("/Locations(%s)/Things/$ref", idLocation), 204);
         // then
-        ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, UtilDto.SERVICE_THING);
-        ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, UtilDto.SERVICE_THING);
-        assertEquals(0, UtilDto.getResourceField(thingService1, "locationIds", List.class).size());
-        assertEquals(0, UtilDto.getResourceField(thingService2, "locationIds", List.class).size());
+        ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, DtoMapperSimple.SERVICE_THING);
+        ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, DtoMapperSimple.SERVICE_THING);
+        assertEquals(0, DtoMapperSimple.getResourceField(thingService1, "locationIds", List.class).size());
+        assertEquals(0, DtoMapperSimple.getResourceField(thingService2, "locationIds", List.class).size());
 
     }
 
@@ -233,10 +233,10 @@ public class LocationTest extends AbstractIntegrationTest {
         // when
         getJsonResponseFromDelete(String.format("/Locations(%s)/Things(%s)/$ref", idLocation, idThing), 204);
         // then
-        ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, UtilDto.SERVICE_THING);
-        ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, UtilDto.SERVICE_THING);
-        assertEquals(0, UtilDto.getResourceField(thingService1, "locationIds", List.class).size());
-        assertEquals(1, UtilDto.getResourceField(thingService2, "locationIds", List.class).size());
+        ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, DtoMapperSimple.SERVICE_THING);
+        ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, DtoMapperSimple.SERVICE_THING);
+        assertEquals(0, DtoMapperSimple.getResourceField(thingService1, "locationIds", List.class).size());
+        assertEquals(1, DtoMapperSimple.getResourceField(thingService2, "locationIds", List.class).size());
 
     }
 
@@ -265,7 +265,7 @@ public class LocationTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
 
-        assertEquals(name + "2", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
+        assertEquals(name + "2", DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class));
 
     }
 
@@ -294,7 +294,7 @@ public class LocationTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
 
-        assertEquals(name + "2", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
+        assertEquals(name + "2", DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class));
 
     }
 }

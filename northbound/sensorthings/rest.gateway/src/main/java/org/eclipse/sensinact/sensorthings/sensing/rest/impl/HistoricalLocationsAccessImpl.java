@@ -28,7 +28,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.HistoricalLocationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
@@ -42,7 +42,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public HistoricalLocation getHistoricalLocation(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
@@ -60,7 +60,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Location> getHistoricalLocationLocations(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         validateAndGetProvider(provider);
@@ -74,9 +74,9 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public Location getHistoricalLocationLocation(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         getTimestampFromId(id);
-        String thingId = UtilDto.extractFirstIdSegment(id);
+        String thingId = DtoMapperSimple.extractFirstIdSegment(id);
         if (!isLocationInThing(thingId, id2)) {
             throw new BadRequestException();
         }
@@ -93,7 +93,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Thing> getHistoricalLocationLocationThings(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
@@ -104,7 +104,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(String id, String id2) {
-        String thingId = UtilDto.extractFirstIdSegment(id);
+        String thingId = DtoMapperSimple.extractFirstIdSegment(id);
 
         getTimestampFromId(id);
         try {
@@ -126,7 +126,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public Thing getHistoricalLocationThing(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         ProviderSnapshot providerThing = validateAndGetProvider(provider);
@@ -146,7 +146,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -155,7 +155,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
         try {

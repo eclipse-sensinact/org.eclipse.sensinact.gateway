@@ -19,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,7 +43,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testCreateObservedProperty() throws Exception {
         // given
         String name = "testCreateObservedProperty";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         // when
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         // then
@@ -60,7 +60,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testDeleteObservedProperty() throws Exception {
         // given
         String name = "testDeleteObservedProperty";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String idObservedProperty = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
@@ -74,7 +74,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testDeleteDatastreamLinkObservedProperty() throws Exception {
         // given
         String name = "testDeleteDatastreamLinkObservedProperty";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String observedPropertyId = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
@@ -99,13 +99,14 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         getJsonResponseFromDelete(String.format("ObservedProperties(%s)", observedPropertyIdDatastream), 409);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyId", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyName", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyDescription", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyProperties", Map.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyName", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyDescription", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyDefinition", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyProperties", Map.class));
 
     }
+
     /**
      * test create observed property with missing required field
      */
@@ -114,7 +115,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // given
         String name = "testCreateObservedPropertyMissingField";
         // name
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(null, "test");
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(null, "test");
         getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 400);
 
         // definition
@@ -132,7 +133,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testCreateDatastreamLinkObservedProperty() throws Exception {
         // given
         String name = "testCreateDatastreamLinkObservedProperty";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String ObservedPropertyId = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
@@ -163,11 +164,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testUpdateObservedProperty() throws Exception {
         // given
         String name = "testUpdateObservedProperty";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
         String idObservedProperty = getIdFromJson(json);
-        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
+        ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
         json = getJsonResponseFromPut(ObservedPropertyUpdate,
                 String.format("ObservedProperties(%s)", idObservedProperty), 204);
         // then
@@ -184,7 +185,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testUpdateObservedPropertyLinkDatastream() throws Exception {
         // given
         String name = "testUpdateObservedPropertyLinkDatastream";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String ObservedPropertyId = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
@@ -206,13 +207,13 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         JsonNode observedPropertyNode = json.get("ObservedProperty");
         String idObservedProperty = getIdFromJson(observedPropertyNode);
         // when
-        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
+        ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
         json = getJsonResponseFromPut(ObservedPropertyUpdate,
                 String.format("ObservedProperties(%s)", idObservedProperty), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + "2", UtilDto.getResourceField(service, "observedPropertyName", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "observedPropertyName", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
     }
 
     /**
@@ -227,11 +228,11 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testUpdatePatchObservedProperty() throws Exception {
         // given
         String name = "testUpdateObservedProperty";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
         String idObservedProperty = getIdFromJson(json);
-        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
+        ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
         json = getJsonResponseFromPatch(ObservedPropertyUpdate,
                 String.format("ObservedProperties(%s)", idObservedProperty), 204);
         // then
@@ -248,7 +249,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
     public void testUpdatePatchObservedPropertyLinkDatastream() throws Exception {
         // given
         String name = "testUpdateObservedPropertyLinkDatastream";
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         JsonNode json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         String ObservedPropertyId = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
@@ -270,13 +271,13 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         JsonNode observedPropertyNode = json.get("ObservedProperty");
         String idObservedProperty = getIdFromJson(observedPropertyNode);
         // when
-        ExpandedObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
+        ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
         json = getJsonResponseFromPatch(ObservedPropertyUpdate,
                 String.format("ObservedProperties(%s)", idObservedProperty), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals("test", UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertEquals("test", DtoMapperSimple.getResourceField(service, "observedPropertyDefinition", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
 
     }
 }

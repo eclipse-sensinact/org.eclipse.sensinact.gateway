@@ -30,10 +30,10 @@ import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
@@ -70,9 +70,9 @@ public abstract class AbstractAccess {
     }
 
     protected List<ProviderSnapshot> getLocationThingsProvider(String id) {
-        return listProviders(parseFilter(EFilterContext.THINGS)).stream().map(UtilDto::getThingService)
+        return listProviders(parseFilter(EFilterContext.THINGS)).stream().map(DtoMapperSimple::getThingService)
                 .filter(Objects::nonNull)
-                .filter(s -> UtilDto.getResourceField(s, "locationIds", List.class).contains(id))
+                .filter(s -> DtoMapperSimple.getResourceField(s, "locationIds", List.class).contains(id))
                 .map(s -> s.getProvider()).toList();
     }
 
@@ -97,25 +97,25 @@ public abstract class AbstractAccess {
     }
 
     protected ResourceSnapshot getObservationResourceSnapshot(String id) {
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(UtilDto.extractFirstIdSegment(id));
-        ServiceSnapshot serviceSnapshot = UtilDto.getDatastreamService(providerSnapshot);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id));
+        ServiceSnapshot serviceSnapshot = DtoMapperSimple.getDatastreamService(providerSnapshot);
         ResourceSnapshot resourceSnapshot = serviceSnapshot.getResource("lastObservation");
         return resourceSnapshot;
     }
 
     protected String getThingIdFromDatastream(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot providerDatastream = validateAndGetProvider(provider);
-        ServiceSnapshot serviceDatastream = UtilDto.getDatastreamService(providerDatastream);
-        String thingId = UtilDto.getResourceField(serviceDatastream, "thingId", String.class);
+        ServiceSnapshot serviceDatastream = DtoMapperSimple.getDatastreamService(providerDatastream);
+        String thingId = DtoMapperSimple.getResourceField(serviceDatastream, "thingId", String.class);
         return thingId;
     }
 
     protected static List<ProviderSnapshot> getLinkProvidersFromThing(SensiNactSession session, String thingId,
             String resourceField) {
         ProviderSnapshot providerThing = validateAndGetProvider(session, thingId);
-        ServiceSnapshot serviceThing = UtilDto.getThingService(providerThing);
-        List<?> linkIds = UtilDto.getResourceField(serviceThing, resourceField, List.class);
+        ServiceSnapshot serviceThing = DtoMapperSimple.getThingService(providerThing);
+        List<?> linkIds = DtoMapperSimple.getResourceField(serviceThing, resourceField, List.class);
         List<ProviderSnapshot> providerLocations = linkIds.stream()
                 .map(linkId -> validateAndGetProvider(session, (String) linkId)).toList();
         return providerLocations;
@@ -124,8 +124,8 @@ public abstract class AbstractAccess {
     @SuppressWarnings("unchecked")
     protected static List<String> getLinkIdsFromThing(SensiNactSession session, String thingId, String resourceField) {
         ProviderSnapshot providerThing = validateAndGetProvider(session, thingId);
-        ServiceSnapshot serviceThing = UtilDto.getThingService(providerThing);
-        return UtilDto.getResourceField(serviceThing, resourceField, List.class);
+        ServiceSnapshot serviceThing = DtoMapperSimple.getThingService(providerThing);
+        return DtoMapperSimple.getResourceField(serviceThing, resourceField, List.class);
 
     }
 
@@ -136,8 +136,8 @@ public abstract class AbstractAccess {
 
     protected boolean isLinkProvidersFromThing(String thingId, String subLinkId, String resourceField) {
         ProviderSnapshot providerThing = validateAndGetProvider(thingId);
-        ServiceSnapshot serviceThing = UtilDto.getThingService(providerThing);
-        return UtilDto.getResourceField(serviceThing, resourceField, List.class).contains(subLinkId);
+        ServiceSnapshot serviceThing = DtoMapperSimple.getThingService(providerThing);
+        return DtoMapperSimple.getResourceField(serviceThing, resourceField, List.class).contains(subLinkId);
 
     }
 
@@ -245,12 +245,12 @@ public abstract class AbstractAccess {
      * @return
      */
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        String service = UtilDto.extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = UtilDto.extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = DtoMapperSimple.extractFirstIdSegment(id.substring(provider.length() + 1));
+        String resource = DtoMapperSimple.extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 

@@ -21,7 +21,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class DatastreamPathHandler extends AbstractPathHandler {
 
@@ -34,8 +34,8 @@ public class DatastreamPathHandler extends AbstractPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
-        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
 
         if (service == null) {
             return null; // not a historical location as it's not thing provider
@@ -61,12 +61,12 @@ public class DatastreamPathHandler extends AbstractPathHandler {
             return provider.getName();
 
         case "name":
-            return UtilDto.getResourceField(service, "friendlyName", String.class);
+            return DtoMapperSimple.getResourceField(service, "friendlyName", String.class);
 
         case "description":
-            return UtilDto.getResourceField(service, "description", String.class);
+            return DtoMapperSimple.getResourceField(service, "description", String.class);
         case "observedArea":
-            return UtilDto.getResourceField(service, "location", GeoJsonObject.class);
+            return DtoMapperSimple.getResourceField(service, "location", GeoJsonObject.class);
         default:
             throw new UnsupportedRuleException("Unexpected resource level field: " + path);
         }

@@ -27,8 +27,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ObservedPropertiesDelete;
@@ -42,7 +41,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedProperty(String id) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(datastreamId));
 
@@ -60,8 +59,8 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getObservedPropertyDatastream(String id, String id2) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
-        String datastreamId2 = UtilDto.extractFirstIdSegment(id2);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
+        String datastreamId2 = DtoMapperSimple.extractFirstIdSegment(id2);
 
         if (!datastreamId.equals(datastreamId2)) {
             throw new NotFoundException();
@@ -74,8 +73,8 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     @PaginationLimit(500)
     @Override
     public ResultList<Observation> getObservedPropertyDatastreamObservations(String id, String id2) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
-        String datastreamId2 = UtilDto.extractFirstIdSegment(id2);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
+        String datastreamId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!datastreamId.equals(datastreamId2)) {
             throw new NotFoundException();
         }
@@ -85,8 +84,8 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
-        String providerDatastream2 = UtilDto.extractFirstIdSegment(id2);
-        String providerDatastream = UtilDto.extractFirstIdSegment(id);
+        String providerDatastream2 = DtoMapperSimple.extractFirstIdSegment(id2);
+        String providerDatastream = DtoMapperSimple.extractFirstIdSegment(id);
 
         if (!providerDatastream.equals(providerDatastream2)) {
             throw new NotFoundException();
@@ -106,8 +105,8 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Thing getObservedPropertyDatastreamThing(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
-        String provider2 = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
+        String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
@@ -116,20 +115,20 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     }
 
     @Override
-    public Response updateObservedProperties(String id, ExpandedObservedProperty observedProperty) {
+    public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
         getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observedProperty);
 
         return Response.noContent().build();
     }
 
     @Override
-    public Response patchObservedProperties(String id, ExpandedObservedProperty observedProperty) {
+    public Response patchObservedProperties(String id, ObservedProperty observedProperty) {
         return updateObservedProperties(id, observedProperty);
     }
 
     @Override
     public Response deleteObservedProperty(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedObservedProperty.class);
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ObservedProperty.class);
 
         return Response.noContent().build();
     }

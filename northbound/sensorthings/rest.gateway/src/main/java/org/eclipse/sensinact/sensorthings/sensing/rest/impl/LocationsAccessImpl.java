@@ -29,7 +29,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.LocationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.LocationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
@@ -43,7 +43,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public Location getLocation(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         Location l = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(LOCATIONS), providerSnapshot);
@@ -77,7 +77,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public HistoricalLocation getLocationHistoricalLocation(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
                 uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
@@ -93,7 +93,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
         if (!id2.equals(id)) {
             throw new NotFoundException();
         }
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 providerSnapshot);
@@ -101,7 +101,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
 
     @Override
     public ResultList<Location> getLocationHistoricalLocationLocations(String id, String id2) {
-        String thingId = UtilDto.extractFirstIdSegment(id2);
+        String thingId = DtoMapperSimple.extractFirstIdSegment(id2);
         List<String> providerLocationIds = getLocationIdsFromThing(getSession(), thingId);
         return new ResultList<>(null, null,
                 providerLocationIds.stream().map(idLocation -> getLocation(idLocation)).toList());
@@ -131,7 +131,7 @@ public class LocationsAccessImpl extends AbstractAccess implements LocationsDele
         if (!isLocationInThing(id2, id)) {
             throw new BadRequestException();
         }
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
 
         return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(DATASTREAMS), provider);

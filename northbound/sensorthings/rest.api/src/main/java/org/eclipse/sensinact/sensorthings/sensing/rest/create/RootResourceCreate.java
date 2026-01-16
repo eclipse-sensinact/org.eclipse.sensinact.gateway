@@ -13,10 +13,10 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.create;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 
 import jakarta.ws.rs.POST;
@@ -62,7 +62,7 @@ public interface RootResourceCreate {
      */
     @POST
     @Path("/ObservedProperties")
-    public Response createObservedProperties(ExpandedObservedProperty observedProperty);
+    public Response createObservedProperties(ObservedProperty observedProperty);
 
     /**
      * create sensor
@@ -72,7 +72,7 @@ public interface RootResourceCreate {
      */
     @POST
     @Path("/Sensors")
-    public Response createSensors(ExpandedSensor sensor);
+    public Response createSensors(Sensor sensor);
 
     /**
      * create a thing

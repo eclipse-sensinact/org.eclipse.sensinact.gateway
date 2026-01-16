@@ -22,12 +22,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -89,7 +90,7 @@ public class ValueTest extends AbstractIntegrationTest {
         // Update the value
         final int newValue = value + random.nextInt(1024) + 1;
         Instant valueUpdateInstant = Instant.now();
-        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "lastObservation",
+        session.setResourceValue(providerDatastream, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
                 getObservation("test", newValue, getFeatureOfInterest("test"), valueUpdateInstant));
 
         observations = utils.queryJson(stream.observationsLink(), new TypeReference<ResultList<Observation>>() {
@@ -128,9 +129,10 @@ public class ValueTest extends AbstractIntegrationTest {
         final String unitName = "degree Celsius";
         final String unitSymbol = "°C";
         final String unitDefinition = "http://unitsofmeasure.org/ucum.html#para-30";
-        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "unitName", unitName);
-        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "unitSymbol", unitSymbol);
-        session.setResourceValue(providerDatastream, UtilDto.SERVICE_DATASTREAM, "unitDefinition", unitDefinition);
+        session.setResourceValue(providerDatastream, DtoMapperSimple.SERVICE_DATASTREAM, "unitName", unitName);
+        session.setResourceValue(providerDatastream, DtoMapperSimple.SERVICE_DATASTREAM, "unitSymbol", unitSymbol);
+        session.setResourceValue(providerDatastream, DtoMapperSimple.SERVICE_DATASTREAM, "unitDefinition",
+                unitDefinition);
 
         // Check in datastream
         ds = utils.queryJson(String.format("/Things(%s)/Datastreams(%s)", provider, providerDatastream),

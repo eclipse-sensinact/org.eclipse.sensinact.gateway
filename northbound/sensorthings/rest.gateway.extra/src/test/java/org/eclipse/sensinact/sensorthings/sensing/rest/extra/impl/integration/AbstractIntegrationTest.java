@@ -36,8 +36,8 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.junit.jupiter.api.AfterEach;
@@ -84,8 +84,8 @@ public class AbstractIntegrationTest {
     @Path("test")
     public static class TestTypeExfiltrator {
         public IDtoMemoryCache<FeatureOfInterest> foiCache;
-        public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
-        public IDtoMemoryCache<ExpandedSensor> sensorCache;
+        public IDtoMemoryCache<ObservedProperty> observedPropertyCache;
+        public IDtoMemoryCache<Sensor> sensorCache;
         public IAccessServiceUseCase serviceUseCase;
         public SensiNactSession session;
 
@@ -105,9 +105,8 @@ public class AbstractIntegrationTest {
             @SuppressWarnings("rawtypes")
             ContextResolver<IDtoMemoryCache> resolverCache = providers.getContextResolver(IDtoMemoryCache.class,
                     MediaType.WILDCARD_TYPE);
-            sensorCache = resolverCache != null ? resolverCache.getContext(ExpandedSensor.class) : null;
-            observedPropertyCache = resolverCache != null ? resolverCache.getContext(ExpandedObservedProperty.class)
-                    : null;
+            sensorCache = resolverCache != null ? resolverCache.getContext(Sensor.class) : null;
+            observedPropertyCache = resolverCache != null ? resolverCache.getContext(ObservedProperty.class) : null;
             foiCache = resolverCache != null ? resolverCache.getContext(FeatureOfInterest.class) : null;
 
         }
@@ -208,8 +207,8 @@ public class AbstractIntegrationTest {
     public IAccessServiceUseCase serviceUseCase;
 
     public IDtoMemoryCache<FeatureOfInterest> foiCache;
-    public IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
-    public IDtoMemoryCache<ExpandedSensor> sensorCache;
+    public IDtoMemoryCache<ObservedProperty> observedPropertyCache;
+    public IDtoMemoryCache<Sensor> sensorCache;
     public SensiNactSession session;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {

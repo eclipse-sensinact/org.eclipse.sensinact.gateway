@@ -21,13 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
+
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -79,11 +80,6 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // name
         ExpandedDataStream dtoDatastream = DtoFactory.getDatastream(null, "test", DtoFactory.getUnitOfMeasure("test"),
                 "obsType", refId, DtoFactory.getSensor("test"), DtoFactory.getObservedProperty("test"), null);
-        json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 400);
-
-        // description
-        dtoDatastream = DtoFactory.getDatastream("test", null, DtoFactory.getUnitOfMeasure("test"), "obsType", refId,
-                DtoFactory.getSensor("test"), DtoFactory.getObservedProperty("test"), null);
         json = getJsonResponseFromPost(dtoDatastream, "Datastreams", 400);
 
         // uom
@@ -214,8 +210,8 @@ public class DatastreamTest extends AbstractIntegrationTest {
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
 
-        assertEquals(name + " Update", UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertEquals(name + " Update", DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
 
     }
 
@@ -251,8 +247,8 @@ public class DatastreamTest extends AbstractIntegrationTest {
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
 
-        assertEquals("Update", UtilDto.getResourceField(serviceAdmin, "description", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertEquals("Update", DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
 
     }
 
@@ -283,12 +279,12 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         UtilsAssert.assertDatastream(dtoDatastream, json);
 
-        ExpandedSensor sensor = DtoFactory.getSensor(name);
+        Sensor sensor = DtoFactory.getSensor(name);
         json = getJsonResponseFromPost(sensor, "Sensors", 201);
         UtilsAssert.assertSensor(sensor, json);
 
         String idSensor = getIdFromJson(json);
-        ExpandedObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
+        ObservedProperty ObservedProperty = DtoFactory.getObservedProperty(name);
         json = getJsonResponseFromPost(ObservedProperty, "ObservedProperties", 201);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
         String idObservedProperty = getIdFromJson(json);
@@ -300,21 +296,21 @@ public class DatastreamTest extends AbstractIntegrationTest {
                 String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idThingUpdate, UtilDto.getResourceField(service, "thingId", String.class));
+        assertEquals(idThingUpdate, DtoMapperSimple.getResourceField(service, "thingId", String.class));
 
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
                 204);
         // then
         service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idSensor, UtilDto.getResourceField(service, "sensorId", String.class));
+        assertEquals(idSensor, DtoMapperSimple.getResourceField(service, "sensorId", String.class));
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
                 String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
         // then
         service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(idObservedProperty, UtilDto.getResourceField(service, "observedPropertyId", String.class));
+        assertEquals(idObservedProperty, DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class));
 
     }
 
@@ -353,7 +349,8 @@ public class DatastreamTest extends AbstractIntegrationTest {
         });
         ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
         @SuppressWarnings("unchecked")
-        List<String> datastreamIds = (List<String>) UtilDto.getResourceField(service, "datastreamIds", Object.class);
+        List<String> datastreamIds = (List<String>) DtoMapperSimple.getResourceField(service, "datastreamIds",
+                Object.class);
         assertFalse(datastreamIds.contains(idDatastream));
     }
 
@@ -389,9 +386,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // then
 
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertNotNull(UtilDto.getResourceField(service, "sensorId", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "sensorName", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "sensorMetadata", Object.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorId", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorName", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorMetadata", Object.class));
 
     }
 
@@ -427,9 +424,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // then
 
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyId", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyName", String.class));
-        assertNotNull(UtilDto.getResourceField(service, "observedPropertyDefinition", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyName", String.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyDefinition", String.class));
 
     }
 

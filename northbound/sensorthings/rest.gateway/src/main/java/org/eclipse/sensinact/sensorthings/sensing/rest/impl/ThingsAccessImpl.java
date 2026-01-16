@@ -38,7 +38,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
@@ -68,8 +68,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Datastream getThingDatastream(String id, String id2) {
-        String providerThingId = UtilDto.extractFirstIdSegment(id);
-        String providerDatastreamId = UtilDto.extractFirstIdSegment(id2);
+        String providerThingId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!isDatastreamInThing(providerThingId, providerDatastreamId)) {
             throw new NotFoundException();
         }
@@ -86,8 +86,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
     @PaginationLimit(500)
     @Override
     public ResultList<Observation> getThingDatastreamObservations(String id, String id2) {
-        String providerThingId = UtilDto.extractFirstIdSegment(id);
-        String providerDatastreamId = UtilDto.extractFirstIdSegment(id2);
+        String providerThingId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!isDatastreamInThing(providerThingId, providerDatastreamId)) {
             throw new NotFoundException();
         }
@@ -98,8 +98,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ObservedProperty getThingDatastreamObservedProperty(String id, String id2) {
-        String providerThingId = UtilDto.extractFirstIdSegment(id);
-        String providerDatastreamId = UtilDto.extractFirstIdSegment(id2);
+        String providerThingId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!isDatastreamInThing(providerThingId, providerDatastreamId)) {
             throw new NotFoundException();
         }
@@ -112,8 +112,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Sensor getThingDatastreamSensor(String id, String id2) {
-        String providerThingId = UtilDto.extractFirstIdSegment(id);
-        String providerDatastreamId = UtilDto.extractFirstIdSegment(id2);
+        String providerThingId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!isDatastreamInThing(providerThingId, providerDatastreamId)) {
             throw new NotFoundException();
         }
@@ -126,8 +126,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Thing getThingDatastreamThing(String id, String id2) {
-        String providerThingId = UtilDto.extractFirstIdSegment(id);
-        String providerDatastreamId = UtilDto.extractFirstIdSegment(id2);
+        String providerThingId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!isDatastreamInThing(providerThingId, providerDatastreamId)) {
             throw new NotFoundException();
         }
@@ -137,7 +137,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ResultList<HistoricalLocation> getThingHistoricalLocations(String id) {
-        String providerThingId = UtilDto.extractFirstIdSegment(id);
+        String providerThingId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot providerThing = validateAndGetProvider(providerThingId);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
@@ -155,7 +155,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public HistoricalLocation getThingHistoricalLocation(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         ProviderSnapshot providerThing = validateAndGetProvider(provider);
         DtoMapper.getTimestampFromId(id2);
 
@@ -173,7 +173,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Thing getThingHistoricalLocationsThing(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         // check if the location exists
         validateAndGetProvider(provider);
         return getThing(id);
@@ -181,7 +181,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ResultList<Location> getThingHistoricalLocationLocations(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
 
         DtoMapper.getTimestampFromId(id2);
 
@@ -193,7 +193,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ResultList<Location> getThingLocations(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         List<ProviderSnapshot> providersLocation = getLocationProvidersFromThing(provider);
         ResultList<Location> list = new ResultList<>(null, null,
                 providersLocation.stream().map(p -> DtoMapper.toLocation(getSession(), application, getMapper(),
@@ -204,7 +204,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Location getThingLocation(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!isLocationInThing(id, id2)) {
             throw new NotFoundException();
         }
@@ -220,8 +220,8 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ResultList<Thing> getThingLocationThings(String id, String id2) {
-        String providerThindId = UtilDto.extractFirstIdSegment(id);
-        String providerLocationId = UtilDto.extractFirstIdSegment(id2);
+        String providerThindId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerLocationId = DtoMapperSimple.extractFirstIdSegment(id2);
 
         if (!isLocationInThing(providerThindId, providerLocationId)) {
             throw new NotFoundException();
@@ -233,7 +233,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);

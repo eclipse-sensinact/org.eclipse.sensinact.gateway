@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
@@ -34,21 +33,23 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.GeometryCollection;
 import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
 
@@ -56,7 +57,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Dto to Model record mapper for updating EMF
@@ -84,118 +84,8 @@ public class DtoToModelMapper {
 
     }
 
-    public static void checkRequireField(Id dto) {
-        if (dto instanceof ExpandedThing) {
-            checkRequireField((ExpandedThing) dto);
-        } else if (dto instanceof ExpandedObservation) {
-            checkRequireField((ExpandedObservation) dto);
-        } else if (dto instanceof ExpandedLocation) {
-            checkRequireField((ExpandedLocation) dto);
-        } else if (dto instanceof ExpandedObservedProperty) {
-            checkRequireField((ExpandedObservedProperty) dto);
-        } else if (dto instanceof ExpandedSensor) {
-            checkRequireField((ExpandedSensor) dto);
-        } else if (dto instanceof ExpandedDataStream) {
-            checkRequireField((ExpandedDataStream) dto);
-        }
-    }
-
-    public static void checkRequireField(ExpandedSensor dto) {
-        if (dto == null) {
-            throw new BadRequestException("sensor not found in  Payload");
-        }
-        if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Payload");
-        }
-        if (dto.encodingType() == null) {
-            throw new BadRequestException("encodingType not found in  Payload");
-        }
-        if (dto.metadata() == null) {
-            throw new BadRequestException("metadata not found in  Payload");
-        }
-
-    }
-
-    public static void checkRequireField(ExpandedObservedProperty dto) {
-        if (dto == null) {
-            throw new BadRequestException("ObservedProperty not found in  Payload");
-        }
-        if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Payload");
-        }
-        if (dto.definition() == null) {
-            throw new BadRequestException("definition not found in  Payload");
-        }
-
-    }
-
-    public static void checkRequireField(ExpandedObservation dto) {
-        if (dto.result() == null) {
-            throw new BadRequestException("result not found in  Payload");
-        }
-        if (dto.phenomenonTime() == null) {
-            throw new BadRequestException("phenomenonTime not found in  Payload");
-        }
-
-    }
-
-    public static void checkRequireField(ExpandedThing dto) {
-        if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Payload");
-        }
-
-    }
-
-    public static void checkRequireField(ExpandedLocation dto) {
-        if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Payload");
-        }
-        if (dto.encodingType() == null) {
-            throw new BadRequestException("encodingType not found in  Payload");
-        }
-        if (dto.location() == null) {
-            throw new BadRequestException("location not found in  Payload");
-        }
-
-    }
-
-    public static void checkRequireField(FeatureOfInterest dto) {
-        if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Payload");
-        }
-        if (dto.encodingType() == null) {
-            throw new BadRequestException("encodingType not found in  Payload");
-        }
-        if (dto.feature() == null) {
-            throw new BadRequestException("feature not found in  Payload");
-        }
-
-    }
-
-    public static void checkRequireField(ExpandedDataStream datastream) {
-        if (datastream.name() == null) {
-            throw new BadRequestException("name not found in  Payload");
-        }
-        if (datastream.description() == null) {
-            throw new BadRequestException("description not found in  Payload");
-        }
-        if (datastream.unitOfMeasurement() == null) {
-            throw new BadRequestException("unit Of Measure not found in  Payload");
-        }
-        if (datastream.observationType() == null) {
-            throw new BadRequestException("observationType not found in  Payload");
-        }
-
-    }
-
-    public static void checkRequireLink(Object... links) {
-        for (int i = 0; i < links.length; i++) {
-            Object link = links[i];
-            if (link == null) {
-                throw new BadRequestException("linked entity is required");
-            }
-        }
-
+    public static String getNewId(Id model) {
+        return sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString().substring(0, 8));
     }
 
     public static Optional<? extends ResourceSnapshot> getProviderField(ServiceSnapshot service, String resource) {
@@ -257,22 +147,22 @@ public class DtoToModelMapper {
                 location.encodingType(), location.location());
     }
 
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds, ExpandedSensor sensor,
-            ExpandedObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
+    public static SensorThingsUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds, Sensor sensor,
+            ObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
             ExpandedObservation lastObservationReceived, FeatureOfInterest featureOfInterest) {
         return toDatastreamUpdate(providerId, null, ds, sensor, observedProperty, unit, lastObservation,
                 lastObservationReceived, featureOfInterest);
     }
 
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, ExpandedDataStream ds,
-            ExpandedSensor sensor, ExpandedObservedProperty observedProperty, UnitOfMeasurement unit,
+            Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, FeatureOfInterest featureOfInterest) {
         return toDatastreamUpdate(providerId, thingId, ds, sensor, observedProperty, unit, lastObservation,
                 lastObservation, featureOfInterest);
     }
 
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, ExpandedDataStream ds,
-            ExpandedSensor sensor, ExpandedObservedProperty observedProperty, UnitOfMeasurement unit,
+            Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
             FeatureOfInterest featureOfInterest) {
 
@@ -335,7 +225,7 @@ public class DtoToModelMapper {
 
             obs = new ExpandedObservation(null, observationId, phenomenonTime, resultTime, result, resultQuality,
                     validTime, parameters, properties, null, null, null, featureOfInterest);
-            DtoToModelMapper.checkRequireField(obs);
+            DtoMapperSimple.checkRequireField(obs);
         }
         // --- Build DatastreamUpdate ---
         DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description, timestamp,
@@ -355,11 +245,11 @@ public class DtoToModelMapper {
     }
 
     public static boolean isRecordOnlyField(Object record, String idFieldName) {
-        return UtilDto.isRecordOnlyField(record, idFieldName);
+        return DtoMapperSimple.isRecordOnlyField(record, idFieldName);
     }
 
     public static Object getRecordField(Object record, String fieldName) {
-        return UtilDto.getRecordField(record, fieldName);
+        return DtoMapperSimple.getRecordField(record, fieldName);
     }
 
     private static Feature toFeature(FeatureCollection fc) {
@@ -375,7 +265,7 @@ public class DtoToModelMapper {
         };
     }
 
-    private static Feature toFeature(ExpandedLocation location) {
+    private static Feature toFeature(Location location) {
         Feature f;
 
         if (location.location() != null) {
@@ -404,7 +294,7 @@ public class DtoToModelMapper {
         return f;
     }
 
-    private static GeoJsonObject aggregate(List<ExpandedLocation> locations) {
+    private static GeoJsonObject aggregate(List<Location> locations) {
         return switch (locations.size()) {
         case 0:
             yield null;
@@ -469,15 +359,15 @@ public class DtoToModelMapper {
         return aggregate(existingLocationIds.stream()
                 .map(idLocation -> UtilDto.getProviderSnapshot(request.session(), idLocation))
                 .filter(Optional::isPresent).map(Optional::get)
-                .map(p -> toLocation(request.session(), request.mapper(), request.uriInfo(), p)).toList());
+                .map(p -> DtoMapperSimple.toLocation(request.mapper(), p, null)).toList());
     }
 
     private static String getLocationId(ExpandedLocation l) {
-        return sanitizeId(l.id() != null ? (String) l.id() : UUID.randomUUID().toString());
+        return DtoToModelMapper.getNewId(l);
     }
 
     private static String getDatastreamid(ExpandedDataStream l) {
-        return sanitizeId(l.id() != null ? (String) l.id() : UUID.randomUUID().toString());
+        return DtoToModelMapper.getNewId(l);
     }
 
     public static List<SensorThingsUpdate> toLocationUpdates(ExpandedLocation location, String id) {
@@ -505,42 +395,6 @@ public class DtoToModelMapper {
                     .filter(p -> p != null).findFirst().orElse(null);
         }
         return null;
-    }
-
-    private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
-            boolean allowNull) {
-        final Optional<? extends ResourceSnapshot> locationResource = getProviderField(
-                UtilDto.getLocationService(provider), LOCATION);
-
-        final Instant time;
-        final Object rawValue;
-        if (locationResource.isEmpty()) {
-            time = Instant.EPOCH;
-            rawValue = null;
-        } else {
-            final TimedValue<?> timedValue = locationResource.get().getValue();
-            if (timedValue == null) {
-                time = Instant.EPOCH;
-                rawValue = null;
-            } else {
-                time = timedValue.getTimestamp() != null ? timedValue.getTimestamp() : Instant.EPOCH;
-                rawValue = timedValue.getValue();
-            }
-        }
-        return getLocation(mapper, rawValue, time, allowNull);
-    }
-
-    public static ExpandedThing toExpandedThing(ExtraUseCaseRequest<ExpandedLocation> request,
-            ExpandedLocation location, ProviderSnapshot provider) {
-
-        String id = provider.getName();
-        // get current location
-        ExpandedLocation readLocation = toLocation(request.session(), request.mapper(), request.uriInfo(), provider);
-        List<ExpandedLocation> locations = readLocation.id().equals(location.id()) ? List.of(location)
-                : List.of(readLocation, location);
-        ExpandedThing thing = new ExpandedThing(null, id, null, null, null, null, null, null, null, locations, null);
-
-        return thing;
     }
 
     public static TimedValue<GeoJsonObject> getLocation(ObjectMapper mapper, Object rawValue, Instant time,
@@ -571,31 +425,6 @@ public class DtoToModelMapper {
         }
 
         return new DefaultTimedValue<>(parsedLocation, time);
-    }
-
-    public static ExpandedLocation toLocation(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
-            ProviderSnapshot provider) {
-        final String providerName = provider.getName();
-        final TimedValue<GeoJsonObject> rcLocation = DtoToModelMapper.getLocation(provider, mapper, false);
-        final Instant time = rcLocation.getTimestamp();
-        final GeoJsonObject object = rcLocation.getValue();
-
-        String id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
-
-        String name = UtilDto.getResourceField(UtilDto.getAdminService(provider), DtoToModelMapper.FRIENDLY_NAME,
-                String.class);
-
-        String description = UtilDto.getResourceField(UtilDto.getAdminService(provider), DtoToModelMapper.DESCRIPTION,
-                String.class);
-
-        String selfLink = uriInfo.getBaseUriBuilder().path(DtoToModelMapper.VERSION).path("Locations({id})")
-                .resolveTemplate("id", id).build().toString();
-        String thingsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Things").build().toString();
-        String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("HistoricalLocations").build()
-                .toString();
-
-        return new ExpandedLocation(selfLink, id, name, description, DtoToModelMapper.ENCODING_TYPE_VND_GEO_JSON,
-                object, thingsLink, historicalLocationsLink, null);
     }
 
     /**

@@ -19,7 +19,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class AbstractPathHandler {
 
@@ -32,23 +32,23 @@ public class AbstractPathHandler {
     }
 
     public ProviderSnapshot getThingProviderFromDatastream(ProviderSnapshot datastremaProvider) {
-        ServiceSnapshot service = UtilDto.getDatastreamService(datastremaProvider);
-        String thingId = UtilDto.getResourceField(service, "thingId", String.class);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(datastremaProvider);
+        String thingId = DtoMapperSimple.getResourceField(service, "thingId", String.class);
 
         return session.providerSnapshot(thingId, EnumSet.noneOf(SnapshotOption.class));
     }
 
     public List<ProviderSnapshot> getDatastreamsProviderFromThing(ProviderSnapshot thingProvider) {
-        ServiceSnapshot service = UtilDto.getThingService(thingProvider);
-        List<?> datastreamIds = UtilDto.getResourceField(service, "datastreamIds", List.class);
+        ServiceSnapshot service = DtoMapperSimple.getThingService(thingProvider);
+        List<?> datastreamIds = DtoMapperSimple.getResourceField(service, "datastreamIds", List.class);
 
         return datastreamIds.stream()
                 .map(id -> session.providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class))).toList();
     }
 
     public List<ProviderSnapshot> getLocationsProviderFromThing(ProviderSnapshot thingProvider) {
-        ServiceSnapshot service = UtilDto.getThingService(thingProvider);
-        List<?> locationIds = UtilDto.getResourceField(service, "locationIds", List.class);
+        ServiceSnapshot service = DtoMapperSimple.getThingService(thingProvider);
+        List<?> locationIds = DtoMapperSimple.getResourceField(service, "locationIds", List.class);
         return locationIds.stream()
                 .map(id -> session.providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class))).toList();
     }
