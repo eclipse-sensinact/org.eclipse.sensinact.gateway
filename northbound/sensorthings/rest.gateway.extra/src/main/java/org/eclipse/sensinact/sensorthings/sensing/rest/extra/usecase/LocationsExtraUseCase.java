@@ -34,7 +34,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -175,7 +175,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
 
                         List<String> newLocationsList = timedValue.getValue().stream()
                                 .filter(id -> !id.equals(locationId)).toList();
-                        return twin.getResource(es.getKey(), UtilDto.SERVICE_THING, "locationIds")
+                        return twin.getResource(es.getKey(), DtoMapperSimple.SERVICE_THING, "locationIds")
                                 .setValue(newLocationsList);
                     }).toList();
 
@@ -207,8 +207,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                         : List.of(twin.getProvider(thingId));
 
                 List<Promise<Map.Entry<String, TimedValue<List<String>>>>> promises = providers.stream()
-                        .map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds").getMultiValue(String.class)
-                                .map(tv -> Map.entry(p.getName(), tv)))
+                        .map(p -> p.getResource(DtoMapperSimple.SERVICE_THING, "locationIds")
+                                .getMultiValue(String.class).map(tv -> Map.entry(p.getName(), tv)))
                         .toList();
 
                 return pf.all(promises)

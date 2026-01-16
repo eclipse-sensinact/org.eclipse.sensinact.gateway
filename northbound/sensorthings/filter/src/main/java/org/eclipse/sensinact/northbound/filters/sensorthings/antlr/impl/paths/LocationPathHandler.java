@@ -24,7 +24,7 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class LocationPathHandler extends AbstractPathHandler {
 
@@ -38,8 +38,8 @@ public class LocationPathHandler extends AbstractPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = UtilDto.getLocationService(provider);
-        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getLocationService(provider);
+        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
 
         if (service == null) {
             return null;
@@ -51,18 +51,18 @@ public class LocationPathHandler extends AbstractPathHandler {
 
                 return provider.getName();
             case "name":
-                return UtilDto.getResourceField(serviceAdmin, "name", String.class);
+                return DtoMapperSimple.getResourceField(serviceAdmin, "name", String.class);
 
             case "description":
-                return UtilDto.getResourceField(serviceAdmin, "description", String.class);
+                return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
 
             case "location":
-                return UtilDto.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+                return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
             case "encodingType":
-                return UtilDto.getResourceField(service, "encodingType", String.class);
+                return DtoMapperSimple.getResourceField(service, "encodingType", String.class);
 
             case "properties":
-                return UtilDto.getResourceField(service, "properties", Map.class);
+                return DtoMapperSimple.getResourceField(service, "properties", Map.class);
 
             default:
                 throw new UnsupportedRuleException("Unexpected resource level field: " + path);
@@ -78,17 +78,17 @@ public class LocationPathHandler extends AbstractPathHandler {
     }
 
     private Object subThings(final String path) {
-        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream().map(UtilDto::getThingService)
-                .filter(Objects::nonNull)
-                .filter(s -> UtilDto.getResourceField(s, "locationIds", List.class).contains(provider.getName()))
+        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream()
+                .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
+                        .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
         return new AnyMatch(thingProviders.stream().map(p -> new ThingPathHandler(p, session).handle(path)).toList());
     }
 
     private Object subHistoricalLocations(final String path) {
-        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream().map(UtilDto::getThingService)
-                .filter(Objects::nonNull)
-                .filter(s -> UtilDto.getResourceField(s, "locationIds", List.class).contains(provider.getName()))
+        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream()
+                .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
+                        .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
         return new AnyMatch(
                 thingProviders.stream().map(p -> new HistoricalLocationPathHandler(p, session).handle(path)).toList());

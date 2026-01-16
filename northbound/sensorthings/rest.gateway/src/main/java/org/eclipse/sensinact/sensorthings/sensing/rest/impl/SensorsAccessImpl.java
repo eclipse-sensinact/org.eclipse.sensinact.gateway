@@ -23,8 +23,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.SensorsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.SensorsDelete;
@@ -37,7 +36,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Sensor getSensor(String id) {
-        String providerId = UtilDto.extractFirstIdSegment(id);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.SENSORS), validateAndGetProvider(providerId));
     }
@@ -50,8 +49,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Datastream getSensorDatastream(String id, String id2) {
-        String providerId = UtilDto.extractFirstIdSegment(id);
-        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
 
         if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
@@ -64,8 +63,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     @PaginationLimit(500)
     @Override
     public ResultList<Observation> getSensorDatastreamObservations(String id, String id2) {
-        String providerId = UtilDto.extractFirstIdSegment(id);
-        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
         }
@@ -75,8 +74,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public ObservedProperty getSensorDatastreamObservedProperty(String id, String id2) {
-        String providerId = UtilDto.extractFirstIdSegment(id);
-        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
         }
@@ -93,8 +92,8 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Sensor getSensorDatastreamSensor(String id, String id2) {
-        String providerId = UtilDto.extractFirstIdSegment(id);
-        String providerId2 = UtilDto.extractFirstIdSegment(id2);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!providerId.equals(providerId2)) {
             throw new NotFoundException();
         }
@@ -116,19 +115,19 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     }
 
     @Override
-    public Response updateSensor(String id, ExpandedSensor sensor) {
+    public Response updateSensor(String id, Sensor sensor) {
         getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, sensor);
         return Response.noContent().build();
     }
 
     @Override
-    public Response patchSensor(String id, ExpandedSensor sensor) {
+    public Response patchSensor(String id, Sensor sensor) {
         return updateSensor(id, sensor);
     }
 
     @Override
     public Response deleteSensor(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedSensor.class);
+        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, Sensor.class);
 
         return Response.noContent().build();
     }

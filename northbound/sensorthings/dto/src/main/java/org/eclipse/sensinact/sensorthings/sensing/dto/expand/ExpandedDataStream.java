@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.sensorthings.sensing.dto.NameDescription;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 
@@ -40,7 +42,7 @@ public record ExpandedDataStream(String selfLink, Object id, String name, String
         @JsonProperty("Sensor@iot.navigationLink") String sensorLink,
         @JsonProperty("Thing@iot.navigationLink") String thingLink,
         @JsonProperty("Observations") List<ExpandedObservation> observations,
-        @JsonProperty("ObservedProperty") ExpandedObservedProperty observedProperty,
-        @JsonProperty("Sensor") ExpandedSensor sensor, @JsonProperty("Observations@iot.nextLink") String obsLink,
-        @JsonProperty("Thing") RefId thing) implements NameDescription {
+        @JsonProperty("ObservedProperty") ObservedProperty observedProperty, @JsonProperty("Sensor") Sensor sensor,
+        @JsonProperty("Observations@iot.nextLink") String obsLink, @JsonProperty("Thing") RefId thing)
+        implements NameDescription {
 }

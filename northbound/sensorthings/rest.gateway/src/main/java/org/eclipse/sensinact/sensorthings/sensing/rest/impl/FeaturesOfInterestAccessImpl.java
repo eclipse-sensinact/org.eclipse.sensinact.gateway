@@ -26,8 +26,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.FeaturesOfInterestAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.FeaturesOfInterestDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
@@ -46,7 +46,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
         FeatureOfInterest foi;
@@ -65,7 +65,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
     // No history as it is *live* observation data not a data stream
     @Override
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
 
         return getLiveObservations(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.OBSERVATIONS), validateAndGetProvider(provider));
@@ -74,7 +74,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
     static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
-        ServiceSnapshot datastreamService = UtilDto.getDatastreamService(provider);
+        ServiceSnapshot datastreamService = DtoMapperSimple.getDatastreamService(provider);
 
         return new ResultList<>(null, null, DtoMapper.toObservation(userSession, application, mapper, uriInfo,
                 expansions, filter, datastreamService.getResource("lastObservation")).map(List::of).orElse(List.of()));
@@ -83,14 +83,14 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
 
     @Override
     public Observation getFeatureOfInterestObservation(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
-        String provider2 = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
+        String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
-        ServiceSnapshot service = UtilDto.getDatastreamService(providerSnapshot);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
         Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.FEATURES_OF_INTEREST),
                 service.getResource("lastObservation"));
@@ -104,8 +104,8 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getFeatureOfInterestObservationDatastream(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
-        String provider2 = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
+        String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
             throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
         }

@@ -20,11 +20,9 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
-
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.ext.Providers;
 
@@ -45,7 +43,7 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
 
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
         if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
-            DtoToModelMapper.checkRequireField(request.model());
+            DtoMapperSimple.checkRequireField(request.model());
         }
     }
 
@@ -58,22 +56,22 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
 
     @SuppressWarnings("unchecked")
     protected List<String> getDatastreamIds(ServiceSnapshot serviceThing) {
-        return UtilDto.getResourceField(serviceThing, "datastreamIds", List.class);
+        return DtoMapperSimple.getResourceField(serviceThing, "datastreamIds", List.class);
 
     }
 
     protected List<String> getLocationIds(ProviderSnapshot provider) {
-        return getLocationIds(UtilDto.getThingService(provider));
+        return getLocationIds(DtoMapperSimple.getThingService(provider));
 
     }
 
     protected List<String> getDatastreamIds(ProviderSnapshot provider) {
-        return getDatastreamIds(UtilDto.getThingService(provider));
+        return getDatastreamIds(DtoMapperSimple.getThingService(provider));
     }
 
     @SuppressWarnings("unchecked")
     protected List<String> getLocationIds(ServiceSnapshot serviceThing) {
-        return UtilDto.getResourceField(serviceThing, "locationIds", List.class);
+        return DtoMapperSimple.getResourceField(serviceThing, "locationIds", List.class);
 
     }
 }

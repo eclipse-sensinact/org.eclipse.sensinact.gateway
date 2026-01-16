@@ -26,7 +26,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -267,7 +267,8 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 String.format("Observations(%s)/FeatureOfInterest/$ref", idObservation), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
+                ExpandedObservation.class);
         assertEquals(idFoiUpdate, obs.featureOfInterest().id());
 
     }
@@ -297,6 +298,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         assertEquals(name + "Update", foiCache.getDto(idFoi).name());
 
     }
+
     /**
      * Tests that <code>DELETE</code> can be used to update a FeatureOfInterest
      */

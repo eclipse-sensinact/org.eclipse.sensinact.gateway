@@ -23,7 +23,7 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class ThingPathHandler extends AbstractPathHandler {
 
@@ -37,8 +37,8 @@ public class ThingPathHandler extends AbstractPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = UtilDto.getThingService(provider);
-        ServiceSnapshot serviceAdmin = UtilDto.getAdminService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getThingService(provider);
+        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
 
         if (service == null) {
             return null;
@@ -50,16 +50,16 @@ public class ThingPathHandler extends AbstractPathHandler {
 
                 return provider.getName();
             case "name":
-                return UtilDto.getResourceField(serviceAdmin, "friendlyName", String.class);
+                return DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class);
 
             case "description":
-                return UtilDto.getResourceField(serviceAdmin, "description", String.class);
+                return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
 
             case "properties":
-                return UtilDto.getResourceField(service, "properties", Map.class);
+                return DtoMapperSimple.getResourceField(service, "properties", Map.class);
 
             case "location":
-                return UtilDto.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+                return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
 
             default:
                 throw new UnsupportedRuleException("Unexpected resource level field: " + path);
@@ -67,7 +67,7 @@ public class ThingPathHandler extends AbstractPathHandler {
 
         } else {
             if (parts[0].equalsIgnoreCase("Locations") && parts[1].equalsIgnoreCase("location")) {
-                return UtilDto.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+                return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
             } else {
                 final Function<String, Object> handler = subPartHandlers.get(parts[0]);
                 if (handler == null) {

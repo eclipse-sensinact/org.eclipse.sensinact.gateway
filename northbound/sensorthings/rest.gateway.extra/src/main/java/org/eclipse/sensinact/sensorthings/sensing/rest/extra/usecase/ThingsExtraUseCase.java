@@ -26,7 +26,7 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -106,7 +106,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedThing> request) {
         // get resource list of datastreamId
         ResourceCommand<TimedValue<List<String>>> listDatastreamIds = new ResourceCommand<TimedValue<List<String>>>(
-                request.id(), UtilDto.SERVICE_THING, "datastreamIds") {
+                request.id(), DtoMapperSimple.SERVICE_THING, "datastreamIds") {
 
             @Override
             protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
@@ -155,7 +155,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
      */
     public AbstractSensinactCommand<?> deleteThingLocationsRef(String idThing, String idLocation) {
         ResourceCommand<TimedValue<List<String>>> listLocationIds = new ResourceCommand<TimedValue<List<String>>>(
-                idThing, UtilDto.SERVICE_THING, "locationIds") {
+                idThing, DtoMapperSimple.SERVICE_THING, "locationIds") {
 
             @Override
             protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
@@ -175,7 +175,8 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
                                 ? locationIds.stream().filter(id -> !id.equals(idLocation)).toList()
                                 : List.of();
 
-                        SensinactResource resource = twin.getResource(idThing, UtilDto.SERVICE_THING, "locationIds");
+                        SensinactResource resource = twin.getResource(idThing, DtoMapperSimple.SERVICE_THING,
+                                "locationIds");
                         return resource.setValue(newLocationIds);
                     }
                     return pf.resolved(null);

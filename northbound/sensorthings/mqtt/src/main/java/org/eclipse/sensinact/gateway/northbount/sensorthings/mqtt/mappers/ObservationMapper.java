@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,14 +34,15 @@ public class ObservationMapper extends ObservationsMapper {
         // TODO What do we do about the timestamp?
         String[] segments = id.split("~");
 
-        if (segments.length != 3) {
+        if (segments.length >= 2) {
             throw new IllegalArgumentException("The Observation id " + id + " is not valid");
         }
         this.provider = segments[0];
-        this.service = segments[1];
-        this.resource = segments[2];
+        this.service = DtoMapperSimple.SERVICE_DATASTREAM;
+        this.resource = segments[1];
     }
 
+    @Override
     public Promise<Stream<Observation>> toPayload(ResourceNotification notification) {
         if (provider.equals(notification.provider()) && service.equals(notification.service())
                 && resource.equals(notification.resource())) {

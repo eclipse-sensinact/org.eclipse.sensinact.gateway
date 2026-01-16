@@ -39,7 +39,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.IdSelf;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensinactSensorthingsApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -162,7 +162,7 @@ public class AbstractIntegrationTest {
     }
 
     protected FeatureOfInterest getFeatureOfInterest(String foiRefId) {
-        return new FeatureOfInterest(null, foiRefId, "test", null, null, null, null);
+        return new FeatureOfInterest(null, foiRefId, "test", null, "test", new Point(0, 0), null);
     }
 
     protected void createDatastream(String provider, String thingId, int value) {
@@ -170,19 +170,22 @@ public class AbstractIntegrationTest {
     }
 
     protected void createDatastream(String provider, String thingId, Object value, Instant valueInstant) {
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "thingId", thingId, valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "id", provider, valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "name", "test", valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "sensorId", "test1", valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "sensorName", "test", valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "observedPropertyId", "test2", valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "observedPropertyName", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "thingId", thingId, valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "id", provider, valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "name", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "sensorId", "test1", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "sensorName", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "sensorEncodingType", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId", "test2", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyName", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyDefinition", "test",
+                valueInstant);
 
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "unitName", "test", valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "unitSymbol", "test", valueInstant);
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "unitDefinition", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "unitName", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "unitSymbol", "test", valueInstant);
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "unitDefinition", "test", valueInstant);
 
-        createResource(provider, UtilDto.SERVICE_DATASTREAM, "lastObservation",
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
                 getObservation("test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
 
     }
@@ -202,8 +205,9 @@ public class AbstractIntegrationTest {
     }
 
     protected void createLocation(String provider) {
-        createResource(provider, UtilDto.SERVICE_LOCATON, "id", provider, null);
-        createResource(provider, UtilDto.SERVICE_LOCATON, "location", new Point(Coordinates.EMPTY, null, null), null);
+        createResource(provider, DtoMapperSimple.SERVICE_LOCATON, "id", provider, null);
+        createResource(provider, DtoMapperSimple.SERVICE_LOCATON, "location", new Point(Coordinates.EMPTY, null, null),
+                null);
 
     }
 
@@ -217,12 +221,12 @@ public class AbstractIntegrationTest {
 
     protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds,
             GeoJsonObject location, Instant instant) {
-        createResource(provider, UtilDto.SERVICE_THING, "id", provider, instant);
-        createResource(provider, UtilDto.SERVICE_THING, "name", "test", instant);
-        createResource(provider, UtilDto.SERVICE_ADMIN, "location",
+        createResource(provider, DtoMapperSimple.SERVICE_THING, "id", provider, instant);
+        createResource(provider, DtoMapperSimple.SERVICE_THING, "name", "test", instant);
+        createResource(provider, DtoMapperSimple.SERVICE_ADMIN, "location",
                 location != null ? location : new Point(Coordinates.EMPTY, null, null), instant);
-        createResource(provider, UtilDto.SERVICE_THING, "locationIds", locationIds, instant);
-        createResource(provider, UtilDto.SERVICE_THING, "datastreamIds", datastreamIds, instant);
+        createResource(provider, DtoMapperSimple.SERVICE_THING, "locationIds", locationIds, instant);
+        createResource(provider, DtoMapperSimple.SERVICE_THING, "datastreamIds", datastreamIds, instant);
     }
 
     protected void createResource(String provider, String service, String resource, Object value, Instant instant) {

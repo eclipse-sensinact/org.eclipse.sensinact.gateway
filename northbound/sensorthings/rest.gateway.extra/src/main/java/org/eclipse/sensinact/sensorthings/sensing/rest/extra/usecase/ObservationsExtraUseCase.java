@@ -27,7 +27,7 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -87,14 +87,14 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
         FeatureOfInterest foi = getFeatureOfInterest(observation);
         if (foi != null) {
-            DtoToModelMapper.checkRequireField(foi);
+            DtoMapperSimple.checkRequireField(foi);
         }
         String id = request.parentId() != null ? request.parentId() : request.id();
-        String providerId = UtilDto.extractFirstIdSegment(id);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         String serviceId = "datastream";
         ServiceSnapshot serviceDatastream = serviceUseCase.read(request.session(), providerId, serviceId);
         checkRequireLink(serviceDatastream);
-        ExpandedObservation existingObservation = UtilDto.getResourceField(serviceDatastream, "lastObservation",
+        ExpandedObservation existingObservation = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation",
                 ExpandedObservation.class);
         return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, existingObservation,
                 observation, foi));
@@ -138,7 +138,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
             throw new InternalServerErrorException(e);
 
         }
-        String dataStreamId = UtilDto.extractFirstIdSegment(request.parentId());
+        String dataStreamId = DtoMapperSimple.extractFirstIdSegment(request.parentId());
         ServiceSnapshot service = serviceUseCase.read(request.session(), dataStreamId, "datastream");
         if (service != null) {
             removeFeatureOfInterest(request.model());
@@ -149,10 +149,10 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
     @Override
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
-        String datastreamId = UtilDto.extractFirstIdSegment(request.id());
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(request.id());
         // get resource observation
         ResourceCommand<TimedValue<ExpandedObservation>> parentCommand = new ResourceCommand<TimedValue<ExpandedObservation>>(
-                datastreamId, UtilDto.SERVICE_DATASTREAM, "lastObservation") {
+                datastreamId, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation") {
             @Override
             protected Promise<TimedValue<ExpandedObservation>> call(SensinactResource resource, PromiseFactory pf) {
                 return resource.getValue(ExpandedObservation.class);
@@ -166,13 +166,13 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                 try {
                     if (parentResult.getFailure() == null) {
                         ExpandedObservation obs = parentResult.getValue().getValue();
-                        String observationId = UtilDto.extractSecondIdSegment(request.id());
+                        String observationId = DtoMapperSimple.extractSecondIdSegment(request.id());
 
                         if (observationId == null || !observationId.equals(obs.id())) {
                             return pf.failed(new BadRequestException());
 
                         }
-                        String datastreamId = UtilDto.extractFirstIdSegment(request.id());
+                        String datastreamId = DtoMapperSimple.extractFirstIdSegment(request.id());
 
                         SensinactProvider sp = twin.getProvider(datastreamId);
                         SensinactResource resource = sp.getResource("datastream", "lastObservation");

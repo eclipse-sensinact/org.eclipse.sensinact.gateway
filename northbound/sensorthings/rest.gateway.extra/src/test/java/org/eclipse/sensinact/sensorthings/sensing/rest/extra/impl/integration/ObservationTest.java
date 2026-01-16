@@ -24,7 +24,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -89,12 +89,13 @@ public class ObservationTest extends AbstractIntegrationTest {
         getJsonResponseFromDelete(String.format("Observations(%s)", idObservation), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, datastreamId, "datastream");
-        ExpandedObservation lastObs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        ExpandedObservation lastObs = DtoMapperSimple.getResourceField(service, "lastObservation",
+                ExpandedObservation.class);
         assertNull(lastObs);
     }
 
     /**
-     *  test create observation with missing required field
+     * test create observation with missing required field
      */
     @Test
     public void testCreateObservationMissingField() throws Exception {
@@ -178,9 +179,10 @@ public class ObservationTest extends AbstractIntegrationTest {
         // when
         getJsonResponseFromDelete(String.format("/Observations(%s)/FeatureOfInterest/$ref", idObservation), 409);
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, UtilDto.extractFirstIdSegment(idObservation),
+        ServiceSnapshot service = serviceUseCase.read(session, DtoMapperSimple.extractFirstIdSegment(idObservation),
                 "datastream");
-        ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
+                ExpandedObservation.class);
         assertNotNull(obs);
         assertNotNull(obs.featureOfInterest());
 

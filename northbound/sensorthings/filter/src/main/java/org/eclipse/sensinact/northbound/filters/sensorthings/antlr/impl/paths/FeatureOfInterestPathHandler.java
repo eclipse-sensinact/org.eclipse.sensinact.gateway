@@ -21,7 +21,7 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.Unsuppor
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class FeatureOfInterestPathHandler extends AbstractPathHandler {
 
@@ -34,7 +34,7 @@ public class FeatureOfInterestPathHandler extends AbstractPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
         if (service == null) {
             return null;
         }
@@ -53,7 +53,8 @@ public class FeatureOfInterestPathHandler extends AbstractPathHandler {
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
 
-        ExpandedObservation obs = UtilDto.getResourceField(service, "lastObservation", ExpandedObservation.class);
+        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
+                ExpandedObservation.class);
         FeatureOfInterest foi = obs.featureOfInterest();
         if (foi == null) {
             return null;

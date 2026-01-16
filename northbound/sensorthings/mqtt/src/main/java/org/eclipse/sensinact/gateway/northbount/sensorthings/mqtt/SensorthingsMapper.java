@@ -81,78 +81,78 @@ public abstract class SensorthingsMapper<T> {
 
     protected final ObjectMapper jsonMapper;
 
-    protected SensorthingsMapper(String topicFilter, ObjectMapper mapper, GatewayThread gateway) {
+    protected SensorthingsMapper(final String topicFilter, final ObjectMapper mapper, final GatewayThread gateway) {
         this.topicFilter = topicFilter;
         this.jsonMapper = mapper;
         this.thread = gateway;
     }
 
-    public Promise<Stream<T>> toPayload(ResourceNotification notification) {
+    public Promise<Stream<T>> toPayload(final ResourceNotification notification) {
         if (notification instanceof ResourceDataNotification) {
-            return toPayload((ResourceDataNotification) notification).filter(Objects::nonNull);
-        } else if (notification instanceof LifecycleNotification) {
-            return toPayload((LifecycleNotification) notification).filter(Objects::nonNull);
-        } else if (notification instanceof ResourceMetaDataNotification) {
-            return toPayload((ResourceMetaDataNotification) notification).filter(Objects::nonNull);
+            return this.toPayload((ResourceDataNotification) notification).filter(Objects::nonNull);
         }
-        LOG.error("Unknown notification type {}", notification.getClass());
-        return emptyStream();
+        if (notification instanceof LifecycleNotification) {
+            return this.toPayload((LifecycleNotification) notification).filter(Objects::nonNull);
+        }
+        if (notification instanceof ResourceMetaDataNotification) {
+            return this.toPayload((ResourceMetaDataNotification) notification).filter(Objects::nonNull);
+        }
+        SensorthingsMapper.LOG.error("Unknown notification type {}", notification.getClass());
+        return this.emptyStream();
     }
 
-    protected Promise<Stream<T>> toPayload(LifecycleNotification lifecycleNotification) {
-        return emptyStream();
+    protected Promise<Stream<T>> toPayload(final LifecycleNotification lifecycleNotification) {
+        return this.emptyStream();
     }
 
-    protected Promise<Stream<T>> toPayload(ResourceDataNotification dataNotification) {
-        return emptyStream();
+    protected Promise<Stream<T>> toPayload(final ResourceDataNotification dataNotification) {
+        return this.emptyStream();
     }
 
-    protected Promise<Stream<T>> toPayload(ResourceMetaDataNotification metadataNotification) {
-        return emptyStream();
+    protected Promise<Stream<T>> toPayload(final ResourceMetaDataNotification metadataNotification) {
+        return this.emptyStream();
     }
 
     public String getTopicFilter() {
-        return topicFilter;
+        return this.topicFilter;
     }
 
     protected abstract Class<T> getPayloadType();
 
     protected final Promise<Stream<T>> emptyStream() {
-        return thread.getPromiseFactory().resolved(Stream.empty());
+        return this.thread.getPromiseFactory().resolved(Stream.empty());
     }
 
     protected Promise<ProviderSnapshot> getProvider(final String providerName) {
         try {
-            return thread.execute(new AbstractTwinCommand<ProviderSnapshot>() {
+            return this.thread.execute(new AbstractTwinCommand<ProviderSnapshot>() {
                 @Override
-                protected Promise<ProviderSnapshot> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                    List<ProviderSnapshot> snapshots = twin.filteredSnapshot(null,
+                protected Promise<ProviderSnapshot> call(final SensinactDigitalTwin twin, final PromiseFactory pf) {
+                    final List<ProviderSnapshot> snapshots = twin.filteredSnapshot(null,
                             p -> p.getName().equals(providerName), null, null);
                     if (snapshots.isEmpty()) {
                         return pf.failed(new NotFoundException(providerName));
-                    } else {
-                        return pf.resolved(snapshots.get(0));
                     }
+                    return pf.resolved(snapshots.get(0));
                 }
             }).recoverWith(p -> {
-                PromiseFactory pf = thread.getPromiseFactory();
+                final PromiseFactory pf = this.thread.getPromiseFactory();
                 final Throwable cause = p.getFailure();
                 if (cause instanceof SensorThingsMqttException) {
                     return pf.failed(cause);
-                } else {
-                    return pf.failed(new SensorThingsMqttException("Error querying SensiNact", cause));
                 }
+                return pf.failed(new SensorThingsMqttException("Error querying SensiNact", cause));
             });
-        } catch (Exception e) {
-            return thread.getPromiseFactory()
+        } catch (final Exception e) {
+            return this.thread.getPromiseFactory()
                     .failed(new SensorThingsMqttException("Interrupted while querying SensiNact", e));
         }
     }
 
     protected Promise<ResourceSnapshot> getResource(final String providerName, final String serviceName,
             final String resourceName) {
-        return getProvider(providerName).map(p -> {
-            ResourceSnapshot rc = p.getResource(serviceName, resourceName);
+        return this.getProvider(providerName).map(p -> {
+            final ResourceSnapshot rc = p.getResource(serviceName, resourceName);
             if (rc != null) {
                 return rc;
             }
@@ -160,41 +160,77 @@ public abstract class SensorthingsMapper<T> {
         });
     }
 
-    protected Promise<Stream<T>> wrap(T value) {
-        return thread.getPromiseFactory().resolved(Optional.ofNullable(value).stream());
+    protected Promise<Stream<T>> wrap(final T value) {
+        return this.thread.getPromiseFactory().resolved(Optional.ofNullable(value).stream());
     }
 
-    protected Promise<Stream<T>> decorate(Promise<T> promise) {
-        return promise.map(Stream::of)
-                .onFailure(t -> LOG.warn("An error occurred executing mapper {}", getClass().getSimpleName(), t))
-                .recoverWith(x -> emptyStream());
+    protected Promise<Stream<T>> decorate(final Promise<T> promise) {
+        return promise
+                .map(v -> v == null ? Stream.<T>empty() : Stream.of(v)).onFailure(t -> SensorthingsMapper.LOG
+                        .warn("An error occurred executing mapper {}", this.getClass().getSimpleName(), t))
+                .recoverWith(x -> this.emptyStream());
     }
 
-    protected <R> Promise<Stream<R>> mapProvider(Promise<ProviderSnapshot> p,
-            Function<Promise<ResourceSnapshot>, Promise<Stream<R>>> conversion) {
-        PromiseFactory pf = thread.getPromiseFactory();
+    protected <R> Promise<Stream<R>> mapProvider(final Promise<ProviderSnapshot> p,
+            final Function<Promise<ResourceSnapshot>, Promise<Stream<R>>> conversion) {
+        final PromiseFactory pf = this.thread.getPromiseFactory();
 
-        Promise<List<Stream<R>>> sensors = p.flatMap(
-                ps -> getResourceSnapshots(ps).map(r -> conversion.apply(pf.resolved(r))).collect(pf.toPromise()));
+        final Promise<List<Stream<R>>> sensors = p.flatMap(
+                ps -> this.getResourceSnapshots(ps).map(r -> conversion.apply(pf.resolved(r))).collect(pf.toPromise()));
 
         return sensors.map(l -> l.stream().flatMap(Function.identity()));
 
     }
 
-    private Stream<ResourceSnapshot> getResourceSnapshots(ProviderSnapshot ps) {
+    protected <R> Promise<Stream<R>> mapProviderIfResource(final Promise<ProviderSnapshot> p,
+            final Predicate<ProviderSnapshot> filter,
+            final Function<Promise<ResourceSnapshot>, Promise<Stream<R>>> conversion,
+            final Function<ProviderSnapshot, Promise<Stream<R>>> fallback) {
+
+        final PromiseFactory pf = this.thread.getPromiseFactory();
+
+        return p.flatMap(ps -> {
+            if (!filter.test(ps)) {
+                return fallback.apply(ps);
+            }
+            final Promise<List<Stream<R>>> resourceStreams = this.getResourceSnapshots(ps)
+                    .map(r -> conversion.apply(pf.resolved(r))).collect(pf.toPromise());
+
+            return resourceStreams.map(list -> list.stream().flatMap(Function.identity()));
+        });
+    }
+
+    protected <R> Promise<Stream<R>> mapProviderIfProvider(final Promise<ProviderSnapshot> p,
+            final Predicate<ProviderSnapshot> filter,
+            final Function<Promise<ProviderSnapshot>, Promise<Stream<R>>> conversion,
+            final Function<ProviderSnapshot, Promise<Stream<R>>> fallback) {
+
+        final PromiseFactory pf = this.thread.getPromiseFactory();
+
+        return p.flatMap(ps -> {
+            if (!filter.test(ps)) {
+                return fallback.apply(ps);
+            }
+            return conversion.apply(pf.resolved(ps));
+
+        });
+    }
+
+    private Stream<ResourceSnapshot> getResourceSnapshots(final ProviderSnapshot ps) {
         return ps.getServices().stream().flatMap(s -> s.getResources().stream());
     }
 
-    public static SensorthingsMapper<?> create(String topicFilter, ObjectMapper jsonMapper, GatewayThread thread) {
+    public static SensorthingsMapper<?> create(final String topicFilter, final ObjectMapper jsonMapper,
+            final GatewayThread thread) {
 
-        String[] segments = topicFilter.split("/");
+        final String[] segments = topicFilter.split("/");
 
         if (!"v1.1".equals(segments[0])) {
-            LOG.warn("The topic filter {} is not for the v1.1 API", topicFilter);
+            SensorthingsMapper.LOG.warn("The topic filter {} is not for the v1.1 API", topicFilter);
             return new NullMapper(topicFilter, jsonMapper, thread);
         }
         String selectFilter = null;
-        int idx = segments[segments.length - 1].indexOf("?$select=");
+        final int idx = segments[segments.length - 1].indexOf("?$select=");
         if (idx != -1) {
             selectFilter = segments[segments.length - 1].substring(idx + 9);
             segments[segments.length - 1] = segments[segments.length - 1].substring(0, idx);
@@ -203,51 +239,55 @@ public abstract class SensorthingsMapper<T> {
         SensorthingsMapper<?> mapper = null;
 
         if (segments.length == 2) {
-            if (COLLECTIONS.contains(segments[1])) {
+            if (SensorthingsMapper.COLLECTIONS.contains(segments[1])) {
                 // Collection entry tracking
                 try {
-                    mapper = getCollectionMapper(topicFilter, segments[1], jsonMapper, thread);
-                } catch (IllegalArgumentException iae) {
-                    LOG.warn(
+                    mapper = SensorthingsMapper.getCollectionMapper(topicFilter, segments[1], jsonMapper, thread);
+                } catch (final IllegalArgumentException iae) {
+                    SensorthingsMapper.LOG.warn(
                             "The topic filter {} is not valid for the v1.1 API as it refers to an unknown collection type",
                             topicFilter, iae);
                 }
             } else {
                 // Entity updates:
                 // https://docs.ogc.org/is/18-088/18-088.html#mqtt-entity-updates
-                Matcher matcher = ENTITY_PATH.matcher(segments[1]);
+                final Matcher matcher = SensorthingsMapper.ENTITY_PATH.matcher(segments[1]);
                 if (matcher.matches()) {
                     try {
-                        mapper = getEntityMapper(topicFilter, matcher.group(1), matcher.group(2), jsonMapper, thread);
-                    } catch (IllegalArgumentException iae) {
-                        LOG.warn(
+                        mapper = SensorthingsMapper.getEntityMapper(topicFilter, matcher.group(1), matcher.group(2),
+                                jsonMapper, thread);
+                    } catch (final IllegalArgumentException iae) {
+                        SensorthingsMapper.LOG.warn(
                                 "The topic filter {} is not valid for the v1.1 API as it refers to an unknown entity type",
                                 topicFilter, iae);
                     }
                 } else {
-                    LOG.warn("The topic filter {} is not valid for the v1.1 API as it does not select a single entity",
+                    SensorthingsMapper.LOG.warn(
+                            "The topic filter {} is not valid for the v1.1 API as it does not select a single entity",
                             topicFilter);
                 }
             }
         } else if (segments.length == 3) {
-            Matcher matcher = ENTITY_PATH.matcher(segments[1]);
+            final Matcher matcher = SensorthingsMapper.ENTITY_PATH.matcher(segments[1]);
             if (matcher.matches()) {
-                if (COLLECTIONS.contains(segments[2])) {
+                if (SensorthingsMapper.COLLECTIONS.contains(segments[2])) {
                     // https://docs.ogc.org/is/18-088/18-088.html#mqtt-subscribe-entity-set
-                    mapper = getEntitySetMapper(topicFilter, segments[2], matcher.group(1), matcher.group(2),
-                            jsonMapper, thread);
+                    mapper = SensorthingsMapper.getEntitySetMapper(topicFilter, segments[2], matcher.group(1),
+                            matcher.group(2), jsonMapper, thread);
                 } else {
                     // (https://docs.ogc.org/is/18-088/18-088.html#mqtt-subscribe-entity-property)
-                    mapper = getPropertyMapper(topicFilter, segments[2], matcher.group(1), matcher.group(2), jsonMapper,
-                            thread);
+                    mapper = SensorthingsMapper.getPropertyMapper(topicFilter, segments[2], matcher.group(1),
+                            matcher.group(2), jsonMapper, thread);
                 }
             } else {
-                LOG.warn("The topic filter {} is not valid for the v1.1 API as it does not select a single entity",
+                SensorthingsMapper.LOG.warn(
+                        "The topic filter {} is not valid for the v1.1 API as it does not select a single entity",
                         topicFilter);
             }
 
         } else {
-            LOG.warn("The topic filter {} is not valid for the v1.1 API as it has the wrong number of segments",
+            SensorthingsMapper.LOG.warn(
+                    "The topic filter {} is not valid for the v1.1 API as it has the wrong number of segments",
                     topicFilter);
         }
 
@@ -262,8 +302,8 @@ public abstract class SensorthingsMapper<T> {
         return mapper;
     }
 
-    private static SensorthingsMapper<?> getCollectionMapper(String topicFilter, String entity, ObjectMapper mapper,
-            GatewayThread thread) {
+    private static SensorthingsMapper<?> getCollectionMapper(final String topicFilter, final String entity,
+            final ObjectMapper mapper, final GatewayThread thread) {
         switch (entity) {
         case "Things":
             return new ThingsMapper(topicFilter, mapper, thread);
@@ -282,13 +322,13 @@ public abstract class SensorthingsMapper<T> {
         case "FeaturesOfInterest":
             return new FeaturesOfInterestMapper(topicFilter, mapper, thread);
         default:
-            LOG.warn("The collection type {} is not recognised", entity);
+            SensorthingsMapper.LOG.warn("The collection type {} is not recognised", entity);
             return null;
         }
     }
 
-    private static SensorthingsMapper<?> getEntityMapper(String topicFilter, String entity, String id,
-            ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getEntityMapper(final String topicFilter, final String entity, final String id,
+            final ObjectMapper mapper, final GatewayThread thread) {
         switch (entity) {
         case "Things":
             return new ThingMapper(topicFilter, id, mapper, thread);
@@ -307,147 +347,154 @@ public abstract class SensorthingsMapper<T> {
         case "FeaturesOfInterest":
             return new FeatureOfInterestMapper(topicFilter, id, mapper, thread);
         default:
-            LOG.warn("The entity type {} is not recognised", entity);
+            SensorthingsMapper.LOG.warn("The entity type {} is not recognised", entity);
             return null;
         }
     }
 
-    private static SensorthingsMapper<?> getEntitySetMapper(String topicFilter, String collection, String parentType,
-            String parentId, ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getEntitySetMapper(final String topicFilter, final String collection,
+            final String parentType, final String parentId, final ObjectMapper mapper, final GatewayThread thread) {
         switch (collection) {
         case "Things":
-            return getThingsSubCollection(topicFilter, parentType, parentId, mapper, thread);
+            return SensorthingsMapper.getThingsSubCollection(topicFilter, parentType, parentId, mapper, thread);
         case "Locations":
-            return getLocationsSubCollection(topicFilter, parentType, parentId, mapper, thread);
+            return SensorthingsMapper.getLocationsSubCollection(topicFilter, parentType, parentId, mapper, thread);
         case "HistoricalLocations":
-            return getHistoricalLocationsSubCollection(topicFilter, parentType, parentId, mapper, thread);
+            return SensorthingsMapper.getHistoricalLocationsSubCollection(topicFilter, parentType, parentId, mapper,
+                    thread);
         case "Datastreams":
-            return getDatastreamsSubCollection(topicFilter, parentType, parentId, mapper, thread);
+            return SensorthingsMapper.getDatastreamsSubCollection(topicFilter, parentType, parentId, mapper, thread);
         case "Observations":
-            return getObservationsSubCollection(topicFilter, parentType, parentId, mapper, thread);
+            return SensorthingsMapper.getObservationsSubCollection(topicFilter, parentType, parentId, mapper, thread);
         case "Sensors":
         case "ObservedProperties":
         case "FeaturesOfInterest":
-            LOG.warn("The collection type {} is not a sub collection of any recognised type", collection);
+            SensorthingsMapper.LOG.warn("The collection type {} is not a sub collection of any recognised type",
+                    collection);
             return null;
         default:
-            LOG.warn("The collection type {} is not recognised", collection);
+            SensorthingsMapper.LOG.warn("The collection type {} is not recognised", collection);
             return null;
         }
     }
 
-    private static SensorthingsMapper<?> getThingsSubCollection(String topicFilter, String parentType, String parentId,
-            ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getThingsSubCollection(final String topicFilter, final String parentType,
+            final String parentId, final ObjectMapper mapper, final GatewayThread thread) {
         if ("Locations".equals(parentType)) {
             return new ThingMapper(topicFilter, parentId.split("~")[0], mapper, thread);
-        } else {
-            LOG.warn("The entity type {} does not contain a set of Things", parentType);
-            return null;
         }
+        SensorthingsMapper.LOG.warn("The entity type {} does not contain a set of Things", parentType);
+        return null;
     }
 
-    private static SensorthingsMapper<?> getLocationsSubCollection(String topicFilter, String parentType,
-            String parentId, ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getLocationsSubCollection(final String topicFilter, final String parentType,
+            final String parentId, final ObjectMapper mapper, final GatewayThread thread) {
         if ("Things".equals(parentType) || "HistoricalLocations".equals(parentType)) {
             return new LocationMapper(topicFilter, parentId, mapper, thread);
-        } else {
-            LOG.warn("The entity type {} does not contain a set of Locations", parentType);
-            return null;
         }
+        SensorthingsMapper.LOG.warn("The entity type {} does not contain a set of Locations", parentType);
+        return null;
     }
 
-    private static SensorthingsMapper<?> getHistoricalLocationsSubCollection(String topicFilter, String parentType,
-            String parentId, ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getHistoricalLocationsSubCollection(final String topicFilter,
+            final String parentType, final String parentId, final ObjectMapper mapper, final GatewayThread thread) {
         if ("Locations".equals(parentType)) {
             return new HistoricalLocationMapper(topicFilter, parentId.split("~")[0], mapper, thread);
-        } else {
-            LOG.warn("The entity type {} does not contain a set of HistoricalLocations", parentType);
-            return null;
         }
+        SensorthingsMapper.LOG.warn("The entity type {} does not contain a set of HistoricalLocations", parentType);
+        return null;
     }
 
-    private static SensorthingsMapper<?> getDatastreamsSubCollection(String topicFilter, String parentType,
-            String parentId, ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getDatastreamsSubCollection(final String topicFilter, final String parentType,
+            final String parentId, final ObjectMapper mapper, final GatewayThread thread) {
         if ("Things".equals(parentType)) {
             return new DatastreamsMapper(topicFilter, mapper, thread) {
                 @Override
-                public Promise<Stream<Datastream>> toPayload(ResourceNotification notification) {
-                    return parentId.equals(notification.provider()) ? super.toPayload(notification) : emptyStream();
+                public Promise<Stream<Datastream>> toPayload(final ResourceNotification notification) {
+                    return parentId.equals(notification.provider()) ? super.toPayload(notification)
+                            : this.emptyStream();
                 }
             };
-        } else if ("Sensors".equals(parentType) || "ObservedProperties".equals(parentType)) {
-            return new DatastreamMapper(topicFilter, parentId, mapper, thread);
-        } else {
-            LOG.warn("The entity type {} does not contain a set of Datastreams", parentType);
-            return null;
         }
+        if ("Sensors".equals(parentType) || "ObservedProperties".equals(parentType)) {
+            return new DatastreamMapper(topicFilter, parentId, mapper, thread);
+        }
+        SensorthingsMapper.LOG.warn("The entity type {} does not contain a set of Datastreams", parentType);
+        return null;
     }
 
-    private static SensorthingsMapper<?> getObservationsSubCollection(String topicFilter, String parentType,
-            String parentId, ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getObservationsSubCollection(final String topicFilter, final String parentType,
+            final String parentId, final ObjectMapper mapper, final GatewayThread thread) {
         if ("Datastreams".equals(parentType) || "FeaturesOfInterest".equals(parentType)) {
             return new ObservationMapper(topicFilter, parentId, mapper, thread);
-        } else {
-            LOG.warn("The entity type {} does not contain a set of Observations", parentType);
-            return null;
         }
+        SensorthingsMapper.LOG.warn("The entity type {} does not contain a set of Observations", parentType);
+        return null;
     }
 
-    private static SensorthingsMapper<?> getPropertyMapper(String topicFilter, String property, String parentType,
-            String parentId, ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getPropertyMapper(final String topicFilter, final String property,
+            final String parentType, final String parentId, final ObjectMapper mapper, final GatewayThread thread) {
 
-        SensorthingsMapper<?> parent = getEntityMapper(topicFilter, parentType, parentId, mapper, thread);
+        final SensorthingsMapper<?> parent = SensorthingsMapper.getEntityMapper(topicFilter, parentType, parentId,
+                mapper, thread);
 
         switch (property) {
         case "name":
-            return (Thing.class.equals(parent.getPayloadType()))
-                    ? getPropertyMapper(NameDescription.class::isAssignableFrom, property, null, "admin",
-                            "friendlyName", parent, mapper, thread)
-                    : getPropertyMapper(NameDescription.class::isAssignableFrom, property, null, null, null, parent,
-                            mapper, thread);
+            return Thing.class.equals(parent.getPayloadType())
+                    ? SensorthingsMapper.getPropertyMapper(NameDescription.class::isAssignableFrom, property, null,
+                            "admin", "friendlyName", parent, mapper, thread)
+                    : SensorthingsMapper.getPropertyMapper(NameDescription.class::isAssignableFrom, property, null,
+                            null, null, parent, mapper, thread);
         case "description":
-            return getPropertyMapper(NameDescription.class::isAssignableFrom, property, null, "admin", "description",
-                    parent, mapper, thread);
+            return SensorthingsMapper.getPropertyMapper(NameDescription.class::isAssignableFrom, property, null,
+                    "admin", "description", parent, mapper, thread);
         case "unitOfMeasurement":
             // TODO Metadata change?
-            return getPropertyMapper(Datastream.class::equals, property, null, null, null, parent, mapper, thread);
+            return SensorthingsMapper.getPropertyMapper(Datastream.class::equals, property, null, null, null, parent,
+                    mapper, thread);
         case "observedArea":
-            return getPropertyMapper(Datastream.class::equals, property, null, "admin", "location", parent, mapper,
-                    thread);
+            return SensorthingsMapper.getPropertyMapper(Datastream.class::equals, property, null, "admin", "location",
+                    parent, mapper, thread);
         case "resultTime":
         case "phenomenonTime":
-            if (Datastream.class.equals(parent.getPayloadType()))
+            if (Datastream.class.equals(parent.getPayloadType())) {
                 return null;
-            return getPropertyMapper(Observation.class::equals, property, null, null, null, parent, mapper, thread);
+            }
+            return SensorthingsMapper.getPropertyMapper(Observation.class::equals, property, null, null, null, parent,
+                    mapper, thread);
         case "properties":
             // TODO Metadata change?
-            return getPropertyMapper(
+            return SensorthingsMapper.getPropertyMapper(
                     Set.of(Datastream.class, ObservedProperty.class, Sensor.class, Thing.class)::contains, property,
                     null, null, null, parent, mapper, thread);
         case "feature":
-            return getPropertyMapper(FeatureOfInterest.class::equals, property, null, "admin", "location", parent,
-                    mapper, thread);
+            return SensorthingsMapper.getPropertyMapper(FeatureOfInterest.class::equals, property, null, "admin",
+                    "location", parent, mapper, thread);
         case "time":
             // TODO - can this actually change?
-            return getPropertyMapper(HistoricalLocation.class::equals, property, null, null, null, parent, mapper,
-                    thread);
+            return SensorthingsMapper.getPropertyMapper(HistoricalLocation.class::equals, property, null, null, null,
+                    parent, mapper, thread);
         case "encodingType":
-            if (Location.class.equals(parent.getPayloadType()))
+            if (Location.class.equals(parent.getPayloadType())) {
                 return null;
+            }
             // TODO Metadata change?
-            return getPropertyMapper(Sensor.class::equals, property, null, null, null, parent, mapper, thread);
+            return SensorthingsMapper.getPropertyMapper(Sensor.class::equals, property, null, null, null, parent,
+                    mapper, thread);
         case "location":
-            return getPropertyMapper(Location.class::equals, property, null, "admin", "location", parent, mapper,
-                    thread);
+            return SensorthingsMapper.getPropertyMapper(Location.class::equals, property, null, "admin", "location",
+                    parent, mapper, thread);
         case "result":
-            return getPropertyMapper(Observation.class::equals, property, null, null, null, parent, mapper, thread);
+            return SensorthingsMapper.getPropertyMapper(Observation.class::equals, property, null, null, null, parent,
+                    mapper, thread);
         case "definition":
             // TODO Metadata change?
-            return getPropertyMapper(ObservedProperty.class::equals, property, null, null, null, parent, mapper,
-                    thread);
+            return SensorthingsMapper.getPropertyMapper(ObservedProperty.class::equals, property, null, null, null,
+                    parent, mapper, thread);
         case "metadata":
             // TODO Metadata change?
-            return getPropertyMapper(Sensor.class::equals, property, null, null, null, parent, mapper, thread);
+            return SensorthingsMapper.getPropertyMapper(Sensor.class::equals, property, null, null, null, parent,
+                    mapper, thread);
         case "observationType":
         case "resultQuality":
         case "validTime":
@@ -455,31 +502,31 @@ public abstract class SensorthingsMapper<T> {
             // These cannot change
             return null;
         default:
-            LOG.warn("The property {} is not recognised", property);
+            SensorthingsMapper.LOG.warn("The property {} is not recognised", property);
             return null;
         }
     }
 
-    private static SensorthingsMapper<?> getPropertyMapper(Predicate<Class<?>> valid, String property, String provider,
-            String service, String resource, SensorthingsMapper<?> parent, ObjectMapper mapper, GatewayThread thread) {
+    private static SensorthingsMapper<?> getPropertyMapper(final Predicate<Class<?>> valid, final String property,
+            final String provider, final String service, final String resource, final SensorthingsMapper<?> parent,
+            final ObjectMapper mapper, final GatewayThread thread) {
         if (valid.test(parent.getPayloadType())) {
             return new PropertyMapper(parent.getTopicFilter(), property, provider, service, resource, parent, mapper,
                     thread);
-        } else {
-            throw new IllegalArgumentException("The property " + property + " from filter " + parent.getTopicFilter()
-                    + " cannot be found in the target object");
         }
+        throw new IllegalArgumentException("The property " + property + " from filter " + parent.getTopicFilter()
+                + " cannot be found in the target object");
     }
 
     private static class NullMapper extends SensorthingsMapper<Object> {
 
-        public NullMapper(String topic, ObjectMapper mapper, GatewayThread thread) {
+        public NullMapper(final String topic, final ObjectMapper mapper, final GatewayThread thread) {
             super(topic, mapper, thread);
         }
 
         @Override
-        public Promise<Stream<Object>> toPayload(ResourceDataNotification notification) {
-            return emptyStream();
+        public Promise<Stream<Object>> toPayload(final ResourceDataNotification notification) {
+            return this.emptyStream();
         }
 
         @Override

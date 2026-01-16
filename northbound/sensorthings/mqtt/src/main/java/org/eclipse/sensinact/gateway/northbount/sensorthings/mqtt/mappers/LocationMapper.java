@@ -27,12 +27,7 @@ public class LocationMapper extends LocationsMapper {
 
     public LocationMapper(String topicFilter, String id, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
-
-        int i = id.indexOf("~");
-        if (i == -1)
-            i = id.length();
-
-        this.provider = id.substring(0, i);
+        this.provider = id;
     }
 
     @Override

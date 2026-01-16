@@ -20,7 +20,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class SensorPathHandler extends AbstractPathHandler {
 
@@ -33,7 +33,7 @@ public class SensorPathHandler extends AbstractPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
         if (service == null) {
             return null;
         }
@@ -53,24 +53,24 @@ public class SensorPathHandler extends AbstractPathHandler {
             final String path) {
         switch (path) {
         case "id":
-            String id = UtilDto.getResourceField(service, "sensorId", String.class);
+            String id = DtoMapperSimple.getResourceField(service, "sensorId", String.class);
             if (id != null)
                 return String.join("~", provider.getName(), id);
             return null;
 
         case "name":
-            return UtilDto.getResourceField(service, "sensorName", String.class);
+            return DtoMapperSimple.getResourceField(service, "sensorName", String.class);
 
         case "description":
-            return UtilDto.getResourceField(service, "sensorDescription", String.class);
+            return DtoMapperSimple.getResourceField(service, "sensorDescription", String.class);
         case "encodingType":
-            return UtilDto.getResourceField(service, "sensorEncodingType", String.class);
+            return DtoMapperSimple.getResourceField(service, "sensorEncodingType", String.class);
 
         case "metadata":
-            return UtilDto.getResourceField(service, "sensorMetadata", Object.class);
+            return DtoMapperSimple.getResourceField(service, "sensorMetadata", Object.class);
 
         case "properties":
-            return UtilDto.getResourceField(service, "sensorProperties", Map.class);
+            return DtoMapperSimple.getResourceField(service, "sensorProperties", Map.class);
 
         default:
             throw new UnsupportedRuleException("Unexpected resource level field: " + path);

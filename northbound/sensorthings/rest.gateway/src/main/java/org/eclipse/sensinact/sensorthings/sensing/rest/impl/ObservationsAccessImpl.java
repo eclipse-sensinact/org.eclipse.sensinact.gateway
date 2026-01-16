@@ -41,7 +41,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservationsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ObservationsDelete;
@@ -77,7 +77,7 @@ public class ObservationsAccessImpl extends AbstractAccess
                                     timestampPlusOneMilli));
                     if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
                         result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                                getExpansions(), criterion, resourceSnapshot, Optional.of(t));
+                                getExpansions(), criterion, resourceSnapshot, t);
                     }
                 }
             } else if (timestamp.equals(milliTimestamp)) {
@@ -86,7 +86,7 @@ public class ObservationsAccessImpl extends AbstractAccess
             }
         } else {
             result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    criterion, resourceSnapshot, Optional.empty());
+                    criterion, resourceSnapshot);
         }
 
         if (result.isEmpty()) {
@@ -97,7 +97,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getObservationDatastream(String id) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
 
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -119,7 +119,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservationDatastreamObservedProperty(String id) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
         return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -128,7 +128,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public Sensor getObservationDatastreamSensor(String id) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
 
@@ -140,7 +140,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public Thing getObservationDatastreamThing(String id) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         String idThing = getThingIdFromDatastream(datastreamId);
 
@@ -152,7 +152,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public FeatureOfInterest getObservationFeatureOfInterest(String id) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
         return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -162,12 +162,12 @@ public class ObservationsAccessImpl extends AbstractAccess
     // No history as it is *live* observation data not a data stream
     @Override
     public ResultList<Observation> getObservationFeatureOfInterestObservations(String id) {
-        String datastreamId = UtilDto.extractFirstIdSegment(id);
+        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         ICriterion criterion = parseFilter(OBSERVATIONS);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
-        ServiceSnapshot serviceDatastream = UtilDto.getDatastreamService(providerSnapshot);
-        ExpandedObservation obs = UtilDto.getResourceField(serviceDatastream, "lastObservation",
+        ServiceSnapshot serviceDatastream = DtoMapperSimple.getDatastreamService(providerSnapshot);
+        ExpandedObservation obs = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation",
                 ExpandedObservation.class);
         if (obs == null || obs.featureOfInterest() == null) {
             throw new NotFoundException();

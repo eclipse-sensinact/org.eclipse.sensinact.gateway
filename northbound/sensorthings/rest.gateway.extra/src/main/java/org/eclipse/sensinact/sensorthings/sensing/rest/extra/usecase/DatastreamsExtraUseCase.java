@@ -28,13 +28,13 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
@@ -51,19 +51,19 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedDataStream, ProviderSnapshot> {
 
-    private final IDtoMemoryCache<ExpandedSensor> sensorCache;
+    private final IDtoMemoryCache<Sensor> sensorCache;
 
     private final IDtoMemoryCache<FeatureOfInterest> foiCache;
 
-    private final IDtoMemoryCache<ExpandedObservedProperty> observedPropertyCache;
+    private final IDtoMemoryCache<ObservedProperty> observedPropertyCache;
 
     @SuppressWarnings("unchecked")
     public DatastreamsExtraUseCase(Providers providers) {
         super(providers);
 
-        sensorCache = resolve(providers, IDtoMemoryCache.class, ExpandedSensor.class);
+        sensorCache = resolve(providers, IDtoMemoryCache.class, Sensor.class);
         foiCache = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
-        observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservedProperty.class);
+        observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedDataStream> request) {
@@ -104,8 +104,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
         checkRequireField(request);
 
-        ExpandedSensor sensor = getCachedExpandedSensor(request.model());
-        ExpandedObservedProperty observedProperty = getCachedExpandedObservedProperty(request.model());
+        Sensor sensor = getCachedExpandedSensor(request.model());
+        ObservedProperty observedProperty = getCachedExpandedObservedProperty(request.model());
         UnitOfMeasurement unit = request.model().unitOfMeasurement();
 
         String thingId = getThingId(request, datastream, datastreamId);
@@ -158,7 +158,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         if (providerDatastream == null) {
             return;
         }
-        String oldThingId = UtilDto.getResourceField(providerDatastream.getService("datastream"), "thingId",
+        String oldThingId = DtoMapperSimple.getResourceField(providerDatastream.getService("datastream"), "thingId",
                 String.class);
         if (thingId != null && oldThingId != null && !oldThingId.equals(thingId)) {
 
@@ -183,12 +183,12 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         }
     }
 
-    private void checkRequireLink(ExtraUseCaseRequest<ExpandedDataStream> request, ExpandedSensor sensor,
-            ExpandedObservedProperty observedProperty, UnitOfMeasurement unit, ProviderSnapshot provider) {
+    private void checkRequireLink(ExtraUseCaseRequest<ExpandedDataStream> request, Sensor sensor,
+            ObservedProperty observedProperty, UnitOfMeasurement unit, ProviderSnapshot provider) {
         if (HttpMethod.POST.equals(request.method())) {
-            DtoToModelMapper.checkRequireLink(request, provider, sensor, observedProperty, unit);
+            DtoMapperSimple.checkRequireLink(request, provider, sensor, observedProperty, unit);
         } else if (HttpMethod.PUT.equals(request.method())) {
-            DtoToModelMapper.checkRequireLink(request, provider, unit);
+            DtoMapperSimple.checkRequireLink(request, provider, unit);
         }
     }
 
@@ -199,8 +199,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
      * @param datastream
      * @return
      */
-    private ExpandedSensor getCachedExpandedSensor(ExpandedDataStream datastream) {
-        ExpandedSensor sensor = null;
+    private Sensor getCachedExpandedSensor(ExpandedDataStream datastream) {
+        Sensor sensor = null;
         // retrieve created sensor
         if (datastream.sensor() != null) {
             if (DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
@@ -212,7 +212,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                 }
             } else {
                 sensor = datastream.sensor();
-                DtoToModelMapper.checkRequireField(sensor);
+                DtoMapperSimple.checkRequireField(sensor);
             }
         }
         return sensor;
@@ -239,7 +239,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                 }
             } else {
                 featureOfInterest = foi;
-                DtoToModelMapper.checkRequireField(featureOfInterest);
+                DtoMapperSimple.checkRequireField(featureOfInterest);
             }
         }
         return featureOfInterest;
@@ -268,8 +268,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
      * @param datastream
      * @return
      */
-    private ExpandedObservedProperty getCachedExpandedObservedProperty(ExpandedDataStream datastream) {
-        ExpandedObservedProperty observedProperty = null;
+    private ObservedProperty getCachedExpandedObservedProperty(ExpandedDataStream datastream) {
+        ObservedProperty observedProperty = null;
         // retrieve create observedPorperty
         if (datastream.observedProperty() != null) {
             if (DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
@@ -281,7 +281,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                 }
             } else {
                 observedProperty = datastream.observedProperty();
-                DtoToModelMapper.checkRequireField(observedProperty);
+                DtoMapperSimple.checkRequireField(observedProperty);
             }
         }
         return observedProperty;
@@ -348,7 +348,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         // TODO Authorization
         String thingId = getThingId(request);
         ResourceCommand<TimedValue<List<String>>> parentCommand = new ResourceCommand<TimedValue<List<String>>>(thingId,
-                UtilDto.SERVICE_THING, "datastreamIds") {
+                DtoMapperSimple.SERVICE_THING, "datastreamIds") {
             @Override
             protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
                 return resource.getMultiValue(String.class);
@@ -369,7 +369,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                     if (datastreamIds != null) {
                         List<String> newDatastreamIds = datastreamIds.stream().filter(id -> !id.equals(request.id()))
                                 .toList();
-                        SensinactResource resource = twin.getResource(thingId, UtilDto.SERVICE_THING, "datastreamIds");
+                        SensinactResource resource = twin.getResource(thingId, DtoMapperSimple.SERVICE_THING,
+                                "datastreamIds");
                         return resource.setValue(newDatastreamIds);
                     }
                     return pf.resolved(null);

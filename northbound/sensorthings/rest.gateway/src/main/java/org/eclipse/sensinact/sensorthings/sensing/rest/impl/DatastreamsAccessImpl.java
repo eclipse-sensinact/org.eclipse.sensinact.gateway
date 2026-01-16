@@ -40,12 +40,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedSensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.DatastreamsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.DatastreamsCreate;
@@ -77,20 +75,20 @@ public class DatastreamsAccessImpl extends AbstractAccess
         ProviderSnapshot provider = validateAndGetProvider(id);
         ResultList<Observation> observationList = RootResourceAccessImpl.getObservationList(getSession(), application,
                 getMapper(), uriInfo, requestContext,
-                provider.getResource(UtilDto.SERVICE_DATASTREAM, "lastObservation"), filter);
+                provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter);
         return observationList;
     }
 
     @Override
     public Observation getDatastreamObservation(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
-        String providerObs = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerObs = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!provider.equals(providerObs)) {
             throw new NotFoundException();
         }
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
-        ServiceSnapshot service = UtilDto.getDatastreamService(providerSnapshot);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
 
         Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), filter, service.getResource("lastObservation"));
@@ -108,8 +106,8 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public FeatureOfInterest getDatastreamObservationFeatureOfInterest(String id, String id2) {
-        String provider = UtilDto.extractFirstIdSegment(id);
-        String providerFoi = UtilDto.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerFoi = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!providerFoi.equals(provider)) {
             throw new NotFoundException();
         }
@@ -120,7 +118,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public ObservedProperty getDatastreamObservedProperty(String id) {
 
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(provider));
 
@@ -134,7 +132,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Sensor getDatastreamSensor(String id) {
-        String provider = UtilDto.extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
 
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(SENSORS), validateAndGetProvider(provider));
@@ -252,7 +250,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public Response updateDatastreamSensorRef(String id, RefId sensor) {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), sensor, id,
-                ExpandedDataStream.class, ExpandedSensor.class);
+                ExpandedDataStream.class, Sensor.class);
 
         return Response.noContent().build();
     }
@@ -260,7 +258,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public Response updateDatastreamObservedPropertyRef(String id, RefId observedProperty) {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), observedProperty,
-                id, ExpandedDataStream.class, ExpandedObservedProperty.class);
+                id, ExpandedDataStream.class, ObservedProperty.class);
 
         return Response.noContent().build();
     }
@@ -284,8 +282,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Response deleteDatastreamSensorRef(String id) {
-        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class,
-                ExpandedSensor.class);
+        getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class, Sensor.class);
 
         return Response.noContent().build();
     }
@@ -293,7 +290,7 @@ public class DatastreamsAccessImpl extends AbstractAccess
     @Override
     public Response deleteDatastreamObservedPropertyRef(String id) {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class,
-                ExpandedObservedProperty.class);
+                ObservedProperty.class);
 
         return Response.noContent().build();
     }

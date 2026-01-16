@@ -13,8 +13,6 @@
 package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 
 import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -23,12 +21,8 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
-import org.eclipse.sensinact.gateway.geojson.Feature;
-import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.gateway.geojson.Polygon;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.NotFoundException;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -38,169 +32,113 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DtoMapper {
 
-    private static final String NO_DESCRIPTION = "No description";
-
-    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
-        ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> "admin".equals(s.getName())).findFirst()
-                .get();
+    private static Optional<? extends ResourceSnapshot> getProviderAdminField(final ProviderSnapshot provider,
+            final String resource) {
+        final ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> "admin".equals(s.getName()))
+                .findFirst().get();
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
-    private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider, String resource) {
-        Optional<? extends ResourceSnapshot> rc = getProviderAdminField(provider, resource);
-        if (rc.isPresent()) {
-            TimedValue<?> value = rc.get().getValue();
-            if (value != null) {
-                return Optional.ofNullable(value.getValue());
-            }
+    public static Thing toThing(final ObjectMapper mapper, final ProviderSnapshot provider) {
+        if (!DtoMapperSimple.isThing(provider)) {
+            return null;
         }
-        return Optional.empty();
+        return DtoMapperSimple.toThing(provider, null);
+
     }
 
-    private static String toString(Object o) {
-        return o == null ? null : String.valueOf(o);
-    }
-
-    private static String toString(Feature f, String propName) {
-        Map<String,Object> properties = f.properties();
-        return properties == null ? null : toString(properties.get(propName));
-    }
-
-    public static Thing toThing(ProviderSnapshot provider) {
-        final String providerName = provider.getName();
-        Thing thing = new Thing(null, providerName,
-                toString(getProviderAdminFieldValue(provider, "friendlyName").orElse(providerName)),
-                toString(getProviderAdminFieldValue(provider, "description").orElse(NO_DESCRIPTION)),
-                null, null, null, null);
-        return thing;
-    }
-
-    private static String getProperty(GeoJsonObject location, String propName) {
-        if (location instanceof Feature) {
-            Feature f = (Feature) location;
-            return toString(f, propName);
-        } else if (location instanceof FeatureCollection) {
-            FeatureCollection fc = (FeatureCollection) location;
-            return fc.features().stream().map(f -> toString(f, propName)).filter(p -> p != null)
-                    .findFirst().orElse(null);
+    public static Location toLocation(final ObjectMapper mapper, final ProviderSnapshot provider) {
+        if (!DtoMapperSimple.isLocation(provider)) {
+            return null;
         }
-        return null;
+
+        return DtoMapperSimple.toLocation(mapper, provider, null);
     }
 
-    public static Location toLocation(ObjectMapper mapper, ProviderSnapshot provider) {
-        final String providerName = provider.getName();
-        final TimedValue<GeoJsonObject> rcLocation = getLocation(provider, mapper, false);
-        final Instant time = rcLocation.getTimestamp();
-        final GeoJsonObject object = rcLocation.getValue();
-
-        String id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
-
-        String name = Objects.requireNonNullElse(getProperty(object, "name"), providerName);
-
-        String description = Objects.requireNonNullElse(getProperty(object, "description"), NO_DESCRIPTION);
-
-        return new Location(null, id, name, description, "application/vnd.geo+json",
-                object, null, null);
-    }
-
-    public static HistoricalLocation toHistoricalLocation(ObjectMapper mapper, ProviderSnapshot provider) {
-        final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
+    public static HistoricalLocation toHistoricalLocation(final ObjectMapper mapper, final ProviderSnapshot provider) {
+        if (!DtoMapperSimple.isThing(provider)) {
+            return null;
+        }
+        final TimedValue<GeoJsonObject> location = DtoMapper.getLocation(provider, mapper, true);
         final Instant time;
         if (location.getTimestamp() == null) {
             time = Instant.EPOCH;
         } else {
             time = location.getTimestamp();
         }
-        String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
+        final String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
         return new HistoricalLocation(null, id, time, null, null);
     }
 
-    private static Polygon getObservedArea(GeoJsonObject object) {
-
-        if (object instanceof Feature) {
-            object = ((Feature) object).geometry();
-        } else if (object instanceof FeatureCollection) {
-            // TODO is there a better mapping?
-            object = ((FeatureCollection) object).features().stream().map((f) -> f.geometry())
-                    .filter(Polygon.class::isInstance).map(Polygon.class::cast).findFirst().orElse(null);
+    public static Datastream toDatastream(final ObjectMapper mapper, final ProviderSnapshot provider)
+            throws NotFoundException {
+        if (!DtoMapperSimple.isDatastream(provider)) {
+            return null;
         }
-        return object instanceof Polygon ? (Polygon) object : null;
+        return DtoMapperSimple.toDatastream(provider, null);
     }
 
-    public static Datastream toDatastream(ObjectMapper mapper, ResourceSnapshot resource) throws NotFoundException {
+    public static Datastream toDatastream(final ObjectMapper mapper, final ResourceSnapshot resource)
+            throws NotFoundException {
         if (resource == null) {
             throw new NotFoundException();
         }
 
-        final ProviderSnapshot provider = resource.getService().getProvider();
-        final Map<String, Object> metadata = resource.getMetadata();
+        return toDatastream(mapper, resource.getService().getProvider());
 
-        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(),
-                resource.getName());
-
-        String name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
-        String description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
-
-        UnitOfMeasurement unit = new UnitOfMeasurement(Objects.toString(metadata.get("sensorthings.unit.name"), null),
-                Objects.toString(metadata.get("unit"), null), Objects.toString(metadata.get("sensorthings.unit.definition"), null));
-
-        Geometry observedArea = getObservedArea(getLocation(provider, mapper, false).getValue());
-        return new Datastream(null, id, name, description,
-                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit,
-                observedArea, null, null, metadata, null, null, null, null);
     }
 
-    public static Sensor toSensor(ResourceSnapshot resource) throws NotFoundException {
+    public static Sensor toSensor(final ResourceSnapshot resource) throws NotFoundException {
         if (resource == null) {
             throw new NotFoundException();
         }
+        ProviderSnapshot provider = resource.getService().getProvider();
+        if (!DtoMapperSimple.isDatastream(provider)) {
+            return null;
+        }
 
-        final String provider = resource.getService().getProvider().getName();
-        final Map<String, Object> metadata = resource.getMetadata();
+        return DtoMapperSimple.toSensor(provider, null);
 
-        String id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
-
-        String name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
-        String description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
-
-        String encodingType = toString(metadata.getOrDefault("sensorthings.sensor.encodingType", "text/plain"));
-        return new Sensor(null, id, name, description, encodingType,
-                metadata.getOrDefault("sensorthings.sensor.metadata", "No metadata"), metadata, null);
     }
 
-    public static Observation toObservation(String provider, String service, String resource, TimedValue<?> tv) {
-        String id = String.format("%s~%s~%s~%s", provider, service, resource,
-                Long.toString(tv.getTimestamp().toEpochMilli(), 16));
-
-        Instant timestamp = tv.getTimestamp();
-        return new Observation(null, id, timestamp, timestamp, tv.getValue(), null, null, null, null, null);
+    public static Observation toObservation(final ResourceSnapshot resource, final TimedValue<?> tv) {
+        final TimedValue<?> t = tv != null ? tv : resource.getValue();
+        ProviderSnapshot provider = resource.getService().getProvider();
+        if (!DtoMapperSimple.isDatastream(provider)) {
+            return null;
+        }
+        return DtoMapperSimple.toObservation(provider.getName(), t, null);
     }
 
-    public static ObservedProperty toObservedProperty(ResourceSnapshot resource) {
-        final Map<String, Object> metadata = resource.getMetadata();
+    public static Observation toObservation(final String provider, final TimedValue<?> tv) {
+        return DtoMapperSimple.toObservation(provider, tv, null);
 
-        String id = String.format("%s~%s~%s", resource.getService().getProvider().getName(),
-                resource.getService().getName(), resource.getName());
-
-        String name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
-        String description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
-        String definition = toString(
-                metadata.getOrDefault("sensorthings.observedproperty.definition", "No definition"));
-
-        return new ObservedProperty(null, id, name, description, definition, metadata, null);
     }
 
-    private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
-            boolean allowNull) {
+    public static ObservedProperty toObservedProperty(final ProviderSnapshot provider) {
+        if (!DtoMapperSimple.isDatastream(provider)) {
+            return null;
+        }
+        return DtoMapperSimple.toObservedProperty(provider, null);
+    }
 
-        final Optional<? extends ResourceSnapshot> locationResource = getProviderAdminField(provider, "location");
+    public static ObservedProperty toObservedProperty(final ResourceSnapshot resource) {
+        return toObservedProperty(resource.getService().getProvider());
+    }
+
+    private static TimedValue<GeoJsonObject> getLocation(final ProviderSnapshot provider, final ObjectMapper mapper,
+            final boolean allowNull) {
+
+        final Optional<? extends ResourceSnapshot> locationResource = DtoMapper.getProviderAdminField(provider,
+                "location");
 
         final Instant time;
         final Object rawValue;
@@ -225,37 +163,32 @@ public class DtoMapper {
             } else {
                 parsedLocation = new Point(Coordinates.EMPTY, null, null);
             }
-        } else {
-            if (rawValue instanceof GeoJsonObject) {
-                parsedLocation = (GeoJsonObject) rawValue;
-            } else if (rawValue instanceof String) {
-                try {
-                    parsedLocation = mapper.readValue((String) rawValue, GeoJsonObject.class);
-                } catch (JsonProcessingException ex) {
-                    if (allowNull) {
-                        return null;
-                    }
-                    throw new RuntimeException("Invalid resource location content", ex);
+        } else if (rawValue instanceof GeoJsonObject) {
+            parsedLocation = (GeoJsonObject) rawValue;
+        } else if (rawValue instanceof String) {
+            try {
+                parsedLocation = mapper.readValue((String) rawValue, GeoJsonObject.class);
+            } catch (final JsonProcessingException ex) {
+                if (allowNull) {
+                    return null;
                 }
-            } else {
-                parsedLocation = mapper.convertValue(rawValue, GeoJsonObject.class);
+                throw new RuntimeException("Invalid resource location content", ex);
             }
+        } else {
+            parsedLocation = mapper.convertValue(rawValue, GeoJsonObject.class);
         }
 
         return new DefaultTimedValue<>(parsedLocation, time);
     }
 
-    public static FeatureOfInterest toFeatureOfInterest(ObjectMapper mapper, ProviderSnapshot provider) {
-        final String providerName = provider.getName();
+    public static FeatureOfInterest toFeatureOfInterest(final ProviderSnapshot provider) {
+        if (!DtoMapperSimple.isDatastream(provider)) {
+            return null;
+        }
+        final ServiceSnapshot serviceSnapshot = DtoMapperSimple.getDatastreamService(provider);
+        final ExpandedObservation lastObservation = DtoMapperSimple.getResourceField(serviceSnapshot, "lastObservation",
+                ExpandedObservation.class);
+        return DtoMapperSimple.toFeatureOfInterest(provider, lastObservation, null);
 
-        final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, false);
-        final GeoJsonObject object = location.getValue();
-
-        String name = Objects.requireNonNullElse(getProperty(object, "name"), providerName);
-
-        String description = Objects.requireNonNullElse(getProperty(object, "description"), NO_DESCRIPTION);
-
-        return new FeatureOfInterest(null, providerName, name, description,
-                "application/vnd.geo+json", object, null);
     }
 }

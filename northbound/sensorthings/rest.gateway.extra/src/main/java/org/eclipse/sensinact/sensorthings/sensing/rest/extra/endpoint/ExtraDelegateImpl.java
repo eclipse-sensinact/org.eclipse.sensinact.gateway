@@ -113,7 +113,9 @@ public class ExtraDelegateImpl implements IExtraDelegate {
                 parentId, clazzModel, clazzRef);
         ExtraUseCaseResponse<S> result = useCase.update(request);
         if (!result.success()) {
-
+            if (result.e() != null) {
+                throw result.e();
+            }
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
@@ -128,7 +130,9 @@ public class ExtraDelegateImpl implements IExtraDelegate {
                 parentId, clazzModel, clazzRef);
         ExtraUseCaseResponse<S> result = useCase.create(request);
         if (!result.success()) {
-
+            if (result.e() != null) {
+                throw result.e();
+            }
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
@@ -159,7 +163,9 @@ public class ExtraDelegateImpl implements IExtraDelegate {
                 id, parentId, clazzUseCase, clazzRef);
         ExtraUseCaseResponse<S> result = useCase.delete(request);
         if (!result.success()) {
-
+            if (result.e() != null) {
+                throw result.e();
+            }
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();

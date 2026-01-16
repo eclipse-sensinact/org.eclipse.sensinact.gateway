@@ -20,7 +20,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class ObservedPropertyPathHandler extends AbstractPathHandler {
 
@@ -33,7 +33,7 @@ public class ObservedPropertyPathHandler extends AbstractPathHandler {
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = UtilDto.getDatastreamService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
         if (service == null) {
             return null;
         }
@@ -55,22 +55,22 @@ public class ObservedPropertyPathHandler extends AbstractPathHandler {
         case "id":
         case "@iot.id":
 
-            String id = UtilDto.getResourceField(service, "observedPropertyId", String.class);
+            String id = DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class);
             if (id != null)
                 return String.join("~", provider.getName(), id);
             return null;
 
         case "name":
-            return UtilDto.getResourceField(service, "observedPropertyName", String.class);
+            return DtoMapperSimple.getResourceField(service, "observedPropertyName", String.class);
 
         case "description":
-            return UtilDto.getResourceField(service, "observedPropertyDescription", String.class);
+            return DtoMapperSimple.getResourceField(service, "observedPropertyDescription", String.class);
 
         case "definition":
-            return UtilDto.getResourceField(service, "observedPropertyDefinition", String.class);
+            return DtoMapperSimple.getResourceField(service, "observedPropertyDefinition", String.class);
 
         case "properties":
-            return UtilDto.getResourceField(service, "observedPropertyProperties", Map.class);
+            return DtoMapperSimple.getResourceField(service, "observedPropertyProperties", Map.class);
 
         default:
             throw new UnsupportedRuleException("Unexpected resource level field: " + path);

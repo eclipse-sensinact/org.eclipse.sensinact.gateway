@@ -12,7 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -34,19 +36,48 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
 
     private final Map<String, Map<String, Object>> expandedValues = new HashMap<>();
 
-    private ExpansionSettingsImpl() {}
+    private ExpansionSettingsImpl() {
+    }
 
     public ExpansionSettingsImpl(Stream<String> expansion) {
         expansion.forEach(this::addRequestedExpansion);
     }
 
-    private void addRequestedExpansion(String expansion) {
+    public static Stream<String> split(String s) {
+        List<String> result = new ArrayList<>();
+        int depth = 0;
+        StringBuilder current = new StringBuilder();
 
-        ExpansionSettingsImpl settings = this;
+        for (char c : s.toCharArray()) {
+            if (c == '(')
+                depth++;
+            if (c == ')')
+                depth--;
 
-        for(String s : expansion.split("/")) {
-            settings = settings.configuredExpansions.computeIfAbsent(s, x -> new ExpansionSettingsImpl());
+            if (c == ',' && depth == 0) {
+                result.add(current.toString().trim());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
         }
+        if (!current.isEmpty()) {
+            result.add(current.toString().trim());
+        }
+        return result.stream();
+    }
+
+    private void addRequestedExpansion(String expansion) {
+        ExpansionSettingsImpl settings = this;
+        if (expansion.indexOf("($expand=") != -1) {
+            settings.configuredExpansions.computeIfAbsent(expansion.substring(0, expansion.indexOf("($expand=")),
+                    x -> new ExpansionSettingsImpl(
+                            split(expansion.substring(expansion.indexOf("($expand=") + 9, expansion.length() - 1))));
+        } else {
+            settings.configuredExpansions.computeIfAbsent(expansion, x -> new ExpansionSettingsImpl());
+
+        }
+
     }
 
     @Override
@@ -56,13 +87,13 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
 
     @Override
     public boolean shouldExpand(String pathSegment, Id context) {
-        return configuredExpansions.containsKey(pathSegment) &&
-                Optional.ofNullable(expandedValues.get(pathSegment)).map(m -> m.get(toStringId(context))).isEmpty();
+        return configuredExpansions.containsKey(pathSegment)
+                && Optional.ofNullable(expandedValues.get(pathSegment)).map(m -> m.get(toStringId(context))).isEmpty();
     }
 
     @Override
     public void addExpansion(String pathSegment, Id context, Object expansion) {
-        if(!shouldExpand(pathSegment, context)) {
+        if (!shouldExpand(pathSegment, context)) {
             throw new IllegalArgumentException("The path " + pathSegment + " is not expandable");
         }
         expandedValues.computeIfAbsent(pathSegment, x -> new HashMap<>()).put(toStringId(context), expansion);
@@ -86,11 +117,10 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
 
     private Map<String, Object> getExpansionsFor(JsonNode context) {
 
-        if(context.hasNonNull("@iot.id")) {
+        if (context.hasNonNull("@iot.id")) {
             String id = context.get("@iot.id").asText();
 
-            return expandedValues.entrySet().stream()
-                    .filter(e -> e.getValue().containsKey(id))
+            return expandedValues.entrySet().stream().filter(e -> e.getValue().containsKey(id))
                     .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().get(id)));
         } else {
             return Map.of();
@@ -99,7 +129,7 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
 
     public JsonNode processExpansions(ObjectMapper mapper, Object object) {
         JsonNode node;
-        if(object instanceof JsonNode) {
+        if (object instanceof JsonNode) {
             node = (JsonNode) object;
         } else {
             node = mapper.valueToTree(object);
@@ -112,25 +142,25 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
 
     private void processExpansions(ObjectMapper mapper, JsonNode node) {
 
-        if(node.getNodeType() == JsonNodeType.OBJECT) {
+        if (node.getNodeType() == JsonNodeType.OBJECT) {
             ObjectNode on = (ObjectNode) node;
 
-            if(isResultList(on)) {
+            if (isResultList(on)) {
                 processExpansions(mapper, on.get("value"));
                 return;
             }
 
-            for(Entry<String, Object> e : getExpansionsFor(on).entrySet()) {
+            for (Entry<String, Object> e : getExpansionsFor(on).entrySet()) {
                 String field = e.getKey();
                 JsonNode expansion = configuredExpansions.get(field).processExpansions(mapper, e.getValue());
                 String linkField = field + "@iot.navigationLink";
                 JsonNode link = on.remove(linkField);
-                if(isResultList(expansion)) {
+                if (isResultList(expansion)) {
                     JsonNode value = expansion.get("value");
                     JsonNode count = expansion.get("@iot.count");
-                    if(count != null && count.isNumber()) {
+                    if (count != null && count.isNumber()) {
                         on.set(field + "@iot.count", count);
-                        if(value.isArray() && count.asInt() > value.size()) {
+                        if (value.isArray() && count.asInt() > value.size()) {
                             on.put(field + "@iot.nextLink", link.asText() + "$skip=" + value.size());
                         }
                     }
@@ -146,13 +176,12 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
 
     private boolean isResultList(JsonNode json) {
         // Must have a null or array value
-        if(json.has("value")) {
+        if (json.has("value")) {
             JsonNode node = json.get("value");
-            if(node.isArray() || node.isNull()) {
+            if (node.isArray() || node.isNull()) {
                 // Only value, count and nextLink are permitted
                 Set<String> permittedKeys = Set.of("value", "@iot.count", "@iot.nextLink");
-                return node.properties().stream()
-                    .noneMatch(e -> !permittedKeys.contains(e.getKey()));
+                return node.properties().stream().noneMatch(e -> !permittedKeys.contains(e.getKey()));
             }
         }
         return false;

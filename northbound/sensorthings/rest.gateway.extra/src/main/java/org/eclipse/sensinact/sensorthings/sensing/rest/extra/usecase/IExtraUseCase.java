@@ -12,8 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
-import java.util.UUID;
-
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
@@ -91,8 +89,7 @@ public interface IExtraUseCase<M extends Id, S> {
 
         public ExtraUseCaseRequest {
             if (id == null && model != null) {
-                id = DtoToModelMapper
-                        .sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString().substring(0, 8));
+                id = DtoToModelMapper.getNewId(model);
             }
         }
 
