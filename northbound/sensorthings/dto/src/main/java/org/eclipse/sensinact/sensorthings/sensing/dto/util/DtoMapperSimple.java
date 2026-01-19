@@ -26,6 +26,8 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.Feature;
+import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.geojson.Polygon;
@@ -603,6 +605,18 @@ public class DtoMapperSimple {
         return null;
     }
 
+    private static Polygon getObservedArea(GeoJsonObject object) {
+
+        if (object instanceof Feature) {
+            object = ((Feature) object).geometry();
+        } else if (object instanceof FeatureCollection) {
+            // TODO is there a better mapping?
+            object = ((FeatureCollection) object).features().stream().map((f) -> f.geometry())
+                    .filter(Polygon.class::isInstance).map(Polygon.class::cast).findFirst().orElse(null);
+        }
+        return object instanceof Polygon ? (Polygon) object : null;
+    }
+
     public static Datastream toDatastream(ProviderSnapshot provider, UriInfo uriInfo) {
         String id = provider.getName();
 
@@ -613,7 +627,8 @@ public class DtoMapperSimple {
         Map<String, Object> metadata = getResourceField(getDatastreamService(provider), "properties", Map.class);
         UnitOfMeasurement unit = toUnitOfMeasure(provider);
 
-        Polygon observedArea = null; // TODO
+        GeoJsonObject observedAreaRead = getResourceField(getAdminService(provider), LOCATION, GeoJsonObject.class);
+        Polygon observedArea = getObservedArea(observedAreaRead);
         String thingId = getResourceField(getDatastreamService(provider), "thingId", String.class);
         Sensor sensor = toSensor(provider, uriInfo);
         ObservedProperty observedProperty = toObservedProperty(provider, uriInfo);
