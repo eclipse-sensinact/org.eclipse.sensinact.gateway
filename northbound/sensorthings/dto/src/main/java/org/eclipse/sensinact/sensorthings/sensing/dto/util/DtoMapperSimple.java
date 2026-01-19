@@ -56,7 +56,7 @@ public class DtoMapperSimple {
 
     private static final String DESCRIPTION = "description";
     private static final String FRIENDLY_NAME = "friendlyName";
-    private static final String LOCATION = "location";
+    public static final String LOCATION = "location";
     private static final String ENCODING_TYPE_VND_GEO_JSON = "application/vnd.geo+json";
     public static final String VERSION = "v1.1";
     private static final String NO_DESCRIPTION = "No description";

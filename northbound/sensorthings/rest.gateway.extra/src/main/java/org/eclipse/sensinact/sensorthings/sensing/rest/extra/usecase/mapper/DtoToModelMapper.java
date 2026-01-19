@@ -73,6 +73,12 @@ public class DtoToModelMapper {
     public static final String NO_DESCRIPTION = "No description";
     public static final String NO_DEFINITION = "No definition";
 
+    /**
+     * get id value from a record
+     *
+     * @param record
+     * @return
+     */
     public static String getIdFromRecord(Object record) {
         Object field = DtoToModelMapper.getRecordField(record, "id");
         Object id = null;
@@ -83,15 +89,35 @@ public class DtoToModelMapper {
 
     }
 
+    /**
+     * get new id for new sensorthing entities
+     *
+     * @param model
+     * @return
+     */
     public static String getNewId(Id model) {
         return sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString().substring(0, 8));
     }
 
+    /**
+     * return resource snapshot identified name from service
+     *
+     * @param service
+     * @param resource
+     * @return
+     */
     public static Optional<? extends ResourceSnapshot> getProviderField(ServiceSnapshot service, String resource) {
 
         return service.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
+    /**
+     * extract second (part) of id separate by ~
+     *
+     * @param id
+     * @param part
+     * @return
+     */
     public static String extractIdSegment(String id, int part) {
         if (id.isEmpty())
             return null;
@@ -107,25 +133,56 @@ public class DtoToModelMapper {
         return null;
     }
 
+    /**
+     * get first segment of i separate by ~
+     *
+     * @param id
+     * @return
+     */
     public static String extractFirstIdSegment(String id) {
         return extractIdSegment(id, 0);
     }
 
+    /**
+     * get second part of id separate by ~
+     *
+     * @param id
+     * @return
+     */
     public static String extractSecondIdSegment(String id) {
         return extractIdSegment(id, 1);
 
     }
 
+    /**
+     * get third part of id separate by ~
+     *
+     * @param id
+     * @return
+     */
     public static String extractThirdIdSegment(String id) {
         return extractIdSegment(id, 2);
 
     }
 
+    /**
+     * get fourth element in the id (separate by ~)
+     *
+     * @param id
+     * @return
+     */
     public static String extractFouthIdSegment(String id) {
         return extractIdSegment(id, 3);
 
     }
 
+    /**
+     * get object from service identified by resource name
+     *
+     * @param service
+     * @param resource
+     * @return
+     */
     public static Optional<Object> getProviderFieldValue(ServiceSnapshot service, String resource) {
         Optional<? extends ResourceSnapshot> rc = getProviderField(service, resource);
         if (rc.isPresent()) {
@@ -141,11 +198,32 @@ public class DtoToModelMapper {
         return String.valueOf(object).replaceAll("[^0-9a-zA-Z\\.\\-_]", "_");
     }
 
+    /**
+     * get location update instance for dataupdate
+     *
+     * @param providerId
+     * @param location
+     * @return
+     */
     public static SensorThingsUpdate toLocationUpdate(String providerId, ExpandedLocation location) {
         return new LocationUpdate(providerId, providerId, location.name(), location.description(),
                 location.encodingType(), location.location());
     }
 
+    /**
+     * get datastream update instance for dataUpdater
+     *
+     * @param providerId
+     * @param observedArea
+     * @param ds
+     * @param sensor
+     * @param observedProperty
+     * @param unit
+     * @param lastObservation
+     * @param lastObservationReceived
+     * @param featureOfInterest
+     * @return
+     */
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, GeoJsonObject observedArea,
             ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
@@ -154,6 +232,20 @@ public class DtoToModelMapper {
                 lastObservationReceived, featureOfInterest);
     }
 
+    /**
+     * get the datastream update instance for dataUpdater
+     *
+     * @param providerId
+     * @param observedArea
+     * @param thingId
+     * @param ds
+     * @param sensor
+     * @param observedProperty
+     * @param unit
+     * @param lastObservation
+     * @param featureOfInterest
+     * @return
+     */
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, GeoJsonObject observedArea, String thingId,
             ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, FeatureOfInterest featureOfInterest) {
@@ -174,19 +266,16 @@ public class DtoToModelMapper {
             return newGeo;
         }
 
-        // Convert newGeo to a Feature (if it is a Geometry)
         List<Feature> newFeatures = new ArrayList<>();
         if (newGeo instanceof Feature f) {
             newFeatures.add(f);
         } else if (newGeo instanceof FeatureCollection fc) {
             newFeatures.addAll(fc.features());
         } else if (newGeo instanceof Geometry g) {
-            // Wrap Geometry into a Feature with no properties
             newFeatures.add(new Feature(null, g, Map.of(), null, null));
         } else {
             throw new IllegalArgumentException("Unsupported GeoJsonObject type: " + newGeo.getClass());
         }
-
         // Merge into existing observedArea
         if (existing instanceof FeatureCollection fc) {
             List<Feature> merged = new ArrayList<>(fc.features());
@@ -208,6 +297,21 @@ public class DtoToModelMapper {
         }
     }
 
+    /**
+     * return datastream update object for dataUpdater to update EMF model
+     *
+     * @param providerId
+     * @param thingId
+     * @param observedArea
+     * @param ds
+     * @param sensor
+     * @param observedProperty
+     * @param unit
+     * @param lastObservation
+     * @param lastObservationReceived
+     * @param featureOfInterest
+     * @return
+     */
     public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, GeoJsonObject observedArea,
             ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
@@ -297,14 +401,35 @@ public class DtoToModelMapper {
         return o == null || o.isEmpty() ? null : String.valueOf(o.get());
     }
 
+    /**
+     * return true if the record object is a record and has only the first
+     * identified by idFieldName, else False
+     *
+     * @param record
+     * @param idFieldName
+     * @return
+     */
     public static boolean isRecordOnlyField(Object record, String idFieldName) {
         return DtoMapperSimple.isRecordOnlyField(record, idFieldName);
     }
 
+    /**
+     * get record field identified by fieldName from a record object, else null
+     *
+     * @param record
+     * @param fieldName
+     * @return
+     */
     public static Object getRecordField(Object record, String fieldName) {
         return DtoMapperSimple.getRecordField(record, fieldName);
     }
 
+    /**
+     * retrun Feature from FeatureCollection
+     *
+     * @param fc
+     * @return
+     */
     private static Feature toFeature(FeatureCollection fc) {
         return switch (fc.features().size()) {
         case 0:
@@ -318,6 +443,13 @@ public class DtoToModelMapper {
         };
     }
 
+    /**
+     * return the Feature GeoJon from the location information in Location
+     * sensorthing entity
+     *
+     * @param location
+     * @return
+     */
     private static Feature toFeature(Location location) {
         Feature f;
 
@@ -349,6 +481,13 @@ public class DtoToModelMapper {
         return f;
     }
 
+    /**
+     * aggregate all location geojson from collection of locations sensorthing
+     * entity in a new Geojson
+     *
+     * @param locations
+     * @return
+     */
     private static GeoJsonObject aggregate(List<Location> locations) {
         return switch (locations.size()) {
         case 0:
@@ -362,6 +501,15 @@ public class DtoToModelMapper {
 
     }
 
+    /**
+     * return the thing update object to be use in dataupdate to update Thing entity
+     *
+     * @param request
+     * @param id
+     * @param existingLocationIds
+     * @param existingDatastreamIds
+     * @return
+     */
     public static List<SensorThingsUpdate> toThingUpdates(ExtraUseCaseRequest<ExpandedThing> request, String id,
             List<String> existingLocationIds, List<String> existingDatastreamIds) {
         String providerIdThing = id;
@@ -412,6 +560,14 @@ public class DtoToModelMapper {
         return listUpdate;
     }
 
+    /**
+     * aggregate location geojson from list of location that is identified by a list
+     * of id in existingLocationIds
+     *
+     * @param request
+     * @param existingLocationIds
+     * @return
+     */
     public static GeoJsonObject getAggregateLocation(ExtraUseCaseRequest<?> request, List<String> existingLocationIds) {
         return aggregate(existingLocationIds.stream()
                 .map(idLocation -> UtilDto.getProviderSnapshot(request.session(), idLocation))
@@ -419,14 +575,34 @@ public class DtoToModelMapper {
                 .map(p -> DtoMapperSimple.toLocation(request.mapper(), p, null)).toList());
     }
 
+    /**
+     * get new id for location if not exists
+     *
+     * @param l
+     * @return
+     */
     private static String getLocationId(ExpandedLocation l) {
         return DtoToModelMapper.getNewId(l);
     }
 
+    /**
+     * get new id for datastream if not exists
+     *
+     * @param l
+     * @return
+     */
     private static String getDatastreamid(ExpandedDataStream l) {
         return DtoToModelMapper.getNewId(l);
     }
 
+    /**
+     * return location update object to update using data update the Location
+     * sensorthing Entity
+     *
+     * @param location
+     * @param id
+     * @return
+     */
     public static List<SensorThingsUpdate> toLocationUpdates(ExpandedLocation location, String id) {
         List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
 
