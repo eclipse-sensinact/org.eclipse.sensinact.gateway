@@ -96,8 +96,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         checkRequireLink(serviceDatastream);
         ExpandedObservation existingObservation = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation",
                 ExpandedObservation.class);
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, existingObservation,
-                observation, foi));
+
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, getObservedArea(request.session(), providerId),
+                null, null, null, null, existingObservation, observation, foi));
     }
 
     private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {

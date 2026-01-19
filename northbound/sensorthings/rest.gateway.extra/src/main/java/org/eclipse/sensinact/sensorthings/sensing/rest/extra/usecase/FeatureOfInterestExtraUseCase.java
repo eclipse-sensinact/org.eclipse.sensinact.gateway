@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
@@ -81,9 +82,9 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         checkRequireField(request);
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
                 receiveFoi.encodingType(), receiveFoi.feature(), null);
-
-        return List.of(
-                DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, null, null, null, foiToUpdate));
+        GeoJsonObject observedArea = getObservedArea(request.session(), providerId);
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, observedArea, (String) null, null, null, null,
+                null, null, foiToUpdate));
 
     }
 

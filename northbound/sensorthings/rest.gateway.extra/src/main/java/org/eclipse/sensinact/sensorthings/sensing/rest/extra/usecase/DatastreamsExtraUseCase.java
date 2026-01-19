@@ -27,6 +27,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
@@ -110,18 +111,18 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
         String thingId = getThingId(request, datastream, datastreamId);
         ProviderSnapshot providerThing = providerUseCase.read(request.session(), thingId);
-
+        GeoJsonObject observedArea = getObservedArea(request.session(), request.id());
         updateOldThingDatastreamIdIfNeeded(request, listUpdates, datastreamId, thingId);
         checkRequireLink(request, sensor, observedProperty, unit, providerThing);
         addDatastreamIdLinkToLinkThing(request, datastreamId, providerThing, listUpdates);
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
             listUpdates.addAll(datastream.observations().stream()
-                    .map(obs -> DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
-                            observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
+                    .map(obs -> DtoToModelMapper.toDatastreamUpdate(datastreamId, observedArea, thingId, datastream,
+                            sensor, observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
                     .toList());
         } else {
-            listUpdates.add(DtoToModelMapper.toDatastreamUpdate(datastreamId, thingId, datastream, sensor,
+            listUpdates.add(DtoToModelMapper.toDatastreamUpdate(datastreamId, observedArea, thingId, datastream, sensor,
                     observedProperty, unit, null, null));
         }
         return listUpdates;

@@ -74,8 +74,8 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<Sensor, Object>
         checkRequireField(request);
         Sensor sensorToUpdate = new Sensor(null, sensorId, receivedSensor.name(), receivedSensor.description(),
                 receivedSensor.encodingType(), receivedSensor.metadata(), receivedSensor.properties(), null);
-        return List.of(
-                DtoToModelMapper.toDatastreamUpdate(providerId, null, sensorToUpdate, null, null, null, null, null));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, getObservedArea(request.session(), providerId),
+                null, sensorToUpdate, null, null, null, null, null));
 
     }
 
