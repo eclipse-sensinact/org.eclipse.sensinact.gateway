@@ -36,7 +36,6 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
@@ -147,29 +146,76 @@ public class DtoToModelMapper {
                 location.encodingType(), location.location());
     }
 
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, ExpandedDataStream ds, Sensor sensor,
-            ObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
-            ExpandedObservation lastObservationReceived, FeatureOfInterest featureOfInterest) {
-        return toDatastreamUpdate(providerId, null, ds, sensor, observedProperty, unit, lastObservation,
+    public static SensorThingsUpdate toDatastreamUpdate(String providerId, GeoJsonObject observedArea,
+            ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
+            ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
+            FeatureOfInterest featureOfInterest) {
+        return toDatastreamUpdate(providerId, null, observedArea, ds, sensor, observedProperty, unit, lastObservation,
                 lastObservationReceived, featureOfInterest);
     }
 
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, ExpandedDataStream ds,
-            Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
+    public static SensorThingsUpdate toDatastreamUpdate(String providerId, GeoJsonObject observedArea, String thingId,
+            ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, FeatureOfInterest featureOfInterest) {
-        return toDatastreamUpdate(providerId, thingId, ds, sensor, observedProperty, unit, lastObservation,
-                lastObservation, featureOfInterest);
+        return toDatastreamUpdate(providerId, thingId, observedArea, ds, sensor, observedProperty, unit,
+                lastObservation, lastObservation, featureOfInterest);
     }
 
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, ExpandedDataStream ds,
-            Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
+    /**
+     * Merge a new FOI geometry into the current observedArea.
+     *
+     * @param currentArea the current observedArea (can be null)
+     * @param newFeature  the new FOI feature geometry
+     * @return the merged observedArea geometry
+     */
+
+    static GeoJsonObject mergeObservedArea(GeoJsonObject existing, GeoJsonObject newGeo) {
+        if (existing == null) {
+            return newGeo;
+        }
+
+        // Convert newGeo to a Feature (if it is a Geometry)
+        List<Feature> newFeatures = new ArrayList<>();
+        if (newGeo instanceof Feature f) {
+            newFeatures.add(f);
+        } else if (newGeo instanceof FeatureCollection fc) {
+            newFeatures.addAll(fc.features());
+        } else if (newGeo instanceof Geometry g) {
+            // Wrap Geometry into a Feature with no properties
+            newFeatures.add(new Feature(null, g, Map.of(), null, null));
+        } else {
+            throw new IllegalArgumentException("Unsupported GeoJsonObject type: " + newGeo.getClass());
+        }
+
+        // Merge into existing observedArea
+        if (existing instanceof FeatureCollection fc) {
+            List<Feature> merged = new ArrayList<>(fc.features());
+            merged.addAll(newFeatures);
+            return new FeatureCollection(merged, fc.bbox(), fc.foreignMembers());
+        } else if (existing instanceof Feature f) {
+            List<Feature> merged = new ArrayList<>();
+            merged.add(f);
+            merged.addAll(newFeatures);
+            return new FeatureCollection(merged, null, null);
+        } else if (existing instanceof Geometry g) {
+            // Wrap existing Geometry into a Feature
+            List<Feature> merged = new ArrayList<>();
+            merged.add(new Feature(null, g, Map.of(), null, null));
+            merged.addAll(newFeatures);
+            return new FeatureCollection(merged, null, null);
+        } else {
+            throw new IllegalArgumentException("Unsupported existing observedArea type: " + existing.getClass());
+        }
+    }
+
+    public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, GeoJsonObject observedArea,
+            ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
             ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
             FeatureOfInterest featureOfInterest) {
 
         Instant timestamp = lastObservationReceived != null && lastObservationReceived.phenomenonTime() != null
                 ? lastObservationReceived.phenomenonTime()
                 : Instant.now();
-
         String name = ds != null ? ds.name() : null;
         String description = ds != null ? ds.description() : null;
 
@@ -197,6 +243,8 @@ public class DtoToModelMapper {
         String unitName = unit != null ? unit.name() : null;
         String unitSymbol = unit != null ? unit.symbol() : null;
         String unitDefinition = unit != null ? unit.definition() : null;
+        GeoJsonObject observedAreaToUpdate = observedArea;
+
         // last observation
         ExpandedObservation obs = lastObservationReceived;
         if (lastObservationReceived != null && lastObservation != null) {
@@ -226,12 +274,17 @@ public class DtoToModelMapper {
             obs = new ExpandedObservation(null, observationId, phenomenonTime, resultTime, result, resultQuality,
                     validTime, parameters, properties, null, null, null, featureOfInterest);
             DtoMapperSimple.checkRequireField(obs);
+            if (featureOfInterest != null && featureOfInterest.feature() != null) {
+                observedAreaToUpdate = mergeObservedArea(observedArea, featureOfInterest.feature());
+            }
+
         }
+
         // --- Build DatastreamUpdate ---
         DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description, timestamp,
-                thingId, sensorId, sensorName, sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties,
-                observedPropertyId, observedPropertyName, observedPropertyDescription, observedPropertyDefinition,
-                observedPropertyProperties, unitName, unitSymbol, unitDefinition, obs);
+                observedAreaToUpdate, thingId, sensorId, sensorName, sensorDescription, sensorEncodingType,
+                sensorMetadata, sensorProperties, observedPropertyId, observedPropertyName, observedPropertyDescription,
+                observedPropertyDefinition, observedPropertyProperties, unitName, unitSymbol, unitDefinition, obs);
 
         return datastreamUpdate;
     }
@@ -274,6 +327,7 @@ public class DtoToModelMapper {
             case Feature:
                 yield (Feature) location.location();
             case FeatureCollection:
+
                 yield toFeature((FeatureCollection) location.location());
             case GeometryCollection:
             case LineString:
@@ -287,6 +341,7 @@ public class DtoToModelMapper {
             default:
                 throw new IllegalArgumentException("Unknown GeoJSON object " + location.location().type());
             };
+
         } else {
             f = null;
         }
@@ -299,10 +354,12 @@ public class DtoToModelMapper {
         case 0:
             yield null;
         case 1:
+
             yield toFeature(locations.get(0));
         default:
             yield new FeatureCollection(locations.stream().map(DtoToModelMapper::toFeature).toList(), null, null);
         };
+
     }
 
     public static List<SensorThingsUpdate> toThingUpdates(ExtraUseCaseRequest<ExpandedThing> request, String id,
@@ -337,11 +394,11 @@ public class DtoToModelMapper {
                 existingDatastreamIds.add(idDatastream);
                 if (ds.observations() != null && ds.observations().size() > 0) {
                     listUpdate.addAll(ds.observations().stream().map(obs -> {
-                        return toDatastreamUpdate(idDatastream, providerIdThing, ds, ds.sensor(), ds.observedProperty(),
-                                ds.unitOfMeasurement(), obs, obs.featureOfInterest());
+                        return toDatastreamUpdate(idDatastream, null, providerIdThing, ds, ds.sensor(),
+                                ds.observedProperty(), ds.unitOfMeasurement(), obs, obs.featureOfInterest());
                     }).toList());
                 } else {
-                    listUpdate.add(toDatastreamUpdate(idDatastream, providerIdThing, ds, ds.sensor(),
+                    listUpdate.add(toDatastreamUpdate(idDatastream, null, providerIdThing, ds, ds.sensor(),
                             ds.observedProperty(), ds.unitOfMeasurement(), null, null));
                 }
             }

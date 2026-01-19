@@ -18,6 +18,8 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
@@ -45,6 +47,17 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
         if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
             DtoMapperSimple.checkRequireField(request.model());
         }
+    }
+
+    protected GeoJsonObject getObservedArea(SensiNactSession session, String datastreamId) {
+        ProviderSnapshot providerDatastream = providerUseCase.read(session, datastreamId);
+        GeoJsonObject observedArea = null;
+
+        if (providerDatastream != null) {
+            observedArea = DtoMapperSimple.getResourceField(DtoMapperSimple.getAdminService(providerDatastream),
+                    DtoMapperSimple.LOCATION, GeoJsonObject.class);
+        }
+        return observedArea;
     }
 
     public AbstractExtraUseCaseDto(Providers providers) {
