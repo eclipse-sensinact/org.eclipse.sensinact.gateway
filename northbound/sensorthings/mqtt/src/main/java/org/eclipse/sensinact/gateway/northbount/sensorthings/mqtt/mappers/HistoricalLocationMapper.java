@@ -28,11 +28,11 @@ public class HistoricalLocationMapper extends HistoricalLocationsMapper {
     public HistoricalLocationMapper(String topicFilter, String id, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
 
-        String[] segments = id.split("~");
-        if (segments.length >= 2) {
-            throw new IllegalArgumentException("The HistoricalLocation id " + id + " is not valid");
-        }
-        this.provider = segments[0];
+        int i = id.indexOf("~");
+        if (i == -1)
+            i = id.length();
+
+        this.provider = id.substring(0, i);
     }
 
     @Override

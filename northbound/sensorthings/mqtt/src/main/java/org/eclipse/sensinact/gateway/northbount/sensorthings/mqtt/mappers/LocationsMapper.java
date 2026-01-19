@@ -24,17 +24,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class LocationsMapper extends SensorthingsMapper<Location> {
 
-    public LocationsMapper(final String topicFilter, final ObjectMapper mapper, final GatewayThread thread) {
+    public LocationsMapper(String topicFilter, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
     }
 
     @Override
-    public Promise<Stream<Location>> toPayload(final ResourceDataNotification notification) {
+    public Promise<Stream<Location>> toPayload(ResourceDataNotification notification) {
         if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
-            return this.decorate(
-                    this.getProvider(notification.provider()).map(p -> DtoMapper.toLocation(this.jsonMapper, p)));
+            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toLocation(jsonMapper, p)));
         }
-        return this.emptyStream();
+        return emptyStream();
     }
 
     @Override

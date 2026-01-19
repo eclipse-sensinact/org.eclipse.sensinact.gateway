@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,11 +32,11 @@ public class SensorMapper extends SensorsMapper {
 
         String[] segments = id.split("~");
 
-        if (segments.length >= 2) {
+        if (segments.length != 3) {
             throw new IllegalArgumentException("The Sensor id " + id + " is not valid");
         }
         this.provider = segments[0];
-        this.service = DtoMapperSimple.SERVICE_DATASTREAM;
+        this.service = segments[1];
         this.resource = segments[2];
     }
 

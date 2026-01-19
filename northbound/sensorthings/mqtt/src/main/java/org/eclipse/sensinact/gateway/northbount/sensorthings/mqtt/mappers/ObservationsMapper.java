@@ -15,10 +15,7 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
@@ -29,28 +26,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ObservationsMapper extends SensorthingsMapper<Observation> {
 
-    public ObservationsMapper(final String topicFilter, final ObjectMapper mapper, final GatewayThread thread) {
+    public ObservationsMapper(String topicFilter, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
     }
 
-    @Override
-    public Promise<Stream<Observation>> toPayload(final LifecycleNotification notification) {
-        if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
-            // This is a resource appearing
-            return this.getObservation(
-                    this.getResource(notification.provider(), notification.service(), notification.resource()));
-        }
-        return this.emptyStream();
-    }
-
-    protected Promise<Stream<Observation>> getObservation(final Promise<ResourceSnapshot> resourceSnapshot) {
-        return this.decorate(resourceSnapshot.map(r -> DtoMapper.toObservation(r, r.getValue())));
-    }
-
-    @Override
-    public Promise<Stream<Observation>> toPayload(final ResourceDataNotification notification) {
-        final TimedValue<Object> tv = new DefaultTimedValue<>(notification.newValue(), notification.timestamp());
-        return this.wrap(DtoMapper.toObservation(notification.provider(), tv));
+    public Promise<Stream<Observation>> toPayload(ResourceDataNotification notification) {
+        TimedValue<Object> tv = new DefaultTimedValue<>(notification.newValue(), notification.timestamp());
+        return wrap(DtoMapper.toObservation(notification.provider(), notification.service(), notification.resource(), tv));
     }
 
     @Override
