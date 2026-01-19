@@ -28,13 +28,11 @@ public class FeatureOfInterestMapper extends FeaturesOfInterestMapper {
     public FeatureOfInterestMapper(String topicFilter, String id, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
 
-        String[] segments = id.split("~");
+        int i = id.indexOf("~");
+        if (i == -1)
+            i = id.length();
 
-        if (segments.length >= 3) {
-            throw new IllegalArgumentException("The Sensor id " + id + " is not valid");
-        }
-        this.provider = segments[0];
-
+        this.provider = id.substring(0, i);
     }
 
     @Override

@@ -650,7 +650,7 @@ public class FiltersTest extends AbstractIntegrationTest {
 
             createThing(provider, List.of(), List.of(providerDatastream1, providerDatastream2));
 
-            Set<String> expandedFields = Set.of("Datastreams/Observations", "Locations");
+            Set<String> expandedFields = Set.of("Datastreams($expand=Observations)", "Locations");
             Map<?, ?> rawResultList = utils.queryJson("/Things/?$expand=" + String.join(",", expandedFields),
                     Map.class);
 

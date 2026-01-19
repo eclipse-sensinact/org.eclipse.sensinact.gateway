@@ -24,16 +24,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FeaturesOfInterestMapper extends SensorthingsMapper<FeatureOfInterest> {
 
-    public FeaturesOfInterestMapper(final String topicFilter, final ObjectMapper mapper, final GatewayThread thread) {
+    public FeaturesOfInterestMapper(String topicFilter, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
     }
 
     @Override
-    public Promise<Stream<FeatureOfInterest>> toPayload(final ResourceDataNotification notification) {
+    public Promise<Stream<FeatureOfInterest>> toPayload(ResourceDataNotification notification) {
         if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
-            return this.decorate(this.getProvider(notification.provider()).map(DtoMapper::toFeatureOfInterest));
+            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toFeatureOfInterest(jsonMapper, p)));
         }
-        return this.emptyStream();
+        return emptyStream();
     }
 
     @Override

@@ -27,28 +27,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SensorsMapper extends SensorthingsMapper<Sensor> {
 
-    public SensorsMapper(final String topicFilter, final ObjectMapper mapper, final GatewayThread thread) {
+    public SensorsMapper(String topicFilter, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
     }
 
     @Override
-    public Promise<Stream<Sensor>> toPayload(final LifecycleNotification notification) {
+    public Promise<Stream<Sensor>> toPayload(LifecycleNotification notification) {
         if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
             // This is a resource appearing
-            return this.getSensor(
-                    this.getResource(notification.provider(), notification.service(), notification.resource()));
+            return getSensor(getResource(notification.provider(), notification.service(), notification.resource()));
         }
-        return this.emptyStream();
+        return emptyStream();
     }
 
     @Override
-    public Promise<Stream<Sensor>> toPayload(final ResourceMetaDataNotification notification) {
-        return this
-                .getSensor(this.getResource(notification.provider(), notification.service(), notification.resource()));
+    public Promise<Stream<Sensor>> toPayload(ResourceMetaDataNotification notification) {
+        return getSensor(getResource(notification.provider(), notification.service(), notification.resource()));
     }
 
-    protected Promise<Stream<Sensor>> getSensor(final Promise<ResourceSnapshot> resourceSnapshot) {
-        return this.decorate(resourceSnapshot.map(DtoMapper::toSensor));
+    protected Promise<Stream<Sensor>> getSensor(Promise<ResourceSnapshot> resourceSnapshot) {
+        return decorate(resourceSnapshot.map(DtoMapper::toSensor));
     }
 
     @Override

@@ -18,7 +18,7 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.osgi.util.promise.Promise;
@@ -27,26 +27,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ObservedPropertiesMapper extends SensorthingsMapper<ObservedProperty> {
 
-    public ObservedPropertiesMapper(final String topicFilter, final ObjectMapper mapper, final GatewayThread thread) {
+    public ObservedPropertiesMapper(String topicFilter, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
     }
 
     @Override
-    public Promise<Stream<ObservedProperty>> toPayload(final LifecycleNotification notification) {
+    public Promise<Stream<ObservedProperty>> toPayload(LifecycleNotification notification) {
         if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
             // This is a resource appearing
-            return this.getObservedProperty(this.getProvider(notification.provider()));
+            return getObservedProperty(getResource(notification.provider(), notification.service(), notification.resource()));
         }
-        return this.emptyStream();
+        return emptyStream();
     }
 
     @Override
-    public Promise<Stream<ObservedProperty>> toPayload(final ResourceMetaDataNotification notification) {
-        return this.getObservedProperty(this.getProvider(notification.provider()));
+    public Promise<Stream<ObservedProperty>> toPayload(ResourceMetaDataNotification notification) {
+        return getObservedProperty(getResource(notification.provider(), notification.service(), notification.resource()));
     }
 
-    protected Promise<Stream<ObservedProperty>> getObservedProperty(final Promise<ProviderSnapshot> providerSnapshot) {
-        return this.decorate(providerSnapshot.map(DtoMapper::toObservedProperty));
+    protected Promise<Stream<ObservedProperty>> getObservedProperty(Promise<ResourceSnapshot> resourceSnapshot) {
+        return decorate(resourceSnapshot.map(DtoMapper::toObservedProperty));
     }
 
     @Override
