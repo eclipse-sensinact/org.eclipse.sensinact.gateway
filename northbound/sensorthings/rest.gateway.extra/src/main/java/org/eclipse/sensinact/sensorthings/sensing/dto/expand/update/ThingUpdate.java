@@ -34,9 +34,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
  */
 @Service("admin")
 public record ThingUpdate(@Model EClass model, @Provider String providerId,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location, // aggregate location for
-                                                                         // historical
-        // location
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
         @Service("thing") @Resource("id") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object thingId,
