@@ -51,7 +51,7 @@ public class ObservationTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
                 DtoFactory.getRefId(thingId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Sensor,Observations", 201);
         UtilsAssert.assertDatastream(datastream, json, true);
         String datastreamId = getIdFromJson(json);
         ExpandedObservation observsation = DtoFactory.getObservation(name);
@@ -78,7 +78,7 @@ public class ObservationTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
                 DtoFactory.getRefId(thingId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Sensor,Observations", 201);
         UtilsAssert.assertDatastream(datastream, json, true);
         String datastreamId = getIdFromJson(json);
         ExpandedObservation observsation = DtoFactory.getObservation(name);
@@ -109,7 +109,7 @@ public class ObservationTest extends AbstractIntegrationTest {
 
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThing(name + "1",
                 DtoFactory.getRefId(thingId));
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Sensor,Observations", 201);
         UtilsAssert.assertDatastream(datastream, json, true);
         String datastreamId = getIdFromJson(json);
         // result
@@ -144,7 +144,7 @@ public class ObservationTest extends AbstractIntegrationTest {
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingWithObservations(name + "Datastream",
                 DtoFactory.getRefId(thingId), List.of(observsation1, observsation2));
 
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,Sensor,ObservedProperty", 201);
 
         UtilsAssert.assertDatastream(datastream, json, true);
 
@@ -171,7 +171,7 @@ public class ObservationTest extends AbstractIntegrationTest {
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingWithObservations(name + "Datastream",
                 DtoFactory.getRefId(thingId), List.of(observsation1, observsation2));
 
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,ObservedProperty", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Observations,Sensor,ObservedProperty", 201);
         JsonNode observationsNode = json.get("Observations");
         assertEquals(observationsNode.size(), 1);
         String idObservation = getIdFromJson(observationsNode.get(0));

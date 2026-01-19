@@ -173,7 +173,7 @@ public class DatastreamTest extends AbstractIntegrationTest {
                 DtoFactory.getRefId(getIdFromJson(json)));
 
         // when
-        json = getJsonResponseFromPost(dtoDatastream, "Datastreams?$expand=Sensor,ObservedProperty", 201);
+        json = getJsonResponseFromPost(dtoDatastream, "Datastreams?$expand=Sensor,ObservedProperty,Observations", 201);
         UtilsAssert.assertDatastream(dtoDatastream, json, true);
 
     }
