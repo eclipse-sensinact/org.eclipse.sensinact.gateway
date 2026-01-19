@@ -44,6 +44,11 @@ public class UtilsAssert {
                 assertNotNull(observedPropertyNode, "observedProperty array must be present");
                 assertEquals(dto.observedProperty().name(), observedPropertyNode.get("name").asText(), "");
             }
+            if (dto.sensor() != null) {
+                JsonNode sensorNode = json.get("Sensor");
+                assertNotNull(sensorNode, "Sensor array must be present");
+                assertEquals(dto.sensor().name(), sensorNode.get("name").asText(), "");
+            }
             if (dto.observations() != null && dto.observations().size() > 0) {
                 assertEquals(1, json.get("Observations").size());
                 assertObservation(dto.observations().get(dto.observations().size() - 1),

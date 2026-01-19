@@ -149,7 +149,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingWithObservations(name + "Datastream",
                 DtoFactory.getRefId(thingId), List.of(observsation1));
 
-        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Sensor,Observations", 201);
 
         UtilsAssert.assertDatastream(datastream, json, true);
 
