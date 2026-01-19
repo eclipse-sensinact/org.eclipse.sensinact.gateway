@@ -55,7 +55,7 @@ A `Resource` is the lowest level of the sensiNact data model. A resource represe
 
 ### Data Resources
 
-A data resource has a single `value` associated with it representing the data it provides.
+A data resource has a `value` associated with it representing the data it provides.
 A resource also has zero or more metadata entries associated with it. For brevity we will use the term `field` to refer to both value and metadata entries.
 
 The `fields` of a resource have associated time stamps representing the times at which they were last updated. They also have an associated property indicating how their value can change.
