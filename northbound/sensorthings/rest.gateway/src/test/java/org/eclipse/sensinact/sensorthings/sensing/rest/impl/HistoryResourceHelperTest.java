@@ -26,9 +26,12 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
+import org.eclipse.sensinact.gateway.geojson.Point;
+
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
 import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFilterComponent;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
@@ -98,7 +101,8 @@ class HistoryResourceHelperTest {
         return new ExpandedObservation(name, name,
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
-                null, null, null, null, null);
+                null, null, null, null,
+                new FeatureOfInterest(null, "test", "test", "test", "test", new Point(0, 0), null));
 
     }
 
