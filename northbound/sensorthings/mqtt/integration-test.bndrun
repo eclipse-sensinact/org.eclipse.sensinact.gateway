@@ -34,7 +34,6 @@
 	io.netty.transport;version='[4.1.93,4.1.94)',\
 	io.netty.transport-classes-epoll;version='[4.1.93,4.1.94)',\
 	io.netty.transport-native-unix-common;version='[4.1.93,4.1.94)',\
-	jakarta.ws.rs-api;version='[3.1.0,3.1.1)',\
 	jul.to.slf4j;version='[2.0.11,2.0.12)',\
 	junit-jupiter-api;version='[5.10.1,5.10.2)',\
 	junit-jupiter-engine;version='[5.10.1,5.10.2)',\

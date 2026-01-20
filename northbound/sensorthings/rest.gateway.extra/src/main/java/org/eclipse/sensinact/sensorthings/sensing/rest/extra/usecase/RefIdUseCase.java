@@ -200,7 +200,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         String idDatastream = request.parentId();
         ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream,
                 DtoMapperSimple.SERVICE_DATASTREAM);
-        ObservedProperty obsProp = DtoMapperSimple.toObservedProperty(service.getProvider(), request.uriInfo());
+        ObservedProperty obsProp = DtoMapperSimple.toObservedProperty(service.getProvider(), null, null);
         ExtraUseCaseResponse<Object> response = observedPropertyExtraUseCase
                 .delete(new ExtraUseCaseRequest<ObservedProperty>(request.session(), request.mapper(),
                         request.uriInfo(), HttpMethod.DELETE, obsProp));
@@ -212,7 +212,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream,
                 DtoMapperSimple.SERVICE_DATASTREAM);
 
-        Sensor sensor = DtoMapperSimple.toSensor(service.getProvider(), request.uriInfo());
+        Sensor sensor = DtoMapperSimple.toSensor(service.getProvider(), null, null);
         ExtraUseCaseResponse<Object> response = sensorExtraUseCase.delete(new ExtraUseCaseRequest<Sensor>(
                 request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, sensor));
         return response;
@@ -271,10 +271,10 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     }
 
     public static ExpandedDataStream toDatastream(ProviderSnapshot provider) {
-        Datastream datastream = DtoMapperSimple.toDatastream(provider, null);
+        Datastream datastream = DtoMapperSimple.toDatastream(provider, null, null, null, null, null);
         UnitOfMeasurement uom = DtoMapperSimple.toUnitOfMeasure(provider);
-        ObservedProperty observedProperty = DtoMapperSimple.toObservedProperty(provider, null);
-        Sensor sensor = DtoMapperSimple.toSensor(provider, null);
+        ObservedProperty observedProperty = DtoMapperSimple.toObservedProperty(provider, null, null);
+        Sensor sensor = DtoMapperSimple.toSensor(provider, null, null);
 
         return new ExpandedDataStream(null, datastream.id(), datastream.name(), datastream.description(),
                 datastream.observationType(), uom, datastream.observedArea(), datastream.phenomenonTime(),
@@ -369,7 +369,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     }
 
     public static ExpandedLocation toLocation(ObjectMapper mapper, ProviderSnapshot provider, String thingId) {
-        Location location = DtoMapperSimple.toLocation(mapper, provider, null);
+        Location location = DtoMapperSimple.toLocation(mapper, provider, null, null, null);
         return new ExpandedLocation(null, location.id(), location.name(), location.description(),
                 location.encodingType(), location.location(), null, null, List.of(new RefId(thingId)));
     }

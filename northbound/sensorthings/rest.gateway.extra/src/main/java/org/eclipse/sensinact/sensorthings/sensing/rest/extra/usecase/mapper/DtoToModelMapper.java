@@ -563,7 +563,7 @@ public class DtoToModelMapper {
         return aggregate(existingLocationIds.stream()
                 .map(idLocation -> UtilDto.getProviderSnapshot(request.session(), idLocation))
                 .filter(Optional::isPresent).map(Optional::get)
-                .map(p -> DtoMapperSimple.toLocation(request.mapper(), p, null)).toList());
+                .map(p -> DtoMapperSimple.toLocation(request.mapper(), p, null, null, null)).toList());
     }
 
     /**
