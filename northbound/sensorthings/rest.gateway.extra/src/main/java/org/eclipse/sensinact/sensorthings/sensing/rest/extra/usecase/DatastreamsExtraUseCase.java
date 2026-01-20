@@ -187,10 +187,14 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
     private void checkRequireLink(ExtraUseCaseRequest<ExpandedDataStream> request, Sensor sensor,
             ObservedProperty observedProperty, UnitOfMeasurement unit, ProviderSnapshot provider) {
-        if (HttpMethod.POST.equals(request.method())) {
-            DtoMapperSimple.checkRequireLink(request, provider, sensor, observedProperty, unit);
-        } else if (HttpMethod.PUT.equals(request.method())) {
-            DtoMapperSimple.checkRequireLink(request, provider, unit);
+        try {
+            if (HttpMethod.POST.equals(request.method())) {
+                DtoMapperSimple.checkRequireLink(request, provider, sensor, observedProperty, unit);
+            } else if (HttpMethod.PUT.equals(request.method())) {
+                DtoMapperSimple.checkRequireLink(request, provider, unit);
+            }
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 

@@ -25,6 +25,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.ext.Providers;
 
@@ -44,8 +46,12 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
     protected final GatewayThread gatewayThread;
 
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
-        if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
-            DtoMapperSimple.checkRequireField(request.model());
+        try {
+            if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
+                DtoMapperSimple.checkRequireField(request.model());
+            }
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 

@@ -48,10 +48,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.UriInfo;
-
 public class DtoMapperSimple {
 
     private static final String DESCRIPTION = "description";
@@ -67,149 +63,136 @@ public class DtoMapperSimple {
 
     public static String SERVICE_LOCATON = "location";
 
-    private static String getLink(UriInfo uriInfo, String baseUri, String path) {
-        String sensorLink = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).build().toString();
-        return sensorLink;
-    }
-
-    public static String getLink(UriInfo uriInfo, String baseUri, String path, String id) {
-        if (id == null) {
-            id = "null";
-        }
-        String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", id).build().toString();
-        return link;
-    }
-
     public static void checkRequireField(Sensor dto) {
         if (dto == null) {
-            throw new BadRequestException("sensor not found in  Sensor");
+            throw new RuntimeException("sensor not found in  Sensor");
         }
         if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Sensor");
+            throw new RuntimeException("name not found in  Sensor");
         }
         if (dto.encodingType() == null) {
-            throw new BadRequestException("encodingType not found in  Sensor");
+            throw new RuntimeException("encodingType not found in  Sensor");
         }
 
     }
 
     public static void checkRequireField(ObservedProperty dto) {
         if (dto == null) {
-            throw new BadRequestException("ObservedProperty not found in  ObservedProperty");
+            throw new RuntimeException("ObservedProperty not found in  ObservedProperty");
         }
         if (dto.name() == null) {
-            throw new BadRequestException("name not found in  ObservedProperty");
+            throw new RuntimeException("name not found in  ObservedProperty");
         }
         if (dto.definition() == null) {
-            throw new BadRequestException("definition not found in  ObservedProperty");
+            throw new RuntimeException("definition not found in  ObservedProperty");
         }
 
     }
 
     public static void checkRequireField(ExpandedObservation dto) {
         if (dto.result() == null) {
-            throw new BadRequestException("result not found in  ExpandedObservation");
+            throw new RuntimeException("result not found in  ExpandedObservation");
         }
         if (dto.phenomenonTime() == null) {
-            throw new BadRequestException("phenomenonTime not found in  ExpandedObservation");
+            throw new RuntimeException("phenomenonTime not found in  ExpandedObservation");
         }
 
     }
 
     public static void checkRequireField(Observation dto) {
         if (dto.result() == null) {
-            throw new BadRequestException("result not found in  Observation");
+            throw new RuntimeException("result not found in  Observation");
         }
         if (dto.phenomenonTime() == null) {
-            throw new BadRequestException("phenomenonTime not found in  Observation");
+            throw new RuntimeException("phenomenonTime not found in  Observation");
         }
 
     }
 
     public static void checkRequireField(ExpandedThing dto) {
         if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Thing");
+            throw new RuntimeException("name not found in  Thing");
         }
 
     }
 
     public static void checkRequireField(Thing dto) {
         if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Thing");
+            throw new RuntimeException("name not found in  Thing");
         }
 
     }
 
     public static void checkRequireField(Location dto) {
         if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Location");
+            throw new RuntimeException("name not found in  Location");
         }
         if (dto.encodingType() == null) {
-            throw new BadRequestException("encodingType not found in  Location");
+            throw new RuntimeException("encodingType not found in  Location");
         }
         if (dto.location() == null) {
-            throw new BadRequestException("location not found in  Location");
+            throw new RuntimeException("location not found in  Location");
         }
 
     }
 
     public static void checkRequireField(ExpandedLocation dto) {
         if (dto.name() == null) {
-            throw new BadRequestException("name not found in  Location");
+            throw new RuntimeException("name not found in  Location");
         }
         if (dto.encodingType() == null) {
-            throw new BadRequestException("encodingType not found in  Location");
+            throw new RuntimeException("encodingType not found in  Location");
         }
         if (dto.location() == null) {
-            throw new BadRequestException("location not found in  Location");
+            throw new RuntimeException("location not found in  Location");
         }
 
     }
 
     public static void checkRequireField(FeatureOfInterest dto) {
         if (dto.name() == null) {
-            throw new BadRequestException("name not found in  FeatureOfInterest");
+            throw new RuntimeException("name not found in  FeatureOfInterest");
         }
         if (dto.encodingType() == null) {
-            throw new BadRequestException("encodingType not found in  FeatureOfInterest");
+            throw new RuntimeException("encodingType not found in  FeatureOfInterest");
         }
         if (dto.feature() == null) {
-            throw new BadRequestException("feature not found in  FeatureOfInterest");
+            throw new RuntimeException("feature not found in  FeatureOfInterest");
         }
 
     }
 
     public static void checkRequireField(ExpandedDataStream datastream) {
         if (datastream.name() == null) {
-            throw new BadRequestException("name not found in  Datastream");
+            throw new RuntimeException("name not found in  Datastream");
         }
 
         if (datastream.unitOfMeasurement() == null) {
-            throw new BadRequestException("unit Of Measure not found in  Datastream");
+            throw new RuntimeException("unit Of Measure not found in  Datastream");
         }
         if (datastream.observationType() == null) {
-            throw new BadRequestException("observationType not found in  Datastream");
+            throw new RuntimeException("observationType not found in  Datastream");
         }
 
     }
 
     public static void checkRequireField(Datastream datastream) {
         if (datastream.name() == null) {
-            throw new BadRequestException("name not found in  Datastream");
+            throw new RuntimeException("name not found in  Datastream");
         }
 
         if (datastream.unitOfMeasurement() == null) {
-            throw new BadRequestException("unit Of Measure not found in  Datastream");
+            throw new RuntimeException("unit Of Measure not found in  Datastream");
         }
         if (datastream.observationType() == null) {
-            throw new BadRequestException("observationType not found in  Datastream");
+            throw new RuntimeException("observationType not found in  Datastream");
         }
 
     }
 
     public static <T> void checkRequireField(T dto) {
         if (dto == null) {
-            throw new BadRequestException("dto null");
+            throw new RuntimeException("dto null");
         } else if (dto instanceof Sensor dtoCasted) {
             checkRequireField(dtoCasted);
         } else if (dto instanceof ExpandedDataStream dtoCasted) {
@@ -233,20 +216,20 @@ public class DtoMapperSimple {
         } else if (dto instanceof FeatureOfInterest dtoCasted) {
             checkRequireField(dtoCasted);
         } else {
-            throw new BadRequestException("no dto managed");
+            throw new RuntimeException("no dto managed");
 
         }
     }
 
     public static void checkRequireField(UnitOfMeasurement unit) {
         if (unit.name() == null) {
-            throw new BadRequestException("name not found in  UnitOfMeasurement");
+            throw new RuntimeException("name not found in  UnitOfMeasurement");
         }
         if (unit.definition() == null) {
-            throw new BadRequestException("definition not found in  UnitOfMeasurement");
+            throw new RuntimeException("definition not found in  UnitOfMeasurement");
         }
         if (unit.symbol() == null) {
-            throw new BadRequestException("symbol not found in  UnitOfMeasurement");
+            throw new RuntimeException("symbol not found in  UnitOfMeasurement");
         }
 
     }
@@ -255,7 +238,7 @@ public class DtoMapperSimple {
         for (int i = 0; i < links.length; i++) {
             Object link = links[i];
             if (link == null) {
-                throw new BadRequestException("linked entity is required");
+                throw new RuntimeException("linked entity is required");
             }
         }
 
@@ -363,7 +346,7 @@ public class DtoMapperSimple {
     public static UnitOfMeasurement toUnitOfMeasure(ProviderSnapshot provider) {
         ServiceSnapshot service = getDatastreamService(provider);
         if (service == null) {
-            throw new NotFoundException();
+            throw new RuntimeException();
         }
 
         String unitName = getResourceField(service, "unitName", String.class);
@@ -376,37 +359,18 @@ public class DtoMapperSimple {
     }
 
     public static HistoricalLocation toHistoricalLocation(ProviderSnapshot provider, Optional<TimedValue<?>> t,
-            UriInfo uriInfo) {
+            String selfLink, String id, String locationsLink, String thingLink) {
         final Instant time = t.map(TimedValue::getTimestamp).orElse(Instant.EPOCH);
 
-        String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
-        String selfLink = null;
-        String thingLink = null;
-        String locationsLink = null;
-        if (uriInfo != null) {
-            selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("HistoricalLocations({id})")
-                    .resolveTemplate("id", id).build().toString();
-            thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
-            locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Locations").build().toString();
-        }
         return new HistoricalLocation(selfLink, id, time, locationsLink, thingLink);
 
     }
 
     public static FeatureOfInterest toFeatureOfInterest(ProviderSnapshot provider, ExpandedObservation lastObservation,
-            UriInfo uriInfo) {
-        ServiceSnapshot serviceSnapshot = getDatastreamService(provider);
-        String idDatastream = getResourceField(serviceSnapshot, "id", String.class);
+            String foiId, String selfLink, String observationLink) {
 
         FeatureOfInterest foiReaded = lastObservation.featureOfInterest();
-        String foiId = String.format("%s~%s~%s", idDatastream, lastObservation.id(), foiReaded.id());
-        String selfLink = null;
-        String observationLink = null;
-        if (uriInfo != null) {
 
-            selfLink = getLink(uriInfo, VERSION, "FeaturesOfInterest({id})", foiId);
-            observationLink = getLink(uriInfo, selfLink, "Observations");
-        }
         FeatureOfInterest foi = new FeatureOfInterest(selfLink, foiId, foiReaded.name(), foiReaded.description(),
                 foiReaded.encodingType(), foiReaded.feature(), observationLink);
 
@@ -415,11 +379,13 @@ public class DtoMapperSimple {
         return foi;
     }
 
-    public static ObservedProperty toObservedProperty(ProviderSnapshot provider, UriInfo uriInfo) {
-        String datastreamId = provider.getName();
+    public static ObservedProperty toObservedProperty(ProviderSnapshot provider, String observedPropertyLink,
+            String datastreamLink) {
         ServiceSnapshot service = getDatastreamService(provider);
+        String datastreamId = provider.getName();
 
         String observedPropertyId = getResourceField(service, "observedPropertyId", String.class);
+
         String id = String.format("%s~%s", datastreamId, observedPropertyId);
         String observedPropertyName = getResourceField(service, "observedPropertyName", String.class);
         String observedPropertyDescription = getResourceField(service, "observedPropertyDescription", String.class);
@@ -427,12 +393,7 @@ public class DtoMapperSimple {
         @SuppressWarnings("unchecked")
         Map<String, Object> observedPropertyProperty = getResourceField(service, "observedPropertyProperties",
                 Map.class);
-        String observedPropertyLink = null;
-        String datastreamLink = null;
-        if (uriInfo != null) {
-            observedPropertyLink = getLink(uriInfo, VERSION, "/ObservedProperties({id})", id);
-            datastreamLink = getLink(uriInfo, observedPropertyLink, "Datastreams");
-        }
+
         ObservedProperty observedProperty = new ObservedProperty(observedPropertyLink, id, observedPropertyName,
                 observedPropertyDescription, observedPropertyDefinition, observedPropertyProperty, datastreamLink);
 
@@ -440,9 +401,10 @@ public class DtoMapperSimple {
         return observedProperty;
     }
 
-    public static Sensor toSensor(ProviderSnapshot provider, UriInfo uriInfo) {
+    public static Sensor toSensor(ProviderSnapshot provider, String sensorLink, String datastreamLink) {
         ServiceSnapshot service = getDatastreamService(provider);
         String sensorId = String.format("%s~%s", provider.getName(),
+
                 getResourceField(service, "sensorId", String.class));
         String sensorName = getResourceField(service, "sensorName", String.class);
         String sensorDescription = getResourceField(service, "sensorDescription", String.class);
@@ -451,12 +413,7 @@ public class DtoMapperSimple {
 
         @SuppressWarnings("unchecked")
         Map<String, Object> sensorProperty = getResourceField(service, "sensorProperty", Map.class);
-        String sensorLink = null;
-        String datastreamLink = null;
-        if (uriInfo != null) {
-            sensorLink = getLink(uriInfo, VERSION, "/Sensors({id})", sensorId);
-            datastreamLink = getLink(uriInfo, sensorLink, "Datastreams");
-        }
+
         Sensor sensor = new Sensor(sensorLink, sensorId, sensorName, sensorDescription, sensorEncodingType,
                 sensorMetadata, sensorProperty, datastreamLink);
 
@@ -465,20 +422,11 @@ public class DtoMapperSimple {
         return sensor;
     }
 
-    public static Thing toThing(ProviderSnapshot provider, UriInfo uriInfo) {
-        String id = provider.getName();
+    public static Thing toThing(ProviderSnapshot provider, String id, String selfLink, String datastreamsLink,
+            String historicalLocationsLink, String locationsLink) {
         String name = getResourceField(getAdminService(provider), FRIENDLY_NAME, String.class);
         String description = getResourceField(getAdminService(provider), DESCRIPTION, String.class);
-        String selfLink = null;
-        String datastreamsLink = null;
-        String historicalLocationsLink = null;
-        String locationsLink = null;
-        if (uriInfo != null) {
-            selfLink = getLink(uriInfo, VERSION, "Things({id})", provider.getName());
-            datastreamsLink = getLink(uriInfo, selfLink, "Datastreams");
-            historicalLocationsLink = getLink(uriInfo, selfLink, "HistoricalLocations");
-            locationsLink = getLink(uriInfo, selfLink, "Locations");
-        }
+
         Thing thing = new Thing(selfLink, id, name, description, null, datastreamsLink, historicalLocationsLink,
                 locationsLink);
 
@@ -487,8 +435,10 @@ public class DtoMapperSimple {
         return thing;
     }
 
-    public static Observation toObservation(ObjectMapper mapper, ResourceSnapshot resource, UriInfo uriInfo) {
-        return toObservation(mapper, resource.getService().getProvider().getName(), null, uriInfo);
+    public static Observation toObservation(ObjectMapper mapper, ResourceSnapshot resource, String selfLink,
+            String datastreamLink, String featureOfInterestLink) {
+        return toObservation(mapper, resource.getService().getProvider().getName(), null, selfLink, datastreamLink,
+                featureOfInterestLink);
     }
 
     public static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
@@ -543,62 +493,40 @@ public class DtoMapperSimple {
         return new DefaultTimedValue<>(parsedLocation, time);
     }
 
-    public static Location toLocation(ObjectMapper mapper, ProviderSnapshot provider, UriInfo uriInfo) {
+    public static Location toLocation(ObjectMapper mapper, ProviderSnapshot provider, String selfLink,
+            String thingsLink, String historicalLocationsLink) {
         final TimedValue<GeoJsonObject> rcLocation = getLocation(provider, mapper, false);
         final GeoJsonObject object = rcLocation.getValue();
-
-        String id = getResourceField(getLocationService(provider), "id", String.class);
+        String id = getResourceField(DtoMapperSimple.getLocationService(provider), "id", String.class);
 
         String name = Objects
                 .requireNonNullElse(getResourceField(getAdminService(provider), FRIENDLY_NAME, String.class), "");
 
         String description = Objects.requireNonNullElse(
                 getResourceField(getAdminService(provider), DESCRIPTION, String.class), NO_DESCRIPTION);
-        String selfLink = null;
-        String thingsLink = null;
-        String historicalLocationsLink = null;
-        if (uriInfo != null) {
-            selfLink = getLink(uriInfo, VERSION, "Locations({id})", provider.getName());
-            thingsLink = getLink(uriInfo, selfLink, "Things");
-            historicalLocationsLink = getLink(uriInfo, selfLink, "HistoricalLocations");
-        }
+
         Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object,
                 thingsLink, historicalLocationsLink);
-        if (uriInfo != null) {
-            DtoMapperSimple.checkRequireField(location);
-        }
+        DtoMapperSimple.checkRequireField(location);
+
         return location;
     }
 
-    public static Observation toObservation(ObjectMapper mapper, String providerId, TimedValue<?> timeValue,
-            UriInfo uriInfo) {
+    public static Observation toObservation(ObjectMapper mapper, String id, TimedValue<?> timeValue, String selfLink,
+            String datastreamLink, String featureOfInterestLink) {
 
         TimedValue<?> t = timeValue;
 
-        final Instant timestamp = t.getTimestamp();
         Object val = t.getValue();
         if (val != null && val instanceof String) {
             ExpandedObservation obs = parseExpandObservation(mapper, val);
-            String id = String.format("%s~%s~%s", providerId, obs.id(), Long.toString(timestamp.toEpochMilli(), 16));
-            String selfLink = null;
-            String datastreamLink = null;
-            String featureOfInterestLink = null;
-
-            if (uriInfo != null) {
-                selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
-                        .resolveTemplate("id", id).build().toString();
-                datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build().toString();
-                featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("FeatureOfInterest").build()
-                        .toString();
-            }
 
             Observation observation = new Observation(selfLink, id, obs.phenomenonTime(), obs.resultTime(),
                     obs.result(), obs.resultQuality(), obs.validTime(), obs.parameters(), datastreamLink,
                     featureOfInterestLink);
-            if (uriInfo != null) {
-                DtoMapperSimple.checkRequireField(observation);
-                DtoMapperSimple.checkRequireLink(obs.featureOfInterest());
-            }
+            DtoMapperSimple.checkRequireField(observation);
+            DtoMapperSimple.checkRequireLink(obs.featureOfInterest());
+
             return observation;
 
         }
@@ -610,7 +538,7 @@ public class DtoMapperSimple {
         return parseExpandObservation(mapper, obsStr);
     }
 
-    private static ExpandedObservation parseExpandObservation(ObjectMapper mapper, Object val) {
+    public static ExpandedObservation parseExpandObservation(ObjectMapper mapper, Object val) {
         ExpandedObservation obs;
         try {
             obs = mapper.readValue((String) val, ExpandedObservation.class);
@@ -632,8 +560,8 @@ public class DtoMapperSimple {
         return object instanceof Polygon ? (Polygon) object : null;
     }
 
-    public static Datastream toDatastream(ProviderSnapshot provider, UriInfo uriInfo) {
-        String id = provider.getName();
+    public static Datastream toDatastream(ProviderSnapshot provider, String selfLink, String observationsLink,
+            String observedPropertyLink, String sensorLink, String thingLink) {
 
         String name = getResourceField(getAdminService(provider), FRIENDLY_NAME, String.class);
         String description = getResourceField(getAdminService(provider), DESCRIPTION, String.class);
@@ -645,24 +573,12 @@ public class DtoMapperSimple {
         GeoJsonObject observedAreaRead = getResourceField(getAdminService(provider), LOCATION, GeoJsonObject.class);
         Polygon observedArea = getObservedArea(observedAreaRead);
         String thingId = getResourceField(getDatastreamService(provider), "thingId", String.class);
-        Sensor sensor = toSensor(provider, uriInfo);
-        ObservedProperty observedProperty = toObservedProperty(provider, uriInfo);
+
+        Sensor sensor = toSensor(provider, null, null);
+        ObservedProperty observedProperty = toObservedProperty(provider, null, null);
         UnitOfMeasurement unitOfMeasurement = toUnitOfMeasure(provider);
 
-        String selfLink = null;
-        String observationsLink = null;
-        String observedPropertyLink = null;
-        String sensorLink = null;
-        String thingLink = null;
-        if (uriInfo != null) {
-            selfLink = getLink(uriInfo, VERSION, "Datastreams({id})", id);
-            observationsLink = getLink(uriInfo, selfLink, "Observations");
-            observedPropertyLink = getLink(uriInfo, selfLink, "ObservedProperty");
-            sensorLink = getLink(uriInfo, selfLink, "Sensor");
-
-            thingLink = getLink(uriInfo, selfLink, "Thing");
-        }
-        Datastream datastream = new Datastream(selfLink, id, name, description,
+        Datastream datastream = new Datastream(selfLink, provider.getName(), name, description,
                 "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
                 metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
 
