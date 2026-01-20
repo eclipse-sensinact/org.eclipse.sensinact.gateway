@@ -284,12 +284,21 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
     private TimedValue<?> toTimedValue(ResultSet rs) throws Exception {
         Object value = null;
         Instant dataTime = rs.getTimestamp("time").toInstant();
-        BigDecimal num = rs.getBigDecimal("num");
-        if (num != null) {
-            if (num.scale() <= 0) {
-                value = num.longValueExact();
+        // First try to get as double to handle special values like Infinity and NaN
+        // which cannot be represented as BigDecimal
+        double numDouble = rs.getDouble("num");
+        if (!rs.wasNull()) {
+            if (Double.isInfinite(numDouble) || Double.isNaN(numDouble)) {
+                // Special floating-point values can't be represented as BigDecimal
+                value = numDouble;
             } else {
-                value = num.doubleValue();
+                // For normal numbers, use BigDecimal for precision
+                BigDecimal num = rs.getBigDecimal("num");
+                if (num.scale() <= 0) {
+                    value = num.longValueExact();
+                } else {
+                    value = num.doubleValue();
+                }
             }
         } else {
             String text = rs.getString("text");

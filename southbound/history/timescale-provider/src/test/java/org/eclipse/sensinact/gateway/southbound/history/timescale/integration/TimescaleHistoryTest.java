@@ -223,6 +223,18 @@ public class TimescaleHistoryTest {
         return dto;
     }
 
+    private GenericDto getDtoWithSpecialDouble(Double value, Instant timestamp) {
+        GenericDto dto = new GenericDto();
+        dto.model = "SpecialValues";
+        dto.provider = "SpecialProvider";
+        dto.service = "SpecialService";
+        dto.resource = "SpecialResource";
+        dto.value = value;
+        dto.type = Double.class;
+        dto.timestamp = timestamp;
+        return dto;
+    }
+
     private PGSimpleDataSource getDataSource() {
         PGSimpleDataSource ds = new PGSimpleDataSource();
         ds.setURL(container.getJdbcUrl());
@@ -638,6 +650,44 @@ public class TimescaleHistoryTest {
                 }
             }).getValue();
         }
+
+        @Test
+        void specialFloatingPointValues() throws Exception {
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NEGATIVE_INFINITY, TS_2012)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.POSITIVE_INFINITY, TS_2013)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NaN, TS_2014)).getValue();
+
+            waitForRowCount("sensinact.numeric_data", 3);
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "single") {
+
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    TimedValue<?> negInfResult = safeGet(
+                            resource.act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "time", TS_2012.atOffset(ZoneOffset.UTC)))
+                                    .map(TimedValue.class::cast));
+                    assertEquals(Double.NEGATIVE_INFINITY, negInfResult.getValue());
+                    assertEquals(TS_2012, negInfResult.getTimestamp());
+
+                    TimedValue<?> posInfResult = safeGet(
+                            resource.act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "time", TS_2013.atOffset(ZoneOffset.UTC)))
+                                    .map(TimedValue.class::cast));
+                    assertEquals(Double.POSITIVE_INFINITY, posInfResult.getValue());
+                    assertEquals(TS_2013, posInfResult.getTimestamp());
+
+                    TimedValue<?> nanResult = safeGet(
+                            resource.act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "time", TS_2014.atOffset(ZoneOffset.UTC)))
+                                    .map(TimedValue.class::cast));
+                    assertTrue(Double.isNaN((Double) nanResult.getValue()));
+                    assertEquals(TS_2014, nanResult.getTimestamp());
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
     }
 
     @Nested
@@ -803,6 +853,40 @@ public class TimescaleHistoryTest {
                     assertEquals(new Point(11.59087, 50.9011834), result.get(1).getValue());
                     assertEquals(TS_2014, result.get(1).getTimestamp());
 
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
+        void specialFloatingPointValuesRange() throws Exception {
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NEGATIVE_INFINITY, TS_2012)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.POSITIVE_INFINITY, TS_2013)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NaN, TS_2014)).getValue();
+
+            waitForRowCount("sensinact.numeric_data", 3);
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
+
+                @SuppressWarnings("unchecked")
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    List<TimedValue<?>> result = safeGet(resource
+                            .act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "fromTime", TS_2012.atOffset(ZoneOffset.UTC),
+                                    "toTime", TS_2014.atOffset(ZoneOffset.UTC)))
+                            .map(List.class::cast));
+                    assertEquals(3, result.size());
+
+                    assertEquals(Double.NEGATIVE_INFINITY, result.get(0).getValue());
+                    assertEquals(TS_2012, result.get(0).getTimestamp());
+
+                    assertEquals(Double.POSITIVE_INFINITY, result.get(1).getValue());
+                    assertEquals(TS_2013, result.get(1).getTimestamp());
+
+                    assertTrue(Double.isNaN((Double) result.get(2).getValue()));
+                    assertEquals(TS_2014, result.get(2).getTimestamp());
                     return pf.resolved(null);
                 }
             }).getValue();
